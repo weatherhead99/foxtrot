@@ -1,0 +1,31 @@
+* Foxtrot
+
+** General
+   - ICE (sincle IDL file)
+   - Ponder for reflection               
+
+** Classes
+
+*** Device
+    - represent "protocol" of device
+
+    - "Attributes": read/write, associated physical dimension & unit
+    - Tag system
+
+*** DeviceConstraints
+    - template functions which can check device concept compliance. Concepts such as "motor axis"
+
+*** MetaDevice
+    - composite or single channel device stuff, e.g. "motor axis" etc.
+
+*** DeviceConnection
+    - represent hardware connection
+
+
+*** DeviceHelper
+    - function which sets up a device, given a device, connection protocol
+      and "local" connection parameters
+
+
+*** Attribute 
+    - 
