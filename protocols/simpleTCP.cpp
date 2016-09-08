@@ -3,6 +3,7 @@
 #include <boost/variant.hpp>
 #include <vector>
 
+#include <memory>
 #include <sys/socket.h>
 
 #include <netinet/in.h>
@@ -11,6 +12,11 @@
 #include <string.h>
 #include <unistd.h>
 #include "ProtocolError.h"
+
+#include <errno.h>
+
+
+#include <iostream>
 
 inline ssize_t c_read(int _fd, void* __buf, size_t nbytes)
 {
@@ -74,26 +80,32 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("couldn't open socket file descriptor. Error was:") + perr);  
   };
   
-  //bind to server
-  sockaddr_in servaddr;
-  auto host = gethostbyname(_addr.c_str());
+  //bind to server;
+  std::unique_ptr<addrinfo,void(*)(addrinfo*)> hints(new addrinfo,freeaddrinfo);
+  hints->ai_socktype = SOCK_STREAM; 
+  hints->ai_family = AF_UNSPEC;
+  hints->ai_flags = (AI_V4MAPPED | AI_ADDRCONFIG);
+  hints->ai_protocol = IPPROTO_TCP;
   
-  if(host== nullptr)
+  addrinfo* host;
+  auto hosterr = getaddrinfo(_addr.c_str(),std::to_string(_port).c_str(),hints.get(),&host);
+  
+  //unique_ptr to make sure freeaddrinfo gets called
+  std::unique_ptr<addrinfo, void(*)(addrinfo*)> addrp(host,freeaddrinfo);
+  
+  
+  if(hosterr < 0)
   {
-    throw ProtocolError("no such host!");
+    throw ProtocolError(std::string("host resolution error: " ) + gai_strerror(hosterr));
   };
   
-  //FIXME: SEGFAULT HERE!!
-  std::copy(host->h_addr, host->h_addr + host->h_length, reinterpret_cast<char*>( servaddr.sin_addr.s_addr));
   
+  std::cout << "ai_flags output: " << host->ai_flags << std::endl;
   
-  servaddr.sin_port = htons(_port);
-  servaddr.sin_family = AF_INET;
-  
-  auto conerr = connect(_sockfd, reinterpret_cast<sockaddr*>(&servaddr),sizeof(servaddr));
+  auto conerr = connect(_sockfd, host->ai_addr,host->ai_addrlen);
   if( conerr < 0)
   {
-    throw ProtocolError(std::string("couldn't connect to host. Error was: " ) + strerror(conerr));
+    throw ProtocolError(std::string("couldn't connect to host. Error was: " ) + strerror(errno));
   };
   
 }
@@ -108,7 +120,7 @@ std::string simpleTCP::read(unsigned int len)
   
   if(recv < 0)
   {
-    throw ProtocolError(std::string("error reading from socket: " ) + strerror(recv));
+    throw ProtocolError(std::string("error reading from socket: " ) + gai_strerror(recv));
   };
   
   
