@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 11)
 
 
 
-include_directories(include)
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 

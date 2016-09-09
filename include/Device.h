@@ -13,7 +13,7 @@ namespace foxtrot
     Device(std::shared_ptr<CommunicationProtocol> proto);
     
     
-  private:
+  protected:
     std::shared_ptr<CommunicationProtocol> _proto;
     
     

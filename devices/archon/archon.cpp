@@ -1,7 +1,34 @@
 #include "archon.h"
 
-archon::archon()
-: Device(nullptr)
+#include "CommunicationProtocol.h"
+
+#include <sstream>
+#include <iomanip>
+
+#include "ProtocolError.h"
+
+
+foxtrot::protocols::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
+: Device(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto)
 {
 
 }
+
+
+std::string foxtrot::protocols::archon::archoncmd(const std::string& request)
+{
+  if(_order == 0xFE)
+  {
+    _order = 0;
+  }
+  
+  std::ostringstream oss;
+  oss << ">" << std::hex << _order << request << "\n";
+  
+  _specproto->write(oss.str());
+  
+  
+
+}
+
+

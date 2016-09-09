@@ -4,15 +4,33 @@
 
 #include <memory>
 
-using namespace foxtrot;
+#include <string>
+
+#include "protocols/simpleTCP.h"
 
 
-class archon : public Device
-{
+namespace foxtrot {
+  namespace protocols
+  {
+    
+
+  class archon : public Device
+  {
+    
+  public:
+    archon(std::shared_ptr<simpleTCP> proto);
+    
+  protected:
+    std::string archoncmd(const std::string& request);
+    
   
-public:
-  archon();
+  private:
+    short unsigned _order;
+    std::shared_ptr<simpleTCP> _specproto;
+
+  };
   
   
-  
+};
+
 };
