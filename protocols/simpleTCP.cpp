@@ -14,20 +14,12 @@
 #include "ProtocolError.h"
 
 #include <errno.h>
-
+#include "ProtocolUtilities.h"
 
 #include <iostream>
 
-inline ssize_t c_read(int _fd, void* __buf, size_t nbytes)
-{
-    return read(_fd,__buf,nbytes);       
-}
 
-inline ssize_t c_write(int _fd, void* __buf, size_t nbytes)
-{
-  return write(_fd,__buf,nbytes);
-  
-};
+using namespace foxtrot::protocols;
 
 
 simpleTCP::simpleTCP(const parameterset*const instance_parameters)
@@ -35,6 +27,9 @@ simpleTCP::simpleTCP(const parameterset*const instance_parameters)
 {
 
 }
+
+
+
 
 
 simpleTCP::~simpleTCP()
@@ -51,24 +46,9 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   //call base class to merge parameterset
   CommunicationProtocol::Init(class_parameters);
   
-  try
-  {
-    _port = boost::get<decltype(_port)>(_params["port"]);
-  }
-  catch(boost::bad_get)
-  {
-    throw ProtocolError("invalid parameter for port!");
-  }
+  extract_parameter_value(_port,_params,"port");
+  extract_parameter_value(_addr,_params,"addr");
   
-  try
-  {
-    _addr = boost::get<decltype(_addr)>(_params["addr"]);
-  }
-  catch(boost::bad_get)
-  {
-    throw ProtocolError("invalid parameter for addr");
-    
-  };
   //TODO: logging here
   
   
@@ -116,7 +96,7 @@ std::string simpleTCP::read(unsigned int len)
   std::vector<unsigned char> out;
   out.resize(len);
   
-  auto recv = c_read(_sockfd,out.data(),out.size());
+  auto recv = ::read(_sockfd,out.data(),out.size());
   
   if(recv < 0)
   {
@@ -133,7 +113,7 @@ std::string simpleTCP::read(unsigned int len)
 void simpleTCP::write(const std::string& data)
 {
   
-  auto err = c_write(_sockfd,const_cast<char*>(data.data()),data.size());
+  auto err = ::write(_sockfd,const_cast<char*>(data.data()),data.size());
   if(err <0)
   {
    throw ProtocolError(std::string("error writing to socket: ") + strerror(err)); 

@@ -18,6 +18,14 @@ if(BUILD_TESTS)
   
 endif(BUILD_TESTS)
 
+macro(foxtrot_test testname)
+    add_executable(${testname} ${testname}.cpp)
+    add_test(${testname} COMMAND ${testname})
+    target_link_libraries(${testname} foxtrot ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
+endmacro(foxtrot_test)
+
+
+
 find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
 
 
@@ -30,6 +38,7 @@ add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto
 
 
 if(BUILD_TESTS)
+  
   add_subdirectory(test)
   
 endif(BUILD_TESTS)	

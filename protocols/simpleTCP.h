@@ -5,15 +5,22 @@
 
 using namespace foxtrot;
 
+namespace foxtrot {
+  
+  namespace protocols
+  {
+
 class simpleTCP : public SerialProtocol
 {
 public:
- 
+  
     simpleTCP(const parameterset*const instance_parameters);
     
     virtual ~simpleTCP();
     
     virtual void Init(const parameterset*const class_parameters) override;
+    void Init(const unsigned port, const std::string& addr);
+    
     
     virtual std::string read(unsigned int len) override;
     virtual void write(const std::string& data) override;
@@ -27,7 +34,8 @@ private:
     
     int _sockfd;
     
-    
+}; 
   
-};
+}; //namespace protocols
 
+}//namespace foxtrot

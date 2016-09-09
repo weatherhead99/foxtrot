@@ -1,4 +1,2 @@
+foxtrot_test(CommunicationProtocol_test)
 
-add_executable(CommunicationProtocol_test CommunicationProtocol_test.cpp)
-add_test(NAME CommunicationProtocol_test COMMAND CommunicationProtocol_test)
-target_link_libraries(CommunicationProtocol_test foxtrot ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
