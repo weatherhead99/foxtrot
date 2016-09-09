@@ -23,9 +23,12 @@ std::string foxtrot::protocols::archon::archoncmd(const std::string& request)
   }
   
   std::ostringstream oss;
-  oss << ">" << std::hex << _order << request << "\n";
+  oss << ">" << std::hex << ++_order << request << "\n";
   
   _specproto->write(oss.str());
+  
+  //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
+  auto ret = _specproto->read(1028);
   
   
 
