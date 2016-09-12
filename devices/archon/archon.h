@@ -10,7 +10,10 @@
 
 
 namespace foxtrot {
-  namespace protocols
+  
+  using namespace protocols;
+  
+  namespace devices
   {
     
 

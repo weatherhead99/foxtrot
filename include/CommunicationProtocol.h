@@ -10,7 +10,7 @@
 namespace foxtrot
 {
   
-  using parameter_types = boost::mpl::vector<unsigned,unsigned char, int , std::string>;
+  using parameter_types = boost::mpl::vector<unsigned,char, int , std::string>;
   using parameter = boost::variant<unsigned, int, std::string>;
   using parameterset = std::map<std::string, parameter>;
   

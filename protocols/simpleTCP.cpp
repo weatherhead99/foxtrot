@@ -46,7 +46,7 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   //call base class to merge parameterset
   CommunicationProtocol::Init(class_parameters);
   
-  extract_parameter_value(_port,_params,"port");
+  extract_parameter_value<unsigned>(_port,_params,"port");
   extract_parameter_value(_addr,_params,"addr");
   
   //TODO: logging here

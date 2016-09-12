@@ -4,6 +4,7 @@
 #include "ProtocolError.h"
 #include <string>
 #include <type_traits>
+#include <typeinfo>
 
 namespace foxtrot {
   
@@ -13,12 +14,12 @@ template <typename T> void extract_parameter_value(T& param_out, const parameter
 {
   try
   {
-    param_out = boost::get<decltype(param_out)>(params.at(paramname));
+    param_out = boost::get<T>(params.at(paramname));
       //TODO: logging here!
   }
   catch(boost::bad_get)
   {
-    throw ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname);
+    throw ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname );
     
   }
   catch(std::out_of_range)

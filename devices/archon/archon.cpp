@@ -8,14 +8,15 @@
 #include "ProtocolError.h"
 
 
-foxtrot::protocols::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
+foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
 : Device(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto)
 {
-
+  proto->Init(nullptr);
+  
 }
 
 
-std::string foxtrot::protocols::archon::archoncmd(const std::string& request)
+std::string foxtrot::devices::archon::archoncmd(const std::string& request)
 {
   if(_order == 0xFE)
   {
@@ -30,6 +31,7 @@ std::string foxtrot::protocols::archon::archoncmd(const std::string& request)
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
   auto ret = _specproto->read(1028);
   
+  return ret;
   
 
 }

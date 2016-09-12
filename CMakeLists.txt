@@ -29,8 +29,10 @@ endmacro(foxtrot_test)
 find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
 
 
+
 add_subdirectory(src)
 
+include_directories(devices protocols)
 add_subdirectory(protocols)
 add_subdirectory(devices)
 
