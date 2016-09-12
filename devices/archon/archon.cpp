@@ -36,6 +36,16 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
   auto ret = _specproto->read(2048);
   
+  //first characters should be "<xx"
+  if(ret[0] != '<')
+  {
+    throw ProtocolError("invalid archon response!");
+  };
+  
+  auto outret = std::stoul(std::string(ret[1],ret[2]),nullptr,16);
+  
+  std::cout << "parsed order: " << outret << std::endl;
+  
   return ret;
   
 
