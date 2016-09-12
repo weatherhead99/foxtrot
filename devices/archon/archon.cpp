@@ -4,12 +4,13 @@
 
 #include <sstream>
 #include <iomanip>
-
+#include <iostream>
 #include "ProtocolError.h"
 
 
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
-: Device(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto)
+  : Device(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
+    _order(0)
 {
   proto->Init(nullptr);
   
@@ -24,12 +25,15 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
   }
   
   std::ostringstream oss;
-  oss << ">" << std::hex << ++_order << request << "\n";
+  oss << ">" << std::hex << std::setw(2)<< std::setfill('0') << ++_order << request << "\n";
   
+  std::cout << "request is: " << oss.str();
+
   _specproto->write(oss.str());
   
+  std::cout << "command written, waiting for reply..." << std::endl;
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
-  auto ret = _specproto->read(1028);
+  auto ret = _specproto->read(2048);
   
   return ret;
   

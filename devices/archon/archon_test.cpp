@@ -27,9 +27,13 @@ int main(int argc, char** argv)
   
   std::shared_ptr<foxtrot::protocols::simpleTCP> proto(new foxtrot::protocols::simpleTCP(&params));
   
+  std::cout << "init archon... " << std::endl;
+  
   archon_harness a(proto);
   
+  std::cout << "sending STATUS command" << std::endl;
+
   auto repl = a.archoncmd("STATUS");
   
-  std::cout << "response to STATUS:" << std::endl;
+  std::cout << "response to STATUS:" << repl << std::endl;
 };
