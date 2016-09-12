@@ -82,6 +82,7 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   
   std::cout << "ai_flags output: " << host->ai_flags << std::endl;
   
+  
   auto conerr = connect(_sockfd, host->ai_addr,host->ai_addrlen);
   if( conerr < 0)
   {
