@@ -46,7 +46,6 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   //raw input - see POSIX serial port guide
   options.c_lflag = ~(ICANON | ECHO | ECHOE | ISIG);
   
-  
   tcsetattr(_fd,TCSANOW, &options);
   
   
