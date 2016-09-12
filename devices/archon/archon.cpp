@@ -42,7 +42,7 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
     throw ProtocolError("invalid archon response!");
   };
   
-  auto outret = std::stoul(std::string(ret[1],ret[2]),nullptr,16);
+  auto outret = std::stoul(ret.substr(1,1),nullptr,16);
   
   std::cout << "parsed order: " << outret << std::endl;
   
