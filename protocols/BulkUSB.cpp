@@ -107,7 +107,7 @@ std::string foxtrot::protocols::BulkUSB::read(unsigned int len)
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
   };
   
-  return std::string(data, *(data + actlen));
+  return std::string(data, (data + actlen));
 
 }
 
@@ -115,7 +115,7 @@ std::string foxtrot::protocols::BulkUSB::read(unsigned int len)
 void foxtrot::protocols::BulkUSB::write(const std::string& data)
 {
   int act_len;
-  auto err = libusb_bulk_transfer(_hdl,_epout,data.data(),data.size(),&act_len,_write_timeout);
+  auto err = libusb_bulk_transfer(_hdl,_epout,reinterpret_cast<unsigned char*>(const_cast<char*>(data.data())),data.size(),&act_len,_write_timeout);
   if(err < 0)
   {
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
