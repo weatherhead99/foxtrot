@@ -8,6 +8,9 @@
 
 #include "protocols/simpleTCP.h"
 
+#include <map>
+
+typedef std::map<std::string,std::string> ssmap;
 
 namespace foxtrot {
   
@@ -25,7 +28,7 @@ namespace foxtrot {
     
   protected:
     std::string archoncmd(const std::string& request);
-    
+    ssmap parse_parameter_response(const std::string& response);
   
   private:
     short unsigned _order;

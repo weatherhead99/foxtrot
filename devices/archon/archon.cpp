@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <string>
 
 #include "ProtocolError.h"
 
@@ -27,6 +28,7 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
   {
     _order = 0;
   }
+  
   auto thisorder = _order;
   
   std::ostringstream oss;
@@ -60,7 +62,9 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
     throw ProtocolError("invalid archon response!");
   };
   
-  auto outret = std::stoul(ret.substr(1,1),nullptr,16);
+  auto outret = std::stoul(ret.substr(1,2),nullptr,16);
+  std::cout << "outret: " << outret << std::endl;
+  
   if(outret != thisorder)
   {
     throw ProtocolError("mismatched order response");
@@ -71,4 +75,32 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
 
 }
 
+ssmap devices::archon::parse_parameter_response(const std::string& response)
+{
+  
+  ssmap out;
+  std::istringstream ss(response);
+  std::string item;
+  
+  while(std::getline(ss, item, ' '))
+  {
+    auto eqpos = std::find(item.begin(), item.end(),'=');
+    if(eqpos == item.end())
+    {
+      throw ProtocolError("malformed archon parameter response");
+    };
+    
+    std::string key(item.begin(), eqpos);
+    std::string val(eqpos + 1, item.end());
+    
+    out[key] = val;
+    
+  };
+  
+  
+  return out;
+  
+  
+
+}
 
