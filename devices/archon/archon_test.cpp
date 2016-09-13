@@ -50,4 +50,7 @@ int main(int argc, char** argv)
   auto statmap = a.parse_parameter_response(repl);
   
   
+  std::cout << a.archoncmd("FETCHLOG") << std::endl;
+  
+  
 };
