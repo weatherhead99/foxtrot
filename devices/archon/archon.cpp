@@ -46,8 +46,7 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
   
   std::cout << "parsed order: " << outret << std::endl;
   
-  return ret;
-  
+  return ret.substr(2,ret.size()-2);
 
 }
 
