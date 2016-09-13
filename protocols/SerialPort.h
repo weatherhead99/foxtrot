@@ -8,6 +8,7 @@ namespace foxtrot
   namespace protocols
   {
     
+    
     class SerialPort : public SerialProtocol
     {
     public:
@@ -21,7 +22,9 @@ namespace foxtrot
       int _fd;
       std::string _port;
       unsigned _baudrate;
-      
+      bool _parity = false;
+      unsigned _stopbits = 1;
+      unsigned _timeout = 5;//timeout in 10ths of a second
     };
     
     
