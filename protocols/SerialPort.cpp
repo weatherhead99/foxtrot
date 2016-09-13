@@ -86,12 +86,16 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   extract_parameter_value(_stopbits,_params,"stopbits",false);
   extract_parameter_value(_timeout,_params,"timeout",false);
   
-  _fd = open(_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY );
+  std::cout << "opening fd.. " << _port <<  std::endl;
+  _fd = open(_port.c_str(), O_RDWR |  O_NOCTTY  );
   
   if(_fd == -1)
   {
     throw ProtocolError("unable to open serial port");
   };
+  
+  
+  std::cout << "setting options... " << std::endl;
   
   //WARNING: segfault danger!
   termios options;
@@ -103,21 +107,22 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   
   
   //TODO: set attributes
+  options.c_cflag = CS8 | CREAD | ~CRTSCTS;
+  
+  
   
   //raw input - see POSIX serial port guide
-  options.c_lflag = ~(ICANON | ECHO | ECHOE | ISIG);
+//   options.c_lflag = ICANON;
   
   //set blocking read
   options.c_cc[VMIN] =  1;
   options.c_cc[VTIME] = _timeout;
   
-  
-  ret = tcsetattr(_fd,TCSANOW, &options);
-  if(ret <0)
+  ret = tcflush(_fd,TCIFLUSH);
+  if( ret <0)
   {
-    throw ProtocolError(std::string("couldn't set tty attributes: " ) + strerror(ret));
-  }
-  
+    throw ProtocolError(std::string("unable to flush serial port: ") + strerror(ret));
+  };
   
   
   
@@ -132,6 +137,15 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   {
     throw ProtocolError( std::string("couldn't set o speed: " )+  strerror(ret) );
   }
+
+  
+  ret = tcsetattr(_fd,TCSANOW, &options);
+  if(ret <0)
+  {
+    throw ProtocolError(std::string("couldn't set tty attributes: " ) + strerror(ret));
+  }
+  
+  
   
   
 }
@@ -143,12 +157,14 @@ std::string foxtrot::protocols::SerialPort::read(unsigned int len)
   std::vector<unsigned char> out;
   out.resize(len);
   
+  
   auto ret = ::read(_fd,out.data(),out.size());
   
   if(ret < 0)
   {
+    
     //TODO:appropriate strerror
-    throw ProtocolError(std::string("error reading from serial port: ") + strerror(ret) );
+    throw ProtocolError(std::string("error reading from serial port: ") + strerror(errno) );
   }
   
   //TODO: if number read is incorrect
@@ -162,7 +178,7 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
   if(ret < 0) 
   {
     //TODO: appropriate strerror
-    throw ProtocolError(std::string("error writing to serial port: " ) + strerror(ret) );
+    throw ProtocolError(std::string("error writing to serial port: " ) + strerror(errno) );
   }
   
 }
