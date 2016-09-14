@@ -16,6 +16,12 @@ public:
   {
    return archon::archoncmd(request); 
   }
+  
+  ssmap parse_parameter_response(const std::string& response)
+  {
+   return archon::parse_parameter_response(response); 
+  }
+  
 };
 
 
@@ -31,9 +37,20 @@ int main(int argc, char** argv)
   
   archon_harness a(proto);
   
-  std::cout << "sending STATUS command" << std::endl;
+//   std::cout << "sending STATUS command" << std::endl;
 
   auto repl = a.archoncmd("STATUS");
+//   std::cout << "response to STATUS:" << repl << std::endl;
   
-  std::cout << "response to STATUS:" << repl << std::endl;
+  auto repl2 = a.archoncmd("SYSTEM");
+//   std::cout << "response to SYSTEM: " << repl2 << std::endl;
+  
+  
+  auto sysmap = a.parse_parameter_response(repl2);
+  auto statmap = a.parse_parameter_response(repl);
+  
+  
+  std::cout << a.archoncmd("FETCHLOG") << std::endl;
+  
+  
 };

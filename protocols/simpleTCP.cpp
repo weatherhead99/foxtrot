@@ -34,7 +34,7 @@ simpleTCP::simpleTCP(const parameterset*const instance_parameters)
 
 simpleTCP::~simpleTCP()
 {
-  
+    
   close(_sockfd);
 
 }
