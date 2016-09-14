@@ -39,6 +39,8 @@ namespace foxtrot
       template <typename arrtp>
       void scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas);
       
+      std::vector<unsigned char> scsi_read10(unsigned short num_lbas, unsigned lba, unsigned len);
+      
       //TODO: template impl?
 
       std::string _devnode;

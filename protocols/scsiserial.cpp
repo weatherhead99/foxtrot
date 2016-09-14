@@ -94,3 +94,34 @@ void foxtrot::protocols::scsiserial::perform_ioctl(sg_io_hdr_t& req)
 
 }
 
+
+
+std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short unsigned int num_lbas, unsigned int lba, unsigned int len)
+{
+  std::vector<unsigned char> data;
+  data.resize(len);
+  
+  unsigned char flags = 0;
+  unsigned char group_number = 0;
+  unsigned char control =0 ;
+  
+  unsigned char* lbap = reinterpret_cast<unsigned char*>(&lba);
+  unsigned char* lenp = reinterpret_cast<unsigned char*>(&num_lbas);
+  
+  group_number &= 0b00011111;
+  
+  std::array<unsigned char, 10> cmd = {0x28, flags, lbap[3],lbap[2],lbap[1],lbap[0],group_number, 
+    lenp[1],lenp[0], control};
+    
+  data.resize(len);
+  auto req = get_req_struct(cmd,data,scsidirection::FROM_DEV);
+  perform_ioctl(req);
+  
+  return data;
+    
+    
+  
+
+}
+
+
