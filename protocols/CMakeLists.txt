@@ -1,5 +1,5 @@
 
-set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp)
+set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp scsiserial.cpp)
 
 
 find_library(libusb usb-1.0 REQUIRED)
