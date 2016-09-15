@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "ProtocolUtilities.h"
 #include "CommunicationProtocol.h"
 
 #include <sstream>
@@ -40,20 +41,9 @@ std::string foxtrot::devices::archon::archoncmd(const std::string& request)
   
   std::cout << "command written, waiting for reply..." << std::endl;
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
-  auto ret = _specproto->read(READ_SIZE);
   
-  //read until we have an endl
-  while( std::find(ret.begin(), ret.end(),'\n')  == ret.end() )
-  {
-    std::cout << "need to read more.." << std::endl;
-    //not a complete response
-    ret += _specproto->read(READ_SIZE);
-    
-  }
   
-  //chop off everything beyond the endl
-  auto endlpos = std::find(ret.begin(), ret.end(), '\n');
-  ret = std::string(ret.begin(), endlpos - 1);
+  auto ret = read_until_endl(_specproto.get(),READ_SIZE,'\n');
   
   
   //first characters should be "<xx"
