@@ -10,7 +10,7 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_TESTS "build test code" ON)
 
-set(boost_cmps "log")
+set(boost_cmps "log;system")
 
 if(BUILD_TESTS)
   enable_testing()
@@ -37,7 +37,7 @@ add_subdirectory(protocols)
 add_subdirectory(devices)
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY})
 
 if(BUILD_TESTS)
   

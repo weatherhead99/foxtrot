@@ -96,18 +96,26 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
 }
 
 
-std::string foxtrot::protocols::BulkUSB::read(unsigned int len)
+std::string foxtrot::protocols::BulkUSB::read(unsigned int len, unsigned* actlen)
 {
   
   unsigned char* data = new unsigned char[len];
-  int actlen;
-  auto err = libusb_bulk_transfer(_hdl,_epin, data,len,&actlen,_read_timeout);
+  
+  
+  int alen_loc;
+  
+  auto err = libusb_bulk_transfer(_hdl,_epin, data,len,&alen_loc,_read_timeout);
   if(err < 0)
   {
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
   };
   
-  return std::string(data, (data + actlen));
+  if(actlen != nullptr)
+  {
+    *actlen = alen_loc; 
+  }
+  
+  return std::string(data, (data + alen_loc));
 
 }
 

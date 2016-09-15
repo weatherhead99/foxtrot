@@ -18,7 +18,7 @@ namespace foxtrot
     virtual ~BulkUSB();
     virtual void Init(const parameterset*const class_parameters) override;
       
-    virtual std::string read(unsigned int len) override;
+    virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
     
     private:

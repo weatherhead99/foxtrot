@@ -22,7 +22,7 @@ public:
     void Init(const unsigned port, const std::string& addr);
     
     
-    virtual std::string read(unsigned int len) override;
+    virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
     
     static bool verify_instance_parameters(const parameterset& instance_parameters);

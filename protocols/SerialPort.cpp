@@ -7,47 +7,37 @@
 #include <string.h>
 #include <vector>
 
+#include <iostream>
 #include <map>
 
-const std::map<unsigned,unsigned> baudrates = { 
-  {0 , B0} ,
-  {50, B50},
-  {75, B75},
-  {110, B110},
-  {134, B134},
-  {150, B150},
-  {200, B200},
-  {300, B300},
-  {600, B600},
-  {1200, B1200},
-  {1800, B1800},
-  {2400, B2400},
-  {4800, B4800},
-  {9600, B9600},
-  {19200, B19200},
-  {38400, B38400},
-  {57600, B57600},
-  {115200, B115200},
-  {230400, B230400},
-  {460800, B460800},
-  {500000, B500000},
-  {576000, B576000},
-  {921600, B921600},
-  {1000000, B1000000},
-  {1152000, B1152000},
-  {1500000, B1500000},
-  {2000000, B2000000},
-  {2500000, B2500000},
-  {3000000, B3000000},
-  {3500000, B3500000},
-  {4000000, B4000000}
+using namespace boost::asio;
+using boost::asio::serial_port_base;
+
+
+const std::map<unsigned, serial_port_base::stop_bits::type> sbitmap 
+{ {1, serial_port_base::stop_bits::one },
+  {2, serial_port_base::stop_bits::two}
+};
+
+const std::map<std::string, serial_port_base::parity::type> paritymap
+{
+  {"none" , serial_port_base::parity::none},
+  {"even" , serial_port_base::parity::even},
+  {"odd", serial_port_base::parity::odd}
+  
+};
+
+const std::map<std::string, serial_port_base::flow_control::type> flowmap
+{
+  {"none" , serial_port_base::flow_control::none},
+  {"hardware", serial_port_base::flow_control::hardware},
+  {"software", serial_port_base::flow_control::software}
   
 };
 
 
-
-
-foxtrot::protocols::SerialPort::SerialPort(const foxtrot::parameterset*const instance_parameters): SerialProtocol(instance_parameters)
+foxtrot::protocols::SerialPort::SerialPort(const foxtrot::parameterset*const instance_parameters)
+: SerialProtocol(instance_parameters), _sport(_io_service)
 {
   
 
@@ -56,7 +46,15 @@ foxtrot::protocols::SerialPort::SerialPort(const foxtrot::parameterset*const ins
 foxtrot::protocols::SerialPort::~SerialPort()
 {
   //TODO: error checking
-  close(_fd);
+  boost::system::error_code ec;
+  _sport.close(ec);
+  
+  if(ec)
+  {
+    std::cout << "unable to close serial port: " << ec.message() << std::endl;
+  };
+  
+  
 
 }
 
@@ -68,117 +66,74 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   
   extract_parameter_value(_port,_params,"port");
   extract_parameter_value(_baudrate,_params,"baudrate");
-
-  //match baudrate to allowed values
   
-  unsigned brate;
-  try{
-    brate = baudrates.at(_baudrate);
-  }
-  catch(std::out_of_range)
-  {
-   throw ProtocolError("invalid baud rate"); 
-  }
+  extract_parameter_map_cast(sbitmap,_stopbits,_params,"stopbits",false);
+  extract_parameter_map_cast(flowmap,_flowcont,_params,"flowcontrol",false);
   
-
+  extract_parameter_map_cast(paritymap,_parity,_params,"parity",false);
   
-  extract_parameter_value(_parity,_params,"parity",false);
-  extract_parameter_value(_stopbits,_params,"stopbits",false);
   extract_parameter_value(_timeout,_params,"timeout",false);
   
-  std::cout << "opening fd.. " << _port <<  std::endl;
-  _fd = open(_port.c_str(), O_RDWR |  O_NOCTTY  );
+  extract_parameter_value(_bits,_params,"bits",false);
   
-  if(_fd == -1)
+  
+  
+  
+  
+  boost::system::error_code ec;
+  
+  _sport.open(_port,ec);
+  if(ec)
   {
-    throw ProtocolError("unable to open serial port");
-  };
-  
-  
-  std::cout << "setting options... " << std::endl;
-  
-  //WARNING: segfault danger!
-  termios options;
-  auto ret = tcgetattr(_fd,&options);
-  if(ret < 0)
-  {
-    throw ProtocolError(std::string("couldn't get attributes for tty:") +  strerror(ret));
+    throw ProtocolError(std::string("can't open serial port: ") + ec.message().c_str());
   }
   
   
-  //TODO: set attributes
-  options.c_cflag = CS8 | CREAD | ~CRTSCTS;
+  _sport.set_option(serial_port_base::baud_rate(_baudrate));
+  _sport.set_option(serial_port_base::parity(_parity));
+  _sport.set_option(serial_port_base::stop_bits(_stopbits));
+  _sport.set_option(serial_port_base::character_size(_bits));
   
   
   
-  //raw input - see POSIX serial port guide
-//   options.c_lflag = ICANON;
-  
-  //set blocking read
-  options.c_cc[VMIN] =  1;
-  options.c_cc[VTIME] = _timeout;
-  
-  ret = tcflush(_fd,TCIFLUSH);
-  if( ret <0)
-  {
-    throw ProtocolError(std::string("unable to flush serial port: ") + strerror(ret));
-  };
-  
-  
-  
-  ret = cfsetispeed(&options,brate);
-  if(ret < 0 )
-  {
-    throw ProtocolError( std::string("couldn't set i speed: ") + strerror(ret)) ;
-  }
-  
-  ret = cfsetospeed(&options,brate);
-  if(ret < 0)
-  {
-    throw ProtocolError( std::string("couldn't set o speed: " )+  strerror(ret) );
-  }
-
-  
-  ret = tcsetattr(_fd,TCSANOW, &options);
-  if(ret <0)
-  {
-    throw ProtocolError(std::string("couldn't set tty attributes: " ) + strerror(ret));
-  }
-  
-  
-  
-  
-}
+};
 
 
 
-std::string foxtrot::protocols::SerialPort::read(unsigned int len)
+std::string foxtrot::protocols::SerialPort::read(unsigned int len, unsigned* actlen)
 {
   std::vector<unsigned char> out;
   out.resize(len);
   
+  boost::system::error_code ec;
   
-  auto ret = ::read(_fd,out.data(),out.size());
-  
-  if(ret < 0)
+  if(actlen != nullptr)
   {
-    
-    //TODO:appropriate strerror
-    throw ProtocolError(std::string("error reading from serial port: ") + strerror(errno) );
+    *actlen = _sport.read_some(buffer(out),ec);
+  }
+  else
+  {
+    _sport.read_some(buffer(out),ec);
   }
   
-  //TODO: if number read is incorrect
-
+  if(ec)
+  {
+    throw ProtocolError(std::string("error reading from serial port: ") + ec.message());
+  }
+  
+  return std::string(out.begin(), out.end());
+  
 }
 
 void foxtrot::protocols::SerialPort::write(const std::string& data)
 {
   
-  auto ret = ::write(_fd,data.data(),data.size());
-  if(ret < 0) 
+  boost::system::error_code ec;
+  _sport.write_some(buffer(data),ec);
+  
+  if(ec)
   {
-    //TODO: appropriate strerror
-    throw ProtocolError(std::string("error writing to serial port: " ) + strerror(errno) );
+   throw ProtocolError( std::string("error writing to serial port: ")  + ec.message()); 
   }
   
 }

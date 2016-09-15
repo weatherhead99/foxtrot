@@ -92,7 +92,7 @@ void simpleTCP::Init(const parameterset* const class_parameters)
 }
 
 
-std::string simpleTCP::read(unsigned int len)
+std::string simpleTCP::read(unsigned int len, unsigned* actlen)
 {
   std::vector<unsigned char> out;
   out.resize(len);
@@ -104,6 +104,10 @@ std::string simpleTCP::read(unsigned int len)
     throw ProtocolError(std::string("error reading from socket: " ) + gai_strerror(recv));
   };
   
+  if(actlen != nullptr)
+  {
+    *actlen = recv;
+  }
   
   return std::string(out.begin(),out.end());
 }
