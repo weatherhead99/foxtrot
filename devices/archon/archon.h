@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Device.h"
+#include "CmdDevice.h"
 
 #include <memory>
 
@@ -20,19 +20,17 @@ namespace foxtrot {
   {
     
 
-  class archon : public Device
+  class archon : public CmdDevice
   {
     
   public:
     archon(std::shared_ptr<simpleTCP> proto);
     
   protected:
-    std::string archoncmd(const std::string& request);
+    virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
     
-    
-    
-  
+      
   private:
     short unsigned _order;
     std::shared_ptr<simpleTCP> _specproto;

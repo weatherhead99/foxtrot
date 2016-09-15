@@ -32,7 +32,7 @@ const std::map<unsigned char, std::string> cornerstone_error_strings
 
 
 foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::SerialProtocol> proto)
-: Device(proto), _serproto(proto)
+: CmdDevice(proto), _serproto(proto)
 {
   
   auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto);
@@ -49,7 +49,7 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::Seria
 }
 
 
-std::string foxtrot::devices::cornerstone260::cornerstonecmd(const std::string& request)
+std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
   
   _serproto->write(request + '\n');

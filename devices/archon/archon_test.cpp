@@ -14,7 +14,7 @@ public:
   {};
   std::string archoncmd(const std::string& request)
   {
-   return archon::archoncmd(request); 
+   return archon::cmd(request); 
   }
   
   ssmap parse_parameter_response(const std::string& response)

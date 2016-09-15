@@ -1,5 +1,5 @@
 #pragma once
-#include "Device.h"
+#include "CmdDevice.h"
 #include "SerialProtocol.h"
 
 namespace foxtrot
@@ -7,13 +7,13 @@ namespace foxtrot
   namespace devices
   {
     
-    class cornerstone260 : public Device
+    class cornerstone260 : public CmdDevice
     {
     public:
       cornerstone260(std::shared_ptr< SerialProtocol> proto);
       
     private:
-      std::string cornerstonecmd(const std::string& request);
+      std::string cmd(const std::string& request) override;
       
       
       bool _cancelecho = true;

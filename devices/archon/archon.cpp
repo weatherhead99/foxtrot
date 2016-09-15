@@ -15,7 +15,7 @@
 #define READ_SIZE 1024
 
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
-  : Device(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
+  : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
     _order(0)
 {
   proto->Init(nullptr);
@@ -23,7 +23,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
 }
 
 
-std::string foxtrot::devices::archon::archoncmd(const std::string& request)
+std::string foxtrot::devices::archon::cmd(const std::string& request)
 {
   if(_order == 0xFE)
   {
