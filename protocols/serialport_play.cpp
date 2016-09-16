@@ -28,6 +28,8 @@ int main(int argc, char** argv)
     cout << "serial port read.. " << endl;
       
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    auto repl = ser.read(1);
+    auto repl = ser.read(10);
+    
+    cout << "repl: " << repl << endl;
     
 };

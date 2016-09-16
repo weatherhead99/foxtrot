@@ -21,7 +21,8 @@ namespace foxtrot
     virtual void Init(const parameterset*const class_parameters) override;
     virtual std::string read(unsigned int len, unsigned* actlen= nullptr) override;
     virtual void write(const std::string& data) override;
-      
+    
+    virtual void flush();
     
     private:
       boost::asio::io_service _io_service;

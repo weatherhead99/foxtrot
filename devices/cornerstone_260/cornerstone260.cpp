@@ -11,11 +11,11 @@
 
 const foxtrot::parameterset cornerstone_class_params_serial
 {
-  {"baudrate" , 9600},
+  {"baudrate" , 9600u},
   {"parity", "none"},
-  {"stopbits", 1},
+  {"stopbits", 1u},
   {"flowcontrol", "none"},
-  {"bits", 8}
+  {"bits", 8u}
 };
 
 const std::map<unsigned char, std::string> cornerstone_error_strings
@@ -44,6 +44,7 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::Seria
   //initialize communication port
   _cancelecho = true;
   serportptr->Init(&cornerstone_class_params_serial);
+  serportptr->flush();
   
 
 }
@@ -59,9 +60,12 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
   
   if(_cancelecho)
   {
-    _serproto->read( request.size() + 1, &actlen );
-    if(actlen < (request.size() + 1) )
+    auto repl = _serproto->read( request.size() , &actlen );
+    if(actlen < (request.size() ) )
     {
+      std::cout << "request.size(): " << request.size() << std::endl;
+      std::cout << "got: " << actlen << " bytes" << std::endl;
+      std::cout << repl << std::endl;
       throw ProtocolError("couldn't read cornerstone echo");
     }
   }
@@ -70,6 +74,7 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
   
   
   
+  return response;
 
 }
 

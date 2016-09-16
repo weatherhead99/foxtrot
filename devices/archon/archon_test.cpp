@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 
+#include "TestUtilities.h"
 
 
 class archon_harness : public foxtrot::devices::archon

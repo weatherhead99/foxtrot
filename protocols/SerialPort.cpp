@@ -137,3 +137,16 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
   }
   
 }
+
+
+void foxtrot::protocols::SerialPort::flush()
+{
+  auto ret = tcflush(  _sport.native_handle(), TCIOFLUSH);
+  if(ret < 0)
+  {
+    throw ProtocolError(std::string("failed to flush serial port: ") + strerror(ret));
+  }
+
+}
+
+
