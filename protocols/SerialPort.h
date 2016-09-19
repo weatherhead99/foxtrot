@@ -22,7 +22,10 @@ namespace foxtrot
     virtual std::string read(unsigned int len, unsigned* actlen= nullptr) override;
     virtual void write(const std::string& data) override;
     
-    virtual void flush();
+    void flush();
+    unsigned bytes_available();
+    
+    std::string read_until_endl( unsigned wait_ms = 0, char endlchar='\n');
     
     private:
       boost::asio::io_service _io_service;

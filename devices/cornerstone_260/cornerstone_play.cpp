@@ -18,14 +18,20 @@ int main(int argc, char** argv)
   foxtrot::expose_cmd<foxtrot::devices::cornerstone260> monoch (std::static_pointer_cast<foxtrot::SerialProtocol>(sport));
   
   
+  auto info = monoch.cmd("INFO?");
+  std::cout << "INFO: " << info << std::endl;
   
-  auto repl = monoch.cmd("INFO?");
-  std::cout << "repl: " << repl << std::endl;
-  
-  std::cout << monoch.cmd("UNITS?") << std::endl;
-  
-  std::cout << monoch.cmd("SHUTTER?") << std::endl;
-  
+
+  auto shutter = monoch.getShutterStatus();
+  std::cout << "SHUTTER:" << shutter << std::endl;
+
+  auto word = shutter ? "closing" : "opening";
+
+  std::cout << word<<"  shutter" << std::endl;
+  monoch.setShutterStatus(!shutter);
+  std::cout << "SHUTTER:" << monoch.getShutterStatus() << std::endl;
+
+
   
   
 }

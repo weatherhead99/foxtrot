@@ -9,6 +9,10 @@
 
 #include <sstream>
 
+#include <chrono>
+#include <thread>
+#include <algorithm>
+
 const foxtrot::parameterset cornerstone_class_params_serial
 {
   {"baudrate" , 9600u},
@@ -31,6 +35,8 @@ const std::map<unsigned char, std::string> cornerstone_error_strings
 };
 
 
+
+
 foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::SerialProtocol> proto)
 : CmdDevice(proto), _serproto(proto)
 {
@@ -46,35 +52,78 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::Seria
   serportptr->Init(&cornerstone_class_params_serial);
   serportptr->flush();
   
-
 }
 
 
 std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
-  
+
+  std::cout << "request size: " << request.size() << std::endl;
+
   _serproto->write(request + '\n');
   
   //read echo, and throw away
+ 
   unsigned actlen;
-  
-  if(_cancelecho)
-  {
-    auto repl = _serproto->read( request.size() , &actlen );
-    if(actlen < (request.size() ) )
-    {
-      std::cout << "request.size(): " << request.size() << std::endl;
-      std::cout << "got: " << actlen << " bytes" << std::endl;
-      std::cout << repl << std::endl;
-      throw ProtocolError("couldn't read cornerstone echo");
-    }
-  }
 
-  auto response = read_until_endl(_serproto.get(),20,'\n'); 
-  
-  
-  
-  return response;
+  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+  auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
+
+  if(serportptr == nullptr)
+    {
+      throw ProtocolError("only serial port supported at the moment");
+    };
+
+  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
+
+  std::cout << "reading echo" << std::endl;
+
+  auto echo = serportptr->read(request.size()+1, &actlen);
+  if( echo[echo.size()-1] != '\n')
+    {
+      throw ProtocolError("couldn't read echo properly");
+    }
+  if( std::string(echo.begin(),echo.end()-1) != request)
+    {
+      throw ProtocolError("echo was invalid");
+    };
+
+  std::cout << "echo ok" << std::endl;
+
+  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
+
+  auto response = serportptr->read_until_endl(20,'\r');
+
+  auto cretpos = std::find(response.begin(),response.end(),'\r');
+ 
+  return std::string(response.begin(),cretpos );
 
 }
 
+
+bool foxtrot::devices::cornerstone260::getShutterStatus()
+{
+  auto response = cmd("SHUTTER?");
+  
+  switch(response[0])
+    {
+    case 'C':
+      return false;
+    case 'O':
+      return true;
+    default:
+      throw ProtocolError("invalid shutter status");
+    }
+
+
+}
+
+void foxtrot::devices::cornerstone260::setShutterStatus(bool status)
+{
+  char cmdch = status ? 'O' : 'C';
+  
+  std::string request{"SHUTTER "};
+  cmd(request + cmdch);
+  
+}

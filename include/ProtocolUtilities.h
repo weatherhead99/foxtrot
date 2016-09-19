@@ -70,7 +70,7 @@ void extract_parameter_map_cast(const std::map<keytp,valtp>& map, valtp& param_o
 }
 
 
-std::string read_until_endl(SerialProtocol* proto, unsigned readlen, char endlchar='\n');
+//std::string read_until_endl(SerialProtocol* proto, unsigned readlen, char endlchar='\n');
 
 
 

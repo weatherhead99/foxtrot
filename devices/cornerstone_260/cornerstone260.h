@@ -12,12 +12,18 @@ namespace foxtrot
     public:
       cornerstone260(std::shared_ptr< SerialProtocol> proto);
       
+      bool getShutterStatus();
+      void setShutterStatus(bool status);
+
+
     protected:
       std::string cmd(const std::string& request) override;
       
       
       bool _cancelecho = true;
       std::shared_ptr<SerialProtocol> _serproto;
+      
+
             
     };
     

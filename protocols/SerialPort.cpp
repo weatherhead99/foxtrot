@@ -3,12 +3,18 @@
 #include <termios.h>
 
 #include "ProtocolUtilities.h"
+
 #include <fcntl.h>
 #include <string.h>
 #include <vector>
 
 #include <iostream>
 #include <map>
+
+#include <chrono>
+#include <thread>
+
+#include <algorithm>
 
 using namespace boost::asio;
 using boost::asio::serial_port_base;
@@ -150,3 +156,37 @@ void foxtrot::protocols::SerialPort::flush()
 }
 
 
+unsigned foxtrot::protocols::SerialPort::bytes_available()
+{
+  unsigned bytes_available;
+  auto ret = ioctl(_sport.native_handle(), FIONREAD, &bytes_available);
+
+  if(ret <0)
+    {
+      throw ProtocolError(std::string("ioctl failed: " ) + strerror(ret));
+    };
+
+  return bytes_available;
+
+}
+
+
+std::string foxtrot::protocols::SerialPort::read_until_endl(unsigned wait_ms, char endlchar)
+{
+  auto avail = bytes_available();
+  auto ret = this->read(avail);
+  
+  decltype(ret.begin()) endlpos;
+
+
+  while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(wait_ms));
+      ret += read(bytes_available());
+
+    };
+
+  return ret;
+  
+
+}
