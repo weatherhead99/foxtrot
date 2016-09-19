@@ -25,10 +25,17 @@ public:
     virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
     
+    virtual std::string read_until_endl(char endlchar = '\n');
+    
+    void setchunk_size(unsigned chunk);
+    unsigned getchunk_size();
+    
+    
     static bool verify_instance_parameters(const parameterset& instance_parameters);
     static bool verify_class_parameters(const parameterset& class_parameters);
     
 private:
+    unsigned _chunk_size = 1024;
     unsigned _port;
     std::string _addr;
     

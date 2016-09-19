@@ -25,7 +25,11 @@ namespace foxtrot
     void flush();
     unsigned bytes_available();
     
-    std::string read_until_endl( unsigned wait_ms = 0, char endlchar='\n');
+    virtual std::string read_until_endl(char endlchar='\n') override;
+    
+    void setWait(unsigned wait_ms);
+    unsigned getWait() const;
+    
     
     private:
       boost::asio::io_service _io_service;
@@ -39,6 +43,9 @@ namespace foxtrot
       serial_port_base::stop_bits::type _stopbits = serial_port_base::stop_bits::one;
       unsigned _bits = 8;
       unsigned _timeout = 5;//timeout in 10ths of a second
+      
+      unsigned _wait_ms = 0;
+      
     };
     
     

@@ -171,7 +171,7 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
 }
 
 
-std::string foxtrot::protocols::SerialPort::read_until_endl(unsigned wait_ms, char endlchar)
+std::string foxtrot::protocols::SerialPort::read_until_endl(char endlchar)
 {
   auto avail = bytes_available();
   auto ret = this->read(avail);
@@ -181,7 +181,7 @@ std::string foxtrot::protocols::SerialPort::read_until_endl(unsigned wait_ms, ch
 
   while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(wait_ms));
+      std::this_thread::sleep_for(std::chrono::milliseconds(_wait_ms));
       ret += read(bytes_available());
 
     };
@@ -190,3 +190,16 @@ std::string foxtrot::protocols::SerialPort::read_until_endl(unsigned wait_ms, ch
   
 
 }
+
+unsigned int foxtrot::protocols::SerialPort::getWait() const
+{
+  return _wait_ms;
+
+}
+
+void foxtrot::protocols::SerialPort::setWait(unsigned int wait_ms)
+{
+  _wait_ms = wait_ms;
+
+}
+

@@ -18,7 +18,7 @@ namespace foxtrot
 
     protected:
       std::string cmd(const std::string& request) override;
-      
+      void readecho(const std::string& request);
       
       bool _cancelecho = true;
       std::shared_ptr<SerialProtocol> _serproto;

@@ -43,7 +43,8 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
   
   
-  auto ret = read_until_endl(_specproto.get(),READ_SIZE,'\n');
+  
+  auto ret = _specproto->read_until_endl();
   
   
   //first characters should be "<xx"

@@ -17,7 +17,7 @@
 #include "ProtocolUtilities.h"
 
 #include <iostream>
-
+#include <algorithm>
 
 using namespace foxtrot::protocols;
 
@@ -126,3 +126,29 @@ void simpleTCP::write(const std::string& data)
   }
 
 }
+
+std::string simpleTCP::read_until_endl(char endlchar)
+{
+  unsigned actlen;
+  auto ret = this->read(_chunk_size, &actlen);
+  
+  decltype(ret.begin()) endlpos;
+  while( (endlpos = std::find(ret.begin(), ret.end(), endlchar) ) == ret.end())
+  {
+    ret += read(_chunk_size);
+  };
+  
+  return ret;
+
+}
+
+unsigned int simpleTCP::getchunk_size()
+{
+  return _chunk_size;
+}
+
+void simpleTCP::setchunk_size(unsigned int chunk)
+{
+  _chunk_size = chunk;
+}
+

@@ -78,8 +78,25 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
 
   std::cout << "reading echo" << std::endl;
+  
+  readecho(request);
 
-  auto echo = serportptr->read(request.size()+1, &actlen);
+  std::cout << "echo ok" << std::endl;
+
+  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
+
+  auto response = serportptr->read_until_endl('\r');
+
+  auto cretpos = std::find(response.begin(),response.end(),'\r');
+ 
+  return std::string(response.begin(),cretpos );
+
+}
+
+void foxtrot::devices::cornerstone260::readecho(const std::string& request)
+{
+  unsigned actlen;
+  auto echo = _serproto->read(request.size() +1, &actlen);
   if( echo[echo.size()-1] != '\n')
     {
       throw ProtocolError("couldn't read echo properly");
@@ -89,17 +106,10 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
       throw ProtocolError("echo was invalid");
     };
 
-  std::cout << "echo ok" << std::endl;
-
-  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
-
-  auto response = serportptr->read_until_endl(20,'\r');
-
-  auto cretpos = std::find(response.begin(),response.end(),'\r');
- 
-  return std::string(response.begin(),cretpos );
 
 }
+
+
 
 
 bool foxtrot::devices::cornerstone260::getShutterStatus()
