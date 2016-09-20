@@ -110,6 +110,8 @@ void scsiserial::scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas)
     lenp[1],lenp[0], control};
   
   auto req = get_req_struct(cmd,data,scsidirection::TO_DEV);
+  perform_ioctl(req);
+  
 };
 
       
