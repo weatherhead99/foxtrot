@@ -8,9 +8,10 @@ using std::endl;
 int main(int argc, char** argv)
 {
   
-  foxtrot::parameterset params{ {"devnode", "/dev/sdb"},
-  {"timeout", 1000u},
-  {"LBA", 100000u}
+  foxtrot::parameterset params{ 
+    {"devnode", "/dev/sdb"},
+    {"timeout", 1000u},
+    {"LBA", 100000u}
   };
   
   foxtrot::protocols::scsiserial proto(&params);
