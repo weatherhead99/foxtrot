@@ -5,7 +5,8 @@
 #include <vector>
 #include <scsi/sg.h>
 #include <array>
-
+#include <utility>
+#include <type_traits>
 
 
 namespace foxtrot
@@ -29,15 +30,29 @@ namespace foxtrot
     
     virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
+    
+    virtual std::string read_until_endl(char endlchar = '\n');
+    
+    
+    unsigned getLBA() const;
+    void setLBA(unsigned lba);
+    
+    unsigned getblen() const;
+    void setblen(unsigned blen);
+    
       
     private:
       void perform_ioctl(sg_io_hdr_t& req);
       template <typename arrtp1, typename arrtp2>   
       sg_io_hdr_t get_req_struct(arrtp1& cmd, arrtp2& reply, const scsidirection dir);
       
+      std::pair<unsigned,unsigned> scsi_read_capacity10();
+      
+      bool scsi_test_unit_ready();
       
       template <typename arrtp>
       void scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas);
+      
       
       std::vector<unsigned char> scsi_read10(unsigned short num_lbas, unsigned lba, unsigned len);
       
@@ -47,6 +62,9 @@ namespace foxtrot
       int _fd;
       unsigned _timeout;
       std::array<unsigned char, 32> _sense_buffer;
+      
+      unsigned _LBA;
+      unsigned _blen;
       
     };
     

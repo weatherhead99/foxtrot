@@ -6,10 +6,13 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <byteswap.h>
+#include <cmath>
 
 foxtrot::protocols::scsiserial::scsiserial(const foxtrot::parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters)
 {
+  _sense_buffer.fill(0);
 
 }
 
@@ -29,6 +32,8 @@ void foxtrot::protocols::scsiserial::Init(const foxtrot::parameterset*const clas
     extract_parameter_value(_devnode,_params,"devnode");
     extract_parameter_value(_timeout,_params,"timeout");
     
+    extract_parameter_value(_LBA,_params,"LBA");    
+    
     _fd = open(_devnode.c_str(),O_RDWR);
     
     if(_fd < 0) 
@@ -47,8 +52,37 @@ void foxtrot::protocols::scsiserial::Init(const foxtrot::parameterset*const clas
     };
     
     
-    
+    //get blen from device
+    auto cap = scsi_read_capacity10();
+    _blen = cap.second;
+        
 }
+
+
+std::string foxtrot::protocols::scsiserial::read(unsigned int len, unsigned int* actlen)
+{
+  
+  unsigned num_lbas = static_cast<unsigned>(std::ceil( len / static_cast<double>(_blen)));
+  auto repl = scsi_read10(num_lbas,_LBA,_blen);
+  
+  return std::string(repl.begin(), repl.end());
+
+}
+
+
+void foxtrot::protocols::scsiserial::write(const std::string& data)
+{
+  
+  unsigned num_lbas = static_cast<unsigned>(std::ceil( data.size() /static_cast<double>(_blen)));
+  
+  std::vector<unsigned char> datavec(data.begin(), data.end());
+  scsi_write10(datavec,_LBA,num_lbas);
+  
+  
+}
+
+
+
 
 
 void foxtrot::protocols::scsiserial::perform_ioctl(sg_io_hdr_t& req)
@@ -94,6 +128,43 @@ void foxtrot::protocols::scsiserial::perform_ioctl(sg_io_hdr_t& req)
 
 }
 
+bool foxtrot::protocols::scsiserial::scsi_test_unit_ready()
+{
+  unsigned char control = 0;
+  std::array<unsigned char, 6> cmd {0, 0, 0, 0, 0, control};
+  std::array<unsigned char, 0> reply;
+  
+  auto req = get_req_struct(cmd,reply,scsidirection::NONE);
+  perform_ioctl(req);
+  
+  //TODO: make it work?
+  return true;
+
+}
+
+
+
+std::pair< unsigned int, unsigned int > foxtrot::protocols::scsiserial::scsi_read_capacity10()
+{
+  
+  std::array<unsigned char, 8> cmd{0};
+  std::array<unsigned char, 8> reply{0};
+  
+  cmd[0] = 0x25;
+  
+  auto req = get_req_struct(cmd,reply,scsidirection::FROM_DEV);
+  perform_ioctl(req);
+  
+  struct replst { int LBA;
+    int blen;
+  };
+  
+  auto replstp = reinterpret_cast<replst*>(reply.data());
+  std::pair<unsigned,unsigned> out{ __bswap_32(replstp->LBA), __bswap_32(replstp->blen)};
+  
+  return out;
+
+}
 
 
 std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short unsigned int num_lbas, unsigned int lba, unsigned int len)
@@ -118,10 +189,12 @@ std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short u
   perform_ioctl(req);
   
   return data;
-    
-    
-  
-
 }
 
+std::string foxtrot::protocols::scsiserial::read_until_endl(char endlchar)
+{
+  
+  throw ProtocolError("not implemented yet!");
+
+}
 
