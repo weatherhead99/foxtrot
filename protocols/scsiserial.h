@@ -40,21 +40,21 @@ namespace foxtrot
     unsigned getblen() const;
     void setblen(unsigned blen);
     
+      std::pair<unsigned,unsigned> scsi_read_capacity10();
+      
+      bool scsi_test_unit_ready();
+      template <typename arrtp>      
+      void scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas);
+      std::array<unsigned char, 96> scsi_inquiry();
+      
+      std::vector<unsigned char> scsi_read10(unsigned short num_lbas, unsigned lba, unsigned len);
       
     private:
+      std::string prepend_length_chrs(const std::string& req);
       void perform_ioctl(sg_io_hdr_t& req);
       template <typename arrtp1, typename arrtp2>   
       sg_io_hdr_t get_req_struct(arrtp1& cmd, arrtp2& reply, const scsidirection dir);
       
-      std::pair<unsigned,unsigned> scsi_read_capacity10();
-      
-      bool scsi_test_unit_ready();
-      
-      template <typename arrtp>
-      void scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas);
-      
-      
-      std::vector<unsigned char> scsi_read10(unsigned short num_lbas, unsigned lba, unsigned len);
       
       //TODO: template impl?
 
@@ -106,9 +106,14 @@ void scsiserial::scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas)
   unsigned char* lbap = reinterpret_cast<unsigned char*>(&lba);
   unsigned char* lenp = reinterpret_cast<unsigned char*>(&num_lbas);
   
+//   std::cout << "lbap0 : " << (int) lbap[0] << std::endl;
+  std::cout << std::hex << "lbap:" << lba << std::endl;
+  std::cout << "len: " << num_lbas << std::endl;
+  
   std::array<unsigned char,10> cmd = {0x2A, flags,lbap[3],lbap[2],lbap[1],lbap[0], group_number,
     lenp[1],lenp[0], control};
   
+    
   auto req = get_req_struct(cmd,data,scsidirection::TO_DEV);
   perform_ioctl(req);
   

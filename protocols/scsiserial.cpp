@@ -9,6 +9,9 @@
 #include <byteswap.h>
 #include <cmath>
 
+#include <algorithm>
+
+
 foxtrot::protocols::scsiserial::scsiserial(const foxtrot::parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters)
 {
@@ -63,9 +66,22 @@ std::string foxtrot::protocols::scsiserial::read(unsigned int len, unsigned int*
 {
   
   unsigned num_lbas = static_cast<unsigned>(std::ceil( len / static_cast<double>(_blen)));
+//   std::cout << "num_lbas: " << num_lbas << std::endl;
+  
+  
+  
   auto repl = scsi_read10(num_lbas,_LBA,_blen);
   
-  return std::string(repl.begin(), repl.end());
+  auto iter = repl.begin();
+  for(unsigned i = 0; i < 20; i++)
+  {
+    std::cout << (int) *iter++ << " " ;
+  
+  }
+ std::cout << std::endl; 
+  
+ auto zerpos = std::find(repl.begin(),repl.end(),static_cast<char>(0x00));
+  return std::string(repl.begin(), zerpos);
 
 }
 
@@ -75,7 +91,17 @@ void foxtrot::protocols::scsiserial::write(const std::string& data)
   
   unsigned num_lbas = static_cast<unsigned>(std::ceil( data.size() /static_cast<double>(_blen)));
   
-  std::vector<unsigned char> datavec(data.begin(), data.end());
+//   std::cout << "num_lbas: " << num_lbas << std::endl;
+  
+  auto datastr = prepend_length_chrs(data);
+  
+  std::vector<unsigned char> datavec(datastr.begin(), datastr.end());
+  //WARNING: doesn't properly handle multiple LBA case!!
+  if(datavec.size() < _blen)
+  {
+    datavec.resize(_blen);
+  };
+  
   scsi_write10(datavec,_LBA,num_lbas);
   
   
@@ -107,6 +133,7 @@ void foxtrot::protocols::scsiserial::perform_ioctl(sg_io_hdr_t& req)
      std::cout << std::endl;
       
     }
+    
     
     if(req.masked_status)
     {
@@ -143,6 +170,19 @@ bool foxtrot::protocols::scsiserial::scsi_test_unit_ready()
 }
 
 
+std::array<unsigned char, 96> foxtrot::protocols::scsiserial::scsi_inquiry()
+{
+  std::array<unsigned char, 8> cmd{0x12, 0, 0, 0, 96, 0};
+  std::array<unsigned char, 96> reply{0};
+
+  auto req = get_req_struct(cmd,reply,scsidirection::FROM_DEV);
+  perform_ioctl(req);
+  
+  return reply;
+  
+}
+
+
 
 std::pair< unsigned int, unsigned int > foxtrot::protocols::scsiserial::scsi_read_capacity10()
 {
@@ -170,7 +210,7 @@ std::pair< unsigned int, unsigned int > foxtrot::protocols::scsiserial::scsi_rea
 std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short unsigned int num_lbas, unsigned int lba, unsigned int len)
 {
   std::vector<unsigned char> data;
-  data.resize(len);
+  data.reserve(len);
   
   unsigned char flags = 0;
   unsigned char group_number = 0;
@@ -188,6 +228,9 @@ std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short u
   auto req = get_req_struct(cmd,data,scsidirection::FROM_DEV);
   perform_ioctl(req);
   
+  std::cout << "req len: " << req.dxfer_len << std::endl;
+  data.resize(req.dxfer_len);
+  
   return data;
 }
 
@@ -197,4 +240,18 @@ std::string foxtrot::protocols::scsiserial::read_until_endl(char endlchar)
   throw ProtocolError("not implemented yet!");
 
 }
+
+
+std::string foxtrot::protocols::scsiserial::prepend_length_chrs(const std::string& req)
+{
+    auto sz  = req.size();
+  unsigned char* szp = reinterpret_cast<unsigned char*>(&sz);
+  
+  std::string out{szp[0], szp[1]  };
+  
+  return out + req;
+  
+
+}
+
 
