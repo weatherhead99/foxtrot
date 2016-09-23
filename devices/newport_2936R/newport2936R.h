@@ -12,6 +12,9 @@ namespace foxtrot
     public:
     newport2936R(std::shared_ptr< SerialProtocol> proto);
     virtual std::string cmd(const std::string& request);
+    
+    
+    
         
     private:
       std::shared_ptr<SerialProtocol> _proto;

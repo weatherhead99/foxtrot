@@ -59,7 +59,11 @@ int main(int argc, char** argv)
   cout << "response: " << std::string(inq.begin(), inq.end())  << endl;
   
   
-  cout << "------------------ask amps-------------------" << endl;
+  proto.write("IDN?");
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  auto idn = proto.read(512);
+  cout << "idn: " << idn << endl;
+  
 
 //   auto cmdstr = form_command_string("AMPS?");
 //   std::vector<unsigned char> cmdvec(cmdstr.begin(), cmdstr.end());
@@ -69,45 +73,40 @@ int main(int argc, char** argv)
   proto.write("AMPS?");
   
   
-  
-  cout << "------------------asked----------------------" << endl;
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   auto amps = proto.read(512);
   cout << "amps: " << amps << endl;
-  
-  
-  
-  cout << "------------------ask volts-------------------" << endl;
 
    proto.write("VOLTS?");
   
-  //   cmdstr = form_command_string("VOLTS?");
-//   cmdvec = std::vector<unsigned char>(cmdstr.begin(), cmdstr.end());
-//   cmdvec.resize(512);
-//   proto.scsi_write10(cmdvec,100000,1);
-  cout << "------------------asked-----------------------" << endl;
   
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  
   auto volts = proto.read(512);
   cout << "volts: " << volts << endl;
   
-  
-  
-  cout << "-------------------ask watts-------------------" << endl;
+
   proto.write("WATTS?");
-  cout << "------------------asked ------------------------" << endl;
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   auto watts = proto.read(512);
-  cout << "watts: " << watts << endl;
+  cout <<"watts: " << watts << endl;
   
-  
-  cout << "---------------------ask shutter----------------" << endl;
   proto.write("LAMP HRS?");
-  cout << "-----------------asked--------------------------" << endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   
+  auto hours = proto.read(512);
+  cout << "lamp hours: " << hours << endl;
+  
+  
+  proto.write("SHUTTER?");
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   auto shutter = proto.read(512);
-  cout << "lamp hours: " << shutter << endl;
+  cout << "shutter: " << shutter << endl;
+  
+  
+  
+  proto.write("STOP");
+  
+  
   
   
 }

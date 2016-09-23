@@ -1,8 +1,12 @@
 #include "CommunicationProtocol.h"
 
 foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters) 
-: _params(*instance_parameters)
 {
+  
+  if(instance_parameters != nullptr)
+  {
+   _params = *instance_parameters; 
+  }
 
 }
 

@@ -11,6 +11,7 @@
 
 foxtrot::protocols::BulkUSB::BulkUSB(const foxtrot::parameterset*const instance_parameters): SerialProtocol(instance_parameters)
 {
+  
   int ret;
   if( ( ret = libusb_init(&_ctxt)) < 0)
   {
@@ -42,42 +43,53 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
     extract_parameter_value(_pid,_params,"pid");
     extract_parameter_value(_epin,_params,"epin");
     extract_parameter_value(_epout,_params,"epout");
-    extract_parameter_value(_write_timeout,_params,"write_timeout");
-    extract_parameter_value(_read_timeout,_params,"read_timeout");
+    extract_parameter_value(_write_timeout,_params,"write_timeout", false);
+    extract_parameter_value(_read_timeout,_params,"read_timeout",false);
     
     
     //get usb device
     auto free_devlist = [] (libusb_device** list) { libusb_free_device_list(list, true);};
     
-    std::unique_ptr<libusb_device*, void(*)(libusb_device**)> device_list(nullptr,free_devlist);
+    std::cout << "device list" << std::endl;
     
-    auto listptr = device_list.get();
+    libusb_device** listptr;
+    
+//     std::cout << "getting device list" << std::endl;
     auto num_devs = libusb_get_device_list(_ctxt, &listptr ); 
+    
+//     std::cout << "matching devices: " << num_devs << std::endl;
     
     std::vector<libusb_device*> matching_devices;
     matching_devices.reserve(num_devs);
     
     for(auto i=0 ; i < num_devs; i++)
     {
+//       std::cout << "i: " << i << std::endl;
       libusb_device_descriptor desc;
       int ret;
-      if( (ret = libusb_get_device_descriptor(*(device_list.get() +i), &desc)) < 0)
+      if( (ret = libusb_get_device_descriptor(*(listptr +i), &desc)) < 0)
       {
 	throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
       };
       
       if(desc.idVendor == _vid && desc.idProduct == _pid)
       {
-	matching_devices.push_back( *(device_list.get() +i));
+	matching_devices.push_back( *(listptr +i));
       };
-      
-      
+        
     };
+    
+    if(matching_devices.size() == 0)
+    {
+      throw ProtocolError("no matching device connected");
+    };
+    
     
     if(matching_devices.size() > 1)
     {
       throw ProtocolError("multiple device support not implemented yet!"); 
     };
+    
     
     
     int ret;
@@ -92,7 +104,7 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
     };
     
     
-    
+   
 }
 
 

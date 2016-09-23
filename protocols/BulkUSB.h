@@ -29,8 +29,8 @@ namespace foxtrot
       unsigned _pid;
       unsigned _epout;
       unsigned _epin;
-      unsigned _write_timeout;
-      unsigned _read_timeout;
+      unsigned _write_timeout = 0;
+      unsigned _read_timeout = 0;
       
     };
     

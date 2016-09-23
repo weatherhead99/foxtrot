@@ -72,13 +72,13 @@ std::string foxtrot::protocols::scsiserial::read(unsigned int len, unsigned int*
   
   auto repl = scsi_read10(num_lbas,_LBA,_blen);
   
-  auto iter = repl.begin();
-  for(unsigned i = 0; i < 20; i++)
-  {
-    std::cout << (int) *iter++ << " " ;
-  
-  }
- std::cout << std::endl; 
+//   auto iter = repl.begin();
+//   for(unsigned i = 0; i < 20; i++)
+//   {
+//     std::cout << (int) *iter++ << " " ;
+//   
+//   }
+//  std::cout << std::endl; 
   
  auto zerpos = std::find(repl.begin(),repl.end(),static_cast<char>(0x00));
   return std::string(repl.begin(), zerpos);
@@ -103,8 +103,6 @@ void foxtrot::protocols::scsiserial::write(const std::string& data)
   };
   
   scsi_write10(datavec,_LBA,num_lbas);
-  
-  
 }
 
 
@@ -228,7 +226,7 @@ std::vector< unsigned char > foxtrot::protocols::scsiserial::scsi_read10(short u
   auto req = get_req_struct(cmd,data,scsidirection::FROM_DEV);
   perform_ioctl(req);
   
-  std::cout << "req len: " << req.dxfer_len << std::endl;
+//   std::cout << "req len: " << req.dxfer_len << std::endl;
   data.resize(req.dxfer_len);
   
   return data;

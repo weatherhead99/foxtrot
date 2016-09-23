@@ -2,11 +2,6 @@
 set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp scsiserial.cpp)
 
 
-find_library(libusb usb-1.0 REQUIRED)
-message(STATUS "libusb: ${libusb}")
-find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
-message(STATUS "libusb path: ${libusb_include}" )
-include_directories(${libusb_include})
 
 
 

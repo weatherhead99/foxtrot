@@ -12,6 +12,7 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include <iomanip>
 
 const foxtrot::parameterset cornerstone_class_params_serial
 {
@@ -57,7 +58,8 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::Seria
 
 std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
-
+  
+  
   std::cout << "request size: " << request.size() << std::endl;
 
   _serproto->write(request + '\n');
@@ -66,7 +68,7 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
  
   unsigned actlen;
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
   auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
 
@@ -79,12 +81,19 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 
   std::cout << "reading echo" << std::endl;
   
-  readecho(request);
+  auto echo = readecho(request);
 
   std::cout << "echo ok" << std::endl;
-
+  std::cout << echo << std::endl;
+  
   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
 
+  //HACK: if no bytes available, assume no response
+  if( serportptr->bytes_available() == 0)
+  {
+    return "";
+  }
+  
   auto response = serportptr->read_until_endl('\r');
 
   auto cretpos = std::find(response.begin(),response.end(),'\r');
@@ -93,19 +102,43 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 
 }
 
-void foxtrot::devices::cornerstone260::readecho(const std::string& request)
+std::string foxtrot::devices::cornerstone260::readecho(const std::string& request)
 {
   unsigned actlen;
   auto echo = _serproto->read(request.size() +1, &actlen);
-  if( echo[echo.size()-1] != '\n')
+  
+  //echo might not be equal to request
+  auto newlpos = std::find(echo.begin(),echo.end(),'\n');
+  
+  
+  if( newlpos == echo.end())
     {
+      std::cout << "echo: " << echo << std::endl;
+      
+      for (auto& c : echo)
+      {
+	std::cout << (int) c << " ";
+      }
+      std::cout << std::endl;
+      
       throw ProtocolError("couldn't read echo properly");
     }
   if( std::string(echo.begin(),echo.end()-1) != request)
     {
+      
+      std::cout << "echo: " << echo << std::endl;
+      
+      for (auto& c : echo)
+      {
+	std::cout << (int) c << " ";
+      }
+      std::cout << std::endl;
+      
+      
       throw ProtocolError("echo was invalid");
     };
 
+  return echo;
 
 }
 
@@ -137,3 +170,29 @@ void foxtrot::devices::cornerstone260::setShutterStatus(bool status)
   cmd(request + cmdch);
   
 }
+
+void foxtrot::devices::cornerstone260::setWave(double wl_nm)
+{
+ 
+  std::ostringstream oss;
+  
+  oss << "GOWAVE " << std::setprecision(2) << std::fixed << wl_nm;
+  std::cout << "sending command: " << oss.str()<< std::endl;
+  
+  cmd(oss.str());
+  
+
+}
+
+
+double foxtrot::devices::cornerstone260::getWave()
+{
+  std::string command{"WAVE?"};
+  
+  auto repl = cmd(command);
+  
+  return std::stod(repl);
+
+}
+
+

@@ -7,10 +7,10 @@
 
 const foxtrot::parameterset newport2936R_usb_params 
 {
-  {"vid", 0x104d},
-  {"pid", 0xcec7},
-  {"epin", 0x81},
-  {"epout", 0x02}
+  {"vid", 0x104du},
+  {"pid", 0xcec7u},
+  {"epin", 0x81u},
+  {"epout", 0x02u}
   
 };
 
@@ -37,6 +37,8 @@ foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialPro
   {
     std::cout << "using usb connected power meter" << std::endl;
     specproto->Init(&newport2936R_usb_params);
+    
+    
     
   }
   else if(  auto serproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto)   != nullptr)

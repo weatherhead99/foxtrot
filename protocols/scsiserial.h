@@ -107,8 +107,8 @@ void scsiserial::scsi_write10(arrtp& data, unsigned lba, unsigned num_lbas)
   unsigned char* lenp = reinterpret_cast<unsigned char*>(&num_lbas);
   
 //   std::cout << "lbap0 : " << (int) lbap[0] << std::endl;
-  std::cout << std::hex << "lbap:" << lba << std::endl;
-  std::cout << "len: " << num_lbas << std::endl;
+//   std::cout << std::hex << "lbap:" << lba << std::endl;
+//   std::cout << "len: " << num_lbas << std::endl;
   
   std::array<unsigned char,10> cmd = {0x2A, flags,lbap[3],lbap[2],lbap[1],lbap[0], group_number,
     lenp[1],lenp[0], control};

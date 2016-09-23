@@ -14,11 +14,14 @@ namespace foxtrot
       
       bool getShutterStatus();
       void setShutterStatus(bool status);
-
+  
+      void setWave(double wl_nm);
+      double getWave();
+      
 
     protected:
       std::string cmd(const std::string& request) override;
-      void readecho(const std::string& request);
+      std::string readecho(const std::string& request);
       
       bool _cancelecho = true;
       std::shared_ptr<SerialProtocol> _serproto;
