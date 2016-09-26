@@ -40,7 +40,7 @@ add_subdirectory(src)
 include_directories(devices protocols)
 add_subdirectory(protocols)
 add_subdirectory(devices)
-
+add_subdirectory(expruns)
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb})

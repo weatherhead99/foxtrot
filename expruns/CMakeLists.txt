@@ -1,0 +1,1 @@
+add_executable(detector_wl_sweep detector_wl_sweep.cpp)
