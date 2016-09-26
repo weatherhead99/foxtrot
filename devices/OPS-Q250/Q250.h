@@ -15,6 +15,14 @@ namespace foxtrot
     
     virtual std::string cmd(const std::string& request);
     
+    void start();
+    void stop();
+    
+    
+    double getAmps();
+    double getVolts();
+    double getWatts();
+    
     
     private:
       std::shared_ptr<protocols::scsiserial> _scsiproto;

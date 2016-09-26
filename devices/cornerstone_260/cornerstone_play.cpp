@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 
   std::cout << word<<"  shutter" << std::endl;
   monoch.setShutterStatus(!shutter);
-  std::cout << "SHUTTER:" << monoch.getShutterStatus() << std::endl;
+  std::cout << "shutter :" << monoch.getShutterStatus() << std::endl;
 
 
   

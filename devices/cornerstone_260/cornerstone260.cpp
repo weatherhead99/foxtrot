@@ -60,7 +60,7 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
   
   
-  std::cout << "request size: " << request.size() << std::endl;
+//   std::cout << "request size: " << request.size() << std::endl;
 
   _serproto->write(request + '\n');
   
@@ -77,16 +77,16 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
       throw ProtocolError("only serial port supported at the moment");
     };
 
-  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
+//   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
 
-  std::cout << "reading echo" << std::endl;
+//   std::cout << "reading echo" << std::endl;
   
   auto echo = readecho(request);
 
-  std::cout << "echo ok" << std::endl;
-  std::cout << echo << std::endl;
+//   std::cout << "echo ok" << std::endl;
+//   std::cout << echo << std::endl;
   
-  std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
+//   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
 
   //HACK: if no bytes available, assume no response
   if( serportptr->bytes_available() == 0)
