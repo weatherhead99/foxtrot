@@ -59,24 +59,37 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::Seria
 std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
   
-  
-//   std::cout << "request size: " << request.size() << std::endl;
-
-  _serproto->write(request + '\n');
-  
-  //read echo, and throw away
- 
-  unsigned actlen;
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(50));
-
   auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
 
   if(serportptr == nullptr)
     {
       throw ProtocolError("only serial port supported at the moment");
-    };
+    }
+   else
+   {
+    serportptr->flush(); 
+     
+   }
+      
 
+  
+  
+//   std::cout << "request size: " << request.size() << std::endl;
+  
+  _serproto->write(request + '\n');
+  
+  //read echo, and throw away
+ 
+  unsigned actlen;
+  
+//   int timeneeded = std::round(1./9600 * request.size() * 1000);
+  
+
+//   std::this_thread::sleep_for(std::chrono::milliseconds(2*timeneeded));
+  
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+  
 //   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
 
 //   std::cout << "reading echo" << std::endl;
@@ -177,7 +190,7 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
   std::ostringstream oss;
   
   oss << "GOWAVE " << std::setprecision(2) << std::fixed << wl_nm;
-  std::cout << "sending command: " << oss.str()<< std::endl;
+//   std::cout << "sending command: " << oss.str()<< std::endl;
   
   cmd(oss.str());
   
@@ -189,7 +202,10 @@ double foxtrot::devices::cornerstone260::getWave()
 {
   std::string command{"WAVE?"};
   
+//   std::cout << "sending command: " << command << std::endl;
   auto repl = cmd(command);
+//   std::cout << "repl is: " << repl << std::endl;
+  
   
   return std::stod(repl);
 

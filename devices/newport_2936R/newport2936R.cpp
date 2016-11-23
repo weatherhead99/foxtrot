@@ -4,6 +4,7 @@
 #include <iostream>
 #include "DeviceError.h"
 #include <algorithm>
+#include <string>
 
 
 const foxtrot::parameterset newport2936R_usb_params 
@@ -125,4 +126,18 @@ void foxtrot::devices::newport2936R::strip_CRLF(std::string& buffer)
 }
 
   
+foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
+{
+  auto repl = cmd("PM:UNIT?");
+  
+  return static_cast<foxtrot::devices::powerunits>(std::stoi(repl));
+
+}
+
+void foxtrot::devices::newport2936R::setUnits(foxtrot::devices::powerunits unit)
+{
+  _proto->write(std::string("PM:UNIT ") + std::to_string(static_cast<unsigned>(unit))+'\r');
+  
+}
+
 

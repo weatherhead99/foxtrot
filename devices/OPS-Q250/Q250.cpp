@@ -45,14 +45,27 @@ double devices::Q250::getAmps()
   return std::stod(repl);
 }
 
+double devices::Q250::getAmpLimit()
+{
+  auto repl = cmd("A-LIM?");
+  return std::stod(repl);
+}
+
+double devices::Q250::getAmpPreset()
+{
+  auto repl = cmd("A-PRESET?");
+  return std::stod(repl);
+}
+
+
 double devices::Q250::getVolts()
 {
   auto repl = cmd("VOLTS?");
   return std::stod(repl);
 }
 
-double devices::Q250::getWatts()
+int devices::Q250::getWatts()
 {
   auto repl = cmd("WATTS?");
-  return std::stod(repl);
+  return std::stoi(repl);
 }

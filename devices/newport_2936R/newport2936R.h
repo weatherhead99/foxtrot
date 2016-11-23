@@ -7,6 +7,17 @@ namespace foxtrot
 {
   namespace devices
   {
+    
+    enum class powerunits
+    {
+     Amps = 0,
+     Volts = 1,
+     Watts = 2,
+     Watts_cm2 = 3,
+     Joules = 4,
+     Joules_cm2 = 5
+    };
+    
     class newport2936R : public CmdDevice
     {
     public:
@@ -20,6 +31,10 @@ namespace foxtrot
         
     double getResponsivity();
     double getArea();
+    
+    powerunits getUnits();
+    void setUnits(powerunits unit);
+    
     private:
       
       void strip_CRLF(std::string& buffer);
