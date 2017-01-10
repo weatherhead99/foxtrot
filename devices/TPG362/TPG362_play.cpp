@@ -20,8 +20,8 @@ int main(int argc, char** argv)
   
   foxtrot::devices::TPG362 vacuumgauge(sport);
 
-  auto pres1 = vacuumgauge.getPressure(1);
-  auto pres2 = vacuumgauge.getPressure(2);
-
+  
+  std::cout << "gauge 1 (" << vacuumgauge.getDeviceName(1) <<") active: " << vacuumgauge.getGaugeOnOff(1) << " pressure: "  << vacuumgauge.getPressure(1) << " hPa"  << std::endl;
+  std::cout << "gauge 2 (" << vacuumgauge.getDeviceName(2) <<") active: " << vacuumgauge.getGaugeOnOff(2) << " pressure: "  << vacuumgauge.getPressure(2) << " hPa"  << std::endl;
   
 }

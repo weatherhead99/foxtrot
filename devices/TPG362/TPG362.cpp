@@ -7,6 +7,7 @@
 #include <numeric>
 #include <iomanip>
 
+#include <cmath>
 #include <chrono>
 #include <thread>
 
@@ -39,13 +40,40 @@ double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
   
   auto ret = semantic_cmd(channel,parameter_no::Pressure,action::read);
   
-  std::cout << "got response: " << ret << std::endl;
+//   std::cout << "got response: " << ret << std::endl;
   
   auto interpret = interpret_response_telegram(ret);
-
-  return 0.;
+  validate_response_telegram_parameters(channel,parameter_no::Pressure,interpret);
+  
+//   std::cout << "data: " << std::get<2>(interpret) << std::endl;
+  return interpret_u_expo_raw(std::get<2>(interpret));
 
 }
+
+
+string foxtrot::devices::TPG362::getDeviceName(short unsigned int channel)
+{
+  auto ret = semantic_cmd(channel,parameter_no::DeviceName, action::read);
+  auto interpret = interpret_response_telegram(ret);
+  validate_response_telegram_parameters(channel,parameter_no::DeviceName,interpret);
+  
+  return std::get<2>(interpret);
+
+}
+
+bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
+{
+  auto ret = semantic_cmd(channel,parameter_no::sensEnable,action::read);
+  auto interpret = interpret_response_telegram(ret);
+  validate_response_telegram_parameters(channel,parameter_no::sensEnable,interpret);
+  
+//   std::cout << std::get<2>(interpret) << std::endl;
+  
+  return static_cast<bool>(std::stoi(std::get<2>(interpret)));
+  
+  
+}
+
 
 
 string foxtrot::devices::TPG362::calculate_checksum(string::const_iterator start, string::const_iterator end)
@@ -72,14 +100,15 @@ std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& mess
 
 std::string foxtrot::devices::TPG362::cmd(const std::string& request)
 {
-  std::cout << "request is: " << request << std::endl;
+  
+//   std::cout << "request is: " << request << std::endl;
 
   std::ostringstream oss;
   
 
   oss << request << calculate_checksum(request) << '\r';
   
-  std::cout <<"request with checksum is: " << oss.str() << std::endl;
+//   std::cout <<"request with checksum is: " << oss.str() << std::endl;
 
   _serproto->write(oss.str());
   
@@ -119,11 +148,21 @@ string foxtrot::devices::TPG362::semantic_cmd(short unsigned channel, parameter_
   }
 
 
-string foxtrot::devices::TPG362::interpret_response_telegram(const string& response)
+string foxtrot::devices::TPG362::nmemonic_cmd(short unsigned int channel, const string& request)
+{
+  //TODO: implement
+  throw std::logic_error("mnemonic commands not supported yet");
+  
+
+}
+
+  
+  
+std::tuple<int,int,string> foxtrot::devices::TPG362::interpret_response_telegram(const string& response)
 {
   //calculate a checksum: the last 4 characters are 3 char checksum + carriage return
   auto csum_calc = calculate_checksum(response.begin(), response.end() - 4);
-  std::cout << "calculated response checksum is: " << csum_calc << std::endl;
+//   std::cout << "calculated response checksum is: " << csum_calc << std::endl;
   
   //validate checksum
   if(response.compare(response.size()-4,3,csum_calc)  != 0)
@@ -146,9 +185,44 @@ string foxtrot::devices::TPG362::interpret_response_telegram(const string& respo
   auto data = response.substr(10,dlen);
  
 
-  return "";
+  return std::make_tuple(addr,paramno,data);
 
 }
 
+void foxtrot::devices::TPG362::validate_response_telegram_parameters(int channel, parameter_no p, const std::tuple< int, int, string >& resp)
+{
+  if(std::get<0>(resp) != (_address * 10 + channel))
+  {
+    throw DeviceError("mismatched device address in reply");
+    
+  }
+  if(std::get<1>(resp) != (static_cast<short unsigned int>(p)))
+  {
+   throw DeviceError("mismatched parameter number in reply");
+  }
+    
+  if(std::get<2>(resp).compare(0,6,"NO_DEF") == 0)
+  {
+    throw DeviceError("the parameter number does not exist");
+  }
+  else if (std::get<2>(resp).compare(0,6,"_RANGE") == 0)
+  {
+    throw DeviceError("the parameter is out of range");
+  }
+  else if (std::get<2>(resp).compare(0,6,"_LOGIC") == 0)
+  {
+    throw DeviceError("Logical Access Violation");
+  }
+  
+  
+
+}
+
+double foxtrot::devices::TPG362::interpret_u_expo_raw(const string& val)
+{
+  double mantissa = std::stoi(val.substr(0,4))/ 1000.;
+  short exponent = std::stoi(val.substr(4,2)) - 20;
+  return mantissa * std::pow(10,exponent);
+}
 
   

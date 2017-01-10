@@ -22,8 +22,8 @@ namespace foxtrot {
    enum class parameter_no : short unsigned
    {
      keylock = 8,
-     degas = 040,
-     sensEnable = 041,
+     degas = 40,
+     sensEnable = 41,
      cfgRelay1 = 45,
      cfgRelay2 = 46,
      cfgRelay3 = 47,
@@ -47,9 +47,12 @@ namespace foxtrot {
     TPG362(std::shared_ptr<SerialProtocol> proto);
     virtual std::string cmd(const std::string& request) override;
     std::string semantic_cmd(short unsigned channel,parameter_no p, action readwrite, const std::string* data = nullptr);
+    std::string nmemonic_cmd(short unsigned channel,const std::string& request);
     
     double getPressure(short unsigned channel=1);
+    std::string getDeviceName(short unsigned channel=1);
     
+    bool getGaugeOnOff(short unsigned channel=1);
     
     
     
@@ -72,8 +75,13 @@ namespace foxtrot {
      string calculate_checksum(const string& message);
      
      
-     string interpret_response_telegram(const string& response);
      
+     
+     std::tuple<int,int,string> interpret_response_telegram(const string& response);
+     
+     void validate_response_telegram_parameters(int channel, parameter_no p, const std::tuple<int,int,string>& resp);
+     
+     double interpret_u_expo_raw(const std::string& val);
      
    };
    
