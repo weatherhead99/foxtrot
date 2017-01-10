@@ -65,7 +65,13 @@ namespace foxtrot {
      //address range 1-24, default is 1
      short unsigned _address = 01; 
      
+     
+     string calculate_checksum(string::const_iterator start, string::const_iterator end);
      string calculate_checksum(const string& message);
+     
+     
+     string interpret_response_telegram(const string& response);
+     
      
    };
    

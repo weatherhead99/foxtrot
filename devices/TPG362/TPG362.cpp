@@ -45,17 +45,24 @@ double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
 }
 
 
-
-std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& message)
+string foxtrot::devices::TPG362::calculate_checksum(string::const_iterator start, string::const_iterator end)
 {
-  auto checksum = std::accumulate(message.begin(), message.end(), 0, 
+    auto checksum = std::accumulate(start, end, 0, 
     [] (const char& c1, const char& c2)
     {
       return static_cast<int>(c1) + static_cast<int>(c2);
     }
   );
+
+    return str_from_number(checksum % 256,3);
+}
+
+
+
+std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& message)
+{
   
-  return str_from_number(checksum % 256,3);
+  return calculate_checksum(message.begin(),message.end());
   
 }
 
@@ -108,3 +115,15 @@ string foxtrot::devices::TPG362::semantic_cmd(short unsigned channel, parameter_
   
   }
 
+
+string foxtrot::devices::TPG362::interpret_response_telegram(const string& response)
+{
+  //calculate a checksum and check it. The last 4 chars are checksum and CR
+  auto csum_calc = calculate_checksum(response.begin(), response.end() - 4);
+  std::cout << "calculated response checksum is: " << csum_calc << std::endl;
+  
+
+}
+
+
+  
