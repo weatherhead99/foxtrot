@@ -44,10 +44,9 @@ namespace foxtrot {
    public:
     TPG362(std::shared_ptr<SerialProtocol> proto);
     virtual std::string cmd(const std::string& request) override;
-    std::string semantic_cmd(parameter_no p, action readwrite, const std::string* data = nullptr);
+    std::string semantic_cmd(short unsigned channel,parameter_no p, action readwrite, const std::string* data = nullptr);
     
-    double getPressure_ch1();
-    double getPressure_ch2();
+    double getPressure(short unsigned channel=1);
     
     
     
@@ -64,7 +63,7 @@ namespace foxtrot {
      
      bool _serialmode;
      //address range 1-24, default is 1
-     short unsigned _address = 010; 
+     short unsigned _address = 01; 
      
      string calculate_checksum(const string& message);
      
