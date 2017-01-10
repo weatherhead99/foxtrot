@@ -10,6 +10,7 @@
 #include <chrono>
 #include <thread>
 
+
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
 : CmdDevice(proto), _serproto(proto)
 {
@@ -129,7 +130,20 @@ string foxtrot::devices::TPG362::interpret_response_telegram(const string& respo
     {
       throw DeviceError("got invalid checksum!");
     };
+
   
+  //validate the '10' characters
+  if(response.compare(3,2,"10") != 0)
+  {
+    throw DeviceError("unexpected sequence in response telegram");
+  };
+
+  //extract parameters from response
+  auto addr = std::stoi(response.substr(0,3));
+  auto paramno = std::stoi(response.substr(5,3));
+  auto dlen = std::stoi(response.substr(8,2));
+  
+  auto data = response.substr(10,dlen);
  
 
   return "";
