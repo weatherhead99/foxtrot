@@ -30,8 +30,22 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
   
   
     
+}
+
+double foxtrot::devices::TPG362::getPressure_ch1()
+{
+  
+  auto ret = semantic_cmd(parameter_no::Pressure,action::read,nullptr);
+  
 
 }
+
+double foxtrot::devices::TPG362::getPressure_ch2()
+{
+
+}
+
+
 
 
 std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& message)
@@ -43,7 +57,7 @@ std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& mess
     }
   );
   
-  return str_from_number(checksum,3);
+  return str_from_number(checksum % 256,3);
   
 }
 
@@ -63,3 +77,29 @@ std::string foxtrot::devices::TPG362::cmd(const std::string& request)
   return repl;
   
 }
+
+string foxtrot::devices::TPG362::semantic_cmd(parameter_no p, action readwrite, const std::string* data)
+  {
+    std::ostringstream oss;
+    //checksum and CR get put in by this->cmd 
+    
+    oss <<str_from_number(static_cast<short unsigned>(_address),3) << 
+    str_from_number(static_cast<short unsigned>(readwrite),2) << 
+    str_from_number(static_cast<short unsigned>(p),3);
+    
+    switch(readwrite)
+    {
+      case action::read : 
+	 oss << "02=?";
+      case action::describe:
+	if(data == nullptr)
+	{
+	  throw std::logic_error("semantic_cmd got a nullptr for data");
+	}
+	oss << str_from_number(data->size(),2) << *data;
+    };
+    
+    return cmd(oss.str());
+  
+  }
+

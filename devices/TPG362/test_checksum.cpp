@@ -29,9 +29,10 @@ int main(int argc, char** argv)
      sum += static_cast<int>(c);
   }
   std::cout << "total sum: " << sum << std::endl;;
-  std::cout << "modulo 256: " << sum %256 << std::endl;
+  std::cout << "modulo 256: " << sum % 256 << std::endl;
   
-
+  
+  
 
 
 }

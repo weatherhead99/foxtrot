@@ -11,13 +11,13 @@ namespace foxtrot {
  namespace devices
  {
    
-   enum class action
+   enum class action : short unsigned
    {
-    read,
-    describe
+    read = 0,
+    describe = 10
    };
    
-   enum class parameter_no
+   enum class parameter_no : short unsigned
    {
      keylock = 8,
      degas = 040,
@@ -44,12 +44,16 @@ namespace foxtrot {
    public:
     TPG362(std::shared_ptr<SerialProtocol> proto);
     virtual std::string cmd(const std::string& request) override;
-    template<typename T> std::string semantic_cmd(parameter_no p, action readwrite, const T& data);
+    std::string semantic_cmd(parameter_no p, action readwrite, const std::string* data = nullptr);
+    
+    double getPressure_ch1();
+    double getPressure_ch2();
+    
     
     
     
    private:
-     template<typename T> string str_from_number(T number, unsigned short width=3)
+     template<typename T> string str_from_number(const T& number, unsigned short width=3)
      {
        std::ostringstream oss;
        oss << std::setw(width) << std::setfill('0') << number;
@@ -66,23 +70,7 @@ namespace foxtrot {
      
    };
    
-  template <typename T> string TPG362::semantic_cmd(parameter_no p, action readwrite, const T& data)
-  {
-    auto dlen = data.size();
-    std::ostringstream oss;
-    //checksum and CR get put in by this->cmd 
-    oss << str_from_number(_address,3) << str_from_number(readwrite,2) << str_from_number(dlen,2) << data;
-    return cmd(oss.str());
   
-  }
-
-  template <> string TPG362::semantic_cmd<std::string>(parameter_no p, action readwrite, const string& data)
-  {
-    
-    return semantic_cmd(p,readwrite,str_from_number(data));
-
-  }
-
    
    
  }
