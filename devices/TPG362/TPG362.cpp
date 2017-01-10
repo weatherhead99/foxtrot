@@ -40,6 +40,8 @@ double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
   
   std::cout << "got response: " << ret << std::endl;
   
+  auto interpret = interpret_response_telegram(ret);
+
   return 0.;
 
 }
@@ -118,10 +120,19 @@ string foxtrot::devices::TPG362::semantic_cmd(short unsigned channel, parameter_
 
 string foxtrot::devices::TPG362::interpret_response_telegram(const string& response)
 {
-  //calculate a checksum and check it. The last 4 chars are checksum and CR
+  //calculate a checksum: the last 4 characters are 3 char checksum + carriage return
   auto csum_calc = calculate_checksum(response.begin(), response.end() - 4);
   std::cout << "calculated response checksum is: " << csum_calc << std::endl;
   
+  //validate checksum
+  if(response.compare(response.size()-4,3,csum_calc)  != 0)
+    {
+      throw DeviceError("got invalid checksum!");
+    };
+  
+ 
+
+  return "";
 
 }
 

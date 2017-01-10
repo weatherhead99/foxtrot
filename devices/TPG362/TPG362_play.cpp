@@ -20,8 +20,8 @@ int main(int argc, char** argv)
   
   foxtrot::devices::TPG362 vacuumgauge(sport);
 
-  vacuumgauge.getPressure(1);
-  vacuumgauge.getPressure(2);
+  auto pres1 = vacuumgauge.getPressure(1);
+  auto pres2 = vacuumgauge.getPressure(2);
 
   
 }
