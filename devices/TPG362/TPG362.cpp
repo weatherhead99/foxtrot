@@ -62,10 +62,15 @@ std::string foxtrot::devices::TPG362::calculate_checksum(const std::string& mess
 
 std::string foxtrot::devices::TPG362::cmd(const std::string& request)
 {
+  std::cout << "request is: " << request << std::endl;
+
   std::ostringstream oss;
   
+
   oss << request << calculate_checksum(request) << '\r';
   
+  std::cout <<"request with checksum is: " << oss.str() << std::endl;
+
   _serproto->write(oss.str());
   
   //HACK: need a better way to wait for the reply
@@ -81,7 +86,7 @@ string foxtrot::devices::TPG362::semantic_cmd(short unsigned channel, parameter_
     std::ostringstream oss;
     //checksum and CR get put in by this->cmd 
     
-    oss <<str_from_number(static_cast<short unsigned>(_address),1) << 
+    oss <<str_from_number(static_cast<short unsigned>(_address),2) << 
     str_from_number(channel,1) << 
     str_from_number(static_cast<short unsigned>(readwrite),2) << 
     str_from_number(static_cast<short unsigned>(p),3);
@@ -90,6 +95,7 @@ string foxtrot::devices::TPG362::semantic_cmd(short unsigned channel, parameter_
     {
       case action::read : 
 	 oss << "02=?";
+	 break;
       case action::describe:
 	if(data == nullptr)
 	{

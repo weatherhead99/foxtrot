@@ -8,7 +8,7 @@ using std::endl;
 
 foxtrot::parameterset sport_params {
   {"port" , "/dev/ttyUSB0"},
-  {"baudrate" , 115200u},
+  {"baudrate" , 9600u},
   };
   
 
@@ -19,5 +19,9 @@ int main(int argc, char** argv)
   
   
   foxtrot::devices::TPG362 vacuumgauge(sport);
+
+  vacuumgauge.getPressure(1);
+  vacuumgauge.getPressure(2);
+
   
 }
