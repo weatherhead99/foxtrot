@@ -4,9 +4,11 @@
 #include <string>
 #include <iostream>
 #include "archon_modules.h"
-
+#include "archon_module_heaterx.h"
 #include "TestUtilities.h"
+#include "backward.hpp"
 
+#define BACKWARD_HAS_BFD 1
 
 // class archon_harness : public foxtrot::devices::archon
 // {
@@ -29,6 +31,7 @@
 
 int main(int argc, char** argv)
 {
+  backward::SignalHandling sh;
   foxtrot::parameterset params;
   params["addr"] = "10.0.0.2";
   params["port"] = 4242u;
@@ -56,9 +59,11 @@ int main(int argc, char** argv)
   };
   
   
+  auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
   
-  
-  
+  std::cout << "tempA:" << heater->getTempA() << std::endl;
+  std::cout << "tempB:" << heater->getTempB() << std::endl;
+  std::cout << "tempC:" << heater->getTempC() << std::endl;
   
   
 };

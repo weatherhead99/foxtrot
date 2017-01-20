@@ -34,7 +34,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   
   //get the modules_installed string value
   int modules_installed = std::stoi(_system.at("MOD_PRESENT"),0,16);
-  std::cout << "modules_installed: " << modules_installed << std::endl;
+//   std::cout << "modules_installed: " << modules_installed << std::endl;
   
   
    for(int i = 0; i < 12; i++)
@@ -42,23 +42,22 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    bool mod_present = ((1 <<i) &  modules_installed) >> i;
    if(mod_present)
    {
-     std::cout << "module present at: " << i+1 << std::endl;
+//      std::cout << "module present at: " << i+1 << std::endl;
     archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<short unsigned>(i,"TYPE",getSystem(),'_'));
     
-    std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
+//     std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
     
     std::unique_ptr<ArchonModule> ptr;
     switch(modtype)
     {
         case(archon_module_types::HeaterX):
-	  std::cout << "HeaterX module detected" << std::endl;
-	  
+	  std::cout << "HeaterX module detected at position " << (i+1) << std::endl;	  
             ptr = ArchonHeaterX::constructModule(*this,i);
             _modules->insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
             break;
 	
 	default:
-	  std::cout << "support for this module isn't implemented yet"<< std::endl;
+	  std::cout << "support for module at position " << (i+1) << " isn't implemented yet"<< std::endl;
 	    
     };
     
@@ -66,7 +65,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    }
    else
    {
-     std::cout << "module not present at: " << i+1 << std::endl;
+     std::cout << "module not present at position " << (i+1) << std::endl;
    };
    
    
@@ -151,13 +150,13 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
     
     std::string key(item.begin(), eqpos);
     
-    //tidy up string
+    //tidy up strings
 //     std::cout << "key before:" << key << "\t length:" << key.size() << std::endl;
     key.erase(std::remove_if(key.begin(),key.end(),[](char c) {return !std::isprint(c); }),key.end());
+    
 //     std::cout << "keey after: " << key <<  "\t length:" << key.size() << std::endl;
-    
-    
     std::string val(eqpos + 1, item.end());
+    val.erase(std::remove_if(key.begin(),key.end(),[](char c) {return !std::isprint(c); }),key.end());
     
     out[key] = val;
     

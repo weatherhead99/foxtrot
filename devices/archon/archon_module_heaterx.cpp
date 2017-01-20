@@ -66,33 +66,7 @@ void devices::ArchonHeaterX::update_variables()
   _heaterBI = extract_module_variable<decltype(_heaterBI)>(_modpos,"HEATERBI",statmap);
   _heaterBD = extract_module_variable<decltype(_heaterBD)>(_modpos,"HEATERBD",statmap);
   
-//   }
-//   catch(std::invalid_argument& err )
-//   {
-//    std::cout << "error, printing statmap" << std::endl;
-//     
-//    for(auto& item : statmap)
-//    { 
-//      std::cout << "*" << item.first<<"*" <<"\t" << "*"<<item.second<<"*"<<std::endl;
-//    }
-//    
-//    throw err;
-//   }
-//   catch(std::out_of_range& err)
-//   {
-//     std::cout << "error, printing statmap" << std::endl;
-//     
-//    for(auto& item : statmap)
-//    { 
-//      std::cout << "*" << item.first<<"*" <<"\t" << "*"<<item.second<<"*"<<std::endl;
-//    }
-//    
-//    throw err;
-//     
-//     
-//   };
-  
-  std::cout << "modpos:" << _modpos << std::endl;
+//   std::cout << "modpos:" << _modpos << std::endl;
   auto gpiostr = get_module_variable_string(_modpos,"DINPUTS",statmap);
   std::istringstream iss(gpiostr);
   std::ostringstream oss;
@@ -103,15 +77,12 @@ void devices::ArchonHeaterX::update_variables()
    b = static_cast<bool>(std::stoi(oss.str()));
    oss.str("");
   }
-  
-  
     
 }
 
 std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonHeaterX::constructModule
 (foxtrot::devices::archon& arch, int modpos)
 {
-  
   
  std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonHeaterX(arch,modpos));
  
