@@ -1,5 +1,6 @@
 #include "archon.h"
 #include "archon_modules.h"
+#include "archon_module_heaterx.h"
 
 #include <algorithm>
 
@@ -10,7 +11,9 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "archon_modules.h"
+#include <utility>
+
+
 
 #include "ProtocolError.h"
 
@@ -26,19 +29,34 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   update_state();
   
   //update the modules vector;
-  _modules = new std::vector<std::unique_ptr<ArchonModule>>();
+  _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
   
   //get the modules_installed string value
   int modules_installed = std::stoi(_system.at("MOD_PRESENT"));
   
-  for(int i = 0; i < 12; i++)
+   for(int i = 0; i < 12; i++)
   {
    bool mod_present = ((1 <<i) &  modules_installed) >> i;
-   archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<int>(i+1,"TYPE",getSystem(),'_'));
+   if(mod_present)
+   {
+    archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<int>(i+1,"TYPE",getSystem(),'_'));
+    
+    switch(modtype)
+    {
+        case(archon_module_types::HeaterX):
+            auto ptr = ArchonHeaterX::constructModule(*this,i);
+            _modules->insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
+            break;
+            
+            throw std::logic_error("other module types not implemented yet!");
+    };
+    
+    
+   };
+   
+   
    
   }
-  
-  
   
   
 }
@@ -141,9 +159,16 @@ void devices::archon::update_state()
 
 }
 
-
-std::vector< int > devices::archon::get_module_positions(const string& module_occupied_str)
+// WARNING: VERY BAD CODE HERE!
+const std::map<int, const foxtrot::devices::ArchonModule&> foxtrot::devices::archon::getAllModules() const
 {
-
+    std::map<int, const foxtrot::devices::ArchonModule&> out;
+    
+    for(const auto& mod : *_modules)
+    {
+        out.insert( std::pair<int,foxtrot::devices::ArchonModule&>(mod.first, *mod.second.get())  );
+    }
+    
+    return out;
 }
 

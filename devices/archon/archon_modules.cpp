@@ -1,6 +1,10 @@
 #include "archon_modules.h"
 #include <sstream>
 
+#include "archon_module_heaterx.h"
+
+using foxtrot::devices::ArchonModule;
+
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
 {
@@ -71,6 +75,3 @@ string devices::get_module_variable_string(int modpos, const string& name, const
       return map.at(oss.str());
 }
 
- 
-
- 

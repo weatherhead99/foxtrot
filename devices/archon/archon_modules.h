@@ -6,6 +6,7 @@
 #include "archon.h"
 #include <sstream>
 #include <type_traits>
+#include <memory>
 
 namespace foxtrot
 {
@@ -35,6 +36,7 @@ namespace devices
             const std::array<char,16>& getID() const;
             const std::array<char,3>& getVersion() const;
             short unsigned getRev() const;
+            
             
     protected:
             short unsigned _modpos;

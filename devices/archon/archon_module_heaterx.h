@@ -2,13 +2,17 @@
 #include "archon_modules.h"
 #include <array>
 
+
 namespace foxtrot
 {
 namespace devices
 {
+    
     class ArchonHeaterX : public ArchonModule
     {
     public:
+    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
+        
     double getHeaterAOutput() const;
     double getHeaterBOutput() const;
     double getTempA() const;

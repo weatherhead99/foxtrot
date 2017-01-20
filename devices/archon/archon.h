@@ -8,6 +8,8 @@
 #include <vector>
 
 
+
+
 using std::string;
 typedef std::map<std::string,std::string> ssmap;
 
@@ -19,8 +21,11 @@ namespace foxtrot {
   
   namespace devices
   {
+    //fwd declares
    class ArchonModule;
-  
+   enum class archon_module_types : short unsigned;
+   
+   
   class archon : public CmdDevice
   {
   public:
@@ -31,7 +36,8 @@ namespace foxtrot {
     
     void update_state();
     
-    const std::vector<std::unique_ptr<ArchonModule>> getAllModules() const;
+    const std::map<int,const ArchonModule&> getAllModules() const;
+    
     
   protected:
     virtual std::string cmd(const std::string& request) override;
@@ -39,7 +45,7 @@ namespace foxtrot {
     
     
   private:
-    std::vector<int> get_module_positions(const string& module_occupied_str);
+    static std::unique_ptr<ArchonModule> constructModule(const archon_module_types& type, int modpos);
     
     short unsigned _order;
     std::shared_ptr<simpleTCP> _specproto;
@@ -47,7 +53,7 @@ namespace foxtrot {
     ssmap _system;
     ssmap _status;
     
-    std::vector<std::unique_ptr<ArchonModule>>* _modules;
+    std::map<int, std::unique_ptr<ArchonModule>>* _modules;
     
     
   };
