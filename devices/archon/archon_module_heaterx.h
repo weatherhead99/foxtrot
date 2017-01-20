@@ -1,4 +1,4 @@
-#pragma once
+#pragma once	
 #include "archon_modules.h"
 #include <array>
 
@@ -19,6 +19,8 @@ namespace devices
     double getTempB() const;
     double getTempC() const;
     std::array<bool,8> getGPIO() const;  
+    
+    virtual const string getTypeName() const;	
     
     private:
     ArchonHeaterX(archon& arch, short unsigned int modpos);

@@ -3,8 +3,17 @@
 
 devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos)
 {
+  update_variables();
+}
+
+
+const string devices::ArchonHeaterX::getTypeName() const
+{
+  
+  return string("HeaterX");
 
 }
+
 
 double devices::ArchonHeaterX::getHeaterAOutput() const
 {
@@ -38,7 +47,10 @@ double devices::ArchonHeaterX::getTempC() const
 void devices::ArchonHeaterX::update_variables()
 {
   
+  
   auto statmap = _arch.getStatus();
+//   try{
+  
   _heaterAOutput = extract_module_variable<decltype(_heaterAOutput)>(_modpos,"HEATERAOUTPUT",statmap);
   _heaterBOutput = extract_module_variable<decltype(_heaterBOutput)>(_modpos,"HEATERBOUTPUT",statmap);
   
@@ -54,7 +66,34 @@ void devices::ArchonHeaterX::update_variables()
   _heaterBI = extract_module_variable<decltype(_heaterBI)>(_modpos,"HEATERBI",statmap);
   _heaterBD = extract_module_variable<decltype(_heaterBD)>(_modpos,"HEATERBD",statmap);
   
-  auto gpiostr = get_module_variable_string(_modpos,"GPIO",statmap);
+//   }
+//   catch(std::invalid_argument& err )
+//   {
+//    std::cout << "error, printing statmap" << std::endl;
+//     
+//    for(auto& item : statmap)
+//    { 
+//      std::cout << "*" << item.first<<"*" <<"\t" << "*"<<item.second<<"*"<<std::endl;
+//    }
+//    
+//    throw err;
+//   }
+//   catch(std::out_of_range& err)
+//   {
+//     std::cout << "error, printing statmap" << std::endl;
+//     
+//    for(auto& item : statmap)
+//    { 
+//      std::cout << "*" << item.first<<"*" <<"\t" << "*"<<item.second<<"*"<<std::endl;
+//    }
+//    
+//    throw err;
+//     
+//     
+//   };
+  
+  std::cout << "modpos:" << _modpos << std::endl;
+  auto gpiostr = get_module_variable_string(_modpos,"DINPUTS",statmap);
   std::istringstream iss(gpiostr);
   std::ostringstream oss;
   
@@ -62,15 +101,18 @@ void devices::ArchonHeaterX::update_variables()
   {
    oss << iss.get();
    b = static_cast<bool>(std::stoi(oss.str()));
-   oss.clear();
-   
+   oss.str("");
   }
+  
+  
     
 }
 
 std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonHeaterX::constructModule
 (foxtrot::devices::archon& arch, int modpos)
 {
+  
+  
  std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonHeaterX(arch,modpos));
  
  return out;

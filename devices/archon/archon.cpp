@@ -7,6 +7,7 @@
 #include "ProtocolUtilities.h"
 #include "CommunicationProtocol.h"
 
+#include <locale>
 #include <sstream>
 #include <iomanip>
 #include <iostream>
@@ -32,26 +33,40 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
   
   //get the modules_installed string value
-  int modules_installed = std::stoi(_system.at("MOD_PRESENT"));
+  int modules_installed = std::stoi(_system.at("MOD_PRESENT"),0,16);
+  std::cout << "modules_installed: " << modules_installed << std::endl;
+  
   
    for(int i = 0; i < 12; i++)
   {
    bool mod_present = ((1 <<i) &  modules_installed) >> i;
    if(mod_present)
    {
-    archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<int>(i+1,"TYPE",getSystem(),'_'));
+     std::cout << "module present at: " << i+1 << std::endl;
+    archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<short unsigned>(i,"TYPE",getSystem(),'_'));
     
+    std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
+    
+    std::unique_ptr<ArchonModule> ptr;
     switch(modtype)
     {
         case(archon_module_types::HeaterX):
-            auto ptr = ArchonHeaterX::constructModule(*this,i);
+	  std::cout << "HeaterX module detected" << std::endl;
+	  
+            ptr = ArchonHeaterX::constructModule(*this,i);
             _modules->insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
             break;
-            
-            throw std::logic_error("other module types not implemented yet!");
+	
+	default:
+	  std::cout << "support for this module isn't implemented yet"<< std::endl;
+	    
     };
     
     
+   }
+   else
+   {
+     std::cout << "module not present at: " << i+1 << std::endl;
    };
    
    
@@ -127,10 +142,21 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
     auto eqpos = std::find(item.begin(), item.end(),'=');
     if(eqpos == item.end())
     {
-      throw ProtocolError("malformed archon parameter response");
+      std::cout << "problematic item: _" << item << "_" << std::endl;
+      std::cout << "ignoring" << std::endl;
+      
+      continue;
+//       throw ProtocolError("malformed archon parameter response");
     };
     
     std::string key(item.begin(), eqpos);
+    
+    //tidy up string
+//     std::cout << "key before:" << key << "\t length:" << key.size() << std::endl;
+    key.erase(std::remove_if(key.begin(),key.end(),[](char c) {return !std::isprint(c); }),key.end());
+//     std::cout << "keey after: " << key <<  "\t length:" << key.size() << std::endl;
+    
+    
     std::string val(eqpos + 1, item.end());
     
     out[key] = val;

@@ -22,20 +22,24 @@ namespace devices
         LVBias = 3,
         HVBias = 4,
         Heater = 5,
-        HeaterX  = 6,
+	//WRONG!
+//         HeaterX  = 6,
         HS = 7,
         HVXBias = 8,
         LVXBias = 9,
-        LVDS = 10
+        LVDS = 10,
+	HeaterX = 11,
+	XVBias = 12
     };
     
     
     class ArchonModule : public Device
     {
     public:
-            const std::array<char,16>& getID() const;
+            const string& getID() const;
             const std::array<char,3>& getVersion() const;
             short unsigned getRev() const;
+	    virtual const std::string getTypeName() const = 0;
             
             
     protected:
@@ -47,13 +51,13 @@ namespace devices
             
             //WARNING: is the lifetime of this guaranteed?
             
-            std::array<char,16> _id;
+            string _id;
             std::array<char,3> _version;
             short unsigned _rev;
             
             archon_module_types _modtype;
 	    
-	    virtual void update_variables() = 0;
+	    virtual void update_variables() = 0 ;
 	    
             
     };
@@ -64,14 +68,18 @@ namespace devices
     template <typename T> typename std::enable_if<std::is_integral<T>::value,T>::type  extract_module_variable(
       int modpos, const string& name,const ssmap& map, char delim='/')
     {
+      std::cout << "getting variable: " << name << std::endl;
       auto stval = get_module_variable_string(modpos,name,map,delim);
+      std::cout << "stval: " << stval << std::endl;
       return std::stoi(stval);
     }
     
     template <typename T> typename std::enable_if<std::is_floating_point<T>::value,T>::type extract_module_variable(
       int modpos, const string& name,const ssmap& map, char delim='/')
     {
+      std::cout << "getting variable: " << name << std::endl;
       auto stval = get_module_variable_string(modpos,name,map,delim);
+      std::cout << "stval: " << stval << std::endl;
       return std::stof(stval);
     }
     

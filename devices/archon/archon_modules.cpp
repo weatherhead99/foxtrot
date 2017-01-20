@@ -8,21 +8,34 @@ using foxtrot::devices::ArchonModule;
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
 {
+  
+  
     auto statmap = _arch.getSystem();
     
     std::ostringstream oss;
     
+    
     oss << "MOD" << _modpos << "_TYPE";
-    _modtype = static_cast<archon_module_types>(std::stoi(statmap[oss.str()]));
-    oss.clear();    
+//     std::cout << "reqstr: " << oss.str() << std::endl;
+    
+    _modtype = static_cast<archon_module_types>(std::stoi(statmap.at(oss.str())));
+//     std::cout << "modtype recorded" << std::endl;
+    oss.str("");
+    oss.clear();
     
     oss << "MOD" << _modpos << "_REV";
-    _rev = static_cast<short unsigned>(std::stoi(statmap[oss.str()]));
+//     std::cout << "reqstr: " << oss.str() << std::endl;
+    
+    _rev = static_cast<short unsigned>(std::stoi(statmap.at(oss.str())));
+//     std::cout << "rev:" << _rev << std::endl;
+    oss.str("");
     oss.clear();
     
     oss << "MOD" << _modpos << "_VERSION";
-    std::istringstream iss(statmap[oss.str()]);
+    std::istringstream iss(statmap.at(oss.str()));
+    oss.str("");
     oss.clear();
+    
     
     for(auto& n : _version)
     {
@@ -31,21 +44,21 @@ foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, sho
       n = std::stoi(verspart);
     };
     
-    iss.clear();
     
     oss << "MOD" << _modpos << "_ID" ;
-    iss.str(statmap[oss.str()]);
     
-    for(auto& ch : _id)
-    {
-      ch = iss.get(); 
-    };
+    
+    _id = statmap.at(oss.str());
+    
+    std::cout << "id: " << _id << std::endl;
+    
+
     
 }
 
 
 
-const std::array<char, 16>& foxtrot::devices::ArchonModule::getID() const
+const std::string& foxtrot::devices::ArchonModule::getID() const
 {
     return _id;
 }
@@ -70,8 +83,26 @@ void foxtrot::devices::ArchonModule::update_variables()
 string devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
 {
       std::ostringstream oss;
-      oss << "MOD" << modpos << delim << name;
+      //WARNING: +1 to get from zero-indexed to 1 indexed
       
-      return map.at(oss.str());
+      oss << "MOD" << (modpos +1)<< delim << name;
+      std::cout << "getstr:" << oss.str() << std::endl;
+      string val;
+      
+      try{
+      val = map.at(oss.str());
+      }
+      catch(std::out_of_range& err)
+      {
+	std::cout << "caught out of range for key: "<< oss.str() << std::endl;
+	for(auto& item: map)
+	{
+	 std::cout << "*" << item.first << "* \t *" << item.second << "*" << std::endl; 
+	}
+	throw err;
+      }
+      
+      
+      return val;
 }
 

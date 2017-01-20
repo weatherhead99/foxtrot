@@ -1,0 +1,58 @@
+
+#include "archon.h"
+#include "simpleTCP.h"
+#include <memory>
+#include <string>
+#include <iostream>
+
+#include "TestUtilities.h"
+
+
+class archon_harness : public foxtrot::devices::archon
+{
+public:
+  archon_harness(std::shared_ptr< simpleTCP > proto)
+  : archon(proto) 
+  {};
+  std::string archoncmd(const std::string& request)
+  {
+   return archon::cmd(request); 
+  }
+  
+  ssmap parse_parameter_response(const std::string& response)
+  {
+   return archon::parse_parameter_response(response); 
+  }
+  
+};
+
+
+int main(int argc, char** argv)
+{
+  foxtrot::parameterset params;
+  params["addr"] = "10.0.0.2";
+  params["port"] = 4242u;
+  
+  std::shared_ptr<foxtrot::protocols::simpleTCP> proto(new foxtrot::protocols::simpleTCP(&params));
+  
+  std::cout << "init archon... " << std::endl;
+  
+  archon_harness a(proto);
+  
+//   std::cout << "sending STATUS command" << std::endl;
+
+  auto repl = a.archoncmd("STATUS");
+//   std::cout << "response to STATUS:" << repl << std::endl;
+  
+  auto repl2 = a.archoncmd("SYSTEM");
+//   std::cout << "response to SYSTEM: " << repl2 << std::endl;
+  
+  
+  auto sysmap = a.parse_parameter_response(repl2);
+  auto statmap = a.parse_parameter_response(repl);
+  
+  
+  std::cout << a.archoncmd("FETCHLOG") << std::endl;
+  
+  
+};
