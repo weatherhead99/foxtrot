@@ -57,6 +57,12 @@ unsigned short foxtrot::devices::ArchonModule::getRev() const
 }
 
 
+void foxtrot::devices::ArchonModule::update_variables()
+{
+  throw std::logic_error("called unimplemented function base update_variables");
+}
+
+
 string devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
 {
       std::ostringstream oss;
@@ -64,5 +70,7 @@ string devices::get_module_variable_string(int modpos, const string& name, const
       
       return map.at(oss.str());
 }
+
+ 
 
  

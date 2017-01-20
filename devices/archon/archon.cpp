@@ -1,4 +1,5 @@
 #include "archon.h"
+#include "archon_modules.h"
 
 #include <algorithm>
 
@@ -9,6 +10,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include "archon_modules.h"
 
 #include "ProtocolError.h"
 
@@ -19,8 +21,37 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
     _order(0)
 {
   proto->Init(nullptr);
+
+  //update the stateful dictionaries
+  update_state();
+  
+  //update the modules vector;
+  _modules = new std::vector<std::unique_ptr<ArchonModule>>();
+  
+  //get the modules_installed string value
+  int modules_installed = std::stoi(_system.at("MOD_PRESENT"));
+  
+  for(int i = 0; i < 12; i++)
+  {
+   bool mod_present = ((1 <<i) &  modules_installed) >> i;
+   archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<int>(i+1,"TYPE",getSystem(),'_'));
+   
+  }
+  
+  
+  
   
 }
+
+devices::archon::~archon()
+{
+  if(_modules)
+  {
+    delete _modules;
+  };
+
+}
+
 
 
 std::string foxtrot::devices::archon::cmd(const std::string& request)
@@ -110,4 +141,9 @@ void devices::archon::update_state()
 
 }
 
+
+std::vector< int > devices::archon::get_module_positions(const string& module_occupied_str)
+{
+
+}
 

@@ -51,7 +51,7 @@ namespace devices
             
             archon_module_types _modtype;
 	    
-	    virtual void update_variables();
+	    virtual void update_variables() = 0;
 	    
             
     };
