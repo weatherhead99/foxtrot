@@ -10,7 +10,7 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_TESTS "build test code" ON)
 
-set(boost_cmps "log;system")
+set(boost_cmps "log;system;date_time")
 
 if(BUILD_TESTS)
   enable_testing()
@@ -34,6 +34,17 @@ message(STATUS "libusb: ${libusb}")
 find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
+
+find_library(plplot plplotcxxd)
+message("PLPLOT: ${plplot}")
+find_path(plplot_path plplot)
+
+find_library(gsl gsl)
+message("gsl: ${gsl}")
+
+find_library(gslcblas gslcblas)
+
+include_directories(util/PRT/)
 
 add_subdirectory(src)
 
