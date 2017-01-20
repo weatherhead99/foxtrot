@@ -4,6 +4,8 @@
 
 #include "Device.h"
 #include "archon.h"
+#include <sstream>
+#include <type_traits>
 
 namespace foxtrot
 {
@@ -34,24 +36,45 @@ namespace devices
             const std::array<char,3>& getVersion() const;
             short unsigned getRev() const;
             
-    
-    private:
+    protected:
+            short unsigned _modpos;
+            archon& _arch;
             ArchonModule(archon& arch, short unsigned modpos);
+	    
+    private:
             
             //WARNING: is the lifetime of this guaranteed?
-            archon& _arch;
             
             std::array<char,16> _id;
             std::array<char,3> _version;
             short unsigned _rev;
             
             archon_module_types _modtype;
-            short unsigned _modpos;
+	    
+	    virtual void update_variables();
+	    
             
     };
     
     
-        
+    string get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim='/');
+    
+    template <typename T> typename std::enable_if<std::is_integral<T>::value,T>::type  extract_module_variable(
+      int modpos, const string& name,const ssmap& map, char delim='/')
+    {
+      auto stval = get_module_variable_string(modpos,name,map,delim);
+      return std::stoi(stval);
+    }
+    
+    template <typename T> typename std::enable_if<std::is_floating_point<T>::value,T>::type extract_module_variable(
+      int modpos, const string& name,const ssmap& map, char delim='/')
+    {
+      auto stval = get_module_variable_string(modpos,name,map,delim);
+      return std::stof(stval);
+    }
+    
+    
+    
     
     
 };

@@ -19,7 +19,10 @@ namespace foxtrot {
   {
   public:
     archon(std::shared_ptr<simpleTCP> proto);
-    ssmap getStatus();
+    const ssmap& getStatus() const;
+    const ssmap& getSystem() const;
+    
+    void update_state();
     
   protected:
     virtual std::string cmd(const std::string& request) override;
@@ -29,6 +32,9 @@ namespace foxtrot {
   private:
     short unsigned _order;
     std::shared_ptr<simpleTCP> _specproto;
+    
+    ssmap _system;
+    ssmap _status;
     
   };
   

@@ -4,7 +4,7 @@
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
 {
-    auto statmap = _arch.getStatus();
+    auto statmap = _arch.getSystem();
     
     std::ostringstream oss;
     
@@ -18,16 +18,24 @@ foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, sho
     
     oss << "MOD" << _modpos << "_VERSION";
     std::istringstream iss(statmap[oss.str()]);
+    oss.clear();
     
-    
-    
-    for(int i =0; i < 3; i++)
+    for(auto& n : _version)
     {
       std::string verspart;
       std::getline(iss,verspart,'.');
-      _version[i] = std::stoi(verspart);
+      n = std::stoi(verspart);
     };
     
+    iss.clear();
+    
+    oss << "MOD" << _modpos << "_ID" ;
+    iss.str(statmap[oss.str()]);
+    
+    for(auto& ch : _id)
+    {
+      ch = iss.get(); 
+    };
     
 }
 
@@ -46,6 +54,15 @@ const std::array<char, 3>& foxtrot::devices::ArchonModule::getVersion() const
 unsigned short foxtrot::devices::ArchonModule::getRev() const
 {
     return _rev;
+}
+
+
+string devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
+{
+      std::ostringstream oss;
+      oss << "MOD" << modpos << delim << name;
+      
+      return map.at(oss.str());
 }
 
  

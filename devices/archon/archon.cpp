@@ -91,8 +91,23 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
 
 }
 
-ssmap foxtrot::devices::archon::getStatus()
+const ssmap& devices::archon::getStatus() const
 {
-    auto statmap = parse_parameter_response(cmd("SYSTEM"));
-    return statmap ;
+  return _status;
+
 }
+
+const ssmap& devices::archon::getSystem() const
+{
+  return _system;
+}
+
+
+void devices::archon::update_state()
+{
+  _system = parse_parameter_response(cmd("SYSTEM"));
+  _status = parse_parameter_response(cmd("STATUS"));
+
+}
+
+
