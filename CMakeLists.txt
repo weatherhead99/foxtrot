@@ -35,10 +35,23 @@ find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
+
+find_library(rttr rttr_core REQUIRED)
+find_path(rttr_include rttr)
+message("rttr include: ${rttr_include}")
+
+include_directories(${rttr_include})
+
 # find_library(plplot plplotcxxd)
 # message("PLPLOT: ${plplot}")
 # find_path(plplot_path plplot)
- 
+
+# find_library(ponder ponder)
+# message("ponder: ${ponder}")
+# find_path(PONDER_INCLUDE_DIR "ponder")
+# message("ponder include: ${PONDER_INCLUDE_DIR}")
+# include_directories(${PONDER_INCLUDE_DIR})
+
 find_library(gsl gsl)
 message("gsl: ${gsl}")
 
@@ -55,7 +68,7 @@ add_subdirectory(expruns)
 add_subdirectory(util)
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb})
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} ${rttr})
 
 if(BUILD_TESTS)
   
