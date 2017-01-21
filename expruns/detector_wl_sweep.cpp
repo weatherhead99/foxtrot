@@ -8,7 +8,7 @@
 #include <plplot/plstream.h>
 #include "wl_sweep_io.h"
 
-#include <root/TCanvas.h>
+// #include <root/TCanvas.h>
 #include <utility>
 
 #include <gsl/gsl_statistics.h>
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
   unsigned num_readings = 100;
   OPMD_setup expt;
   
-  auto graph = new TCanvas();
+//   auto graph = new TCanvas();
   
   wl_sweep_table table("results.fits",num_readings);
   

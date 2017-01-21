@@ -35,10 +35,10 @@ find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
-find_library(plplot plplotcxxd)
-message("PLPLOT: ${plplot}")
-find_path(plplot_path plplot)
-
+# find_library(plplot plplotcxxd)
+# message("PLPLOT: ${plplot}")
+# find_path(plplot_path plplot)
+ 
 find_library(gsl gsl)
 message("gsl: ${gsl}")
 
