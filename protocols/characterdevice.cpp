@@ -51,11 +51,11 @@ std::string foxtrot::protocols::characterdevice::read(unsigned int len, unsigned
 
 void foxtrot::protocols::characterdevice::write(const std::string& data)
 {
-  cout << "writing..." << endl;
+//   cout << "writing..." << endl;
   _fs << data << std::endl;
-  cout << "flushing..." << endl;
+//   cout << "flushing..." << endl;
   _fs.flush();
-  cout << "flushed." << endl;
+//   cout << "flushed." << endl;
   
 }
 

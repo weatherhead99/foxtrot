@@ -13,7 +13,7 @@ add_executable(serialport_play serialport_play.cpp)
 target_link_libraries(serialport_play foxtrot)
 
 add_executable(chardevice_play chardevice_play.cpp)
-target_link_libraries(chardevice_play foxtrot)
+target_link_libraries(chardevice_play foxtrot foxtrot_util gsl gslcblas)
 
 
 if(BUILD_TESTS)
