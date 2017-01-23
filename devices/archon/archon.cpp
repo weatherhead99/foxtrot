@@ -110,12 +110,16 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   
   auto ret = _specproto->read_until_endl();
   
+  //sanitize response
+  ret.erase(std::remove_if(ret.begin(),ret.end(),[] (char c) { return !std::isprint(c); }),ret.end());
+  
   
   //first characters should be "<xx"
   if(ret[0] != '<')
   {
     throw ProtocolError("invalid archon response!");
   };
+  
   
   auto outret = std::stoul(ret.substr(1,2),nullptr,16);
   std::cout << "outret: " << outret << std::endl;
