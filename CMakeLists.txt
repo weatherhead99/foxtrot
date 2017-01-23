@@ -35,12 +35,18 @@ find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
+# Oxford ONLY
+set(ENV{RTTR_DIR} "/home/dweatherill/Software/rttr-0.9.5-src/build/install")
 
-find_library(rttr rttr_core REQUIRED)
-find_path(rttr_include rttr)
-message("rttr include: ${rttr_include}")
 
-include_directories(${rttr_include})
+
+#TODO: FIX THIS!
+include_directories("/home/dweatherill/Software/rttr-0.9.5-src/build/install/include/")
+
+find_package(RTTR CONFIG REQUIRED Core)
+
+
+
 
 # find_library(plplot plplotcxxd)
 # message("PLPLOT: ${plplot}")
@@ -68,7 +74,7 @@ add_subdirectory(expruns)
 add_subdirectory(util)
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} ${rttr})
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
 
 if(BUILD_TESTS)
   
