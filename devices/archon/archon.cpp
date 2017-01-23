@@ -31,7 +31,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   update_state();
   
   //update the modules vector;
-  _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
+//   _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
   
   //get the modules_installed string value
   int modules_installed = std::stoi(_system.at("MOD_PRESENT"),0,16);
@@ -54,7 +54,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
         case(archon_module_types::HeaterX):
 	  std::cout << "HeaterX module detected at position " << (i+1) << std::endl;	  
             ptr = ArchonHeaterX::constructModule(*this,i);
-            _modules->insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
+            _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
             break;
 	
 	default:
@@ -78,11 +78,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
 
 devices::archon::~archon()
 {
-  if(_modules)
-  {
-    delete _modules;
-  };
-
+  
 }
 
 
@@ -99,11 +95,11 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   std::ostringstream oss;
   oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
   
-  std::cout << "request is: " << oss.str();
+//   std::cout << "request is: " << oss.str();
 
   _specproto->write(oss.str());
   
-  std::cout << "command written, waiting for reply..." << std::endl;
+//   std::cout << "command written, waiting for reply..." << std::endl;
   //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
   
   
@@ -114,15 +110,25 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   ret.erase(std::remove_if(ret.begin(),ret.end(),[] (char c) { return !std::isprint(c); }),ret.end());
   
   
-  //first characters should be "<xx"
-  if(ret[0] != '<')
+  
+  if(ret[0] != '<' )
   {
+   
+    std::cout << "got RET: " << ret << std::endl;
+    std::cout << "request was: " << request << std::endl;
+    if(ret[0] == '?')
+    {
+      
+     throw DeviceError("archon threw an error message! Check the logs..."); 
+    }
+    
     throw ProtocolError("invalid archon response!");
   };
   
   
+  
   auto outret = std::stoul(ret.substr(1,2),nullptr,16);
-  std::cout << "outret: " << outret << std::endl;
+//   std::cout << "outret: " << outret << std::endl;
   
   if(outret != thisorder)
   {
@@ -186,7 +192,33 @@ void devices::archon::update_state()
 {
   _system = parse_parameter_response(cmd("SYSTEM"));
   _status = parse_parameter_response(cmd("STATUS"));
+  
+  for(auto& mod: _modules)
+  {
+    if(mod.second != nullptr)
+    {
+     mod.second->update_variables(); 
+    }
+  }
+  
+/*  
+  //check if _modules is initialized yet!
+  if(_modules != nullptr)
+  {
+    std::cout << "modules is not nullptr" << std::endl;
+    for(auto* mod : _modules)
+    {
+      std::cout << "got to here!" << std::endl;
+      
+      if(mod.second != nullptr)
+      {
+	std::cout << "some module is not a nullptr" << std::endl;
+	mod.second->update_variables();
+      };
+    };
 
+  };
+  std::cout << "got out" << std::endl;*/
 }
 
 // WARNING: VERY BAD CODE HERE!
@@ -194,7 +226,7 @@ const std::map<int, const foxtrot::devices::ArchonModule&> foxtrot::devices::arc
 {
     std::map<int, const foxtrot::devices::ArchonModule&> out;
     
-    for(const auto& mod : *_modules)
+    for(const auto& mod : _modules)
     {
         out.insert( std::pair<int,foxtrot::devices::ArchonModule&>(mod.first, *mod.second.get())  );
     }
@@ -223,7 +255,7 @@ void devices::archon::writeConfigLine(const string& line)
   }
   
   std::ostringstream oss;
-  oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::hex << _config_lines << line;
+  oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase<<  std::hex << _config_lines << line;
   cmd(oss.str());
   
   _config_lines++;
@@ -258,6 +290,29 @@ void devices::archon::applyall()
 std::unique_ptr< devices::ArchonModule > devices::archon::constructModule(const devices::archon_module_types& type, int modpos)
 {
 
+}
+
+std::string devices::archon::fetch_log()
+{
+  auto repl = cmd("FETCHLOG");
+  return repl;
+
+}
+
+std::vector< string > devices::archon::fetch_all_logs()
+{
+  update_state();
+  auto statmap = getStatus();
+  int nLogs = std::stoi(statmap.at("LOG"));
+  
+  std::vector<std::string> out;
+  out.reserve(nLogs);
+  for(int i=0; i < nLogs; i++)
+  {
+    out.push_back(fetch_log());
+  };
+
+  return out;
 }
 
 
