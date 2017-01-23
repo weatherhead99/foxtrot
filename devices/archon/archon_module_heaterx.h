@@ -10,6 +10,9 @@ namespace devices
     
     class ArchonHeaterX : public ArchonModule
     {
+      friend class archon;
+      
+      
     public:
     static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
         
@@ -23,8 +26,8 @@ namespace devices
     virtual const string getTypeName() const;	
     
     private:
-    ArchonHeaterX(archon& arch, short unsigned int modpos);
     virtual void update_variables() override;
+    ArchonHeaterX(archon& arch, short unsigned int modpos);
     
     double _heaterAOutput;
     double _heaterBOutput;

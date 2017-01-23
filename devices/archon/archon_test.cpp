@@ -7,6 +7,7 @@
 #include "archon_module_heaterx.h"
 #include "TestUtilities.h"
 #include "backward.hpp"
+#include <DeviceError.h>
 #include <vector>
 #define BACKWARD_HAS_BFD 1
 using std::cout;
@@ -14,16 +15,20 @@ using std::endl;
 
 
 std::vector<string> config_lines
-{ {"MOD11\\SENSORACURRENT=10000"},
-{"MOD11\\SENSORALABEL=TANK"},
-{"MOD11\\SENSORALOWERLIMIT=-150.0"},
-{"MOD11\\SENSORATYPE=2"},
-{"MOD11\\SENSORAUPPERLIMIT=50.0"},
-{"MOD11\\SENSORBCURRENT=10000"},
-{"MOD11\\SENSORBLABEL=STAGE"},
-{"MOD11\\SENSORBUPPERLIMIT=50.0"},
-{"MOD11\\SENSORBLOWERLIMIT=-150.0"},
-{"MOD11\\SENSORBTYPE=2"},
+{ {"MOD11/SENSORACURRENT=10000"},
+{"MOD11/SENSORALABEL=TANK"},
+{"MOD11/SENSORALOWERLIMIT=-150.0"},
+{"MOD11/SENSORATYPE=2"},
+{"MOD11/SENSORAUPPERLIMIT=50.0"},
+{"MOD11/SENSORBCURRENT=10000"},
+{"MOD11/SENSORBLABEL=STAGE"},
+{"MOD11/SENSORBUPPERLIMIT=50.0"},
+{"MOD11/SENSORBLOWERLIMIT=-150.0"},
+{"MOD11/SENSORBTYPE=2"},
+{"LINES=0"},
+{"STATES=0"},
+{"PARAMETERS=0"},
+{"CONSTANTS=0"}
 };
 
 
@@ -65,6 +70,20 @@ int main(int argc, char** argv)
    cout << a.readConfigLine(i) << endl; 
   }
   
+  cout << "applying config..." << endl;
+  try{
+    a.applyall();
+    
+  }
+  catch(foxtrot::DeviceError)
+  {
+    auto all_logs = a.fetch_all_logs();
+    for(auto& log: all_logs)
+    {
+      cout << log << endl;
+    };
+    
+  }
   
   auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
   

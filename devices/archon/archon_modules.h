@@ -35,6 +35,7 @@ namespace devices
     
     class ArchonModule : public Device
     {
+      friend class foxtrot::devices::archon;
     public:
             const string& getID() const;
             const std::array<char,3>& getVersion() const;

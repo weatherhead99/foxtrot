@@ -28,6 +28,8 @@ namespace foxtrot {
    
   class archon : public CmdDevice
   {
+    
+    
   public:
     archon(std::shared_ptr<simpleTCP> proto);
     ~archon();
@@ -35,6 +37,10 @@ namespace foxtrot {
     const ssmap& getSystem() const;
     
     void clear_config();
+    
+    std::string fetch_log();
+    std::vector<std::string> fetch_all_logs();
+    
     
     void writeConfigLine(const std::string& line);
     std::string readConfigLine(int num);
@@ -60,7 +66,7 @@ namespace foxtrot {
     ssmap _system;
     ssmap _status;
     
-    std::map<int, std::unique_ptr<ArchonModule>>* _modules;
+    std::map<int, std::unique_ptr<ArchonModule>> _modules;
     
     int _config_lines =0;
     
