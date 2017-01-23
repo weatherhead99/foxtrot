@@ -34,9 +34,16 @@ namespace foxtrot {
     const ssmap& getStatus() const;
     const ssmap& getSystem() const;
     
+    void clear_config();
+    
+    void writeConfigLine(const std::string& line);
+    std::string readConfigLine(int num);
+    
     void update_state();
+    void applyall();
     
     const std::map<int,const ArchonModule&> getAllModules() const;
+    
     
     
   protected:
@@ -54,6 +61,8 @@ namespace foxtrot {
     ssmap _status;
     
     std::map<int, std::unique_ptr<ArchonModule>>* _modules;
+    
+    int _config_lines =0;
     
     
   };

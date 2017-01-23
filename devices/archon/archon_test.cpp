@@ -7,26 +7,24 @@
 #include "archon_module_heaterx.h"
 #include "TestUtilities.h"
 #include "backward.hpp"
-
+#include <vector>
 #define BACKWARD_HAS_BFD 1
+using std::cout;
+using std::endl;
 
-// class archon_harness : public foxtrot::devices::archon
-// {
-// public:
-//   archon_harness(std::shared_ptr< simpleTCP > proto)
-//   : archon(proto) 
-//   {};
-//   std::string archoncmd(const std::string& request)
-//   {
-//    return archon::cmd(request); 
-//   }
-//   
-//   ssmap parse_parameter_response(const std::string& response)
-//   {
-//    return archon::parse_parameter_response(response); 
-//   }
-//   
-// };
+
+std::vector<string> config_lines
+{ {"MOD11\\SENSORACURRENT=10000"},
+{"MOD11\\SENSORALABEL=TANK"},
+{"MOD11\\SENSORALOWERLIMIT=-150.0"},
+{"MOD11\\SENSORATYPE=2"},
+{"MOD11\\SENSORAUPPERLIMIT=50.0"},
+{"MOD11\\SENSORBCURRENT=10000"},
+{"MOD11\\SENSORBLABEL=STAGE"},
+{"MOD11\\SENSORBUPPERLIMIT=50.0"},
+{"MOD11\\SENSORBLOWERLIMIT=-150.0"},
+{"MOD11\\SENSORBTYPE=2"},
+};
 
 
 int main(int argc, char** argv)
@@ -43,13 +41,6 @@ int main(int argc, char** argv)
   foxtrot::devices::archon a(proto);
   
   
-  auto system = a.getSystem();
-  for (auto& item: system)
-  {
-   std::cout << item.first << "\t" << item.second << std::endl; 
-    
-  }
-  
   
   auto modules = a.getAllModules();
   for( auto& mod: modules)
@@ -57,6 +48,22 @@ int main(int argc, char** argv)
     std::cout << "module in position: " << mod.first << std::endl;
     
   };
+  
+  
+  std::cout << "clearing config..." << std::endl;
+  a.clear_config();
+  
+  std::cout << "attempting to write new config..." << std::endl;
+  for(const auto& line : config_lines)
+  {
+    a.writeConfigLine(line);
+  }
+  
+  cout << "attempting to read config back..." << endl;
+  for(int i=0; i< 10; i++)
+  {
+   cout << a.readConfigLine(i) << endl; 
+  }
   
   
   auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
