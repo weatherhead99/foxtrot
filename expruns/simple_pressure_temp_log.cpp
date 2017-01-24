@@ -78,10 +78,6 @@ int main(int argc, char**argv)
   auto interval_s = vm["interval_s"].as<int>();
   
   
-  
-  
-  
-  
   auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
   foxtrot::devices::TPG362 vacuumgauge(sport);
   
@@ -122,7 +118,7 @@ int main(int argc, char**argv)
   auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
   
   //setup log file
-  string folder = "/home/dweatherill/teststation_logs/";
+  //string folder = "/home/dweatherill/teststation_logs/";
   string fname_base = "temp_pres_";
   
   boost::gregorian::date current_date(boost::gregorian::day_clock::local_day());
@@ -130,14 +126,15 @@ int main(int argc, char**argv)
   pt::time_facet fc ("%Y_%M_%d");
   
   std::ostringstream fname;
-  fname << folder + fname_base;
+  fname <<  fname_base;
   fname.imbue(std::locale(fname.getloc(),&fc));
   fname << current_date;
   fname << ".txt";
   
   cout << fname.str() << endl;
   
-  std::fstream fs(fname.str(),std::ios::out);
+  
+  std::fstream fs(fname.str(),std::ios::out | std::ios::app);
   fs.exceptions(std::fstream::failbit | std::fstream::badbit);
   
   fs << "unixtime,date/time,pressure(hPa),temperature_stage(C),temperature_tank(C)" << endl;

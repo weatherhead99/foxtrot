@@ -58,38 +58,42 @@ int main(int argc, char** argv)
   std::cout << "clearing config..." << std::endl;
   a.clear_config();
   
-  std::cout << "attempting to write new config..." << std::endl;
-  for(const auto& line : config_lines)
-  {
-    a.writeConfigLine(line);
-  }
-  
-  cout << "attempting to read config back..." << endl;
-  for(int i=0; i< 10; i++)
-  {
-   cout << a.readConfigLine(i) << endl; 
-  }
-  
-  cout << "applying config..." << endl;
-  try{
-    a.applyall();
-    
-  }
-  catch(foxtrot::DeviceError)
-  {
-    auto all_logs = a.fetch_all_logs();
-    for(auto& log: all_logs)
-    {
-      cout << log << endl;
-    };
-    
-  }
-  
-  auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
-  
-  std::cout << "tempA:" << heater->getTempA() << std::endl;
-  std::cout << "tempB:" << heater->getTempB() << std::endl;
-  std::cout << "tempC:" << heater->getTempC() << std::endl;
+ auto heater = static_cast<foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
+ heater->setSensorType(foxtrot::devices::HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
   
   
+//   std::cout << "attempting to write new config..." << std::endl;
+//   for(const auto& line : config_lines)
+//   {
+//     a.writeConfigLine(line);
+//   }
+//   
+//   cout << "attempting to read config back..." << endl;
+//   for(int i=0; i< 10; i++)
+//   {
+//    cout << a.readConfigLine(i) << endl; 
+//   }
+//   
+//   cout << "applying config..." << endl;
+//   try{
+//     a.applyall();
+//     
+//   }
+//   catch(foxtrot::DeviceError)
+//   {
+//     auto all_logs = a.fetch_all_logs();
+//     for(auto& log: all_logs)
+//     {
+//       cout << log << endl;
+//     };
+//     
+//   }
+//   
+//   auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
+//   
+//   std::cout << "tempA:" << heater->getTempA() << std::endl;
+//   std::cout << "tempB:" << heater->getTempB() << std::endl;
+//   std::cout << "tempC:" << heater->getTempC() << std::endl;
+//   
+//   
 };
