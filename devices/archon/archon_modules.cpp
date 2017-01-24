@@ -86,7 +86,7 @@ string devices::get_module_variable_string(int modpos, const string& name, const
       //WARNING: +1 to get from zero-indexed to 1 indexed
       
       oss << "MOD" << (modpos +1)<< delim << name;
-      std::cout << "getstr:" << oss.str() << std::endl;
+//       std::cout << "getstr:" << oss.str() << std::endl;
       string val;
       
       try{

@@ -1,6 +1,7 @@
 #include "archon.h"
 #include "archon_modules.h"
 #include "archon_module_heaterx.h"
+#include "DeviceError.h"
 
 #include <algorithm>
 
@@ -72,7 +73,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    
   }
   
-  
+  //TODO: clear config on init, because otherwise we have no idea what's in there
 }
 
 devices::archon::~archon()
@@ -96,7 +97,7 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   auto thisorder = _order;
   
   std::ostringstream oss;
-  oss << ">" << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
+  oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
   
   std::cout << "request is: " << oss.str();
 
@@ -109,12 +110,16 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   
   auto ret = _specproto->read_until_endl();
   
+  //sanitize response
+  ret.erase(std::remove_if(ret.begin(),ret.end(),[] (char c) { return !std::isprint(c); }),ret.end());
+  
   
   //first characters should be "<xx"
   if(ret[0] != '<')
   {
     throw ProtocolError("invalid archon response!");
   };
+  
   
   auto outret = std::stoul(ret.substr(1,2),nullptr,16);
   std::cout << "outret: " << outret << std::endl;
@@ -196,4 +201,64 @@ const std::map<int, const foxtrot::devices::ArchonModule&> foxtrot::devices::arc
     
     return out;
 }
+
+void devices::archon::clear_config()
+{
+  cmd("CLEARCONFIG");
+  _config_lines = 0;
+
+}
+
+
+void devices::archon::writeConfigLine(const string& line)
+{
+  //check if possible
+  if(_config_lines >= 2047)
+  {
+   throw foxtrot::DeviceError("tried to write too many config lines to archon");
+  }
+  if(line.size() >= 2047)
+  {
+   throw foxtrot::DeviceError("tried to write a config line to archon that was too long"); 
+  }
+  
+  std::ostringstream oss;
+  oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::hex << _config_lines << line;
+  cmd(oss.str());
+  
+  _config_lines++;
+
+}
+
+std::string devices::archon::readConfigLine(int num)
+{
+  if( num > _config_lines)
+  {
+    throw std::logic_error("tried to read an archon config line that we don't think exists...");
+  };
+  
+  std::ostringstream oss;
+  oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::hex << num ;
+  auto repl = cmd(oss.str());
+  
+  return repl;
+
+}
+
+
+void devices::archon::applyall()
+{
+  cmd("APPLYALL");
+
+}
+
+
+
+
+std::unique_ptr< devices::ArchonModule > devices::archon::constructModule(const devices::archon_module_types& type, int modpos)
+{
+
+}
+
+
 
