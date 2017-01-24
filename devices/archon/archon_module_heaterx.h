@@ -39,6 +39,10 @@ namespace devices
     void setSensorType(HeaterXSensors sensor, HeaterXSensorTypes type) ;
     HeaterXSensorTypes getSensorType(HeaterXSensors sensor);
     
+    void setSensorCurrent(HeaterXSensors sensor, int curr_na);
+    int getSensorCurrent(HeaterXSensors sensor);
+    
+    
     virtual const string getTypeName() const;	
     
     private:

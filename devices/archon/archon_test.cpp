@@ -38,6 +38,7 @@ int main(int argc, char** argv)
   foxtrot::parameterset params;
   params["addr"] = "10.0.0.2";
   params["port"] = 4242u;
+  params["timeout"] = 30;
   
   std::shared_ptr<foxtrot::protocols::simpleTCP> proto(new foxtrot::protocols::simpleTCP(&params));
   
@@ -58,42 +59,41 @@ int main(int argc, char** argv)
   std::cout << "clearing config..." << std::endl;
   a.clear_config();
   
+  std::cout << "getting heater module..." << std::endl;
+  
  auto heater = static_cast<foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
+ 
+ cout << "setting sensor type..>" << std::endl;
  heater->setSensorType(foxtrot::devices::HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
   
-  
-//   std::cout << "attempting to write new config..." << std::endl;
-//   for(const auto& line : config_lines)
-//   {
-//     a.writeConfigLine(line);
-//   }
-//   
-//   cout << "attempting to read config back..." << endl;
-//   for(int i=0; i< 10; i++)
-//   {
-//    cout << a.readConfigLine(i) << endl; 
-//   }
-//   
-//   cout << "applying config..." << endl;
-//   try{
-//     a.applyall();
-//     
-//   }
-//   catch(foxtrot::DeviceError)
-//   {
-//     auto all_logs = a.fetch_all_logs();
-//     for(auto& log: all_logs)
-//     {
-//       cout << log << endl;
-//     };
-//     
-//   }
-//   
-//   auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
-//   
-//   std::cout << "tempA:" << heater->getTempA() << std::endl;
-//   std::cout << "tempB:" << heater->getTempB() << std::endl;
-//   std::cout << "tempC:" << heater->getTempC() << std::endl;
-//   
-//   
+ cout << "getting sensor type..." << std::endl;
+ auto senstype = heater->getSensorType(foxtrot::devices::HeaterXSensors::A);
+ 
+ cout << "setting sensor A current..." << std::endl;
+ heater->setSensorCurrent(foxtrot::devices::HeaterXSensors::A,10000);
+ 
+ cout << "getting sensor A current..." << std::endl;
+ auto current = heater->getSensorCurrent(foxtrot::devices::HeaterXSensors::A);
+ cout << current << endl;
+ 
+ a.set_timing_lines(0);
+ a.set_states(0);
+ a.set_constants(0);
+ a.set_parameters(0);
+ 
+ cout << "applying config... " << endl;
+ try{
+   
+  a.applyall();
+ }
+ catch(foxtrot::DeviceError& err)
+ {
+   cout << "archon log:" << endl;
+   auto logs = a.fetch_all_logs();
+   for(auto& log : logs)
+   {
+     cout << log << endl;
+   };
+   
+ };
 };
