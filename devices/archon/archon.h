@@ -42,13 +42,19 @@ namespace foxtrot {
     std::vector<std::string> fetch_all_logs();
     
     
-    void writeConfigLine(const std::string& line);
+    int writeConfigLine(const std::string& line, int num=-1);
     std::string readConfigLine(int num);
+    
+    
+    void writeKeyValue(const std::string& key, const std::string& val);
+    std::string readKeyValue(const std::string& key);
+    
     
     void update_state();
     void applyall();
+    void applymodule(int modpos);
     
-    const std::map<int,const ArchonModule&> getAllModules() const;
+    const std::map<int,ArchonModule&> getAllModules() const;
     
     
     
@@ -58,7 +64,6 @@ namespace foxtrot {
     
     
   private:
-    static std::unique_ptr<ArchonModule> constructModule(const archon_module_types& type, int modpos);
     
     short unsigned _order;
     std::shared_ptr<simpleTCP> _specproto;
@@ -67,6 +72,8 @@ namespace foxtrot {
     ssmap _status;
     
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
+    
+    std::map<const std::string, int> _configlinemap;
     
     int _config_lines =0;
     

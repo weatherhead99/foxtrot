@@ -1,9 +1,13 @@
 #include "archon_module_heaterx.h"
 #include <sstream>
 
+
+
+
 devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos)
 {
   update_variables();
+  
 }
 
 
@@ -88,3 +92,22 @@ std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonHeaterX:
  
  return out;
 }
+
+void devices::ArchonHeaterX::setSensorType(devices::HeaterXSensors sensor, devices::HeaterXSensorTypes type) 
+{
+    std::ostringstream oss;
+    oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
+    writeConfigKey(oss.str(),std::to_string(static_cast<short unsigned>(type)));
+    
+}
+
+devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
+  
+  return static_cast<HeaterXSensorTypes>(std::stoul(readConfigKey(oss.str())));
+  
+}
+
+

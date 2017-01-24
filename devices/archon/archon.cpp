@@ -201,30 +201,12 @@ void devices::archon::update_state()
     }
   }
   
-/*  
-  //check if _modules is initialized yet!
-  if(_modules != nullptr)
-  {
-    std::cout << "modules is not nullptr" << std::endl;
-    for(auto* mod : _modules)
-    {
-      std::cout << "got to here!" << std::endl;
-      
-      if(mod.second != nullptr)
-      {
-	std::cout << "some module is not a nullptr" << std::endl;
-	mod.second->update_variables();
-      };
-    };
-
-  };
-  std::cout << "got out" << std::endl;*/
 }
 
 // WARNING: VERY BAD CODE HERE!
-const std::map<int, const foxtrot::devices::ArchonModule&> foxtrot::devices::archon::getAllModules() const
+const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::getAllModules() const
 {
-    std::map<int, const foxtrot::devices::ArchonModule&> out;
+    std::map<int, foxtrot::devices::ArchonModule&> out;
     
     for(const auto& mod : _modules)
     {
@@ -242,7 +224,7 @@ void devices::archon::clear_config()
 }
 
 
-void devices::archon::writeConfigLine(const string& line)
+int devices::archon::writeConfigLine(const string& line,int num)
 {
   //check if possible
   if(_config_lines >= 2047)
@@ -254,13 +236,26 @@ void devices::archon::writeConfigLine(const string& line)
    throw foxtrot::DeviceError("tried to write a config line to archon that was too long"); 
   }
   
+  if(num <0)
+  {
+    //if the value -1 is passed in, add a new line
+    num = _config_lines++;
+    
+  }
+  else if(num > _config_lines)
+  {
+    throw std::logic_error("trying to overwrite a config line" + std::to_string(num) + " that doesn't exist yet");
+  };
+  
   std::ostringstream oss;
-  oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase<<  std::hex << _config_lines << line;
+  oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase<<  std::hex << num << line;
   cmd(oss.str());
   
-  _config_lines++;
+  return num;
 
 }
+
+
 
 std::string devices::archon::readConfigLine(int num)
 {
@@ -284,13 +279,15 @@ void devices::archon::applyall()
 
 }
 
-
-
-
-std::unique_ptr< devices::ArchonModule > devices::archon::constructModule(const devices::archon_module_types& type, int modpos)
+void devices::archon::applymodule(int modpos)
 {
-
+  std::ostringstream oss;
+  oss << "APPLYMOD" << std::setw(2) << std::setfill('0') << std::uppercase << std::hex << modpos;
+  cmd(oss.str());
+  
 }
+
+
 
 std::string devices::archon::fetch_log()
 {
@@ -313,6 +310,41 @@ std::vector< string > devices::archon::fetch_all_logs()
   };
 
   return out;
+}
+
+
+
+string devices::archon::readKeyValue(const string& key)
+{
+  auto linenumit = _configlinemap.find(key);
+  if(linenumit == _configlinemap.end())
+  {
+    throw std::runtime_error("the key " + key + " is not registered with this archon handler");
+  };
+  
+  return readConfigLine(linenumit->second);
+  
+}
+
+void devices::archon::writeKeyValue(const string& key, const string& val)
+{
+  auto linenumit = _configlinemap.find(key);
+  
+  std::ostringstream oss; 
+  oss << key << "=" << val;
+  
+  if(linenumit == _configlinemap.end())
+  {
+    //this is a new key 
+    auto linenum = writeConfigLine(oss.str());
+    _configlinemap.at(key) = linenum;
+  
+  }
+  else
+  {
+    auto linenum = _configlinemap.at(key);
+    writeConfigLine(oss.str(),linenum);
+  };
 }
 
 
