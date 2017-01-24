@@ -133,37 +133,46 @@ int main(int argc, char**argv)
   
   cout << fname.str() << endl;
   
+  //check if file exists
+  bool fexists;
   
-  std::fstream fs(fname.str(),std::ios::out | std::ios::app);
+  {
+    std::fstream ifs(fname.str(),std::ios::in);
+    fexists = ifs.good();
+  };
+  
+  std::fstream fs(fname.str(),std::ios::out| std::ios::app);
   fs.exceptions(std::fstream::failbit | std::fstream::badbit);
   
-  fs << "unixtime,date/time,pressure(hPa),temperature_stage(C),temperature_tank(C)" << endl;
+  if(!fexists)
+  {
+  fs << "unixtime,date/time,pressure_cryostat(hPa),pressure_pump(hPa),temperature_stage(C),temperature_tank(C)" << endl;
+  };
+  
+  
   
   while(true)
   {
    
     archon.update_state();
-    
-    
    auto now = pt::second_clock::local_time();
-   auto pressure = vacuumgauge.getPressure(2);
+   auto pressure_pump = vacuumgauge.getPressure(1);
+   auto pressure_cryostat = vacuumgauge.getPressure(2);
    auto tank_temp = heater->getTempA();
    auto stage_temp = heater->getTempB();
    
-//    auto res = multimeter.get4WireResistance();
-//    auto temperature = foxtrot::util::ITL_90_res_to_tmp(res,foxtrot::util::PRTsensors::PT100);
    cout << "date time is: " << pt::to_simple_string(now) << endl;
-   cout << "pressure: " << pressure << "hPa" <<  endl;
+   cout << "pressure at cryostat is: " << pressure_cryostat << "hPa" <<  endl;
+   cout << "pressure at pump is: " << pressure_pump << "hPa" <<  endl;
    
    cout << "LN2 tank temperature: " << tank_temp << " degC " << endl;
    cout << "stage temperature: " << stage_temp << " degC " << endl;
    
    
-//    cout << "resistance: " << res << "ohms" << endl;
-//    cout << "temperature: " <<  temperature << endl;
    auto unix_epoch = (now - pt::from_time_t(0)).total_seconds();
    
-   fs  << unix_epoch << "," << pt::to_iso_string(now) << "," << pressure << "," << stage_temp << "," << tank_temp << endl;// "," << res << "," << temperature << endl;
+   fs  << unix_epoch << "," << pt::to_iso_string(now) << "," <<pressure_cryostat <<","
+   << pressure_pump << "," << stage_temp << "," << tank_temp << endl;// "," << res << "," << temperature << endl;
    fs.flush();
    
    
