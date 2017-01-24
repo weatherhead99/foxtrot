@@ -42,7 +42,10 @@ namespace devices
             short unsigned getRev() const;
 	    virtual const std::string getTypeName() const = 0;
             
-            
+	    void writeConfigKey(const string& key, const string& val);
+	    string readConfigKey(const string& key);
+	            
+	    
     protected:
             short unsigned _modpos;
             archon& _arch;
@@ -57,9 +60,7 @@ namespace devices
             short unsigned _rev;
             
             archon_module_types _modtype;
-	    
 	    virtual void update_variables() = 0 ;
-	    
             
     };
     

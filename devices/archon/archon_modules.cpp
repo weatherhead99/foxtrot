@@ -2,9 +2,12 @@
 #include <sstream>
 
 #include "archon_module_heaterx.h"
+#include <iomanip>
 
 using foxtrot::devices::ArchonModule;
+using foxtrot::devices::archon_module_types;
 
+  
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
 {
@@ -46,13 +49,9 @@ foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, sho
     
     
     oss << "MOD" << _modpos << "_ID" ;
-    
-    
     _id = statmap.at(oss.str());
     
     std::cout << "id: " << _id << std::endl;
-    
-
     
 }
 
@@ -102,7 +101,24 @@ string devices::get_module_variable_string(int modpos, const string& name, const
 	throw err;
       }
       
-      
       return val;
+}
+
+string ArchonModule::readConfigKey(const string& subkey)
+{
+  std::ostringstream oss;
+  oss << "MOD" << std::setw(2) << std::uppercase << std::hex << _modpos << "/" << subkey;
+  
+  return _arch.readKeyValue(oss.str());
+  
+}
+
+void ArchonModule::writeConfigKey(const string& key, const string& val)
+{
+  std::ostringstream oss;
+  oss << "MOD" << std::setw(2) << std::uppercase << std::hex << _modpos << "/" << key ;
+  
+  _arch.writeKeyValue(oss.str(),val);
+
 }
 
