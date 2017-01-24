@@ -97,6 +97,7 @@ void devices::ArchonHeaterX::setSensorType(devices::HeaterXSensors sensor, devic
 {
     std::ostringstream oss;
     oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
+    
     writeConfigKey(oss.str(),std::to_string(static_cast<short unsigned>(type)));
     
 }
@@ -110,4 +111,23 @@ devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::Heate
   
 }
 
+void devices::ArchonHeaterX::setSensorCurrent(devices::HeaterXSensors sensor, int curr_na)
+{
+  std::ostringstream oss;
+  oss <<"SENSOR" << static_cast<char>(sensor) << "CURRENT";
+  
+  writeConfigKey(oss.str(),std::to_string(curr_na));
+  
+}
+
+
+
+int devices::ArchonHeaterX::getSensorCurrent(devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) << "CURRENT";
+  
+  return std::stoi(readConfigKey(oss.str()));
+
+}
 

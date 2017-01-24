@@ -6,6 +6,7 @@
 #include "protocols/simpleTCP.h"
 #include <map>
 #include <vector>
+#include <boost/iterator/iterator_concepts.hpp>
 
 
 
@@ -56,7 +57,17 @@ namespace foxtrot {
     
     const std::map<int,ArchonModule&> getAllModules() const;
     
+    void set_timing_lines(int n);
+    int get_timing_lines();
     
+    void set_states(int n);
+    int get_states();
+    
+    void set_parameters(int n);
+    int get_parameters();
+    
+    void set_constants(int n);
+    int get_constants();
     
   protected:
     virtual std::string cmd(const std::string& request) override;

@@ -322,7 +322,19 @@ string devices::archon::readKeyValue(const string& key)
     throw std::runtime_error("the key " + key + " is not registered with this archon handler");
   };
   
-  return readConfigLine(linenumit->second);
+  auto line = readConfigLine(linenumit->second);
+  
+  //fine equals sign
+  auto eqpos = std::find(line.begin(), line.end(),'=');
+  if(eqpos == line.end())
+  {
+    throw DeviceError("malformed config line returned from archon");
+    
+  };
+  
+  auto val = string(eqpos+1,line.end());
+  
+  return val;
   
 }
 
@@ -337,7 +349,7 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
   {
     //this is a new key 
     auto linenum = writeConfigLine(oss.str());
-    _configlinemap.at(key) = linenum;
+    _configlinemap.insert({key,linenum});
   
   }
   else
@@ -347,5 +359,49 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
   };
 }
 
+
+void devices::archon::set_timing_lines(int n)
+{
+  writeKeyValue("LINES",std::to_string(n));
+
+}
+
+int devices::archon::get_timing_lines()
+{
+  return std::stoi(readKeyValue("LINES"));
+
+}
+
+int devices::archon::get_states()
+{
+  return std::stoi(readKeyValue("STATES"));
+
+}
+
+void devices::archon::set_states(int n)
+{
+  writeKeyValue("STATES",std::to_string(n));
+}
+
+int devices::archon::get_constants()
+{
+  return std::stoi(readKeyValue("CONSTANTS"));
+}
+
+void devices::archon::set_constants(int n)
+{
+  writeKeyValue("CONSTANTS",std::to_string(n));
+}
+
+int devices::archon::get_parameters()
+{
+  return std::stoi(readKeyValue("PARAMETERS"));
+
+}
+
+void devices::archon::set_parameters(int n)
+{
+  writeKeyValue("PARAMETERS",std::to_string(n));
+}
 
 

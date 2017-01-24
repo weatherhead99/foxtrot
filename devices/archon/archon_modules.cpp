@@ -107,7 +107,7 @@ string devices::get_module_variable_string(int modpos, const string& name, const
 string ArchonModule::readConfigKey(const string& subkey)
 {
   std::ostringstream oss;
-  oss << "MOD" << std::setw(2) << std::uppercase << std::hex << _modpos << "/" << subkey;
+  oss << "MOD" << std::setw(2) << std::setfill('0')  << (_modpos+1) << "/" << subkey;
   
   return _arch.readKeyValue(oss.str());
   
@@ -116,7 +116,7 @@ string ArchonModule::readConfigKey(const string& subkey)
 void ArchonModule::writeConfigKey(const string& key, const string& val)
 {
   std::ostringstream oss;
-  oss << "MOD" << std::setw(2) << std::uppercase << std::hex << _modpos << "/" << key ;
+  oss << "MOD" << std::setw(2) << std::setfill('0') << (_modpos+1) << "/" << key ;
   
   _arch.writeKeyValue(oss.str(),val);
 
