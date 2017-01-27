@@ -16,6 +16,7 @@
 #include <archon/archon.h>
 #include <archon/archon_module_heaterx.h>
 #include <DeviceError.h>
+#include <ProtocolError.h>
 
 #include <boost/program_options.hpp>
 
@@ -41,7 +42,8 @@ foxtrot::parameterset tpg_params {
 
 foxtrot::parameterset archon_params {
   {"addr" , "10.0.0.2"},
-  {"port" , 4242u}
+  {"port" , 4242u},
+  {"timeout", 30}
 };
 
 std::vector<string> config_lines
@@ -60,6 +62,8 @@ std::vector<string> config_lines
 {"PARAMETERS=0"},
 {"CONSTANTS=0"}
 };
+
+
 
 int main(int argc, char**argv)
 {
@@ -154,13 +158,25 @@ int main(int argc, char**argv)
   while(true)
   {
    
-    archon.update_state();
    auto now = pt::second_clock::local_time();
-   auto pressure_pump = vacuumgauge.getPressure(1);
-   auto pressure_cryostat = vacuumgauge.getPressure(2);
-   auto tank_temp = heater->getTempA();
-   auto stage_temp = heater->getTempB();
+   auto pressure_pump = vacuumgauge.getPressure(2);
+   auto pressure_cryostat = vacuumgauge.getPressure(1);
+    
+   double tank_temp = -273.15;
+   double stage_temp = -273.15;
+   try{
    
+      archon.update_state();
+      tank_temp = heater->getTempA();
+      stage_temp = heater->getTempB();
+   }
+   catch(foxtrot::ProtocolError)
+   {
+     cout <<"archon seems to have failed.... " << endl;
+     cout << "logging only pressure..." << endl;
+     
+   }
+   cout << "-------------------------------------------" << endl;
    cout << "date time is: " << pt::to_simple_string(now) << endl;
    cout << "pressure at cryostat is: " << pressure_cryostat << "hPa" <<  endl;
    cout << "pressure at pump is: " << pressure_pump << "hPa" <<  endl;
