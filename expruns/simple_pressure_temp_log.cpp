@@ -72,7 +72,8 @@ int main(int argc, char**argv)
   //program options setup
   po::options_description desc("Allowed Options");
   desc.add_options()("outfname",po::value<string>(),"set logging file name")
-		  ("interval_s",po::value<int>()->default_value(120),"seconds between logging points");
+		  ("interval_s",po::value<int>()->default_value(120),"seconds between logging points")
+		  ("fname",po::value<string>()->default_value("temp_pres_"),"filename base to store data");
 		  
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,desc),vm);
@@ -80,7 +81,7 @@ int main(int argc, char**argv)
   po::notify(vm);
   
   auto interval_s = vm["interval_s"].as<int>();
-  
+  auto fname_base = vm["fname"].as<string>();
   
   auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
   foxtrot::devices::TPG362 vacuumgauge(sport);
@@ -123,7 +124,7 @@ int main(int argc, char**argv)
   
   //setup log file
   //string folder = "/home/dweatherill/teststation_logs/";
-  string fname_base = "temp_pres_";
+  
   
   boost::gregorian::date current_date(boost::gregorian::day_clock::local_day());
   
@@ -191,12 +192,9 @@ int main(int argc, char**argv)
    << pressure_pump << "," << stage_temp << "," << tank_temp << endl;// "," << res << "," << temperature << endl;
    fs.flush();
    
-   
    cout << "sleeping for " << interval_s << " seconds..." <<endl;
    
    std::this_thread::sleep_for(std::chrono::seconds(interval_s));
-    
-   
     
   }
   
