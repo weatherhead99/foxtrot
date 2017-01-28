@@ -1,0 +1,69 @@
+syntax="proto3";
+
+enum capability_types
+{
+    VALUE_READONLY = 0;
+    VALUE_READWRITE = 1;
+    ACTION = 2;
+}
+
+enum value_types
+{
+    FLOAT = 0;
+    INT = 1;
+    BOOL = 2;
+    STRING = 3;
+
+}
+
+message devcapability
+{
+    capability_types tp = 1;
+    string capname = 2;
+    map<uint32, string> argnames = 3;
+    map<uint32, value_types> argtypes = 4;
+    value_types rettp = 5;
+}
+message devdescribe
+{
+    uint32 devid = 1;    
+    string devtype = 2;
+    string devcomment = 3;
+}
+
+message servdescribe
+{
+    string servcomment = 1;
+    map<uint32, devdescribe> devs_attached = 2;
+}
+
+message capability_argument
+{
+    uint32 position = 1;
+    oneof value {
+     double dblarg = 2;
+     sint32 intarg = 3;
+     bool boolarg = 4;
+     string strarg = 5;
+    }
+
+}
+
+message capability_request
+{
+    uint32 devid = 1;
+    string capname  = 2;
+    repeated capability_argument args = 3;
+}
+
+message capability_response
+{
+    uint32 devid = 1;
+    string capname = 2;
+    oneof return {
+        double dblret = 3;
+        sint32 intret =4;
+        bool boolret = 5;
+        string stringret = 6;
+    }
+}
