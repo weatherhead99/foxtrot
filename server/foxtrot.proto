@@ -51,19 +51,28 @@ message capability_argument
 
 message capability_request
 {
-    uint32 devid = 1;
-    string capname  = 2;
-    repeated capability_argument args = 3;
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname  = 3;
+    repeated capability_argument args = 4;
 }
 
 message capability_response
 {
-    uint32 devid = 1;
-    string capname = 2;
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname = 3;
     oneof return {
-        double dblret = 3;
-        sint32 intret =4;
-        bool boolret = 5;
-        string stringret = 6;
+        double dblret = 4;
+        sint32 intret =5;
+        bool boolret = 6;
+        string stringret = 7;
     }
+        
+}
+
+service CapabilityService
+{
+    rpc InvokeCapability (capability_request) returns (capability_response);
+
 }
