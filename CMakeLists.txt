@@ -25,7 +25,6 @@ macro(foxtrot_test testname)
 endmacro(foxtrot_test)
 
 
-
 find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
 
 
@@ -35,12 +34,9 @@ find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
+set(CMAKE_PREFIX_PATH "/usr/local/lib64/cmake/")
 
-find_library(rttr rttr_core REQUIRED)
-find_path(rttr_include rttr)
-message("rttr include: ${rttr_include}")
-
-include_directories(${rttr_include})
+find_package(rttr REQUIRED)
 
 # find_library(plplot plplotcxxd)
 # message("PLPLOT: ${plplot}")
@@ -66,9 +62,10 @@ add_subdirectory(protocols)
 add_subdirectory(devices)
 add_subdirectory(expruns)
 add_subdirectory(util)
+add_subdirectory(server)
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} ${rttr})
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
 
 if(BUILD_TESTS)
   
