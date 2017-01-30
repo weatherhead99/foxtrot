@@ -7,7 +7,7 @@ Created on Sat Jan 14 00:24:12 2017
 """
 
 #TODO: machine based config
-folder = '/home/danw/teststand_logs/'
+folder = '/home/danw/teststand_logs'
 
 import pandas as pd
 import os
@@ -30,8 +30,13 @@ def datetime_to_frac_ordinal(dt):
     ordinal = dt.toordinal()
     dtmidnight = datetime.fromordinal(ordinal)
     from_midnight = dt - dtmidnight
-    frac_ordinal = from_midnight / timedelta(days=1)
+    frac_ordinal = from_midnight.total_seconds() / timedelta(days=1).total_seconds()
     return float(ordinal)  + frac_ordinal
+
+
+def find_nearest_index(val,series):
+    arg_nearest = np.argmin(np.abs(val - np.array(series)))
+    return arg_nearest
 
 def label_nearest_point(x,xs,ys,ax,fmtstr,col):
     arg_nearest = np.argmin(np.abs(xs - x))
@@ -44,13 +49,17 @@ def label_nearest_point(x,xs,ys,ax,fmtstr,col):
 
     print('nearest: %2.2f, %2.2f' % (xnearest,ynearest))
 
-fls = [folder + _ for _ in os.listdir(folder)]
-mod_times = [os.path.getmtime(_) for _ in fls if "~" not in _]
-newest_file = fls[mod_times.index(max(mod_times))]
+fls = [_ for _ in os.listdir(folder)]
+
+f = folder + '/' + 'holdtime2017-Jan-27.txt'
+
+#mod_times = [os.path.getmtime(_) for _ in fls if "~" not in _]
+#newest_file = fls[mod_times.index(max(mod_times))]
     
-fl = "/home/danw/teststand_logs/temp_pres_2017-Jan-24.txt"
+#fl = "/home/danw/teststand_logs/temp_pres_2017-Jan-24.txt"
+
 #df = pd.read_csv(os.path.abspath(folder + '/' + fls[0]),header=0)
-df = pd.read_csv( fl,header=0)
+df = pd.read_csv(os.path.abspath(f),header=0)
 
 datetimes = [parser.parse(_) for _ in df['date/time']]
 dtfracords = np.array([datetime_to_frac_ordinal(_) for _ in datetimes])
@@ -59,14 +68,25 @@ plt.close('all')
 fig,ax = plt.subplots(figsize=(14,5))
 
 
-ax.plot(datetimes,df['pressure_cryostat(hPa)'],"-",c='blue',label='Pressure at cryostat')
-ax.plot(datetimes,df['pressure_pump(hPa)'],"--",c='blue',label='Pressure at Pump')
+#START = 0
+
+START_DATE = datetime(2017,1,30,8,30)
+START =  find_nearest_index(START_DATE,datetimes)
+
+END = -1
+PLOT_EVERY=1
+
+slc = slice(START,END,PLOT_EVERY)
+
+ax.plot(datetimes[slc],df['pressure_pump(hPa)'][slc],"-",c='blue',label='Pressure at Pump')
 ax.set_ylabel('Pressure (hPa)')
 
+ax.plot(datetimes[slc],df['pressure_cryostat(hPa)'][slc],"-",c='blue',label='Pressure at Pump')
+#
 ax2 = ax.twinx()
-ax2.plot(datetimes,df['temperature_stage(C)'],"-",c='red',label='Stage Temperature')
-ax2.plot(datetimes,df['temperature_tank(C)'],"--",c='red',label='Tank temperature')
-
+ax2.plot(datetimes[slc],df['temperature_tank(C)'][slc],"-",c='red',label='Stage Temperature')
+ax2.plot(datetimes[slc],df['temperature_stage(C)'][slc],"--",c='red',label='Stage Temperature')
+#
 ax2.set_ylabel('Temperature ($^\circ$C)')
 
 
@@ -74,10 +94,10 @@ ax2.set_ylabel('Temperature ($^\circ$C)')
 fmtpres = mtck.FormatStrFormatter('%2.1e')
 ax.semilogy()       
 ax.yaxis.set_major_formatter(fmtpres)
-ax.yaxis.set_major_locator(mtck.LogLocator(base=10.,subs=[1.,2.5,5.]))
+ax.yaxis.set_major_locator(mtck.LogLocator(base=10.,subs=[1.,2,5.]))
 
 #date formatting
-ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=60))
+ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=10))
 fmt = mdat.DateFormatter('%d-%b-%H:%M')
 ax.xaxis.set_major_formatter(fmt)
 
@@ -90,9 +110,9 @@ plt.minorticks_on()
 plt.tight_layout()              
 
 lns,lbs = ax.get_legend_handles_labels()
-lns2,lbs2 = ax2.get_legend_handles_labels()
+#lns2,lbs2 = ax2.get_legend_handles_labels()
 
-ax.legend(lns + lns2, lbs+lbs2)
+#ax.legend(lns + lns2, lbs+lbs2,loc='center right')
 
 
 #label major tick points
@@ -101,5 +121,8 @@ for x in ax.xaxis.majorTicks:
     
     
     label_nearest_point(loc,dtfracords,df['pressure_cryostat(hPa)'],ax,"%2.2e","blue")
-    label_nearest_point(loc,dtfracords,df['temperature_stage(C)'],ax2,"%2.2f","red")
+    label_nearest_point(loc,dtfracords,df['pressure_pump(hPa)'],ax,"%2.2e","blue")
+    label_nearest_point(loc,dtfracords,df['temperature_tank(C)'],ax2,"%2.0f","red")
+    label_nearest_point(loc,dtfracords,df['temperature_stage(C)'],ax2,"%2.0f","red")
+#    label_nearest_point(loc,dtfracords,df['temperature(C)'],ax2,"%2.2f","red")
 
