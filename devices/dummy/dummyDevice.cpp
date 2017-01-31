@@ -1,30 +1,29 @@
 #include "dummyDevice.h"
 #include <rttr/registration>
 #include <rttr/type>
-
 #include <type_traits>
 
 
-foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
 // dummyDevice::dummyDevice() : Device(nullptr)
+foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
 {
 }
 
-int foxtrot::devices::dummyDevice::getCounter()
 // int dummyDevice::getCounter()
+int foxtrot::devices::dummyDevice::getCounter()
 {
     return _counter++;
 }
 
 
-double foxtrot::devices::dummyDevice::getRandomDouble()
 // double dummyDevice::getRandomDouble() 
+double foxtrot::devices::dummyDevice::getRandomDouble()
 {
     return _distribution(_generator);
 }
 
-void foxtrot::devices::dummyDevice::resetCounter()
 // void dummyDevice::resetCounter()
+void foxtrot::devices::dummyDevice::resetCounter()
 {
     _counter = 0;
 }
@@ -44,6 +43,5 @@ RTTR_REGISTRATION
  .property_readonly("getCounter", &dummyDevice::getCounter)
  .property_readonly("getRandomDouble", &dummyDevice::getRandomDouble)
  .method("resetCounter", &dummyDevice::resetCounter)
-
  ;
 }

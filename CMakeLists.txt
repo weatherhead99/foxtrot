@@ -2,14 +2,8 @@ project(foxtrot)
 cmake_minimum_required(VERSION 3.2)
 set(CMAKE_CXX_STANDARD 11)
 
-
-
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
-
-
-
 option(BUILD_TESTS "build test code" ON)
-
 set(boost_cmps "log;system;date_time")
 
 if(BUILD_TESTS)
@@ -24,9 +18,7 @@ macro(foxtrot_test testname)
     target_link_libraries(${testname} foxtrot ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endmacro(foxtrot_test)
 
-
 find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
-
 
 find_library(libusb usb-1.0 REQUIRED)
 message(STATUS "libusb: ${libusb}")
@@ -34,9 +26,9 @@ find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
-set(CMAKE_PREFIX_PATH "/usr/local/lib64/cmake/")
+set(CMAKE_PREFIX_PATH "/usr/local/lib64")
 
-find_package(rttr REQUIRED)
+find_package(rttr REQUIRED PATH_SUFFIXES )
 
 # find_library(plplot plplotcxxd)
 # message("PLPLOT: ${plplot}")
@@ -53,6 +45,7 @@ message("gsl: ${gsl}")
 
 find_library(gslcblas gslcblas)
 
+include_directories("/usr/local/lib64/include/")
 include_directories(util/PRT/)
 
 add_subdirectory(src)
@@ -64,11 +57,11 @@ add_subdirectory(expruns)
 add_subdirectory(util)
 add_subdirectory(server)
 
+#HACK: manually include RTTR directory 
+
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
 
-if(BUILD_TESTS)
-  
+if(BUILD_TESTS)  
   add_subdirectory(test)
-  
 endif(BUILD_TESTS)	
