@@ -70,8 +70,9 @@ fig,ax = plt.subplots(figsize=(14,5))
 
 #START = 0
 
-START_DATE = datetime(2017,1,30,8,30)
-START =  find_nearest_index(START_DATE,datetimes)
+#START_DATE = datetime(2017,1,31,9,30)
+#START =  find_nearest_index(START_DATE,datetimes)
+START=0
 
 END = -1
 PLOT_EVERY=1
@@ -92,12 +93,12 @@ ax2.set_ylabel('Temperature ($^\circ$C)')
 
 #pressure formatting
 fmtpres = mtck.FormatStrFormatter('%2.1e')
-ax.semilogy()       
+#ax.semilogy()       
 ax.yaxis.set_major_formatter(fmtpres)
 ax.yaxis.set_major_locator(mtck.LogLocator(base=10.,subs=[1.,2,5.]))
 
 #date formatting
-ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=10))
+ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=400))
 fmt = mdat.DateFormatter('%d-%b-%H:%M')
 ax.xaxis.set_major_formatter(fmt)
 
