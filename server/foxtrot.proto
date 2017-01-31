@@ -1,5 +1,9 @@
 syntax="proto3";
 
+package foxtrot.exptserve;
+
+message empty {}
+
 enum capability_types
 {
     VALUE_READONLY = 0;
@@ -13,7 +17,6 @@ enum value_types
     INT = 1;
     BOOL = 2;
     STRING = 3;
-
 }
 
 message devcapability
@@ -24,6 +27,7 @@ message devcapability
     map<uint32, value_types> argtypes = 4;
     value_types rettp = 5;
 }
+
 message devdescribe
 {
     uint32 devid = 1;    
@@ -46,7 +50,6 @@ message capability_argument
      bool boolarg = 4;
      string strarg = 5;
     }
-
 }
 
 message capability_request
@@ -68,11 +71,10 @@ message capability_response
         bool boolret = 6;
         string stringret = 7;
     }
-        
 }
 
 service CapabilityService
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
-
+    rpc DescribeServer(empty) returns (servdescribe);
 }
