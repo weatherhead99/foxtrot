@@ -50,7 +50,6 @@ namespace devices
     private:
             
             //WARNING: is the lifetime of this guaranteed?
-            
             string _id;
             std::array<char,3> _version;
             short unsigned _rev;

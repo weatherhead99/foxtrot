@@ -3,6 +3,8 @@
 
 #include "archon_module_heaterx.h"
 
+#include <iostream>
+
 using foxtrot::devices::ArchonModule;
 
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)

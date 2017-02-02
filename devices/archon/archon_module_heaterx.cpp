@@ -43,6 +43,46 @@ double devices::ArchonHeaterX::getTempC() const
   return _TempC;
 }
 
+double devices::ArchonHeaterX::getHeaterAP() const
+{
+  return _heaterAP;
+
+}
+
+double devices::ArchonHeaterX::getHeaterAI() const
+{
+  return _heaterAI;
+  
+}
+
+double devices::ArchonHeaterX::getHeaterAD() const
+{
+  return _heaterAD;
+}
+
+double devices::ArchonHeaterX::getHeaterBP() const
+{
+  return _heaterBP;
+}
+
+
+double devices::ArchonHeaterX::getHeaterBI() const
+{
+  return _heaterBI;
+}
+
+double devices::ArchonHeaterX::getHeaterBD() const
+{
+  return _heaterBD;
+}
+
+
+std::array< bool, int(8) > devices::ArchonHeaterX::getGPIO() const
+{
+  return _GPIO;
+
+}
+
 
 void devices::ArchonHeaterX::update_variables()
 {
