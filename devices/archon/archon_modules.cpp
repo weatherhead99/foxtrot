@@ -4,6 +4,8 @@
 #include "archon_module_heaterx.h"
 #include <iomanip>
 
+#include <iostream>
+
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
 

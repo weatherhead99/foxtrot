@@ -31,6 +31,15 @@ namespace devices
         
     double getHeaterAOutput() const;
     double getHeaterBOutput() const;
+    double getHeaterAP() const;
+    double getHeaterAI() const;
+    double getHeaterAD() const;
+    
+    double getHeaterBP() const;
+    double getHeaterBI() const;
+    double getHeaterBD() const;
+    
+    
     double getTempA() const;
     double getTempB() const;
     double getTempC() const;
