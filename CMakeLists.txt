@@ -38,10 +38,7 @@ include_directories(${libusb_include})
 # Oxford ONLY
 set(ENV{RTTR_DIR} "/home/dweatherill/Software/rttr-0.9.5-src/build/install")
 
-find_library(rttr rttr_core REQUIRED)
-find_path(rttr_include rttr)
-message("rttr include: ${rttr_include}")
-
+find_package(rttr REQUIRED)
 include_directories(${rttr_include})
 
 # find_library(plplot plplotcxxd)
