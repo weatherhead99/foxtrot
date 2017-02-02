@@ -10,7 +10,7 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_TESTS "build test code" ON)
 
-set(boost_cmps "log;system;date_time")
+set(boost_cmps "log;system;date_time;program_options")
 
 if(BUILD_TESTS)
   enable_testing()
