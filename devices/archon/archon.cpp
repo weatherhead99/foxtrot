@@ -279,13 +279,6 @@ void devices::archon::applyall()
 
 }
 
-void devices::archon::applymodule(int modpos)
-{
-  std::ostringstream oss;
-  oss << "APPLYMOD" << std::setw(2) << std::setfill('0') << std::uppercase << std::hex << modpos;
-  cmd(oss.str());
-  
-}
 
 
 

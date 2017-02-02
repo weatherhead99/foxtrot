@@ -20,6 +20,11 @@ namespace devices
        B = 'B',
        C = 'C'
      };
+     
+     enum class HeaterXHeaters : char {
+       A = 'A',
+       B = 'B'
+     };
   
     class ArchonHeaterX : public ArchonModule
     {
@@ -51,6 +56,45 @@ namespace devices
     void setSensorCurrent(HeaterXSensors sensor, int curr_na);
     int getSensorCurrent(HeaterXSensors sensor);
     
+    void setHeaterTarget(HeaterXHeaters heater, double target);
+    double getHeaterTarget(HeaterXHeaters heater);
+    
+    void setHeaterSensor(HeaterXHeaters heater, HeaterXSensors sensor);
+    HeaterXSensors getHeaterSensor(HeaterXHeaters heater);
+    
+    void setSensorLowerLimit(HeaterXSensors sensor, double temp);
+    double getSensorLowerLimit(HeaterXSensors sensor);
+    
+    void setSensorUpperLimit(HeaterXSensors sensor, double temp);
+    double getSensorUpperLimit(HeaterXSensors sensor);
+    
+    //TODO: value validation on all of these!
+    void setHeaterP(HeaterXHeaters heater, int p);
+    int getHeaterP(HeaterXHeaters heater);
+    
+    void setHeaterI(HeaterXHeaters heater, int i);
+    int getHeaterI(HeaterXHeaters heater);
+    
+    void setHeaterIL(HeaterXHeaters heater, int il);
+    int getHeaterIL(HeaterXHeaters heater);
+    
+    void setHeaterD(HeaterXHeaters heater, int d);
+    int getHeaterD(HeaterXHeaters heater);
+    
+    void setHeaterUpdateTime(int ms);
+    int getHeaterUpdateTime();
+    
+    void setHeaterRamp(HeaterXHeaters heater, bool onoff);
+    bool getHeaterRamp(HeaterXHeaters heater);
+    
+    void setHeaterRampRate(HeaterXHeaters heater, int rate_mk_ut);
+    int getHeaterRampRate(HeaterXHeaters heater);
+    
+    void setHeaterLabel(HeaterXHeaters heater, const string& label);
+    string getHeaterLabel(HeaterXHeaters heater);
+    
+    void setSensorLabel(HeaterXSensors sensor, const string& label);
+    string getSensorLabel(HeaterXSensors sensor);
     
     virtual const string getTypeName() const;	
     

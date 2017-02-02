@@ -1,6 +1,22 @@
 #include "archon_module_heaterx.h"
 #include <sstream>
+#include "DeviceError.h"
 
+
+using foxtrot::DeviceError;
+
+template<typename T> void assert_limits(T low, T high, T val)
+{
+ if(val < low)
+ {
+   throw DeviceError("value: " + std::to_string(val) + " is below limit: " + std::to_string(low));
+ }
+ else if (val > high)
+ {
+   throw DeviceError("value: " + std::to_string(val) + "is above limit: " + std::to_string(high));
+ }
+  
+}
 
 
 
@@ -139,7 +155,6 @@ void devices::ArchonHeaterX::setSensorType(devices::HeaterXSensors sensor, devic
     oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
     
     writeConfigKey(oss.str(),std::to_string(static_cast<short unsigned>(type)));
-    
 }
 
 devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::HeaterXSensors sensor)
@@ -148,7 +163,6 @@ devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::Heate
   oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
   
   return static_cast<HeaterXSensorTypes>(std::stoul(readConfigKey(oss.str())));
-  
 }
 
 void devices::ArchonHeaterX::setSensorCurrent(devices::HeaterXSensors sensor, int curr_na)
@@ -157,7 +171,6 @@ void devices::ArchonHeaterX::setSensorCurrent(devices::HeaterXSensors sensor, in
   oss <<"SENSOR" << static_cast<char>(sensor) << "CURRENT";
   
   writeConfigKey(oss.str(),std::to_string(curr_na));
-  
 }
 
 
@@ -168,6 +181,228 @@ int devices::ArchonHeaterX::getSensorCurrent(devices::HeaterXSensors sensor)
   oss << "SENSOR" << static_cast<char>(sensor) << "CURRENT";
   
   return std::stoi(readConfigKey(oss.str()));
+}
+
+void devices::ArchonHeaterX::setHeaterTarget(devices::HeaterXHeaters heater, double target)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "TARGET";
+  writeConfigKey(oss.str(), std::to_string(target));
+}
+
+double devices::ArchonHeaterX::getHeaterTarget(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "TARGET";
+  return std::stod(readConfigKey(oss.str()));
+}
+
+void devices::ArchonHeaterX::setHeaterSensor(devices::HeaterXHeaters heater, devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "SENSOR";
+  
+  int sens;
+  switch(sensor)
+  {
+    case(HeaterXSensors::A):
+      sens =  0;
+      break;
+    case(HeaterXSensors::B):
+      sens = 1;
+      break;
+    case(HeaterXSensors::C):
+      sens = 2;
+      break;
+  };
+      
+  writeConfigKey(oss.str(),std::to_string(sens));
+}
+
+devices::HeaterXSensors devices::ArchonHeaterX::getHeaterSensor(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "SENSOR";
+  
+  auto sens = std::stoi(readConfigKey(oss.str()));
+
+  switch(sens)
+  {
+  case(0):
+   return HeaterXSensors::A;
+  case(1):
+    return HeaterXSensors::B;
+  case(2):
+    return HeaterXSensors::C;
+  }
+  
+}
+
+
+void devices::ArchonHeaterX::setSensorLowerLimit(devices::HeaterXSensors sensor, double temp)
+{
+  
+  assert_limits(-150.,50.,temp);
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) <<"LOWERLIMIT";
+  writeConfigKey(oss.str(),std::to_string(temp));
+  
+}
+
+double devices::ArchonHeaterX::getSensorLowerLimit(devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) <<"LOWERLIMIT";
+  return std::stod(readConfigKey(oss.str()));
 
 }
+
+void devices::ArchonHeaterX::setSensorUpperLimit(devices::HeaterXSensors sensor, double temp)
+{
+  assert_limits(-150.,50.,temp);
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) <<"UPPERLIMIT";
+  writeConfigKey(oss.str(),std::to_string(temp));
+
+}
+
+double devices::ArchonHeaterX::getSensorUpperLimit(devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) <<"UPPERLIMIT";
+  return std::stod(readConfigKey(oss.str()));
+
+}
+
+void devices::ArchonHeaterX::setHeaterP(devices::HeaterXHeaters heater, int p)
+{
+  assert_limits(0,10000,p);
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "P";
+  writeConfigKey(oss.str(),std::to_string(p));
+}
+
+int devices::ArchonHeaterX::getHeaterP(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "P";
+  return std::stoi(readConfigKey(oss.str()));
+}
+
+
+void devices::ArchonHeaterX::setHeaterI(devices::HeaterXHeaters heater, int i)
+{
+  assert_limits(0,10000,i);
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "I";
+  writeConfigKey(oss.str(),std::to_string(i));
+}
+
+int devices::ArchonHeaterX::getHeaterI(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "I";
+  return std::stoi(readConfigKey(oss.str()));
+}
+
+void devices::ArchonHeaterX::setHeaterIL(devices::HeaterXHeaters heater, int il)
+{
+  assert_limits(0,10000,il);
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "IL";
+  writeConfigKey(oss.str(),std::to_string(il));
+}
+
+int devices::ArchonHeaterX::getHeaterIL(devices::HeaterXHeaters heater)
+{
+  
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "IL";
+  return std::stoi(readConfigKey(oss.str()));
+}
+
+void devices::ArchonHeaterX::setHeaterD(devices::HeaterXHeaters heater, int d)
+{
+  assert_limits(0,10000,d);
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "D";
+  writeConfigKey(oss.str(),std::to_string(d));
+}
+
+int devices::ArchonHeaterX::getHeaterD(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "D";
+  return std::stoi(readConfigKey(oss.str()));
+}
+
+void devices::ArchonHeaterX::setHeaterUpdateTime(int ms)
+{
+  assert_limits(1,30000,ms);
+  writeConfigKey("HEATERUPDATETIME",std::to_string(ms));
+}
+
+int devices::ArchonHeaterX::getHeaterUpdateTime()
+{
+  return std::stoi(readConfigKey("HEATERUPDATETIME"));
+
+}
+
+void devices::ArchonHeaterX::setHeaterRamp(devices::HeaterXHeaters heater, bool onoff)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "RAMP";
+  writeConfigKey(oss.str(),std::to_string(static_cast<int>(onoff)));
+}
+
+bool devices::ArchonHeaterX::getHeaterRamp(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "RAMP";
+  return static_cast<bool>(std::stoi(readConfigKey(oss.str())));
+  
+}
+
+void devices::ArchonHeaterX::setHeaterLabel(devices::HeaterXHeaters heater, const string& label)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "LABEL";
+  writeConfigKey(oss.str(), label);
+}
+
+string devices::ArchonHeaterX::getHeaterLabel(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "LABEL";
+  return readConfigKey(oss.str());
+}
+
+void devices::ArchonHeaterX::setSensorLabel(devices::HeaterXSensors sensor, const string& label)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) << "LABEL";
+  writeConfigKey(oss.str(), label);
+}
+
+string devices::ArchonHeaterX::getSensorLabel(devices::HeaterXSensors sensor)
+{
+  std::ostringstream oss;
+  oss << "SENSOR" << static_cast<char>(sensor) << "LABEL";
+  return readConfigKey(oss.str());
+}
+
+void devices::ArchonHeaterX::setHeaterRampRate(devices::HeaterXHeaters heater, int rate_mk_ut)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "RAMPRATE";
+  writeConfigKey(oss.str(),std::to_string(rate_mk_ut));
+}
+
+int devices::ArchonHeaterX::getHeaterRampRate(devices::HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "RAMPRATE";
+  return std::stoi(readConfigKey(oss.str()));
+}
+
 

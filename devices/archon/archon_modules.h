@@ -7,6 +7,7 @@
 #include <sstream>
 #include <type_traits>
 #include <memory>
+#include <iomanip>
 
 namespace foxtrot
 {
@@ -44,7 +45,8 @@ namespace devices
             
 	    void writeConfigKey(const string& key, const string& val);
 	    string readConfigKey(const string& key);
-	            
+	    
+	    void apply();
 	    
     protected:
             short unsigned _modpos;
@@ -89,7 +91,10 @@ namespace devices
     }
     
     
-    
+    template <typename T> void archon_hex_stream_configure(T& stream, int width=2)
+    {
+      stream << std::setw(width) << std::setfill('0') << std::hex << std::uppercase ;
+    }
     
     
 };

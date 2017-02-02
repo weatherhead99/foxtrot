@@ -29,7 +29,7 @@ namespace foxtrot {
    
   class archon : public CmdDevice
   {
-    
+    friend class foxtrot::devices::ArchonModule;
     
   public:
     archon(std::shared_ptr<simpleTCP> proto);
@@ -53,7 +53,7 @@ namespace foxtrot {
     
     void update_state();
     void applyall();
-    void applymodule(int modpos);
+    
     
     const std::map<int,ArchonModule&> getAllModules() const;
     

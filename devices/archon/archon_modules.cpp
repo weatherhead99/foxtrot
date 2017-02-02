@@ -10,7 +10,7 @@
 
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
-
+using foxtrot::devices::archon_hex_stream_configure;
   
 foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
@@ -120,9 +120,24 @@ string ArchonModule::readConfigKey(const string& subkey)
 void ArchonModule::writeConfigKey(const string& key, const string& val)
 {
   std::ostringstream oss;
-  oss << "MOD" << std::setw(2) << std::setfill('0') << (_modpos+1) << "/" << key ;
+  oss << "MOD" << std::setw(2) << std::setfill('0') << std::hex << std::uppercase<<  (_modpos+1) << "/" << key ;
   
   _arch.writeKeyValue(oss.str(),val);
+
+}
+
+
+void ArchonModule::apply()
+{
+  std::ostringstream oss;
+  
+  oss << "APPLYMOD" ;
+  archon_hex_stream_configure(oss);
+  oss << (_modpos + 1);
+
+  //TODO: should find a way round this not needing to be a friend!
+  _arch.cmd(oss.str());
+  
 
 }
 
