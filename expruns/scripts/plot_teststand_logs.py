@@ -7,7 +7,7 @@ Created on Sat Jan 14 00:24:12 2017
 """
 
 #TODO: machine based config
-folder = '/home/danw/teststand_logs'
+folder = '/home/dweatherill/teststation_logs'
 
 import pandas as pd
 import os
@@ -52,11 +52,6 @@ def label_nearest_point(x,xs,ys,ax,fmtstr,col):
 fls = [_ for _ in os.listdir(folder)]
 
 f = folder + '/' + 'holdtime2017-Jan-27.txt'
-
-#mod_times = [os.path.getmtime(_) for _ in fls if "~" not in _]
-#newest_file = fls[mod_times.index(max(mod_times))]
-    
-#fl = "/home/danw/teststand_logs/temp_pres_2017-Jan-24.txt"
 
 #df = pd.read_csv(os.path.abspath(folder + '/' + fls[0]),header=0)
 df = pd.read_csv(os.path.abspath(f),header=0)

@@ -37,8 +37,12 @@ include_directories(${libusb_include})
 
 # Oxford ONLY
 set(ENV{RTTR_DIR} "/home/dweatherill/Software/rttr-0.9.5-src/build/install")
-#set(CMAKE_PREFIX_PATH "/usr/local/lib64")
-find_package(rttr REQUIRED PATH_SUFFIXES )
+
+find_library(rttr rttr_core REQUIRED)
+find_path(rttr_include rttr)
+message("rttr include: ${rttr_include}")
+
+include_directories(${rttr_include})
 
 # find_library(plplot plplotcxxd)
 # message("PLPLOT: ${plplot}")
