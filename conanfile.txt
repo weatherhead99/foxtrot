@@ -1,0 +1,10 @@
+[requires]
+gRPC/1.1.0-dev@a_teammate/stable
+Protobuf/3.1.0@a_teammate/stable
+
+[generators]
+cmake
+
+[options]
+gRPC:shared=True
+gRPC:non_cpp_plugins=True

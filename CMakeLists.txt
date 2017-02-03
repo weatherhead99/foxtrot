@@ -2,13 +2,13 @@ project(foxtrot)
 cmake_minimum_required(VERSION 3.2)
 set(CMAKE_CXX_STANDARD 11)
 
-
+include(cmake/host_specific.cmake)
 
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 
-
 option(BUILD_TESTS "build test code" ON)
+option(BUILD_SERVER "build foxtrot server" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
@@ -24,39 +24,14 @@ macro(foxtrot_test testname)
     target_link_libraries(${testname} foxtrot ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endmacro(foxtrot_test)
 
+include(cmake/libraries.cmake)
 
 
-find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
-
-
-find_library(libusb usb-1.0 REQUIRED)
-message(STATUS "libusb: ${libusb}")
-find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
-message(STATUS "libusb path: ${libusb_include}" )
-include_directories(${libusb_include})
-
-# Oxford ONLY
-set(ENV{RTTR_DIR} "/home/dweatherill/Software/rttr-0.9.5-src/build/install")
-
-find_package(rttr REQUIRED)
 include_directories(${rttr_include})
 
-# find_library(plplot plplotcxxd)
-# message("PLPLOT: ${plplot}")
-# find_path(plplot_path plplot)
-
-# find_library(ponder ponder)
-# message("ponder: ${ponder}")
-# find_path(PONDER_INCLUDE_DIR "ponder")
-# message("ponder include: ${PONDER_INCLUDE_DIR}")
-# include_directories(${PONDER_INCLUDE_DIR})
-
-find_library(gsl gsl)
-message("gsl: ${gsl}")
-
-find_library(gslcblas gslcblas)
 
 include_directories(util/PRT/)
+
 
 add_subdirectory(src)
 
@@ -65,15 +40,21 @@ add_subdirectory(protocols)
 add_subdirectory(devices)
 add_subdirectory(expruns)
 add_subdirectory(util)
+
+if(BUILD_SERVER)
 add_subdirectory(server)
+endif()
 
 #HACK: manually include RTTR directory 
 
 add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core )
 
-if(BUILD_TESTS)
-  
+get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
+message("foxtrot ILLs: ${foxtrot_transitive_link}")
+
+
+
+if(BUILD_TESTS)  
   add_subdirectory(test)
-  
 endif(BUILD_TESTS)	
