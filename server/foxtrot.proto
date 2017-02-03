@@ -73,7 +73,7 @@ message capability_response
     }
 }
 
-service CapabilityService
+service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);

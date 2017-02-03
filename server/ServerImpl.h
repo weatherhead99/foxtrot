@@ -1,0 +1,26 @@
+#pragma once
+#include <memory>
+#include "foxtrot.pb.h"
+#include "foxtrot.grpc.pb.h"
+
+#include <grpc++/grpc++.h>
+
+using grpc::Server;
+using grpc::ServerCompletionQueue;
+using grpc::ServerContext;
+using grpc::ServerBuilder;
+
+using namespace foxtrot::exptserve;
+
+class ServerImpl final
+{
+public:
+    ~ServerImpl();
+    void Run();
+    
+private:
+    std::unique_ptr<ServerCompletionQueue> _cq;
+    std::unique_ptr<Server> _server;
+    
+    exptserve::AsyncService _service;   
+};
