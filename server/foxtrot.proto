@@ -1,6 +1,6 @@
 syntax="proto3";
 
-package foxtrot.exptserve;
+package foxtrot;
 
 message empty {}
 

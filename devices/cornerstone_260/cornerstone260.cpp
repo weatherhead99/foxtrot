@@ -13,6 +13,7 @@
 #include <thread>
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
 
 const foxtrot::parameterset cornerstone_class_params_serial
 {

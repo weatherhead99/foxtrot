@@ -8,6 +8,7 @@
 #include <memory>
 
 #include <vector>
+#include <iostream>
 
 foxtrot::protocols::BulkUSB::BulkUSB(const foxtrot::parameterset*const instance_parameters): SerialProtocol(instance_parameters)
 {

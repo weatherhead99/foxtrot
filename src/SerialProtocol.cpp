@@ -1,4 +1,5 @@
 #include "SerialProtocol.h"
+#include <iostream>
 
 foxtrot::SerialProtocol::SerialProtocol(const foxtrot::parameterset*const instance_parameters)
 : CommunicationProtocol(instance_parameters)

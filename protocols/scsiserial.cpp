@@ -10,7 +10,7 @@
 #include <cmath>
 
 #include <algorithm>
-
+#include <iostream>
 
 foxtrot::protocols::scsiserial::scsiserial(const foxtrot::parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters)

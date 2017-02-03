@@ -79,7 +79,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   //setup lines, timing lines etc...
   set_timing_lines(0);
   set_states(0);
-  set_parameters(0);
+  set_parameters(0); 
   set_constants(0);
   
   

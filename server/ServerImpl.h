@@ -10,7 +10,8 @@ using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
 using grpc::ServerBuilder;
 
-using namespace foxtrot::exptserve;
+
+namespace foxtrot{
 
 class ServerImpl final
 {
@@ -22,5 +23,9 @@ private:
     std::unique_ptr<ServerCompletionQueue> _cq;
     std::unique_ptr<Server> _server;
     
-    exptserve::AsyncService _service;   
+    foxtrot::exptserve::AsyncService _service;
+    
+    
 };
+
+}
