@@ -13,5 +13,10 @@ if( ${host} STREQUAL "pplxdt43")
 #   list(APPEND CMAKE_PREFIX_PATH "/local/home/weatherill/")
 #   list(APPEND CMAKE_PREFIX_PATH "/local/home/weatherill/lib/cmake/protobuf")
 #   
-  
+
+elseif( ${host} STREQUAL "linux-desktop.lan")
+    set(RTTR_DIR "/home/danw/Software/rttr-0.9.5-src/build/install")
+    list(APPEND CMAKE_PREFIX_PATH ${RTTR_DIR})
+
 endif()
+

@@ -21,13 +21,16 @@ get_property(rttr_include TARGET RTTR::Core PROPERTY INTERFACE_INCLUDE_DIRECTORI
 if(BUILD_SERVER)
   find_package(Protobuf REQUIRED)
   set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+  message(STATUS "CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}")
   
-  if(CONAN_BUILD)
-    find_package(grpc REQUIRED)
-  else()
-    find_package(gRPC REQUIRED)
-  endif()
+  find_package(grpc REQUIRED)
   
+#   if(CONAN_BUILD)
+#     find_package(grpc REQUIRED)
+#   else()
+#     find_package(gRPC REQUIRED)
+#   endif()
+#   
   find_package(ZLIB REQUIRED )
   find_package(OpenSSL REQUIRED)
   include_directories(${GRPCPP_INCLUDE_DIR})
