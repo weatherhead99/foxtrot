@@ -18,6 +18,7 @@ class ServerImpl final
 public:
     ~ServerImpl();
     void Run();
+    void HandleRpcs();
     
 private:
     std::unique_ptr<ServerCompletionQueue> _cq;
