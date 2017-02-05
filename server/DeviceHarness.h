@@ -2,10 +2,12 @@
 #include "Device.h"
 #include <memory>
 #include <map>
-#include <random>
+#include <vector>
 #include <climits>
 #include "foxtrot.grpc.pb.h"
 #include <rttr/type>
+#include <mutex>
+#include <deque>
 
 namespace foxtrot
 {
@@ -18,11 +20,11 @@ namespace foxtrot
         DeviceHarness();
         void AddDevice(std::unique_ptr<Device> dev);
         
-        Device* const GetDevice(int id);
+        const Device* const GetDevice(int id);
+        std::mutex& GetMutex(int id);
         
         std::vector<std::string> GetCapabilityNames(int devid);
         devcapability GetDeviceCapability(int devid, const std::string& capname);
-        
         
         
         //TODO:must be a more elegant way to do this trick
@@ -31,12 +33,10 @@ namespace foxtrot
         
     private:
         int _id = 0;
+        
         std::map<int,std::unique_ptr<Device>> _devmap;
-        std::random_device _generator;
-        std::uniform_int_distribution<int> _distribution;
-        
-        
-        
+        std::vector<std::unique_ptr<Device>> _devvec;
+        std::deque<std::mutex> _devmutexes;
         
     };
     

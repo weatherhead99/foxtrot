@@ -4,12 +4,38 @@
 #include "DeviceError.h"
 #include "ProtocolError.h"
 
+#include <mutex>
+
 using namespace foxtrot;
 
 foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 : _harness(harness)
 {
 }
+
+
+template <typename T> bool foxtrot_error_checking(T fun, capability_response& repl)
+{
+             try{    
+                fun();
+                return true;
+         }
+         catch(class DeviceError& err)
+         {
+             errstatus* errstat = repl.mutable_err();
+             errstat->set_msg(err.what());
+             errstat->set_tp(error_types::DeviceError);
+             return false;
+         }
+         catch(class ProtocolError& err)
+         {
+             errstatus* errstat = repl.mutable_err();
+             errstat->set_msg(err.what());
+             errstat->set_tp(error_types::ProtocolError);
+             return false;
+         };
+             
+};
 
 
 bool set_returntype(rttr::variant& retval, capability_response& repl)
@@ -46,6 +72,36 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
 }
 
 
+rttr::variant get_arg(const capability_argument& arg, bool& success)
+{
+    success=true;
+    rttr::variant outarg;
+    auto which_type = arg.value_case();
+    switch(which_type)
+    {
+    case(capability_argument::ValueCase::kDblarg):
+        outarg = arg.dblarg();
+        break;
+        
+    case(capability_argument::ValueCase::kIntarg):
+        outarg = arg.intarg();
+        break;
+        
+    case(capability_argument::ValueCase::kBoolarg):
+        outarg = arg.boolarg();
+        break;
+    
+    case(capability_argument::ValueCase::kStrarg):
+        outarg = arg.strarg();
+        break;
+
+    case(capability_argument::ValueCase::VALUE_NOT_SET):
+        success = false;
+    }
+
+    return outarg;
+}
+
 
 void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
 {
@@ -56,7 +112,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     repl.set_devid(req.devid());
     repl.set_capname(req.capname());
     
-    foxtrot::Device* dev;
+    const foxtrot::Device* dev;
     
     try{
         dev = _harness.GetDevice(devid);    
@@ -75,95 +131,107 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     auto prop = devtp.get_property(req.capname().c_str());
     auto meth = devtp.get_method(req.capname().c_str());
     
-    
-    if (!meth && !prop)
-    {
-     errstatus* errstat = repl.mutable_err();
-     errstat->set_msg("no matching property or method");
-     errstat->set_tp(error_types::out_of_range);
+    try{
+        if (!meth && !prop)
+        {
+        errstatus* errstat = repl.mutable_err();
+        errstat->set_msg("no matching property or method");
+        errstat->set_tp(error_types::out_of_range);
+        return;
+        }
+        else if (!prop)
+        {
+            //method
+            auto args = req.args();
+            
+            std::vector<rttr::argument> argvec;
+            argvec.resize(args.size());
+            
+            for(auto& arg: args)
+            {
+                bool success;
+                rttr::variant outarg = get_arg(arg,success);
+                if(!success)
+                {          
+                    errstatus* errstat = repl.mutable_err();
+                    errstat->set_msg("argument at position " + std::to_string(arg.position()) + "is not set");
+                    errstat->set_tp(error_types::Error);
+                        return;
+                }
+                
+                argvec[arg.position()] = outarg;            
+            };
+            
+            rttr::variant retval;
+            
+            auto& mut = _harness.GetMutex(devid);
+            std::lock_guard<std::mutex> lock(mut);
+            retval = meth.invoke_variadic(dev,argvec);
+            if(!set_returntype(retval,repl))
+            {
+                //TODO:should be error handling here?
+                return;
+            };
+        }
+        else
+        {
+            //property
+            rttr::variant val;
+                if(prop.is_readonly())
+                {
+                    cout << "readonly property" << endl;
+                    val = prop.get_value(dev);
+                }
+                else
+                {
+                    if( req.args_size() >1)
+                    {
+                        //ERRROR: should only have one number to set a property
+                        errstatus* errstat = repl.mutable_err();
+                        errstat->set_msg("require only 1 argument to writeable property");
+                        errstat->set_tp(error_types::ProtocolError);
+                    }
+                    else if (req.args_size() == 1)
+                    {
+                    auto& mut = _harness.GetMutex(devid);
+                    std::lock_guard<std::mutex> lock(mut);
+                    bool success;
+                    auto arg = get_arg(req.args()[0],success);
+                    prop.set_value(dev,arg);
+                    }
+                    else if(req.args_size() == 0)
+                    {
+                        val  = prop.get_value(dev);
+                    }
+                    if(!set_returntype(val,repl))
+                    {
+                        return;
+                    }
+                }
+                if(!set_returntype(val,repl))
+                {
+                    
+                  return;  
+                };
+                
+        };
         
     }
-    else if (!prop)
-    {
-        //method
-         auto args = req.args();
-         
-         std::vector<rttr::argument> argvec;
-         argvec.resize(args.size());
-         
-         for(auto& arg: args)
-         {
-             rttr::variant outarg;
-             auto which_type = arg.value_case();
-             switch(which_type)
-             {
-                 case(capability_argument::ValueCase::kDblarg):
-                     outarg = arg.dblarg();
-                     break;
-                     
-                 case(capability_argument::ValueCase::kIntarg):
-                     outarg = arg.intarg();
-                     break;
-                     
-                 case(capability_argument::ValueCase::kBoolarg):
-                     outarg = arg.boolarg();
-                     break;
-                 
-                 case(capability_argument::ValueCase::kStrarg):
-                     outarg = arg.strarg();
-                     break;
-                
-                 case(capability_argument::ValueCase::VALUE_NOT_SET):
-                     errstatus* errstat = repl.mutable_err();
-                     errstat->set_msg("argument at position " + std::to_string(arg.position()) + "is not set");
-                     errstat->set_tp(error_types::Error);
-                     return;
-             }
-             argvec[arg.position()] = outarg;
-             
-         };
-         
-         rttr::variant retval;
-         try{
-             
-             //TODO: thread safety!!!!
-         retval = meth.invoke_variadic(dev,argvec);
-         }
-         catch(class DeviceError& err)
-         {
+    catch(class DeviceError& err)
+        {
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg(err.what());
              errstat->set_tp(error_types::DeviceError);
              return;
          }
-         catch(class ProtocolError& err)
+    catch(class ProtocolError& err)
          {
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg(err.what());
              errstat->set_tp(error_types::ProtocolError);
              return;
          };
-         
-        if(!set_returntype(retval,repl))
-        {
-            return;
-        };
-        
-        
-        
-    }
-    else
-    {
-        //property
-         auto val = prop.get_value(dev);
-         if(!set_returntype(val,repl))
-         {
-             return;
-         }
-         
-         
-         
-    }
-
+            
+          
     return;
 }

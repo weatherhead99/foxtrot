@@ -4,6 +4,7 @@
 #include <utility>
 #include <algorithm>
 
+
 using std::cout;
 using std::endl;
 
@@ -43,7 +44,6 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 
 
 foxtrot::DeviceHarness::DeviceHarness()
-: _distribution(0,INT_MAX)
 {
     
     
@@ -54,20 +54,29 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 {
     
     auto thisid = _id++;
-    _devmap.insert(std::move(std::pair<int,std::unique_ptr<Device>>{thisid, std::move(dev)}));
-    
-    
+//     _devmap.insert(std::move(std::pair<int,std::unique_ptr<Device>>{thisid, std::move(dev)}));
+    _devvec.push_back(std::move(dev));
+    _devmutexes.emplace_back();
+       
 }
 
 
 
 
-Device* const foxtrot::DeviceHarness::GetDevice(int id)
+const Device* const foxtrot::DeviceHarness::GetDevice(int id)
 {
-    auto& devptr = _devmap.at(id);
+//     auto& devptr = _devmap.at(id);
+    auto& devptr = _devvec.at(id);
     return devptr.get();
     
 }
+
+std::mutex & foxtrot::DeviceHarness::GetMutex(int id)
+{
+    return _devmutexes[id];
+}
+
+
 
 std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 {
