@@ -59,9 +59,33 @@ int test_invokecapability(std::shared_ptr<grpc::Channel> channel)
     cout << "invoking RPC..." << endl;
     std::unique_ptr<exptserve::Stub> stub(exptserve::NewStub(channel));
     
+    
+    req.set_devid(0);
+    req.set_capname("getRandomDouble");
+    
     auto status=  stub->InvokeCapability(&ctxt,req,&repl);
     if(status.ok())
     {
+        std::string repr;
+        auto rettp = repl.return_case();
+        switch(rettp)
+        {
+            case(capability_response::ReturnCase::kDblret):
+            
+                 repr = std::to_string(repl.dblret());
+            break;
+            case(capability_response::ReturnCase::kIntret):
+                repr = std::to_string(repl.intret());
+                break;
+            case(capability_response::ReturnCase::kBoolret):
+                repr = std::to_string(repl.boolret());
+                break;
+            case(capability_response::ReturnCase::kStringret):
+                repr = repl.stringret();
+                break;
+        }
+            
+        cout << "response was: " << repr << endl;
         return 0;
     }
     else

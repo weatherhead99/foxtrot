@@ -19,7 +19,7 @@ namespace foxtrot
   constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDescribeServer;
   
   void HandleRequest(reqtp& req, repltp& repl);
-  
+
   
  private:
   std::string _servcomment;

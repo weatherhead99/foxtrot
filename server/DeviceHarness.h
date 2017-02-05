@@ -23,6 +23,8 @@ namespace foxtrot
         std::vector<std::string> GetCapabilityNames(int devid);
         devcapability GetDeviceCapability(int devid, const std::string& capname);
         
+        
+        
         //TODO:must be a more elegant way to do this trick
         const std::map<int,const Device*> GetDevMap() const;
         

@@ -51,7 +51,7 @@ void ServerImpl::Run()
 void foxtrot::ServerImpl::HandleRpcs()
 {
     ServerDescribeLogic describe_logic(_servcomment,_harness);
-    InvokeCapabilityLogic capability_logic;
+    InvokeCapabilityLogic capability_logic(_harness);
     
     
     

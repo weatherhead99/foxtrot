@@ -20,6 +20,21 @@ enum value_types
     VOID = 4;
 }
 
+enum error_types
+{
+    Error = 0;
+    DeviceError = 1;
+    ProtocolError = 2;
+    out_of_range = 3;
+}
+
+message errstatus
+{
+    error_types tp =1;
+    string msg = 2;
+
+}
+
 message devcapability
 {
     capability_types tp = 1;
@@ -74,6 +89,7 @@ message capability_response
         bool boolret = 6;
         string stringret = 7;
     }
+    errstatus err = 8;
 }
 
 service exptserve
