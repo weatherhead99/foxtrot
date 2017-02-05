@@ -33,6 +33,8 @@ message devdescribe
     uint32 devid = 1;    
     string devtype = 2;
     string devcomment = 3;
+    repeated devcapability caps = 4;
+    
 }
 
 message servdescribe

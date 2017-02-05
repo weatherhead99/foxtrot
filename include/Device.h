@@ -18,14 +18,15 @@ namespace foxtrot
   {
     RTTR_ENABLE()
   public:
-    Device(std::shared_ptr<CommunicationProtocol> proto);
+    Device(std::shared_ptr<CommunicationProtocol> proto, const std::string& comment = "");
     
     virtual const std::string getDeviceTypeName() const;
-    
+    const std::string getDeviceComment() const;
+    void setDeviceComment(const std::string& comment);
     
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;
-    
+    std::string _devcomment;
     
     
     

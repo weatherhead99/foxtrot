@@ -23,6 +23,14 @@ int test_describeserver(std::shared_ptr<grpc::Channel> channel)
     {
         cout << "server comment is:" << repl.servcomment() << endl;
         
+        auto devmap = repl.devs_attached();
+        for(auto& pr : devmap)
+        {
+            
+            cout << "id:" << pr.first << " type: " << pr.second.devtype() << " comment: " << pr.second.devcomment() << endl;
+            
+        }
+        
         return 0;
     }
     else

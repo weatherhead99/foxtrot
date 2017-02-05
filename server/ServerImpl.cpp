@@ -10,8 +10,8 @@
 using std::string;
 using namespace foxtrot;
 
-foxtrot::ServerImpl::ServerImpl(const std::string& servcomment)
-: _servcomment(servcomment)
+foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, foxtrot::DeviceHarness& harness)
+: _servcomment(servcomment), _harness(harness)
 {
 }
 
@@ -50,10 +50,10 @@ void ServerImpl::Run()
 
 void foxtrot::ServerImpl::HandleRpcs()
 {
-    ServerDescribeLogic describe_logic;
+    ServerDescribeLogic describe_logic(_servcomment,_harness);
     InvokeCapabilityLogic capability_logic;
     
-    describe_logic._servcomment = _servcomment;
+    
     
     new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
     new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);

@@ -5,6 +5,7 @@
 
 #include <grpc++/grpc++.h>
 #include <string>
+#include "DeviceHarness.h"
 
 using grpc::Server;
 using grpc::ServerCompletionQueue;
@@ -17,7 +18,7 @@ namespace foxtrot{
 class ServerImpl final
 {
 public:
-    ServerImpl(const std::string& servcomment);
+    ServerImpl(const std::string& servcomment, DeviceHarness& harness);
     
     ~ServerImpl();
     void Run();
@@ -30,7 +31,7 @@ private:
     foxtrot::exptserve::AsyncService _service;
     
     std::string _servcomment;
-    
+    DeviceHarness& _harness;
     
 };
 
