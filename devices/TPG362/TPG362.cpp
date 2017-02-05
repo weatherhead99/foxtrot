@@ -12,6 +12,7 @@
 #include <thread>
 
 #include <rttr/registration>
+#include <climits>
 
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
 : CmdDevice(proto), _serproto(proto)
@@ -226,6 +227,21 @@ double foxtrot::devices::TPG362::interpret_u_expo_raw(const string& val)
   return mantissa * std::pow(10,exponent);
 }
 
+int convert_short_unsigned_to_int(short unsigned value, bool& ok)
+{
+    if(value < 0)
+    {
+        ok = false;
+        return 0;
+    }
+    else if(value > USHRT_MAX)
+    {
+        ok = false;
+        return 0;
+    }
+    return static_cast<int>(value);   
+}
+
 RTTR_REGISTRATION{
     using namespace rttr;
     using foxtrot::devices::TPG362;
@@ -243,4 +259,5 @@ RTTR_REGISTRATION{
         parameter_names("channel")
     );
     
+    rttr::type::register_converter_func(convert_short_unsigned_to_int);
 }
