@@ -43,6 +43,7 @@ namespace foxtrot {
    
    class TPG362 : public CmdDevice
    {
+    RTTR_ENABLE()
    public:
     TPG362(std::shared_ptr<SerialProtocol> proto);
     virtual std::string cmd(const std::string& request) override;

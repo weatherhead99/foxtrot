@@ -11,6 +11,7 @@
 #include <chrono>
 #include <thread>
 
+#include <rttr/registration>
 
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
 : CmdDevice(proto), _serproto(proto)
@@ -225,4 +226,21 @@ double foxtrot::devices::TPG362::interpret_u_expo_raw(const string& val)
   return mantissa * std::pow(10,exponent);
 }
 
-  
+RTTR_REGISTRATION{
+    using namespace rttr;
+    using foxtrot::devices::TPG362;
+    registration::class_<TPG362>("foxtrot::devices::dummyDevice")
+    .method("getPressure", &TPG362::getPressure)
+    (
+        parameter_names("channel")
+    )
+    .method("getDeviceName", &TPG362::getDeviceName)
+    (
+        parameter_names("channel")
+    )
+    .method("getGaugeOnOff",&TPG362::getGaugeOnOff)
+    (
+        parameter_names("channel")
+    );
+    
+}
