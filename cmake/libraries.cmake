@@ -1,5 +1,7 @@
 find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
 
+message("Boost libraries ${Boost_LIBRARIES}")
+
 find_library(libusb usb-1.0 REQUIRED)
 message(STATUS "libusb: ${libusb}")
 find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)

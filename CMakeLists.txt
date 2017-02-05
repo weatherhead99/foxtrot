@@ -1,6 +1,7 @@
-project(foxtrot)
+project(foxtrot C CXX)
 cmake_minimum_required(VERSION 3.2)
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include(cmake/host_specific.cmake)
 
@@ -45,10 +46,9 @@ if(BUILD_SERVER)
 add_subdirectory(server)
 endif()
 
-#HACK: manually include RTTR directory 
 
-add_library(foxtrot $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core )
+add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
 
 get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
 message("foxtrot ILLs: ${foxtrot_transitive_link}")
