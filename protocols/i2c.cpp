@@ -1,6 +1,7 @@
 #include "i2c.h"
 #include "ProtocolUtilities.h"
 #include <linux/i2c-dev.h>
+#include <i2c/smbus.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
@@ -45,9 +46,18 @@ void foxtrot::protocols::i2c::Init(const parameterset *const class_parameters)
     
 }
 
-std::string foxtrot::protocols::i2c::read_block_data(int cmd, int len)
+std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(int cmd, int len)
 {
+    std::vector<unsigned char> out;
+    out.resize(len);
     
+    auto ret =  i2c_smbus_read_i2c_block_data(_fd,cmd,out.size(),out.data());
     
+    if (ret != out.size())
+    {
+      throw ProtocolError("didn't read correct amount of bytes");   
+    }
+    
+    return out;
 }
 
