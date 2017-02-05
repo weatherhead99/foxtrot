@@ -227,7 +227,7 @@ double foxtrot::devices::TPG362::interpret_u_expo_raw(const string& val)
   return mantissa * std::pow(10,exponent);
 }
 
-int convert_short_unsigned_to_int(short unsigned value, bool& ok)
+short unsigned convert_int_to_short_unsigned(int value, bool& ok)
 {
     if(value < 0)
     {
@@ -259,5 +259,5 @@ RTTR_REGISTRATION{
         parameter_names("channel")
     );
     
-    rttr::type::register_converter_func(convert_short_unsigned_to_int);
+    rttr::type::register_converter_func(convert_int_to_short_unsigned);
 }
