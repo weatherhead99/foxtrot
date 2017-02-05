@@ -8,47 +8,59 @@ using std::cout;
 using std::endl;
 using namespace foxtrot;
 
-class testClient
+
+int test_describeserver(std::shared_ptr<grpc::Channel> channel)
 {
-public:
-    testClient(std::shared_ptr<grpc::Channel> channel) 
-    : _stub(exptserve::NewStub(channel)) {};
-    double randomDouble()
+    servdescribe repl;
+    empty req;
+    grpc::ClientContext ctxt;
+    cout << "invoking RPC..." << endl;
+    std::unique_ptr<exptserve::Stub> stub(exptserve::NewStub(channel));
+    
+    auto status = stub->DescribeServer(&ctxt,req,&repl);
+    if(status.ok())
     {
-        capability_request req;
-        req.set_msgid(0);
-        req.set_capname("getRandomDouble");
-        req.set_devid(0);
-        
-        capability_response repl;
-        
-        grpc::ClientContext ctxt;
-        cout << "invoking RPC..." << endl;
-        auto status = _stub->InvokeCapability(&ctxt,req,&repl);
-        
-        if(status.ok())
-        {
-            return 0.;
-        }
-        else
-        {
-            cout << status.error_code() << ": " << status.error_message() << endl;
-            return 1.;
-        }
-            
+        return 0;
     }
-private:
-    std::unique_ptr<exptserve::Stub> _stub;
-};
+    else
+    {
+        cout << status.error_code() << ": " << status.error_message() << endl;
+        return 1;
+    }
+
+}
+
+int test_invokecapability(std::shared_ptr<grpc::Channel> channel)
+{
+    capability_request req;
+    capability_response repl;
+    
+    grpc::ClientContext ctxt;
+    cout << "invoking RPC..." << endl;
+    std::unique_ptr<exptserve::Stub> stub(exptserve::NewStub(channel));
+    
+    auto status=  stub->InvokeCapability(&ctxt,req,&repl);
+    if(status.ok())
+    {
+        return 0;
+    }
+    else
+    {
+        cout << status.error_code() << ": " << status.error_message() << endl;
+        return 1;
+    }
+    
+}
+
 
 int main(int argc, char** argv)
 {
-    cout << "creating client..." << endl;
-    testClient client(grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials()));
+    
+    auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
     cout << "RPC call... " << endl;
-    auto repl = client.randomDouble();
-
+    auto repl = test_describeserver(channel);
     cout << "reply was.." << repl  << endl;
-
+    repl = test_invokecapability(channel);
+    
 
 }

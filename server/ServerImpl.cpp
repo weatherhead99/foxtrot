@@ -1,8 +1,11 @@
 #include "ServerImpl.h"
 #include <string>
-#include "CallData.h"
+
+#include "ServerDescribeImpl.h"
+#include "InvokeCapabilityImpl.h"
 
 #include <iostream>
+#include <typeinfo>
 
 using std::string;
 using namespace foxtrot;
@@ -20,7 +23,6 @@ void ServerImpl::Run()
     //TODO: SETTING OF ADDRESS PROPERLY
     string addrstr("0.0.0.0:50051");
     
-    exptserve::AsyncService service;
     
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
@@ -32,6 +34,8 @@ void ServerImpl::Run()
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
     
+    
+    
     std::cout << "server listening on " << addrstr << std::endl;
     
     HandleRpcs();
@@ -39,16 +43,22 @@ void ServerImpl::Run()
 
 void foxtrot::ServerImpl::HandleRpcs()
 {
-    new CallData(&_service, _cq.get());
+    ServerDescribeLogic describe_logic;
+    InvokeCapabilityLogic capability_logic;
+    
+    new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
+    new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
+    
     void* tag;
     bool ok;
+    
     while(true)
     {
-        GPR_CODEGEN_ASSERT(_cq->Next(&tag,&ok));
-        GPR_CODEGEN_ASSERT(ok);
-        static_cast<CallData*>(tag)->Proceed();
+     _cq->Next(&tag,&ok);
+     static_cast<HandlerTag*>(tag)->Proceed();
         
     }
+    
         
     
 }
