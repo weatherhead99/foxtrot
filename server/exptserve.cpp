@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    foxtrot::ServerImpl serv;
+    foxtrot::ServerImpl serv("test server");
     serv.Run();
     
 

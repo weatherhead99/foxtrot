@@ -4,6 +4,7 @@
 
 #include "HandlerBase.h"
 #include <iostream>
+#include <string>
 
 namespace foxtrot
 {
@@ -14,6 +15,8 @@ namespace foxtrot
   constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDescribeServer;
   
   void HandleRequest(reqtp& req, repltp& repl);
+  
+  std::string _servcomment;
   
  };
     

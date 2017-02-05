@@ -20,6 +20,8 @@ int test_describeserver(std::shared_ptr<grpc::Channel> channel)
     auto status = stub->DescribeServer(&ctxt,req,&repl);
     if(status.ok())
     {
+        cout << "server comment is:" << repl.servcomment() << endl;
+        
         return 0;
     }
     else
