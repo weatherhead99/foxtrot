@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include "backward.hpp"
 
 using std::cout;
 using std::endl;
@@ -57,7 +58,7 @@ int test_invokecapability(std::shared_ptr<grpc::Channel> channel)
 
 int main(int argc, char** argv)
 {
-    
+    backward::SignalHandling sh;
     auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
     cout << "RPC call... " << endl;
     auto repl = test_describeserver(channel);
