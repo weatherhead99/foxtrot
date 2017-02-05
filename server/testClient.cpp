@@ -29,6 +29,15 @@ int test_describeserver(std::shared_ptr<grpc::Channel> channel)
             
             cout << "id:" << pr.first << " type: " << pr.second.devtype() << " comment: " << pr.second.devcomment() << endl;
             
+            cout << "number of capabilities: " << pr.second.caps_size() << endl;
+            
+            cout << "capabilities: " << endl;
+            for(auto cap: pr.second.caps())
+            {
+                cout << cap.tp() << endl;
+                
+            }
+            
         }
         
         return 0;

@@ -18,8 +18,11 @@ namespace foxtrot
         double getRandomDouble() ;
         int getCounter();
         
+        void setWomble(double val);
+        
         void resetCounter();
         
+        int add(int a1, int a2);
             
         const std::string getDeviceTypeName() const override;
         

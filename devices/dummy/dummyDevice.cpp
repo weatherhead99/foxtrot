@@ -34,6 +34,12 @@ const std::string foxtrot::devices::dummyDevice::getDeviceTypeName() const
     return "dummyDevice";
 }
 
+int foxtrot::devices::dummyDevice::add(int a1, int a2)
+{
+    return a1 + a2;
+}
+
+
 
 RTTR_REGISTRATION
 {
@@ -43,5 +49,8 @@ RTTR_REGISTRATION
  .property_readonly("getCounter", &dummyDevice::getCounter)
  .property_readonly("getRandomDouble", &dummyDevice::getRandomDouble)
  .method("resetCounter", &dummyDevice::resetCounter)
- ;
+ .method("add", &dummyDevice::add)
+ (
+     parameter_names("a1","a2")
+     );
 }

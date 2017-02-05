@@ -23,5 +23,6 @@ add_executable(testClient testClient.cpp)
 target_link_libraries(testClient foxtrotserv)
 
 
-
-
+add_executable(harnesstest harnesstest.cpp)
+target_include_directories(harnesstest PRIVATE ${CMAKE_SOURCE_DIR}/devices/dummy/)
+target_link_libraries(harnesstest foxtrot dummy foxtrotserv)

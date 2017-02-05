@@ -17,14 +17,15 @@ enum value_types
     INT = 1;
     BOOL = 2;
     STRING = 3;
+    VOID = 4;
 }
 
 message devcapability
 {
     capability_types tp = 1;
     string capname = 2;
-    map<uint32, string> argnames = 3;
-    map<uint32, value_types> argtypes = 4;
+    repeated string argnames = 3;
+    repeated value_types argtypes = 4;
     value_types rettp = 5;
 }
 

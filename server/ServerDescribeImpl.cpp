@@ -26,7 +26,22 @@ void foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl)
           desc.set_devid(devid);
           desc.set_devtype(devpair.second->getDeviceTypeName());
           desc.set_devcomment(devpair.second->getDeviceComment());
+          
+          //enumerate capabilities
+          //WARNING: SLOOOOW
+          auto capnames = _harness.GetCapabilityNames(devid);
+          for(auto& capname : capnames)
+          {
+              cout << "adding capability: " << capname << endl;
+              auto outcaps = desc.add_caps();
+              outcaps->CopyFrom(_harness.GetDeviceCapability(devid, capname));
+              
+              cout << outcaps->DebugString() << endl;
+              
+          }
+          
           (*outdevmap)[devid] = desc;    
+          
       };
         
     

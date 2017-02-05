@@ -4,9 +4,14 @@
 #include <map>
 #include <random>
 #include <climits>
+#include "foxtrot.grpc.pb.h"
+#include <rttr/type>
 
 namespace foxtrot
 {
+    
+    value_types get_appropriate_wire_type(const rttr::type& tp);
+    
     class DeviceHarness
     {
     public:
@@ -15,11 +20,15 @@ namespace foxtrot
         
         Device* const GetDevice(int id);
         
+        std::vector<std::string> GetCapabilityNames(int devid);
+        devcapability GetDeviceCapability(int devid, const std::string& capname);
+        
         //TODO:must be a more elegant way to do this trick
         const std::map<int,const Device*> GetDevMap() const;
         
         
     private:
+        int _id = 0;
         std::map<int,std::unique_ptr<Device>> _devmap;
         std::random_device _generator;
         std::uniform_int_distribution<int> _distribution;
