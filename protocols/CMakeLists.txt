@@ -1,6 +1,10 @@
 
-set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp scsiserial.cpp characterdevice.cpp
-i2c.cpp)
+set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp scsiserial.cpp characterdevice.cpp)
+
+option(BUILD_I2C OFF)
+if(BUILD_I2C)
+  list(APPEND proto_srcs i2c.cpp)
+endif()
 
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
