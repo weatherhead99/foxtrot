@@ -9,6 +9,8 @@ Created on Sat Jan 14 00:24:12 2017
 #TODO: machine based config
 folder = '/home/dweatherill/teststation_logs'
 
+ATMOS_HPA = 1010
+
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
@@ -51,7 +53,8 @@ def label_nearest_point(x,xs,ys,ax,fmtstr,col):
 
 fls = [_ for _ in os.listdir(folder)]
 
-f = folder + '/' + 'holdtime2017-Jan-27.txt'
+#f = folder + '/' + 'holdtime2017-Jan-27.txt'
+f = folder + '/' + 'pumpdown2017-Feb-06.txt'
 
 #df = pd.read_csv(os.path.abspath(folder + '/' + fls[0]),header=0)
 df = pd.read_csv(os.path.abspath(f),header=0)
@@ -65,22 +68,28 @@ fig,ax = plt.subplots(figsize=(14,5))
 
 #START = 0
 
-#START_DATE = datetime(2017,1,31,9,30)
-#START =  find_nearest_index(START_DATE,datetimes)
-START=0
+START_DATE = datetime(2017,2,7,11,00)
+START =  find_nearest_index(START_DATE,datetimes)
+#START=0
 
 END = -1
 PLOT_EVERY=1
 
 slc = slice(START,END,PLOT_EVERY)
 
-ax.plot(datetimes[slc],df['pressure_pump(hPa)'][slc],"-",c='blue',label='Pressure at Pump')
+#normalize maximum pressure
+df['pressure_pump(hPa)'][df['pressure_pump(hPa)'] > ATMOS_HPA] = ATMOS_HPA
+df['pressure_cryostat(hPa)'][df['pressure_cryostat(hPa)'] > ATMOS_HPA] = ATMOS_HPA
+
+
+
+ax.plot(datetimes[slc],df['pressure_pump(hPa)'][slc],"--",c='blue',label='Pressure at Pump')
 ax.set_ylabel('Pressure (hPa)')
 
-ax.plot(datetimes[slc],df['pressure_cryostat(hPa)'][slc],"-",c='blue',label='Pressure at Pump')
+ax.plot(datetimes[slc],df['pressure_cryostat(hPa)'][slc],"-",c='blue',label='Pressure at Cryostat')
 #
 ax2 = ax.twinx()
-ax2.plot(datetimes[slc],df['temperature_tank(C)'][slc],"-",c='red',label='Stage Temperature')
+ax2.plot(datetimes[slc],df['temperature_tank(C)'][slc],"-",c='red',label='Tank Temperature')
 ax2.plot(datetimes[slc],df['temperature_stage(C)'][slc],"--",c='red',label='Stage Temperature')
 #
 ax2.set_ylabel('Temperature ($^\circ$C)')
