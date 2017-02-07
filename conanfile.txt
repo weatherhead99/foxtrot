@@ -6,5 +6,6 @@ Protobuf/3.1.0@a_teammate/stable
 cmake
 
 [options]
+Protobuf:shared=True
 gRPC:shared=True
 gRPC:non_cpp_plugins=True

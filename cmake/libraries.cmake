@@ -27,12 +27,6 @@ if(BUILD_SERVER)
   
   find_package(grpc REQUIRED)
   
-#   if(CONAN_BUILD)
-#     find_package(grpc REQUIRED)
-#   else()
-#     find_package(gRPC REQUIRED)
-#   endif()
-#   
   find_package(ZLIB REQUIRED )
   find_package(OpenSSL REQUIRED)
   include_directories(${GRPCPP_INCLUDE_DIR})
@@ -42,3 +36,9 @@ if(BUILD_SERVER)
   message(STATUS "libdl: ${dl}")
   
 endif()
+
+
+find_library(CCfits CCfits)
+find_library(cfitsio cfitsio)
+find_path(CFITSIO_INCLUDE_DIR fitsio.h PATH_SUFFIXES cfitsio)
+include_directories(${CFITSIO_INCLUDE_DIR})

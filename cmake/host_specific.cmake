@@ -3,16 +3,13 @@ message(STATUS "building on host: ${host}")
 
 if( ${host} STREQUAL "pplxdt43")
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  set(CONAN_BUILD TRUE)
-  
+  set(CONAN_BUILD TRUE)  
   conan_basic_setup()
-#   message(STATUS "found specific config for ${host}")
-#   
-#   set(RTTR_DIR "/home/weatherill/Software/rttr-0.9.5-src/build/install")
-#   list(APPEND CMAKE_PREFIX_PATH ${RTTR_DIR})
-#   list(APPEND CMAKE_PREFIX_PATH "/local/home/weatherill/")
-#   list(APPEND CMAKE_PREFIX_PATH "/local/home/weatherill/lib/cmake/protobuf")
-#   
+  set(RTTR_DIR "/home/weatherill/Software/rttr-0.9.5-src/build/install")
+  list(APPEND CMAKE_PREFIX_PATH ${RTTR_DIR})
+  list(APPEND CMAKE_PREFIX_PATH "/local/home/weatherill/")
+  set(CMAKE_LIBRARY_ARCHITECTURE x86_64-linux-gnu)
+
 
 elseif( ${host} STREQUAL "linux-desktop.lan")
     set(RTTR_DIR "/home/danw/Software/rttr-0.9.5-src/build/install")

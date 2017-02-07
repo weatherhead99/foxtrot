@@ -18,8 +18,7 @@ namespace foxtrot
   class parameter_visit : public boost::static_visitor<>
   {
     
-    
-    
+        
     
   };
   

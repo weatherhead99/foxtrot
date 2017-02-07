@@ -3,10 +3,6 @@
 
 # find_package(ROOT REQUIRED)
 
-find_library(CCfits CCfits)
-find_library(cfitsio cfitsio)
-find_path(CFITSIO_INCLUDE_DIR fitsio.h PATH_SUFFIXES cfitsio)
-include_directories(${CFITSIO_INCLUDE_DIR})
 
 
 # include_directories(${plplot_path}/plplot)
