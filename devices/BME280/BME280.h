@@ -13,7 +13,10 @@ namespace devices
  {
  public:
      BME280(std::shared_ptr<CommunicationProtocol> proto);
-     void ReadData();
+     double GetTemperature_C();
+     double GetPressure_hPa();
+     double GetHumidity_pc();
+     
      
  private:
      struct caldata_struct
@@ -34,6 +37,7 @@ namespace devices
          
      };
      
+     void ReadData();
      
      struct humidity_caldata
      {
@@ -47,10 +51,13 @@ namespace devices
      
      
      void ReadCalibrationData();
+     void SetupControlRegister();
      
-     unsigned char _oversample_temp;
-     unsigned char _oversample_pres;
-     unsigned char _mode;
+     
+     unsigned char _oversample_temp = 2;
+     unsigned char _oversample_pres =2;
+     unsigned char _oversample_hum = 2;
+     unsigned char _mode = 1;
      
      int _pressure_raw;
      int _temp_raw;
@@ -63,6 +70,10 @@ namespace devices
      caldata_struct _caldata;
      humidity_caldata _humcaldata;
      unsigned char _H1;
+     
+     float _wait_time_ms;
+     
+     
      
      std::shared_ptr<foxtrot::protocols::i2c> _i2c_proto;
      

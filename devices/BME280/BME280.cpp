@@ -19,12 +19,37 @@ foxtrot::devices::BME280::BME280(std::shared_ptr<CommunicationProtocol> proto)
     {
         throw foxtrot::DeviceError("couldn't cast protocol pointer to i2c");
     }
+    SetupControlRegister();
+    ReadCalibrationData();
     
 }
 
+
+void foxtrot::devices::BME280::SetupControlRegister()
+{
+  
+  
+}
+
+
+
 void foxtrot::devices::BME280::ReadCalibrationData()
 {
-    
+  auto cal1 = _i2c_proto->read_block_data(0x88,24);
+  auto cal2 = _i2c_proto->read_block_data(0xA1,1);
+  auto cal3 = _i2c_proto->read_block_data(0xE1,7);
+  
+  //clench...
+  auto* interpreted_caldata =  reinterpret_cast<caldata_struct*>(cal1.data());
+  _caldata = *interpreted_caldata;
+
+  _H1 = *cal2.data();
+  
+  auto* interpreted_humdata = reinterpret_cast<humidity_caldata*>(cal3.data());
+  _humcaldata = *interpreted_humdata;
+  
+  _wait_time_ms = 1.25 + (2.3 * _oversample_temp) + ((2.3*_oversample_pres) +0.575) + ((2.3*_oversample_hum)+0.575 ) ;
+  
 }
 
 void foxtrot::devices::BME280::ReadData()
