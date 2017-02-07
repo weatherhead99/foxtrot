@@ -34,6 +34,18 @@ namespace devices
          
      };
      
+     
+     struct humidity_caldata
+     {
+       short H2;
+       unsigned char H3;
+       char H4;
+       char H5;
+       char H6;
+     };
+     
+     
+     
      void ReadCalibrationData();
      
      unsigned char _oversample_temp;
@@ -49,6 +61,8 @@ namespace devices
      double _humidity;
      
      caldata_struct _caldata;
+     humidity_caldata _humcaldata;
+     unsigned char _H1;
      
      std::shared_ptr<foxtrot::protocols::i2c> _i2c_proto;
      

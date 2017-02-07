@@ -10,6 +10,7 @@
 #define REG_HUM_LSB 0xFE
 
 
+//most of this taken from https://bitbucket.org/MattHawkinsUK/rpispy-misc/raw/master/python/bme280.py
 
 foxtrot::devices::BME280::BME280(std::shared_ptr<CommunicationProtocol> proto)
 : Device(proto), _i2c_proto(std::dynamic_pointer_cast<foxtrot::protocols::i2c>(proto))
@@ -24,6 +25,9 @@ foxtrot::devices::BME280::BME280(std::shared_ptr<CommunicationProtocol> proto)
 void foxtrot::devices::BME280::ReadCalibrationData()
 {
     
+  
+  
+  
 }
 
 void foxtrot::devices::BME280::ReadData()
@@ -40,6 +44,47 @@ void foxtrot::devices::BME280::ReadData()
     auto t_fine = var1+var2;
     
     _temperature =  ((t_fine *5) + 128) >> 8;
+    
+    // Refine pressure and adjust for temperature
+    var1 = t_fine / 2.0 - 64000.0;
+    var2 = var1 * var1 * _caldata.P6 / 32768.0;
+    var2 = var2 + var1 * _caldata.P5 * 2.0;
+    var2 = var2 / 4.0 + _caldata.P4 * 65536.0;
+    var1 = (_caldata.P3 * var1 * var1 / 524288.0 + _caldata.P2 * var1) / 524288.0;
+    var1 = (1.0 + var1 / 32768.0) * _caldata.P1;
+    
+    if(var1 == 0)
+    {
+      _pressure=0.;
+    }
+    else
+    {
+      _pressure = 1048576.0 - _pressure_raw;
+      _pressure = ((_pressure - var2 / 4096.0) * 6250.0) / var1;
+      var1 = _caldata.P9 * _pressure * _pressure / 2147483648.0;
+      var2 = _pressure * _caldata.P8 / 32768.0;
+      _pressure += (var1 + var2 + _caldata.P7) / 16.0;
+
+    }
+    // Refine humidity
+    _humidity = t_fine - 76800.0;
+    _humidity = (_humidity_raw - (_humcaldata.H4 * 64.0 + _humcaldata.H5/ 16384.0 * _humidity)) *
+    (_humcaldata.H2 / 65536.0 * (1.0 + _humcaldata.H6 / 67108864.0 * _humidity * (1.0 + _humcaldata.H3/ 67108864.0 * _humidity)));
+    _humidity *= (1.0 - _H1 * _humidity / 524288.0);
+    
+    if(_humidity > 100)
+    {
+      _humidity = 100;
+    }
+    else if(_humidity < 0)
+    {
+      _humidity = 0.;
+    };
+
+    _temperature /= 100.;
+    _pressure /= 100.;
+    
+    
     
     
 }
