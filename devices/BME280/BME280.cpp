@@ -25,9 +25,6 @@ foxtrot::devices::BME280::BME280(std::shared_ptr<CommunicationProtocol> proto)
 void foxtrot::devices::BME280::ReadCalibrationData()
 {
     
-  
-  
-  
 }
 
 void foxtrot::devices::BME280::ReadData()
