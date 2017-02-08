@@ -1,7 +1,7 @@
 #pragma once	
 #include "archon_modules.h"
 #include <array>
-
+#include <rttr/registration>
 
 
 namespace foxtrot
@@ -28,6 +28,7 @@ namespace devices
   
     class ArchonHeaterX : public ArchonModule
     {
+    RTTR_ENABLE()
       friend class archon;
       
       

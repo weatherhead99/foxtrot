@@ -8,6 +8,7 @@
 #include <type_traits>
 #include <memory>
 #include <iomanip>
+#include <rttr/type>
 
 namespace foxtrot
 {
@@ -37,6 +38,7 @@ namespace devices
     class ArchonModule : public Device
     {
       friend class foxtrot::devices::archon;
+      RTTR_ENABLE();
     public:
             const string& getID() const;
             const std::array<char,3>& getVersion() const;

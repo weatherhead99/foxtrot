@@ -406,3 +406,140 @@ int devices::ArchonHeaterX::getHeaterRampRate(devices::HeaterXHeaters heater)
 }
 
 
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using devices::ArchonHeaterX;
+    
+ registration::class_<ArchonHeaterX>("foxtrot::devices::ArchonHeaterX")
+ .property_readonly("getHeaterAOutput",&ArchonHeaterX::getHeaterAOutput)
+ .property_readonly("getHeaterBOutput",&ArchonHeaterX::getHeaterBOutput)
+ .property_readonly("getHeaterAP", &ArchonHeaterX::getHeaterAP)
+ .property_readonly("getHeaterAD", &ArchonHeaterX::getHeaterAD)
+ .property_readonly("getHeaterAI", &ArchonHeaterX::getHeaterAI)
+ .property_readonly("getHeaterBP", &ArchonHeaterX::getHeaterBP)
+ .property_readonly("getHeaterBI", &ArchonHeaterX::getHeaterBI)
+ .property_readonly("getHeaterBD", &ArchonHeaterX::getHeaterBD)
+ .property_readonly("getTempA", &ArchonHeaterX::getTempA)
+ .property_readonly("getTempB", &ArchonHeaterX::getTempB)
+ .property_readonly("getTempC", &ArchonHeaterX::getTempC)
+ .method("setSensorType", &ArchonHeaterX::setSensorType)
+ (
+     parameter_names("sensor","type")
+     )
+ .method("getSensorType",&ArchonHeaterX::getSensorType)
+ (
+     parameter_names("sensor")
+     )
+ .method("setSensorCurrent",&ArchonHeaterX::setSensorCurrent)
+ (
+     parameter_names("sensor","curr_na")
+     )
+ .method("getSensorCurrent",&ArchonHeaterX::getSensorCurrent)
+ ( 
+    parameter_names("sensor")
+    )
+ .method("setHeaterTarget",&ArchonHeaterX::setHeaterTarget)
+ (
+     parameter_names("heater","target")
+     )
+ .method("getHeaterTarget",&ArchonHeaterX::getHeaterTarget)
+ (
+     parameter_names("heater")
+     )
+ .method("setHeaterSensor",&ArchonHeaterX::setHeaterSensor)
+ (
+     parameter_names("heater","sensor")
+     )
+ .method("getHeaterSensor",&ArchonHeaterX::getHeaterSensor)
+ (
+     parameter_names("heater")
+     )
+ .method("setSensorLowerLimit",&ArchonHeaterX::setSensorLowerLimit)
+ (
+     parameter_names("sensor","temp")
+     )
+ .method("getSensorLowerLimit",&ArchonHeaterX::getSensorLowerLimit)
+ (
+     parameter_names("sensor")
+     )
+ .method("setSensorUpperLimit",&ArchonHeaterX::setSensorUpperLimit)
+ (
+     parameter_names("sensor","teno")
+     )
+ .method("setHeaterP",&ArchonHeaterX::setHeaterP)
+ (
+     parameter_names("heater","p")
+     )
+ .method("setHeaterI",&ArchonHeaterX::setHeaterI)
+ (
+     parameter_names("heater","i")
+     )
+ .method("setHeaterIL",&ArchonHeaterX::setHeaterIL)
+ (
+     parameter_names("heater","il")
+     )
+ .method("setHeaterD",&ArchonHeaterX::setHeaterD)
+ (
+     parameter_names("heater","d")
+     )
+ .method("getHeaterP",&ArchonHeaterX::getHeaterP)
+ (
+     parameter_names("heater")
+     )
+ .method("getHeaterI",&ArchonHeaterX::getHeaterI)
+ (
+     parameter_names("heater")
+     )
+ .method("getHeaterIL",&ArchonHeaterX::getHeaterIL)
+ (
+     parameter_names("heater")
+     )
+ .method("getHeaterD",&ArchonHeaterX::getHeaterD)
+ (
+     parameter_names("heater")
+     )
+ .method("setHeaterUpdateTime",&ArchonHeaterX::setHeaterUpdateTime)
+ (
+     parameter_names("ms")
+     )
+ .property_readonly("getHeaterUpdateTime",&ArchonHeaterX::getHeaterUpdateTime)
+ .method("setHeaterRamp",&ArchonHeaterX::setHeaterRamp)
+ (
+     parameter_names("heater","onoff")
+     )
+ .method("getHeaterRamp",&ArchonHeaterX::getHeaterRamp)
+ (
+     parameter_names("heater")
+     )
+ .method("setHeaterRampRate", &ArchonHeaterX::setHeaterRampRate)
+ (
+     parameter_names("heater","rate_mk_ut")
+     )
+ .method("getHeaterRampRate", &ArchonHeaterX::getHeaterRampRate)
+ (
+     parameter_names("heater")
+     )
+ .method("setHeaterLabel",&ArchonHeaterX::setHeaterLabel)
+ (
+     parameter_names("heater","label")
+     )
+ .method("getHeaterLabel",&ArchonHeaterX::getHeaterLabel)
+ (
+     parameter_names("heater")
+     )
+ .method("setSensorLabel",&ArchonHeaterX::setSensorLabel)
+ (
+     parameter_names("heater","label")
+     )
+ .method("getSensorLabel",&ArchonHeaterX::getSensorLabel)
+ (
+     parameter_names("heater")
+     )
+ ;
+ 
+     
+    
+}
+
+

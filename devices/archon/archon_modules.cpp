@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include <iostream>
+#include <rttr/registration>
+
 
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
@@ -140,4 +142,31 @@ void ArchonModule::apply()
   
 
 }
+
+
+
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using foxtrot::devices::ArchonModule;
+ 
+ //TODO get version
+ 
+ registration::class_<ArchonModule>("foxtrot::devices::ArchonModule")
+ .property_readonly("getID",&ArchonModule::getID)
+ .property_readonly("getRev",&ArchonModule::getRev)
+ .method("writeConfigKey",&ArchonModule::writeConfigKey)
+ (
+     parameter_names("key","val")
+     
+ )
+ .method("readConfigKey",&ArchonModule::readConfigKey)
+ (
+     parameter_names("key")
+     );
+ 
+    
+    
+}
+
 
