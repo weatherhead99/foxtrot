@@ -163,8 +163,9 @@ RTTR_REGISTRATION
  .method("readConfigKey",&ArchonModule::readConfigKey)
  (
      parameter_names("key")
-     );
- 
+     )
+ .method("apply",&ArchonModule::apply)
+ ;
     
     
 }
