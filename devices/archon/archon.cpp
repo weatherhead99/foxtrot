@@ -413,7 +413,7 @@ RTTR_REGISTRATION
  
  //TODO: fetch all logs
  
- registration::class_<archon>("archon")
+ registration::class_<archon>("foxtrot::devices::archon")
  .method("clear_config",&archon::clear_config)
  .property_readonly("fetch_log",&archon::fetch_log)
  .method("update_state",&archon::update_state)
