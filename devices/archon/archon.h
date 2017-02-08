@@ -8,7 +8,7 @@
 #include <vector>
 #include <boost/iterator/iterator_concepts.hpp>
 
-
+#include <rttr/registration>
 
 
 using std::string;
@@ -29,6 +29,7 @@ namespace foxtrot {
    
   class archon : public CmdDevice
   {
+      RTTR_ENABLE()
     friend class foxtrot::devices::ArchonModule;
     
   public:

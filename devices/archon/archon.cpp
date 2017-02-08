@@ -406,4 +406,21 @@ void devices::archon::set_parameters(int n)
   writeKeyValue("PARAMETERS",std::to_string(n));
 }
 
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using foxtrot::devices::archon;
+ 
+ //TODO: fetch all logs
+ 
+ registration::class_<archon>("archon")
+ .method("clear_config",&archon::clear_config)
+ .property_readonly("fetch_log",&archon::fetch_log)
+ .method("update_state",&archon::update_state)
+ .method("applyall",&archon::applyall)
+ ;
+    
+    
+    
+}
 
