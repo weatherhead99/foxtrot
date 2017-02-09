@@ -14,7 +14,7 @@ foxtrot::parameterset archon_params
     {"timeout", 30}
 };
 
-
+extern "C" { 
 int setup(foxtrot::DeviceHarness& harness)
 {   
     
@@ -43,3 +43,4 @@ int setup(foxtrot::DeviceHarness& harness)
     
     return 0;  
 };
+}

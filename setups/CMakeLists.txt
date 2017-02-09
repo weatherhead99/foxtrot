@@ -1,4 +1,27 @@
-add_library(testbench_archon_heater MODULE testbench_archon_heater.cpp)
+set(setups testbench_archon_heater.cpp dummy_setup.cpp)
 
-target_include_directories(testbench_archon_heater PRIVATE
+
+foreach(setup ${setups})
+get_filename_component(setup_we ${setup} NAME_WE)
+add_library(${setup_we} MODULE ${setup})
+set_target_properties(${setup_we} PROPERTIES PREFIX "")
+
+target_include_directories(${setup_we} PRIVATE
 $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
+
+target_link_libraries(${setup_we} archon dummy)
+
+
+endforeach()
+
+set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/dummy_setup.so)
+configure_file(setuptest.cpp.in setuptest.cpp)
+
+add_executable(setuptest ${CMAKE_CURRENT_BINARY_DIR}/setuptest.cpp setuptest.cpp.in)
+
+target_include_directories(setuptest PRIVATE
+$<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
+
+target_link_libraries(setuptest foxtrot foxtrotserv)
+
+

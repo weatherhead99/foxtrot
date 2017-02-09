@@ -1,0 +1,33 @@
+#include "ExperimentalSetup.h"
+#include <iostream>
+#include "DeviceHarness.h"
+
+using std::cout;
+using std::endl;
+
+int main(int argc, char** argv)
+{
+    foxtrot::DeviceHarness harness;
+    foxtrot::ExperimentalSetup setup("@TEST_SETUP_FILE@",harness);
+    
+    
+    auto devmap = harness.GetDevMap();
+    
+    cout << "devices in harness.." << endl;
+    
+    for(auto& item: devmap)
+    {
+     cout << "id: " << item.first << "\t";
+     cout << "name: " << item.second->getDeviceTypeName() << endl;
+        
+    }
+    
+    auto capnames = harness.GetCapabilityNames(0);
+    for(auto& cap : capnames)
+    {
+        cout << "capability name:" << cap << endl;
+    };
+    
+
+
+}

@@ -18,6 +18,15 @@ foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxt
   
   auto sym = dlsym(_dl,"setup");
   
+  if(sym == nullptr)
+  {
+   throw std::runtime_error("couldn't find setup() symbol in setup file");
+  }
+  
+  auto setup_fun = reinterpret_cast<int(*)(foxtrot::DeviceHarness&)>(sym);
+  
+  setup_fun(harness);
+  
     
 };
 
