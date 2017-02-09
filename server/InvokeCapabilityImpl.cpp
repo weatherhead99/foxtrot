@@ -6,6 +6,9 @@
 
 #include <mutex>
 
+using std::cout;
+using std::endl;
+
 using namespace foxtrot;
 
 foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
@@ -40,10 +43,13 @@ template <typename T> bool foxtrot_error_checking(T fun, capability_response& re
 
 bool set_returntype(rttr::variant& retval, capability_response& repl)
 {
+    
+    cout << "setting return type" << endl;
         auto rettp = get_appropriate_wire_type(retval.get_type());
             bool convertsuccess;
          if(rettp == value_types::FLOAT)
          {
+             cout << "it's a double!" << endl;
             repl.set_dblret(retval.to_double(&convertsuccess));
          }
          else if (rettp == value_types::BOOL)
@@ -68,6 +74,7 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
              errstat->set_tp(error_types::Error);
          };
          
+         cout << "convertsuccess: "<< convertsuccess << endl;
          return convertsuccess;
 }
 
@@ -134,6 +141,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     try{
         if (!meth && !prop)
         {
+            std::cout << "no matching property or method error" << std::endl;
         errstatus* errstat = repl.mutable_err();
         errstat->set_msg("no matching property or method");
         errstat->set_tp(error_types::out_of_range);
@@ -153,6 +161,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 rttr::variant outarg = get_arg(arg,success);
                 if(!success)
                 {          
+                    cout << "error in getting arguments..." << endl;
                     errstatus* errstat = repl.mutable_err();
                     errstat->set_msg("argument at position " + std::to_string(arg.position()) + "is not set");
                     errstat->set_tp(error_types::Error);
@@ -167,6 +176,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
             retval = meth.invoke_variadic(dev,argvec);
+//             cout << "method invoked successfully" << endl;
             if(!set_returntype(retval,repl))
             {
                 //TODO:should be error handling here?
@@ -179,8 +189,9 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             rttr::variant val;
                 if(prop.is_readonly())
                 {
-                    cout << "readonly property" << endl;
+//                     cout << "readonly property" << endl;
                     val = prop.get_value(dev);
+                    
                 }
                 else
                 {
@@ -210,6 +221,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 }
                 if(!set_returntype(val,repl))
                 {
+                    cout << "couldn't set return type..." << endl;
                     
                   return;  
                 };
@@ -219,6 +231,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     }
     catch(class DeviceError& err)
         {
+            cout << "caught device error" << endl;
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg(err.what());
              errstat->set_tp(error_types::DeviceError);
@@ -226,12 +239,14 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
          }
     catch(class ProtocolError& err)
          {
+             cout << "caught protocol error" << endl;
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg(err.what());
              errstat->set_tp(error_types::ProtocolError);
              return;
          };
             
-          
+//     cout << "repl has error: " << repl.has_err() << endl;
+//     cout << "repl return: " << repl.dblret() << endl;
     return;
 }

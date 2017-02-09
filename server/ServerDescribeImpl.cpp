@@ -32,11 +32,11 @@ void foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl)
           auto capnames = _harness.GetCapabilityNames(devid);
           for(auto& capname : capnames)
           {
-              cout << "adding capability: " << capname << endl;
+//               cout << "adding capability: " << capname << endl;
               auto outcaps = desc.add_caps();
               outcaps->CopyFrom(_harness.GetDeviceCapability(devid, capname));
               
-              cout << outcaps->DebugString() << endl;
+//               cout << outcaps->DebugString() << endl;
               
           }
           

@@ -134,10 +134,10 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     
 }
 
-foxtrot::capability_response foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
+foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
 {
     std::vector<ft_variant> empty;
-    InvokeCapability(devid,capname,empty.begin(),empty.end());
+    return InvokeCapability(devid,capname,empty.begin(),empty.end());
     
 }
 

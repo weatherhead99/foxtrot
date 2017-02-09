@@ -41,9 +41,9 @@ namespace foxtrot
         Client(const std::string& connstr);
         ~Client();
         servdescribe DescribeServer();
-        template<typename iteratortp> capability_response InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
+        template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
-        capability_response InvokeCapability(int devid, const std::string& capname);
+        ft_variant InvokeCapability(int devid, const std::string& capname);
         
         
     private:
@@ -53,7 +53,7 @@ namespace foxtrot
  
     };
     
-    template<typename iteratortp> capability_response Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
+    template<typename iteratortp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
     {
         
         static_assert(std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
@@ -80,7 +80,7 @@ namespace foxtrot
         
         if(status.ok())
         {
-            return repl;
+            return ft_variant_from_response(repl);
         }
         else
         {

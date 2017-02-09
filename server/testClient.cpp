@@ -41,9 +41,13 @@ int main(int argc, char** argv)
     
     auto response = client.InvokeCapability(0,"getRandomDouble");
       
-    auto ret = ft_variant_from_response(response);
-    
-    cout << ret << endl;
+    cout << response << endl;
     
 
+    cout << "now for an exception..." << endl;
+    
+    response = client.InvokeCapability(0,"brokenMethod");
+    
+    
+    
 }
