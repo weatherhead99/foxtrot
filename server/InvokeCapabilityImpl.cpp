@@ -132,7 +132,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     foxtrot::Device* dev;
     cout << "capability requested is: " << req.capname() << endl;
     
-    cout << "debug string" << req.DebugString() << endl;
+//     cout << "debug string" << req.DebugString() << endl;
     
     try{
         dev = _harness.GetDevice(devid);    
@@ -225,33 +225,22 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                     
                 };
                 
-                cout << "target_argtp: " << target_argtp.get_name() << endl;
                 //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
-                outarg.convert(target_argtp);
-                cout << "outarg value: " << outarg.get_value<int>() << endl;
-                cout << "position: " << arg.position() << endl;
-                
-                //TODO:FIX THIS SHIT!
+                success = outarg.convert(target_argtp);
+		
                 argvec[arg.position()] = outarg;
                 
-                cout << "argvec at value: " << argvec.at(arg.position()).get_value<int>() << endl;
-                
-                if(arg.position() == 1)
-                {
-                    cout << "argvec[0] : "<< argvec[0].get_value<int>() <<endl;
-                    cout << "argvec[1]: " <<argvec[1].get_value<int>() << endl;
-                }
-
             };
             
             
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
             
-            meth = devtp.get_method("add");
-
-//             retval = meth.invoke_variadic(*dev,argvec);
-                retval = meth.invoke(*dev,argvec[0],argvec[1]);
+	    std::vector<rttr::argument> callargs(argvec.begin(), argvec.end());
+	    
+            retval = meth.invoke_variadic(*dev,callargs);
+             
+// 	    cout << "signature: " << meth.get_signature() << endl;
                         
         }
         

@@ -76,6 +76,10 @@ bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
   
 }
 
+const string foxtrot::devices::TPG362::getDeviceTypeName() const
+{
+  return "TPG362";
+}
 
 
 string foxtrot::devices::TPG362::calculate_checksum(string::const_iterator start, string::const_iterator end)
@@ -239,7 +243,9 @@ short unsigned convert_int_to_short_unsigned(int value, bool& ok)
         ok = false;
         return 0;
     }
-    return static_cast<int>(value);   
+    std::cout << "in value: " << value << std::endl;
+    
+    return static_cast<short unsigned>(value);   
 }
 
 RTTR_REGISTRATION{

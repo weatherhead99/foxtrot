@@ -11,12 +11,13 @@ foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& ar
 
 void foxtrot::ft_variant_visitor::operator()(double& i) const
 {
+//   std::cout << "arg value at visitor is: <double> " << i << std::endl;
     _arg.set_dblarg(i);
 }
 
 void foxtrot::ft_variant_visitor::operator()(int& d) const
 {
-    std::cout << "arg value at visitor is: " << d << std::endl;
+//     std::cout << "arg value at visitor is: <int> " << d << std::endl;
     _arg.set_intarg(d);
 }
 
@@ -28,6 +29,7 @@ void foxtrot::ft_variant_visitor::operator()(bool& i) const
 
 void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
 {
+//   std::cout << "arg value at visitor is: <string> " << s << std::endl;
     _arg.set_strarg(s);
 }
 

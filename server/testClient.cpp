@@ -35,21 +35,34 @@ int main(int argc, char** argv)
         }
         
     };
+   
+    cout << "attempting pressure readout... " << endl;
+    
+    std::vector<ft_variant> args {1};
+    auto response = client.InvokeCapability(0,"getPressure",args.begin(),args.end());
+    
+    cout << boost::get<double>(response) << endl;
+    
+    cout << "is gauge on... " << endl;
+    response = client.InvokeCapability(0,"getGaugeOnOff",args.begin(), args.end());
+    
+    cout << boost::get<bool>(response) << endl;
     
     
-    cout << "invoking randomdouble..." << endl;
     
-    auto response = client.InvokeCapability(0,"getRandomDouble");
-      
-    cout << response << endl;
-    
-    
-    for(int i =0; i< 3; i++)
-    {
-        auto counter = client.InvokeCapability(0,"getCounter");
-        cout << "counter: " << boost::get<int>(counter) << endl;
-        
-    }
+//     cout << "invoking randomdouble..." << endl;
+//     
+//     auto response = client.InvokeCapability(0,"getRandomDouble");
+//       
+//     cout << response << endl;
+//     
+//     
+//     for(int i =0; i< 3; i++)
+//     {
+//         auto counter = client.InvokeCapability(0,"getCounter");
+//         cout << "counter: " << boost::get<int>(counter) << endl;
+//         
+//     }
 
 //     cout << "now for an exception..." << endl;
 //     
@@ -60,14 +73,14 @@ int main(int argc, char** argv)
 //     response = client.InvokeCapability(0,"unsupportedtype");
 
 
-    cout << "adding two numbers..." << endl;
+//     cout << "adding two numbers..." << endl;
     
 //     
 //     response = client.InvokeCapability(0,"add",args.begin(), args.end());
 //     
-    std::vector<foxtrot::ft_variant> args { 15,12 };
-    response = client.InvokeCapability(0,"add",args);
-    
-    cout << "the response is: "<< boost::get<int>(response) << endl;
+//     std::vector<foxtrot::ft_variant> args { 15,12 };
+//     response = client.InvokeCapability(0,"add",args);
+//     
+//     cout << "the response is: "<< boost::get<int>(response) << endl;
     
 }

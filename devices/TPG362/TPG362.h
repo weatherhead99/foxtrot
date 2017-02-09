@@ -55,6 +55,7 @@ namespace foxtrot {
     
     bool getGaugeOnOff(short unsigned channel=1);
     
+    virtual const string getDeviceTypeName() const;
     
     
    private:

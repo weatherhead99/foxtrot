@@ -25,11 +25,13 @@ int main(int argc, char** argv)
         
     }
     
-    auto capnames = harness.GetCapabilityNames(0);
+    auto capnames = harness.GetCapabilityNames(1);
     for(auto& cap : capnames)
     {
         cout << "capability name:" << cap << endl;
     };
+    
+    
     
 
 

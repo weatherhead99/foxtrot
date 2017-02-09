@@ -17,7 +17,7 @@ ${ZLIB_LIBRARIES} ${dl} dummy)
 add_executable(exptserve exptserve.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
-target_link_libraries(exptserve foxtrotserv dummy)
+target_link_libraries(exptserve foxtrotserv dummy ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(testClient testClient.cpp)
 target_link_libraries(testClient foxtrotserv foxtrotclient)

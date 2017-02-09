@@ -9,12 +9,12 @@ set_target_properties(${setup_we} PROPERTIES PREFIX "")
 target_include_directories(${setup_we} PRIVATE
 $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
 
-target_link_libraries(${setup_we} archon dummy)
+target_link_libraries(${setup_we} archon dummy TPG362)
 
 
 endforeach()
 
-set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/dummy_setup.so)
+set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 # set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 configure_file(setuptest.cpp.in setuptest.cpp)
 
