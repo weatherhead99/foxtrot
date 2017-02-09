@@ -2,11 +2,14 @@
 #include <iostream>
 #include "DeviceHarness.h"
 
+#include "backward.hpp"
+
 using std::cout;
 using std::endl;
 
 int main(int argc, char** argv)
 {
+    backward::SignalHandling sh;
     foxtrot::DeviceHarness harness;
     foxtrot::ExperimentalSetup setup("@TEST_SETUP_FILE@",harness);
     
