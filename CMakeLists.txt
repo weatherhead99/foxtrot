@@ -44,6 +44,7 @@ add_subdirectory(util)
 
 if(BUILD_SERVER)
 add_subdirectory(server)
+add_subdirectory(client)
 endif()
 
 
