@@ -10,6 +10,7 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 option(BUILD_TESTS "build test code" ON)
 option(BUILD_SERVER "build foxtrot server" ON)
+option(BUILD_SETUPS "build experimental setups" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
@@ -47,6 +48,9 @@ add_subdirectory(server)
 add_subdirectory(client)
 endif()
 
+if(BUILD_SETUPS)
+add_subdirectory(setups)
+endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)

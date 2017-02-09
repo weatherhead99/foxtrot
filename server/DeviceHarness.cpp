@@ -50,7 +50,7 @@ foxtrot::DeviceHarness::DeviceHarness()
 }
 
 
-void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
+void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> dev)
 {
     
     auto thisid = _id++;
@@ -60,6 +60,20 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
        
 }
 
+void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
+{
+    
+    auto raw_ptr = dev.release();
+    
+    //TODO: some way of doing this with std::default_delete
+    auto newptr = std::unique_ptr<Device,void(*)(Device*)>
+    (raw_ptr,[](Device* dev) {delete dev;});
+    
+    _devvec.push_back(std::move(newptr));
+    _devmutexes.emplace_back();
+    
+    
+}
 
 
 

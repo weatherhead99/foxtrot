@@ -18,6 +18,7 @@ namespace foxtrot
     {
     public:
         DeviceHarness();
+        void AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
         void AddDevice(std::unique_ptr<Device> dev);
         
         const Device* const GetDevice(int id);
@@ -34,8 +35,8 @@ namespace foxtrot
     private:
         int _id = 0;
         
-        std::map<int,std::unique_ptr<Device>> _devmap;
-        std::vector<std::unique_ptr<Device>> _devvec;
+        std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
+        std::vector<std::unique_ptr<Device,void(*)(Device*)>> _devvec;
         std::deque<std::mutex> _devmutexes;
         
     };
