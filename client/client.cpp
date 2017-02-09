@@ -11,12 +11,12 @@ foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& ar
 
 void foxtrot::ft_variant_visitor::operator()(double& i) const
 {
-    _arg.set_intarg(i);
+    _arg.set_dblarg(i);
 }
 
 void foxtrot::ft_variant_visitor::operator()(int& d) const
 {
-    _arg.set_dblarg(d);
+    _arg.set_intarg(d);
 }
 
 
