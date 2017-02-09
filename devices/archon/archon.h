@@ -31,7 +31,7 @@ namespace foxtrot {
   {
       RTTR_ENABLE()
     friend class foxtrot::devices::ArchonModule;
-    
+virtual const string getDeviceTypeName() const;
   public:
     archon(std::shared_ptr<simpleTCP> proto);
     ~archon();

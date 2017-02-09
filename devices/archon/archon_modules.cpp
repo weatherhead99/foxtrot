@@ -122,7 +122,7 @@ string devices::get_module_variable_string(int modpos, const string& name, const
 string ArchonModule::readConfigKey(const string& subkey)
 {
   std::ostringstream oss;
-  oss << "MOD" << std::setw(2) << std::setfill('0')  << (_modpos+1) << "/" << subkey;
+  oss << "MOD" << (_modpos+1) << "/" << subkey;
   
   return _arch.readKeyValue(oss.str());
   
@@ -131,7 +131,7 @@ string ArchonModule::readConfigKey(const string& subkey)
 void ArchonModule::writeConfigKey(const string& key, const string& val)
 {
   std::ostringstream oss;
-  oss << "MOD" << std::setw(2) << std::setfill('0') << std::hex << std::uppercase<<  (_modpos+1) << "/" << key ;
+  oss << "MOD" <<  (_modpos+1) << "/" << key ;
   
   _arch.writeKeyValue(oss.str(),val);
 
@@ -143,7 +143,7 @@ void ArchonModule::apply()
   std::ostringstream oss;
   
   oss << "APPLYMOD" ;
-  archon_hex_stream_configure(oss);
+//   archon_hex_stream_configure(oss);
   oss << (_modpos + 1);
 
   //TODO: should find a way round this not needing to be a friend!

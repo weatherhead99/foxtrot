@@ -30,7 +30,8 @@ namespace devices
     {
     RTTR_ENABLE()
       friend class archon;
-      
+
+    virtual const string getDeviceTypeName() const;
       
     public:
     static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);

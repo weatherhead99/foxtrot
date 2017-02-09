@@ -21,6 +21,12 @@
 
 #define READ_SIZE 1024
 
+const string devices::archon::getDeviceTypeName() const
+{
+  return "archon";
+}
+
+
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
     _order(0)

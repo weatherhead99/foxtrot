@@ -18,6 +18,11 @@ template<typename T> void assert_limits(T low, T high, T val)
   
 }
 
+const string devices::ArchonHeaterX::getDeviceTypeName() const
+{
+  return "ArchonHeaterX";
+}
+
 
 
 devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos)
