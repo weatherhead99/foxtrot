@@ -40,6 +40,7 @@ namespace devices
       friend class foxtrot::devices::archon;
       RTTR_ENABLE();
     public:
+      
             const string& getID() const;
             const std::array<char,3>& getVersion() const;
             short unsigned getRev() const;
@@ -47,6 +48,9 @@ namespace devices
             
 	    void writeConfigKey(const string& key, const string& val);
 	    string readConfigKey(const string& key);
+	    
+	    double getTemp();
+	    
 	    
 	    void apply();
 	    

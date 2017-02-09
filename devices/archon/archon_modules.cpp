@@ -63,6 +63,7 @@ foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, sho
 
 
 
+
 const std::string& foxtrot::devices::ArchonModule::getID() const
 {
     return _id;
@@ -77,6 +78,14 @@ unsigned short foxtrot::devices::ArchonModule::getRev() const
 {
     return _rev;
 }
+
+double ArchonModule::getTemp()
+{
+  auto temp = readConfigKey("TEMP");
+  return std::stod(temp);
+  
+}
+
 
 
 void foxtrot::devices::ArchonModule::update_variables()

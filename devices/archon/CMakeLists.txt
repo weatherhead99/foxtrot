@@ -1,4 +1,5 @@
-add_library(archon archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_autoupdate.cpp)
+add_library(archon archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_autoupdate.cpp
+archon_module_generic_bias.cpp)
 target_link_libraries(archon RTTR::Core)
 
 add_executable(archon_test archon_test.cpp)
