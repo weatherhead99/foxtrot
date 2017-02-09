@@ -1,6 +1,8 @@
 #include "client.h"
 
-
+#include "Error.h"
+#include "DeviceError.h"
+#include "ProtocolError.h"
 
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)
@@ -31,6 +33,35 @@ void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
 foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
     foxtrot::ft_variant out;
+    
+    //error checking
+    if(repl.has_err())
+    {
+        auto err = repl.err();
+        
+        class foxtrot::Error except(err.msg());
+        class foxtrot::DeviceError exceptdev(err.msg());
+        class foxtrot::ProtocolError exceptproto(err.msg());
+        
+        switch(err.tp())
+        {
+            case(error_types::Error):
+                throw except;
+            case(error_types::DeviceError):
+                throw exceptdev;
+            case(error_types::ProtocolError):
+                throw exceptproto;
+            case(error_types::out_of_range):
+                throw std::out_of_range(err.msg());
+                
+            default:
+                throw std::runtime_error(err.msg());
+                
+        }
+        
+    }
+    
+    
     auto rettp = repl.return_case();
     switch(rettp)
     {
