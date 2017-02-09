@@ -1,6 +1,7 @@
 #include "devices/dummy/dummyDevice.h"
 #include "DeviceHarness.h"
 #include <memory>
+#include "DeviceError.h"
 
 #include <iostream>
 

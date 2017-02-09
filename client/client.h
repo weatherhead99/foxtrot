@@ -39,15 +39,16 @@ namespace foxtrot
     {
     public:
         Client(const std::string& connstr);
-        
+        ~Client();
         servdescribe DescribeServer();
         template<typename iteratortp> capability_response InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
+        capability_response InvokeCapability(int devid, const std::string& capname);
+        
         
     private:
-        std::shared_ptr<grpc::Channel> _channel;
-        grpc::ClientContext _ctxt;
         std::unique_ptr<exptserve::Stub> _stub;
+        std::shared_ptr<grpc::Channel> _channel;
         int _msgid = 0;
  
     };
@@ -65,6 +66,7 @@ namespace foxtrot
         req.set_devid(devid);
         req.set_capname(capname);
         
+        
         int i =0;
         for(auto it = begin_args; it != end_args; it++)
         {
@@ -73,7 +75,8 @@ namespace foxtrot
             arg.set_position(i++);
         };
         
-        auto status = _stub->InvokeCapability(&_ctxt,req,&repl);
+        grpc::ClientContext ctxt;
+        auto status = _stub->InvokeCapability(&ctxt,req,&repl);
         
         if(status.ok())
         {
@@ -85,7 +88,7 @@ namespace foxtrot
         throw std::runtime_error("GRPC Error");
         }
         
-        
+      
     }
     
     

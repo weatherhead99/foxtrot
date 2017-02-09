@@ -37,7 +37,15 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     //error checking
     if(repl.has_err())
     {
+        std::cout << "there's an error in this response..." << std::endl;
+        
+        std::cout << "error type: " << repl.err().tp() << std::endl;
+        
         auto err = repl.err();
+        
+        std::cout << "constructing exceptions" << std::endl;
+        
+//         std::string msg = err.
         
         class foxtrot::Error except(err.msg());
         class foxtrot::DeviceError exceptdev(err.msg());
@@ -66,6 +74,7 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     switch(rettp)
     {
         case(capability_response::ReturnCase::kDblret):
+            std::cout << "double" << std::endl;
             out = repl.dblret();
             break;
         case(capability_response::ReturnCase::kIntret):
@@ -88,11 +97,17 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
 
 
 foxtrot::Client::Client(const std::string& connstr)
-
 {
     _channel = grpc::CreateChannel(connstr,grpc::InsecureChannelCredentials());
+    
+    std::cout << "connect status: " << _channel->GetState(true) << std::endl;
     _stub = exptserve::NewStub(_channel);
     
+}
+
+foxtrot::Client::~Client()
+{
+ 
 }
 
 
@@ -101,7 +116,10 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     servdescribe repl;
     empty req;
     
-    auto status = _stub->DescribeServer(&_ctxt, req,&repl);
+    std::cout << "invoking describe RPC..." << std::endl;
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->DescribeServer(&ctxt, req,&repl);
     
     if(status.ok())
     {
@@ -115,3 +133,12 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     }
     
 }
+
+foxtrot::capability_response foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
+{
+    std::vector<ft_variant> empty;
+    InvokeCapability(devid,capname,empty.begin(),empty.end());
+    
+}
+
+

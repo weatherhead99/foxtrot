@@ -2,7 +2,8 @@
 #include <rttr/registration>
 #include <rttr/type>
 #include <type_traits>
-
+#include <iostream>
+#include "DeviceError.h"
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
@@ -19,7 +20,10 @@ int foxtrot::devices::dummyDevice::getCounter()
 // double dummyDevice::getRandomDouble() 
 double foxtrot::devices::dummyDevice::getRandomDouble()
 {
-    return _distribution(_generator);
+    std::cout << "generating random double.." << std::endl;
+    auto num  = _distribution(_generator);
+    std::cout << "num: " << num << std::endl;
+    return num;
 }
 
 // void dummyDevice::resetCounter()
@@ -39,6 +43,11 @@ int foxtrot::devices::dummyDevice::add(int a1, int a2)
     return a1 + a2;
 }
 
+void foxtrot::devices::dummyDevice::brokenMethod()
+{
+    class DeviceError except("womble!");
+    throw except;
+}
 
 
 RTTR_REGISTRATION
@@ -52,5 +61,7 @@ RTTR_REGISTRATION
  .method("add", &dummyDevice::add)
  (
      parameter_names("a1","a2")
-     );
+     )
+ .method("brokenMethod",&dummyDevice::brokenMethod)
+ ;
 }

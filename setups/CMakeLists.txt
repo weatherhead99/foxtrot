@@ -15,6 +15,7 @@ target_link_libraries(${setup_we} archon dummy)
 endforeach()
 
 set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/dummy_setup.so)
+# set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 configure_file(setuptest.cpp.in setuptest.cpp)
 
 add_executable(setuptest ${CMAKE_CURRENT_BINARY_DIR}/setuptest.cpp setuptest.cpp.in)

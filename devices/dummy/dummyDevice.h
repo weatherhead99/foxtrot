@@ -21,7 +21,9 @@ namespace foxtrot
         void setWomble(double val);
         
         void resetCounter();
-        
+
+        void brokenMethod();
+            
         int add(int a1, int a2);
             
         const std::string getDeviceTypeName() const override;
