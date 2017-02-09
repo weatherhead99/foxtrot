@@ -16,6 +16,7 @@ void foxtrot::ft_variant_visitor::operator()(double& i) const
 
 void foxtrot::ft_variant_visitor::operator()(int& d) const
 {
+    std::cout << "arg value at visitor is: " << d << std::endl;
     _arg.set_intarg(d);
 }
 

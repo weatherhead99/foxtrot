@@ -74,6 +74,7 @@ namespace foxtrot
         {
             auto arg = outargs->Add();
             
+            
             boost::apply_visitor(ft_variant_visitor(*arg),*it);
             arg->set_position(i++);
             

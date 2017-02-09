@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
     cout << "adding two numbers..." << endl;
     
-    std::vector<foxtrot::ft_variant> args { 12,  15   };
+    std::vector<foxtrot::ft_variant> args { 15,12 };
     
     response = client.InvokeCapability(0,"add",args.begin(), args.end());
     

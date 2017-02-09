@@ -63,7 +63,7 @@ RTTR_REGISTRATION
 {
  using namespace rttr;
  using foxtrot::devices::dummyDevice;
- registration::class_<dummyDevice>("foxtrot::dummyDevice")
+ registration::class_<dummyDevice>("foxtrot::devices::dummyDevice")
  .property_readonly("getCounter", &dummyDevice::getCounter)
  .property_readonly("getRandomDouble", &dummyDevice::getRandomDouble)
  .method("resetCounter", &dummyDevice::resetCounter)

@@ -12,7 +12,7 @@ add_library(foxtrotserv SHARED ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapa
 )
 
 target_link_libraries(foxtrotserv foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
-${ZLIB_LIBRARIES} ${dl} )
+${ZLIB_LIBRARIES} ${dl} dummy)
 
 add_executable(exptserve exptserve.cpp)
 

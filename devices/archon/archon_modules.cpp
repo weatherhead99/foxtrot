@@ -155,6 +155,7 @@ RTTR_REGISTRATION
  registration::class_<ArchonModule>("foxtrot::devices::ArchonModule")
  .property_readonly("getID",&ArchonModule::getID)
  .property_readonly("getRev",&ArchonModule::getRev)
+ .property_readonly("getVersion",&ArchonModule::getVersion)
  .method("writeConfigKey",&ArchonModule::writeConfigKey)
  (
      parameter_names("key","val")

@@ -6,10 +6,13 @@
 
 #include <memory>
 #include "Device.h"
+#include <vector>
 
 #include <istream>
 
 using namespace rttr;
+using std::cout;
+using std::endl;
 
 int main(int argc, char** argv)
 {
@@ -30,23 +33,18 @@ int main(int argc, char** argv)
     auto tp = type::get(*dev);
     
     
-    std::string cmd;
     
-    std::cin >> cmd;
-    
+    cout << "adding two numbers.." << endl;
     
     
-    auto resetmeth = tp.get_method(cmd.c_str());
-    resetmeth.invoke(dev);
+    std::vector<rttr::argument> args{1,15};
+    
+    auto addmeth = tp.get_method("add");
+    
+    auto ret = addmeth.invoke_variadic(dev,args);
     
     
-    std::cout << "100 counters: " << std::endl;
-    for(int i =0 ; i < 100; i++)
-    {
-        std::cout <<  dummydev->getCounter() << " ";
-    }
-  
-    std::cout << std::endl;
+    cout << "return type: " << ret.get_type().get_name() << endl;
     
     
 };

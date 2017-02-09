@@ -115,7 +115,7 @@ rttr::variant get_arg(const capability_argument& arg, bool& success)
         success = false;
     }
 
-    cout << "outarg type: " << outarg.get_type().get_name() << endl;
+//     cout << "outarg type: " << outarg.get_type().get_name() << endl;
     return outarg;
 }
 
@@ -131,6 +131,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     
     foxtrot::Device* dev;
     cout << "capability requested is: " << req.capname() << endl;
+    
+    cout << "debug string" << req.DebugString() << endl;
     
     try{
         dev = _harness.GetDevice(devid);    
@@ -173,9 +175,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             std::cout << "method..." << std::endl;
             auto args = req.args();
             
-            std::vector<rttr::argument> argvec;
+            std::vector<rttr::variant> argvec;
             argvec.resize(args.size());
-            
             
             //check parameter infos
             auto param_infs = meth.get_parameter_infos();
@@ -192,10 +193,10 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             
             for(auto& arg: args)
             {
-//                 cout << "arg position: " << arg.position() << endl;
                 bool success;
                 rttr::variant outarg = get_arg(arg,success);
-//                 cout << "outarg type: "<< outarg.get_type().get_name() << endl;
+                
+                   
                 if(!success)
                 {          
                     cout << "error in getting arguments..." << endl;
@@ -227,7 +228,19 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 cout << "target_argtp: " << target_argtp.get_name() << endl;
                 //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
                 outarg.convert(target_argtp);
-                argvec.at(arg.position()) = rttr::argument(outarg);
+                cout << "outarg value: " << outarg.get_value<int>() << endl;
+                cout << "position: " << arg.position() << endl;
+                
+                //TODO:FIX THIS SHIT!
+                argvec[arg.position()] = outarg;
+                
+                cout << "argvec at value: " << argvec.at(arg.position()).get_value<int>() << endl;
+                
+                if(arg.position() == 1)
+                {
+                    cout << "argvec[0] : "<< argvec[0].get_value<int>() <<endl;
+                    cout << "argvec[1]: " <<argvec[1].get_value<int>() << endl;
+                }
 
             };
             
@@ -237,7 +250,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             
             meth = devtp.get_method("add");
 
-            retval = meth.invoke_variadic(*dev,argvec);
+//             retval = meth.invoke_variadic(*dev,argvec);
+                retval = meth.invoke(*dev,argvec[0],argvec[1]);
                         
         }
         
