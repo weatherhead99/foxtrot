@@ -411,11 +411,79 @@ int devices::ArchonHeaterX::getHeaterRampRate(devices::HeaterXHeaters heater)
 }
 
 
+int heater_to_int(devices::HeaterXHeaters heater, bool& success)
+{
+    success = true;
+    switch(heater)
+    {
+        case(devices::HeaterXHeaters::A):
+            return 0;
+        case(devices::HeaterXHeaters::B):
+            return 1;
+    }
+    
+}
+
+devices::HeaterXHeaters int_to_heater(int i, bool& success)
+{
+    success = true;
+    switch(i)
+    {
+        case(0):
+            return devices::HeaterXHeaters::A;
+        case(1):
+            return devices::HeaterXHeaters::B;
+        default:
+            success = false;
+            return devices::HeaterXHeaters::A;
+    }
+    
+}
+
+int sensor_to_int(devices::HeaterXSensors sensor, bool& success)
+{
+    success = true;
+    switch(sensor)
+    {
+        case(devices::HeaterXSensors::A):
+            return 0;
+        case(devices::HeaterXSensors::B):
+            return 1;
+        case(devices::HeaterXSensors::C):
+            return 2;
+    }
+    
+}
+
+devices::HeaterXSensors int_to_sensor(int i, bool& success)
+{
+    success = true;
+    switch(i)
+    {
+        case(0):
+            return devices::HeaterXSensors::A;
+        case(1):
+            return devices::HeaterXSensors::B;
+        case(2):
+            return devices::HeaterXSensors::C;
+        default:
+            success = false;
+            return devices::HeaterXSensors::A;
+        
+    }
+    
+}
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
  using devices::ArchonHeaterX;
-    
+
+ type::register_converter_func(int_to_heater);
+ type::register_converter_func(heater_to_int);
+ type::register_converter_func(int_to_sensor);
+ type::register_converter_func(sensor_to_int);
+ 
  registration::class_<ArchonHeaterX>("foxtrot::devices::ArchonHeaterX")
  .property_readonly("getHeaterAOutput",&ArchonHeaterX::getHeaterAOutput)
  .property_readonly("getHeaterBOutput",&ArchonHeaterX::getHeaterBOutput)
