@@ -62,9 +62,11 @@ int main(int argc, char** argv)
 
     cout << "adding two numbers..." << endl;
     
+//     
+//     response = client.InvokeCapability(0,"add",args.begin(), args.end());
+//     
     std::vector<foxtrot::ft_variant> args { 15,12 };
-    
-    response = client.InvokeCapability(0,"add",args.begin(), args.end());
+    response = client.InvokeCapability(0,"add",args);
     
     cout << "the response is: "<< boost::get<int>(response) << endl;
     

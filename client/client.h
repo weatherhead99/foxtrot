@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <type_traits>
+#include <initializer_list>
 
 #include <boost/variant.hpp>
 #include <grpc++/grpc++.h>
@@ -43,7 +44,9 @@ namespace foxtrot
         servdescribe DescribeServer();
         template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
+        template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);
         ft_variant InvokeCapability(int devid, const std::string& capname);
+        
         
         
     private:
@@ -95,6 +98,13 @@ namespace foxtrot
         
       
     }
+    
+    template<typename containertp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, containertp args)
+    {
+        return InvokeCapability(devid,capname,args.begin(),args.end());
+        
+    };
+    
     
     
 }

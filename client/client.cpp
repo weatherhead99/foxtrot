@@ -142,4 +142,3 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
     
 }
 
-
