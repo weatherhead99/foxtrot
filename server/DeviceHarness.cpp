@@ -54,8 +54,8 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)>
 {
     
     auto thisid = _id++;
-//     _devmap.insert(std::move(std::pair<int,std::unique_ptr<Device>>{thisid, std::move(dev)}));
     _devvec.push_back(std::move(dev));
+    
     _devmutexes.emplace_back();
        
 }
@@ -69,10 +69,7 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
     (raw_ptr,[](Device* dev) {delete dev;});
     
-    _devvec.push_back(std::move(newptr));
-    _devmutexes.emplace_back();
-    
-    
+    AddDevice(std::move(newptr));
 }
 
 
@@ -200,10 +197,13 @@ const std::map<int, const Device *>  foxtrot::DeviceHarness::GetDevMap() const
 {
     //TODO: this is SLOOOOOOOW!
     std::map<int,const Device*> out;
-    for(auto& devptrpair : _devmap)
+    
+    int i =0;
+    for(auto& dev : _devvec)
     {
-        out.insert({devptrpair.first, devptrpair.second.get()});
+        out.insert(std::pair<int,const Device*>(i++, dev.get()));
     }
+    
     return out;
     
 }

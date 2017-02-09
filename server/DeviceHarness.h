@@ -35,7 +35,7 @@ namespace foxtrot
     private:
         int _id = 0;
         
-        std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
+//         std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
         std::vector<std::unique_ptr<Device,void(*)(Device*)>> _devvec;
         std::deque<std::mutex> _devmutexes;
         
