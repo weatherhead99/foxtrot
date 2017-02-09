@@ -50,6 +50,14 @@ void foxtrot::devices::dummyDevice::brokenMethod()
 }
 
 
+std::vector<int> foxtrot::devices::dummyDevice::unsupportedtype()
+{
+    std::vector<int> out {1,2,3,4};
+    return out;
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -63,5 +71,6 @@ RTTR_REGISTRATION
      parameter_names("a1","a2")
      )
  .method("brokenMethod",&dummyDevice::brokenMethod)
+ .property_readonly("unsupportedtype",&dummyDevice::unsupportedtype)
  ;
 }

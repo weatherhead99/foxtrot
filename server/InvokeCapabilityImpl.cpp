@@ -138,6 +138,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     auto prop = devtp.get_property(req.capname().c_str());
     auto meth = devtp.get_method(req.capname().c_str());
     
+    rttr::variant retval;
+    
     try{
         if (!meth && !prop)
         {
@@ -171,26 +173,20 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 argvec[arg.position()] = outarg;            
             };
             
-            rttr::variant retval;
             
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
             retval = meth.invoke_variadic(dev,argvec);
 //             cout << "method invoked successfully" << endl;
-            if(!set_returntype(retval,repl))
-            {
-                //TODO:should be error handling here?
-                return;
-            };
         }
         else
         {
             //property
-            rttr::variant val;
+            
                 if(prop.is_readonly())
                 {
 //                     cout << "readonly property" << endl;
-                    val = prop.get_value(dev);
+                    retval = prop.get_value(dev);
                     
                 }
                 else
@@ -212,19 +208,10 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                     }
                     else if(req.args_size() == 0)
                     {
-                        val  = prop.get_value(dev);
+                        retval  = prop.get_value(dev);
                     }
-                    if(!set_returntype(val,repl))
-                    {
-                        return;
-                    }
-                }
-                if(!set_returntype(val,repl))
-                {
-                    cout << "couldn't set return type..." << endl;
                     
-                  return;  
-                };
+                }
                 
         };
         
@@ -248,5 +235,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             
 //     cout << "repl has error: " << repl.has_err() << endl;
 //     cout << "repl return: " << repl.dblret() << endl;
+         
+    set_returntype(retval,repl);
     return;
 }

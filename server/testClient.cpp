@@ -44,10 +44,12 @@ int main(int argc, char** argv)
     cout << response << endl;
     
 
-    cout << "now for an exception..." << endl;
+//     cout << "now for an exception..." << endl;
+//     
+//     response = client.InvokeCapability(0,"brokenMethod");
+//     
     
-    response = client.InvokeCapability(0,"brokenMethod");
-    
-    
+    cout << "an unsupported type..." << endl;
+    response = client.InvokeCapability(0,"unsupportedtype");
     
 }

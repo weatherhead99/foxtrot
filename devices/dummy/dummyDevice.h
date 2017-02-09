@@ -4,6 +4,8 @@
 #include <random>
 
 #include <rttr/type>
+#include <vector>
+
 
 namespace foxtrot
 {
@@ -23,6 +25,7 @@ namespace foxtrot
         void resetCounter();
 
         void brokenMethod();
+        std::vector<int> unsupportedtype();
             
         int add(int a1, int a2);
             
