@@ -53,7 +53,7 @@ add_subdirectory(setups)
 endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core)
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${libusb} RTTR::Core ${dl})
 
 get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
 message("foxtrot ILLs: ${foxtrot_transitive_link}")
