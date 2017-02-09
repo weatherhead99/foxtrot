@@ -5,106 +5,23 @@
 #include <memory>
 #include "backward.hpp"
 
+#include "client.h"
+
 using std::cout;
 using std::endl;
 using namespace foxtrot;
 
 
-int test_describeserver(std::shared_ptr<grpc::Channel> channel)
-{
-    servdescribe repl;
-    empty req;
-    grpc::ClientContext ctxt;
-    cout << "invoking RPC..." << endl;
-    std::unique_ptr<exptserve::Stub> stub(exptserve::NewStub(channel));
-    
-    auto status = stub->DescribeServer(&ctxt,req,&repl);
-    if(status.ok())
-    {
-        cout << "server comment is:" << repl.servcomment() << endl;
-        
-        auto devmap = repl.devs_attached();
-        for(auto& pr : devmap)
-        {
-            
-            cout << "id:" << pr.first << " type: " << pr.second.devtype() << " comment: " << pr.second.devcomment() << endl;
-            
-            cout << "number of capabilities: " << pr.second.caps_size() << endl;
-            
-            cout << "capabilities: " << endl;
-            for(auto cap: pr.second.caps())
-            {
-                cout << cap.tp() << endl;
-                
-            }
-            
-        }
-        
-        return 0;
-    }
-    else
-    {
-        cout << status.error_code() << ": " << status.error_message() << endl;
-        return 1;
-    }
-
-}
-
-int test_invokecapability(std::shared_ptr<grpc::Channel> channel)
-{
-    capability_request req;
-    capability_response repl;
-    
-    grpc::ClientContext ctxt;
-    cout << "invoking RPC..." << endl;
-    std::unique_ptr<exptserve::Stub> stub(exptserve::NewStub(channel));
-    
-    
-    req.set_devid(0);
-    req.set_capname("getRandomDouble");
-    
-    auto status=  stub->InvokeCapability(&ctxt,req,&repl);
-    if(status.ok())
-    {
-        std::string repr;
-        auto rettp = repl.return_case();
-        switch(rettp)
-        {
-            case(capability_response::ReturnCase::kDblret):
-            
-                 repr = std::to_string(repl.dblret());
-            break;
-            case(capability_response::ReturnCase::kIntret):
-                repr = std::to_string(repl.intret());
-                break;
-            case(capability_response::ReturnCase::kBoolret):
-                repr = std::to_string(repl.boolret());
-                break;
-            case(capability_response::ReturnCase::kStringret):
-                repr = repl.stringret();
-                break;
-        }
-            
-        cout << "response was: " << repr << endl;
-        return 0;
-    }
-    else
-    {
-        cout << status.error_code() << ": " << status.error_message() << endl;
-        return 1;
-    }
-    
-}
-
-
 int main(int argc, char** argv)
 {
     backward::SignalHandling sh;
-    auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
-    cout << "RPC call... " << endl;
-    auto repl = test_describeserver(channel);
-    cout << "reply was.." << repl  << endl;
-    repl = test_invokecapability(channel);
+    
+    foxtrot::Client client("localhost::50051");
+    
+    auto repl = client.DescribeServer();
+    
+
+    
     
 
 }

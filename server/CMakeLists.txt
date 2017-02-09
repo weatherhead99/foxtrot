@@ -20,7 +20,8 @@ add_executable(exptserve exptserve.cpp)
 target_link_libraries(exptserve foxtrotserv dummy)
 
 add_executable(testClient testClient.cpp)
-target_link_libraries(testClient foxtrotserv)
+target_link_libraries(testClient foxtrotserv foxtrotclient)
+target_include_directories(testClient PRIVATE ${CMAKE_SOURCE_DIR}/client/)
 
 
 add_executable(harnesstest harnesstest.cpp)
