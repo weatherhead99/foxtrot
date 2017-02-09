@@ -58,6 +58,7 @@ namespace foxtrot {
     
     const std::map<int,ArchonModule&> getAllModules() const;
     
+    
     void set_timing_lines(int n);
     int get_timing_lines();
     
