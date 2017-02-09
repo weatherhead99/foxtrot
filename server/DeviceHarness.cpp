@@ -74,7 +74,7 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 
 
 
-const Device* const foxtrot::DeviceHarness::GetDevice(int id)
+Device* const foxtrot::DeviceHarness::GetDevice(int id)
 {
 //     auto& devptr = _devmap.at(id);
     auto& devptr = _devvec.at(id);

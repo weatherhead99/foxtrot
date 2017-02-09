@@ -43,6 +43,13 @@ int main(int argc, char** argv)
       
     cout << response << endl;
     
+    
+    for(int i =0; i< 3; i++)
+    {
+        auto counter = client.InvokeCapability(0,"getCounter");
+        cout << "counter: " << boost::get<int>(counter) << endl;
+        
+    }
 
 //     cout << "now for an exception..." << endl;
 //     
@@ -55,8 +62,10 @@ int main(int argc, char** argv)
 
     cout << "adding two numbers..." << endl;
     
-    std::vector<foxtrot::ft_variant> args { 12,15   };
+    std::vector<foxtrot::ft_variant> args { 12,  15   };
     
-    client.InvokeCapability(0,"add",args.begin(), args.end());
+    response = client.InvokeCapability(0,"add",args.begin(), args.end());
+    
+    cout << "the response is: "<< boost::get<int>(response) << endl;
     
 }

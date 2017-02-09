@@ -4,6 +4,8 @@
 #include "DeviceError.h"
 #include "ProtocolError.h"
 
+#include "devices/dummy/dummyDevice.h"
+
 #include <mutex>
 
 using std::cout;
@@ -100,10 +102,12 @@ rttr::variant get_arg(const capability_argument& arg, bool& success)
         break;
         
     case(capability_argument::ValueCase::kBoolarg):
+        
         outarg = arg.boolarg();
         break;
     
     case(capability_argument::ValueCase::kStrarg):
+        
         outarg = arg.strarg();
         break;
 
@@ -111,6 +115,7 @@ rttr::variant get_arg(const capability_argument& arg, bool& success)
         success = false;
     }
 
+    cout << "outarg type: " << outarg.get_type().get_name() << endl;
     return outarg;
 }
 
@@ -124,7 +129,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     repl.set_devid(req.devid());
     repl.set_capname(req.capname());
     
-    const foxtrot::Device* dev;
+    foxtrot::Device* dev;
     cout << "capability requested is: " << req.capname() << endl;
     
     try{
@@ -144,6 +149,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     auto prop = devtp.get_property(req.capname().c_str());
     auto meth = devtp.get_method(req.capname().c_str());
     
+    
+    
     rttr::variant retval;
     
     try{
@@ -158,6 +165,11 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
         else if (!prop)
         {
             //method
+            if(!meth.is_valid())
+            {
+                cout << "invalid method" << endl;
+            }
+            
             std::cout << "method..." << std::endl;
             auto args = req.args();
             
@@ -180,9 +192,10 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             
             for(auto& arg: args)
             {
-                cout << "arg position:" << arg.position() << endl;
+//                 cout << "arg position: " << arg.position() << endl;
                 bool success;
                 rttr::variant outarg = get_arg(arg,success);
+//                 cout << "outarg type: "<< outarg.get_type().get_name() << endl;
                 if(!success)
                 {          
                     cout << "error in getting arguments..." << endl;
@@ -192,10 +205,10 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                         return;
                 }
                 
-                auto target_argtp = param_infs[arg.position()].get_type();
+                const auto target_argtp = param_infs[arg.position()].get_type();
                 if(!outarg.can_convert(target_argtp))
                 {
-                    cout << "error converting argument" << endl;
+                    cout << "error converting argument " << endl;
                     errstatus* errstat = repl.mutable_err();
                     errstat->set_msg("argument at position " + std::to_string(arg.position()) + 
                     "cannot be converted to type " + target_argtp.get_name());
@@ -204,17 +217,30 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                     
                 }
                 
-                argvec[arg.position()] = outarg;            
+                if(outarg.get_type() != target_argtp)
+                {
+                    cout << "WARNING: need to convert an arg from " << outarg.get_type().get_name() << " to " 
+                    << target_argtp.get_name() << endl;
+                    
+                };
+                
+                cout << "target_argtp: " << target_argtp.get_name() << endl;
+                //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
+                outarg.convert(target_argtp);
+                argvec.at(arg.position()) = rttr::argument(outarg);
+
             };
             
             
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
-            retval = meth.invoke_variadic(dev,argvec);
-            cout << "method invoked successfully" << endl;
-            cout << "method name is: " << meth.get_name() << endl;
-            cout << "return val type is: " << retval.get_type().get_name()  << endl;
+            
+            meth = devtp.get_method("add");
+
+            retval = meth.invoke_variadic(*dev,argvec);
+                        
         }
+        
         else
         {
             //property
@@ -222,7 +248,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 if(prop.is_readonly())
                 {
 //                     cout << "readonly property" << endl;
-                    retval = prop.get_value(dev);
+                    retval = prop.get_value(*dev);
                     
                 }
                 else
@@ -240,7 +266,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                     std::lock_guard<std::mutex> lock(mut);
                     bool success;
                     auto arg = get_arg(req.args()[0],success);
-                    prop.set_value(dev,arg);
+                    prop.set_value(*dev,arg);
                     }
                     else if(req.args_size() == 0)
                     {

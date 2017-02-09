@@ -21,7 +21,7 @@ namespace foxtrot
         void AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
         void AddDevice(std::unique_ptr<Device> dev);
         
-        const Device* const GetDevice(int id);
+        Device* const GetDevice(int id);
         std::mutex& GetMutex(int id);
         
         std::vector<std::string> GetCapabilityNames(int devid);
