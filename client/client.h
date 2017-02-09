@@ -66,13 +66,17 @@ namespace foxtrot
         req.set_devid(devid);
         req.set_capname(capname);
         
+        auto outargs = req.mutable_args();
+        
         
         int i =0;
         for(auto it = begin_args; it != end_args; it++)
         {
-            capability_argument arg;
-            boost::apply_visitor(ft_variant_visitor(arg),*it);
-            arg.set_position(i++);
+            auto arg = outargs->Add();
+            
+            boost::apply_visitor(ft_variant_visitor(*arg),*it);
+            arg->set_position(i++);
+            
         };
         
         grpc::ClientContext ctxt;

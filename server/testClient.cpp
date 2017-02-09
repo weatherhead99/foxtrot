@@ -49,7 +49,14 @@ int main(int argc, char** argv)
 //     response = client.InvokeCapability(0,"brokenMethod");
 //     
     
-    cout << "an unsupported type..." << endl;
-    response = client.InvokeCapability(0,"unsupportedtype");
+//     cout << "an unsupported type..." << endl;
+//     response = client.InvokeCapability(0,"unsupportedtype");
+
+
+    cout << "adding two numbers..." << endl;
+    
+    std::vector<foxtrot::ft_variant> args { 12,15   };
+    
+    client.InvokeCapability(0,"add",args.begin(), args.end());
     
 }

@@ -40,6 +40,7 @@ const std::string foxtrot::devices::dummyDevice::getDeviceTypeName() const
 
 int foxtrot::devices::dummyDevice::add(int a1, int a2)
 {
+    std::cout << "adding numbers: " << a1 << " and " << a2 << std::endl;
     return a1 + a2;
 }
 

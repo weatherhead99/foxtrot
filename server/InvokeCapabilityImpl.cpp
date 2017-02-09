@@ -46,6 +46,7 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
     
     cout << "setting return type" << endl;
         auto rettp = get_appropriate_wire_type(retval.get_type());
+        cout << "rettp is: "<< rettp << endl;
             bool convertsuccess;
          if(rettp == value_types::FLOAT)
          {
@@ -59,10 +60,12 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
          }
          else if(rettp == value_types::INT)
          {
+             cout << "int" << endl;
              repl.set_intret(retval.to_int(&convertsuccess));
          }
          else if(rettp == value_types::STRING)
          {
+             cout << "string" << endl;
              repl.set_stringret(retval.to_string(&convertsuccess));
          }
          //if it's VOID, no need to set rettp
@@ -84,6 +87,8 @@ rttr::variant get_arg(const capability_argument& arg, bool& success)
     success=true;
     rttr::variant outarg;
     auto which_type = arg.value_case();
+    cout << "arg type switch: " << which_type << endl;
+    
     switch(which_type)
     {
     case(capability_argument::ValueCase::kDblarg):
@@ -120,6 +125,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     repl.set_capname(req.capname());
     
     const foxtrot::Device* dev;
+    cout << "capability requested is: " << req.capname() << endl;
     
     try{
         dev = _harness.GetDevice(devid);    
@@ -152,13 +158,29 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
         else if (!prop)
         {
             //method
+            std::cout << "method..." << std::endl;
             auto args = req.args();
             
             std::vector<rttr::argument> argvec;
             argvec.resize(args.size());
             
+            
+            //check parameter infos
+            auto param_infs = meth.get_parameter_infos();
+            
+            if(args.size() != param_infs.size())
+            {
+                cout << "unexpected number of arguments supplied" << endl;
+                errstatus* errstat = repl.mutable_err();
+                errstat->set_msg("incorrect number of arguments supplied");
+                errstat->set_tp(error_types::out_of_range);
+                return;
+            }
+            
+            
             for(auto& arg: args)
             {
+                cout << "arg position:" << arg.position() << endl;
                 bool success;
                 rttr::variant outarg = get_arg(arg,success);
                 if(!success)
@@ -170,6 +192,18 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                         return;
                 }
                 
+                auto target_argtp = param_infs[arg.position()].get_type();
+                if(!outarg.can_convert(target_argtp))
+                {
+                    cout << "error converting argument" << endl;
+                    errstatus* errstat = repl.mutable_err();
+                    errstat->set_msg("argument at position " + std::to_string(arg.position()) + 
+                    "cannot be converted to type " + target_argtp.get_name());
+                    errstat->set_tp(error_types::out_of_range);
+                    return;
+                    
+                }
+                
                 argvec[arg.position()] = outarg;            
             };
             
@@ -177,7 +211,9 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
             retval = meth.invoke_variadic(dev,argvec);
-//             cout << "method invoked successfully" << endl;
+            cout << "method invoked successfully" << endl;
+            cout << "method name is: " << meth.get_name() << endl;
+            cout << "return val type is: " << retval.get_type().get_name()  << endl;
         }
         else
         {
