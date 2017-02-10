@@ -1,6 +1,8 @@
-add_library(archon archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_autoupdate.cpp
-archon_module_generic_bias.cpp)
-target_link_libraries(archon RTTR::Core)
+set(archon_srcs archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_autoupdate.cpp archon_module_generic_bias.cpp )
+
+add_library(archon STATIC ${archon_srcs})
+
+
 
 add_executable(archon_test archon_test.cpp)
-target_link_libraries(archon_test archon foxtrot ${OPENSSL_LIBRARIES})
+target_link_libraries(archon_test RTTR::Core foxtrot archon)

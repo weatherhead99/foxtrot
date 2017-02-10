@@ -59,7 +59,6 @@ get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
 message("foxtrot ILLs: ${foxtrot_transitive_link}")
 
 
-
 if(BUILD_TESTS)  
   add_subdirectory(test)
 endif(BUILD_TESTS)	

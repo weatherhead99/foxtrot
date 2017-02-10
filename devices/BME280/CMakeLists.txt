@@ -1,1 +1,1 @@
-add_library(BME280 BME280.cpp)
+add_device_lib(BME280 BME280.cpp)
