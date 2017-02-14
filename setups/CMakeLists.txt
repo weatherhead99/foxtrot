@@ -11,6 +11,8 @@ $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}
 
 target_link_libraries(${setup_we} archon dummy TPG362)
 
+#needed so we have already generated the protobuf files
+add_dependencies(${setup_we} foxtrotserv)
 
 endforeach()
 
