@@ -13,3 +13,6 @@ target_link_libraries(detector_wl_sweep foxtrot cornerstone260 newport2936R Q250
 
 add_executable(simple_pressure_temp_log simple_pressure_temp_log.cpp)
 target_link_libraries(simple_pressure_temp_log ${Boost_LIBRARIES} foxtrot TPG362 DM3068 foxtrot_util gsl gslcblas archon)
+
+add_executable(bakeout_tempread bakeout_tempread.cpp)
+target_link_libraries(bakeout_tempread  foxtrot DM3068  TPG362 foxtrot_util ${gsl} ${gslcblas} ${Boost_LIBRARIES})

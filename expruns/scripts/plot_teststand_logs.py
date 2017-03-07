@@ -54,7 +54,7 @@ def label_nearest_point(x,xs,ys,ax,fmtstr,col):
 fls = [_ for _ in os.listdir(folder)]
 
 #f = folder + '/' + 'holdtime2017-Jan-27.txt'
-f = folder + '/' + 'pumpdown2017-Feb-06.txt'
+f = folder + '/' + 'pumpdown2017-Feb-13.txt'
 
 #df = pd.read_csv(os.path.abspath(folder + '/' + fls[0]),header=0)
 df = pd.read_csv(os.path.abspath(f),header=0)
@@ -68,7 +68,8 @@ fig,ax = plt.subplots(figsize=(14,5))
 
 #START = 0
 
-START_DATE = datetime(2017,2,7,11,00)
+#START_DATE = datetime(2017,2,7,11,00)
+START_DATE = datetime(2017,2,13,17,30)
 START =  find_nearest_index(START_DATE,datetimes)
 #START=0
 
@@ -102,7 +103,9 @@ ax.yaxis.set_major_formatter(fmtpres)
 ax.yaxis.set_major_locator(mtck.LogLocator(base=10.,subs=[1.,2,5.]))
 
 #date formatting
-ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=400))
+INTERVAL_MINUTES=200
+
+ax.xaxis.set_major_locator(mdat.MinuteLocator(interval=INTERVAL_MINUTES))
 fmt = mdat.DateFormatter('%d-%b-%H:%M')
 ax.xaxis.set_major_formatter(fmt)
 
