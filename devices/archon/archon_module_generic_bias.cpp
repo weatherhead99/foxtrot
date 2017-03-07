@@ -1,5 +1,9 @@
 #include "archon_module_generic_bias.h"
 #include <sstream>
+#include "archon_modules.h"
+
+using namespace foxtrot;
+using std::string;
 
 devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod, const string& nmemonic, 
 					      int numchans, double lowlimit, double highlimit)

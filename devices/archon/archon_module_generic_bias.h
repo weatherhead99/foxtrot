@@ -1,5 +1,5 @@
 #pragma once
-#include "archon_modules.h"
+
 
 #include <memory>
 #include <string>
@@ -9,8 +9,13 @@ namespace foxtrot
 {
 namespace devices
 {
+  class ArchonModule;
+    
   class ArchonGenericBias 
   {
+      
+      friend class ArchonLVX;
+      
   public:
     
     void setLabel(int channel, const std::string& label);

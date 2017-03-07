@@ -71,6 +71,10 @@ virtual const string getDeviceTypeName() const;
     void set_constants(int n);
     int get_constants();
     
+    void set_power(bool onoff);
+    
+    void load_timing_script(const std::string& script);
+    
   protected:
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
@@ -83,6 +87,7 @@ virtual const string getDeviceTypeName() const;
     
     ssmap _system;
     ssmap _status;
+    ssmap _frame;
     
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     

@@ -38,7 +38,31 @@ template <typename T> bool foxtrot_error_checking(T fun, capability_response& re
              errstat->set_msg(err.what());
              errstat->set_tp(error_types::ProtocolError);
              return false;
-         };
+         }
+         catch(std::out_of_range& err)
+         {
+             errstatus* errstat = repl.mutable_err();
+             errstat->set_msg(err.what());
+             errstat->set_tp(error_types::out_of_range);
+             return false;
+             
+         }
+         catch(std::exception& err)
+         {
+             auto errstat = repl.mutable_err();
+             errstat->set_msg(err.what());
+             errstat->set_tp(error_types::Error);
+             return false;
+         }
+         catch(...)
+         {
+             auto errstat = repl.mutable_err();
+             errstat->set_msg("");
+             errstat->set_tp(error_types::unknown_error);
+             return false;
+             
+         }
+         ;
              
 };
 

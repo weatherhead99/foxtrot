@@ -207,6 +207,7 @@ void devices::archon::update_state()
 {
   _system = parse_parameter_response(cmd("SYSTEM"));
   _status = parse_parameter_response(cmd("STATUS"));
+  _frame = parse_parameter_response(cmd("FRAME"));
   
   for(auto& mod: _modules)
   {
@@ -412,6 +413,39 @@ void devices::archon::set_parameters(int n)
   writeKeyValue("PARAMETERS",std::to_string(n));
 }
 
+
+void foxtrot::devices::archon::set_power(bool onoff)
+{
+    if(onoff)
+    {
+        cmd("POWERON");
+    }
+    else
+    {
+        cmd("POWEROFF");
+    }
+    
+}
+
+void foxtrot::devices::archon::load_timing_script(const std::string& script)
+{
+    std::stringstream ss;
+    std::string to;
+    
+    int i=0;
+    while(std::getline(ss,to,'\n'))
+    {
+       auto configkey = "LINE" + std::to_string(i++); 
+       auto line = "\"" + to + "\"";
+       writeKeyValue(configkey,line);
+    };
+    
+    set_timing_lines(i);
+    
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -424,6 +458,7 @@ RTTR_REGISTRATION
  .property_readonly("fetch_log",&archon::fetch_log)
  .method("update_state",&archon::update_state)
  .method("applyall",&archon::applyall)
+ .method("set_power",&archon::set_power)
  ;
     
     

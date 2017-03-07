@@ -26,6 +26,7 @@ enum error_types
     DeviceError = 1;
     ProtocolError = 2;
     out_of_range = 3;
+    unknown_error = 4;
 }
 
 message errstatus
