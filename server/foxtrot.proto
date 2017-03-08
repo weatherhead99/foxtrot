@@ -17,7 +17,8 @@ enum value_types
     INT = 1;
     BOOL = 2;
     STRING = 3;
-    VOID = 4;
+    BYTE_DATA = 4;
+    VOID = 5;
 }
 
 enum error_types
@@ -76,7 +77,7 @@ message capability_request
     uint32 msgid = 1;
     uint32 devid = 2;
     string capname  = 3;
-    repeated capability_argument args = 4;
+    repeated capability_argument args = 4; 
 }
 
 message capability_response
@@ -96,7 +97,10 @@ message capability_response
 message datachunk
 {
     bytes data = 1;
-    errstatus err = 2;
+    uint32 msgid = 2;
+    uint32 devid = 3;
+    string capname = 4;
+    errstatus err = 5;
 
 }
 

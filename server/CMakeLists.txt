@@ -9,7 +9,7 @@ message("generated protobuf hdrs: ${PROTO_HDRS}")
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(foxtrotserv SHARED ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapabilityImpl.cpp  DeviceHarness.cpp 
-ExperimentalSetup.cpp
+FetchDataImpl.cpp ExperimentalSetup.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 

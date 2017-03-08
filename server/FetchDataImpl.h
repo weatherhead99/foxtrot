@@ -6,21 +6,23 @@
 
 namespace foxtrot
 {
-    struct FetchDataImpl
+    struct FetchDataLogic
     {
+        typedef capability_request reqtp;
+        typedef grpc::ServerWriter<datachunk> repltp; 
+        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
         
-        FetchDataImpl(exptserve::AsyncService* service, grpc::ServerCompletionQueue* cq);
+        FetchDataLogic(DeviceHarness& harness);
         
-        
-        void HandleRequest(reqtp& req, repltp& repl);
+        void HandleRequest(reqtp& req, repltp& writer);
         
     private:
-        exptserve::AsyncService* _service;
+        DeviceHarness& _harness;
         
     };
     
     
-    
+    typedef HandlerBase<FetchDataLogic> FetchDataImpl;
 
     
     

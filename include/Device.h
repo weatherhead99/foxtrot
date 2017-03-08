@@ -16,7 +16,7 @@ namespace foxtrot
  {
   STREAMINGDATA   
      
- }
+ };
 
   class CommunicationProtocol;
   
