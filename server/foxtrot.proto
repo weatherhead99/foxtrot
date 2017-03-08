@@ -93,8 +93,17 @@ message capability_response
     errstatus err = 8;
 }
 
+message datachunk
+{
+    bytes data = 1;
+    errstatus err = 2;
+
+}
+
+
 service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
+    rpc FetchData(capability_request) returns (stream datachunk);
 }

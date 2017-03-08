@@ -191,6 +191,23 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
 
 }
 
+std::vector<unsigned char> foxtrot::devices::archon::parse_binary_response(const std::string& response)
+{
+    std::vector<unsigned char> out;
+    out.reserve(1024);
+    
+    if(response[0] != ':')
+    {
+        throw ProtocolError("expected a binary response but didn't get one!");
+    }
+    
+    out.assign(response.begin() +1, response.end());
+    return out;
+    
+}
+
+
+
 const ssmap& devices::archon::getStatus() const
 {
   return _status;
@@ -445,6 +462,24 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
 }
 
 
+void foxtrot::devices::archon::lockbuffer(int buf)
+{
+    if(buf < 1 || buf > 3)
+    {
+        throw std::out_of_range("invalid buffer, must be 1 :3 ");
+    }
+    
+    cmd("LOCK" + std::to_string(buf));
+}
+
+
+void foxtrot::devices::archon::unlockbuffers()
+{
+    cmd("LOCK0");
+}
+
+
+
 
 RTTR_REGISTRATION
 {
@@ -459,6 +494,7 @@ RTTR_REGISTRATION
  .method("update_state",&archon::update_state)
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
+ .method("load_timing_script", &archon::load_timing_script)
  ;
     
     

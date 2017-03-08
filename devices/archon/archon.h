@@ -75,9 +75,18 @@ virtual const string getDeviceTypeName() const;
     
     void load_timing_script(const std::string& script);
     
+    
+    void lockbuffer(int buf);
+    void unlockbuffers();
+    
+    bool isbuffercomplete(int buf);
+    
+    
   protected:
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
+    
+    std::vector<unsigned char> parse_binary_response(const std::string& response);
     
     
   private:

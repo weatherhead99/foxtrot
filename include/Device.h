@@ -11,6 +11,12 @@
 
 namespace foxtrot
 {
+    
+ enum class CapabilityMeta
+ {
+  STREAMINGDATA   
+     
+ }
 
   class CommunicationProtocol;
   
