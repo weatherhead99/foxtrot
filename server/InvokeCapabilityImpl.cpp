@@ -7,6 +7,7 @@
 #include "devices/dummy/dummyDevice.h"
 
 #include <mutex>
+#include "ServerUtil.h"
 
 using std::cout;
 using std::endl;
@@ -27,31 +28,23 @@ template <typename T> bool foxtrot_error_checking(T fun, capability_response& re
          }
          catch(class DeviceError& err)
          {
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::DeviceError);
+             set_repl_err(repl,err,error_types::DeviceError);
              return false;
          }
          catch(class ProtocolError& err)
          {
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::ProtocolError);
+             set_repl_err(repl,err,error_types::ProtocolError);
              return false;
          }
          catch(std::out_of_range& err)
          {
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::out_of_range);
+             set_repl_err(repl,err,error_types::out_of_range);
              return false;
              
          }
          catch(std::exception& err)
          {
-             auto errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::Error);
+             set_repl_err(repl,err,error_types::Error);
              return false;
          }
          catch(...)
@@ -163,9 +156,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     }
     catch(std::out_of_range& err)
     {
-      errstatus* errstat = repl.mutable_err();
-      errstat->set_msg(err.what());
-      errstat->set_tp(error_types::out_of_range);
+      set_repl_err(repl,err,error_types::out_of_range);
       return;
     };
     
@@ -308,17 +299,13 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     catch(class DeviceError& err)
         {
             cout << "caught device error" << endl;
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::DeviceError);
+            set_repl_err(repl,err,error_types::DeviceError);
              return;
          }
     catch(class ProtocolError& err)
          {
              cout << "caught protocol error" << endl;
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg(err.what());
-             errstat->set_tp(error_types::ProtocolError);
+             set_repl_err(repl,err,error_types::ProtocolError);
              return;
          };
             
