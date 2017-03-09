@@ -96,7 +96,7 @@ void ArchonModule::update_variables()
 }
 
 
-string get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
+string foxtrot::devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
 {
       std::ostringstream oss;
       //WARNING: +1 to get from zero-indexed to 1 indexed
