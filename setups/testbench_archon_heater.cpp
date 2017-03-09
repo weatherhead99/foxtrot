@@ -43,6 +43,7 @@ int setup(foxtrot::DeviceHarness& harness)
     auto heater = static_cast<foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
     
     using foxtrot::devices::HeaterXSensors;
+    using foxtrot::devices::HeaterXHeaters;
     
     
     heater->setSensorCurrent(HeaterXSensors::A, 10000);
@@ -55,6 +56,14 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setSensorType(HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
     heater->setSensorLabel(HeaterXSensors::A, "Tank");
     heater->setSensorLabel(HeaterXSensors::B, "Stage");
+    
+    
+    heater->setHeaterP(HeaterXHeaters::A, 1000);
+    heater->setHeaterD(HeaterXHeaters::A, 8000);
+    heater->setHeaterUpdateTime(2000);
+    
+    heater->setHeaterSensor(HeaterXHeaters::A, HeaterXSensors::B);
+    
     
     //TODO: doesn't work right now for some reason???
 //     heater->apply();
