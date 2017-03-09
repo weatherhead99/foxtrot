@@ -9,12 +9,14 @@
 #include <iostream>
 #include <rttr/registration>
 
+using namespace foxtrot::devices;
+
 
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
 using foxtrot::devices::archon_hex_stream_configure;
   
-foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, short unsigned modpos)
+ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
 : _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
 {
   
@@ -64,17 +66,17 @@ foxtrot::devices::ArchonModule::ArchonModule(foxtrot::devices::archon& arch, sho
 
 
 
-const std::string& foxtrot::devices::ArchonModule::getID() const
+const std::string& ArchonModule::getID() const
 {
     return _id;
 }
 
-const std::array<char, 3>& foxtrot::devices::ArchonModule::getVersion() const
+const std::array<char, 3>& ArchonModule::getVersion() const
 {
     return _version;
 }
 
-unsigned short foxtrot::devices::ArchonModule::getRev() const
+unsigned short ArchonModule::getRev() const
 {
     return _rev;
 }
@@ -88,13 +90,13 @@ double ArchonModule::getTemp()
 
 
 
-void foxtrot::devices::ArchonModule::update_variables()
+void ArchonModule::update_variables()
 {
   throw std::logic_error("called unimplemented function base update_variables");
 }
 
 
-string devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
+string get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
 {
       std::ostringstream oss;
       //WARNING: +1 to get from zero-indexed to 1 indexed

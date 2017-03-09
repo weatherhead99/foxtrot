@@ -9,6 +9,32 @@ _hcbias(*this, "LVHC", 6, 0, 31.)
 }
 
 
+std::unique_ptr< devices::ArchonModule > devices::ArchonLVX::constructModule(devices::archon& arch, int modpos)
+{
+  std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonLVX(arch,modpos));
+  
+  return out;
+
+}
+
+
+const string devices::ArchonLVX::getTypeName() const
+{
+  
+  return string("LVX");
+
+}
+
+void devices::ArchonLVX::update_variables()
+{
+  
+  //TODO: update this!
+  
+
+}
+
+
+
 void foxtrot::devices::ArchonLVX::setLabel(bool HC, int channel, const std::string& label)
 {
     if(HC)

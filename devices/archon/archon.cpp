@@ -1,6 +1,7 @@
 #include "archon.h"
 #include "archon_modules.h"
 #include "archon_module_heaterx.h"
+#include "archon_module_lvxbias.h"
 #include "DeviceError.h"
 
 #include <algorithm>
@@ -63,6 +64,13 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
             _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
             break;
 	
+	case(archon_module_types::LVBias):
+	  //TODO: is the real thing an LVX?
+	  std::cout << "LVBias module detected at position " << (i+1) << std::endl;
+	  ptr = ArchonLVX::constructModule(*this,i);
+	  _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i,std::move(ptr)));
+	  break;
+	    
 	default:
 	  std::cout << "support for module at position " << (i+1) << " isn't implemented yet"<< std::endl;
 	    

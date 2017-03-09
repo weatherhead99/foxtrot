@@ -4,6 +4,8 @@
 
 
 using foxtrot::DeviceError;
+using namespace foxtrot;
+using namespace foxtrot::devices;
 
 template<typename T> void assert_limits(T low, T high, T val)
 {
@@ -154,7 +156,7 @@ std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonHeaterX:
  return out;
 }
 
-void devices::ArchonHeaterX::setSensorType(devices::HeaterXSensors sensor, devices::HeaterXSensorTypes type) 
+void ArchonHeaterX::setSensorType(HeaterXSensors sensor, HeaterXSensorTypes type) 
 {
     std::ostringstream oss;
     oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
@@ -162,7 +164,7 @@ void devices::ArchonHeaterX::setSensorType(devices::HeaterXSensors sensor, devic
     writeConfigKey(oss.str(),std::to_string(static_cast<short unsigned>(type)));
 }
 
-devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::HeaterXSensors sensor)
+HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(HeaterXSensors sensor)
 {
   std::ostringstream oss;
   oss << "SENSOR" << static_cast<char>(sensor) << "TYPE";
@@ -170,7 +172,7 @@ devices::HeaterXSensorTypes devices::ArchonHeaterX::getSensorType(devices::Heate
   return static_cast<HeaterXSensorTypes>(std::stoul(readConfigKey(oss.str())));
 }
 
-void devices::ArchonHeaterX::setSensorCurrent(devices::HeaterXSensors sensor, int curr_na)
+void ArchonHeaterX::setSensorCurrent(HeaterXSensors sensor, int curr_na)
 {
   std::ostringstream oss;
   oss <<"SENSOR" << static_cast<char>(sensor) << "CURRENT";
@@ -180,7 +182,7 @@ void devices::ArchonHeaterX::setSensorCurrent(devices::HeaterXSensors sensor, in
 
 
 
-int devices::ArchonHeaterX::getSensorCurrent(devices::HeaterXSensors sensor)
+int ArchonHeaterX::getSensorCurrent(HeaterXSensors sensor)
 {
   std::ostringstream oss;
   oss << "SENSOR" << static_cast<char>(sensor) << "CURRENT";
@@ -188,21 +190,21 @@ int devices::ArchonHeaterX::getSensorCurrent(devices::HeaterXSensors sensor)
   return std::stoi(readConfigKey(oss.str()));
 }
 
-void devices::ArchonHeaterX::setHeaterTarget(devices::HeaterXHeaters heater, double target)
+void ArchonHeaterX::setHeaterTarget(HeaterXHeaters heater, double target)
 {
   std::ostringstream oss;
   oss << "HEATER" << static_cast<char>(heater) << "TARGET";
   writeConfigKey(oss.str(), std::to_string(target));
 }
 
-double devices::ArchonHeaterX::getHeaterTarget(devices::HeaterXHeaters heater)
+double ArchonHeaterX::getHeaterTarget(HeaterXHeaters heater)
 {
   std::ostringstream oss;
   oss << "HEATER" << static_cast<char>(heater) << "TARGET";
   return std::stod(readConfigKey(oss.str()));
 }
 
-void devices::ArchonHeaterX::setHeaterSensor(devices::HeaterXHeaters heater, devices::HeaterXSensors sensor)
+void ArchonHeaterX::setHeaterSensor(HeaterXHeaters heater, HeaterXSensors sensor)
 {
   std::ostringstream oss;
   oss << "HEATER" << static_cast<char>(heater) << "SENSOR";

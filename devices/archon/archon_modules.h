@@ -77,22 +77,14 @@ namespace devices
     template <typename T> typename std::enable_if<std::is_integral<T>::value,T>::type  extract_module_variable(
       int modpos, const string& name,const ssmap& map, char delim='/')
     {
-//       std::cout << "getting variable: " << name << std::endl;
       auto stval = get_module_variable_string(modpos,name,map,delim);
-//       std::cout << "stval: " << stval << std::endl;
       return std::stoi(stval);
     }
     
     template <typename T> typename std::enable_if<std::is_floating_point<T>::value,T>::type extract_module_variable(
       int modpos, const string& name,const ssmap& map, char delim='/')
     {
-//       std::cout << "getting variable: " << name << std::endl;
       auto stval = get_module_variable_string(modpos,name,map,delim);
-//       std::cout << "stval: " << stval << std::endl;
-      
-//       std::cout << "trying stoi" << std::stoi(stval) << std::endl;
-//       std::cout << "trying stof" << std::stof(stval) << std::endl;
-      
       return std::stof(stval);
     }
     

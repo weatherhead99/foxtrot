@@ -66,16 +66,16 @@ int main(int argc, char** argv)
  cout << "setting sensor type..>" << std::endl;
  heater->setSensorType(foxtrot::devices::HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
   
- cout << "getting sensor type..." << std::endl;
- auto senstype = heater->getSensorType(foxtrot::devices::HeaterXSensors::A);
- 
- cout << "setting sensor A current..." << std::endl;
- heater->setSensorCurrent(foxtrot::devices::HeaterXSensors::A,10000);
- 
- cout << "getting sensor A current..." << std::endl;
- auto current = heater->getSensorCurrent(foxtrot::devices::HeaterXSensors::A);
- cout << current << endl;
- 
+//  cout << "getting sensor type..." << std::endl;
+//  auto senstype = heater->getSensorType(foxtrot::devices::HeaterXSensors::A);
+//  
+//  cout << "setting sensor A current..." << std::endl;
+//  heater->setSensorCurrent(foxtrot::devices::HeaterXSensors::A,10000);
+//  
+//  cout << "getting sensor A current..." << std::endl;
+//  auto current = heater->getSensorCurrent(foxtrot::devices::HeaterXSensors::A);
+//  cout << current << endl;
+//  
  a.set_timing_lines(0);
  a.set_states(0);
  a.set_constants(0);
