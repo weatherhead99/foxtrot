@@ -70,6 +70,10 @@ namespace devices
     void setSensorUpperLimit(HeaterXSensors sensor, double temp);
     double getSensorUpperLimit(HeaterXSensors sensor);
     
+    void setHeaterEnable(HeaterXHeaters heater, bool onoff);
+    bool getHeaterEnable(HeaterXHeaters heater);
+    
+    
     //TODO: value validation on all of these!
     void setHeaterP(HeaterXHeaters heater, int p);
     int getHeaterP(HeaterXHeaters heater);

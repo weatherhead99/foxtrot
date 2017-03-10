@@ -281,6 +281,24 @@ double devices::ArchonHeaterX::getSensorUpperLimit(devices::HeaterXSensors senso
 
 }
 
+void foxtrot::devices::ArchonHeaterX::setHeaterEnable(foxtrot::devices::HeaterXHeaters heater, bool onoff)
+{
+    std::ostringstream oss;
+    oss << "HEATER" << static_cast<char>(heater) << "ENABLE";
+    writeConfigKey(oss.str(),std::to_string(static_cast<int>(onoff)));
+    
+}
+
+bool foxtrot::devices::ArchonHeaterX::getHeaterEnable(foxtrot::devices::HeaterXHeaters heater)
+{
+    std::ostringstream oss;
+    oss << "HEATER" << static_cast<char>(heater) << "ENABLE";
+    return std::stoi(readConfigKey(oss.str()));
+    
+}
+
+
+
 void devices::ArchonHeaterX::setHeaterP(devices::HeaterXHeaters heater, int p)
 {
   assert_limits(0,10000,p);
@@ -608,6 +626,14 @@ RTTR_REGISTRATION
      parameter_names("heater","label")
      )
  .method("getSensorLabel",&ArchonHeaterX::getSensorLabel)
+ (
+     parameter_names("heater")
+     )
+ .method("setHeaterEnable", &ArchonHeaterX::setHeaterEnable)
+ (
+     parameter_names("heater","onoff")
+     )
+ .method("getHeaterEnable", &ArchonHeaterX::getHeaterEnable)
  (
      parameter_names("heater")
      )
