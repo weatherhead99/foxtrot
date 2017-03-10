@@ -57,5 +57,64 @@ void set_heater_target(foxtrot::Client& cl, int devid, double target)
     
 }
 
+void update_archon_state(const foxtrot::servdescribe& cl, foxtrot::Client& cli)
+{
+      auto archon = std::find_if(cl.devs_attached().begin(), cl.devs_attached().end(),
+                               [] (decltype(*cl.devs_attached().begin())& val) 
+                               {
+                                   if(val.second.devtype() == "archon")
+                                   {
+                                       return true;
+                                   }
+                                   return false;
+                            }
+                       );
+  
+    if(archon == cl.devs_attached().end())
+      {
+	  throw std::logic_error("no archon connected to server");
+      }
+      
+      
+   cli.InvokeCapability(archon->first, "update_state");
+}
 
+std::vector< int > get_heater_coeffs(foxtrot::Client& cl, int devid)
+{
+  auto P = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAP"));
+  auto I = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAI"));
+  auto D = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAD"));
+  
+  return std::vector<int>{P,I,D};
+
+}
+
+double get_heater_output(foxtrot::Client& cl, int devid)
+{
+  return boost::get<double>(cl.InvokeCapability(devid, "getHeaterAOutput"));
+  
+}
+
+
+
+
+std::pair< double, double > get_temperatures(foxtrot::Client& cl, int devid)
+{
+  std::pair<double,double> out;
+  
+  out.first = boost::get<double>(cl.InvokeCapability(devid,"getTempA"));
+  out.second = boost::get<double>(cl.InvokeCapability(devid,"getTempB"));
+  
+  return out;
+
+}
+
+
+
+void apply_settings(foxtrot::Client& cl, int devid)
+{
+  std::vector<foxtrot::ft_variant> args{};
+  cl.InvokeCapability(devid,"apply", args.begin(), args.end());
+  
+}
 

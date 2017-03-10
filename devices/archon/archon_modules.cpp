@@ -146,7 +146,7 @@ void ArchonModule::apply()
   
   oss << "APPLYMOD" ;
 //   archon_hex_stream_configure(oss);
-  oss << (_modpos + 1);
+  oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase  << (_modpos + 1);
 
   //TODO: should find a way round this not needing to be a friend!
   _arch.cmd(oss.str());

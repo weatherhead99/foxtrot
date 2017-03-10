@@ -66,7 +66,7 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
     cout << "setting return type" << endl;
         auto rettp = get_appropriate_wire_type(retval.get_type());
         cout << "rettp is: "<< rettp << endl;
-            bool convertsuccess;
+            bool convertsuccess = true;
          if(rettp == value_types::FLOAT)
          {
              cout << "it's a double!" << endl;
@@ -88,6 +88,12 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
              repl.set_stringret(retval.to_string(&convertsuccess));
          }
          //if it's VOID, no need to set rettp
+         else if(rettp == value_types::VOID)
+	 {
+	    cout << "void" << endl;
+	    repl.set_stringret("");
+	   
+	 }
          
          if(!convertsuccess)
          {
@@ -307,7 +313,13 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
              cout << "caught protocol error" << endl;
              set_repl_err(repl,err,error_types::ProtocolError);
              return;
-         };
+         }
+    catch(std::exception& err)
+    {
+          cout << "caught generic error" << endl;
+	  set_repl_err(repl,err,error_types::Error);
+	  return;
+    }
             
 //     cout << "repl has error: " << repl.has_err() << endl;
 //     cout << "repl return: " << repl.dblret() << endl;

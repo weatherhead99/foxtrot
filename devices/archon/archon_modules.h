@@ -38,7 +38,7 @@ namespace devices
     class ArchonModule : public Device
     {
       friend class foxtrot::devices::archon;
-      RTTR_ENABLE();
+      RTTR_ENABLE(Device);
     public:
       
             const string& getID() const;

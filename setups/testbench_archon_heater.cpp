@@ -46,28 +46,34 @@ int setup(foxtrot::DeviceHarness& harness)
     using foxtrot::devices::HeaterXHeaters;
     
     
-    heater->setSensorCurrent(HeaterXSensors::A, 10000);
-    heater->setSensorCurrent(HeaterXSensors::B, 10000);
+    heater->setSensorCurrent(HeaterXSensors::A, 50000);
+    heater->setSensorCurrent(HeaterXSensors::B, 50000);
     heater->setSensorLowerLimit(HeaterXSensors::A, -150.0);
     heater->setSensorLowerLimit(HeaterXSensors::B, -150.0);
     heater->setSensorUpperLimit(HeaterXSensors::A, 50.0);
     heater->setSensorUpperLimit(HeaterXSensors::B, 50.0);
     heater->setSensorType(HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
-    heater->setSensorType(HeaterXSensors::A, foxtrot::devices::HeaterXSensorTypes::RTD100);
+    heater->setSensorType(HeaterXSensors::B, foxtrot::devices::HeaterXSensorTypes::RTD100);
     heater->setSensorLabel(HeaterXSensors::A, "Tank");
     heater->setSensorLabel(HeaterXSensors::B, "Stage");
     
     
     heater->setHeaterP(HeaterXHeaters::A, 1000);
+    heater->setHeaterI(HeaterXHeaters::A,0);
     heater->setHeaterD(HeaterXHeaters::A, 8000);
     heater->setHeaterUpdateTime(2000);
     
     heater->setHeaterSensor(HeaterXHeaters::A, HeaterXSensors::B);
     
+    heater->setHeaterTarget(HeaterXHeaters::A, -100.);
+    
+    archon->applyall();
+    
+    archon->set_power(true);
+    
     
     //TODO: doesn't work right now for some reason???
 //     heater->apply();
-    archon->applyall();
     
     
     //WARNING: oh shit, a const_cast

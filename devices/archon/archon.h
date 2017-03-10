@@ -29,7 +29,7 @@ namespace foxtrot {
    
   class archon : public CmdDevice
   {
-      RTTR_ENABLE()
+      RTTR_ENABLE(CmdDevice)
     friend class foxtrot::devices::ArchonModule;
     virtual const string getDeviceTypeName() const;
   public:

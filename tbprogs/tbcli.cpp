@@ -67,13 +67,26 @@ int main(int argc, char** argv)
         
         auto opts = po::collect_unrecognized(parsed.options, po::include_positional);
         opts.erase(opts.begin());
-        
-        po::store(po::command_line_parser(opts).options(heater_desc).positional(heater_pdesc).run(),vm);
+	
+        po::store(po::command_line_parser(opts).options(heater_desc).positional(heater_pdesc)
+	.run(),vm);
         
         if(!vm.count("subcmd"))
         {
-            lg.Fatal("no heater subcommand specified");
-            exit(1);
+	  lg.Info("printing heater info");
+         
+	  update_archon_state(servdesc,client);
+	  
+	  auto output = get_heater_output(client,devid);
+	  auto PIDvec = get_heater_coeffs(client,devid);
+	  
+	  std::cout<<"output:" << output << std::endl;
+	  std::cout << "P:" << PIDvec[0] << std::endl;
+	  std::cout << "I:" << PIDvec[1] << std::endl;
+	  std::cout << "D:" << PIDvec[2] << std::endl;
+	  
+	  
+	  exit(0);
         }
         
         
@@ -82,18 +95,14 @@ int main(int argc, char** argv)
         {
             lg.Info("enabling heater");
             enable_disable_heater_output(client, devid, true);
+	    apply_settings(client,devid);
             exit(0);
         }
         else if( subcmd == "disable")
         {
             lg.Info("disabling heater");
             enable_disable_heater_output(client, devid, false);
-            exit(0);
-        }
-        else if(subcmd == "show")
-        {
-            lg.Info("print heater details");
-            
+	    apply_settings(client,devid);
             exit(0);
         }
         else if(subcmd == "target")
@@ -102,6 +111,7 @@ int main(int argc, char** argv)
             {
                 lg.Info("printing heater target");
                 auto tgt = get_heater_target(client,devid);
+		std::cout << tgt << std::endl;
                 exit(0);
             }
             
@@ -112,6 +122,7 @@ int main(int argc, char** argv)
             
             lg.Debug("target value: " + std::to_string(val));
             set_heater_target(client,devid,val);
+	    apply_settings(client,devid);
             exit(0);
                 
         }
@@ -159,7 +170,26 @@ int main(int argc, char** argv)
     }
     
     
-    
+    else if(cmd == "temp")
+    {
+	auto devid = find_archon_heater(servdesc);
+        if(devid < 0)
+        {
+            lg.Fatal("no archon heater found on server");
+            exit(1);
+        }
+        
+        
+        update_archon_state(servdesc,client);
+	
+	auto temps = get_temperatures(client,devid);
+	
+	std::cout << "tank:" << temps.first << std::endl;
+	std::cout << "stage:" << temps.second << std::endl;
+	
+	
+        
+    }
     
 
 

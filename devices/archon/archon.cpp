@@ -230,8 +230,12 @@ const ssmap& devices::archon::getSystem() const
 
 void devices::archon::update_state()
 {
+  
+  std::cout << "system.." << std::endl;
   _system = parse_parameter_response(cmd("SYSTEM"));
+  std::cout << "status.." << std::endl;
   _status = parse_parameter_response(cmd("STATUS"));
+  std::cout << "frame.." << std::endl;
   _frame = parse_parameter_response(cmd("FRAME"));
   
   for(auto& mod: _modules)

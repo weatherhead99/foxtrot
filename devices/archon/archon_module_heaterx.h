@@ -28,7 +28,7 @@ namespace devices
   
     class ArchonHeaterX : public ArchonModule
     {
-    RTTR_ENABLE()
+    RTTR_ENABLE(ArchonModule)
       friend class archon;
 
     virtual const string getDeviceTypeName() const;
