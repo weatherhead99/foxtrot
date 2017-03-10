@@ -45,7 +45,8 @@ int main(int argc, char** argv)
     auto cmd = vm["cmd"].as<std::string>();
     if(cmd == "heater")
     {
-        if(!find_archon_heater(servdesc))
+        auto devid = find_archon_heater(servdesc);
+        if(devid < 0)
         {
             lg.Fatal("no archon heater found on server");
             exit(1);
@@ -80,13 +81,13 @@ int main(int argc, char** argv)
         if(subcmd == "enable")
         {
             lg.Info("enabling heater");
-            
+            enable_disable_heater_output(client, devid, true);
             exit(0);
         }
         else if( subcmd == "disable")
         {
             lg.Info("disabling heater");
-            
+            enable_disable_heater_output(client, devid, false);
             exit(0);
         }
         else if(subcmd == "show")
@@ -100,7 +101,7 @@ int main(int argc, char** argv)
             if(!vm.count("value"))
             {
                 lg.Info("printing heater target");
-                
+                auto tgt = get_heater_target(client,devid);
                 exit(0);
             }
             
@@ -110,7 +111,7 @@ int main(int argc, char** argv)
             auto val = std::stod(strval);
             
             lg.Debug("target value: " + std::to_string(val));
-            
+            set_heater_target(client,devid,val);
             exit(0);
                 
         }

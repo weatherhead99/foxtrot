@@ -29,7 +29,7 @@ int find_archon_heater(const foxtrot::servdescribe& cl)
 void enable_disable_heater_output(foxtrot::Client& cl, int devid, bool onoff)
 {
     std::vector<foxtrot::ft_variant> args{0, onoff  };
-    auto response = cl.InvokeCapability(devid,"setHeaterEnable",args.begin(), args.end());
+    cl.InvokeCapability(devid,"setHeaterEnable",args.begin(), args.end());
     
 }
 
@@ -50,6 +50,12 @@ double get_heater_target(foxtrot::Client& cl, int devid)
     
 }
 
+void set_heater_target(foxtrot::Client& cl, int devid, double target)
+{
+    std::vector<foxtrot::ft_variant> args{0, target};
+    cl.InvokeCapability(devid,"setHeaterTarget", args.begin(), args.end());
+    
+}
 
 
 
