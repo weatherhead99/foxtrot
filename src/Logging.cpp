@@ -12,7 +12,8 @@
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <boost/smart_ptr/make_shared_object.hpp>
 
-#include <boost/core/null_deleter.hpp>
+//#include <boost/core/null_deleter.hpp>
+
 #include <boost/log/utility/setup/common_attributes.hpp>
 
 
@@ -47,7 +48,10 @@ void foxtrot::setDefaultSink()
     
     auto sink = boost::make_shared<text_sink>();
     
-    boost::shared_ptr< std::ostream > stream(&std::clog, boost::null_deleter());
+//     boost::shared_ptr< std::ostream > stream(&std::clog, boost::null_deleter());
+    
+    boost::shared_ptr<std::ostream> stream(&std::clog, [] (decltype(&std::clog) lg) {});
+    
     sink->locked_backend()->add_stream(stream);
     
     logging::core::get()->add_sink(sink);
