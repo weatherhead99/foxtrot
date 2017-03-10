@@ -2,7 +2,7 @@
 #include <algorithm>
 
 
-bool find_archon_heater(const foxtrot::servdescribe& cl)
+int find_archon_heater(const foxtrot::servdescribe& cl)
 {
     
     auto heater = std::find_if(cl.devs_attached().begin(), cl.devs_attached().end(),
@@ -16,15 +16,40 @@ bool find_archon_heater(const foxtrot::servdescribe& cl)
                             }
                        );
     
-    return false;
+    if(heater == cl.devs_attached().end())
+    {
+        return -1;
+    }
+    
+    return heater->first;
+    
     
 }
 
-void enable_disable_heater_output(foxtrot::Client& cl)
+void enable_disable_heater_output(foxtrot::Client& cl, int devid, bool onoff)
 {
-    std::vector<foxtrot::ft_variant> args{2};
-    
+    std::vector<foxtrot::ft_variant> args{0, onoff  };
+    auto response = cl.InvokeCapability(devid,"setHeaterEnable",args.begin(), args.end());
     
 }
+
+
+bool is_heater_enabled(foxtrot::Client& cl, int devid)
+{
+    std::vector<foxtrot::ft_variant> args{0};
+    auto resp = cl.InvokeCapability(devid,"getHeaterEnable",args.begin(), args.end());
+    return boost::get<bool>(resp);
+}
+
+
+double get_heater_target(foxtrot::Client& cl, int devid)
+{
+    std::vector<foxtrot::ft_variant> args{0};
+    auto resp = cl.InvokeCapability(devid,"getHeaterTarget",args.begin(), args.end());
+    return boost::get<double>(resp);
+    
+}
+
+
 
 
