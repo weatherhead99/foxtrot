@@ -283,7 +283,7 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                     auto& mut = _harness.GetMutex(devid);
                     std::lock_guard<std::mutex> lock(mut);
                     bool success;
-                    auto arg = get_arg(req.args()[0],success);
+                    auto arg = get_arg(req.args().Get(0),success);
                     prop.set_value(*dev,arg);
                     }
                     else if(req.args_size() == 0)
