@@ -2,15 +2,14 @@
 #include <iostream>
 
 foxtrot::ServerDescribeLogic::ServerDescribeLogic(const std::string& comment, foxtrot::DeviceHarness& harness)
-: _servcomment(comment), _harness(harness)
+: _servcomment(comment), _harness(harness), _lg("ServerDescribeLogic")
 {
 }
 
 
 void foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl)
 {
-  
-      std::cout << "processing server describe request" << std::endl;
+      _lg.Debug("processing server describe request");
       
       repl.set_servcomment(_servcomment);
       

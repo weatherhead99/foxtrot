@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 #include "DeviceHarness.h"
-
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -24,7 +24,7 @@ namespace foxtrot
  private:
   std::string _servcomment;
   DeviceHarness& _harness;
-  
+  Logging _lg;
   
  };
     

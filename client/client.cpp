@@ -100,10 +100,11 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
 
 
 foxtrot::Client::Client(const std::string& connstr)
+: _lg("foxtrotClient")
 {
     _channel = grpc::CreateChannel(connstr,grpc::InsecureChannelCredentials());
     
-    std::cout << "connect status: " << _channel->GetState(true) << std::endl;
+    _lg.Debug("connect status: " + std::to_string(_channel->GetState(true)));
     _stub = exptserve::NewStub(_channel);
     
 }
@@ -119,7 +120,7 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     servdescribe repl;
     empty req;
     
-    std::cout << "invoking describe RPC..." << std::endl;
+    _lg.Debug("invoking describe RPC...");
     
     grpc::ClientContext ctxt;
     auto status = _stub->DescribeServer(&ctxt, req,&repl);

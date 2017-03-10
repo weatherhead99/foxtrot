@@ -11,6 +11,7 @@
 #include <grpc++/grpc++.h>
 #include "foxtrot.grpc.pb.h"
 
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -53,6 +54,7 @@ namespace foxtrot
         std::unique_ptr<exptserve::Stub> _stub;
         std::shared_ptr<grpc::Channel> _channel;
         int _msgid = 0;
+        Logging _lg;
  
     };
     
