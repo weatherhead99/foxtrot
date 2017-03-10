@@ -45,7 +45,7 @@ namespace foxtrot {
     
     
     int writeConfigLine(const std::string& line, int num=-1);
-    std::string readConfigLine(int num);
+    std::string readConfigLine(int num,bool override_existing=false);
     
     
     void writeKeyValue(const std::string& key, const std::string& val);
@@ -90,6 +90,7 @@ namespace foxtrot {
     
     
   private:
+      void read_parse_existing_config();
     
     short unsigned _order;
     std::shared_ptr<simpleTCP> _specproto;

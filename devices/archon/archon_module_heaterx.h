@@ -38,13 +38,13 @@ namespace devices
         
     double getHeaterAOutput() const;
     double getHeaterBOutput() const;
-    double getHeaterAP() const;
-    double getHeaterAI() const;
-    double getHeaterAD() const;
+    int getHeaterAP() const;
+    int getHeaterAI() const;
+    int getHeaterAD() const;
     
-    double getHeaterBP() const;
-    double getHeaterBI() const;
-    double getHeaterBD() const;
+    int getHeaterBP() const;
+    int getHeaterBI() const;
+    int getHeaterBD() const;
     
     
     double getTempA() const;
@@ -115,13 +115,13 @@ namespace devices
     double _TempB;
     double _TempC;
     
-    double _heaterAP;
-    double _heaterAI;
-    double _heaterAD;
+    int _heaterAP;
+    int _heaterAI;
+    int _heaterAD;
     
-    double _heaterBP;
-    double _heaterBI;
-    double _heaterBD;
+    int _heaterBP;
+    int _heaterBI;
+    int _heaterBD;
     
     std::array<bool,8> _GPIO;
         

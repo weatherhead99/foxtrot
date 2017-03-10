@@ -70,35 +70,35 @@ double devices::ArchonHeaterX::getTempC() const
   return _TempC;
 }
 
-double devices::ArchonHeaterX::getHeaterAP() const
+int devices::ArchonHeaterX::getHeaterAP() const
 {
   return _heaterAP;
 
 }
 
-double devices::ArchonHeaterX::getHeaterAI() const
+int devices::ArchonHeaterX::getHeaterAI() const
 {
   return _heaterAI;
   
 }
 
-double devices::ArchonHeaterX::getHeaterAD() const
+int devices::ArchonHeaterX::getHeaterAD() const
 {
   return _heaterAD;
 }
 
-double devices::ArchonHeaterX::getHeaterBP() const
+int devices::ArchonHeaterX::getHeaterBP() const
 {
   return _heaterBP;
 }
 
 
-double devices::ArchonHeaterX::getHeaterBI() const
+int devices::ArchonHeaterX::getHeaterBI() const
 {
   return _heaterBI;
 }
 
-double devices::ArchonHeaterX::getHeaterBD() const
+int devices::ArchonHeaterX::getHeaterBD() const
 {
   return _heaterBD;
 }

@@ -302,9 +302,9 @@ int devices::archon::writeConfigLine(const string& line,int num)
 
 
 
-std::string devices::archon::readConfigLine(int num)
+std::string devices::archon::readConfigLine(int num, bool override_existing)
 {
-  if( num > _config_lines)
+  if( num > _config_lines && !override_existing)
   {
     throw std::logic_error("tried to read an archon config line that we don't think exists...");
   };
@@ -488,6 +488,38 @@ void foxtrot::devices::archon::lockbuffer(int buf)
 void foxtrot::devices::archon::unlockbuffers()
 {
     cmd("LOCK0");
+}
+
+void foxtrot::devices::archon::read_parse_existing_config()
+{
+    //NOTE: need to write at least one config line because reading empty config results in infinite loop
+    
+    writeKeyValue("RAWSTARTPIXEL","0");
+    
+    for(int i =0 ; i < 2048; i++)
+    {
+        auto confline = readConfigLine(i,true);
+        if(confline.size() == 0)
+        {
+            break;
+        }
+        
+        auto eqpos = std::find(confline.begin(), confline.end(),'=');
+        if(eqpos == confline.end())
+        {
+            throw DeviceError("malformed config line returned from archon");    
+        };
+  
+        auto key = string(confline.begin(),eqpos);
+        auto val = string(eqpos+1,confline.end());
+  
+        _configlinemap.insert({key,i});
+        
+    }
+    
+    
+    
+    
 }
 
 

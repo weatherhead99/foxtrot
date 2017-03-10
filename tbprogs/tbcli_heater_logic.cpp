@@ -81,9 +81,9 @@ void update_archon_state(const foxtrot::servdescribe& cl, foxtrot::Client& cli)
 
 std::vector< int > get_heater_coeffs(foxtrot::Client& cl, int devid)
 {
-  auto P = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAP"));
-  auto I = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAI"));
-  auto D = boost::get<double>(cl.InvokeCapability(devid,"getHeaterAD"));
+  auto P = boost::get<int>(cl.InvokeCapability(devid,"getHeaterAP"));
+  auto I = boost::get<int>(cl.InvokeCapability(devid,"getHeaterAI"));
+  auto D = boost::get<int>(cl.InvokeCapability(devid,"getHeaterAD"));
   
   return std::vector<int>{P,I,D};
 
