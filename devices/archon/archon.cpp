@@ -87,8 +87,8 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    
   }
   
-  //TODO: clear config on init, because otherwise we have no idea what's in there
-  clear_config();
+  //NOTE: this used to clear existing config
+  read_parse_existing_config();
   
   //setup lines, timing lines etc...
   set_timing_lines(0);
