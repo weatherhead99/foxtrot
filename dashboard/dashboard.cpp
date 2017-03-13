@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv)
 {
-    backward::SignalHandling sh;
+//     backward::SignalHandling sh;
     QApplication app(argc,argv);
     
     Dashboard dash;

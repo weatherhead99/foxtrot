@@ -21,6 +21,8 @@ public slots:
     
     
 private:
+    void rethrow_error(std::exception_ptr pt);
+    
     Ui::MainWindow ui;
     foxtrot::Client * _client;
 };

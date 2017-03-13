@@ -3,7 +3,7 @@
 #include <future>
 #include <thread>
 #include <chrono>
-
+#include <exception>
 
 Dashboard::Dashboard(QWidget* parent)
 : QMainWindow(parent)
@@ -27,17 +27,39 @@ Dashboard::~Dashboard()
 
 void Dashboard::connectServer()
 {
+    
     auto async_connect_client = [this] () {
-        ui.statusbar->showMessage("connecting...");
-      _client = new foxtrot::Client("localhost:50051");
-      ui.statusbar->showMessage("connected to server");
-      
-      
         
+        try{
+        ui.statusbar->showMessage("connecting...");      
+      _client = new foxtrot::Client("localhost:50051");
+      ui.statusbar->showMessage("connected to server"); 
+
+      ui.statusbar->showMessage("finding archon heater device...");
+      
+      auto servdesc = _client->DescribeServer();
+      
+        }
+        catch(...)
+        {
+            ui.statusbar->showMessage("caught exception...");
+            
+         rethrow_error(std::current_exception());   
+            
+        }
+      
+      
     };
     
-    std::async(async_connect_client);
+    auto result = std::async(std::launch::async,async_connect_client);
+    
     
 }
 
 
+void Dashboard::rethrow_error(std::exception_ptr pt)
+{
+    std::rethrow_exception(pt);
+    
+    
+}
