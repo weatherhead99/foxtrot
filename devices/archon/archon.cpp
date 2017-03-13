@@ -522,6 +522,21 @@ void foxtrot::devices::archon::read_parse_existing_config()
     
 }
 
+void foxtrot::devices::archon::holdTiming()
+{
+    cmd("HOLDTIMING");
+}
+
+void foxtrot::devices::archon::releaseTiming()
+{
+    cmd("RELEASETIMING");
+}
+
+void foxtrot::devices::archon::resetTiming()
+{
+    cmd("RESETTIMING");
+}
+
 
 
 

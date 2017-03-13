@@ -4,6 +4,7 @@
 #include "Logging.h"
 #include "backward.hpp"
 #include "tbcli_heater_logic.h"
+#include "tbcli_pressure_logic.h"
 
 int main(int argc, char** argv)
 {
@@ -186,8 +187,24 @@ int main(int argc, char** argv)
 	
 	std::cout << "tank:" << temps.first << std::endl;
 	std::cout << "stage:" << temps.second << std::endl;
-	
-	
+	    
+    }
+    
+    else if(cmd == "pressure")
+    {
+     auto devid = find_pressure_gauge(servdesc);
+     if(devid < 0)
+     {
+         lg.Fatal("no TPG362 gauge controller found on server");
+         exit(1);
+     }
+     
+     auto pres_cryo = get_cryostat_pressure(client,devid);
+     auto pres_pump = get_cryostat_pressure(client,devid);
+     
+     std::cout << "cryostat:" << pres_cryo   << std::endl;
+     std::cout << "pump:" << pres_pump << std::endl;
+        
         
     }
     

@@ -81,6 +81,10 @@ namespace foxtrot {
     
     bool isbuffercomplete(int buf);
     
+    void holdTiming();
+    void releaseTiming();
+    void resetTiming();
+    
     
   protected:
     virtual std::string cmd(const std::string& request) override;

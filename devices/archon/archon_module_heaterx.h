@@ -102,6 +102,7 @@ namespace devices
     void setSensorLabel(HeaterXSensors sensor, const string& label);
     string getSensorLabel(HeaterXSensors sensor);
     
+    
     virtual const string getTypeName() const;	
     
     private:
