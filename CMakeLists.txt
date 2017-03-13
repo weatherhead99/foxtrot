@@ -12,6 +12,7 @@ option(BUILD_TESTS "build test code" ON)
 option(BUILD_SERVER "build foxtrot server" ON)
 option(BUILD_SETUPS "build experimental setups" ON)
 option(BUILD_PROGS "build utility programs" ON)
+option(BUILD_DASHBOARD "build monitoring dashboard program" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
@@ -65,6 +66,10 @@ if(BUILD_PROGS)
 add_subdirectory(tbprogs)
 endif()
 
+
+if(BUILD_DASHBOARD)
+add_subdirectory(dashboard)
+endif()
 
 if(BUILD_TESTS)  
   add_subdirectory(test)
