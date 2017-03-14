@@ -73,6 +73,9 @@ namespace devices
     void setHeaterEnable(HeaterXHeaters heater, bool onoff);
     bool getHeaterEnable(HeaterXHeaters heater);
     
+    void setHeaterLimit(HeaterXHeaters heater, double lim);
+    double getHeaterLimit(HeaterXHeaters heater);
+    
     
     //TODO: value validation on all of these!
     void setHeaterP(HeaterXHeaters heater, int p);

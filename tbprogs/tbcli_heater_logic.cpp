@@ -30,6 +30,7 @@ void enable_disable_heater_output(foxtrot::Client& cl, int devid, bool onoff)
 {
     std::vector<foxtrot::ft_variant> args{0, onoff  };
     cl.InvokeCapability(devid,"setHeaterEnable",args.begin(), args.end());
+    cl.InvokeCapability(devid,"apply");
     
 }
 

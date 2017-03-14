@@ -4,7 +4,7 @@
 #include "devices/archon/archon_module_heaterx.h"
 
 #include "protocols/simpleTCP.h"
-
+#include "DeviceError.h"
 #include "protocols/SerialPort.h"
 #include "devices/TPG362/TPG362.h"
 
@@ -63,11 +63,33 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setHeaterD(HeaterXHeaters::A, 8000);
     heater->setHeaterUpdateTime(2000);
     
+    heater->setHeaterRamp(HeaterXHeaters::A, false);
+    heater->setHeaterRampRate(HeaterXHeaters::A, 1);
+    
     heater->setHeaterSensor(HeaterXHeaters::A, HeaterXSensors::B);
+    heater->setHeaterLabel(HeaterXHeaters::A, "stage");
     
     heater->setHeaterTarget(HeaterXHeaters::A, -100.);
+    heater->setHeaterLimit(HeaterXHeaters::A, 25.);
+    
+    heater->apply();
+    
+    try{
     
     archon->applyall();
+    }
+    catch(class foxtrot::DeviceError& err)
+    {
+      auto archon_logs = archon->fetch_all_logs();
+      
+      for(auto& log : archon_logs)
+      {
+	std::cout << "archon log: " << log << std::endl;
+      };
+      
+      throw err;
+      
+    }
     
     archon->set_power(true);
     

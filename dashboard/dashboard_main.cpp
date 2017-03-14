@@ -102,6 +102,16 @@ void Dashboard::updateTempReadings()
   ui.tank_temp_display->display(tank_temp);
   ui.stage_temp_display->display(stage_temp);
   
+  
+  std::vector<foxtrot::ft_variant> args{0};
+  auto heater_target = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterTarget",args.begin(),args.end()));
+  
+  auto heater_output = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterAOutput"));
+  
+  ui.heater_output->display(heater_output / 25. * 100);
+  ui.heater_target->display(heater_target);
+  
+  
   auto now = QDateTime::currentDateTime();
   
   ui.statusbar->showMessage("last update: " + now.toString());

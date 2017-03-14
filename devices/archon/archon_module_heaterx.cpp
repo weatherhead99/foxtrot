@@ -430,6 +430,23 @@ int devices::ArchonHeaterX::getHeaterRampRate(devices::HeaterXHeaters heater)
   return std::stoi(readConfigKey(oss.str()));
 }
 
+double ArchonHeaterX::getHeaterLimit(HeaterXHeaters heater)
+{
+  std::ostringstream oss;
+  oss <<"HEATER" << static_cast<char>(heater) << "LIMIT";
+  return std::stoi(readConfigKey(oss.str()));
+
+}
+
+void ArchonHeaterX::setHeaterLimit(HeaterXHeaters heater, double lim)
+{
+  std::ostringstream oss;
+  oss << "HEATER" << static_cast<char>(heater) << "LIMIT";
+  writeConfigKey(oss.str(),std::to_string(lim));
+
+}
+
+
 
 int heater_to_int(devices::HeaterXHeaters heater, bool& success)
 {
