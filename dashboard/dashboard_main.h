@@ -1,5 +1,6 @@
 #pragma once
 #include <QWidget>
+#include <QTimer>
 #include "ui_dashboard_main.h"
 
 namespace foxtrot
@@ -16,13 +17,18 @@ public:
     
 public slots:
     void connectServer();
-//     void updateTempReadings();
-  
+    void updateTempReadings();
+    void setautoupdate(bool onoff);
+    
     
     
 private:
     void rethrow_error(std::exception_ptr pt);
-    
+    QTimer _timer;
     Ui::MainWindow ui;
     foxtrot::Client * _client;
+    int _heater_devid = -1;
+    int _presgauge_devid = -1;
+    int _archon_devid = -1;
+    
 };

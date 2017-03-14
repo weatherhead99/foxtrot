@@ -4,6 +4,8 @@
 #include "DeviceError.h"
 #include "ProtocolError.h"
 
+#include <algorithm>
+
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)
 {
@@ -77,7 +79,7 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     switch(rettp)
     {
         case(capability_response::ReturnCase::kDblret):
-            std::cout << "double" << std::endl;
+//             std::cout << "double" << std::endl;
             out = repl.dblret();
             break;
         case(capability_response::ReturnCase::kIntret):
@@ -93,8 +95,31 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     
     return out;
     
+
 }
 
+int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp)
+{
+    auto device = std::find_if(sd.devs_attached().begin(), sd.devs_attached().end(),
+                               [&devtp] (decltype(*sd.devs_attached().begin())& val) 
+                               {
+                                   if(val.second.devtype() == devtp)
+                                   {
+                                       return true;
+                                   }
+                                   return false;
+                            }
+                       );
+  if (device == sd.devs_attached().end())
+  {
+    
+    return -1;
+  }
+
+  return device->first;
+  
+
+}
 
 
 

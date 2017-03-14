@@ -27,7 +27,7 @@ int find_pressure_gauge(const foxtrot::servdescribe& cl)
 
 double get_cryostat_pressure(foxtrot::Client& cl, int devid)
 {
-    std::vector<foxtrot::ft_variant> args{0};
+    std::vector<foxtrot::ft_variant> args{1};
     auto pres = boost::get<double>(cl.InvokeCapability(devid,"getPressure",args.begin(),args.end()));
     
     return pres;
@@ -35,7 +35,7 @@ double get_cryostat_pressure(foxtrot::Client& cl, int devid)
 
 double get_pump_pressure(foxtrot::Client& cl, int devid)
 {
-    std::vector<foxtrot::ft_variant> args{1};
+    std::vector<foxtrot::ft_variant> args{2};
     auto pres = boost::get<double>(cl.InvokeCapability(devid,"getPressure",args.begin(), args.end()));
     
     return pres;

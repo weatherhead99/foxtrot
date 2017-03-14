@@ -200,7 +200,7 @@ int main(int argc, char** argv)
      }
      
      auto pres_cryo = get_cryostat_pressure(client,devid);
-     auto pres_pump = get_cryostat_pressure(client,devid);
+     auto pres_pump = get_pump_pressure(client,devid);
      
      std::cout << "cryostat:" << pres_cryo   << std::endl;
      std::cout << "pump:" << pres_pump << std::endl;

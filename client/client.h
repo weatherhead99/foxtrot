@@ -37,6 +37,8 @@ namespace foxtrot
     
     ft_variant ft_variant_from_response(const capability_response& repl);
     
+    
+    
     class Client
     {
     public:
@@ -58,6 +60,7 @@ namespace foxtrot
  
     };
     
+    int find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp);
     template<typename iteratortp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
     {
         

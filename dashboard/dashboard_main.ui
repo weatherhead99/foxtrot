@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="1" column="1">
-     <widget class="QLCDNumber" name="lcdNumber"/>
+     <widget class="QLCDNumber" name="stage_temp_display"/>
     </item>
     <item row="0" column="1">
      <widget class="QLCDNumber" name="tank_temp_display">
@@ -32,7 +32,7 @@
      <widget class="QLabel" name="stage_label">
       <property name="font">
        <font>
-        <pointsize>18</pointsize>
+        <pointsize>24</pointsize>
        </font>
       </property>
       <property name="text">
@@ -44,11 +44,31 @@
      <widget class="QLabel" name="tank_label">
       <property name="font">
        <font>
-        <pointsize>18</pointsize>
+        <pointsize>24</pointsize>
        </font>
       </property>
       <property name="text">
        <string>tank temperature (C)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QSpinBox" name="updatetimeout">
+      <property name="minimum">
+       <number>500</number>
+      </property>
+      <property name="maximum">
+       <number>20000</number>
+      </property>
+      <property name="value">
+       <number>2000</number>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>auto update timeout (ms)</string>
       </property>
      </widget>
     </item>
@@ -60,7 +80,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -68,6 +88,8 @@
      <string>Fi&amp;le</string>
     </property>
     <addaction name="actionConnect"/>
+    <addaction name="actionManual_update"/>
+    <addaction name="actionAuto_update"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -75,6 +97,19 @@
   <action name="actionConnect">
    <property name="text">
     <string>Connect</string>
+   </property>
+  </action>
+  <action name="actionManual_update">
+   <property name="text">
+    <string>manual update</string>
+   </property>
+  </action>
+  <action name="actionAuto_update">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>auto update</string>
    </property>
   </action>
  </widget>

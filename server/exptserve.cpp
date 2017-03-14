@@ -5,6 +5,7 @@
 #include <memory>
 #include <iostream>
 #include "ExperimentalSetup.h"
+#include <backward.hpp>
 
 using namespace foxtrot;
 using std::cout;
@@ -16,6 +17,7 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
+  backward::SignalHandling sh;
   std::string setupfile;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()

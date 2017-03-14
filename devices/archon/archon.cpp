@@ -33,6 +33,10 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
     _order(0)
 {
   proto->Init(nullptr);
+  
+  //NOTE: this used to clear existing config
+  read_parse_existing_config();
+  
 
   //update the stateful dictionaries
   update_state();
@@ -87,8 +91,6 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    
   }
   
-  //NOTE: this used to clear existing config
-  read_parse_existing_config();
   
   //setup lines, timing lines etc...
   set_timing_lines(0);
@@ -289,7 +291,7 @@ int devices::archon::writeConfigLine(const string& line,int num)
   }
   else if(num > _config_lines)
   {
-    throw std::logic_error("trying to overwrite a config line" + std::to_string(num) + " that doesn't exist yet");
+    throw std::logic_error("trying to overwrite a config line " + std::to_string(num) + " that doesn't exist yet");
   };
   
   std::ostringstream oss;
@@ -310,7 +312,7 @@ std::string devices::archon::readConfigLine(int num, bool override_existing)
   };
   
   std::ostringstream oss;
-  oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::hex << num ;
+  oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase << std::hex << num ;
   auto repl = cmd(oss.str());
   
   return repl;
@@ -496,7 +498,8 @@ void foxtrot::devices::archon::read_parse_existing_config()
     
     writeKeyValue("RAWSTARTPIXEL","0");
     
-    for(int i =0 ; i < 2048; i++)
+    int i;
+    for(i =0 ; i < 2048; i++)
     {
         auto confline = readConfigLine(i,true);
         if(confline.size() == 0)
@@ -517,6 +520,7 @@ void foxtrot::devices::archon::read_parse_existing_config()
         
     }
     
+    _config_lines = i;
     
     
     

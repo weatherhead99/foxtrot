@@ -4,15 +4,23 @@
 #include <thread>
 #include <chrono>
 #include <exception>
+#include <QDateTime>
+
 
 Dashboard::Dashboard(QWidget* parent)
-: QMainWindow(parent)
+: QMainWindow(parent), _timer(this)
 {
+ 
+ 
+  
     ui.setupUi(this);
     
     ui.statusbar->showMessage("starting up");
     
     QObject::connect(ui.actionConnect, &QAction::triggered, this, &Dashboard::connectServer);
+    QObject::connect(ui.actionManual_update, &QAction::triggered, this, &Dashboard::updateTempReadings);
+    QObject::connect(ui.actionAuto_update, &QAction::toggled, this, &Dashboard::setautoupdate);
+    QObject::connect(&_timer,&QTimer::timeout, this, &Dashboard::updateTempReadings);
     
 }
 
@@ -39,13 +47,30 @@ void Dashboard::connectServer()
       
       auto servdesc = _client->DescribeServer();
       
+      _heater_devid = foxtrot::find_devid_on_server(servdesc,"ArchonHeaterX");
+      if(_heater_devid < 0)
+      {
+	ui.statusbar->showMessage("no heater module found");
+      }
+      _presgauge_devid = foxtrot::find_devid_on_server(servdesc, "TPG362");
+      if(_presgauge_devid < 0)
+      {
+	ui.statusbar->showMessage("no pressure gauge found");
+      }
+      
+      _archon_devid = foxtrot::find_devid_on_server(servdesc,"archon");
+      if(_archon_devid < 0)
+      {
+	ui.statusbar->showMessage("no archon found");
+      }
+      
+      
+      
         }
         catch(...)
         {
             ui.statusbar->showMessage("caught exception...");
-            
-         rethrow_error(std::current_exception());   
-            
+	    rethrow_error(std::current_exception());   
         }
       
       
@@ -55,6 +80,51 @@ void Dashboard::connectServer()
     
     
 }
+
+void Dashboard::updateTempReadings()
+{
+  if(_heater_devid < 0 || _presgauge_devid < 0 || _archon_devid < 0)
+  {
+   ui.statusbar->showMessage("no devices setup, cannot update");
+   return;
+  }
+  
+  if(!_client)
+  {
+    ui.statusbar->showMessage("no client setup, cannot update");
+    return; 
+  }
+  
+  _client->InvokeCapability(_archon_devid,"update_state");
+  auto tank_temp = boost::get<double>(_client->InvokeCapability(_heater_devid,"getTempA"));
+  auto stage_temp = boost::get<double>(_client->InvokeCapability(_heater_devid,"getTempB"));
+
+  ui.tank_temp_display->display(tank_temp);
+  ui.stage_temp_display->display(stage_temp);
+  
+  auto now = QDateTime::currentDateTime();
+  
+  ui.statusbar->showMessage("last update: " + now.toString());
+  
+}
+
+void Dashboard::setautoupdate(bool onoff)
+{
+  if(onoff)
+  {
+    ui.statusbar->showMessage("auto update enabling");
+    _timer.start(ui.updatetimeout->value());
+    
+  }
+  else
+  {
+    ui.statusbar->showMessage("auto update disabling");
+    _timer.stop();
+  }
+  
+  
+}
+
 
 
 void Dashboard::rethrow_error(std::exception_ptr pt)
