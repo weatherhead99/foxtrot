@@ -42,6 +42,20 @@ namespace foxtrot
     class Client
     {
     public:
+	class capability_proxy
+	{
+	  friend class Client;
+	  ft_variant operator()(std::initializer_list<ft_variant> args);
+	protected:
+	  capability_proxy(Client& cl, int devid, const std::string& capname);
+	  
+	private:
+	  Client& _clientbackref;
+	  std::string _capname;
+	  int _devid;
+	};
+      
+      
         Client(const std::string& connstr);
         ~Client();
         servdescribe DescribeServer();
@@ -49,7 +63,10 @@ namespace foxtrot
         
         template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);
         ft_variant InvokeCapability(int devid, const std::string& capname);
-        
+	
+	ft_variant InvokeCapability(int devid, const std::string& capname, std::initializer_list<ft_variant> args);
+	
+        capability_proxy call(int devid, const std::string& capname);
         
         
     private:

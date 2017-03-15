@@ -170,3 +170,28 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
     
 }
 
+
+foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_variant > args)
+{
+  return InvokeCapability(devid,capname, args);
+  
+
+}
+
+foxtrot::Client::capability_proxy::capability_proxy(foxtrot::Client& cl, int devid, const std::string& capname)
+: _clientbackref(cl),_devid(devid), _capname(capname)
+{
+
+}
+
+foxtrot::ft_variant foxtrot::Client::capability_proxy::operator()(std::initializer_list< foxtrot::ft_variant > args)
+{
+ return _clientbackref.InvokeCapability(_devid,_capname,args);
+}
+
+
+foxtrot::Client::capability_proxy foxtrot::Client::call(int devid, const std::string& capname)
+{
+  return capability_proxy(*this, devid,capname);
+  
+}
