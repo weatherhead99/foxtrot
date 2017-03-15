@@ -75,6 +75,9 @@ namespace foxtrot {
     
     void load_timing_script(const std::string& script);
     
+    void write_timing_state(const std::string& name, const std::string& state);
+    
+    
     
     void lockbuffer(int buf);
     void unlockbuffers();
@@ -84,6 +87,15 @@ namespace foxtrot {
     void holdTiming();
     void releaseTiming();
     void resetTiming();
+    
+    void setParam(const std::string& name, unsigned val);
+    unsigned getParam(const std::string& name);
+    
+    void setConstant(const std::string& name, unsigned val);
+    unsigned getConstant(const std::string& name);
+    
+    void apply_param(const std::string& name);
+    void apply_all_params();
     
     
   protected:
@@ -105,9 +117,14 @@ namespace foxtrot {
     
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     
-    std::map<const std::string, int> _configlinemap;
+    std::map<std::string, int> _configlinemap;
+    
+    std::vector<std::string> _statenames;
+    
     
     int _config_lines =0;
+    
+    int _states = 0;
     
     
   };

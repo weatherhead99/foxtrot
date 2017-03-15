@@ -35,7 +35,10 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   proto->Init(nullptr);
   
   //NOTE: this used to clear existing config
-  read_parse_existing_config();
+  //TODO: still not reliable
+  
+//   read_parse_existing_config();
+  clear_config();
   
 
   //update the stateful dictionaries
@@ -460,7 +463,7 @@ void foxtrot::devices::archon::set_power(bool onoff)
 
 void foxtrot::devices::archon::load_timing_script(const std::string& script)
 {
-    std::stringstream ss;
+    std::stringstream ss(script);
     std::string to;
     
     int i=0;
@@ -474,6 +477,8 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
     set_timing_lines(i);
     
 }
+
+
 
 
 void foxtrot::devices::archon::lockbuffer(int buf)
@@ -541,6 +546,104 @@ void foxtrot::devices::archon::resetTiming()
     cmd("RESETTIMING");
 }
 
+unsigned int devices::archon::getConstant(const string& name)
+{
+  return std::stoul(readKeyValue(name));
+  
+}
+
+void devices::archon::setConstant(const string& name, unsigned int val)
+{
+  try
+  {
+    readKeyValue(name);
+  }
+  catch(std::runtime_error& err)
+  {
+   //NOTE: key is not in registry 
+    set_constants(get_constants()  +1);
+  }
+  
+  writeKeyValue(name,std::to_string(val));
+}
+
+
+unsigned int devices::archon::getParam(const string& name)
+{
+  return std::stoul(readKeyValue(name));
+
+}
+
+
+void devices::archon::setParam(const string& name, unsigned int val)
+{
+  bool newparam = false;
+  try
+  {
+    readKeyValue(name);
+  }
+  catch(std::runtime_error& err)
+  {
+   //NOTE: key is not in registry 
+    newparam = true;
+  }
+  
+  writeKeyValue(name,std::to_string(val));
+
+  //NOTE: do this last for exception safety
+  if(newparam)
+  {
+    set_parameters(get_parameters() + 1);
+  }
+  
+  
+}
+
+void devices::archon::write_timing_state(const string& name, const string& state)
+{
+  std::stringstream ss(state);
+  std::string to;
+  bool newstate = ( std::find(_statenames.begin(), _statenames.end(), name)  == _statenames.end() );
+  
+  //NOTE: difference of 1 between index and number total
+  int this_state = newstate? get_states() : get_states() -1;
+  
+  
+  while(std::getline(ss,to,'\n'))
+  {
+     auto eqpos = std::find(to.begin(),to.end(),'=');
+     if(eqpos == to.end())
+     {
+       throw std::runtime_error("malformed timing state line: " + to);
+     }
+     
+     std::string configkey(to.begin(),eqpos);
+     configkey = "STATE" + std::to_string(this_state) + "/" + configkey; 
+     std::string val(eqpos + 1, to.end());
+     
+     writeKeyValue(configkey, val);
+  }
+  
+  //NOTE: do this now in case of exceptions
+  if(newstate)
+  {
+    set_states(get_states() + 1);
+  }
+   
+
+}
+
+void devices::archon::apply_all_params()
+{
+  cmd("LOADPARAMS");
+
+}
+
+void devices::archon::apply_param(const string& name)
+{
+  cmd("LOADPARAM " + name);
+
+}
 
 
 
@@ -558,7 +661,42 @@ RTTR_REGISTRATION
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
+ .method("getParam", &archon::getParam)
+ (
+   parameter_names("name")
+ )
+ .method("setParam",&archon::setParam)
+ (
+   parameter_names("name","val")
+   )
+ .method("getConstant",&archon::getConstant)
+ (
+   parameter_names("name")
+   )
+ .method("setConstant", &archon::setConstant)
+ (
+   parameter_names("name","val")
+   )
+
+ .method("apply_param", &archon::apply_param)
+ (
+   parameter_names("name")
+   )
+ .method("apply_all_params", &archon::apply_all_params)
+ .method("holdTiming", &archon::holdTiming)
+ .method("releaseTiming",&archon::releaseTiming)
+ .method("resetTiming", &archon::resetTiming)
+ .method("lockbuffer",&archon::lockbuffer)
+ (
+   parameter_names("buf")
+   )
+ .method("unlockbuffers",&archon::unlockbuffers)
+ .method("write_timing_state",&archon::write_timing_state)
+ (
+   parameter_names("name", "state")
+   )
  ;
+ 
     
     
     
