@@ -62,7 +62,7 @@ std::array< int, int(3) > OPMD_hlclient::get_heater_PID()
 
 double OPMD_hlclient::get_heater_target()
 {
- 
+  return boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterTarget",{0}));
 }
 
 double OPMD_hlclient::get_stage_temp()
@@ -84,6 +84,7 @@ void OPMD_hlclient::set_heater_onoff(bool onoff)
 
 bool OPMD_hlclient::get_heater_onoff()
 {
+  return boost::get<bool>(_client->InvokeCapability(_heater_devid,"getHeaterEnable",{0}));
 
 }
 
