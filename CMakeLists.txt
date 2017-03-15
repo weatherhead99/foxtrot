@@ -13,6 +13,7 @@ option(BUILD_SERVER "build foxtrot server" ON)
 option(BUILD_SETUPS "build experimental setups" ON)
 option(BUILD_PROGS "build utility programs" ON)
 option(BUILD_DASHBOARD "build monitoring dashboard program" ON)
+option(BUILD_OPMD "build OPMD high level client library" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
@@ -74,3 +75,7 @@ endif()
 if(BUILD_TESTS)  
   add_subdirectory(test)
 endif(BUILD_TESTS)	
+
+if(BUILD_OPMD)
+  add_subdirectory(OPMD)
+endif()
