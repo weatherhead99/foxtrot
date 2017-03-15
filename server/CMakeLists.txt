@@ -13,8 +13,9 @@ FetchDataImpl.cpp ExperimentalSetup.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
-target_link_libraries(foxtrotserv foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
+target_link_libraries(foxtrotserv PUBLIC foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
 ${ZLIB_LIBRARIES} ${dl} dummy)
+
 
 add_executable(exptserve exptserve.cpp)
 
@@ -28,4 +29,4 @@ target_include_directories(testClient PRIVATE ${CMAKE_SOURCE_DIR}/client/)
 
 add_executable(harnesstest harnesstest.cpp)
 target_include_directories(harnesstest PRIVATE ${CMAKE_SOURCE_DIR}/devices/dummy/)
-target_link_libraries(harnesstest foxtrot dummy foxtrotserv)
+target_link_libraries(harnesstest ${OPENSSL_LIBRARIES} foxtrot dummy foxtrotserv)
