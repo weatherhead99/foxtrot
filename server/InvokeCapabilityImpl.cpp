@@ -107,40 +107,7 @@ bool set_returntype(rttr::variant& retval, capability_response& repl)
 }
 
 
-rttr::variant get_arg(const capability_argument& arg, bool& success)
-{
-    success=true;
-    rttr::variant outarg;
-    auto which_type = arg.value_case();
-    cout << "arg type switch: " << which_type << endl;
-    
-    switch(which_type)
-    {
-    case(capability_argument::ValueCase::kDblarg):
-        outarg = arg.dblarg();
-        break;
-        
-    case(capability_argument::ValueCase::kIntarg):
-        outarg = arg.intarg();
-        break;
-        
-    case(capability_argument::ValueCase::kBoolarg):
-        
-        outarg = arg.boolarg();
-        break;
-    
-    case(capability_argument::ValueCase::kStrarg):
-        
-        outarg = arg.strarg();
-        break;
 
-    case(capability_argument::ValueCase::VALUE_NOT_SET):
-        success = false;
-    }
-
-//     cout << "outarg type: " << outarg.get_type().get_name() << endl;
-    return outarg;
-}
 
 
 void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)

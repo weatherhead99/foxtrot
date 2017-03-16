@@ -1,22 +1,14 @@
 #include "FetchDataImpl.h"
 #include "Device.h"
 
+#include "ServerUtil.h"
+
 foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 : _harness(harness)
 {
 }
 
 
-foxtrot::datachunk init_chunk(foxtrot::FetchDataLogic::reqtp& req)
-{
-  foxtrot::datachunk out;
-  out.set_msgid(req.msgid());
-  out.set_devid(req.devid());
-  out.set_capname(req.capname());
-    
-  return out;  
-  
-}
 
 
 void foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& writer)
@@ -32,7 +24,7 @@ void foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& writer)
     }
     catch(std::out_of_range& err)
     {
-        auto repl = init_chunk(req);
+        auto repl = init_chunk<foxtrot::datachunk>(req);
         
         auto errstat = repl.mutable_err();
         errstat->set_msg(err.what());
