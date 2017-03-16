@@ -1,4 +1,5 @@
 #include "DeviceHarness.h"
+#include "ServerUtil.h"
 
 #include <iostream>
 #include <utility>
@@ -12,35 +13,6 @@ using namespace foxtrot;
 using namespace rttr;
 
 
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
-{
-    
-    if(tp == type::get<void>())
-    {
-        return value_types::VOID;
-    }
-    
-    if(!tp.is_arithmetic())
-    {
-        return value_types::STRING;
-    }
-    
-    //check for bool
-    if(tp == type::get<bool>())
-    {
-        return value_types::BOOL;
-    }
-    
-    //check for float
-    if( (tp == type::get<double>()) || (tp == type::get<float>())) 
-    {
-        return value_types::FLOAT;
-    }
-    
-    return value_types::INT;
-    
-    
-}
 
 
 foxtrot::DeviceHarness::DeviceHarness()

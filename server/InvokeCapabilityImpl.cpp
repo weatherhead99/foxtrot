@@ -9,102 +9,18 @@
 #include <mutex>
 #include "ServerUtil.h"
 
+
 using std::cout;
 using std::endl;
 
 using namespace foxtrot;
 
 foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
-: _harness(harness)
+: _harness(harness), _lg("InvokeCapabilityLogic")
 {
 }
 
 
-template <typename T> bool foxtrot_error_checking(T fun, capability_response& repl)
-{
-             try{    
-                fun();
-                return true;
-         }
-         catch(class DeviceError& err)
-         {
-             set_repl_err(repl,err,error_types::DeviceError);
-             return false;
-         }
-         catch(class ProtocolError& err)
-         {
-             set_repl_err(repl,err,error_types::ProtocolError);
-             return false;
-         }
-         catch(std::out_of_range& err)
-         {
-             set_repl_err(repl,err,error_types::out_of_range);
-             return false;
-             
-         }
-         catch(std::exception& err)
-         {
-             set_repl_err(repl,err,error_types::Error);
-             return false;
-         }
-         catch(...)
-         {
-             auto errstat = repl.mutable_err();
-             errstat->set_msg("");
-             errstat->set_tp(error_types::unknown_error);
-             return false;
-             
-         }
-         ;
-             
-};
-
-
-bool set_returntype(rttr::variant& retval, capability_response& repl)
-{
-    
-    cout << "setting return type" << endl;
-        auto rettp = get_appropriate_wire_type(retval.get_type());
-        cout << "rettp is: "<< rettp << endl;
-            bool convertsuccess = true;
-         if(rettp == value_types::FLOAT)
-         {
-             cout << "it's a double!" << endl;
-            repl.set_dblret(retval.to_double(&convertsuccess));
-         }
-         else if (rettp == value_types::BOOL)
-         {
-             convertsuccess = retval.can_convert(rttr::type::get<bool>());
-             repl.set_boolret(retval.to_bool());
-         }
-         else if(rettp == value_types::INT)
-         {
-             cout << "int" << endl;
-             repl.set_intret(retval.to_int(&convertsuccess));
-         }
-         else if(rettp == value_types::STRING)
-         {
-             cout << "string" << endl;
-             repl.set_stringret(retval.to_string(&convertsuccess));
-         }
-         //if it's VOID, no need to set rettp
-         else if(rettp == value_types::VOID)
-	 {
-	    cout << "void" << endl;
-	    repl.set_stringret("");
-	   
-	 }
-         
-         if(!convertsuccess)
-         {
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg("couldn't successfully convert return type");
-             errstat->set_tp(error_types::Error);
-         };
-         
-         cout << "convertsuccess: "<< convertsuccess << endl;
-         return convertsuccess;
-}
 
 
 
@@ -160,87 +76,30 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
                 cout << "invalid method" << endl;
             }
             
-            std::cout << "method..." << std::endl;
-            auto args = req.args();
-            
-            std::vector<rttr::variant> argvec;
-            argvec.resize(args.size());
-            
-            //check parameter infos
-            auto param_infs = meth.get_parameter_infos();
-            
-            if(args.size() != param_infs.size())
-            {
-                cout << "unexpected number of arguments supplied" << endl;
-                errstatus* errstat = repl.mutable_err();
-                errstat->set_msg("incorrect number of arguments supplied");
-                errstat->set_tp(error_types::out_of_range);
-                return;
-            }
-            
-            
-            for(auto& arg: args)
-            {
-                bool success;
-                rttr::variant outarg = get_arg(arg,success);
-                
-                   
-                if(!success)
-                {          
-                    cout << "error in getting arguments..." << endl;
-                    errstatus* errstat = repl.mutable_err();
-                    errstat->set_msg("argument at position " + std::to_string(arg.position()) + "is not set");
-                    errstat->set_tp(error_types::Error);
-                        return;
-                }
-                
-                const auto target_argtp = param_infs[arg.position()].get_type();
-                if(!outarg.can_convert(target_argtp))
-                {
-                    cout << "error converting argument " << endl;
-                    errstatus* errstat = repl.mutable_err();
-                    errstat->set_msg("argument at position " + std::to_string(arg.position()) + 
-                    "cannot be converted to type " + target_argtp.get_name());
-                    errstat->set_tp(error_types::out_of_range);
-                    return;
-                    
-                }
-                
-                if(outarg.get_type() != target_argtp)
-                {
-                    cout << "WARNING: need to convert an arg from " << outarg.get_type().get_name() << " to " 
-                    << target_argtp.get_name() << endl;
-                    
-                };
-                
-                //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
-                success = outarg.convert(target_argtp);
-		
-                argvec[arg.position()] = outarg;
-                
-            };
-            
+            std::vector<rttr::argument> callargs;
+            try{
+	    callargs = get_callargs(meth,req,repl);
+	    }
+	    catch(int& i)
+	    {
+	      return;
+	    }
             
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
-            
-	    std::vector<rttr::argument> callargs(argvec.begin(), argvec.end());
+	    
 	    
             retval = meth.invoke_variadic(*dev,callargs);
-             
-// 	    cout << "signature: " << meth.get_signature() << endl;
                         
         }
         
         else
         {
-            //property
-            
+            //property            
                 if(prop.is_readonly())
                 {
 //                     cout << "readonly property" << endl;
                     retval = prop.get_value(*dev);
-                    
                 }
                 else
                 {

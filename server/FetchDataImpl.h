@@ -3,6 +3,7 @@
 #include "foxtrot.grpc.pb.h"
 #include "HandlerBase.h"
 #include "DeviceHarness.h"
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -18,6 +19,7 @@ namespace foxtrot
         
     private:
         DeviceHarness& _harness;
+	foxtrot::Logging _lg;
         
     };
     

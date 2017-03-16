@@ -12,8 +12,6 @@
 namespace foxtrot
 {
     
-    value_types get_appropriate_wire_type(const rttr::type& tp);
-    
     class DeviceHarness
     {
     public:

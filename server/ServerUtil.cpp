@@ -1,6 +1,6 @@
 #include "ServerUtil.h"
 #include "Logging.h"
-
+#include <rttr/type>
 
 rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
     {
@@ -40,3 +40,84 @@ rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
     }
     
     
+    
+bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
+{
+      foxtrot::Logging _lg("set_returntype");
+  
+      _lg.Trace("setting return type" );
+        auto rettp = get_appropriate_wire_type(retval.get_type());
+        _lg.Trace("rettp is: " + std::to_string(rettp) );
+            bool convertsuccess = true;
+         if(rettp == value_types::FLOAT)
+         {
+	   _lg.Trace("it's a double!");
+            repl.set_dblret(retval.to_double(&convertsuccess));
+         }
+         else if (rettp == value_types::BOOL)
+         {
+	   _lg.Trace("bool");
+             convertsuccess = retval.can_convert(rttr::type::get<bool>());
+             repl.set_boolret(retval.to_bool());
+         }
+         else if(rettp == value_types::INT)
+         {
+             _lg.Trace("int");
+             repl.set_intret(retval.to_int(&convertsuccess));
+         }
+         else if(rettp == value_types::STRING)
+         {
+             _lg.Trace("string");
+             repl.set_stringret(retval.to_string(&convertsuccess));
+         }
+         //if it's VOID, no need to set rettp
+         else if(rettp == value_types::VOID)
+	 {
+	    _lg.Trace("void");
+	    repl.set_stringret("");
+	   
+	 }
+         
+         if(!convertsuccess)
+         {
+             errstatus* errstat = repl.mutable_err();
+             errstat->set_msg("couldn't successfully convert return type");
+             errstat->set_tp(error_types::Error);
+         };
+         
+         _lg.Debug("convertsuccess: " + std::to_string(convertsuccess) );
+         return convertsuccess;
+}
+
+foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
+{
+    using namespace rttr;
+    
+    if(tp == type::get<void>())
+    {
+        return value_types::VOID;
+    }
+    
+    if(!tp.is_arithmetic())
+    {
+        return value_types::STRING;
+    }
+    
+    //check for bool
+    if(tp == type::get<bool>())
+    {
+        return value_types::BOOL;
+    }
+    
+    //check for float
+    if( (tp == type::get<double>()) || (tp == type::get<float>())) 
+    {
+        return value_types::FLOAT;
+    }
+    
+    return value_types::INT;
+    
+    
+}
+
+
