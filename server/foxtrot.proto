@@ -94,6 +94,16 @@ message capability_response
     errstatus err = 8;
 }
 
+message chunk_request
+{ 
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname = 3;
+    repeated capability_argument args = 4;
+    uint32 chunksize = 5;
+
+}
+
 message datachunk
 {
     bytes data = 1;

@@ -9,7 +9,7 @@ namespace foxtrot
 {
     struct FetchDataLogic
     {
-        typedef capability_request reqtp;
+        typedef chunk_request reqtp;
         typedef grpc::ServerWriter<datachunk> repltp; 
         constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
         
