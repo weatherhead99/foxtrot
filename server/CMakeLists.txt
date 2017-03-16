@@ -14,13 +14,13 @@ ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
 target_link_libraries(foxtrotserv PUBLIC foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
-${ZLIB_LIBRARIES} ${dl} dummy)
+${ZLIB_LIBRARIES} ${dl})
 
 
 add_executable(exptserve exptserve.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
-target_link_libraries(exptserve foxtrotserv dummy ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 add_executable(testClient testClient.cpp)
 target_link_libraries(testClient foxtrotserv foxtrotclient)

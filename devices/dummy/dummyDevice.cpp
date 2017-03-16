@@ -57,6 +57,20 @@ std::vector<int> foxtrot::devices::dummyDevice::unsupportedtype()
     return out;
 }
 
+std::vector< unsigned char > foxtrot::devices::dummyDevice::getCountStream(int n)
+{
+  std::vector<unsigned char> out;
+  out.reserve(n);
+  unsigned char o;
+  for(int i=0; i< n; i++)
+  {  
+    out.push_back(o++);
+    
+  }
+  
+  return out;
+
+}
 
 
 RTTR_REGISTRATION
@@ -73,5 +87,11 @@ RTTR_REGISTRATION
      )
  .method("brokenMethod",&dummyDevice::brokenMethod)
  .property_readonly("unsupportedtype",&dummyDevice::unsupportedtype)
+ .method("getCountStream",&dummyDevice::getCountStream)
+ (
+   parameter_names("n"),
+  metadata("streamdata",true)
+   )
+ 
  ;
 }

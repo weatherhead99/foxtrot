@@ -78,8 +78,8 @@ namespace foxtrot
     bool set_returntype(rttr::variant& retval, foxtrot::capability_response& repl);
     value_types get_appropriate_wire_type(const rttr::type& tp);
     
-    template <typename repltp> std::vector<rttr::argument> get_callargs(rttr::method& meth, 
-									foxtrot::capability_request& req,
+    template <typename reqtp, typename repltp> std::vector<rttr::variant> get_callargs(rttr::method& meth, 
+									reqtp& req,
 									repltp& repl)
     {
       foxtrot::Logging lg("get_callargs");
@@ -141,8 +141,23 @@ namespace foxtrot
 	  
       };
       
-      std::vector<rttr::argument> callargs(argvec.begin(), argvec.end());
-      return callargs;
+      for(auto& arg : argvec)
+      {
+	bool success;
+	auto str = arg.to_string(&success);
+	if(!success)
+	{
+	  lg.Error("couldn't get string whil trying to print arg");
+	  break;
+	}
+	
+	lg.Trace("arg: " + str);
+	
+      }
+      
+      
+      return argvec;
+      
 
     }
       

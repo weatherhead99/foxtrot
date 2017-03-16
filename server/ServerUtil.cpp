@@ -21,13 +21,11 @@ rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
         outarg = arg.intarg();
         break;
         
-    case(capability_argument::ValueCase::kBoolarg):
-        
+    case(capability_argument::ValueCase::kBoolarg):    
         outarg = arg.boolarg();
         break;
     
     case(capability_argument::ValueCase::kStrarg):
-        
         outarg = arg.strarg();
         break;
 

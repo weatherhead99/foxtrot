@@ -15,6 +15,7 @@ namespace foxtrot
     
     template<typename T> class HandlerBase : public HandlerTag
     {
+      
     public:
         
         HandlerBase(exptserve::AsyncService* service, grpc::ServerCompletionQueue* cq, T& logic)
@@ -37,12 +38,12 @@ namespace foxtrot
             }
             else if(_status == status::PROCESS)
             {
-            new HandlerBase<T>(_service, _cq,_logic);
-            
-            _logic.HandleRequest(_req,_reply);
-            
-            _status = status::FINISH;
-            _responder.Finish(_reply,grpc::Status::OK,this);
+	       new HandlerBase<T>(_service, _cq,_logic);
+	      if(_logic.HandleRequest(_req,_reply, _responder, this))
+	      {
+	      _status = status::FINISH;
+	      };
+	      
             }
             else
             {
@@ -52,6 +53,11 @@ namespace foxtrot
             }
        
         }
+        
+        grpc::ServerCompletionQueue* GetCQ()
+	{
+	  return _cq;
+	}
         
     private:
             
@@ -64,7 +70,7 @@ namespace foxtrot
         typename T::reqtp _req;
         typename T::repltp _reply;
         
-        grpc::ServerAsyncResponseWriter<typename T::repltp> _responder;
+	typename T::respondertp _responder;
         enum class status {CREATE,PROCESS,FINISH};
         status _status;
         

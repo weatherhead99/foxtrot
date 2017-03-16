@@ -7,7 +7,7 @@ foxtrot::ServerDescribeLogic::ServerDescribeLogic(const std::string& comment, fo
 }
 
 
-void foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl)
+bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
       _lg.Debug("processing server describe request");
       
@@ -43,5 +43,6 @@ void foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl)
           
       };
         
-    
+     respond.Finish(repl,grpc::Status::OK,tag);
+     return true;
 }

@@ -100,7 +100,8 @@ message chunk_request
     uint32 devid = 2;
     string capname = 3;
     repeated capability_argument args = 4;
-    uint32 chunksize = 5;
+    uint32 dataid = 5;
+    uint32 chunksize = 6;
 
 }
 
@@ -110,7 +111,8 @@ message datachunk
     uint32 msgid = 2;
     uint32 devid = 3;
     string capname = 4;
-    errstatus err = 5;
+    uint32 dataid = 5;
+    errstatus err = 6;
 
 }
 
@@ -119,5 +121,5 @@ service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
-    rpc FetchData(capability_request) returns (stream datachunk);
+    rpc FetchData(chunk_request) returns (stream datachunk);
 }

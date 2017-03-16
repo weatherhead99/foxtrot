@@ -37,6 +37,23 @@ namespace foxtrot
     
     ft_variant ft_variant_from_response(const capability_response& repl);
     
+    class ft_variant_printer : public boost::static_visitor<>
+    {
+    public:
+      ft_variant_printer();
+      
+      void operator()(const double& d);
+      void operator()(const int& i);
+      void operator()(const bool& b);
+      void operator()(const std::string& s);
+      
+      std::string string();
+      
+    private:
+      std::string _str;
+      
+    };
+    
     
     
     class Client
@@ -59,6 +76,7 @@ namespace foxtrot
         Client(const std::string& connstr);
         ~Client();
         servdescribe DescribeServer();
+	
         template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
         template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);
@@ -68,8 +86,24 @@ namespace foxtrot
 	
         capability_proxy call(int devid, const std::string& capname);
         
+	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize);
+	
         
     private:
+        template< typename reqtp, typename iteratortp> void fill_args(reqtp& req, iteratortp args_begin, iteratortp args_end)
+	{
+	  auto outargs = req.mutable_args();
+	  int i=0;
+	  for(auto it = args_begin; it != args_end; it++)
+	  {
+	   auto arg = outargs->Add(); 
+	   boost::apply_visitor(ft_variant_visitor(*arg),*it);
+	   arg->set_position(i++);
+	   
+	  };
+	  
+	}
+      
         std::unique_ptr<exptserve::Stub> _stub;
         std::shared_ptr<grpc::Channel> _channel;
         int _msgid = 0;
@@ -91,20 +125,22 @@ namespace foxtrot
         req.set_devid(devid);
         req.set_capname(capname);
         
-        auto outargs = req.mutable_args();
-        
-        
-        int i =0;
-        for(auto it = begin_args; it != end_args; it++)
-        {
-            auto arg = outargs->Add();
-            
-            
-            boost::apply_visitor(ft_variant_visitor(*arg),*it);
-            arg->set_position(i++);
-            
-        };
-        
+	fill_args(req, begin_args,end_args);
+	
+//         auto outargs = req.mutable_args();
+//         
+//         
+//         int i =0;
+//         for(auto it = begin_args; it != end_args; it++)
+//         {
+//             auto arg = outargs->Add();
+//             
+//             
+//             boost::apply_visitor(ft_variant_visitor(*arg),*it);
+//             arg->set_position(i++);
+//             
+//         };
+//         
         grpc::ClientContext ctxt;
         auto status = _stub->InvokeCapability(&ctxt,req,&repl);
         

@@ -36,51 +36,28 @@ int main(int argc, char** argv)
         
     };
    
-    cout << "attempting pressure readout... " << endl;
+        
+    cout << "invoking randomdouble..." << endl;
     
-    std::vector<ft_variant> args {1};
-    auto response = client.InvokeCapability(0,"getPressure",args.begin(),args.end());
-    
-    cout << boost::get<double>(response) << endl;
-    
-    cout << "is gauge on... " << endl;
-    response = client.InvokeCapability(0,"getGaugeOnOff",args.begin(), args.end());
-    
-    cout << boost::get<bool>(response) << endl;
+    auto response = client.InvokeCapability(0,"getRandomDouble");
+      
+    cout << response << endl;
     
     
-    
-//     cout << "invoking randomdouble..." << endl;
-//     
-//     auto response = client.InvokeCapability(0,"getRandomDouble");
-//       
-//     cout << response << endl;
-//     
-//     
-//     for(int i =0; i< 3; i++)
-//     {
-//         auto counter = client.InvokeCapability(0,"getCounter");
-//         cout << "counter: " << boost::get<int>(counter) << endl;
-//         
-//     }
+    for(int i =0; i< 3; i++)
+    {
+        auto counter = client.InvokeCapability(0,"getCounter");
+        cout << "counter: " << boost::get<int>(counter) << endl;
+        
+    }
 
-//     cout << "now for an exception..." << endl;
-//     
-//     response = client.InvokeCapability(0,"brokenMethod");
-//     
     
-//     cout << "an unsupported type..." << endl;
-//     response = client.InvokeCapability(0,"unsupportedtype");
-
-
-//     cout << "adding two numbers..." << endl;
+    response = client.InvokeCapability(0,"add",{5,6});
     
-//     
-//     response = client.InvokeCapability(0,"add",args.begin(), args.end());
-//     
-//     std::vector<foxtrot::ft_variant> args { 15,12 };
-//     response = client.InvokeCapability(0,"add",args);
-//     
-//     cout << "the response is: "<< boost::get<int>(response) << endl;
+    cout << "the response is: "<< boost::get<int>(response) << endl;
+    
+    
+    
+    
     
 }

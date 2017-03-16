@@ -35,6 +35,44 @@ void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
     _arg.set_strarg(s);
 }
 
+foxtrot::ft_variant_printer::ft_variant_printer()
+{
+
+}
+
+void foxtrot::ft_variant_printer::operator()(const std::string& s)
+{
+  _str = s;
+}
+
+void foxtrot::ft_variant_printer::operator()(const bool& b)
+{
+  _str = std::to_string(b);
+}
+
+
+void foxtrot::ft_variant_printer::operator()(const int& i)
+{
+  _str = std::to_string(i);
+
+}
+
+void foxtrot::ft_variant_printer::operator()(const double& d)
+{
+  _str = std::to_string(d);
+
+}
+
+std::string foxtrot::ft_variant_printer::string()
+{
+  return _str;
+
+}
+
+
+
+
+
 foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
     foxtrot::ft_variant out;
@@ -173,7 +211,19 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
 
 foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_variant > args)
 {
-  return InvokeCapability(devid,capname, args);
+  //TODO: optimize?
+  
+  ft_variant_printer pt;
+  for(auto& arg: args)
+  {
+   boost::apply_visitor(pt,arg);  
+   _lg.Trace("arg: "  + pt.string());
+    
+  }
+  
+  std::vector<ft_variant> argvec(args.begin(), args.end());
+  
+  return InvokeCapability(devid,capname, argvec);
   
 
 }
@@ -195,3 +245,28 @@ foxtrot::Client::capability_proxy foxtrot::Client::call(int devid, const std::st
   return capability_proxy(*this, devid,capname);
   
 }
+
+
+std::vector< unsigned char> foxtrot::Client::FetchData(int devid, const std::string& capname, unsigned int dataid, unsigned int chunksize)
+{
+  using namespace foxtrot;
+  
+  chunk_request req;
+  req.set_devid(devid);
+  req.set_capname(capname);
+  req.set_msgid(_msgid++);
+  req.set_chunksize(chunksize);
+  
+  auto outargs = req.mutable_args();
+  
+  grpc::ClientContext ctxt;
+  auto reader = _stub->FetchData(&ctxt,req);
+  
+  std::vector<unsigned char> data_out;
+  
+
+  
+
+}
+
+

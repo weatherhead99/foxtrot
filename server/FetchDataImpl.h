@@ -5,18 +5,24 @@
 #include "DeviceHarness.h"
 #include "Logging.h"
 
+#include <map>
+
 namespace foxtrot
 {
     struct FetchDataLogic
     {
         typedef chunk_request reqtp;
-        typedef grpc::ServerWriter<datachunk> repltp; 
+        typedef datachunk repltp; 
+	typedef grpc::ServerAsyncWriter<datachunk> respondertp;
+	
         constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
         
         FetchDataLogic(DeviceHarness& harness);
         
-        void HandleRequest(reqtp& req, repltp& writer);
+	
+        bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
         
+	
     private:
         DeviceHarness& _harness;
 	foxtrot::Logging _lg;

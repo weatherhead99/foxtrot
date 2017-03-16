@@ -3,6 +3,7 @@
 
 #include "ServerDescribeImpl.h"
 #include "InvokeCapabilityImpl.h"
+#include "FetchDataImpl.h"
 
 #include <iostream>
 #include <typeinfo>
@@ -52,17 +53,20 @@ void foxtrot::ServerImpl::HandleRpcs()
 {
     ServerDescribeLogic describe_logic(_servcomment,_harness);
     InvokeCapabilityLogic capability_logic(_harness);
-    
-    
+    FetchDataLogic fetch_logic(_harness);
     
     new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
     new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
+    new FetchDataImpl(&_service,_cq.get(),fetch_logic);
+    
+    
     
     void* tag;
     bool ok;
     
     while(true)
     {
+      //TODO: check this for return, shutdown etc
      _cq->Next(&tag,&ok);
      static_cast<HandlerTag*>(tag)->Proceed();
         

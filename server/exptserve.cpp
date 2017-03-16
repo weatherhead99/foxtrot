@@ -6,6 +6,7 @@
 #include <iostream>
 #include "ExperimentalSetup.h"
 #include <backward.hpp>
+#include "Logging.h"
 
 using namespace foxtrot;
 using std::cout;
@@ -30,7 +31,7 @@ int main(int argc, char** argv)
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
     
     po::notify(vm);
-    
+    foxtrot::setDefaultSink();
     
     if(!vm.count("setupfile"))
     {

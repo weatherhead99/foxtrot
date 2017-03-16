@@ -21,12 +21,7 @@ foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 }
 
 
-
-
-
-
-
-void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
+bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
     std::cout << "processing invoke capability request" << std::endl;
     
@@ -46,7 +41,8 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     catch(std::out_of_range& err)
     {
       set_repl_err(repl,err,error_types::out_of_range);
-      return;
+      respond.Finish(repl,grpc::Status::OK,tag);
+      return true;
     };
     
     auto devtp = rttr::type::get(*dev);
@@ -54,8 +50,6 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
     
     auto prop = devtp.get_property(req.capname().c_str());
     auto meth = devtp.get_method(req.capname().c_str());
-    
-    
     
     rttr::variant retval;
     
@@ -66,29 +60,41 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
         errstatus* errstat = repl.mutable_err();
         errstat->set_msg("no matching property or method");
         errstat->set_tp(error_types::out_of_range);
-        return;
+	respond.Finish(repl,grpc::Status::OK,tag);
+        return true;
         }
         else if (!prop)
         {
             //method
             if(!meth.is_valid())
             {
-                cout << "invalid method" << endl;
+                _lg.Error("invalid method!");
+		set_repl_err_msg(repl,"invalid method", error_types::Error);
+		return true;
             }
             
-            std::vector<rttr::argument> callargs;
+            std::vector<rttr::variant> args;
             try{
-	    callargs = get_callargs(meth,req,repl);
+	      args = get_callargs(meth,req,repl);	    
+	      for(auto& arg: args)
+	      {
+		rttr::variant v = arg;
+		_lg.Trace("arg: " + v.to_string());
+	      
+	      }
+	    
 	    }
 	    catch(int& i)
 	    {
-	      return;
+	      set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
+	      respond.Finish(repl,grpc::Status::OK,tag);
+	      return true;
 	    }
             
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
 	    
-	    
+	    std::vector<rttr::argument> callargs(args.begin(), args.end());
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
@@ -132,24 +138,28 @@ void foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl)
         {
             cout << "caught device error" << endl;
             set_repl_err(repl,err,error_types::DeviceError);
-             return;
+	    respond.Finish(repl,grpc::Status::OK,tag);
+             return true;
          }
     catch(class ProtocolError& err)
          {
              cout << "caught protocol error" << endl;
              set_repl_err(repl,err,error_types::ProtocolError);
-             return;
+	     respond.Finish(repl,grpc::Status::OK,tag);
+             return true;
          }
     catch(std::exception& err)
     {
           cout << "caught generic error" << endl;
 	  set_repl_err(repl,err,error_types::Error);
-	  return;
+	  respond.Finish(repl,grpc::Status::OK,tag);
+	  return true;
     }
             
 //     cout << "repl has error: " << repl.has_err() << endl;
 //     cout << "repl return: " << repl.dblret() << endl;
          
     set_returntype(retval,repl);
-    return;
+    respond.Finish(repl,grpc::Status::OK,tag);
+    return true;
 }
