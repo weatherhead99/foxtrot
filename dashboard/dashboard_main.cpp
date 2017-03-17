@@ -17,6 +17,8 @@ Dashboard::Dashboard(QWidget* parent)
     
     ui.statusbar->showMessage("starting up");
     
+    this->setWindowState(Qt::WindowMaximized);
+    
     QObject::connect(ui.actionConnect, &QAction::triggered, this, &Dashboard::connectServer);
     QObject::connect(ui.actionManual_update, &QAction::triggered, this, &Dashboard::updateTempReadings);
     QObject::connect(ui.actionAuto_update, &QAction::toggled, this, &Dashboard::setautoupdate);

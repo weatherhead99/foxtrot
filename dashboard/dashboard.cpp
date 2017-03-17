@@ -10,6 +10,8 @@ int main(int argc, char** argv)
     
     Dashboard dash;
     
+    
+    
     dash.show();
     
     return app.exec();

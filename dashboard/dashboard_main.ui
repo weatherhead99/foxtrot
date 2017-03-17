@@ -131,6 +131,16 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QwtThermo" name="Thermo">
+        <property name="scalePosition">
+         <enum>QwtThermo::TopScale</enum>
+        </property>
+        <property name="maxValue">
+         <double>100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>
@@ -141,7 +151,7 @@
      <x>0</x>
      <y>0</y>
      <width>890</width>
-     <height>19</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -174,6 +184,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QwtThermo</class>
+   <extends>QWidget</extends>
+   <header>qwt_thermo.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
