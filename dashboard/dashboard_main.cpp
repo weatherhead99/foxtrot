@@ -5,6 +5,7 @@
 #include <chrono>
 #include <exception>
 #include <QDateTime>
+#include <cmath>
 
 
 Dashboard::Dashboard(QWidget* parent)
@@ -110,9 +111,22 @@ void Dashboard::updateTempReadings()
   
   auto heater_output = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterAOutput"));
   
-  ui.heater_output->display(heater_output / 25. * 100);
-  ui.heater_target->display(heater_target);
   
+  ui.heater_output->setValue(heater_output / 25. * 100);
+  
+  auto heater_P = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAP"));
+  auto heater_I = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAI"));
+  auto heater_D = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAD"));
+                                      
+  auto heater_total = heater_P + heater_I + heater_D;
+  
+  double P_pc = heater_P / std::abs(heater_total);
+  double I_pc = heater_I / std::abs(heater_total);
+  double D_pc = heater_D / std::abs(heater_total);
+  
+  ui.heater_D->setValue(D_pc);
+  ui.heater_I->setValue(I_pc);
+  ui.heater_P->setValue(P_pc);
   
   auto now = QDateTime::currentDateTime();
   
