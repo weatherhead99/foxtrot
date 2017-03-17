@@ -34,9 +34,6 @@
         <property name="smallDecimalPoint">
          <bool>true</bool>
         </property>
-        <property name="numDigits">
-         <number>4</number>
-        </property>
         <property name="digitCount">
          <number>4</number>
         </property>
@@ -76,9 +73,6 @@
         <property name="smallDecimalPoint">
          <bool>true</bool>
         </property>
-        <property name="numDigits">
-         <number>5</number>
-        </property>
         <property name="digitCount">
          <number>5</number>
         </property>
@@ -112,9 +106,6 @@
         <property name="smallDecimalPoint">
          <bool>true</bool>
         </property>
-        <property name="numDigits">
-         <number>5</number>
-        </property>
         <property name="digitCount">
          <number>5</number>
         </property>
@@ -138,21 +129,15 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QwtThermo" name="heater_P">
-        <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
-        </property>
-        <property name="minValue">
+       <widget class="QwtThermo" name="heater_P" native="true">
+        <property name="minValue" stdset="0">
          <double>-1.000000000000000</double>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QwtThermo" name="heater_D">
-        <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
-        </property>
-        <property name="minValue">
+       <widget class="QwtThermo" name="heater_D" native="true">
+        <property name="minValue" stdset="0">
          <double>-1.000000000000000</double>
         </property>
        </widget>
@@ -165,14 +150,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QwtThermo" name="heater_output">
-        <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
-        </property>
-        <property name="maxValue">
+       <widget class="QwtThermo" name="heater_output" native="true">
+        <property name="maxValue" stdset="0">
          <double>100.000000000000000</double>
         </property>
-        <property name="minValue">
+        <property name="minValue" stdset="0">
          <double>0.000000000000000</double>
         </property>
        </widget>
@@ -192,11 +174,8 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QwtThermo" name="heater_I">
-        <property name="scalePosition">
-         <enum>QwtThermo::TopScale</enum>
-        </property>
-        <property name="minValue">
+       <widget class="QwtThermo" name="heater_I" native="true">
+        <property name="minValue" stdset="0">
          <double>-1.000000000000000</double>
         </property>
        </widget>
@@ -211,7 +190,7 @@
      <x>0</x>
      <y>0</y>
      <width>890</width>
-     <height>30</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

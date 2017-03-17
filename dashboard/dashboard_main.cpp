@@ -11,19 +11,34 @@
 Dashboard::Dashboard(QWidget* parent)
 : QMainWindow(parent), _timer(this)
 {
- 
- 
-  
     ui.setupUi(this);
+
+  
+#if QWT_VERSION >= 0x060103
+#pragma message("using QWT new version hacks")
+  ui.heater_D->setScale(-1.,1.);
+  ui.heater_D->setOrientation(Qt::Horizontal);
+  ui.heater_I->setScale(-1.,1.);
+  ui.heater_I->setOrientation(Qt::Horizontal);
+  ui.heater_P->setScale(-1.,1.);
+  ui.heater_P->setOrientation(Qt::Horizontal);
+  ui.heater_output->setScale(0,100.);
+  ui.heater_output->setOrientation(Qt::Horizontal);
+  
+#endif
+  
     
     ui.statusbar->showMessage("starting up");
     
-    this->setWindowState(Qt::WindowMaximized);
+//     this->setWindowState(Qt::WindowMaximized);
     
     QObject::connect(ui.actionConnect, &QAction::triggered, this, &Dashboard::connectServer);
     QObject::connect(ui.actionManual_update, &QAction::triggered, this, &Dashboard::updateTempReadings);
     QObject::connect(ui.actionAuto_update, &QAction::toggled, this, &Dashboard::setautoupdate);
     QObject::connect(&_timer,&QTimer::timeout, this, &Dashboard::updateTempReadings);
+    
+    connectServer();
+    setautoupdate(true);
     
 }
 
@@ -108,6 +123,8 @@ void Dashboard::updateTempReadings()
   
   std::vector<foxtrot::ft_variant> args{0};
   auto heater_target = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterTarget",args.begin(),args.end()));
+  
+  ui.heater_target->display(heater_target);
   
   auto heater_output = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterAOutput"));
   

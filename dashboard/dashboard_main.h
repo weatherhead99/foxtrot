@@ -22,6 +22,7 @@ public slots:
     
     
     
+    
 private:
     void rethrow_error(std::exception_ptr pt);
     QTimer _timer;
