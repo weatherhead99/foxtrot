@@ -7,3 +7,6 @@ target_link_libraries(foxtrotclient INTERFACE foxtrotserv)
 
 add_dependencies(foxtrotclient foxtrotserv)
 
+
+add_executable(fetchdatatest fetchdatatest.cpp)
+target_link_libraries(fetchdatatest foxtrotclient)

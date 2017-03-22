@@ -247,26 +247,4 @@ foxtrot::Client::capability_proxy foxtrot::Client::call(int devid, const std::st
 }
 
 
-std::vector< unsigned char> foxtrot::Client::FetchData(int devid, const std::string& capname, unsigned int dataid, unsigned int chunksize)
-{
-  using namespace foxtrot;
-  
-  chunk_request req;
-  req.set_devid(devid);
-  req.set_capname(capname);
-  req.set_msgid(_msgid++);
-  req.set_chunksize(chunksize);
-  
-  auto outargs = req.mutable_args();
-  
-  grpc::ClientContext ctxt;
-  auto reader = _stub->FetchData(&ctxt,req);
-  
-  std::vector<unsigned char> data_out;
-  
-
-  
-
-}
-
 

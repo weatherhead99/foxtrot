@@ -86,7 +86,8 @@ namespace foxtrot
 	
         capability_proxy call(int devid, const std::string& capname);
         
-	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize);
+// 	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, std::initializer_list<ft_variant> args);
+	template <typename iteratortp> std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args);
 	
         
     private:
@@ -127,20 +128,6 @@ namespace foxtrot
         
 	fill_args(req, begin_args,end_args);
 	
-//         auto outargs = req.mutable_args();
-//         
-//         
-//         int i =0;
-//         for(auto it = begin_args; it != end_args; it++)
-//         {
-//             auto arg = outargs->Add();
-//             
-//             
-//             boost::apply_visitor(ft_variant_visitor(*arg),*it);
-//             arg->set_position(i++);
-//             
-//         };
-//         
         grpc::ClientContext ctxt;
         auto status = _stub->InvokeCapability(&ctxt,req,&repl);
         
@@ -163,7 +150,37 @@ namespace foxtrot
         
     };
     
-    
+    template <typename iteratortp> std::vector<unsigned char> Client::FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args)
+    {
+        static_assert(std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
+                           "iterator type must dereference to ft_variant");
+        
+      chunk_request req;
+      req.set_devid(devid);
+      req.set_capname(capname);
+      
+      req.set_msgid(_msgid++);
+      req.set_chunksize(chunksize);
+     
+      fill_args(req, begin_args, end_args);
+      
+      grpc::ClientContext ctxt;
+      auto reader = _stub->FetchData(&ctxt,req);
+      
+      std::vector<unsigned char> out;
+      
+      datachunk repl;
+      while(reader->Read(&repl))
+      {
+	auto thisdat = repl.data();
+	out.insert(out.end(),std::begin(thisdat), std::end(thisdat));
+	
+	//TODO: error handling here!
+      }
+      
+      return out;
+    }
+
     
 }
 

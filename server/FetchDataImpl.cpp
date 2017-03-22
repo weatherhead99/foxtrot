@@ -147,15 +147,16 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     bool extra_chunk = data.size() % csize ? true : false;
     
     auto currval = data.begin();
-    void* atag;
+    //
+    long unsigned atag = reinterpret_cast<long unsigned>(tag) +1;
     bool ok;
     for(int i =0 ; i < num_chunks; i++)
     {
      auto outdat = repl.mutable_data();
      outdat->assign(currval, currval + csize);
      currval += csize;
-     respond.Write(repl,tag);
-     cq->Next(&atag,&ok);
+     respond.Write(repl,reinterpret_cast<void*>(atag++));
+     cq->Next((void**) &atag,&ok);
      if(!ok)
      {
       _lg.Error("completion queue next failed!"); 
@@ -167,15 +168,15 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       repl = init_chunk<foxtrot::datachunk>(req);
       auto outdat = repl.mutable_data();
       outdat->assign(currval,data.end());
-      respond.Write(repl,tag);
-      cq->Next(&atag,&ok);
+      respond.Write(repl,reinterpret_cast<void*>(atag++));
+      cq->Next( (void**) &atag,&ok);
       if(!ok)
       {
 	_lg.Error("completion queue next failed!");
       }
     }
     
-    respond.Finish(grpc::Status::OK,tag);
+    respond.Finish(grpc::Status::CANCELLED,reinterpret_cast<void*>(atag++));
     return true;
     
 }
