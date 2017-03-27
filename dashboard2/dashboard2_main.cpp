@@ -1,6 +1,6 @@
 #include "dashboard2_main.h"
 #include "OPMD_hlclient.h"
-
+#include <QKeyEvent>
 
 Dashboard2::Dashboard2(QWidget* parent)
 {
@@ -19,12 +19,12 @@ Dashboard2::~Dashboard2()
 
 void Dashboard2::keyPressEvent(QKeyEvent* ev)
 {
-  if(ev->key() == Qt::Key_z)
+  if(ev->key() == Qt::Key_Z)
   {
     ui.tabWidget->setCurrentWidget(ui.cryotab);
     
   }
-  else if(ev->key() == Qt::Key_x)
+  else if(ev->key() == Qt::Key_X)
   {
     ui.tabWidget->setCurrentWidget(ui.CCDtab);
      
