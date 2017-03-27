@@ -172,9 +172,8 @@ namespace foxtrot
       datachunk repl;
       while(reader->Read(&repl))
       {
-	auto thisdat = repl.data();
-	out.insert(out.end(),std::begin(thisdat), std::end(thisdat));
-	
+        auto thisdat = repl.data();
+        out.insert(out.end(),std::begin(thisdat), std::end(thisdat));
 	//TODO: error handling here!
       }
       

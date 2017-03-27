@@ -23,11 +23,7 @@ int main(int argc, char** argv)
   std::vector<foxtrot::ft_variant> args {3000};
   auto dat = cl.FetchData(dummy_devid,"getCountStream",0,100,args.begin(),args.end());
   
-  for(auto& c : dat)
-  {
-      cout << (int) c << "\t";
-  }
-  cout << endl;
+  cout << "data size: " << dat.size() << endl;
   
   
 

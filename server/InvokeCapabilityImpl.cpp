@@ -69,32 +69,50 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             if(!meth.is_valid())
             {
                 _lg.Error("invalid method!");
-		set_repl_err_msg(repl,"invalid method", error_types::Error);
-		return true;
+                set_repl_err_msg(repl,"invalid method", error_types::Error);
+                return true;
             }
             
             std::vector<rttr::variant> args;
             try{
-	      args = get_callargs(meth,req,repl);	    
-	      for(auto& arg: args)
-	      {
-		rttr::variant v = arg;
-		_lg.Trace("arg: " + v.to_string());
+                args = get_callargs(meth,req,repl);	    
+                for(auto& arg: args)
+                {
+                rttr::variant v = arg;
+                _lg.Trace("arg: " + v.to_string());
 	      
-	      }
+                }
 	    
-	    }
-	    catch(int& i)
-	    {
-	      set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
-	      respond.Finish(repl,grpc::Status::OK,tag);
-	      return true;
-	    }
-            
+                }  
+                catch(int& i)
+                {
+                set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
+                respond.Finish(repl,grpc::Status::OK,tag);
+                return true;
+                }
+                
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
 	    
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
+        
+        
+            //check if it's a stream data method
+            auto streammeta = meth.get_metadata("streamdata");
+            if(streammeta.is_valid())
+            {
+                if(streammeta.to_bool())
+                {
+                    _lg.Error("tried to InvokeCapability on a bulk data method!");
+                    auto msg = "tried to InvokeCapability on a bulk data method!";
+                    set_repl_err_msg(repl,msg,error_types::Error);
+                    respond.Finish(repl,grpc::Status::OK,tag);
+                    return true;
+                }
+                
+        
+            }
+        
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
@@ -102,6 +120,20 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         else
         {
             //property            
+            auto streammeta = prop.get_metadata("streamdata");
+            if(streammeta.is_valid())
+            {
+                if(streammeta.to_bool())
+                {
+                    _lg.Error("tried to InvokeCapability on a bulk data property!");
+                    auto msg = "tried to InvokeCapability on a bulk data property!";
+                    set_repl_err_msg(repl,msg,error_types::Error);
+                    respond.Finish(repl,grpc::Status::OK,tag);
+                    return true;
+                }
+                
+        
+            }
                 if(prop.is_readonly())
                 {
 //                     cout << "readonly property" << endl;
