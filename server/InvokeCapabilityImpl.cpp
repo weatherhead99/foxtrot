@@ -23,7 +23,7 @@ foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 
 bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
-    std::cout << "processing invoke capability request" << std::endl;
+    _lg.Debug("processing invoke capability request" );
     
     auto devid = req.devid();
     repl.set_msgid(req.msgid());
@@ -31,7 +31,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     repl.set_capname(req.capname());
     
     foxtrot::Device* dev;
-    cout << "capability requested is: " << req.capname() << endl;
+    _lg.Debug("capability requested is: " + req.capname() );
     
 //     cout << "debug string" << req.DebugString() << endl;
     
@@ -56,7 +56,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     try{
         if (!meth && !prop)
         {
-            std::cout << "no matching property or method error" << std::endl;
+            _lg.Error("no matching property or method error" );
         errstatus* errstat = repl.mutable_err();
         errstat->set_msg("no matching property or method");
         errstat->set_tp(error_types::out_of_range);
@@ -136,24 +136,24 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     }
     catch(class DeviceError& err)
         {
-            cout << "caught device error" << endl;
+            _lg.Error("caught device error" );
             set_repl_err(repl,err,error_types::DeviceError);
-	    respond.Finish(repl,grpc::Status::OK,tag);
+            respond.Finish(repl,grpc::Status::OK,tag);
              return true;
          }
     catch(class ProtocolError& err)
          {
-             cout << "caught protocol error" << endl;
+             _lg.Error("caught protocol error" );
              set_repl_err(repl,err,error_types::ProtocolError);
-	     respond.Finish(repl,grpc::Status::OK,tag);
+            respond.Finish(repl,grpc::Status::OK,tag);
              return true;
          }
     catch(std::exception& err)
     {
-          cout << "caught generic error" << endl;
-	  set_repl_err(repl,err,error_types::Error);
-	  respond.Finish(repl,grpc::Status::OK,tag);
-	  return true;
+          _lg.Error("caught generic error" );
+        set_repl_err(repl,err,error_types::Error);
+        respond.Finish(repl,grpc::Status::OK,tag);
+        return true;
     }
             
 //     cout << "repl has error: " << repl.has_err() << endl;
