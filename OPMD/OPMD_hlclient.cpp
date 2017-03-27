@@ -65,6 +65,13 @@ double OPMD_hlclient::get_heater_target()
   return boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterTarget",{0}));
 }
 
+void OPMD_hlclient::set_heater_target(double tgt)
+{
+    _client->InvokeCapability(_heater_devid,"setHeaterTarget", {0, tgt});
+    
+}
+
+
 double OPMD_hlclient::get_stage_temp()
 {
   return boost::get<double>(_client->InvokeCapability(_heater_devid,"getTempB")); 
@@ -86,6 +93,11 @@ bool OPMD_hlclient::get_heater_onoff()
 {
   return boost::get<bool>(_client->InvokeCapability(_heater_devid,"getHeaterEnable",{0}));
 
+}
+
+void OPMD_hlclient::apply_heater_settings()
+{
+    _client->InvokeCapability(_heater_devid,"apply");
 }
 
 
