@@ -9,6 +9,7 @@
 #include <boost/iterator/iterator_concepts.hpp>
 
 #include <rttr/registration>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 
 using std::string;
@@ -18,6 +19,16 @@ typedef std::map<std::string,std::string> ssmap;
 namespace foxtrot {
   
   using namespace protocols;
+  
+  struct framemeta
+  {
+   unsigned long long u64timestamp;
+   unsigned frameno;
+   unsigned width;
+   unsigned height;
+   unsigned baseaddr;
+   bool bit32;   
+  };
   
   
   namespace devices
@@ -37,6 +48,7 @@ namespace foxtrot {
     ~archon();
     const ssmap& getStatus() const;
     const ssmap& getSystem() const;
+    const ssmap& getFrame() const;
     
     void clear_config();
     
@@ -98,6 +110,8 @@ namespace foxtrot {
     void apply_all_params();
     
     
+    void sync_archon_timer();
+    
   protected:
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
@@ -115,6 +129,7 @@ namespace foxtrot {
     ssmap _status;
     ssmap _frame;
     
+    std::map<unsigned char, framemeta> _framedata;
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     
     std::map<std::string, int> _configlinemap;
@@ -126,6 +141,8 @@ namespace foxtrot {
     
     int _states = 0;
     
+    unsigned long long _arch_tmr;
+    boost::posix_time::ptime _sys_tmr;
     
   };
   

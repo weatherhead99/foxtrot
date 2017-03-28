@@ -69,7 +69,14 @@ endif()
 
 
 if(BUILD_DASHBOARD)
+find_package(Qt5 COMPONENTS Core Widgets REQUIRED)
+get_target_property(qcore Qt5::Core  LOCATION_Release)
+message(STATUS "qt: ${qcore}")
+find_package(Qwt REQUIRED)
+set(CMAKE_AUTOMOC ON)
+
 add_subdirectory(dashboard)
+add_subdirectory(dashboard2)
 endif()
 
 if(BUILD_TESTS)  

@@ -16,6 +16,7 @@ public:
   virtual ~OPMD_hlclient();
   
   
+  
   double get_cryostat_pressure();
   double get_pump_pressure();
   
@@ -31,7 +32,7 @@ public:
   double get_heater_target();
   void set_heater_target(double tgt);
   
-  
+  void apply_heater_settings();
   
   
 private:

@@ -15,7 +15,7 @@ foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 
 bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
-    std::cout << "processing fetch data request" << std::endl;
+    _lg.Debug("processing fetch data request" );
     
     foxtrot::Device* dev;
     repl = init_chunk<foxtrot::datachunk>(req);
@@ -146,16 +146,26 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     unsigned num_chunks = data.size() / csize;
     bool extra_chunk = data.size() % csize ? true : false;
     
+    _lg.Trace("num chunks: " + std::to_string(num_chunks));
+    
     auto currval = data.begin();
-    void* atag;
+    
+    
+    
+    long unsigned atag = reinterpret_cast<long unsigned>(tag) +1;
+    
+    _lg.Trace("atag: " + std::to_string(atag));
+    
     bool ok;
     for(int i =0 ; i < num_chunks; i++)
     {
      auto outdat = repl.mutable_data();
      outdat->assign(currval, currval + csize);
      currval += csize;
+     _lg.Trace("writing chunk to wire: " + std::to_string(i));
+//      respond.Write(repl,reinterpret_cast<void*>(atag++));
      respond.Write(repl,tag);
-     cq->Next(&atag,&ok);
+     cq->Next((void**) &atag,&ok);
      if(!ok)
      {
       _lg.Error("completion queue next failed!"); 
@@ -164,18 +174,24 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     
     if(extra_chunk)
     {
+      _lg.Debug("extra chunk writing...");
       repl = init_chunk<foxtrot::datachunk>(req);
       auto outdat = repl.mutable_data();
       outdat->assign(currval,data.end());
+//       respond.Write(repl,reinterpret_cast<void*>(atag++));
       respond.Write(repl,tag);
-      cq->Next(&atag,&ok);
+      cq->Next( (void**) &atag,&ok);
       if(!ok)
       {
 	_lg.Error("completion queue next failed!");
       }
     }
     
-    respond.Finish(grpc::Status::OK,tag);
+    _lg.Trace("all chunks written...");
+    
+    respond.Finish(grpc::Status::OK,reinterpret_cast<void*>(atag++));
+    
+    _lg.Trace("marked stream finished");
     return true;
     
 }

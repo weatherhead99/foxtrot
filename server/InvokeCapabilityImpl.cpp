@@ -23,7 +23,7 @@ foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 
 bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
-    std::cout << "processing invoke capability request" << std::endl;
+    _lg.Debug("processing invoke capability request" );
     
     auto devid = req.devid();
     repl.set_msgid(req.msgid());
@@ -31,7 +31,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     repl.set_capname(req.capname());
     
     foxtrot::Device* dev;
-    cout << "capability requested is: " << req.capname() << endl;
+    _lg.Debug("capability requested is: " + req.capname() );
     
 //     cout << "debug string" << req.DebugString() << endl;
     
@@ -56,7 +56,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     try{
         if (!meth && !prop)
         {
-            std::cout << "no matching property or method error" << std::endl;
+            _lg.Error("no matching property or method error" );
         errstatus* errstat = repl.mutable_err();
         errstat->set_msg("no matching property or method");
         errstat->set_tp(error_types::out_of_range);
@@ -69,32 +69,50 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             if(!meth.is_valid())
             {
                 _lg.Error("invalid method!");
-		set_repl_err_msg(repl,"invalid method", error_types::Error);
-		return true;
+                set_repl_err_msg(repl,"invalid method", error_types::Error);
+                return true;
             }
             
             std::vector<rttr::variant> args;
             try{
-	      args = get_callargs(meth,req,repl);	    
-	      for(auto& arg: args)
-	      {
-		rttr::variant v = arg;
-		_lg.Trace("arg: " + v.to_string());
+                args = get_callargs(meth,req,repl);	    
+                for(auto& arg: args)
+                {
+                rttr::variant v = arg;
+                _lg.Trace("arg: " + v.to_string());
 	      
-	      }
+                }
 	    
-	    }
-	    catch(int& i)
-	    {
-	      set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
-	      respond.Finish(repl,grpc::Status::OK,tag);
-	      return true;
-	    }
-            
+                }  
+                catch(int& i)
+                {
+                set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
+                respond.Finish(repl,grpc::Status::OK,tag);
+                return true;
+                }
+                
             auto& mut = _harness.GetMutex(devid);
             std::lock_guard<std::mutex> lock(mut);
 	    
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
+        
+        
+            //check if it's a stream data method
+            auto streammeta = meth.get_metadata("streamdata");
+            if(streammeta.is_valid())
+            {
+                if(streammeta.to_bool())
+                {
+                    _lg.Error("tried to InvokeCapability on a bulk data method!");
+                    auto msg = "tried to InvokeCapability on a bulk data method!";
+                    set_repl_err_msg(repl,msg,error_types::Error);
+                    respond.Finish(repl,grpc::Status::OK,tag);
+                    return true;
+                }
+                
+        
+            }
+        
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
@@ -102,6 +120,20 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         else
         {
             //property            
+            auto streammeta = prop.get_metadata("streamdata");
+            if(streammeta.is_valid())
+            {
+                if(streammeta.to_bool())
+                {
+                    _lg.Error("tried to InvokeCapability on a bulk data property!");
+                    auto msg = "tried to InvokeCapability on a bulk data property!";
+                    set_repl_err_msg(repl,msg,error_types::Error);
+                    respond.Finish(repl,grpc::Status::OK,tag);
+                    return true;
+                }
+                
+        
+            }
                 if(prop.is_readonly())
                 {
 //                     cout << "readonly property" << endl;
@@ -136,24 +168,24 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     }
     catch(class DeviceError& err)
         {
-            cout << "caught device error" << endl;
+            _lg.Error("caught device error" );
             set_repl_err(repl,err,error_types::DeviceError);
-	    respond.Finish(repl,grpc::Status::OK,tag);
+            respond.Finish(repl,grpc::Status::OK,tag);
              return true;
          }
     catch(class ProtocolError& err)
          {
-             cout << "caught protocol error" << endl;
+             _lg.Error("caught protocol error" );
              set_repl_err(repl,err,error_types::ProtocolError);
-	     respond.Finish(repl,grpc::Status::OK,tag);
+            respond.Finish(repl,grpc::Status::OK,tag);
              return true;
          }
     catch(std::exception& err)
     {
-          cout << "caught generic error" << endl;
-	  set_repl_err(repl,err,error_types::Error);
-	  respond.Finish(repl,grpc::Status::OK,tag);
-	  return true;
+          _lg.Error("caught generic error" );
+        set_repl_err(repl,err,error_types::Error);
+        respond.Finish(repl,grpc::Status::OK,tag);
+        return true;
     }
             
 //     cout << "repl has error: " << repl.has_err() << endl;

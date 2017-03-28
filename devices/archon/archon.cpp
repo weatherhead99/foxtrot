@@ -232,6 +232,11 @@ const ssmap& devices::archon::getSystem() const
   return _system;
 }
 
+const ssmap & foxtrot::devices::archon::getFrame() const
+{
+    return _frame;
+}
+
 
 void devices::archon::update_state()
 {
@@ -643,6 +648,12 @@ void devices::archon::apply_param(const string& name)
 {
   cmd("LOADPARAM " + name);
 
+}
+
+void foxtrot::devices::archon::sync_archon_timer()
+{
+    _arch_tmr = std::stoull(cmd("TIMER"));
+    _sys_tmr = boost::posix_time::microsec_clock::universal_time();
 }
 
 
