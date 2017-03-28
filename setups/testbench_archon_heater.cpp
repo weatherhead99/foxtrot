@@ -6,7 +6,10 @@
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
 #include "protocols/SerialPort.h"
+#include <BulkUSB.h>
 #include "devices/TPG362/TPG362.h"
+
+#include "devices/newport_2936R/newport2936R.h"
 
 #include <memory>
 
@@ -22,7 +25,7 @@ foxtrot::parameterset tpg_params {
   {"baudrate" , 9600u},
   };
  
-
+  
 
 extern "C" { 
 int setup(foxtrot::DeviceHarness& harness)
@@ -111,6 +114,12 @@ int setup(foxtrot::DeviceHarness& harness)
     harness.AddDevice(std::move(archon));
     harness.AddDevice(std::move(heaterptr));
     
+    
+    //setup power meter
+    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(nullptr);
+    auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
+    
+    harness.AddDevice(std::move(powermeter));
     return 0;  
 };
 }
