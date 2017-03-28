@@ -20,8 +20,10 @@ namespace foxtrot
     
     class newport2936R : public CmdDevice
     {
+      RTTR_ENABLE()
     public:
     newport2936R(std::shared_ptr< SerialProtocol> proto);
+    virtual const std::string getDeviceTypeName() const override;
     virtual std::string cmd(const std::string& request);
     
     void setLambda(int l);
