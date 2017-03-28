@@ -208,6 +208,20 @@ int main(int argc, char** argv)
         
     }
     
+    else if(cmd == "powermeter")
+    {
+      auto devid = foxtrot::find_devid_on_server(servdesc, "newport2936R");
+      if(devid < 0)
+      {
+	lg.Fatal("no newport 2936R found on server");
+	exit(1);
+      }
+      
+      auto power = boost::get<double>(client.InvokeCapability(devid,"getPower",{}));
+      auto units = boost::get<std::string>(client.InvokeCapability(devid,"getUnits",{})); 
+      std::cout << "units length: " << units.size() << std::endl;
+      std::cout << "power: " << power <<  " " << units << std::endl;
+    }
 
 
 
