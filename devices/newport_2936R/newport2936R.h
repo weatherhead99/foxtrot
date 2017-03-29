@@ -2,6 +2,7 @@
 #include "CmdDevice.h"
 #include "SerialProtocol.h"
 #include <memory>
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -38,7 +39,7 @@ namespace foxtrot
     void setUnits(powerunits unit);
     
     private:
-      
+      foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);
       
       std::shared_ptr<SerialProtocol> _proto;

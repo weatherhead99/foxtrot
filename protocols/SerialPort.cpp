@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include <boost/asio/write.hpp>
+
 using namespace boost::asio;
 using boost::asio::serial_port_base;
 
@@ -135,12 +137,21 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
 {
   
   boost::system::error_code ec;
-  _sport.write_some(buffer(data),ec);
+  
+  auto num_written = boost::asio::write(_sport,buffer(data),ec);
+//   _sport.write_some(buffer(data),ec);
+  
   
   if(ec)
   {
    throw ProtocolError( std::string("error writing to serial port: ")  + ec.message()); 
   }
+  
+  if(num_written != data.size())
+  {
+    throw ProtocolError("some bytes not written!");
+  }
+  
   
 }
 

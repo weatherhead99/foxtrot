@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 #include <rttr/registration>
+#include <thread>
+#include <chrono>
 
 const foxtrot::parameterset newport2936R_usb_params 
 {
@@ -19,7 +21,7 @@ const foxtrot::parameterset newport2936R_usb_params
 const foxtrot::parameterset newport2936R_serial_params
 {
   {"baudrate", 38400u},
-  {"stopbits",  1},
+  {"stopbits",  1u},
   {"bits",  8u},
   {"parity",  "none"},
   {"flowcontrol", "none"}
@@ -30,23 +32,32 @@ const foxtrot::parameterset newport2936R_serial_params
 
 
 foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialProtocol> proto)
-: CmdDevice(proto), _proto(proto)
+: CmdDevice(proto), _proto(proto), _lg("newport2936R")
 {
   
   
   auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::BulkUSB>(proto);
+  auto serproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto);
   if(specproto != nullptr)
   {
-    std::cout << "using usb connected power meter" << std::endl;
+    _lg.Info( "using usb connected power meter");
     specproto->Init(&newport2936R_usb_params);
+    _lg.Debug("init done");
     _usbmode = true;
     
     
   }
-  else if(  auto serproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto)   != nullptr)
+  else if(  serproto   != nullptr)
   {
-    std::cout << "using serial connected power meter" << std::endl;
-    specproto->Init(&newport2936R_serial_params);
+    _lg.Info("using serial connected power meter" );
+    serproto->Init(&newport2936R_serial_params);
+    _lg.Debug("init done");
+    
+    _lg.Debug("flushing serial port");
+    serproto->flush();
+    
+    _lg.Debug("disabling command echo");
+    serproto->write("ECHO 0\r");
     _usbmode = false;
     
   }
@@ -58,8 +69,14 @@ foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialPro
 std::string foxtrot::devices::newport2936R::cmd(const std::string& request)
 {
   
+  _lg.Debug("request is: " + request);
   _proto->write(request + '\r');
   
+  if(!_usbmode)
+  {
+    auto specproto = static_cast<foxtrot::protocols::SerialPort*>(_proto.get());
+    specproto->flush();
+  }
   
   unsigned actlen;
   auto buffer = _proto->read(64, &actlen);
@@ -168,7 +185,6 @@ foxtrot::devices::powerunits convert_string_to_powerunit(const std::string& s, b
 {
   using foxtrot::devices::powerunits;
   ok = true;
-  
   if(s == "A")
   {
     return powerunits::Amps;
