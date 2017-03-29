@@ -24,6 +24,10 @@ int main(int argc, char** argv)
      auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
      foxtrot::devices::newport2936R OPM(proto);
      
+     bool ok;
+     auto ampstr = convert_powerunit_to_string(foxtrot::devices::powerunits::Amps, ok);
+     std::cout << "amps: " << ampstr << std::endl;
+     
      std::cout << "manual command..>" << std::endl;
      auto repl = OPM.cmd("PM:P?");
      std::cout << repl << std::endl;

@@ -9,8 +9,9 @@ namespace foxtrot
   namespace devices
   {
     
-    enum class powerunits
+    enum class powerunits : short unsigned
     {
+      
      Amps = 0,
      Volts = 1,
      Watts = 2,
@@ -46,6 +47,10 @@ namespace foxtrot
       bool _usbmode;
     };
     
+    
+    
   }//namespace devices
   
 }//namespace foxtrot
+
+std::string convert_powerunit_to_string(foxtrot::devices::powerunits p, bool& ok);

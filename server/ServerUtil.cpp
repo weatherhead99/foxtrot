@@ -44,6 +44,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
       foxtrot::Logging _lg("set_returntype");
   
       _lg.Trace("setting return type" );
+      _lg.Trace("raw type name is: " + retval.get_type().get_name());
         auto rettp = get_appropriate_wire_type(retval.get_type());
         _lg.Trace("rettp is: " + std::to_string(rettp) );
             bool convertsuccess = true;
@@ -66,6 +67,18 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          else if(rettp == value_types::STRING)
          {
              _lg.Trace("string");
+	     
+	     auto canconv = retval.can_convert(rttr::type::get<std::string>());
+	     _lg.Trace("can convert to string: " + std::to_string(canconv));
+	     
+	     auto ok = retval.convert(rttr::type::get<std::string>());
+	     
+	     _lg.Trace("converted string: " + retval.to_string());
+	     
+	     bool ok2;
+	     std::string out = retval.convert<std::string>(&ok2);
+	     _lg.Trace("retval.convert: " + out);
+	     
              repl.set_stringret(retval.to_string(&convertsuccess));
          }
          //if it's VOID, no need to set rettp
@@ -90,6 +103,9 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
 foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 {
     using namespace rttr;
+    
+    
+    
     
     if(tp == type::get<void>())
     {
