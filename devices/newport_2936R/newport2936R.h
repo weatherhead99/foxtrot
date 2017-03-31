@@ -2,14 +2,16 @@
 #include "CmdDevice.h"
 #include "SerialProtocol.h"
 #include <memory>
+#include "Logging.h"
 
 namespace foxtrot
 {
   namespace devices
   {
     
-    enum class powerunits
+    enum class powerunits : short unsigned
     {
+      
      Amps = 0,
      Volts = 1,
      Watts = 2,
@@ -38,13 +40,17 @@ namespace foxtrot
     void setUnits(powerunits unit);
     
     private:
-      
+      foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);
       
       std::shared_ptr<SerialProtocol> _proto;
       bool _usbmode;
     };
     
+    
+    
   }//namespace devices
   
 }//namespace foxtrot
+
+std::string convert_powerunit_to_string(foxtrot::devices::powerunits p, bool& ok);

@@ -6,6 +6,8 @@
 #include <algorithm>
 #include <string>
 #include <rttr/registration>
+#include <thread>
+#include <chrono>
 
 const foxtrot::parameterset newport2936R_usb_params 
 {
@@ -19,7 +21,7 @@ const foxtrot::parameterset newport2936R_usb_params
 const foxtrot::parameterset newport2936R_serial_params
 {
   {"baudrate", 38400u},
-  {"stopbits",  1},
+  {"stopbits",  1u},
   {"bits",  8u},
   {"parity",  "none"},
   {"flowcontrol", "none"}
@@ -30,23 +32,32 @@ const foxtrot::parameterset newport2936R_serial_params
 
 
 foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialProtocol> proto)
-: CmdDevice(proto), _proto(proto)
+: CmdDevice(proto), _proto(proto), _lg("newport2936R")
 {
   
   
   auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::BulkUSB>(proto);
+  auto serproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto);
   if(specproto != nullptr)
   {
-    std::cout << "using usb connected power meter" << std::endl;
+    _lg.Info( "using usb connected power meter");
     specproto->Init(&newport2936R_usb_params);
+    _lg.Debug("init done");
     _usbmode = true;
     
     
   }
-  else if(  auto serproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto)   != nullptr)
+  else if(  serproto   != nullptr)
   {
-    std::cout << "using serial connected power meter" << std::endl;
-    specproto->Init(&newport2936R_serial_params);
+    _lg.Info("using serial connected power meter" );
+    serproto->Init(&newport2936R_serial_params);
+    _lg.Debug("init done");
+    
+    _lg.Debug("flushing serial port");
+    serproto->flush();
+    
+    _lg.Debug("disabling command echo");
+    serproto->write("ECHO 0\r");
     _usbmode = false;
     
   }
@@ -58,8 +69,14 @@ foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialPro
 std::string foxtrot::devices::newport2936R::cmd(const std::string& request)
 {
   
+  _lg.Debug("request is: " + request);
   _proto->write(request + '\r');
   
+  if(!_usbmode)
+  {
+    auto specproto = static_cast<foxtrot::protocols::SerialPort*>(_proto.get());
+    specproto->flush();
+  }
   
   unsigned actlen;
   auto buffer = _proto->read(64, &actlen);
@@ -129,6 +146,14 @@ void foxtrot::devices::newport2936R::strip_CRLF(std::string& buffer)
 foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
 {
   auto repl = cmd("PM:UNIT?");
+  repl.erase(std::remove_if(repl.begin(),repl.end(), ::isspace),repl.end());
+  
+  
+  _lg.Trace("units reply: " + repl);
+  _lg.Trace("units reply length: " + std::to_string(repl.size()));
+  
+  _lg.Trace("stoi: " + std::to_string(std::stoi(repl)));
+  
   
   return static_cast<foxtrot::devices::powerunits>(std::stoi(repl));
 
@@ -148,26 +173,37 @@ const std::string foxtrot::devices::newport2936R::getDeviceTypeName() const
 
 std::string convert_powerunit_to_string(foxtrot::devices::powerunits unit, bool&ok)
 {
+  foxtrot::Logging lg("convert_powerunit_to_string");
+  
+  lg.Trace("converting powerunit to string");
+  
   using foxtrot::devices::powerunits;
   ok = true;
   switch(unit)
   {
-    case(powerunits::Amps): return "A";
-    case(powerunits::Volts): return "V";
-    case(powerunits::Watts): return "W";
-    case(powerunits::Watts_cm2): return "W/cm2";
-    case(powerunits::Joules): return "J";
-    case(powerunits::Joules_cm2): return "J/cm2";
-      
+    case(powerunits::Amps): return std::string("A");
+    case(powerunits::Volts): return std::string("V");
+    case(powerunits::Watts): return std::string("W");
+    case(powerunits::Watts_cm2): return std::string("W/cm2");
+    case(powerunits::Joules): return std::string("J");
+    case(powerunits::Joules_cm2): return std::string("J/cm2");
+    default:
+      ok = false;
+      return std::string("ERROR");
   }
   
 }
 
 
-foxtrot::devices::powerunits convert_string_to_powerunit(const std::string& s, bool& ok)
-{
+foxtrot::devices::powerunits convert_string_to_powerunit(std::string s, bool& ok)
+{ 
   using foxtrot::devices::powerunits;
   ok = true;
+    foxtrot::Logging lg("convert_powerunit_to_string");
+  
+  lg.Trace("converting string to powerunit");
+
+  
   
   if(s == "A")
   {
@@ -201,12 +237,17 @@ foxtrot::devices::powerunits convert_string_to_powerunit(const std::string& s, b
   
 }
 
+  
 
 RTTR_REGISTRATION
 {
   using namespace rttr;
   using foxtrot::devices::newport2936R;
   
+  type::register_converter_func(convert_powerunit_to_string);
+  type::register_converter_func(convert_string_to_powerunit);
+  
+  registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits");
   registration::class_<newport2936R>("foxtrot::devices::newport2936R")
   .method("setLambda",&newport2936R::setLambda)
   (
@@ -223,7 +264,6 @@ RTTR_REGISTRATION
     )
   ;
   
-  rttr::type::register_converter_func(convert_powerunit_to_string);
-  rttr::type::register_converter_func(convert_string_to_powerunit);
+  
   
 }

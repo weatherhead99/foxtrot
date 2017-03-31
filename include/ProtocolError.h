@@ -9,10 +9,7 @@ namespace foxtrot
  public:
     ProtocolError(const std::string& msg);
    
-  
-  
-   
-   
+     
  };
   
   

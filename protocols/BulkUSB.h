@@ -1,5 +1,6 @@
 #pragma once
 #include "SerialProtocol.h"
+#include "Logging.h"
 
 class libusb_context;
 class libusb_device_handle;
@@ -31,7 +32,7 @@ namespace foxtrot
       unsigned _epin;
       unsigned _write_timeout = 0;
       unsigned _read_timeout = 0;
-      
+      foxtrot::Logging _lg;
     };
     
     

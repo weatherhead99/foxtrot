@@ -4,18 +4,21 @@
 
 #include <libusb.h>
 #include "ProtocolError.h"
+#include "ProtocolTimeoutError.h"
 #include <string>
 #include <memory>
 
 #include <vector>
 #include <iostream>
 
-foxtrot::protocols::BulkUSB::BulkUSB(const foxtrot::parameterset*const instance_parameters): SerialProtocol(instance_parameters)
+foxtrot::protocols::BulkUSB::BulkUSB(const foxtrot::parameterset*const instance_parameters)
+: SerialProtocol(instance_parameters), _lg("BulkUSB")
 {
   
   int ret;
   if( ( ret = libusb_init(&_ctxt)) < 0)
   {
+    _lg.Error("error initializing libusb");
     throw  ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
   };
   
@@ -38,7 +41,6 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
 {
   //call base class to merge parameters
     foxtrot::CommunicationProtocol::Init(class_parameters);
-    
   
     extract_parameter_value(_vid,_params,"vid");
     extract_parameter_value(_pid,_params,"pid");
@@ -51,7 +53,7 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
     //get usb device
     auto free_devlist = [] (libusb_device** list) { libusb_free_device_list(list, true);};
     
-    std::cout << "device list" << std::endl;
+    _lg.Info("reading device list...");
     
     libusb_device** listptr;
     
@@ -70,6 +72,7 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
       int ret;
       if( (ret = libusb_get_device_descriptor(*(listptr +i), &desc)) < 0)
       {
+	_lg.Error("error getting device descriptor");
 	throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
       };
       
@@ -96,14 +99,28 @@ void foxtrot::protocols::BulkUSB::Init(const foxtrot::parameterset*const class_p
     int ret;
     if(  (ret = libusb_open(matching_devices[0], &_hdl) ) < 0)
     {
+      _lg.Error("error opening device...");
       throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
     };
+    
+    if( (ret = libusb_reset_device(_hdl)) < 0)
+    {
+      _lg.Error("error resetting device...");
+      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+    }
+    
     
     if( (ret = libusb_set_configuration(_hdl,1)) <0)
     {
+      _lg.Error("error setting configuration");
       throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
     };
     
+    if( (ret = libusb_claim_interface(_hdl,0)) < 0)
+    {
+      _lg.Error("error claiming interface");
+      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+    }
     
    
 }
@@ -118,17 +135,28 @@ std::string foxtrot::protocols::BulkUSB::read(unsigned int len, unsigned* actlen
   int alen_loc;
   
   auto err = libusb_bulk_transfer(_hdl,_epin, data,len,&alen_loc,_read_timeout);
-  if(err < 0)
-  {
-    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
-  };
   
   if(actlen != nullptr)
   {
     *actlen = alen_loc; 
   }
   
-  return std::string(data, (data + alen_loc));
+  if(err < 0)
+  {
+    _lg.Error("error doing bulk transfer for read");
+    _lg.Debug("error code: " + std::to_string(err));
+    if(err == -7)
+    {
+      throw ProtocolTimeoutError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
+    }
+    
+    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
+  };
+  
+  std::string out(data, (data + alen_loc));
+  
+  delete[] data;
+  return std::move(out);
 
 }
 
@@ -139,6 +167,13 @@ void foxtrot::protocols::BulkUSB::write(const std::string& data)
   auto err = libusb_bulk_transfer(_hdl,_epout,reinterpret_cast<unsigned char*>(const_cast<char*>(data.data())),data.size(),&act_len,_write_timeout);
   if(err < 0)
   {
+    _lg.Error("error doing bulk transfer for write");
+    _lg.Debug("error code:  " + std::to_string(err));
+    if(err == -7)
+    {
+      throw ProtocolTimeoutError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
+    }
+    
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
   };
   if(act_len != data.size())
