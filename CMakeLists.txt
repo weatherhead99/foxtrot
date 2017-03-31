@@ -14,6 +14,7 @@ option(BUILD_SETUPS "build experimental setups" ON)
 option(BUILD_PROGS "build utility programs" ON)
 option(BUILD_DASHBOARD "build monitoring dashboard program" ON)
 option(BUILD_OPMD "build OPMD high level client library" ON)
+option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
@@ -85,4 +86,8 @@ endif(BUILD_TESTS)
 
 if(BUILD_OPMD)
   add_subdirectory(OPMD)
+endif()
+
+if(BUILD_KEYPAD)
+  add_subdirectory(keypad)
 endif()
