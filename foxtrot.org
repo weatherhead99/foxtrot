@@ -1,31 +1,17 @@
 * Foxtrot
 
-** General
-   - ICE (sincle IDL file)
-   - Ponder for reflection               
+** TODO ANQP broadcaster
+amqpcpp
 
-** Classes
+** TODO  Archon frame grab
 
-*** Device
-    - represent "protocol" of device
+** TODO logger (on top of AMQP??)
 
-    - "Attributes": read/write, associated physical dimension & unit
-    - Tag system
+** TODO heater monitor logic
 
-*** DeviceConstraints
-    - template functions which can check device concept compliance. Concepts such as "motor axis"
+** TODO LCA-10140 FITS output
 
-*** MetaDevice
-    - composite or single channel device stuff, e.g. "motor axis" etc.
-
-*** DeviceConnection
-    - represent hardware connection
+** TODO Archon monitor biases and currents
 
 
-*** DeviceHelper
-    - function which sets up a device, given a device, connection protocol
-      and "local" connection parameters
 
-
-*** Attribute 
-    - 
