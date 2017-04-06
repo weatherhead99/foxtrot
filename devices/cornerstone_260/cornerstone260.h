@@ -1,6 +1,7 @@
 #pragma once
 #include "CmdDevice.h"
 #include "SerialProtocol.h"
+#include <rttr/registration>
 
 namespace foxtrot
 {
@@ -9,6 +10,7 @@ namespace foxtrot
     
     class cornerstone260 : public CmdDevice
     {
+      RTTR_ENABLE(CmdDevice)
     public:
       cornerstone260(std::shared_ptr< SerialProtocol> proto);
       
@@ -18,7 +20,15 @@ namespace foxtrot
       void setWave(double wl_nm);
       double getWave();
       
+      
+      void setFilter(int fnum);
+      int getFilter();
 
+      void setGrating(int gr);
+      int getGrating();
+      
+      void setGratingCalibration(int gr, int lines, double factor, double zero, double offset, std::string label);
+      
     protected:
       std::string cmd(const std::string& request) override;
       std::string readecho(const std::string& request);
@@ -34,3 +44,4 @@ namespace foxtrot
     
   }//namespace devices
 } //namespace foxtrot
+ 

@@ -190,7 +190,7 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
  
   std::ostringstream oss;
   
-  oss << "GOWAVE " << std::setprecision(2) << std::fixed << wl_nm;
+  oss << "GOWAVE " << std::setprecision(6) << std::fixed << wl_nm;
 //   std::cout << "sending command: " << oss.str()<< std::endl;
   
   cmd(oss.str());
@@ -212,4 +212,91 @@ double foxtrot::devices::cornerstone260::getWave()
 
 }
 
+void foxtrot::devices::cornerstone260::setFilter(int fnum)
+{
+  std::ostringstream oss;
+  oss << "FILTER " << fnum ;
+  cmd(oss.str());
+}
+
+int foxtrot::devices::cornerstone260::getFilter()
+{
+  std::string command("FILTER?");
+  auto repl = cmd(command);
+  
+  return std::stoi(repl);
+  
+}
+
+
+int foxtrot::devices::cornerstone260::getGrating()
+{
+  std::string command("GRATING?");
+  auto repl = cmd(command);
+  
+  return std::stoi(repl);
+
+}
+
+
+
+void foxtrot::devices::cornerstone260::setGrating(int gr)
+{
+  
+  std::ostringstream oss ;
+  oss << "GRATING " << gr ;
+  cmd(oss.str());
+  
+}
+
+void foxtrot::devices::cornerstone260::setGratingCalibration(int gr, int lines, double factor, double zero, double offset, std::string label)
+{
+  label = label.substr(0,9);
+  std::ostringstream oss;
+  oss << "GRAT" << gr << "LINES " << lines;
+  cmd(oss.str());
+  
+  oss.str("");
+  oss << "GRAT" << gr << "FACTOR " << std::setprecision(6) << factor;
+  cmd(oss.str());
+  oss.str("");
+  
+  
+  oss << "GRAT" << gr << "OFFSET " << std::setprecision(6) << offset;
+  cmd(oss.str());
+  oss.str("");
+  
+  oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << offset;
+  cmd(oss.str());
+  oss.str("");
+  
+  oss << "GRAT" << gr <<"LABEL " << label;
+
+}
+
+
+RTTR_REGISTRATION
+{
+  using namespace rttr;
+  using foxtrot::devices::cornerstone260;
+  
+  registration::class_<cornerstone260>("foxtrot::devices::cornerstone260")
+  .property_readonly("getShutterStatus",&cornerstone260::getShutterStatus)
+  .property_readonly("getWave",&cornerstone260::getWave)
+  .property_readonly("getFilter",&cornerstone260::getFilter)
+  .property_readonly("getGrating", &cornerstone260::getGrating)
+  .method("setWave",&cornerstone260::setWave)
+  (parameter_names("wl_nm"))
+  .method("setFilter",&cornerstone260::setFilter)
+  (parameter_names("fl"))
+  .method("setGrating",&cornerstone260::setGrating)
+  (parameter_names("gr"))
+  .method("setGratingCalibration", &cornerstone260::setGratingCalibration)
+  (parameter_names("gr","lines","factor","zero","offset","label"))
+  ;
+  
+  
+  
+  
+}
 
