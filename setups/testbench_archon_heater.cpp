@@ -3,6 +3,7 @@
 #include "devices/archon/archon_modules.h"
 #include "devices/archon/archon_module_heaterx.h"
 
+
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
 #include "protocols/SerialPort.h"
@@ -10,6 +11,9 @@
 #include "devices/TPG362/TPG362.h"
 
 #include "devices/newport_2936R/newport2936R.h"
+
+#include "devices/cornerstone_260/cornerstone260.h"
+
 
 #include <memory>
 
@@ -25,6 +29,11 @@ foxtrot::parameterset tpg_params {
   {"baudrate" , 9600u},
   };
  
+  
+foxtrot::parameterset cornerstone_params
+{
+  {"port", "/dev/ttyS0"}
+};
   
 
 extern "C" { 
@@ -120,6 +129,14 @@ int setup(foxtrot::DeviceHarness& harness)
     auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
     
     harness.AddDevice(std::move(powermeter));
+    
+    
+    
+    auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
+    auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
+    
+    harness.AddDevice(std::move(monoch));
+    
     return 0;  
 };
 }

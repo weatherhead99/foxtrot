@@ -68,6 +68,7 @@ double OPMD_hlclient::get_heater_target()
 void OPMD_hlclient::set_heater_target(double tgt)
 {
     _client->InvokeCapability(_heater_devid,"setHeaterTarget", {0, tgt});
+    _client->InvokeCapability(_heater_devid,"apply");
     
 }
 
@@ -95,9 +96,5 @@ bool OPMD_hlclient::get_heater_onoff()
 
 }
 
-void OPMD_hlclient::apply_heater_settings()
-{
-    _client->InvokeCapability(_heater_devid,"apply");
-}
 
 

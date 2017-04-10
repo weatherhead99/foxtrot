@@ -16,7 +16,6 @@ public:
   virtual ~OPMD_hlclient();
   
   
-  
   double get_cryostat_pressure();
   double get_pump_pressure();
   
@@ -32,15 +31,15 @@ public:
   double get_heater_target();
   void set_heater_target(double tgt);
   
-  void apply_heater_settings();
+  
+  
+protected:
+  foxtrot::Logging _lg;
+  foxtrot::Client* _client;
   
   
 private:
   int _heater_devid = -1;
   int _pressure_devid = -1;
-  
-  foxtrot::Logging _lg;
-  
-  foxtrot::Client* _client;
   
 };
