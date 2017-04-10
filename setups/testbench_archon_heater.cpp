@@ -14,6 +14,7 @@
 
 #include "devices/cornerstone_260/cornerstone260.h"
 
+#include "devices/OPS-Q250/Q250.h"
 
 #include <memory>
 
@@ -35,6 +36,14 @@ foxtrot::parameterset cornerstone_params
   {"port", "/dev/ttyS0"}
 };
   
+
+const foxtrot::parameterset psu_params
+{
+  {"devnode", "/dev/sdb"},
+  {"timeout", 2000u}
+};
+
+
 
 extern "C" { 
 int setup(foxtrot::DeviceHarness& harness)
@@ -140,6 +149,12 @@ int setup(foxtrot::DeviceHarness& harness)
     monoch->setGratingCalibration(2,600,1.000800,3.22885911,0.085817,"g2");
     
     harness.AddDevice(std::move(monoch));
+
+
+    auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
+    auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
+    
+    harness.AddDevice(std::move(lamp_psu));
     
     return 0;  
 };

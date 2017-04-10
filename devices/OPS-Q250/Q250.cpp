@@ -69,3 +69,23 @@ int devices::Q250::getWatts()
   auto repl = cmd("WATTS?");
   return std::stoi(repl);
 }
+
+
+
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+using devices::Q250;
+  registration::class_<Q250>("foxtrot::devices::Q250")
+  .property_readonly("getWatts", &Q250::getWatts)
+  .property_readonly("getVolts", &Q250::getVolts)
+  .property_readonly("getAmpPreset",&Q250::getAmpPreset)
+  .property_readonly("getAmpLimit",&Q250::getAmpLimit)
+  .method("start",&Q250::start)
+  .method("stop",&Q250::stop)
+  ;
+  
+  
+  
+  
+}

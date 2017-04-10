@@ -3,6 +3,8 @@
 #include "CmdDevice.h"
 #include "scsiserial.h"
 
+#include <rttr/registration>
+
 
 namespace foxtrot
 {
@@ -10,6 +12,9 @@ namespace foxtrot
   {
     class Q250 : public CmdDevice
     {
+      
+      RTTR_ENABLE(CmdDevice)
+      
     public:
     Q250(std::shared_ptr<protocols::scsiserial> proto);
     
