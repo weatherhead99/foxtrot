@@ -17,3 +17,4 @@ add_subdirectory(DM3068)
 add_subdirectory(dummy)
 
 add_subdirectory(BME280)
+add_subdirectory(stellarnet)

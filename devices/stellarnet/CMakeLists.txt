@@ -1,0 +1,1 @@
+add_device_lib(stellarnet stellarnet.cpp)
