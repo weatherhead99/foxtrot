@@ -131,9 +131,13 @@ int setup(foxtrot::DeviceHarness& harness)
     harness.AddDevice(std::move(powermeter));
     
     
-    
+    //setup monochromator
     auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
     auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
+    
+    //calibrate monochromator - TODO do from configuration file somewhere
+    monoch->setGratingCalibration(1,600,0.99510,0.0872665,0.086534,"g1");
+    monoch->setGratingCalibration(2,600,1.000800,3.22885911,0.085817,"g2");
     
     harness.AddDevice(std::move(monoch));
     
