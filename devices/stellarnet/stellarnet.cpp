@@ -2,6 +2,8 @@
 #include "ProtocolError.h"
 #include "DeviceError.h"
 #include <libusb.h>
+#include <fstream>
+
 
 #define DEVICE_ID_ADDR 0x20
 #define COEFF_C1_ADDR 0x80
@@ -12,8 +14,8 @@
 
 
 
-foxtrot::devices::stellarnet::stellarnet(const std::string& firmware_file): CmdDevice(nullptr),
-_lg("stellarnet"), _firmware_file(firmmware_file)
+foxtrot::devices::stellarnet::stellarnet(const std::string& firmware_file, int timeout_ms): CmdDevice(nullptr),
+_lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
 {
   if( int ret = libusb_init(&_ctxt) < 0)
   {
@@ -48,14 +50,14 @@ _lg("stellarnet"), _firmware_file(firmmware_file)
       if(desc.idVendor == FX2_VID && desc.idProduct == FX2_PID)
       {
 	_lg.Info("found empty FX2 chip, uploading firmware...");
-	reenumerate_device(desc,*(listptr+i));
+	reenumerate_device(&desc,*(listptr+i));
 	//NOTE: loop will run again and init real device
 	
       }
       else if(desc.idVendor == STELLARNET_VID && desc.idProduct == STELLARNET_PID)
       {
 	_lg.Info("found enumerated stellarnet device!");
-	setup_reenumerated_device(desc, *(listptr+i));
+	setup_reenumerated_device(&desc, *(listptr+i));
 	
 	break;
       }
@@ -89,18 +91,18 @@ const std::string foxtrot::devices::stellarnet::getDeviceTypeName() const
 }
 
 
-foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev)
+void foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev)
 {
   
   //set configuration
-  if(libusb_open(dev,_hdl) < 0)
+  if(int ret = libusb_open(dev,&_hdl) < 0)
   {
     _lg.Error("error opening device...");
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
   }
 
   int cfg;
-  if( libusb_get_configuration(_hdl,&cfg) < 0)
+  if( int ret = libusb_get_configuration(_hdl,&cfg) < 0)
   {
     _lg.Error("error checking active config..>");
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
@@ -111,9 +113,55 @@ foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* desc,
    libusb_set_configuration(_hdl,1); 
   }
   
+  auto reqtp_out = LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE;
+  auto reqtp_in = LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE;
   //load firmware
   
+  //CPU into reset
+  unsigned char reset_state[1] = {1};
+  if(int ret = libusb_control_transfer(_hdl,reqtp_out,0xA0,0xE600,0,reset_state,1,_timeout_ms) < 0)
+  {
+    _lg.Error("error putting CPU into reset");
+    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+  }
   
+  //load firmware
+  std::ifstream ifs(_firmware_file);
+  std::string line;
+  while(std::getline(ifs,line))
+  {
+    int count = std::stoi(line.substr(0,2),0,16);
+    int addr = std::stoi(line.substr(3,4),0,16);
+    
+    auto payloadstr = line.substr(9,count*2);
+    
+    std::vector<unsigned char> payload;
+    payload.resize(count);
+     
+    auto striter = payloadstr.begin();
+    for(auto& c_out : payload)
+    {
+      c_out = std::stoi(std::string(*striter, *striter+2),0,16);
+      striter+=2;
+    };
+    
+    if(auto ret = libusb_control_transfer(_hdl,reqtp_out,0xA0,addr,0,payload.data(),payload.size(),_timeout_ms) < 0)
+    {
+     _lg.Error("error loading firmware at address: " + std::to_string(addr));
+     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+    }
+    
+  };
+  
+  
+  
+  //CPU out of reset
+  reset_state[0] = 0;
+  if(auto ret = libusb_control_transfer(_hdl,reqtp_out,0xA0,0xE600,0,reset_state,1,_timeout_ms) < 0)
+  {
+    _lg.Error("error taking CPU out of reset");
+    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+  }
   
   
   
@@ -121,7 +169,7 @@ foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* desc,
 
 }
 
-foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev)
+void foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev)
 {
 
 }

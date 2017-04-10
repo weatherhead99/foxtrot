@@ -21,14 +21,14 @@ namespace foxtrot
    class stellarnet : public CmdDevice
    {
    public:
-     stellarnet(const std::string& firmware_file);
+     stellarnet(const std::string& firmware_file, int timeout_ms);
       virtual const std::string getDeviceTypeName() const;
       virtual ~stellarnet();
       
    private:
      
-     reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev);
-     setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev);
+     void reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev);
+     void setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev);
      
      libusb_context* _ctxt;
      libusb_device_handle* _hdl;
@@ -37,6 +37,7 @@ namespace foxtrot
      
      const std::string _firmware_file;
      
+     int _timeout_ms;
    };
    
    
