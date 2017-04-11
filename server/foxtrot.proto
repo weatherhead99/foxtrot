@@ -94,6 +94,21 @@ message capability_response
     errstatus err = 8;
 }
 
+
+message telemetry
+{
+    string name = 1;
+    uint64 tstamp = 2;
+    oneof return {
+        double dblret = 3;
+        sint32 intret = 4;
+        bool boolret = 5;
+        string stringret = 6;
+        }
+        
+    errstatus err = 7;
+}
+
 message chunk_request
 { 
     uint32 msgid = 1;
