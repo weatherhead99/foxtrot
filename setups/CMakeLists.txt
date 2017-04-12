@@ -9,7 +9,7 @@ set_target_properties(${setup_we} PROPERTIES PREFIX "")
 target_include_directories(${setup_we} PRIVATE
 $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
 
-target_link_libraries(${setup_we} archon dummy TPG362 newport2936R)
+target_link_libraries(${setup_we} archon dummy TPG362 newport2936R cornerstone260)
 
 #needed so we have already generated the protobuf files
 add_dependencies(${setup_we} foxtrotserv)
