@@ -42,13 +42,13 @@ namespace foxtrot
 	    
 	    
         protected:
-            
-        private:
-            ArchonLVX(archon& arch, short unsigned int modpos);
-            
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
+            ArchonLVX(archon& arch, short unsigned int modpos);
 	    
+            
+        private:
+            
 	    std::array<bool,8> _GPIO;
             
         };

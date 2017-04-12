@@ -15,6 +15,7 @@ namespace devices
   {
       
       friend class ArchonLVX;
+      friend class ArchonHVX;
       
   public:
     
