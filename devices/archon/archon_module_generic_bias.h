@@ -29,6 +29,11 @@ namespace devices
     
     void setEnable(int channel, bool onoff);
     bool getEnable(int channel);
+    
+    double measureV(int channel);
+    double measureI(int channel);
+    
+    
   
   protected:
     ArchonGenericBias(ArchonModule& mod, const std::string& nmemonic,

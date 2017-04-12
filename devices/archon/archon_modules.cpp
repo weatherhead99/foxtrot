@@ -83,9 +83,23 @@ unsigned short ArchonModule::getRev() const
 
 double ArchonModule::getTemp()
 {
-  auto temp = readConfigKey("TEMP");
-  return std::stod(temp);
   
+  
+  std::ostringstream oss;
+  oss << "MOD" << (_modpos+1) << "/" << "TEMP";
+  
+  auto statmap = _arch.getStatus();
+  auto tempstr = statmap.at(oss.str());
+  
+  return std::stod(tempstr);
+  
+}
+
+
+const archon& ArchonModule::getArchon()
+{
+  return _arch;
+
 }
 
 

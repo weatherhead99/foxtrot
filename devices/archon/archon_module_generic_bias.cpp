@@ -97,6 +97,30 @@ bool devices::ArchonGenericBias::getEnable(int channel)
   return std::stoi(_mod.readConfigKey(oss.str()));
 }
 
+double devices::ArchonGenericBias::measureI(int channel)
+{
+  check_channel_number(channel);
+  std::ostringstream oss;
+  oss << _biasnmemonic << "_I" << channel;
+  
+  auto str = _mod.getArchon().getStatus().at(oss.str());
+  return std::stod(str);
+
+}
+
+
+double devices::ArchonGenericBias::measureV(int channel)
+{
+  check_channel_number(channel);
+  std::ostringstream oss;
+  oss << _biasnmemonic << "_V" << channel;
+  
+  auto str = _mod.getArchon().getStatus().at(oss.str());
+  return std::stod(str);
+
+}
+
+
 
 void devices::ArchonGenericBias::check_channel_number(int channel)
 {

@@ -54,6 +54,10 @@ namespace devices
 	    
 	    void apply();
 	    
+	    
+	    const archon& getArchon();
+	    
+	    
     protected:
             short unsigned _modpos;
             archon& _arch;

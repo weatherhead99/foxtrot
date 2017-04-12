@@ -153,6 +153,36 @@ int foxtrot::devices::ArchonLVX::getLimit(int channel)
     
 }
 
+
+double devices::ArchonLVX::measureI(bool HC, int channel)
+{
+  if(HC)
+  {
+    return _hcbias.measureI(channel);
+  }
+  else
+  {
+    return _lcbias.measureI(channel);
+  }
+
+}
+
+
+
+double devices::ArchonLVX::measureV(bool HC, int channel)
+{
+  if(HC)
+  {
+    return _hcbias.measureV(channel);
+  }
+  else
+  {
+    return _lcbias.measureI(channel);
+  }
+
+}
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -178,6 +208,10 @@ RTTR_REGISTRATION
  .method("setLimit",&ArchonLVX::setLimit)
  (parameter_names("channel","limit_mA"))
  .method("getLimit",&ArchonLVX::getLimit)
+ .method("measureI",&ArchonLVX::measureI)
+ (parameter_names("HC","channel"))
+ .method("measureV",&ArchonLVX::measureV)
+ (parameter_names("HC","channel"))
  ;
   
   

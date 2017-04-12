@@ -37,7 +37,10 @@ namespace foxtrot
             int getLimit(int channel);
             
             //TODO: GPIO
-            
+            double measureV(bool HC, int channel);
+	    double measureI(bool HC, int channel);
+	    
+	    
         protected:
             
         private:
@@ -45,6 +48,8 @@ namespace foxtrot
             
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
+	    
+	    std::array<bool,8> _GPIO;
             
         };
         
