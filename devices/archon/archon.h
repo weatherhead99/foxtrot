@@ -11,6 +11,7 @@
 #include <rttr/registration>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include "Logging.h"
 
 using std::string;
 typedef std::map<std::string,std::string> ssmap;
@@ -143,6 +144,7 @@ namespace foxtrot {
     
     unsigned long long _arch_tmr;
     boost::posix_time::ptime _sys_tmr;
+    foxtrot::Logging _lg;
     
   };
   

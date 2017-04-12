@@ -30,7 +30,7 @@ const string devices::archon::getDeviceTypeName() const
 
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
-    _order(0)
+    _order(0), _lg("archon")
 {
   proto->Init(nullptr);
   
@@ -66,20 +66,20 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
     switch(modtype)
     {
         case(archon_module_types::HeaterX):
-	  std::cout << "HeaterX module detected at position " << (i+1) << std::endl;	  
+	  _lg.Info("HeaterX module detected at position " + std::to_string(i+1));
             ptr = ArchonHeaterX::constructModule(*this,i);
             _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
             break;
-	
-	case(archon_module_types::LVBias):
-	  //TODO: is the real thing an LVX?
-	  std::cout << "LVBias module detected at position " << (i+1) << std::endl;
+	  
+	  
+	case(archon_module_types::LVXBias):
+	  _lg.Info("LVXBias module detected at position " + std::to_string(i+1));
 	  ptr = ArchonLVX::constructModule(*this,i);
-	  _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i,std::move(ptr)));
+	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
 	    
 	default:
-	  std::cout << "support for module at position " << (i+1) << " isn't implemented yet"<< std::endl;
+	  _lg.Info("support for module at position " + std::to_string(i+1)  + " isn't implemented yet");
 	    
     };
     

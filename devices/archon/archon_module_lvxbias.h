@@ -1,7 +1,7 @@
 #pragma once	
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
-
+#include <rttr/registration>
 
 
 namespace foxtrot
@@ -12,6 +12,7 @@ namespace foxtrot
         
         class ArchonLVX : public ArchonModule
         {
+	  RTTR_ENABLE(ArchonModule)
         public:
 	    
 	    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);

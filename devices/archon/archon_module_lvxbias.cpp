@@ -153,6 +153,35 @@ int foxtrot::devices::ArchonLVX::getLimit(int channel)
     
 }
 
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using foxtrot::devices::ArchonLVX;
+
+ registration::class_<ArchonLVX>("foxtrot::devices::ArchonLVX")
+ .method("setLabel", &ArchonLVX::setLabel)
+ (parameter_names("HC", "channel", "label"))
+ .method("getLabel", &ArchonLVX::getLabel)
+ (parameter_names("HC","channel"))
+ .method("setOrder", &ArchonLVX::setOrder)
+ (parameter_names("HC","channel","sequence"))
+ .method("getOrder", &ArchonLVX::getOrder)
+ (parameter_names("HC","channel"))
+ .method("setV", &ArchonLVX::setV)
+ (parameter_names("HC","channel","V"))
+ .method("getV",&ArchonLVX::getV)
+ (parameter_names("HC","channel"))
+ .method("setEnable",&ArchonLVX::setEnable)
+ (parameter_names("HC","channel","onoff"))
+ .method("getEnable",&ArchonLVX::getEnable)
+ (parameter_names("HC","channel"))
+ .method("setLimit",&ArchonLVX::setLimit)
+ (parameter_names("channel","limit_mA"))
+ .method("getLimit",&ArchonLVX::getLimit)
+ ;
+  
+  
+}
 
 
     
