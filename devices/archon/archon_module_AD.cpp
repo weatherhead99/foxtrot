@@ -16,6 +16,13 @@ devices::ArchonAD::ArchonAD(devices::archon& arch, short unsigned int modpos)
 
 }
 
+
+void devices::ArchonAD::update_variables()
+{
+
+}
+
+
 double devices::ArchonAD::getClamp(int channel)
 {
   
