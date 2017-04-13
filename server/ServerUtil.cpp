@@ -179,6 +179,26 @@ std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, un
         dt = foxtrot::byte_data_types::UINT;
         return data;
     }
+    else if(data = variant_to_bytes<unsigned long>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::ULONG;
+        return data;
+    }
+    else if(data = variant_to_bytes<short>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::SHORT;
+        return data;
+    }
+    else if(data= variant_to_bytes<int>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::IINT;
+        return data;
+    }
+    else if(data =  variant_to_bytes<long>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::LONG;
+        return data;
+    }
     
     throw std::logic_error("function couldn't convert to recognized array type...");
     

@@ -26,7 +26,10 @@ enum byte_data_types
     UCHAR = 0;
     USHORT = 1;
     UINT = 2;
-    
+    ULONG = 3;
+    SHORT = 4;
+    IINT = 5;
+    LONG = 6;
 }
 
 enum error_types
