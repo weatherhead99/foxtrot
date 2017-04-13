@@ -21,6 +21,14 @@ enum value_types
     VOID = 5;
 }
 
+enum byte_data_types
+{
+    UCHAR = 0;
+    USHORT = 1;
+    UINT = 2;
+    
+}
+
 enum error_types
 {
     Error = 0;
@@ -128,6 +136,7 @@ message datachunk
     string capname = 4;
     uint32 dataid = 5;
     errstatus err = 6;
+    byte_data_types dtp = 7;
 
 }
 

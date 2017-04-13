@@ -1,6 +1,10 @@
 #include "ServerUtil.h"
 #include "Logging.h"
 #include <rttr/type>
+#include <rttr/variant.h>
+
+#include <memory>
+
 
 rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
     {
@@ -131,6 +135,52 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
     
     return value_types::INT;
     
+    
+}
+
+template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
+{ 
+    
+    rttr::type tp = rttr::type::get<std::vector<T>>();
+    if(!vt.can_convert(tp))
+    {
+        return nullptr;
+    }
+    
+    auto arr = vt.convert<std::vector<T>>();
+    
+    byte_size = sizeof(T) / sizeof(unsigned char) * arr.size();
+    auto data  = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
+    
+    std::copy(arr.begin(), arr.end(), data.get());
+    
+    return data;
+    
+}
+
+
+std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
+{
+    
+    std::unique_ptr<unsigned char[]> data;
+    //find type
+    if(data = variant_to_bytes<unsigned char>(arr,byte_size))
+    {
+     dt = foxtrot::byte_data_types::UCHAR;   
+     return data;
+    }
+    else if(data = variant_to_bytes<unsigned short>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::USHORT;
+        return data;
+    }
+    else if(data = variant_to_bytes<unsigned int>(arr,byte_size))
+    {
+        dt = foxtrot::byte_data_types::UINT;
+        return data;
+    }
+    
+    throw std::logic_error("function couldn't convert to recognized array type...");
     
 }
 

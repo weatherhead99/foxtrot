@@ -2,6 +2,12 @@
 #include "foxtrot.grpc.pb.h"
 #include <rttr/type>
 #include "Logging.h"
+#include "byteview.h"
+
+namespace rttr
+{
+ class variant;   
+}
 
 namespace foxtrot
 {
@@ -72,7 +78,10 @@ namespace foxtrot
              
 };
 
-    
+
+    std::unique_ptr<unsigned char[]> byte_view_data(rttr::variant& arr, unsigned& byte_size, foxtrot::byte_data_types& dtype);
+
+
     rttr::variant get_arg(const capability_argument& arg, bool& success);
     
     bool set_returntype(rttr::variant& retval, foxtrot::capability_response& repl);
