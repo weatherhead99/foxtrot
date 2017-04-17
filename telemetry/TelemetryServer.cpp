@@ -6,6 +6,9 @@
 #include <boost/date_time.hpp>
 #include <boost/variant.hpp>
 #include "foxtrot.pb.h"
+#include "ServerUtil.h"
+#include "DeviceError.h"
+#include "ProtocolError.h"
 
 class telem_visitor : public boost::static_visitor<>
 {
@@ -37,8 +40,8 @@ private:
 };
 
 
-foxtrot::TelemetryServer::TelemetryServer( const std::string& topic, foxtrot::Client& client)
-:  _topic(topic), _lg("TelemetryServer"), _client(client)
+foxtrot::TelemetryServer::TelemetryServer( const std::string& topic, foxtrot::Client& client, int tick_ms)
+:  _topic(topic), _lg("TelemetryServer"), _client(client), _tick_ms(tick_ms)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
@@ -69,9 +72,19 @@ foxtrot::TelemetryServer::~TelemetryServer()
 }
 
 
-void foxtrot::TelemetryServer::AddTelemetryItem(telemfun fun, std::chrono::milliseconds timeout, const std::string& name, const std::string& subtopic)
+void foxtrot::TelemetryServer::AddTelemetryItem(telemfun fun, unsigned ticks, const std::string& name, const std::string& subtopic)
 {
-    _funs.push_back(std::make_tuple(timeout,fun,name,subtopic));
+    _funs.push_back(std::make_tuple(ticks,fun,name,subtopic));
+    
+}
+
+void foxtrot::TelemetryServer::BindSocket(const std::string& bindaddr)
+{
+    auto ret = nn_bind(_nn_pub_skt,bindaddr.c_str());
+    if(ret < 0)
+    {
+        throw std::runtime_error("nanomsg error: " + std::string(strerror(errno)));
+    }
     
 }
 
@@ -88,55 +101,88 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
     
     auto epoch = boost::posix_time::from_time_t(0);
     
+    long unsigned _tick = 1;
+    
     try{
         while(true)
         {
-            
-        for(auto funtup = _funs.begin(); funtup != _funs.end(); funtup++)
-        {
-          _lg.Debug("running function for telemetry item: " + std::get<2>(*funtup));  
-          auto now = boost::posix_time::microsec_clock::universal_time();
-          auto ms_since_epoch = (now - epoch).total_milliseconds();
-          _lg.Debug("timestamp: " + std::to_string(ms_since_epoch));
-          
-          auto ret = std::get<1>(*funtup)(_client);
-          
-          foxtrot::telemetry telem_msg;
-          telem_msg.set_name(std::get<2>(*funtup));
-          telem_msg.set_tstamp(ms_since_epoch);
-          
-          telem_visitor v(telem_msg);
-          boost::apply_visitor(v,ret);
-          
-          std::ostringstream oss;
-          oss << _topic << "|" << std::get<3>(*funtup) << "|";
-          
-          if( !telem_msg.SerializeToOstream(&oss))
-          {
-              throw std::runtime_error("failed to serialize telemetry message!");
-          }
-          
-          auto nbytes = nn_send(_nn_pub_skt,oss.str().c_str(), oss.str().size(),0);
-          if(nbytes < oss.str().size())
-          {
-              throw std::runtime_error("didn't successfully send all data!");
-          };
-          
-          std::chrono::milliseconds nextwait;
-          if(funtup != (_funs.end() -1) )
-          {
-            nextwait = std::get<0>(*funtup) - std::get<0>(*(funtup+1));
-          }
-          else
-          {
-           nextwait = std::get<0>(_funs[0]);   
-          }
+            for(auto& funtup : _funs)
+            {
+              if(_tick % std::get<0>(funtup) == 0  )
+              {
+                  _lg.Trace("collecting telemetry: " + std::get<2>(funtup));
+                  //this function should be called on this tick
+                  auto fun  = std::get<1>(funtup);
+                  
+                  foxtrot::telemetry msg;
+                  foxtrot::ft_variant telem_value;
+                  bool success = false;
+                  try{
+                    telem_value = std::get<1>(funtup)(_client);
+                    
+                    telem_visitor vst(msg);
+                    //TODO error handling here
+                    boost::apply_visitor(vst,telem_value);
+                    
+                    success = true;
+                  }
+                  catch(class foxtrot::DeviceError& err)
+                  {
+                      _lg.Error("device error while getting telemetry");
+                      set_repl_err(msg,err,error_types::DeviceError);
+                      
+                  }
+                  catch(class foxtrot::ProtocolError& err)
+                  {
+                      _lg.Error("protocol error while getting telemetry");
+                      set_repl_err(msg,err,error_types::ProtocolError);
+                      
+                  }
+                  catch(std::out_of_range& err)
+                  {
+                      _lg.Error("out of range error trapped while getting telemetry");
+                      set_repl_err(msg,err,error_types::out_of_range);
+                  }
+                  catch(std::exception& err)
+                  {
+                      _lg.Error("generic exception while getting telemetry");
+                      set_repl_err(msg,err,error_types::Error);
+                  }
+                  catch(...)
+                  {
+                      _lg.Error("unhandled error while getting telemetry");
+                      set_repl_err_msg(msg,"unknown error",error_types::unknown_error);
+                  }
+                  
+                  
+                  auto now = boost::posix_time::microsec_clock::universal_time();
+                  msg.set_name(std::get<2>(funtup));
+                  msg.set_tstamp( (now-epoch).total_microseconds());
+                  
+                  std::ostringstream oss;
+                  oss << _topic << "|" << std::get<3>(funtup);
+                  if(!msg.SerializeToOstream(&oss))
+                  {
+                      _lg.Error("failed to serialize message!");
+                  };
+                  
+                  _lg.Trace("message: " + oss.str());
+                  auto nbytes = nn_send(_nn_pub_skt, oss.str().c_str(), oss.str().size(),0);
+                  
+                  if(nbytes != oss.str().size())
+                  {
+                   _lg.Error("invalid number of bytes written!");   
+                   _lg.Error("expected: " + std::to_string(oss.str().size()));
+                   _lg.Error("actual: " + std::to_string(nbytes));
+                  }
+                  
+              }
               
-          _lg.Trace("next wait is: " + std::to_string(nextwait.count()));
-          std::this_thread::sleep_for(nextwait);
+            }
             
-        };
-        
+         _tick++;
+         std::this_thread::sleep_for(std::chrono::milliseconds(_tick_ms));
+         _lg.Trace("sleeping until next tick..");
         
         }
     }
@@ -154,7 +200,7 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
 
 void foxtrot::TelemetryServer::sort_funs_vector()
 {
-    using funpair = std::tuple<std::chrono::milliseconds, telemfun, std::string, std::string>;
+    using funpair = std::tuple<unsigned, telemfun, std::string, std::string>;
     
     auto cmpfun = [] (const funpair& first, const funpair& second)
     {
