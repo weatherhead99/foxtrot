@@ -180,6 +180,13 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             respond.Finish(repl,grpc::Status::OK,tag);
              return true;
          }
+    catch(std::out_of_range& err)
+    {
+        _lg.Error("caught out of range error");
+        set_repl_err(repl,err,error_types::out_of_range);
+        respond.Finish(repl,grpc::Status::OK,tag);
+        return true;
+    }
     catch(std::exception& err)
     {
           _lg.Error("caught generic error" );
@@ -187,6 +194,13 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         respond.Finish(repl,grpc::Status::OK,tag);
         return true;
     }
+    catch(...)
+    {
+        _lg.Error("caught otherwise unspecified error");
+        set_repl_err_msg(repl, "unknown error", error_types::Error);
+        
+    }
+        
             
 //     cout << "repl has error: " << repl.has_err() << endl;
 //     cout << "repl return: " << repl.dblret() << endl;
