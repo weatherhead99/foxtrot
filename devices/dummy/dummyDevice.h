@@ -33,6 +33,7 @@ namespace foxtrot
         const std::string getDeviceTypeName() const override;
 	
 	std::vector<unsigned char> getCountStream(int n);
+    std::vector<double> getRandomVector(int n);
         
     protected:
         

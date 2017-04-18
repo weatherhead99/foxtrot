@@ -1,3 +1,4 @@
+
 #include "FetchDataImpl.h"
 #include "Device.h"
 
@@ -124,31 +125,33 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       return true;
     }
     
-    auto arrtp = rttr::type::get<std::vector<unsigned char>>();
-    if(!retval.can_convert(arrtp))
-    {
-      _lg.Error("can't convert return type to unsigned char vector");
-      set_repl_err_msg(repl,"can't convert return type to uchar vector",error_types::Error);
-      respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
-    }
-    
-    
+        
     //get the cq, we'll need it later
     _lg.Debug("getting completion queue");
     auto cq = reinterpret_cast<FetchDataImpl*>(tag)->GetCQ();
     
+    unsigned byte_size;
+    foxtrot::byte_data_types dt;
+    auto data = foxtrot::byte_view_data(retval,byte_size,dt);
     
-    auto data = retval.convert<std::vector<unsigned char>>();
+    if(data == nullptr )
+    {
+      _lg.Error("can't convert return type to vector ");
+      set_repl_err_msg(repl,"can't convert return type to vector",error_types::Error);
+      respond.Write(repl,tag);
+//       respond.Finish(grpc::Status::OK,tag);
+      return true;
+    }
+
     
     auto csize = req.chunksize();
     
-    unsigned num_chunks = data.size() / csize;
-    bool extra_chunk = data.size() % csize ? true : false;
+    unsigned num_chunks = byte_size / csize;
+    bool extra_chunk = byte_size % csize ? true : false;
     
     _lg.Trace("num chunks: " + std::to_string(num_chunks));
     
-    auto currval = data.begin();
+    auto currval = data.get();
     
     
     
@@ -176,14 +179,16 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     {
       _lg.Debug("extra chunk writing...");
       repl = init_chunk<foxtrot::datachunk>(req);
+      repl.set_dtp(dt);
       auto outdat = repl.mutable_data();
-      outdat->assign(currval,data.end());
+      _lg.Trace("WARNING, possible seGFAULT!");
+      outdat->assign(currval,data.get() + byte_size);
 //       respond.Write(repl,reinterpret_cast<void*>(atag++));
       respond.Write(repl,tag);
       cq->Next( (void**) &atag,&ok);
       if(!ok)
       {
-	_lg.Error("completion queue next failed!");
+        _lg.Error("completion queue next failed!");
       }
     }
     

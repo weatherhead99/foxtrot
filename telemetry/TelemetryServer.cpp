@@ -86,6 +86,8 @@ void foxtrot::TelemetryServer::BindSocket(const std::string& bindaddr)
         throw std::runtime_error("nanomsg error: " + std::string(strerror(errno)));
     }
     
+    _lg.Debug("endpoint id: " + std::to_string(ret));
+    
 }
 
 

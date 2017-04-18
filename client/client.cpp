@@ -136,6 +136,57 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
 
 }
 
+template <typename T> std::vector<T> copy_to_out_type(const std::vector<unsigned char>& in)
+{
+    return std::vector<T>(reinterpret_cast<const T*>(in.data()), 
+                          reinterpret_cast<const T*>(in.data() + in.size()));
+}
+
+
+foxtrot::ft_vector_variant foxtrot::ft_variant_from_data(const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data)
+{
+    using namespace foxtrot;
+    ft_vector_variant out;
+    
+    switch(tp)
+    {
+        case(byte_data_types::UCHAR):
+            out = data;
+            break;
+        case(byte_data_types::USHORT):
+            out = copy_to_out_type<unsigned short>(data);
+            break;
+        case(byte_data_types::UINT):
+            out = copy_to_out_type<unsigned>(data);
+            break;
+        case(byte_data_types::ULONG):
+            out = copy_to_out_type<unsigned long>(data);
+            break;
+        case(byte_data_types::SHORT):
+            out = copy_to_out_type<short>(data);
+            break;
+        case(byte_data_types::IINT):
+            out = copy_to_out_type<int>(data);
+            break;
+        case(byte_data_types::LONG):
+            out = copy_to_out_type<long>(data);
+            break;
+        case(byte_data_types::BFLOAT):
+            out = copy_to_out_type<float>(data);
+            break;
+        case(byte_data_types::BDOUBLE):
+            out =  copy_to_out_type<double>(data);
+            break;
+    }
+    
+    return out;
+}
+
+
+
+
+
+
 int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp)
 {
     auto device = std::find_if(sd.devs_attached().begin(), sd.devs_attached().end(),

@@ -13,10 +13,15 @@
 
 #include "Logging.h"
 
+#include "DeviceError.h"
+#include "ProtocolError.h"
+
 namespace foxtrot
 {
     
     typedef boost::variant<double,int,bool,std::string> ft_variant;
+    
+    typedef boost::variant<std::vector<unsigned char> , std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double> > ft_vector_variant;
     
     
     class ft_variant_visitor : public boost::static_visitor<>
@@ -36,6 +41,8 @@ namespace foxtrot
     };
     
     ft_variant ft_variant_from_response(const capability_response& repl);
+    ft_vector_variant ft_variant_from_data(const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data);
+    
     
     class ft_variant_printer : public boost::static_visitor<>
     {
@@ -87,7 +94,7 @@ namespace foxtrot
         capability_proxy call(int devid, const std::string& capname);
         
 // 	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, std::initializer_list<ft_variant> args);
-	template <typename iteratortp> std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args);
+	template <typename iteratortp> ft_vector_variant FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args);
 	
         
     private:
@@ -150,7 +157,7 @@ namespace foxtrot
         
     };
     
-    template <typename iteratortp> std::vector<unsigned char> Client::FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args)
+    template <typename iteratortp> ft_vector_variant Client::FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args)
     {
         static_assert(std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
                            "iterator type must dereference to ft_variant");
@@ -167,17 +174,45 @@ namespace foxtrot
       grpc::ClientContext ctxt;
       auto reader = _stub->FetchData(&ctxt,req);
       
-      std::vector<unsigned char> out;
+      std::vector<unsigned char> bytes;
       
       datachunk repl;
       while(reader->Read(&repl))
       {
         auto thisdat = repl.data();
-        out.insert(out.end(),std::begin(thisdat), std::end(thisdat));
-	//TODO: error handling here!
+        bytes.insert(bytes.end(),std::begin(thisdat), std::end(thisdat));
+        
+        //TODO: error handling here!
+        if(repl.has_err())
+        {
+            auto err = repl.err();
+            
+            class foxtrot::Error except(err.msg());
+            class foxtrot::DeviceError exceptdev(err.msg());
+            class foxtrot::ProtocolError exceptproto(err.msg());
+        
+            switch(err.tp())
+            {
+                case(error_types::Error):
+                    throw except;
+                case(error_types::DeviceError):
+                    throw exceptdev;
+                case(error_types::ProtocolError):
+                    throw exceptproto;
+                case(error_types::out_of_range):
+                    throw std::out_of_range(err.msg());
+                    
+                default:
+                    throw std::runtime_error(err.msg());
+            }
+            
+        };
+        
       }
       
-      return out;
+      
+      return ft_variant_from_data(repl.dtp(),bytes);
+      
     }
 
     

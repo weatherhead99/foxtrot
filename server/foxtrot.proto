@@ -30,6 +30,8 @@ enum byte_data_types
     SHORT = 4;
     IINT = 5;
     LONG = 6;
+    BFLOAT =7;
+    BDOUBLE = 8;
 }
 
 enum error_types

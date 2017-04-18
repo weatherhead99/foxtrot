@@ -20,9 +20,9 @@ int foxtrot::devices::dummyDevice::getCounter()
 // double dummyDevice::getRandomDouble() 
 double foxtrot::devices::dummyDevice::getRandomDouble()
 {
-    std::cout << "generating random double.." << std::endl;
+//     std::cout << "generating random double.." << std::endl;
     auto num  = _distribution(_generator);
-    std::cout << "num: " << num << std::endl;
+//     std::cout << "num: " << num << std::endl;
     return num;
 }
 
@@ -73,6 +73,20 @@ std::vector< unsigned char > foxtrot::devices::dummyDevice::getCountStream(int n
 }
 
 
+std::vector<double> foxtrot::devices::dummyDevice::getRandomVector(int n)
+{
+    std::vector<double> out;
+    out.reserve(n);
+    for(int i =0 ; i<n; i++)
+    {
+        out.push_back(getRandomDouble());
+    }
+    
+    return out;
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -92,6 +106,11 @@ RTTR_REGISTRATION
    parameter_names("n"),
   metadata("streamdata",true)
    )
+ .method("getRandomVector",&dummyDevice::getRandomVector)
+ (
+     parameter_names("n"),
+     metadata("streamdata",true)
+     )
  
  ;
 }

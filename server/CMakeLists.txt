@@ -16,6 +16,8 @@ ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 target_link_libraries(foxtrotserv PUBLIC foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
 ${ZLIB_LIBRARIES} ${dl})
 
+target_include_directories(foxtrotserv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 add_executable(exptserve exptserve.cpp)
 
