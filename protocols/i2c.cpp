@@ -50,19 +50,25 @@ std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(unsigned cha
 {
     
     i2c_smbus_ioctl_data ioc;
+    union i2c_smbus_data dat;
     
-    std::vector<unsigned char> dat;
-    dat.resize(len+1);
     
-    dat[0] = cmd;
+    ioc.read_write = I2C_SMBUS_WRITE;
+    ioc.command = cmd;
+    ioc.size = I2C_SMBUS_I2C_BLOCK_DATA;
+    ioc.data = &dat;
     
-    if(read(_fd,dat.data(),len) != len)
+    dat.block[0] = len;
+    
+    if( ioctl(_fd,I2C_SMBUS, &ioc))
     {
-        _lg.Error("only read: " + std::to_string(len) );
-        throw ProtocolError("didn't read correct number of bytes...");
+        _lg.Error("errno: "+ std::string(strerror(errno)));
+        throw ProtocolError("ioctl failed...");
+        
     };
     
-    
+    std::vector<unsigned char> out(dat.block + 1, dat.block+ len) ;
+    return out;
     
 }
 
