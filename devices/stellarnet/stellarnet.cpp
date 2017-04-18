@@ -239,6 +239,14 @@ void foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descr
   auto lambda_coeff_3 = get_stored_bytes(COEFF_C2_ADDR);
   auto lambda_coeff_4 = get_stored_bytes(COEFF_C4_ADDR);
   
+  //TODO: convert coeffs properly to float
+  
+  _coeffs.resize(4);
+//   _coeffs[0] = lambda_coeff_1;
+//   _coeffs[1] = lambda_coeff_2;
+//   _coeffs[2] = lambda_coeff_3;
+//   _coeffs[3] = lambda_coeff_4;
+//   
   _lg.Trace("setting default device timing...");
   set_device_timing(100,3);
   
@@ -413,4 +421,51 @@ std::vector< unsigned short> foxtrot::devices::stellarnet::read_spectrum(int int
 }
 
 
+std::vector< double > foxtrot::devices::stellarnet::get_coeffs()
+{
+  return _coeffs;
+}
+
+std::vector< double > foxtrot::devices::stellarnet::read_calibrated_spectrum(int int_time_ms)
+{
+  auto raw_spec = read_spectrum(int_time_ms);
+
+  std::vector<double> calspec(raw_spec.begin(), raw_spec.end());
+  
+  for(auto& d : calspec)
+  {
+   d = d*d*d * _coeffs[3] / 8. + d*d * _coeffs[1] / 4. + d * _coeffs[0] /2. + _coeffs[2]; 
+  }
+  
+  return calspec;
+  
+}
+
+
+
+
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using foxtrot::devices::stellarnet;
+
+ registration::class_<stellarnet>("foxtrot::devices::stellarnet")
+ .method("read_spectrum", &stellarnet::read_spectrum)
+ ( parameter_names("int_time_ms"),
+   metadata("streamdata",true)
+   
+ )
+ .method("read_calibrated_spectrum", &stellarnet::read_calibrated_spectrum)
+ (parameter_names("int_time_ms"),
+ metadata("streamdata",true)
+ )
+ .method("get_coeffs", &stellarnet::get_coeffs)
+ (metadata("streamdata",true)
+ )
+ ;
+  
+  
+  
+  
+}
 

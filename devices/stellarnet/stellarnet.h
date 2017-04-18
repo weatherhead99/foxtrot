@@ -14,7 +14,7 @@
 #define COEFF_C3_ADDR 0xC0
 #define COEFF_C4_ADDR 0xE0
 
-
+#include <rttr/registration>
 
 class libusb_device;
 class libusb_context;
@@ -27,12 +27,15 @@ namespace foxtrot
     
    class stellarnet : public Device
    {
+     RTTR_ENABLE(Device)
    public:
      stellarnet(const std::string& firmware_file, int timeout_ms);
       virtual const std::string getDeviceTypeName() const;
       virtual ~stellarnet();
       
       std::vector<unsigned short> read_spectrum(int int_time_ms);
+      std::vector<double> get_coeffs();
+      std::vector<double> read_calibrated_spectrum(int int_time_ms);
       
       
    private:
@@ -56,6 +59,8 @@ namespace foxtrot
      
      int _timeout_ms;
      
+     
+     std::vector<double> _coeffs;
      
      std::string _dettype;
      std::string _devid;
