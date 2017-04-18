@@ -45,7 +45,8 @@ void foxtrot::protocols::characterdevice::Init(const foxtrot::parameterset*const
 std::string foxtrot::protocols::characterdevice::read(unsigned int len, unsigned int* actlen)
 {
  std::ostringstream oss;
-  oss << _fs;
+ 
+ oss << _fs.rdbuf();
   return oss.str();
 }
 
