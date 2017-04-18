@@ -241,12 +241,28 @@ void foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descr
   
   //TODO: convert coeffs properly to float
   
+  
   _coeffs.resize(4);
-//   _coeffs[0] = lambda_coeff_1;
-//   _coeffs[1] = lambda_coeff_2;
-//   _coeffs[2] = lambda_coeff_3;
-//   _coeffs[3] = lambda_coeff_4;
-//   
+  std::string coeffstr;
+  
+  iss.str(std::string(lambda_coeff_1.begin(), lambda_coeff_1.end()));
+  iss >> coeffstr;
+  _coeffs[0] = std::stod(coeffstr);
+  
+  iss.str(std::string(lambda_coeff_2.begin(), lambda_coeff_2.end()));
+  iss >> coeffstr;
+  _coeffs[1] = std::stod(coeffstr);
+  
+  
+  iss.str(std::string(lambda_coeff_3.begin(), lambda_coeff_3.end()));
+  iss >> coeffstr;
+  _coeffs[2] = std::stod(coeffstr);
+  
+  
+  iss.str(std::string(lambda_coeff_4.begin(), lambda_coeff_4.end()));
+  iss >> coeffstr;
+  _coeffs[3] = std::stod(coeffstr);
+  
   _lg.Trace("setting default device timing...");
   set_device_timing(100,3);
   
