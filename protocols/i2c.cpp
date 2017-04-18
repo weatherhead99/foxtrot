@@ -46,29 +46,21 @@ void foxtrot::protocols::i2c::Init(const parameterset *const class_parameters)
     
 }
 
-std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(int cmd, int len)
+std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(unsigned char cmd, int len)
 {
     
     i2c_smbus_ioctl_data ioc;
     
-    union i2c_smbus_data dat;
-    dat.block[0] = len;
+    std::vector<unsigned char> dat;
+    dat.resize(len+1);
     
-    ioc.command = cmd;
-    ioc.size = len;
-    ioc.data = &dat;
-    ioc.read_write = I2C_SMBUS_READ;
-
-    auto ret = ioctl(_fd,I2C_SMBUS ,&ioc);
+    dat[0] = cmd;
     
-    if(ret ==-1)
+    if(read(_fd,dat.data(),len) != len)
     {
-        _lg.Error("ioctl failed");
-        _lg.Error("errno: " + std::to_string(errno));
-        throw ProtocolError("failed to read block data");
+        _lg.Error("only read: " + std::to_string(len) );
+        throw ProtocolError("didn't read correct number of bytes...");
     };
-    
-    std::vector<unsigned char> out(dat.block +1, dat.block + dat.block[0]);
     
     
     
