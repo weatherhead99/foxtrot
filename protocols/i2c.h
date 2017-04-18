@@ -18,6 +18,7 @@ namespace foxtrot
 	    
 	    
         private:
+            
             std::string _devnode;
             unsigned _address;
             
