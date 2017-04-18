@@ -17,6 +17,8 @@
 #include <map>
 
 
+
+
 const std::map<int,int> pixel_map
 {
   {1 , 2048},
@@ -437,25 +439,11 @@ std::vector< unsigned short> foxtrot::devices::stellarnet::read_spectrum(int int
 }
 
 
-std::vector< double > foxtrot::devices::stellarnet::get_coeffs()
+std::vector< double > foxtrot::devices::stellarnet::get_coeffs() const
 {
   return _coeffs;
 }
 
-std::vector< double > foxtrot::devices::stellarnet::read_calibrated_spectrum(int int_time_ms)
-{
-  auto raw_spec = read_spectrum(int_time_ms);
-
-  std::vector<double> calspec(raw_spec.begin(), raw_spec.end());
-  
-  for(auto& d : calspec)
-  {
-   d = d*d*d * _coeffs[3] / 8. + d*d * _coeffs[1] / 4. + d * _coeffs[0] /2. + _coeffs[2]; 
-  }
-  
-  return calspec;
-  
-}
 
 
 
@@ -470,10 +458,6 @@ RTTR_REGISTRATION
  ( parameter_names("int_time_ms"),
    metadata("streamdata",true)
    
- )
- .method("read_calibrated_spectrum", &stellarnet::read_calibrated_spectrum)
- (parameter_names("int_time_ms"),
- metadata("streamdata",true)
  )
  .method("get_coeffs", &stellarnet::get_coeffs)
  (metadata("streamdata",true)

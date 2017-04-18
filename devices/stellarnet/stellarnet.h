@@ -34,8 +34,9 @@ namespace foxtrot
       virtual ~stellarnet();
       
       std::vector<unsigned short> read_spectrum(int int_time_ms);
-      std::vector<double> get_coeffs();
-      std::vector<double> read_calibrated_spectrum(int int_time_ms);
+      //NOTE: wavelengths are calculated as p**3 * c3/8 + p**2 * c1/4 + p*c0/2 + c2
+      std::vector<double> get_coeffs() const;
+      
       
       
    private:
