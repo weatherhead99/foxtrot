@@ -106,7 +106,35 @@ void foxtrot::devices::BME280::ReadData()
     _temperature /= 100.;
     _pressure /= 100.;
     
-    
+}
+
+double foxtrot::devices::BME280::GetHumidity_pc()
+{
+    return _humidity;
+}
+
+double foxtrot::devices::BME280::GetPressure_hPa()
+{
+    return _pressure;
+}
+
+
+double foxtrot::devices::BME280::GetTemperature_C()
+{
+    return _temperature;
+}
+
+
+RTTR_REGISTRATION{
+ using namespace rttr;
+ using foxtrot::devices::BME280;
+ 
+ registration::class_<BME280>("foxtrot::devices::BME280")
+ .property_readonly("GetTemperature_C",&BME280::GetTemperature_C)
+ .property_readonly("GetPressure_hPa",&BME280::GetPressure_hPa)
+ .property_readonly("getHumidity_pc",&BME280::GetHumidity_pc)
+ .method("ReadData",&BME280::ReadData)
+ ;
     
     
 }

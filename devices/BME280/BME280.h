@@ -4,6 +4,7 @@
 #include "Device.h"
 #include "CommunicationProtocol.h"
 #include "i2c.h"
+#include <rttr/registration>
 
 namespace foxtrot
 {
@@ -11,12 +12,14 @@ namespace devices
 {
  class BME280 : public Device 
  {
+     RTTR_ENABLE(Device)
  public:
      BME280(std::shared_ptr<CommunicationProtocol> proto);
      double GetTemperature_C();
      double GetPressure_hPa();
      double GetHumidity_pc();
      
+     void ReadData();
      
  private:
      struct caldata_struct
@@ -37,7 +40,6 @@ namespace devices
          
      };
      
-     void ReadData();
      
      struct humidity_caldata
      {
