@@ -2,6 +2,7 @@
 #include "CommunicationProtocol.h"
 #include <string>
 #include <vector>
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -18,7 +19,7 @@ namespace foxtrot
 	    
 	    
         private:
-            
+            foxtrot::Logging _lg;
             std::string _devnode;
             unsigned _address;
             

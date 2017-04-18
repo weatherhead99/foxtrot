@@ -13,28 +13,30 @@
 //most of this taken from https://bitbucket.org/MattHawkinsUK/rpispy-misc/raw/master/python/bme280.py
 
 foxtrot::devices::BME280::BME280(std::shared_ptr<CommunicationProtocol> proto)
-: Device(proto), _i2c_proto(std::dynamic_pointer_cast<foxtrot::protocols::i2c>(proto))
+: Device(proto), _i2c_proto(std::dynamic_pointer_cast<foxtrot::protocols::i2c>(proto)),
+_lg("BME280")
 {
     if(_i2c_proto == nullptr)
     {
         throw foxtrot::DeviceError("couldn't cast protocol pointer to i2c");
     }
-    SetupControlRegister();
+    SetupControlRegister(1,1,0);
     ReadCalibrationData();
     
 }
 
 
-void foxtrot::devices::BME280::SetupControlRegister()
+void foxtrot::devices::BME280::SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres, unsigned char charmode)
 {
-  
-  
-}
+    std::vector<unsigned char> dat{osample_temp << 5 | osample_pres << 2 | charmode};
+    
 
+}
 
 
 void foxtrot::devices::BME280::ReadCalibrationData()
 {
+    
   auto cal1 = _i2c_proto->read_block_data(0x88,24);
   auto cal2 = _i2c_proto->read_block_data(0xA1,1);
   auto cal3 = _i2c_proto->read_block_data(0xE1,7);

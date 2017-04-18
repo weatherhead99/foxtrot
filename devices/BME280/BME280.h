@@ -5,6 +5,7 @@
 #include "CommunicationProtocol.h"
 #include "i2c.h"
 #include <rttr/registration>
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -53,7 +54,7 @@ namespace devices
      
      
      void ReadCalibrationData();
-     void SetupControlRegister();
+     void SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres, unsigned char mode);
      
      
      unsigned char _oversample_temp = 2;
@@ -75,7 +76,7 @@ namespace devices
      
      float _wait_time_ms;
      
-     
+     foxtrot::Logging _lg;
      
      std::shared_ptr<foxtrot::protocols::i2c> _i2c_proto;
      
