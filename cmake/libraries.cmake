@@ -18,6 +18,8 @@ find_library(gslcblas gslcblas)
 find_package(rttr REQUIRED)
 get_property(rttr_include TARGET RTTR::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
 
+find_package(Threads REQUIRED)
+
 
 #dependencies only required for server
 if(BUILD_SERVER)

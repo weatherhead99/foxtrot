@@ -58,7 +58,7 @@ add_subdirectory(setups)
 endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} RTTR::Core ${dl})
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} RTTR::Core ${dl} ${CMAKE_THREAD_LIBS_INIT})
 
 
 
