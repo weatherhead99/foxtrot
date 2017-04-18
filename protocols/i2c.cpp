@@ -1,7 +1,7 @@
 #include "i2c.h"
 #include "ProtocolUtilities.h"
 #include <linux/i2c-dev.h>
-//#include <i2c/smbus.h>
+#include <i2c/smbus.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
@@ -61,7 +61,7 @@ std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(int cmd, int
     return out;
 }
 
-void foxtrot::protocols::i2c::write_block_data(int cmd, const std::vector< unsigned int >& data)
+void foxtrot::protocols::i2c::write_block_data(int cmd, const std::vector< unsigned char >& data)
 {
   //TODO: write this function!
   
