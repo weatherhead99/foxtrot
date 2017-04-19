@@ -163,7 +163,7 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                   
                   std::ostringstream oss;
                   
-                  oss << _topic << "|" << std::get<3>(funtup) << std::get<2>(funtup);
+                  oss << _topic << "|" << std::get<3>(funtup) << std::get<2>(funtup) <<">";
                   
                   
                   
