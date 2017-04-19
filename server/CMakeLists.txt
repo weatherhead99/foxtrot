@@ -3,6 +3,11 @@
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
+
+if(BUILD_PYTHON)
+
+endif()
+
 message("generated protobuf stubs: ${PROTO_SRCS}")
 message("generated protobuf hdrs: ${PROTO_HDRS}")
 

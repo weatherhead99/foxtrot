@@ -20,7 +20,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     
     foxtrot::Device* dev;
     repl = init_chunk<foxtrot::datachunk>(req);
-    repl.set_dataid(req.dataid());
+    
     
     try
     {

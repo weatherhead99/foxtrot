@@ -8,6 +8,7 @@
 #include <rttr/type>
 #include <mutex>
 #include <deque>
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -32,7 +33,7 @@ namespace foxtrot
         
     private:
         int _id = 0;
-        
+        foxtrot::Logging _lg;
 //         std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
         std::vector<std::unique_ptr<Device,void(*)(Device*)>> _devvec;
         std::deque<std::mutex> _devmutexes;
