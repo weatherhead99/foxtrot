@@ -152,7 +152,9 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
     byte_size = sizeof(T) / sizeof(unsigned char) * arr.size();
     auto data  = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
     
-    std::copy(arr.begin(), arr.end(), data.get());
+    auto targetptr = reinterpret_cast<unsigned char*>(arr.data());
+    
+    std::copy(targetptr , targetptr + byte_size, data.get());
     
     return data;
     
@@ -161,51 +163,60 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
 
 std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
 {
-    
+    foxtrot::Logging lg("byte_view_data");
     std::unique_ptr<unsigned char[]> data;
     //find type
     if(data = variant_to_bytes<unsigned char>(arr,byte_size))
     {
+      lg.Trace("UCHAR");
      dt = foxtrot::byte_data_types::UCHAR;   
      return data;
     }
     else if(data = variant_to_bytes<unsigned short>(arr,byte_size))
     {
+      lg.Trace("USHORT");
         dt = foxtrot::byte_data_types::USHORT;
         return data;
     }
     else if(data = variant_to_bytes<unsigned int>(arr,byte_size))
     {
+      lg.Trace("UINT");
         dt = foxtrot::byte_data_types::UINT;
         return data;
     }
     else if(data = variant_to_bytes<unsigned long>(arr,byte_size))
     {
+      lg.Trace("ULONG");
         dt = foxtrot::byte_data_types::ULONG;
         return data;
     }
     else if(data = variant_to_bytes<short>(arr,byte_size))
     {
+      lg.Trace("SHORT");
         dt = foxtrot::byte_data_types::SHORT;
         return data;
     }
     else if(data= variant_to_bytes<int>(arr,byte_size))
     {
+      lg.Trace("IINT");
         dt = foxtrot::byte_data_types::IINT;
         return data;
     }
     else if(data =  variant_to_bytes<long>(arr,byte_size))
     {
+      lg.Trace("LONG");
         dt = foxtrot::byte_data_types::LONG;
         return data;
     }
     else if(data = variant_to_bytes<float>(arr,byte_size))
     {
+      lg.Trace("BFLOAT");
         dt = foxtrot::byte_data_types::BFLOAT;
         return data;
     }
     else if(data = variant_to_bytes<double>(arr,byte_size))
     {
+      lg.Trace("BDOUBLE");
         dt = foxtrot::byte_data_types::BDOUBLE;
         return data;
     }
