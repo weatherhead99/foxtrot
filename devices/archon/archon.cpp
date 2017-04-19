@@ -768,7 +768,14 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   for(int i=0; i < num_blocks; i++)
   {
-    auto ret = _specproto->read_until_endl();
+    int actlen;
+    auto ret = _specproto->read(1024,&actlen);
+    if(actlen != 1024)
+    {
+      _lg.Warning("cycle: " + std::to_string(i));
+      _lg.Warning("didn't read 1024 bytes...");
+      
+    }
     if(ret[0] != '<' )
     {
       _lg.Error("got RET: " + ret );
