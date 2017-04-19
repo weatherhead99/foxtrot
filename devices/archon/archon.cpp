@@ -768,7 +768,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   for(int i=0; i < num_blocks; i++)
   {
-    int actlen;
+    unsigned actlen;
     auto ret = _specproto->read(1024,&actlen);
     if(actlen != 1024)
     {

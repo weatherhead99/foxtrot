@@ -16,6 +16,7 @@ option(BUILD_DASHBOARD "build monitoring dashboard program" ON)
 option(BUILD_OPMD "build OPMD high level client library" ON)
 option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
 option(BUILD_TELEMETRY "build telemetry server" ON)
+option(BUILD_PYTHON "build python bindings" ON)
 
 set(boost_cmps "log;system;date_time;program_options")
 
