@@ -6,7 +6,7 @@ Created on Wed Apr 19 17:49:43 2017
 @author: weatherill
 """
 
-import asyncio
+
 import os
 os.environ['LD_LIBRARY_PATH'] = '/local/home/weatherill/lib/'
 

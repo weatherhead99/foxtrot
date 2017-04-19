@@ -46,12 +46,10 @@ class TelemetryCatcher:
     
     def waitmessage(self):
         msg = self._sock.recv()
-        parts = msg.split(b'>')
-        topic = parts[0]
-        if len(parts) == 2:
-            protobuf = parts[1]
-        else:
-            protobuf = b"".join(parts[1:])
+        splitpoint = msg.index(b'>')
+        
+        topic = msg[:splitpoint]
+        protobuf = msg[splitpoint+1:]
         print(topic)
         
         t = telemetry()
