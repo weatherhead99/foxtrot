@@ -672,6 +672,137 @@ void foxtrot::devices::archon::sync_archon_timer()
 }
 
 
+int devices::archon::get_frameno(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "FRAME";
+  return std::stoi(_frame.at(oss.str()));
+
+
+}
+
+int devices::archon::get_height(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "HEIGHT";
+  return std::stoi(_frame.at(oss.str()));
+
+
+}
+
+int devices::archon::get_width(int buf)
+{
+  std::ostringstream oss ;
+  oss << "BUF" << buf << "WIDTH";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+bool devices::archon::isbuffercomplete(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "COMPLETE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+int devices::archon::get_mode(int buf)
+{
+    std::ostringstream oss;
+  oss << "BUF" << buf << "MODE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+bool devices::archon::get_32bit(int buf)
+{
+      std::ostringstream oss;
+  oss << "BUF" << buf << "SAMPLE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+
+}
+
+
+
+std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
+{
+  std::vector<unsigned int> out;
+  
+  //need to update state or width/height might actually be wrong
+  update_state();
+  
+  lockbuffer(buf);
+  
+  if(!isbuffercomplete(buf))
+  {
+    throw DeviceError("buffer not complete for reading!");
+  }
+  
+  auto pixels = get_width(buf) * get_height(buf);
+  out.reserve(pixels);
+  
+  std::ostringstream oss;
+  oss << "BUF" << buf << "BASE";
+  auto baseaddr = std::stoul(_frame.at(oss.str()),0,16);
+ 
+  unsigned num_bytes = get_32bit(buf) ? pixels * 4 : pixels * 2;
+  
+  auto num_blocks = num_bytes / 1024 ;
+  num_blocks = (num_bytes % 1024 == 0) ? num_blocks: num_blocks + 1;
+  
+  
+  
+  oss.str("");
+  oss << ">00FETCH" << std::hex << std::setw(8) << std::setfill('0') << baseaddr << num_blocks <<'\n';
+  
+  //construct command manually
+  _specproto->write(oss.str());
+  bool is32 = get_32bit(buf);
+  
+  for(int i=0; i < num_blocks; i++)
+  {
+    auto ret = _specproto->read_until_endl();
+    if(ret[0] != '<' )
+    {
+      _lg.Error("got RET: " + ret );
+      _lg.Error("request was: " + oss.str());
+      if(ret[0] == '?')
+      {
+      throw DeviceError("archon threw an error message! Check the logs..."); 
+      }  
+      throw ProtocolError("invalid archon response!");
+    };
+    
+   auto bytes = parse_binary_response(ret.substr(3));
+   
+   if(is32)
+   {
+      unsigned* ptr = reinterpret_cast<unsigned*>(bytes.data());
+      out.insert(out.end(),ptr, ptr + 1024 / 4);
+   }
+   else
+   {
+     //WARNING: does this do the stride properly?
+     unsigned short* ptr = reinterpret_cast<unsigned short*>(bytes.data());
+     out.insert(out.end(),ptr, ptr + 1024 / 2);
+     
+   }
+    
+  };
+  
+  return out;
+  
+  
+}
+
+
 
 RTTR_REGISTRATION
 {
@@ -721,9 +852,19 @@ RTTR_REGISTRATION
  (
    parameter_names("name", "state")
    )
+ .method("get_frameno", &archon::get_frameno)
+ (parameter_names("buf"))
+ .method("get_width", &archon::get_width)
+ (parameter_names("buf"))
+ .method("get_height",&archon::get_height)
+ (parameter_names("buf"))
+ .method("get_mode",&archon::get_mode)
+ (parameter_names("buf"))
+ .method("get_32bit",&archon::get_32bit)
+ (parameter_names("buf"))
+ .method("fetch_buffer",&archon::fetch_buffer)
+ (parameter_names("buf"), metadata("streamdata",true))
  ;
- 
-    
     
     
 }

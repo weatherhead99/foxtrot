@@ -67,6 +67,14 @@ namespace foxtrot {
     
     void update_state();
     void applyall();
+
+    std::vector<unsigned int> fetch_buffer(int buf);
+    
+    int get_frameno(int buf);
+    int get_width(int buf);
+    int get_height(int buf);
+    int get_mode(int buf);
+    bool get_32bit(int buf);
     
     
     const std::map<int,ArchonModule&> getAllModules() const;
