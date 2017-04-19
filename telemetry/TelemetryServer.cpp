@@ -162,19 +162,26 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                   msg.set_tstamp( (now-epoch).total_microseconds());
                   
                   std::ostringstream oss;
-                  oss << _topic << "|" << std::get<3>(funtup);
+                  
+                  oss << _topic << "|" << std::get<3>(funtup) << std::get<2>(funtup);
+                  
+                  
+                  
+                  _lg.Trace("topic string: " + oss.str());
+                  
                   if(!msg.SerializeToOstream(&oss))
                   {
                       _lg.Error("failed to serialize message!");
                   };
                   
-                  _lg.Trace("message: " + oss.str());
-                  auto nbytes = nn_send(_nn_pub_skt, oss.str().c_str(), oss.str().size(),0);
+                  auto total_msg = oss.str();
                   
-                  if(nbytes != oss.str().size())
+                  auto nbytes = nn_send(_nn_pub_skt, total_msg.c_str(),total_msg.size(),0);
+                  
+                  if(nbytes != total_msg.size())
                   {
                    _lg.Error("invalid number of bytes written!");   
-                   _lg.Error("expected: " + std::to_string(oss.str().size()));
+                   _lg.Error("expected: " + std::to_string(total_msg.size()));
                    _lg.Error("actual: " + std::to_string(nbytes));
                   }
                   
