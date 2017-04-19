@@ -14,7 +14,19 @@ cl = Client("localhost:50051")
 
 dev = cl._devices[0]
 
-cap = dev._caps[5]
+addcap = dev._caps[5]
+addret = addcap.call_cap_sync(cl,1,2)
+
+strmcap = dev._caps[7]
+strmret = strmcap.call_cap_sync(cl,100)
 
 
-ags = foxtrot.Client._construct_args(cap._argnames,1,2)
+counts = cl.dummyDevice.getCountStream(cl,5000)
+
+
+
+repl = dev.getRandomVector.call_cap_sync(cl,100)
+bts = foxtrot.Client._process_sync_response(repl,streamraw=True)
+
+vec = cl.dummyDevice.getRandomVector(cl,5000)
+
