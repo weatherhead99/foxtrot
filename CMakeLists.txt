@@ -40,6 +40,7 @@ include_directories(${rttr_include})
 
 include_directories(util/PRT/)
 
+include(GNUInstallDirs)
 
 add_subdirectory(src)
 
@@ -61,6 +62,11 @@ endif()
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} RTTR::Core ${dl} ${CMAKE_THREAD_LIBS_INIT})
 
+install(TARGETS foxtrot LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+
+file(GLOB ft_includes include/*.h)
+message(STATUS "ft includes: ${ft_includes}")
+install(FILES ${ft_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 
 
 get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)

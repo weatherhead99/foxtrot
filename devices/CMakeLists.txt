@@ -1,8 +1,7 @@
 macro(add_device_lib name srcfiles)
 add_library(${name} STATIC ${srcfiles})
 list(APPEND device_libs ${name})
-
-
+install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/devices/)
 endmacro()
 
 

@@ -3,10 +3,7 @@
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
-
-if(BUILD_PYTHON)
-
-endif()
+install(FILES foxtrot.proto DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/)
 
 message("generated protobuf stubs: ${PROTO_SRCS}")
 message("generated protobuf hdrs: ${PROTO_HDRS}")
@@ -18,16 +15,22 @@ FetchDataImpl.cpp ExperimentalSetup.cpp ServerUtil.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
+file(GLOB ft_server_includes *.h)
+install(FILES ${ft_server_includes} ${PROTO_HDRS} ${PROTO_GRPC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
+
 target_link_libraries(foxtrotserv PUBLIC foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
 ${ZLIB_LIBRARIES} ${dl})
 
 target_include_directories(foxtrotserv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
+install(TARGETS foxtrotserv LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 add_executable(exptserve exptserve.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
 target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY})
+
+install(TARGETS exptserve RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_executable(testClient testClient.cpp)
 target_link_libraries(testClient foxtrotserv foxtrotclient)
