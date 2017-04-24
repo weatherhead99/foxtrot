@@ -5,6 +5,7 @@
 #include <utility>
 #include <algorithm>
 #include <sstream>
+#include <rttr/type>
 
 
 using std::cout;
@@ -42,6 +43,11 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
     (raw_ptr,[](Device* dev) {delete dev;});
     
+    
+
+//     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
+//     (raw_ptr,[](Device* dev) {});
+    
     AddDevice(std::move(newptr));
 }
 
@@ -68,7 +74,7 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
     
     _lg.Info("getting device...");
     auto dev = GetDevice(devid);
-    auto tp = type::get(*dev);
+    auto tp = rttr::type::get(*dev);
     _lg.Info( "tp: " + tp.get_name() );
     
     auto props = tp.get_properties();

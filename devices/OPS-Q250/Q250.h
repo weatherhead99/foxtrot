@@ -19,6 +19,7 @@ namespace foxtrot
     Q250(std::shared_ptr<protocols::scsiserial> proto);
     
     virtual std::string cmd(const std::string& request);
+    virtual const std::string getDeviceTypeName() const;
     
     void start();
     void stop();

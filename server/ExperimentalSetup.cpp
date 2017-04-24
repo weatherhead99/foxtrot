@@ -5,7 +5,7 @@
 using namespace foxtrot;
 
 foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness)
-: _harness(harness)
+: _harness(harness), _lg("ExperimentalSetup")
 {
   _dl = dlopen(setupfile.c_str(), RTLD_LAZY);
   if(_dl == nullptr)
@@ -32,6 +32,8 @@ foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxt
 
 foxtrot::ExperimentalSetup::~ExperimentalSetup()
 {
+  _lg.Debug("closing dso..");
     dlclose(_dl);
+    _lg.Debug("dso closed");
 }
 

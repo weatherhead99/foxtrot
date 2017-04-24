@@ -116,6 +116,12 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 
 }
 
+const std::string foxtrot::devices::cornerstone260::getDeviceTypeName() const
+{
+    return "cornerstone260";
+}
+
+
 std::string foxtrot::devices::cornerstone260::readecho(const std::string& request)
 {
   unsigned actlen;

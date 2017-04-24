@@ -14,6 +14,8 @@ namespace foxtrot
     public:
       cornerstone260(std::shared_ptr< SerialProtocol> proto);
       
+      virtual const std::string getDeviceTypeName() const;
+      
       bool getShutterStatus();
       void setShutterStatus(bool status);
   

@@ -5,7 +5,6 @@
 #include <vector>
 #include <climits>
 #include "foxtrot.grpc.pb.h"
-#include <rttr/type>
 #include <mutex>
 #include <deque>
 #include "Logging.h"
