@@ -25,7 +25,7 @@ target_include_directories(foxtrotserv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(TARGETS foxtrotserv LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
-add_executable(exptserve exptserve.cpp)
+add_executable(exptserve exptserve.cpp exptserve_funcs.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
 target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY})

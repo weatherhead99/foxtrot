@@ -8,6 +8,7 @@
 #include <backward.hpp>
 #include "Logging.h"
 #include <rttr/type>
+#include "exptserve.h"
 
 using namespace foxtrot;
 using std::cout;
@@ -19,15 +20,14 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
-//   backward::SignalHandling sh;
+    backward::SignalHandling sh;
     std::string setupfile;
-    std::string dumpfile;
     std::string servname;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
     ("servername,n",po::value<std::string>(&servname),"server name")
-    ("dumpsetup,d", po::bool_switch()->default_value(false), "dump server JSON description");
+    ("dump", po::value<std::string>(), "dump server JSON description");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1);
@@ -54,9 +54,13 @@ int main(int argc, char** argv)
     DeviceHarness harness;
     foxtrot::ExperimentalSetup setup(setupfile,harness);
     
-    if(vm["dumpsetup"].as<bool>())
+    if(vm.count("dump"))
     {
       cout << "dumping setup..." << endl;
+      
+      auto dumpfile = vm["dump"].as<std::string>();
+      dump_setup(harness, dumpfile);
+      
       return 0;
     }
     
