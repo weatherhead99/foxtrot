@@ -14,6 +14,8 @@ target_link_libraries(${setup_we} archon dummy TPG362 newport2936R cornerstone26
 #needed so we have already generated the protobuf files
 add_dependencies(${setup_we} foxtrotserv)
 
+install(TARGETS ${setup_we} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/setups/)
+
 endforeach()
 
 set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)

@@ -3,6 +3,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <backward.hpp>
 #include <iostream>
+#include <sstream>
+#include "client.h"
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -16,9 +18,13 @@ int main(int argc, char** argv)
   po::options_description desc("telemetry broadcaster for foxtrot telemetry.");
   
   std::string configfile;
+  int port;
+  std::string addr;
   
   desc.add_options()
-  ("configfile,c",po::value<std::string>(&configfile),"config file");
+  ("configfile,c",po::value<std::string>(&configfile),"config file")
+  ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
+  ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),"address of server");
 
   po::positional_options_description pdesc;
   pdesc.add("configfile",-1);
@@ -36,9 +42,12 @@ int main(int argc, char** argv)
   }
   
   
+  std::ostringstream oss;
+  oss << addr << ":" << port;
+
+  foxtrot::Client cl(oss.str());
   
-
-
+  auto servdesc = cl.DescribeServer();
 
 
 }
