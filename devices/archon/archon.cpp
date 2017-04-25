@@ -760,7 +760,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   
   oss.str("");
-  oss << ">00FETCH" << std::hex << std::setw(8) << std::setfill('0') << baseaddr << num_blocks <<'\n';
+  oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << num_blocks <<'\n';
   
   //construct command manually
   _specproto->write(oss.str());
