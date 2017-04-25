@@ -105,7 +105,7 @@ class Client:
         
         for devkey in self._servdescribe.devs_attached.keys():
             dev = self._servdescribe.devs_attached.get(devkey)
-            self._devices.append(Device(dev.devid, dev.devtype, dev.caps, dev.devcomment))            
+            self._devices.append(Device(dev.devid, dev.devtype, dev.caps, dev.devcomment,self))            
         
         
         for dev in self._devices:
@@ -128,14 +128,15 @@ class Client:
             return self._devices[self._devtypes.index(keystr)]    
 
 class Device:
-    def __init__(self,devid,devtp, caps,comment):
+    def __init__(self,devid,devtp, caps,comment,client):
         self._devid = devid
         self._devtp = devtp
         self._comment = comment
+        self._cl = client
         
         self._caps = []
         for cap in caps:
-            self._caps.append(Capability(cap.tp,cap.capname,cap.argnames,cap.argtypes,cap.rettp,devid))
+            self._caps.append(Capability(cap.tp,cap.capname,cap.argnames,cap.argtypes,cap.rettp,devid,client))
         
         for cap in self._caps:
             setattr(self,cap._capname,cap)
@@ -149,7 +150,7 @@ class Device:
         
 
 class Capability:
-    def __init__(self,captp,capname,argnames,argtypes,rettp,devid):
+    def __init__(self,captp,capname,argnames,argtypes,rettp,devid,client):
         self._captp = captp
         self._capname = capname
         self._argnames = argnames
@@ -158,6 +159,7 @@ class Capability:
         self._msgid = 0
         self.chunksize = DEFAULT_CHUNKSIZE
         self._devid = devid
+        self._cl = client
         
     def __repr__(self):
         if len(self._argnames) > 0:
@@ -185,10 +187,8 @@ class Capability:
         
         return ret
         
-    def __call__(self,cl,*args,**kwargs):
-        if not isinstance(cl,Client):
-            raise TypeError("didn't provide a client object!")
-        repl = self.call_cap_sync(cl,*args,**kwargs)
+    def __call__(self,*args,**kwargs):
+        repl = self.call_cap_sync(self._cl,*args,**kwargs)
         return _process_sync_response(repl)
         
     

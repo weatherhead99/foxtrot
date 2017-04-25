@@ -272,7 +272,7 @@ void foxtrot::devices::cornerstone260::setGratingCalibration(int gr, int lines, 
   cmd(oss.str());
   oss.str("");
   
-  oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << offset;
+  oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << zero;
   cmd(oss.str());
   oss.str("");
   
