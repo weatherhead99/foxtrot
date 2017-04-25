@@ -237,7 +237,7 @@ int foxtrot::devices::cornerstone260::getFilter()
 
 int foxtrot::devices::cornerstone260::getGrating()
 {
-  std::string command("GRATING?");
+  std::string command("GRAT?");
   auto repl = cmd(command);
   
   return std::stoi(repl);
@@ -250,7 +250,7 @@ void foxtrot::devices::cornerstone260::setGrating(int gr)
 {
   
   std::ostringstream oss ;
-  oss << "GRATING " << gr ;
+  oss << "GRAT " << gr ;
   cmd(oss.str());
   
 }

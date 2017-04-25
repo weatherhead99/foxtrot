@@ -15,6 +15,7 @@
 #include "devices/cornerstone_260/cornerstone260.h"
 
 #include "devices/OPS-Q250/Q250.h"
+#include "devices/stellarnet/stellarnet.h"
 
 #include <memory>
 
@@ -155,6 +156,10 @@ int setup(foxtrot::DeviceHarness& harness)
     auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
     
     harness.AddDevice(std::move(lamp_psu));
+    
+    
+    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet("/home/dweatherill/Software/stellarnet/files_to_copy/stellarnet.hex",1000));
+    harness.AddDevice(std::move(spectrometer));
     
     return 0;  
 };
