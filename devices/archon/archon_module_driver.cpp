@@ -100,5 +100,25 @@ const string foxtrot::devices::ArchonDriver::getTypeName() const
 }
 
 
-
+RTTR_REGISTRATION
+{
+    using namespace rttr;
+    using foxtrot::devices::ArchonDriver;
+    
+    registration::class_<ArchonDriver>("foxtrot::devices::ArchonDriver")
+    .method("setLabel", &ArchonDriver::setLabel)
+    (parameter_names("channel","label"))
+    .method("getLabel", &ArchonDriver::getLabel)
+    (parameter_names("channel"))
+    .method("setSlowSlewRate", &ArchonDriver::setSlowSlewRate)
+    (parameter_names("channel","val"))
+    .method("getSlowSlewRate", &ArchonDriver::getSlowSlewRate)
+    (parameter_names("channel"))
+    .method("getFastSlewRate",&ArchonDriver::getFastSlewRate)
+    (parameter_names("channel"))
+    .method("setFastSlewRate",&ArchonDriver::setFastSlewRate)
+    (parameter_names("channel","val"))
+    ;
+    
+}
 
