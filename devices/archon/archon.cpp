@@ -4,6 +4,8 @@
 #include "archon_module_lvxbias.h"
 #include "archon_module_hvxbias.h"
 #include "archon_module_AD.h"
+#include "archon_module_xvbias.h"
+#include "archon_module_driver.h"
 #include "DeviceError.h"
 
 #include <algorithm>
@@ -64,39 +66,50 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
     
 //     std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
     
-    std::unique_ptr<ArchonModule> ptr;
+    std::unique_ptr<ArchonModule> ptr(nullptr);
     switch(modtype)
     {
         case(archon_module_types::HeaterX):
 	  _lg.Info("HeaterX module detected at position " + std::to_string(i+1));
-            ptr = ArchonHeaterX::constructModule(*this,i);
-            _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
-            break;
+        ptr = ArchonHeaterX::constructModule(*this,i);
+        break;
 	  
 	  
 	case(archon_module_types::LVXBias):
 	  _lg.Info("LVXBias module detected at position " + std::to_string(i+1));
 	  ptr = ArchonLVX::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
 	
 	case(archon_module_types::HVXBias):
 	  _lg.Info("HVXBias module detected at position " + std::to_string(i+1));
 	  ptr = ArchonHVX::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
 	  
 	case(archon_module_types::AD):
 	  _lg.Info("A/D module detected at position " + std::to_string(i+1));
 	  ptr = ArchonAD::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
-	  
+      
+    case(archon_module_types::XVBias):
+        _lg.Info("XVBias module detected at position " + std::to_string(i+1));
+        ptr = ArchonXV::constructModule(*this,i);
+        break;
+        
+    case(archon_module_types::Driver):
+        _lg.Info("Driver module detected at position " + std::to_string(i+1));
+        ptr =  ArchonDriver::constructModule(*this,i);
+        break;
 	  
 	default:
 	  _lg.Info("support for module at position " + std::to_string(i+1)  + " isn't implemented yet");
 	    
     };
+    
+    
+    if(ptr)
+    {
+        _modules.insert(std::make_pair(i,std::move(ptr)));
+    }
     
     
    }
