@@ -27,7 +27,8 @@ const string devices::ArchonHeaterX::getDeviceTypeName() const
 
 
 
-devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos)
+devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos),
+archonGPIO(arch,modpos)
 {
   update_variables();
   

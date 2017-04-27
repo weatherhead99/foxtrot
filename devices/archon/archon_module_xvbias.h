@@ -1,6 +1,7 @@
 #pragma once
 #include "archon_modules.h"
 #include "archon_module_lvxbias.h"
+#include "archon_GPIO.h"
 
 namespace foxtrot
 {
