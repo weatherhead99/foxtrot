@@ -849,7 +849,7 @@ int foxtrot::devices::archon::getsignal_start()
     return std::stoi(val);
 }
 
-int foxtrot::devices::archon::getsignal_start()
+int foxtrot::devices::archon::getsignal_end()
 {
     auto val = readKeyValue("SHD2");
     return std::stoi(val);
@@ -920,6 +920,13 @@ RTTR_REGISTRATION
  (parameter_names("buf"))
  .method("fetch_buffer",&archon::fetch_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
+ .property_readonly("getreset_start",&archon::getreset_start)
+ .property_readonly("getreset_end",&archon::getreset_end)
+ .property_readonly("getsignal_start",&archon::getsignal_start)
+ .property_readonly("getsignal_end",&archon::getsignal_end)
+ .method("setCDSTiming",&archon::setCDSTiming)
+ (parameter_names("reset_start","reset_end","signal_start","signal_end"))
+ 
  ;
     
     
