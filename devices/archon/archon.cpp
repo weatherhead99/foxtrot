@@ -822,6 +822,42 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
 }
 
+void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end)
+{
+    writeKeyValue("SHP1",std::to_string(reset_start));
+    writeKeyValue("SHP2",std::to_string(reset_end));
+    writeKeyValue("SHD1", std::to_string(signal_start));
+    writeKeyValue("SHD2", std::to_string(signal_end));
+    
+}
+
+int foxtrot::devices::archon::getreset_start()
+{
+    auto val = readKeyValue("SHP1");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getreset_end()
+{
+    auto val = readKeyValue("SHP2");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getsignal_start()
+{
+    auto val = readKeyValue("SHD1");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getsignal_start()
+{
+    auto val = readKeyValue("SHD2");
+    return std::stoi(val);
+}
+
+
+
+
 
 
 RTTR_REGISTRATION

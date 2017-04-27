@@ -121,6 +121,16 @@ namespace foxtrot {
     
     void sync_archon_timer();
     
+    void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
+    
+    int getreset_start();
+    int getreset_end();
+    int getsignal_start();
+    int getsignal_end();
+    
+    
+    
+    
   protected:
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
