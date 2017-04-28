@@ -242,6 +242,21 @@ void foxtrot::devices::newport2936R::manualTriggerState(bool state)
 
 }
 
+std::string foxtrot::devices::newport2936R::getcaldate()
+{
+  auto repl = cmd("CALDATE?");
+  return repl;
+
+}
+
+double foxtrot::devices::newport2936R::getcaltemp()
+{
+  auto repl = cmd("CALTEMP?");
+  return std::stod(repl);
+  
+}
+
+
 
 
 

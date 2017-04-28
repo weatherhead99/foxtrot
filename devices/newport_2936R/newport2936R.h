@@ -58,6 +58,9 @@ namespace foxtrot
     
     void manualTriggerState(bool state);
     
+    std::string getcaldate();
+    double getcaltemp();
+    
     private:
       foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);
