@@ -1,4 +1,14 @@
 
+set(FOXTROT_PROTO_VERSION 1)
+set(FOXTROT_PROTO_HASH "cbdcdb06ae7c6d8b95bc08a26ab732ee521b0854")
+
+file(SHA1 ${CMAKE_CURRENT_SOURCE_DIR}/foxtrot.proto THIS_PROTO_HASH)
+message(STATUS "ft_proto hash: ${THIS_PROTO_HASH}")
+
+if(NOT ${FOXTROT_PROTO_HASH} STREQUAL ${THIS_PROTO_HASH})
+    message(ERROR "mismatch of foxtrot proto file hash! Need version increment!")
+endif()
+
 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)

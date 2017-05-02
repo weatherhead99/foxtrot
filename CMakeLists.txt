@@ -62,11 +62,11 @@ endif()
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} RTTR::Core ${dl} ${CMAKE_THREAD_LIBS_INIT})
 
-install(TARGETS foxtrot LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+install(TARGETS foxtrot EXPORT ft_targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
 
 file(GLOB ft_includes include/*.h)
 message(STATUS "ft includes: ${ft_includes}")
-install(FILES ${ft_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
+install(FILES ${ft_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/ COMPONENT devel)
 
 
 get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
@@ -103,3 +103,16 @@ endif()
 if(BUILD_TELEMETRY)
   add_subdirectory(telemetry)
 endif()
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(cmake/foxtrotConfig.cmake.in foxtrotConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/ COMPONENT devel)
+
+
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/foxtrotVersion.cmake VERSION 0.0.1 
+COMPATIBILITY SameMajorVersion)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotVersion.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/ COMPONENT devel)
+
+

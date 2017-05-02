@@ -1,0 +1,9 @@
+#Config file for the foxtrot package 
+
+
+@PACKAGE_INIT@
+set(foxtrot_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+if(NOT TARGET foxtrot AND NOT foxtrot_BINARY_DIR)
+    include(${foxtrot_CMAKE_DIR}/foxtrotTargets.cmake)
+endif()
