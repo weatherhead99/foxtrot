@@ -1,6 +1,8 @@
 #include "BME280.h"
 #include "DeviceError.h"
 
+#include <iostream>
+
 #define REG_DATA 0xF7
 #define REG_CONTROL 0xF4
 #define REG_CONFIG 0xF5
@@ -9,6 +11,9 @@
 #define REG_HUM_MSB 0xFD
 #define REG_HUM_LSB 0xFE
 
+
+using std::cout;
+using std::endl;
 
 //most of this taken from https://bitbucket.org/MattHawkinsUK/rpispy-misc/raw/master/python/bme280.py
 
@@ -20,6 +25,8 @@ _lg("BME280")
     {
         throw foxtrot::DeviceError("couldn't cast protocol pointer to i2c");
     }
+
+    _i2c_proto->Init(nullptr);
     SetupControlRegister(1,1,0);
     ReadCalibrationData();
     
@@ -40,15 +47,47 @@ void foxtrot::devices::BME280::ReadCalibrationData()
   auto cal1 = _i2c_proto->read_block_data(0x88,24);
   auto cal2 = _i2c_proto->read_block_data(0xA1,1);
   auto cal3 = _i2c_proto->read_block_data(0xE1,7);
-  
+  _lg.Debug("read calibration constants");
+
+
+  for(auto& c : cal1)
+    {
+      cout << (int) c << '\t' ;
+    }
+	cout << endl;
+
+		cout << "----" << endl;
+
+				  for(auto& c : cal2)
+				    {
+				      cout << (int) c << '\t';
+				    }
+					cout << endl;
+		
+	      
   //clench...
-  auto* interpreted_caldata =  reinterpret_cast<caldata_struct*>(cal1.data());
+  caldata_struct* interpreted_caldata =  reinterpret_cast<caldata_struct*>(cal1.data());
+		if(interpreted_caldata == nullptr)
+		  {
+		    throw std::logic_error("invalid caldata struct assignment");
+
+		  }
   _caldata = *interpreted_caldata;
 
-  _H1 = *cal2.data();
+		_lg.Debug("copied caldata");
+  _H1 = cal2[0];
+		_lg.Debug("copied cal2");
   
-  auto* interpreted_humdata = reinterpret_cast<humidity_caldata*>(cal3.data());
+		
+  humidity_caldata* interpreted_humdata = reinterpret_cast<humidity_caldata*>(cal3.data());
+		if(interpreted_humdata == nullptr)
+		  {
+
+		    throw std::logic_error("invalid humdata struct assignment");
+		  }
   _humcaldata = *interpreted_humdata;
+		_lg.Debug("copied cal3");
+		
   
   _wait_time_ms = 1.25 + (2.3 * _oversample_temp) + ((2.3*_oversample_pres) +0.575) + ((2.3*_oversample_hum)+0.575 ) ;
   

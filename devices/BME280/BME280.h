@@ -23,6 +23,7 @@ namespace devices
      void ReadData();
      
  private:
+#pragma pack(push,1)
      struct caldata_struct
      {
          unsigned short T1;
@@ -40,8 +41,9 @@ namespace devices
          short P9;
          
      };
-     
-     
+#pragma pack(pop)
+
+#pragma pack(push,1)
      struct humidity_caldata
      {
        short H2;
@@ -50,6 +52,7 @@ namespace devices
        char H5;
        char H6;
      };
+#pragma pack(pop)
      
      
      

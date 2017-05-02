@@ -9,13 +9,13 @@ using std::endl;
 const foxtrot::parameterset i2c_params
 {
     {"devnode", "/dev/i2c-1"},
-    {"address", 76u}
+    {"address", 0x76u}
 };
 
 
 int main(int argc, char** argv)
 {
-    backward::SignalHandling sh;
+  //    backward::SignalHandling sh;
     
     
     auto proto = std::make_shared<foxtrot::protocols::i2c>(&i2c_params);
