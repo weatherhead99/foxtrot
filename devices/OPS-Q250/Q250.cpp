@@ -17,6 +17,12 @@ foxtrot::devices::Q250::Q250(std::shared_ptr<protocols::scsiserial> proto)
   _scsiproto->Init(&Q250_class_parameters);
 }
 
+const std::string devices::Q250::getDeviceTypeName() const
+{
+    return "Q250";
+}
+
+
 std::string foxtrot::devices::Q250::cmd(const std::string& request)
 {
   

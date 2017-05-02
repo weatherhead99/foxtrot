@@ -8,6 +8,7 @@
 #include <rttr/registration>
 #include <thread>
 #include <chrono>
+#include <sstream>
 
 const foxtrot::parameterset newport2936R_usb_params 
 {
@@ -194,6 +195,71 @@ std::string convert_powerunit_to_string(foxtrot::devices::powerunits unit, bool&
   
 }
 
+foxtrot::devices::powermodes foxtrot::devices::newport2936R::getMode()
+{
+  auto repl = cmd("PM:MODE?");
+  
+  powermodes  sw = static_cast<powermodes>(std::stoi(repl));
+  return sw;
+}
+
+
+foxtrot::devices::powermodes convert_int_to_mode(int s, bool& ok)
+{
+  if(s > 7 || s < 0)
+  {
+    ok = false;
+  }
+  
+  ok = true;
+  return static_cast<foxtrot::devices::powermodes>(s);
+}
+
+int convert_mode_to_int(foxtrot::devices::powermodes mode, bool& ok)
+{
+  ok = true;
+  return static_cast<int>(mode);
+};
+
+void foxtrot::devices::newport2936R::setMode(foxtrot::devices::powermodes mode)
+{
+  short unsigned sw = static_cast<short unsigned>(mode);
+  
+  std::ostringstream oss;
+  oss << "PM:MODE " << sw <<'\r';
+  _proto->write(oss.str());
+  
+
+}
+
+
+void foxtrot::devices::newport2936R::manualTriggerState(bool state)
+{
+  std::ostringstream oss;
+  oss << "PM:TRIG:STATE " << (int) state <<'\r';
+  _proto->write(oss.str());
+  
+
+}
+
+std::string foxtrot::devices::newport2936R::getcaldate()
+{
+  auto repl = cmd("CALDATE?");
+  return repl;
+
+}
+
+double foxtrot::devices::newport2936R::getcaltemp()
+{
+  auto repl = cmd("CALTEMP?");
+  return std::stod(repl);
+  
+}
+
+
+
+
+
 
 foxtrot::devices::powerunits convert_string_to_powerunit(std::string s, bool& ok)
 { 
@@ -246,6 +312,8 @@ RTTR_REGISTRATION
   
   type::register_converter_func(convert_powerunit_to_string);
   type::register_converter_func(convert_string_to_powerunit);
+  type::register_converter_func(convert_int_to_mode);
+  type::register_converter_func(convert_mode_to_int);
   
   registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits");
   registration::class_<newport2936R>("foxtrot::devices::newport2936R")

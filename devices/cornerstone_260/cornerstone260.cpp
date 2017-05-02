@@ -116,6 +116,12 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 
 }
 
+const std::string foxtrot::devices::cornerstone260::getDeviceTypeName() const
+{
+    return "cornerstone260";
+}
+
+
 std::string foxtrot::devices::cornerstone260::readecho(const std::string& request)
 {
   unsigned actlen;
@@ -231,7 +237,7 @@ int foxtrot::devices::cornerstone260::getFilter()
 
 int foxtrot::devices::cornerstone260::getGrating()
 {
-  std::string command("GRATING?");
+  std::string command("GRAT?");
   auto repl = cmd(command);
   
   return std::stoi(repl);
@@ -244,7 +250,7 @@ void foxtrot::devices::cornerstone260::setGrating(int gr)
 {
   
   std::ostringstream oss ;
-  oss << "GRATING " << gr ;
+  oss << "GRAT " << gr ;
   cmd(oss.str());
   
 }
@@ -266,7 +272,7 @@ void foxtrot::devices::cornerstone260::setGratingCalibration(int gr, int lines, 
   cmd(oss.str());
   oss.str("");
   
-  oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << offset;
+  oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << zero;
   cmd(oss.str());
   oss.str("");
   

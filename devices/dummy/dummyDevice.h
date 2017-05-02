@@ -13,7 +13,7 @@ namespace foxtrot
     {
     class dummyDevice : public foxtrot::Device 
     {
-        RTTR_ENABLE(foxtrot::Device)
+        RTTR_ENABLE(Device)
     public:
         dummyDevice();
         

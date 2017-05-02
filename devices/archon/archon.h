@@ -67,6 +67,14 @@ namespace foxtrot {
     
     void update_state();
     void applyall();
+
+    std::vector<unsigned int> fetch_buffer(int buf);
+    
+    int get_frameno(int buf);
+    int get_width(int buf);
+    int get_height(int buf);
+    int get_mode(int buf);
+    bool get_32bit(int buf);
     
     
     const std::map<int,ArchonModule&> getAllModules() const;
@@ -112,6 +120,16 @@ namespace foxtrot {
     
     
     void sync_archon_timer();
+    
+    void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
+    
+    int getreset_start();
+    int getreset_end();
+    int getsignal_start();
+    int getsignal_end();
+    
+    
+    
     
   protected:
     virtual std::string cmd(const std::string& request) override;

@@ -4,6 +4,8 @@
 #include "archon_module_lvxbias.h"
 #include "archon_module_hvxbias.h"
 #include "archon_module_AD.h"
+#include "archon_module_xvbias.h"
+#include "archon_module_driver.h"
 #include "DeviceError.h"
 
 #include <algorithm>
@@ -64,39 +66,50 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
     
 //     std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
     
-    std::unique_ptr<ArchonModule> ptr;
+    std::unique_ptr<ArchonModule> ptr(nullptr);
     switch(modtype)
     {
         case(archon_module_types::HeaterX):
 	  _lg.Info("HeaterX module detected at position " + std::to_string(i+1));
-            ptr = ArchonHeaterX::constructModule(*this,i);
-            _modules.insert(std::pair<int,std::unique_ptr<ArchonModule>>(i, std::move(ptr)));
-            break;
+        ptr = ArchonHeaterX::constructModule(*this,i);
+        break;
 	  
 	  
 	case(archon_module_types::LVXBias):
 	  _lg.Info("LVXBias module detected at position " + std::to_string(i+1));
 	  ptr = ArchonLVX::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
 	
 	case(archon_module_types::HVXBias):
 	  _lg.Info("HVXBias module detected at position " + std::to_string(i+1));
 	  ptr = ArchonHVX::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
 	  
 	case(archon_module_types::AD):
 	  _lg.Info("A/D module detected at position " + std::to_string(i+1));
 	  ptr = ArchonAD::constructModule(*this,i);
-	  _modules.insert(std::make_pair(i,std::move(ptr)));
 	  break;
-	  
+      
+    case(archon_module_types::XVBias):
+        _lg.Info("XVBias module detected at position " + std::to_string(i+1));
+        ptr = ArchonXV::constructModule(*this,i);
+        break;
+        
+    case(archon_module_types::Driver):
+        _lg.Info("Driver module detected at position " + std::to_string(i+1));
+        ptr =  ArchonDriver::constructModule(*this,i);
+        break;
 	  
 	default:
 	  _lg.Info("support for module at position " + std::to_string(i+1)  + " isn't implemented yet");
 	    
     };
+    
+    
+    if(ptr)
+    {
+        _modules.insert(std::make_pair(i,std::move(ptr)));
+    }
     
     
    }
@@ -672,6 +685,180 @@ void foxtrot::devices::archon::sync_archon_timer()
 }
 
 
+int devices::archon::get_frameno(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "FRAME";
+  return std::stoi(_frame.at(oss.str()));
+
+
+}
+
+int devices::archon::get_height(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "HEIGHT";
+  return std::stoi(_frame.at(oss.str()));
+
+
+}
+
+int devices::archon::get_width(int buf)
+{
+  std::ostringstream oss ;
+  oss << "BUF" << buf << "WIDTH";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+bool devices::archon::isbuffercomplete(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "COMPLETE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+int devices::archon::get_mode(int buf)
+{
+    std::ostringstream oss;
+  oss << "BUF" << buf << "MODE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+bool devices::archon::get_32bit(int buf)
+{
+      std::ostringstream oss;
+  oss << "BUF" << buf << "SAMPLE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+
+}
+
+
+
+std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
+{
+  std::vector<unsigned int> out;
+  
+  //need to update state or width/height might actually be wrong
+  update_state();
+  
+  lockbuffer(buf);
+  
+  if(!isbuffercomplete(buf))
+  {
+    throw DeviceError("buffer not complete for reading!");
+  }
+  
+  auto pixels = get_width(buf) * get_height(buf);
+  out.reserve(pixels);
+  
+  std::ostringstream oss;
+  oss << "BUF" << buf << "BASE";
+  auto baseaddr = std::stoul(_frame.at(oss.str()),0,16);
+ 
+  unsigned num_bytes = get_32bit(buf) ? pixels * 4 : pixels * 2;
+  
+  auto num_blocks = num_bytes / 1024 ;
+  num_blocks = (num_bytes % 1024 == 0) ? num_blocks: num_blocks + 1;
+  
+  
+  
+  oss.str("");
+  oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << num_blocks <<'\n';
+  
+  //construct command manually
+  _specproto->write(oss.str());
+  bool is32 = get_32bit(buf);
+  
+  for(int i=0; i < num_blocks; i++)
+  {
+    unsigned actlen;
+    auto ret = _specproto->read(1024,&actlen);
+    if(actlen != 1024)
+    {
+      _lg.Warning("cycle: " + std::to_string(i));
+      _lg.Warning("didn't read 1024 bytes...");
+      
+    }
+    if(ret[0] != '<' )
+    {
+      _lg.Error("got RET: " + ret );
+      _lg.Error("request was: " + oss.str());
+      if(ret[0] == '?')
+      {
+      throw DeviceError("archon threw an error message! Check the logs..."); 
+      }  
+      throw ProtocolError("invalid archon response!");
+    };
+    
+   auto bytes = parse_binary_response(ret.substr(3));
+   
+   if(is32)
+   {
+      unsigned* ptr = reinterpret_cast<unsigned*>(bytes.data());
+      out.insert(out.end(),ptr, ptr + 1024 / 4);
+   }
+   else
+   {
+     //WARNING: does this do the stride properly?
+     unsigned short* ptr = reinterpret_cast<unsigned short*>(bytes.data());
+     out.insert(out.end(),ptr, ptr + 1024 / 2);
+     
+   }
+    
+  };
+  
+  return out;
+  
+  
+}
+
+void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end)
+{
+    writeKeyValue("SHP1",std::to_string(reset_start));
+    writeKeyValue("SHP2",std::to_string(reset_end));
+    writeKeyValue("SHD1", std::to_string(signal_start));
+    writeKeyValue("SHD2", std::to_string(signal_end));
+    
+}
+
+int foxtrot::devices::archon::getreset_start()
+{
+    auto val = readKeyValue("SHP1");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getreset_end()
+{
+    auto val = readKeyValue("SHP2");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getsignal_start()
+{
+    auto val = readKeyValue("SHD1");
+    return std::stoi(val);
+}
+
+int foxtrot::devices::archon::getsignal_end()
+{
+    auto val = readKeyValue("SHD2");
+    return std::stoi(val);
+}
+
+
+
+
+
 
 RTTR_REGISTRATION
 {
@@ -721,9 +908,26 @@ RTTR_REGISTRATION
  (
    parameter_names("name", "state")
    )
- ;
+ .method("get_frameno", &archon::get_frameno)
+ (parameter_names("buf"))
+ .method("get_width", &archon::get_width)
+ (parameter_names("buf"))
+ .method("get_height",&archon::get_height)
+ (parameter_names("buf"))
+ .method("get_mode",&archon::get_mode)
+ (parameter_names("buf"))
+ .method("get_32bit",&archon::get_32bit)
+ (parameter_names("buf"))
+ .method("fetch_buffer",&archon::fetch_buffer)
+ (parameter_names("buf"), metadata("streamdata",true))
+ .property_readonly("getreset_start",&archon::getreset_start)
+ .property_readonly("getreset_end",&archon::getreset_end)
+ .property_readonly("getsignal_start",&archon::getsignal_start)
+ .property_readonly("getsignal_end",&archon::getsignal_end)
+ .method("setCDSTiming",&archon::setCDSTiming)
+ (parameter_names("reset_start","reset_end","signal_start","signal_end"))
  
-    
+ ;
     
     
 }

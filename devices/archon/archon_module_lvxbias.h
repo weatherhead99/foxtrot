@@ -2,7 +2,7 @@
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
 #include <rttr/registration>
-
+#include "archon_GPIO.h"
 
 namespace foxtrot
 {
@@ -10,9 +10,9 @@ namespace foxtrot
     {
         class archon;
         
-        class ArchonLVX : public ArchonModule
+        class ArchonLVX : public ArchonModule, public archonGPIO
         {
-	  RTTR_ENABLE(ArchonModule)
+        RTTR_ENABLE(ArchonModule,archonGPIO)
         public:
 	    
 	    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);

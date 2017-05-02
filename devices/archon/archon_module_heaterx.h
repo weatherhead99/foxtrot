@@ -2,7 +2,7 @@
 #include "archon_modules.h"
 #include <array>
 #include <rttr/registration>
-
+#include "archon_GPIO.h"
 
 namespace foxtrot
 {
@@ -26,7 +26,7 @@ namespace devices
        B = 'B'
      };
   
-    class ArchonHeaterX : public ArchonModule
+    class ArchonHeaterX : public ArchonModule, public archonGPIO
     {
     RTTR_ENABLE(ArchonModule)
       friend class archon;

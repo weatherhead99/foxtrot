@@ -20,7 +20,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     
     foxtrot::Device* dev;
     repl = init_chunk<foxtrot::datachunk>(req);
-    repl.set_dataid(req.dataid());
+    
     
     try
     {
@@ -143,7 +143,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       return true;
     }
 
-    
+    repl.set_dtp(dt);
     auto csize = req.chunksize();
     
     unsigned num_chunks = byte_size / csize;

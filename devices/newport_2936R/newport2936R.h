@@ -20,6 +20,19 @@ namespace foxtrot
      Joules_cm2 = 5
     };
     
+    enum class powermodes : short unsigned
+    {
+      DC_cont =0,
+      DC_sing = 1,
+      Integrate = 2,
+      PP_cont = 3,
+      PP_sing = 4,
+      pulse_cont = 5,
+      pulse_single = 6,
+      RMS = 7      
+    };
+    
+    
     class newport2936R : public CmdDevice
     {
       RTTR_ENABLE()
@@ -38,6 +51,15 @@ namespace foxtrot
     
     powerunits getUnits();
     void setUnits(powerunits unit);
+    
+    
+    powermodes getMode();
+    void setMode(powermodes mode);
+    
+    void manualTriggerState(bool state);
+    
+    std::string getcaldate();
+    double getcaltemp();
     
     private:
       foxtrot::Logging _lg;

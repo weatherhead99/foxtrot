@@ -2,7 +2,9 @@
 #include "devices/archon/archon.h"
 #include "devices/archon/archon_modules.h"
 #include "devices/archon/archon_module_heaterx.h"
-
+#include "devices/archon/archon_module_hvxbias.h"
+#include "devices/archon/archon_module_driver.h"
+#include "devices/archon/archon_module_AD.h"
 
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
@@ -15,6 +17,7 @@
 #include "devices/cornerstone_260/cornerstone260.h"
 
 #include "devices/OPS-Q250/Q250.h"
+#include "devices/stellarnet/stellarnet.h"
 
 #include <memory>
 
@@ -42,6 +45,14 @@ const foxtrot::parameterset psu_params
   {"devnode", "/dev/sdb"},
   {"timeout", 2000u}
 };
+
+
+template <typename T> std::unique_ptr<foxtrot::Device, void(*)(foxtrot::Device*)>
+get_ptr_for_harness( const T* ptr)
+{
+  return std::unique_ptr<foxtrot::Device,void(*)(foxtrot::Device*)>
+    (static_cast<foxtrot::Device*>(const_cast<T*>(ptr),[](foxtrot::Device*){}));
+}
 
 
 
@@ -94,6 +105,14 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setHeaterLimit(HeaterXHeaters::A, 25.);
     
     heater->apply();
+
+    auto hvxbias = static_cast<foxtrot::devices::ArchonHVX*>(&modules.at(8));
+    auto clockdriver = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(9));
+    auto AD1 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(4));
+    auto AD2 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(5));
+    auto AD3 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(6));
+    auto AD4 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(7));
+    
     
     try{
     
@@ -132,6 +151,15 @@ int setup(foxtrot::DeviceHarness& harness)
     harness.AddDevice(std::move(archon));
     harness.AddDevice(std::move(heaterptr));
     
+    auto hvxptr = std::unique_ptr<foxtrot::Device, void(*)(foxtrot::Device*)>
+      (static_cast<foxtrot::Device*>(
+				     const_cast<foxtrot::devices::ArchonHVX*>(hvxbias)),
+       [](foxtrot::Device*) {});
+
+    harness.AddDevice(std::move(hvxptr));
+
+
+
     
     //setup power meter
     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(nullptr);
@@ -155,6 +183,10 @@ int setup(foxtrot::DeviceHarness& harness)
     auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
     
     harness.AddDevice(std::move(lamp_psu));
+    
+    
+    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet("/home/dweatherill/Software/stellarnet/files_to_copy/stellarnet.hex",1000));
+    harness.AddDevice(std::move(spectrometer));
     
     return 0;  
 };

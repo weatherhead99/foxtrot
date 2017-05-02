@@ -3,8 +3,6 @@
 
 # find_package(ROOT REQUIRED)
 
-
-
 # include_directories(${plplot_path}/plplot)
 
 add_executable(detector_wl_sweep detector_wl_sweep.cpp OPMD_setup.cpp wl_sweep_io.cpp)

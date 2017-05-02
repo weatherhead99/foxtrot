@@ -35,6 +35,15 @@ double devices::ArchonAD::getClamp(int channel)
 
 }
 
+void foxtrot::devices::ArchonAD::setPreampGain(bool hgain)
+{
+    _oss.str("");
+    _oss << "PREAMPGAIN";
+    
+    writeConfigKey(_oss.str(), std::to_string(hgain));
+}
+
+
 bool devices::ArchonAD::getPreampGain()
 {
   auto str = readConfigKey("PREAMPGAIN");
@@ -64,4 +73,20 @@ void devices::ArchonAD::setClamp(int channel, double val)
 
 }
 
-
+RTTR_REGISTRATION
+{
+ using namespace rttr;
+ using foxtrot::devices::ArchonAD;
+ 
+ registration::class_<ArchonAD>("foxtrot::devices::ArchonAD")
+ .method("setClamp",&ArchonAD::setClamp)
+ (parameter_names("channel","val"))
+ .method("getClamp",&ArchonAD::getClamp)
+ (parameter_names("channel"))
+ .method("setPreampGain",&ArchonAD::setPreampGain)
+ (parameter_names("hgain"))
+ .property_readonly("getPreampGain",&ArchonAD::getPreampGain)
+ ;
+     
+    
+}

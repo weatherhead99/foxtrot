@@ -4,6 +4,8 @@
 #include <iostream>
 #include <utility>
 #include <algorithm>
+#include <sstream>
+#include <rttr/type>
 
 
 using std::cout;
@@ -15,7 +17,7 @@ using namespace rttr;
 
 
 
-foxtrot::DeviceHarness::DeviceHarness()
+foxtrot::DeviceHarness::DeviceHarness() : _lg("DeviceHarness")
 {
     
     
@@ -41,6 +43,11 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
     (raw_ptr,[](Device* dev) {delete dev;});
     
+    
+
+//     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
+//     (raw_ptr,[](Device* dev) {});
+    
     AddDevice(std::move(newptr));
 }
 
@@ -65,10 +72,10 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 {
     std::vector<std::string> out;
     
-    cout << "getting device..." << endl;
+    _lg.Info("getting device...");
     auto dev = GetDevice(devid);
-    auto tp = type::get(*dev);
-    cout << "tp: " << tp.get_name() << endl;
+    auto tp = rttr::type::get(*dev);
+    _lg.Info( "tp: " + tp.get_name() );
     
     auto props = tp.get_properties();
     auto meths = tp.get_methods();
@@ -106,21 +113,29 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     
     if(prop)
     {
-     
+      
+      if(prop.get_type().is_array())
+      {
+	cap.set_tp(capability_types::STREAM);
+	
+      }
+      
       if(prop.is_readonly())
       {
             
           cap.set_tp(capability_types::VALUE_READONLY);
-          cout << cap.tp() << endl;   
+	  std::ostringstream oss;
+	  oss << cap.tp();
+          _lg.Debug(oss.str() );
       }
       else
       {
           cap.set_tp(capability_types::VALUE_READWRITE);
       }
       
-      cout << "rettp: " << prop.get_type().get_name() << endl;
+      _lg.Debug( "rettp: " + prop.get_type().get_name() );
       foxtrot::value_types rettp = get_appropriate_wire_type(prop.get_type());
-      cout << "rettp wire type : " << rettp << endl;
+      _lg.Debug( "rettp wire type : " + rettp );
       
       cap.set_rettp(rettp);
       
@@ -128,7 +143,15 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     }
     else if (meth)
     {
+	  if(meth.get_return_type().is_array())
+	  {
+	   cap.set_tp(capability_types::STREAM);
+	   
+	  }
+	  else{
+      
             cap.set_tp(capability_types::ACTION);
+	  }
             
             //in this case, set argument names and types
             auto args =  meth.get_parameter_infos();

@@ -49,15 +49,8 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
   libusb_device** listptr;
   auto num_devs = libusb_get_device_list(_ctxt,&listptr);
   
-  std::vector<libusb_device*> matching_devices;
-  matching_devices.reserve(num_devs);
   
-  
-  bool second_run = true;
-  bool dev_found = false;
-  
-  while(second_run)
-  {
+  //run through and find any unloaded devices
     for(auto i =0; i< num_devs; i++)
     {
       _lg.Trace("getting device descriptor...");
@@ -68,21 +61,37 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
 	throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
       };
       
-      if(desc.idVendor == FX2_VID && desc.idProduct == FX2_PID && !dev_found)
+      if(desc.idVendor == FX2_VID && desc.idProduct == FX2_PID )
       {
 	_lg.Info("found empty FX2 chip, uploading firmware...");
 	reenumerate_device(&desc,*(listptr+i));
 	//NOTE: loop will run again and init real device
 	std::this_thread::sleep_for(std::chrono::seconds(3));
-	dev_found = true;
 	break;
 	
       }
-      else if(desc.idVendor == STELLARNET_VID && desc.idProduct == STELLARNET_PID)
+    };
+    libusb_free_device_list(listptr,true);
+    
+    
+    num_devs = libusb_get_device_list(_ctxt,&listptr);
+   bool dev_found = false;
+    
+    for(auto i =0; i< num_devs; i++)
+    {
+      _lg.Trace("getting device descriptor...");
+      libusb_device_descriptor desc;
+      if( int ret = libusb_get_device_descriptor(*(listptr+i), &desc) < 0)
+      {
+	_lg.Error("error getting device descriptor"); 
+	throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+      };
+      
+      if(desc.idVendor == STELLARNET_VID && desc.idProduct == STELLARNET_PID)
       {
 	_lg.Info("found enumerated stellarnet device!");
 	setup_reenumerated_device(&desc, *(listptr+i));
-	second_run = false;
+	
 	dev_found = true;
 	break;
       }
@@ -94,16 +103,8 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
       _lg.Error("no stellarnet device found...");
       libusb_free_device_list(listptr,true);
       throw DeviceError("no stellarnet device found!");
-    
   }
-      
-    
-  }
-  
-    
-  
-    
-    libusb_free_device_list(listptr,true);
+         
 
 }
 
@@ -112,6 +113,7 @@ foxtrot::devices::stellarnet::~stellarnet()
 {
   if(_hdl)
   {
+    libusb_release_interface(_hdl,0);
     libusb_close(_hdl);
   }
   
@@ -204,7 +206,6 @@ void foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* 
   
   _lg.Info("firmware upload finished");
   
-  //release device as it won't be needed again
   libusb_close(_hdl);
   
 
@@ -219,6 +220,13 @@ void foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descr
     _lg.Error("error opening device for setup");
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
   }
+  
+  if(int ret = libusb_claim_interface(_hdl,0) < 0)
+  {
+    _lg.Error("error releasing interface");
+    throw ProtocolError(std::string("libusb error: " ) + libusb_strerror(static_cast<libusb_error>(ret)));
+  }
+  
   
   
   _lg.Trace("getting detector type...");

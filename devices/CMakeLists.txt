@@ -1,8 +1,7 @@
 macro(add_device_lib name srcfiles)
 add_library(${name} STATIC ${srcfiles})
 list(APPEND device_libs ${name})
-
-
+install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/devices/)
 endmacro()
 
 
@@ -15,6 +14,7 @@ add_subdirectory(newport_2936R)
 add_subdirectory(TPG362)
 add_subdirectory(DM3068)
 add_subdirectory(dummy)
-
-add_subdirectory(BME280)
+if(BUILD_I2C)
+  add_subdirectory(BME280)
+endif()
 add_subdirectory(stellarnet)
