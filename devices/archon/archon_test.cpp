@@ -9,7 +9,7 @@
 #include "backward.hpp"
 #include <DeviceError.h>
 #include <vector>
-#define BACKWARD_HAS_BFD 1
+
 using std::cout;
 using std::endl;
 

@@ -529,6 +529,8 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
     
     set_timing_lines(i);
     
+    cmd("LOADTIMING");
+    
 }
 
 
@@ -848,6 +850,8 @@ void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int 
     writeKeyValue("SHP2",std::to_string(reset_end));
     writeKeyValue("SHD1", std::to_string(signal_start));
     writeKeyValue("SHD2", std::to_string(signal_end));
+    
+    cmd("APPLYCDS");
     
 }
 

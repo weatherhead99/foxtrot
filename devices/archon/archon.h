@@ -77,6 +77,7 @@ namespace foxtrot {
     bool get_32bit(int buf);
     
     
+    
     const std::map<int,ArchonModule&> getAllModules() const;
     
     
