@@ -8,6 +8,7 @@ Created on Wed Apr 19 11:44:13 2017
 from functools import wraps
 from .foxtrot_pb2_grpc import *
 from .foxtrot_pb2 import *
+from .Errors import *
 
 import struct
 
@@ -89,6 +90,22 @@ def _process_sync_response(repl,streamraw=False):
         whichattr = repl.WhichOneof("return")
         return getattr(repl,whichattr)
         
+        
+def _check_repl_err(repl):
+    if not repl.HasField('err'):
+        return
+
+    if repl.err.tp == 0:
+        raise RuntimeError(repl.err.msg)
+    elif repl.err.tp == 1:
+        raise DeviceError(repl.err.msg)
+    elif repl.err.tp == 2:
+        raise ProtocolError(repl.err.msg)
+    elif repl.err.tp == 3:
+        raise ValueError(repl.err.msg)
+    else:
+        raise RuntimeError("unknown error")
+        
 def _reinterpret_cast_bytes(bts,tp):
     pass
 
@@ -109,7 +126,10 @@ class Client:
         
         
         for dev in self._devices:
-            setattr(self,dev._devtp,dev)
+            if len(dev._comment) > 0:
+                setattr(self,dev._comment,dev)
+            else:
+                setattr(self,dev._devtp,dev)
         
         
     def __getitem__(self,keystr):
@@ -189,6 +209,7 @@ class Capability:
         
     def __call__(self,*args,**kwargs):
         repl = self.call_cap_sync(self._cl,*args,**kwargs)
+        _check_repl_err(repl)
         return _process_sync_response(repl)
         
     
