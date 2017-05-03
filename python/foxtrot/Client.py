@@ -88,7 +88,11 @@ def _process_sync_response(repl,streamraw=False):
         
     else:
         whichattr = repl.WhichOneof("return")
-        return getattr(repl,whichattr)
+        ret = getattr(repl,whichattr)
+        if whichattr == "stringret" and len(ret) == 0:
+            return None
+        return ret
+        
         
         
 def _check_repl_err(repl):
