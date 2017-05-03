@@ -137,6 +137,10 @@ RTTR_REGISTRATION
     (parameter_names("channel"))
     .method("setFastSlewRate",&ArchonDriver::setFastSlewRate)
     (parameter_names("channel","val"))
+    .method("setEnable",&ArchonDriver::setEnable)
+    (parameter_names("channel","onoff"))
+    .method("getEnable",&ArchonDriver::getEnable)
+    (parameter_names("channel"))
     ;
     
 }
