@@ -7,6 +7,8 @@
 
 namespace foxtrot
 {
+  class Logging;
+  
 namespace devices
 {
   class ArchonModule;
@@ -35,11 +37,11 @@ namespace devices
     double measureV(int channel);
     double measureI(int channel);
     
-    
+    void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
   
   protected:
     ArchonGenericBias(ArchonModule& mod, const std::string& nmemonic,
-      int numchans, double lowlimit, double highlimit) ;
+      int numchans, double lowlimit, double highlimit, Logging& lg) ;
     
   private:
     void check_channel_number(int channel);
@@ -47,7 +49,8 @@ namespace devices
     
     ArchonModule& _mod;
     std::string _biasnmemonic;
-     
+    Logging& _lg; 
+    
     int _numchans;
     double _lowlimit;
     double _highlimit;

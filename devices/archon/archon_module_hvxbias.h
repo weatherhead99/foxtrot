@@ -2,7 +2,7 @@
 #include "archon_modules.h"
 #include "archon_module_lvxbias.h"
 #include <rttr/registration>
-
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -23,11 +23,7 @@ namespace foxtrot
     
     private:
       ArchonHVX(archon& arch, short unsigned int modpos);
-      ArchonGenericBias _lcbias;
-      ArchonGenericBias _hcbias;
-    
-    
-    
+      
       
     };
     

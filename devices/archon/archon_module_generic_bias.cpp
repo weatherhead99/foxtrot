@@ -1,13 +1,15 @@
 #include "archon_module_generic_bias.h"
 #include <sstream>
 #include "archon_modules.h"
+#include "Logging.h"
+
 
 using namespace foxtrot;
 using std::string;
 
 devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod, const string& nmemonic, 
-					      int numchans, double lowlimit, double highlimit)
-: _mod(mod), _biasnmemonic(nmemonic), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit)
+					      int numchans, double lowlimit, double highlimit, Logging& lg)
+: _mod(mod), _biasnmemonic(nmemonic), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit), _lg(lg)
 {
 
 }
@@ -92,7 +94,7 @@ bool devices::ArchonGenericBias::getEnable(int channel)
 {
   check_channel_number(channel);
   std::ostringstream oss;
-  oss << _biasnmemonic << "_ENABLE" << channel;
+  oss <<  _biasnmemonic << "_ENABLE" << channel;
   
   return std::stoi(_mod.readConfigKey(oss.str()));
 }
@@ -100,8 +102,12 @@ bool devices::ArchonGenericBias::getEnable(int channel)
 double devices::ArchonGenericBias::measureI(int channel)
 {
   check_channel_number(channel);
+  auto modpos = _mod.getmodpos() + 1;
+  
   std::ostringstream oss;
-  oss << _biasnmemonic << "_I" << channel;
+  oss << "MOD" << modpos << "/" << _biasnmemonic << "_I" << channel;
+  
+  _lg.Debug("measureI request: " + oss.str());
   
   auto str = _mod.getArchon().getStatus().at(oss.str());
   return std::stod(str);
@@ -112,8 +118,11 @@ double devices::ArchonGenericBias::measureI(int channel)
 double devices::ArchonGenericBias::measureV(int channel)
 {
   check_channel_number(channel);
+  auto modpos = _mod.getmodpos() + 1;
   std::ostringstream oss;
-  oss << _biasnmemonic << "_V" << channel;
+  oss << "MOD" << modpos << "/" << _biasnmemonic << "_V" << channel;
+  
+  _lg.Debug("measureV request: " + oss.str());
   
   auto str = _mod.getArchon().getStatus().at(oss.str());
   return std::stod(str);
@@ -148,4 +157,15 @@ void devices::ArchonGenericBias::check_limits(double val)
   }
 
 }
+
+void devices::ArchonGenericBias::reconfigure(const string& nmemonic, int numchans, double lowlimit, double highlimit)
+{
+  _biasnmemonic = nmemonic;
+  _numchans = numchans;
+  _lowlimit = lowlimit;
+  _highlimit = highlimit;
+  
+
+}
+
 

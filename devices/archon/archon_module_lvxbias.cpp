@@ -4,8 +4,9 @@
 foxtrot::devices::ArchonLVX::ArchonLVX(foxtrot::devices::archon& arch, unsigned short modpos)
 : foxtrot::devices::ArchonModule(arch,modpos), 
 foxtrot::devices::archonGPIO(arch,modpos),
-_lcbias(*this, "LVLC", 24, -14.0, 14.0),
-_hcbias(*this, "LVHC", 6, -14.0,14.0)
+_lg("ArchonLVX"),
+_lcbias(*this, "LVLC", 24, -14.0, 14.0,_lg),
+_hcbias(*this, "LVHC", 6, -14.0,14.0,_lg)
 {
 }
 

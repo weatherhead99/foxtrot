@@ -56,6 +56,7 @@ namespace devices
 	    
 	    
 	    const archon& getArchon();
+	    short unsigned getmodpos();
 	    
 	    
     protected:

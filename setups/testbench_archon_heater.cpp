@@ -5,6 +5,7 @@
 #include "devices/archon/archon_module_hvxbias.h"
 #include "devices/archon/archon_module_driver.h"
 #include "devices/archon/archon_module_AD.h"
+#include "devices/archon/archon_module_xvbias.h"
 
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
@@ -47,11 +48,20 @@ const foxtrot::parameterset psu_params
 };
 
 
+//     auto heaterptr = std::unique_ptr<foxtrot::Device,
+//     void(*)(foxtrot::Device*)> 
+//     (   static_cast<foxtrot::Device*>(
+//         const_cast<foxtrot::devices::ArchonHeaterX*>(heater)), 
+//         [] (foxtrot::Device*) {}) ;
+//     
+
+
 template <typename T> std::unique_ptr<foxtrot::Device, void(*)(foxtrot::Device*)>
 get_ptr_for_harness( const T* ptr)
 {
   return std::unique_ptr<foxtrot::Device,void(*)(foxtrot::Device*)>
-    (static_cast<foxtrot::Device*>(const_cast<T*>(ptr),[](foxtrot::Device*){}));
+    (static_cast<foxtrot::Device*>(
+      const_cast<T*>(ptr)),[](foxtrot::Device*){});
 }
 
 
@@ -71,7 +81,8 @@ int setup(foxtrot::DeviceHarness& harness)
     
     auto modules = archon->getAllModules();
     
-    //WARNING: segault ahoy
+    
+    //============== Archon Heater ====================//
     auto heater = static_cast<foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
     
     using foxtrot::devices::HeaterXSensors;
@@ -106,12 +117,53 @@ int setup(foxtrot::DeviceHarness& harness)
     
     heater->apply();
 
+    
+    auto heaterptr = get_ptr_for_harness(heater);
+    harness.AddDevice(std::move(heaterptr));
+    //============Archon biases & drivers================//
+    
     auto hvxbias = static_cast<foxtrot::devices::ArchonHVX*>(&modules.at(8));
+    auto hvxptr = get_ptr_for_harness(hvxbias);
+    harness.AddDevice(std::move(hvxptr));
+
+    auto lvxbias = static_cast<foxtrot::devices::ArchonLVX*>(&modules.at(3));
+    auto lvxptr = get_ptr_for_harness(lvxbias);
+    harness.AddDevice(std::move(lvxptr));
+    
+    auto xvbias = static_cast<foxtrot::devices::ArchonXV*>(&modules.at(1));
+    auto xvptr = get_ptr_for_harness(xvbias);
+    harness.AddDevice(std::move(xvptr));
+    
     auto clockdriver = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(9));
+    auto cdptr = get_ptr_for_harness(clockdriver);
+    clockdriver->setDeviceComment("CCD_clocks");
+    harness.AddDevice(std::move(cdptr));
+    
+    auto clockdriver2 = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(2));
+    auto cdptr2 = get_ptr_for_harness(clockdriver2);
+    clockdriver2->setDeviceComment("spare_clocks");
+    harness.AddDevice(std::move(cdptr2));
+    
+    //==============Archon A/Ds =====================//
     auto AD1 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(4));
+    auto ad1ptr = get_ptr_for_harness(AD1);
+    AD1->setDeviceComment("AD1");
+    harness.AddDevice(std::move(ad1ptr));
+    
     auto AD2 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(5));
+    auto ad2ptr = get_ptr_for_harness(AD2);
+    AD2->setDeviceComment("AD2");
+    harness.AddDevice(std::move(ad2ptr));
+    
     auto AD3 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(6));
+    auto ad3ptr = get_ptr_for_harness(AD3);
+    AD3->setDeviceComment("AD3");
+    harness.AddDevice(std::move(ad3ptr));
+    
     auto AD4 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(7));
+    auto ad4ptr = get_ptr_for_harness(AD4);
+    AD4->setDeviceComment("AD4");
+    harness.AddDevice(std::move(ad4ptr));
     
     
     try{
@@ -134,32 +186,14 @@ int setup(foxtrot::DeviceHarness& harness)
     archon->set_power(true);
     
     
-    //TODO: doesn't work right now for some reason???
-//     heater->apply();
-    
-    
-    //WARNING: oh shit, a const_cast
-    auto heaterptr = std::unique_ptr<foxtrot::Device,
-    void(*)(foxtrot::Device*)> 
-    (   static_cast<foxtrot::Device*>(
-        const_cast<foxtrot::devices::ArchonHeaterX*>(heater)), 
-        [] (foxtrot::Device*) {}) ;
-    
-
     harness.AddDevice(std::move(presgauge));
-    
     harness.AddDevice(std::move(archon));
-    harness.AddDevice(std::move(heaterptr));
     
-    auto hvxptr = std::unique_ptr<foxtrot::Device, void(*)(foxtrot::Device*)>
-      (static_cast<foxtrot::Device*>(
-				     const_cast<foxtrot::devices::ArchonHVX*>(hvxbias)),
-       [](foxtrot::Device*) {});
-
-    harness.AddDevice(std::move(hvxptr));
-
-
-
+    //===================radiometry system========================//
+    
+    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet("/home/dweatherill/Software/stellarnet/files_to_copy/stellarnet.hex",1000));
+    harness.AddDevice(std::move(spectrometer));
+    
     
     //setup power meter
     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(nullptr);
@@ -168,6 +202,8 @@ int setup(foxtrot::DeviceHarness& harness)
     harness.AddDevice(std::move(powermeter));
     
     
+    
+    //====================illumination system========================//
     //setup monochromator
     auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
     auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
@@ -185,8 +221,6 @@ int setup(foxtrot::DeviceHarness& harness)
     harness.AddDevice(std::move(lamp_psu));
     
     
-    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet("/home/dweatherill/Software/stellarnet/files_to_copy/stellarnet.hex",1000));
-    harness.AddDevice(std::move(spectrometer));
     
     return 0;  
 };

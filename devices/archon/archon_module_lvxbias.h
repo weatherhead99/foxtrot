@@ -3,6 +3,7 @@
 #include "archon_module_generic_bias.h"
 #include <rttr/registration>
 #include "archon_GPIO.h"
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -47,9 +48,9 @@ namespace foxtrot
             ArchonGenericBias _hcbias;
             ArchonLVX(archon& arch, short unsigned int modpos);
 	    
+            Logging _lg;
             
         private:
-            
 	    std::array<bool,8> _GPIO;
             
         };

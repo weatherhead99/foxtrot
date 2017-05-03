@@ -103,6 +103,13 @@ const archon& ArchonModule::getArchon()
 }
 
 
+short unsigned int ArchonModule::getmodpos()
+{
+  return _modpos;
+
+}
+
+
 
 void ArchonModule::update_variables()
 {

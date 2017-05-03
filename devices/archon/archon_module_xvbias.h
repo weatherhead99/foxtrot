@@ -2,6 +2,7 @@
 #include "archon_modules.h"
 #include "archon_module_lvxbias.h"
 #include "archon_GPIO.h"
+#include "Logging.h"
 
 namespace foxtrot
 {
@@ -25,6 +26,7 @@ namespace foxtrot
             ArchonXV(archon& arch, int modpos);
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
+	    Logging _lg;
             
             
             
