@@ -53,7 +53,7 @@ void foxtrot::devices::BSC203::transmit_message(short unsigned int opcode, arrtp
 { 
   unsigned char* len = &data.size(); 
   unsigned char* optpr = reinterpret_cast<unsigned char*>(&opcode);
-  std::array<unsigned char, 6> header{ optpr[1], optpr[0], len[1],len[0], static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
+  std::array<unsigned char, 6> header{ optpr[1], optpr[0], len[1],len[0], static_cast<unsigned char>(dest) |0x80 ,static_cast<unsigned char>(src)};
   
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
