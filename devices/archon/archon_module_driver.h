@@ -26,6 +26,9 @@ namespace foxtrot
       void setFastSlewRate(int channel, double val);
       double getFastSlewRate(int channel);
       
+      void setEnable(int channel, bool onoff);
+      bool getEnable(int channel);
+      
   private:
       ArchonDriver(archon& arch, short unsigned int modpos);
       std::ostringstream _oss;

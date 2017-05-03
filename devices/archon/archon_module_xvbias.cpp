@@ -1,11 +1,11 @@
 #include "archon_module_xvbias.h"
 
 foxtrot::devices::ArchonXV::ArchonXV(foxtrot::devices::archon& arch, int modpos)
-: foxtrot::devices::ArchonLVX(arch,modpos),
-_lg("ArchonXV"),
-_lcbias(*this,"XVN",4,-95.0,0.,_lg),
-_hcbias(*this,"XVP",4,0,90.0,_lg)
+: foxtrot::devices::ArchonLVX(arch,modpos)
 {
+  _lg = Logging("ArchonXV");
+  _lcbias.reconfigure("XVN",4,-95.0,0.);
+  _hcbias.reconfigure("XVP",4,0,90.0);
     
 }
 

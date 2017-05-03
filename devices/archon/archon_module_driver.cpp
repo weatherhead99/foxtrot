@@ -99,6 +99,25 @@ const string foxtrot::devices::ArchonDriver::getTypeName() const
     return "Driver";
 }
 
+void devices::ArchonDriver::setEnable(int channel, bool onoff)
+{
+  checkChannel(channel);
+  _oss.str("");
+  _oss << "ENABLE" << channel;
+  
+  writeConfigKey(_oss.str(), std::to_string((int) onoff));
+
+}
+
+bool devices::ArchonDriver::getEnable(int channel)
+{
+  checkChannel(channel);
+  _oss.str("");
+  _oss << "ENABLE" << channel;
+  return std::stoi(readConfigKey(_oss.str()));
+}
+
+
 
 RTTR_REGISTRATION
 {

@@ -24,9 +24,6 @@ namespace foxtrot
             
         private:
             ArchonXV(archon& arch, int modpos);
-            ArchonGenericBias _lcbias;
-            ArchonGenericBias _hcbias;
-	    Logging _lg;
             
             
             
