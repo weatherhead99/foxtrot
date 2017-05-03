@@ -115,6 +115,8 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setHeaterTarget(HeaterXHeaters::A, -100.);
     heater->setHeaterLimit(HeaterXHeaters::A, 25.);
     
+    heater->setDIOPower(true);
+    
     heater->apply();
 
     
@@ -123,18 +125,55 @@ int setup(foxtrot::DeviceHarness& harness)
     //============Archon biases & drivers================//
     
     auto hvxbias = static_cast<foxtrot::devices::ArchonHVX*>(&modules.at(8));
+    for(int i=1; i<=16; i++)
+    {
+      hvxbias->setLabel(false,i,"OD" + std::to_string(i));  
+    }
+    hvxbias->setLabel(false,17,"RDA");
+    hvxbias->setLabel(false,19,"RDB");
+    
+    hvxbias->setLabel(false,21,"GD1");
+    hvxbias->setLabel(false,22,"GD2");
+    hvxbias->setLabel(false,23,"GD3");
+    hvxbias->setLabel(false,24,"GD4");
+    
+    
     auto hvxptr = get_ptr_for_harness(hvxbias);
     harness.AddDevice(std::move(hvxptr));
 
     auto lvxbias = static_cast<foxtrot::devices::ArchonLVX*>(&modules.at(3));
+    lvxbias->setLabel(false,1,"OG1");
+    lvxbias->setLabel(false,2,"OG2");
+    lvxbias->setLabel(false,3,"OG3");
+    lvxbias->setLabel(false,4,"OG4");
+    
+    lvxbias->setLabel(true,1,"7V5");
+    lvxbias->setLabel(true,2,"m7V5");
+    lvxbias->setLabel(true,3,"13V5");
+    lvxbias->setLabel(true,5,"m13V5");
+    
     auto lvxptr = get_ptr_for_harness(lvxbias);
     harness.AddDevice(std::move(lvxptr));
     
     auto xvbias = static_cast<foxtrot::devices::ArchonXV*>(&modules.at(1));
+    xvbias->setLabel(false,1,"VBB");
     auto xvptr = get_ptr_for_harness(xvbias);
     harness.AddDevice(std::move(xvptr));
     
     auto clockdriver = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(9));
+    clockdriver->setLabel(1,"IPHI1");
+    clockdriver->setLabel(2,"IPHI2");
+    clockdriver->setLabel(3,"IPHI3");
+    clockdriver->setLabel(4,"IPHI4");
+    clockdriver->setLabel(5,"RPHI1");
+    clockdriver->setLabel(6,"RPHI2");
+    clockdriver->setLabel(7,"RPHI3");
+    clockdriver->setLabel(8,"PHIR");
+    for(int i=1; i<=8; i++)
+    {
+     clockdriver->setEnable(i,true); 
+    }
+    
     auto cdptr = get_ptr_for_harness(clockdriver);
     clockdriver->setDeviceComment("CCD_clocks");
     harness.AddDevice(std::move(cdptr));
