@@ -93,6 +93,7 @@ namespace foxtrot {
     int get_constants();
     
     void set_power(bool onoff);
+    bool get_power();
     
     void load_timing_script(const std::string& script);
     

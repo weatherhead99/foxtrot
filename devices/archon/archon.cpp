@@ -494,6 +494,26 @@ void foxtrot::devices::archon::set_power(bool onoff)
     
 }
 
+bool devices::archon::get_power()
+{
+  auto power = std::stoi(getStatus().at("POWER"));
+  switch(power)
+  {
+    case(0): _lg.Error("unknown power state");
+    throw DeviceError("unknown power state");
+    case(1): _lg.Error("no configuration applied");
+    throw DeviceError("no configuration applied");
+    case(2): return false;
+    case(3): _lg.Error("intermediate power");
+    throw DeviceError("intermediate power state");
+    case(4): return true;
+    case(5): return false;
+  }
+
+}
+
+
+
 void foxtrot::devices::archon::load_timing_script(const std::string& script)
 {
     std::stringstream ss(script);
