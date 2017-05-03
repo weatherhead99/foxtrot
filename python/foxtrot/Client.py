@@ -10,9 +10,16 @@ from .foxtrot_pb2_grpc import *
 from .foxtrot_pb2 import *
 from .Errors import *
 
+import types
 import struct
 
 DEFAULT_CHUNKSIZE=1000
+
+value_type_to_return_field_dict = {FLOAT : ('dblret', float),
+                                   INT   : ('intret',int),
+                                    BOOL : ('boolret',bool),
+                                  STRING : ('stringret',bytes)
+}
 
 def _capability_argument_from_value(val):
     arg = capability_argument()
@@ -122,6 +129,9 @@ class Client:
         self._servdescribe = self._stub.DescribeServer(empty())
         self._comment = self._servdescribe.servcomment
         
+        self._setup_device_tree()
+        
+    def _setup_device_tree(self):
         self._devices = []
         
         for devkey in self._servdescribe.devs_attached.keys():
@@ -134,8 +144,12 @@ class Client:
                 setattr(self,dev._comment,dev)
             else:
                 setattr(self,dev._devtp,dev)
-        
-        
+    
+    def save_servdesc(self,fname):
+        ss = self._servdescribe.SerializeToString()
+        with open(fname,'wb') as f:
+            f.write(ss)
+                
     def __getitem__(self,keystr):
         if not hasattr(self,"_devtypes"):
             self._devtypes = [_._devtp for _ in self._devices]
@@ -150,6 +164,42 @@ class Client:
                 return self._devices[self._devcomments.index(keystr)]
 
             return self._devices[self._devtypes.index(keystr)]    
+
+
+def _fake_call_sync(obj,client,*args,**kwargs):
+    req = obj.construct_request(*args,**kwargs)
+    
+    if len(args) + len(kwargs) != len(req.args):
+        raise IndexError("incorrect number of arguments to dummy func")
+    
+    repl = datachunk() if obj._captp is STREAM else capability_response()
+    
+    repl.msgid = req.msgid
+    repl.capname = req.capname
+    repl.devid = req.devid
+    
+    if obj._captp is STREAM:
+        pass    
+    else:
+        if obj._rettp in value_type_to_return_field_dict:
+            attrname,tp = value_type_to_return_field_dict[obj._rettp]
+            setattr(repl,attrname,tp())
+        
+    return repl
+    
+
+class DummyClient(Client):
+    def __init__(self,sdfname):
+        with open(sdfname,'rb') as f:
+            ss = f.read()
+        self._servdescribe = servdescribe()
+        self._servdescribe.ParseFromString(ss)
+        self._setup_device_tree()
+        
+        for dev in self._devices:
+            for cap in dev._caps:
+                cap.call_cap_sync = types.MethodType(_fake_call_sync,cap)
+     
 
 class Device:
     def __init__(self,devid,devtp, caps,comment,client):
@@ -172,6 +222,7 @@ class Device:
         else:
             return str(self._devtp)
         
+            
 
 class Capability:
     def __init__(self,captp,capname,argnames,argtypes,rettp,devid,client):
