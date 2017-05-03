@@ -8,6 +8,13 @@ _hcbias(*this,"XVP",4,0,90.0)
     
 }
 
+const string devices::ArchonXV::getDeviceTypeName() const
+{
+  return "ArchonXV";
+}
+
+
+
 std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonXV::constructModule(foxtrot::devices::archon& arch, int modpos)
 {
     std::unique_ptr<foxtrot::devices::ArchonModule> out(new 

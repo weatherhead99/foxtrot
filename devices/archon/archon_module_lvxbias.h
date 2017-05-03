@@ -1,4 +1,4 @@
-#pragma once	
+#pragma once		
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
 #include <rttr/registration>
@@ -18,6 +18,7 @@ namespace foxtrot
 	    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
 	    
 	    virtual const string getTypeName() const override;
+	    virtual const string getDeviceTypeName() const;
 	    
 	    virtual void update_variables() override;
 	  

@@ -26,6 +26,12 @@ const string devices::ArchonLVX::getTypeName() const
 
 }
 
+const string devices::ArchonLVX::getDeviceTypeName() const
+{
+    return "ArchonLVX";
+}
+
+
 void devices::ArchonLVX::update_variables()
 {
   

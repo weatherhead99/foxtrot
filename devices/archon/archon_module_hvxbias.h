@@ -18,8 +18,8 @@ namespace foxtrot
       
     virtual const string getTypeName() const override;
     virtual void update_variables() override;
-    
-    
+      virtual const string getDeviceTypeName() const;
+      
     
     private:
       ArchonHVX(archon& arch, short unsigned int modpos);

@@ -8,6 +8,12 @@ std::unique_ptr< devices::ArchonModule > devices::ArchonHVX::constructModule(dev
 
 }
 
+const string devices::ArchonHVX::getDeviceTypeName() const
+{
+  return "ArchonHVX";
+}
+
+
 
 const string devices::ArchonHVX::getTypeName() const
 {
