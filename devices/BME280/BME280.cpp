@@ -47,7 +47,7 @@ void foxtrot::devices::BME280::ReadCalibrationData()
     
   auto cal1 = _i2c_proto->read_block_data(0x88,24);
   auto cal2 = _i2c_proto->read_block_data(0xA1,1);
-  auto cal3 = _i2c_proto->read_block_data(0xE1,7);
+  auto cal3 = _i2c_proto->read_block_data(0xE1,6);
   _lg.Debug("read calibration constants");
 
 
@@ -76,7 +76,7 @@ void foxtrot::devices::BME280::ReadCalibrationData()
   _caldata = *interpreted_caldata;
 
 		_lg.Debug("copied caldata");
-  _H1 = cal2[0];
+		_H1 = cal2[0];
 		_lg.Debug("copied cal2");
   
 		
@@ -90,6 +90,13 @@ void foxtrot::devices::BME280::ReadCalibrationData()
 		_lg.Debug("copied cal3");
 		
   
+  _humcaldata.H4 <<= 4;
+  _humcaldata.H4 |= (_humcaldata.H4a & 0x0F);
+  
+  _humcaldata.H5 <<= 4;
+  _humcaldata.H5 |= (_humcaldata.H4a >> 4 & 0x0F);
+		
+		
   _wait_time_ms = 1.25 + (2.3 * _oversample_temp) + ((2.3*_oversample_pres) +0.575) + ((2.3*_oversample_hum)+0.575 ) ;
   
 }

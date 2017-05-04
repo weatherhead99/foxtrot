@@ -49,16 +49,14 @@ namespace devices
        short H2;
        unsigned char H3;
        char H4;
+       char H4a;
        char H5;
        char H6;
      };
 #pragma pack(pop)
      
-     
-     
      void ReadCalibrationData();
      void SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres,unsigned char osample_hum, unsigned char mode);
-     
      
      unsigned char _oversample_temp = 2;
      unsigned char _oversample_pres =2;
