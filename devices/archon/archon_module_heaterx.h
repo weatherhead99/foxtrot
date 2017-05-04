@@ -1,8 +1,8 @@
 #pragma once	
 #include "archon_modules.h"
+#include "archon_GPIO.h"
 #include <array>
 #include <rttr/registration>
-#include "archon_GPIO.h"
 
 namespace foxtrot
 {
@@ -28,7 +28,7 @@ namespace devices
   
     class ArchonHeaterX : public ArchonModule, public archonGPIO
     {
-    RTTR_ENABLE(ArchonModule)
+    RTTR_ENABLE(ArchonModule,archonGPIO)
       friend class archon;
 
     virtual const string getDeviceTypeName() const;
@@ -111,6 +111,7 @@ namespace devices
     private:
     virtual void update_variables() override;
     ArchonHeaterX(archon& arch, short unsigned int modpos);
+    
     
     //read values
     double _heaterAOutput;
