@@ -1,3 +1,4 @@
+
 #include "i2c.h"
 #include "ProtocolUtilities.h"
 #include <linux/i2c-dev.h>
@@ -75,11 +76,32 @@ std::vector<unsigned char> foxtrot::protocols::i2c::read_block_data(unsigned cha
     
 }
 
-void foxtrot::protocols::i2c::write_block_data(int cmd, const std::vector< unsigned char >& data)
+// void foxtrot::protocols::i2c::write_block_data(int cmd, const std::vector< unsigned char >& data)
+// {
+//   //TODO: write this function!
+//   
+//   throw std::runtime_error("not implemented yet");
+//   
+// 
+// }
+
+void foxtrot::protocols::i2c::write_byte_data(unsigned char reg, unsigned char val)
 {
-  //TODO: write this function!
+  i2c_smbus_ioctl_data ioc;
+  union i2c_smbus_data dat;
   
-  throw std::runtime_error("not implemented yet");
+  dat.byte = val;
+  
+  ioc.read_write = I2C_SMBUS_WRITE;
+  ioc.command = val;
+  ioc.size = I2C_SMBUS_BYTE_DATA;
+  ioc.data = &dat;
+  
+  if(ioctl(_fd,I2C_SMBUS, &ioc))
+  {
+    _lg.Error("errno: " + std::string(strerror(errno)));
+    throw ProtocolError("ioctl failed in write_byte_data");
+  }
   
 
 }
