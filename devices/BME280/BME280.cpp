@@ -27,17 +27,18 @@ _lg("BME280")
     }
 
     _i2c_proto->Init(nullptr);
-    SetupControlRegister(1,1,0);
+    SetupControlRegister(2,2,2,1);
     ReadCalibrationData();
     
 }
 
 
-void foxtrot::devices::BME280::SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres, unsigned char charmode)
+void foxtrot::devices::BME280::SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres, unsigned char osample_hum, unsigned char charmode)
 {
-    std::vector<unsigned char> dat{osample_temp << 5 | osample_pres << 2 | charmode};
-    
-
+  _i2c_proto->write_byte_data(REG_CONTROL_HUM, osample_hum);
+  auto control = osample_temp << 5 | osample_pres << 2 | charmode;
+  _i2c_proto->write_byte_data(REG_CONTROL, control);
+  
 }
 
 

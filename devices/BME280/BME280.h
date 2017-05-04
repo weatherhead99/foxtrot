@@ -57,7 +57,7 @@ namespace devices
      
      
      void ReadCalibrationData();
-     void SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres, unsigned char mode);
+     void SetupControlRegister(unsigned char osample_temp, unsigned char osample_pres,unsigned char osample_hum, unsigned char mode);
      
      
      unsigned char _oversample_temp = 2;
