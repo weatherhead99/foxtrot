@@ -688,6 +688,28 @@ void devices::archon::write_timing_state(const string& name, const string& state
 
 }
 
+void devices::archon::settapline(int n, const string& tapline)
+{
+  if(n > _taplines )
+  {
+    throw DeviceError("invalid TAP line number");
+  }
+  
+  std::ostringstream oss;
+  oss << "TAPLINE" << n;
+  
+  writeKeyValue(oss.str(),tapline);
+  _taplines++;
+  
+  writeKeyValue("TAPLINES", _taplines +1);
+
+  
+  
+  
+}
+
+
+
 void devices::archon::apply_all_params()
 {
   cmd("LOADPARAMS");
@@ -763,6 +785,41 @@ bool devices::archon::get_32bit(int buf)
 
 
 }
+
+void devices::archon::setrawchannel(int ch)
+{
+  writeKeyValue("RAWSEL",ch);
+
+}
+void devices::archon::setrawenable(bool onoff)
+{
+  writeKeyValue("RAWENABLE",onoff);
+
+}
+
+void devices::archon::setrawendline(int line)
+{
+  writeKeyValue("RAWENDLINE", line);
+
+}
+void devices::archon::setrawsamples(int n)
+{
+  writeKeyValue("RAWSAMPLES", n);
+
+}
+
+void devices::archon::setrawstartline(int line)
+{
+  writeKeyValue("RAWSTARTLINE",line);
+
+}
+void devices::archon::setrawstartpixel(int pix)
+{
+  writeKeyValue("RAWSTARTPIXEL",pix);
+
+}
+
+
 
 
 
@@ -880,6 +937,18 @@ int foxtrot::devices::archon::getsignal_end()
 }
 
 
+void devices::archon::settrigoutinvert(bool invert)
+{
+  writeKeyValue("TRIGOUTINVERT",(int) invert);
+
+}
+
+void devices::archon::settrigoutpower(bool onoff)
+{
+  writeKeyValue("TRIGOUTPOWER", (int) onoff);
+
+}
+
 
 
 
@@ -950,7 +1019,24 @@ RTTR_REGISTRATION
  .property_readonly("getsignal_end",&archon::getsignal_end)
  .method("setCDSTiming",&archon::setCDSTiming)
  (parameter_names("reset_start","reset_end","signal_start","signal_end"))
- 
+ .method("settapline", &archon::settapline)
+ (parameter_names("tapline"))
+ .method("settrigoutinvert", &archon::settrigoutinvert)
+ (parameter_names("invert"))
+ .method("settrigoutpower", &archon::settrigoutpower)
+ (parameter_names("onoff"))
+ .method("setrawenable",&archon::setrawenable)
+ (parameter_names("onoff"))
+ .method("setrawchannel",&archon::setrawchannel)
+ (parameter_names("ch"))
+ .method("setrawstartline",&archon::setrawstartline)
+ (parameter_names("line"))
+ .method("setrawendline",&archon::setrawendline)
+ (parameter_names("line"))
+ .method("setrawstartpixel",&archon::setrawstartpixel)
+ (parameter_names("pix"))
+ .method("setrawsamples", &archon::setrawsamples)
+ (parameter_names("n"))
  ;
     
     

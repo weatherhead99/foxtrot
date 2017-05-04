@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "CmdDevice.h"
@@ -131,6 +132,18 @@ namespace foxtrot {
     int getsignal_end();
     
     
+    void settapline(int n, const std::string& tapline);
+    
+    void settrigoutpower(bool onoff);
+    void settrigoutinvert(bool invert);
+    
+    
+    void setrawenable(bool onoff);
+    void setrawchannel(int ch);
+    void setrawstartline(int line);
+    void setrawendline(int line);
+    void setrawstartpixel(int pix);
+    void setrawsamples(int n);
     
     
   protected:
@@ -154,12 +167,12 @@ namespace foxtrot {
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     
     std::map<std::string, int> _configlinemap;
-    
+     
     std::vector<std::string> _statenames;
     
     
     int _config_lines =0;
-    
+    int _taplines = 0;
     int _states = 0;
     
     unsigned long long _arch_tmr;

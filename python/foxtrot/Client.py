@@ -95,6 +95,8 @@ def _process_sync_response(repl,streamraw=False):
         
     else:
         whichattr = repl.WhichOneof("return")
+        if whichattr is None:
+            return
         ret = getattr(repl,whichattr)
         if whichattr == "stringret" and len(ret) == 0:
             return None

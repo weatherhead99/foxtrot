@@ -88,7 +88,7 @@ void foxtrot::devices::archonGPIO::setLabel(int ch, const std::string& label)
     writeConfigKey_gpio(_oss.str(),label);
 }
 
-void foxtrot::devices::archonGPIO::setSource(int ch, foxtrot::devices::gpio_source& source)
+void foxtrot::devices::archonGPIO::setSource(int ch, foxtrot::devices::gpio_source source)
 {
     _oss.str("");
     _oss << "DIO_SOURCE" << ch;

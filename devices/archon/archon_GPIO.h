@@ -33,7 +33,7 @@ namespace foxtrot
          void setDirection(int pair, bool inout);
          bool getDirection(int pair);
          
-         void setSource(int ch, gpio_source& source);
+         void setSource(int ch, gpio_source source);
          gpio_source getSource(int ch);
          
          
