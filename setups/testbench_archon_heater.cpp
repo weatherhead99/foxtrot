@@ -75,6 +75,8 @@ int setup(foxtrot::DeviceHarness& harness)
     auto archon = std::unique_ptr<foxtrot::devices::archon> (
         new foxtrot::devices::archon(archontcp));
     
+    archon->settrigoutpower(true);
+    
     auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
     
     auto presgauge = std::unique_ptr<foxtrot::devices::TPG362> (new foxtrot::devices::TPG362(sport));

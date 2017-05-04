@@ -146,6 +146,8 @@ namespace foxtrot {
     void setrawsamples(int n);
     
     
+    void setframemode(int mode);
+    
     
   protected:
     virtual std::string cmd(const std::string& request) override;

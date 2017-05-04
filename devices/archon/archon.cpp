@@ -950,6 +950,11 @@ void devices::archon::settrigoutpower(bool onoff)
 }
 
 
+void devices::archon::setframemode(int mode)
+{
+  writeKeyValue("FRAMEMODE", std::to_string(mode));
+
+}
 
 
 
@@ -1037,6 +1042,8 @@ RTTR_REGISTRATION
  (parameter_names("pix"))
  .method("setrawsamples", &archon::setrawsamples)
  (parameter_names("n"))
+ .method("setframemode", &archon::setframemode)
+ (parameter_names("mode"))
  ;
     
     
