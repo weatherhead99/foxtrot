@@ -28,10 +28,13 @@ namespace foxtrot
     double getAmps();
     double getAmpLimit();
     double getAmpPreset();
-    
+    int getLampHours();
     double getVolts();
     
     int getWatts();
+    
+    void setAmpPreset(double amps);
+    
     
     
     private:

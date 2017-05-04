@@ -1,6 +1,8 @@
 #include "Q250.h"
 #include <chrono>
 #include <thread>
+#include <iomanip>
+#include <sstream>
 
 using namespace foxtrot;
 
@@ -76,6 +78,20 @@ int devices::Q250::getWatts()
   return std::stoi(repl);
 }
 
+int devices::Q250::getLampHours()
+{
+  auto repl = cmd("LAMP HRS?");
+  return std::stoi(repl);
+
+}
+
+void devices::Q250::setAmpPreset(double amps)
+{
+  std::ostringstream oss;
+  oss << "A-PRESET " << std::setprecision(1) << amps;
+  _scsiproto->write(oss.str());
+
+}
 
 
 RTTR_REGISTRATION
@@ -85,8 +101,11 @@ using devices::Q250;
   registration::class_<Q250>("foxtrot::devices::Q250")
   .property_readonly("getWatts", &Q250::getWatts)
   .property_readonly("getVolts", &Q250::getVolts)
+  .property_readonly("getAmps", &Q250::getAmps)
   .property_readonly("getAmpPreset",&Q250::getAmpPreset)
   .property_readonly("getAmpLimit",&Q250::getAmpLimit)
+  .property_readonly("getLampHours", &Q250::getLampHours)
+  .method("setAmpPreset",&Q250::setAmpPreset)
   .method("start",&Q250::start)
   .method("stop",&Q250::stop)
   ;
