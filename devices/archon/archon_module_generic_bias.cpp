@@ -40,15 +40,15 @@ void devices::ArchonGenericBias::setOrder(int channel, int sequence)
   std::ostringstream oss;
  oss << _biasnmemonic << "_ORDER" << channel;
  
- if(sequence < 1)
+ if(sequence < 0)
  {
    throw std::out_of_range("invalid sequence number < 1");
  }
- else if(sequence > _numchans)
+ /*else if(sequence > _numchans)
  {
    throw std::out_of_range("invalid sequence number > numchans");
  }
-   
+ */  
  _mod.writeConfigKey(oss.str(),std::to_string(sequence));
   
 }
