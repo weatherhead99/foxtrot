@@ -87,7 +87,7 @@ int setup(foxtrot::DeviceHarness& harness)
     
     using foxtrot::devices::HeaterXSensors;
     using foxtrot::devices::HeaterXHeaters;
-    
+    using foxtrot::devices::gpio_source;
     
     heater->setSensorCurrent(HeaterXSensors::A, 50000);
     heater->setSensorCurrent(HeaterXSensors::B, 50000);
@@ -115,6 +115,17 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setHeaterTarget(HeaterXHeaters::A, -100.);
     heater->setHeaterLimit(HeaterXHeaters::A, 25.);
     
+    heater->setSource(1,gpio_source::clocked);
+    heater->setLabel(1,"PCLAMP1");
+    heater->setSource(2,gpio_source::clocked);
+    heater->setLabel(1,"PCLAMP2");
+    heater->setSource(3,gpio_source::clocked);
+    heater->setLabel(1,"PCLAMP3");
+    heater->setSource(4,gpio_source::clocked);
+    heater->setLabel(1,"PCLAMP4");
+    
+    heater->setDirection(1,true);
+    
     heater->setDIOPower(true);
     
     heater->apply();
@@ -128,29 +139,54 @@ int setup(foxtrot::DeviceHarness& harness)
     for(int i=1; i<=16; i++)
     {
       hvxbias->setLabel(false,i,"OD" + std::to_string(i));  
+      hvxbias->setOrder(false,i,2);
     }
     hvxbias->setLabel(false,17,"RDA");
+    hvxbias->setOrder(false,17,3);
     hvxbias->setLabel(false,19,"RDB");
+    hvxbias->setOrder(false,19,3);
     
-    hvxbias->setLabel(false,21,"GD1");
-    hvxbias->setLabel(false,22,"GD2");
-    hvxbias->setLabel(false,23,"GD3");
-    hvxbias->setLabel(false,24,"GD4");
     
+    for(int i=1; i<=4; i++)
+    {
+      hvxbias->setLabel(false,i + 20,"GD" + std::to_string(i));
+      hvxbias->setOrder(false,i + 20, 4);
+    }
     
     auto hvxptr = get_ptr_for_harness(hvxbias);
     harness.AddDevice(std::move(hvxptr));
 
     auto lvxbias = static_cast<foxtrot::devices::ArchonLVX*>(&modules.at(3));
-    lvxbias->setLabel(false,1,"OG1");
-    lvxbias->setLabel(false,2,"OG2");
-    lvxbias->setLabel(false,3,"OG3");
-    lvxbias->setLabel(false,4,"OG4");
+    
+    for(int i=1; i<=4; i++)
+    {
+      lvxbias->setLabel(false,i,"OG" + std::to_string(i));
+      lvxbias->setOrder(false,i,5);
+    }
+    
     
     lvxbias->setLabel(true,1,"7V5");
     lvxbias->setLabel(true,2,"m7V5");
     lvxbias->setLabel(true,3,"13V5");
     lvxbias->setLabel(true,5,"m13V5");
+    
+    for(int i=1 ;i <= 4; i++)
+    {
+     lvxbias->setLimit(i,300);
+     lvxbias->setEnable(true,i,true);
+     lvxbias->setOrder(true,i,0);
+    }
+    
+    lvxbias->setLimit(1,300);
+    lvxbias->setLimit(2,300);
+    lvxbias->setLimit(3,300);
+    lvxbias->setLimit(4,300);
+    
+    lvxbias->setV(true,1,7.5);
+    lvxbias->setV(true,2,-7.5);
+    lvxbias->setV(true,3,7.5);
+    lvxbias->setV(true,4,-7.5);
+    
     
     auto lvxptr = get_ptr_for_harness(lvxbias);
     harness.AddDevice(std::move(lvxptr));
@@ -187,21 +223,25 @@ int setup(foxtrot::DeviceHarness& harness)
     auto AD1 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(4));
     auto ad1ptr = get_ptr_for_harness(AD1);
     AD1->setDeviceComment("AD1");
+    AD1->setPreampGain(false);
     harness.AddDevice(std::move(ad1ptr));
     
     auto AD2 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(5));
     auto ad2ptr = get_ptr_for_harness(AD2);
     AD2->setDeviceComment("AD2");
+    AD2->setPreampGain(false);
     harness.AddDevice(std::move(ad2ptr));
     
     auto AD3 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(6));
     auto ad3ptr = get_ptr_for_harness(AD3);
     AD3->setDeviceComment("AD3");
+    AD3->setPreampGain(false);
     harness.AddDevice(std::move(ad3ptr));
     
     auto AD4 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(7));
     auto ad4ptr = get_ptr_for_harness(AD4);
     AD4->setDeviceComment("AD4");
+    AD4->setPreampGain(false);
     harness.AddDevice(std::move(ad4ptr));
     
     
@@ -222,7 +262,8 @@ int setup(foxtrot::DeviceHarness& harness)
       
     }
     
-    archon->set_power(true);
+    
+//     archon->set_power(true);
     
     
     harness.AddDevice(std::move(presgauge));

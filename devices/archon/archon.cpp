@@ -701,7 +701,7 @@ void devices::archon::settapline(int n, const string& tapline)
   writeKeyValue(oss.str(),tapline);
   _taplines++;
   
-  writeKeyValue("TAPLINES", _taplines +1);
+  writeKeyValue("TAPLINES", std::to_string(_taplines +1));
 
   
   
@@ -788,34 +788,34 @@ bool devices::archon::get_32bit(int buf)
 
 void devices::archon::setrawchannel(int ch)
 {
-  writeKeyValue("RAWSEL",ch);
+  writeKeyValue("RAWSEL",std::to_string(ch));
 
 }
 void devices::archon::setrawenable(bool onoff)
 {
-  writeKeyValue("RAWENABLE",onoff);
+  writeKeyValue("RAWENABLE",std::to_string(onoff));
 
 }
 
 void devices::archon::setrawendline(int line)
 {
-  writeKeyValue("RAWENDLINE", line);
+  writeKeyValue("RAWENDLINE", std::to_string(line));
 
 }
 void devices::archon::setrawsamples(int n)
 {
-  writeKeyValue("RAWSAMPLES", n);
+  writeKeyValue("RAWSAMPLES", std::to_string(n));
 
 }
 
 void devices::archon::setrawstartline(int line)
 {
-  writeKeyValue("RAWSTARTLINE",line);
+  writeKeyValue("RAWSTARTLINE",std::to_string(line));
 
 }
 void devices::archon::setrawstartpixel(int pix)
 {
-  writeKeyValue("RAWSTARTPIXEL",pix);
+  writeKeyValue("RAWSTARTPIXEL",std::to_string(pix));
 
 }
 
@@ -939,13 +939,13 @@ int foxtrot::devices::archon::getsignal_end()
 
 void devices::archon::settrigoutinvert(bool invert)
 {
-  writeKeyValue("TRIGOUTINVERT",(int) invert);
+  writeKeyValue("TRIGOUTINVERT",std::to_string((int) invert));
 
 }
 
 void devices::archon::settrigoutpower(bool onoff)
 {
-  writeKeyValue("TRIGOUTPOWER", (int) onoff);
+  writeKeyValue("TRIGOUTPOWER", std::to_string((int) onoff));
 
 }
 
@@ -1020,7 +1020,7 @@ RTTR_REGISTRATION
  .method("setCDSTiming",&archon::setCDSTiming)
  (parameter_names("reset_start","reset_end","signal_start","signal_end"))
  .method("settapline", &archon::settapline)
- (parameter_names("tapline"))
+ (parameter_names("n","tapline"))
  .method("settrigoutinvert", &archon::settrigoutinvert)
  (parameter_names("invert"))
  .method("settrigoutpower", &archon::settrigoutpower)

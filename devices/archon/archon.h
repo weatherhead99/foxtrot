@@ -146,6 +146,7 @@ namespace foxtrot {
     void setrawsamples(int n);
     
     
+    
   protected:
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
