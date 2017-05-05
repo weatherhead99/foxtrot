@@ -701,10 +701,10 @@ void devices::archon::write_timing_state(const string& name, const string& state
 {
   std::stringstream ss(state);
   std::string to;
-  bool newstate = ( std::find(_statenames.begin(), _statenames.end(), name)  == _statenames.end() );
+  auto findstate = std::find(_statenames.begin(),_statenames.end(),name);
+  auto state_idx = std::distance(_statenames.begin(),findstate);
   
-  //NOTE: difference of 1 between index and number total
-  int this_state = newstate? get_states() : get_states() -1;
+  bool newstate = ( findstate  == _statenames.end() );
   
   
   while(std::getline(ss,to,'\n'))
@@ -716,7 +716,7 @@ void devices::archon::write_timing_state(const string& name, const string& state
      }
      
      std::string configkey(to.begin(),eqpos);
-     configkey = "STATE" + std::to_string(this_state) + "/" + configkey; 
+     configkey = "STATE" + std::to_string(state_idx) + "/" + configkey; 
      std::string val(eqpos + 1, to.end());
      
      writeKeyValue(configkey, val);
