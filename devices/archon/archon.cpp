@@ -651,6 +651,8 @@ void devices::archon::setParam(const string& name, unsigned int val)
     set_parameters(get_parameters() + 1);
   }
   
+  apply_param(name);
+  
   
 }
 
@@ -1044,6 +1046,11 @@ RTTR_REGISTRATION
  (parameter_names("n"))
  .method("setframemode", &archon::setframemode)
  (parameter_names("mode"))
+ .property_readonly("get_timing_lines",&archon::get_timing_lines)
+ .property_readonly("get_states",&archon::get_states)
+ .property_readonly("get_constants",&archon::get_constants)
+ .property_readonly("get_power",&archon::get_power)
+ .property_readonly("get_parameters",&archon::get_parameters)
  ;
     
     
