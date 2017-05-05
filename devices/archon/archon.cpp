@@ -602,7 +602,7 @@ void foxtrot::devices::archon::resetTiming()
     cmd("RESETTIMING");
 }
 
-unsigned int devices::archon::getConstant(const string& name)
+double devices::archon::getConstant(const string& name)
 {
    int confnum;
     try{
@@ -622,12 +622,12 @@ unsigned int devices::archon::getConstant(const string& name)
     auto quotepos = std::find(eqpos, paramline.end(),'\"');
     
     //TODO: this will fail at runtime
-    return std::stoul(std::string(eqpos+1,quotepos));
+    return std::stod(std::string(eqpos+1,quotepos));
 
   
 }
 
-void devices::archon::setConstant(const string& name, unsigned int val)
+void devices::archon::setConstant(const string& name, double val)
 {
     int confnum;
     try{

@@ -115,8 +115,8 @@ namespace foxtrot {
     void setParam(const std::string& name, unsigned val);
     unsigned getParam(const std::string& name);
     
-    void setConstant(const std::string& name, unsigned val);
-    unsigned getConstant(const std::string& name);
+    void setConstant(const std::string& name, double val);
+    double getConstant(const std::string& name);
     
     void apply_param(const std::string& name);
     void apply_all_params();
