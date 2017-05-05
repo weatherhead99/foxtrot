@@ -172,7 +172,8 @@ namespace foxtrot {
     std::map<std::string, int> _configlinemap;
      
     std::vector<std::string> _statenames;
-    
+    std::map<std::string,int> _parammap;
+    std::map<std::string,int> _constantmap;
     
     int _config_lines =0;
     int _taplines = 0;

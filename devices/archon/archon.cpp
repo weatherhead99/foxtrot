@@ -610,51 +610,60 @@ unsigned int devices::archon::getConstant(const string& name)
 
 void devices::archon::setConstant(const string& name, unsigned int val)
 {
-  try
-  {
-    readKeyValue(name);
-  }
-  catch(std::runtime_error& err)
-  {
-   //NOTE: key is not in registry 
-    set_constants(get_constants()  +1);
-  }
-  
-  writeKeyValue(name,std::to_string(val));
+    int confnum;
+    try{
+        confnum = _constantmap.at(name);
+    }
+    catch(std::out_of_range& err)
+    {   
+        confnum = get_constants();
+        _constantmap[name] = confnum;
+        set_constants(confnum +1);
+    }
+    
+    std::ostringstream oss;
+    oss << "CONSTANT" << confnum;
+    
+  writeKeyValue(oss.str(),std::to_string(val));
 }
 
 
 unsigned int devices::archon::getParam(const string& name)
 {
-  return std::stoul(readKeyValue(name));
+    int confnum;
+    try{
+        confnum = _constantmap.at(name);
+    }
+    catch(std::out_of_range& err)
+    {
+        throw DeviceError("parameter not known to this archon");
+    }
+    
+    std::ostringstream oss;
+    oss << "PARAMETER" << confnum;
+    
+  return std::stoul(readKeyValue(oss.str()));
 
 }
 
 
 void devices::archon::setParam(const string& name, unsigned int val)
 {
-  bool newparam = false;
-  try
-  {
-    readKeyValue(name);
-  }
-  catch(std::runtime_error& err)
-  {
-   //NOTE: key is not in registry 
-    newparam = true;
-  }
-  
-  writeKeyValue(name,std::to_string(val));
-
-  //NOTE: do this last for exception safety
-  if(newparam)
-  {
-    set_parameters(get_parameters() + 1);
-  }
-  
-  apply_param(name);
-  
-  
+    int confnum;
+    try{
+        confnum = _parammap.at(name);
+    }
+    catch(std::out_of_range& err)
+    {   
+        confnum = get_parameters();
+        _parammap[name] = confnum;
+        set_parameters(confnum +1);
+    }
+    
+    std::ostringstream oss;
+    oss << "PARAMETER" << confnum;
+    
+  writeKeyValue(oss.str(),std::to_string(val));
 }
 
 void devices::archon::write_timing_state(const string& name, const string& state)
