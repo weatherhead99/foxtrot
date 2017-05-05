@@ -303,6 +303,7 @@ void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
   _config_lines = 0;
+  _configlinemap.clear();
 
 }
 
