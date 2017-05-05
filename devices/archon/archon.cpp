@@ -604,7 +604,26 @@ void foxtrot::devices::archon::resetTiming()
 
 unsigned int devices::archon::getConstant(const string& name)
 {
-  return std::stoul(readKeyValue(name));
+   int confnum;
+    try{
+        confnum = _constantmap.at(name);
+    }
+    catch(std::out_of_range& err)
+    {
+        throw DeviceError("parameter not known to this archon");
+    }
+    
+    std::ostringstream oss;
+    oss << "CONSTANT" << confnum;
+    
+    auto paramline = readKeyValue(oss.str());
+    
+    auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
+    auto quotepos = std::find(eqpos, paramline.end(),'\"');
+    
+    //TODO: this will fail at runtime
+    return std::stoul(std::string(eqpos,quotepos));
+
   
 }
 
@@ -621,10 +640,13 @@ void devices::archon::setConstant(const string& name, unsigned int val)
         set_constants(confnum +1);
     }
     
-    std::ostringstream oss;
-    oss << "CONSTANT" << confnum;
+    std::ostringstream osskey;
+    osskey << "CONSTANT" << confnum;
     
-  writeKeyValue(oss.str(),std::to_string(val));
+    std::ostringstream ossval;
+    ossval << '\"' << name << '=' << val << '\"';
+    
+  writeKeyValue(osskey.str(),ossval.str());
 }
 
 
@@ -642,7 +664,13 @@ unsigned int devices::archon::getParam(const string& name)
     std::ostringstream oss;
     oss << "PARAMETER" << confnum;
     
-  return std::stoul(readKeyValue(oss.str()));
+    auto paramline = readKeyValue(oss.str());
+    
+    auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
+    auto quotepos = std::find(eqpos, paramline.end(),'\"');
+    
+    //TODO: this will fail at runtime
+    return std::stoul(std::string(eqpos,quotepos));
 
 }
 
@@ -660,10 +688,13 @@ void devices::archon::setParam(const string& name, unsigned int val)
         set_parameters(confnum +1);
     }
     
-    std::ostringstream oss;
-    oss << "PARAMETER" << confnum;
+    std::ostringstream osskey;
+    osskey << "PARAMETER" << confnum;
     
-  writeKeyValue(oss.str(),std::to_string(val));
+    std::ostringstream ossval;
+    ossval << '\"' << name << '=' << val << '\"';
+    
+  writeKeyValue(osskey.str(),ossval.str());
 }
 
 void devices::archon::write_timing_state(const string& name, const string& state)
