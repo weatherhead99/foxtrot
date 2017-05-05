@@ -654,7 +654,7 @@ unsigned int devices::archon::getParam(const string& name)
 {
     int confnum;
     try{
-        confnum = _constantmap.at(name);
+        confnum = _parammap.at(name);
     }
     catch(std::out_of_range& err)
     {
