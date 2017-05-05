@@ -622,7 +622,7 @@ unsigned int devices::archon::getConstant(const string& name)
     auto quotepos = std::find(eqpos, paramline.end(),'\"');
     
     //TODO: this will fail at runtime
-    return std::stoul(std::string(eqpos,quotepos));
+    return std::stoul(std::string(eqpos+1,quotepos));
 
   
 }
@@ -670,7 +670,7 @@ unsigned int devices::archon::getParam(const string& name)
     auto quotepos = std::find(eqpos, paramline.end(),'\"');
     
     //TODO: this will fail at runtime
-    return std::stoul(std::string(eqpos,quotepos));
+    return std::stoul(std::string(eqpos+1,quotepos));
 
 }
 
