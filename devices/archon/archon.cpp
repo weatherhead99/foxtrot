@@ -716,7 +716,7 @@ void devices::archon::write_timing_state(const string& name, const string& state
      }
      
      std::string configkey(to.begin(),eqpos);
-     configkey = "STATE" + std::to_string(state_idx) + "\\" + configkey; 
+     configkey = "STATE" + std::to_string(state_idx) + "/" + configkey; 
      std::string val(eqpos + 1, to.end());
      
      writeKeyValue(configkey, val);
