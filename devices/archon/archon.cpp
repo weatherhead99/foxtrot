@@ -128,6 +128,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   set_states(0);
   set_parameters(0); 
   set_constants(0);
+  writeKeyValue("TAPLINES","0");
   
   
 }
