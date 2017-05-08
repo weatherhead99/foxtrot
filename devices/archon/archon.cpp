@@ -839,6 +839,32 @@ bool devices::archon::get_32bit(int buf)
 
 }
 
+void devices::archon::set_tap_pixels(short unsigned npixels)
+{
+  writeKeyValue("PIXELCOUNT", std::to_string(npixels));
+
+}
+
+short unsigned devices::archon::get_tap_pixels()
+{
+
+  return std::stoi(readKeyValue("PIXELCOUNT"));
+}
+
+void devices::archon::set_tap_lines(short unsigned lines)
+{
+  writeKeyValue("LINECOUNT",std::to_string(lines));
+
+
+}
+
+short unsigned devices::archon::get_tap_lines()
+{
+  return std::stoi(readKeyValue("LINECOUNT"));
+
+}
+
+
 void devices::archon::setrawchannel(int ch)
 {
   writeKeyValue("RAWSEL",std::to_string(ch));
@@ -1103,6 +1129,14 @@ RTTR_REGISTRATION
  .property_readonly("get_power",&archon::get_power)
  .property_readonly("get_parameters",&archon::get_parameters)
  .method("settap", &archon::settap)
+   (parameter_names("AD","LR","gain","offset"))
+   .method("set_tap_pixels", &archon::set_tap_pixels)
+   (parameter_names("npixels"))
+   .property_readonly("get_tap_pixels",&archon::get_tap_pixels)
+   .method("set_tap_lines",&archon::set_tap_lines)
+   (parameter_names("lines"))
+   .property_readonly("get_tap_linues",&archon::get_tap_lines)
+
  ;
     
     

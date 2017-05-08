@@ -76,7 +76,12 @@ namespace foxtrot {
     int get_height(int buf);
     int get_mode(int buf);
     bool get_32bit(int buf);
-    
+     
+    void set_tap_pixels(short unsigned npixels);
+    short unsigned get_tap_pixels();
+
+    void set_tap_lines(short unsigned lines);
+    short unsigned get_tap_lines();
     
     
     const std::map<int,ArchonModule&> getAllModules() const;
