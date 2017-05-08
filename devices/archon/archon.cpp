@@ -731,6 +731,8 @@ void devices::archon::write_timing_state(const string& name, const string& state
 
 }
 
+
+
 void devices::archon::settapline(int n, const string& tapline)
 {
   if(n > _taplines )
@@ -745,12 +747,19 @@ void devices::archon::settapline(int n, const string& tapline)
   _taplines++;
   
   writeKeyValue("TAPLINES", std::to_string(_taplines +1));
-
-  
-  
   
 }
 
+void foxtrot::devices::archon::settap(unsigned char AD, bool LR, unsigned short gain, unsigned short offset)
+{
+        char LRchar = LR ? 'R' : 'L';
+        std::ostringstream oss;
+        oss << "AD" << AD << LR << ',' << gain << ',' << offset;
+        
+        //WARNING: all sorts of edge cases that could blow up later here
+        settapline(_taplines,oss.str());
+        
+}
 
 
 void devices::archon::apply_all_params()
