@@ -750,7 +750,7 @@ void devices::archon::settapline(int n, const string& tapline)
   
 }
 
-void foxtrot::devices::archon::settap(unsigned char AD, bool LR, unsigned short gain, unsigned short offset)
+void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, unsigned short offset)
 {
         char LRchar = LR ? 'R' : 'L';
         std::ostringstream oss;

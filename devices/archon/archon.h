@@ -133,7 +133,7 @@ namespace foxtrot {
     
     
     void settapline(int n, const std::string& tapline);
-    void settap(unsigned char AD, bool LR, unsigned short gain, unsigned short offset);
+    void settap(unsigned char AD, bool LR, double gain, unsigned short offset);
     
     void settrigoutpower(bool onoff);
     void settrigoutinvert(bool invert);
