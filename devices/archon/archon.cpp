@@ -755,7 +755,7 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, un
 {
         char LRchar = LR ? 'R' : 'L';
         std::ostringstream oss;
-        oss << "AD" << AD << LR << ',' << gain << ',' << offset;
+        oss << "AD" << AD << LRchar << ',' << gain << ',' << offset;
         
         //WARNING: all sorts of edge cases that could blow up later here
         settapline(_taplines,oss.str());
