@@ -736,7 +736,7 @@ void devices::archon::write_timing_state(const string& name, const string& state
 
 void devices::archon::settapline(int n, const string& tapline)
 {
-  if(n >= _taplines )
+  if(n > _taplines )
   {
     throw DeviceError("invalid TAP line number");
   }
