@@ -1101,6 +1101,7 @@ RTTR_REGISTRATION
  .property_readonly("get_constants",&archon::get_constants)
  .property_readonly("get_power",&archon::get_power)
  .property_readonly("get_parameters",&archon::get_parameters)
+ .method("settap", &archon::settap)
  ;
     
     
