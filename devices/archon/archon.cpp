@@ -525,7 +525,9 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
     while(std::getline(ss,to,'\n'))
     {
        auto configkey = "LINE" + std::to_string(i++); 
-       auto line = "\"" + to + "\"";
+//     how about that ?   
+//        auto line = "\"" + to + "\"";
+       auto line = to;
        writeKeyValue(configkey,line);
     };
     
