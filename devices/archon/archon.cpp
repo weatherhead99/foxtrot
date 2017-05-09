@@ -531,8 +531,6 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
     
     set_timing_lines(i);
     
-    cmd("LOADTIMING");
-    
 }
 
 
@@ -1057,6 +1055,10 @@ void devices::archon::setframemode(int mode)
 
 }
 
+void devices::archon::load_timing()
+{
+ cmd("LOADTIMING");   
+}
 
 
 RTTR_REGISTRATION
@@ -1158,7 +1160,9 @@ RTTR_REGISTRATION
    .method("set_tap_lines",&archon::set_tap_lines)
    (parameter_names("lines"))
    .property_readonly("get_tap_linues",&archon::get_tap_lines)
-
+   .method("get_pixels",&archon::get_pixels)
+   (parameter_names("buf"))
+  .method("load_timing", &archon::load_timing)
  ;
     
     
