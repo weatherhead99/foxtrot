@@ -645,7 +645,7 @@ void devices::archon::setConstant(const string& name, double val)
     osskey << "CONSTANT" << confnum;
     
     std::ostringstream ossval;
-    ossval << '\"' << name << '=' << val << '\"';
+    ossval << name << '=' << val ;
     
   writeKeyValue(osskey.str(),ossval.str());
 }
@@ -693,12 +693,12 @@ void devices::archon::setParam(const string& name, unsigned int val)
     osskey << "PARAMETER" << confnum;
     
     std::ostringstream ossval;
-    ossval << '\"' << name << '=' << val << '\"';
+    ossval << name << '=' << val ;
     
   writeKeyValue(osskey.str(),ossval.str());
 }
 
-void devices::archon::write_timing_state(const string& name, const string& state)
+void devices::archon::write_timing_state(string name, const string& state)
 {
   std::stringstream ss(state);
   std::string to;
@@ -726,8 +726,10 @@ void devices::archon::write_timing_state(const string& name, const string& state
   //NOTE: do this now in case of exceptions
   if(newstate)
   {
-    set_states(get_states() + 1);
+    set_states(_statenames.size());
+   _statenames.insert(_statenames.end(),name);
   }
+   
    
 
 }

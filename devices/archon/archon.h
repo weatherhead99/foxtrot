@@ -108,7 +108,7 @@ namespace foxtrot {
     void load_timing_script(const std::string& script);
     void load_timing();
     
-    void write_timing_state(const std::string& name, const std::string& state);
+    void write_timing_state(std::string name, const std::string& state);
     
     
     
