@@ -745,9 +745,12 @@ void devices::archon::settapline(int n, const string& tapline)
   oss << "TAPLINE" << n;
   
   writeKeyValue(oss.str(),tapline);
-  _taplines++;
   
-  writeKeyValue("TAPLINES", std::to_string(_taplines ));
+  if(n == _taplines)
+  {
+    _taplines++;
+    writeKeyValue("TAPLINES", std::to_string(_taplines ));
+  };
   
 }
 
@@ -758,7 +761,18 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, un
         oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
         
         //WARNING: all sorts of edge cases that could blow up later here
-        settapline(_taplines,oss.str());
+        
+        try 
+        {
+            int tline = _ADtaplinemap.at(AD);
+            settapline(tline,oss.str());
+        }
+        catch(std::out_of_range& err)
+        {
+            _ADtaplinemap[AD] = _taplines;
+            settapline(_taplines,oss.str());
+                
+        }
         
 }
 
@@ -797,8 +811,16 @@ int devices::archon::get_height(int buf)
   oss << "BUF" << buf << "HEIGHT";
   return std::stoi(_frame.at(oss.str()));
 
-
 }
+
+int devices::archon::get_pixels(int buf)
+{
+      std::ostringstream oss ;
+  oss << "BUF" << buf << "PIXELS";
+    return std::stoi(_frame.at(oss.str()));
+        
+};
+
 
 int devices::archon::get_width(int buf)
 {
