@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <sys/ioctl.h>
 
 using namespace foxtrot::protocols;
 
@@ -144,6 +145,19 @@ std::string simpleTCP::read_until_endl(char endlchar)
   return ret;
 
 }
+
+unsigned int simpleTCP::bytes_available()
+{
+  int count;
+  auto ret = ioctl(_sockfd,FIONREAD,&count);
+  if(ret <0)
+  {
+    throw ProtocolError(std::string("couldn't check bytes available:") + strerror(ret));
+  }
+
+  return count;
+}
+
 
 unsigned int simpleTCP::getchunk_size()
 {

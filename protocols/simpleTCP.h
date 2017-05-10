@@ -30,6 +30,7 @@ public:
     void setchunk_size(unsigned chunk);
     unsigned getchunk_size();
     
+    unsigned bytes_available();
     
     static bool verify_instance_parameters(const parameterset& instance_parameters);
     static bool verify_class_parameters(const parameterset& class_parameters);

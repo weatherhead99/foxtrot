@@ -13,6 +13,8 @@
 #include "ProtocolUtilities.h"
 #include "CommunicationProtocol.h"
 
+#include <thread>
+#include <chrono>
 #include <locale>
 #include <sstream>
 #include <iomanip>
@@ -238,10 +240,10 @@ std::vector<unsigned char> foxtrot::devices::archon::parse_binary_response(const
     std::vector<unsigned char> out;
     out.reserve(1024);
     
-    if(response[0] != ':')
-    {
-        throw ProtocolError("expected a binary response but didn't get one!");
-    }
+//     if(response[0] != ':')
+//     {
+//         throw ProtocolError("expected a binary response but didn't get one!");
+//     }
     
     out.assign(response.begin() +1, response.end());
     return out;
@@ -933,57 +935,100 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   //need to update state or width/height might actually be wrong
   update_state();
   
-  lockbuffer(buf);
-  
   if(!isbuffercomplete(buf))
   {
     throw DeviceError("buffer not complete for reading!");
   }
+  lockbuffer(buf);
   
   auto pixels = get_width(buf) * get_height(buf);
-  out.reserve(pixels);
   
+  out.reserve(pixels);
   std::ostringstream oss;
   oss << "BUF" << buf << "BASE";
-  auto baseaddr = std::stoul(_frame.at(oss.str()),0,16);
+  //WARNING: baseaddr is NOT HEXADECIMAL IN FRAME DICT.... WTF...
+  //WARNING: but FETCH command requires baseaddr in hex
+  auto baseaddr = std::stoul(_frame.at(oss.str()));
  
-  unsigned num_bytes = get_32bit(buf) ? pixels * 4 : pixels * 2;
+  bool is32 = get_32bit(buf);
+  unsigned num_bytes = is32 ? pixels * 4 : pixels * 2;
   
   auto num_blocks = num_bytes / 1024 ;
   num_blocks = (num_bytes % 1024 == 0) ? num_blocks: num_blocks + 1;
   
-  
+  _lg.Debug("num_blocks: " + std::to_string(num_blocks));
   
   oss.str("");
-  oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << num_blocks <<'\n';
+  oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << std::setw(8) << std::setfill('0') << num_blocks <<'\n';
   
   //construct command manually
   _specproto->write(oss.str());
-  bool is32 = get_32bit(buf);
+  
+  
+  //this should be the response "header"
+  unsigned actlen;
+  
+  
+  for(int i=0 ; i < 100; i++)
+  {
+    auto bytes_avail = _specproto->bytes_available();
+    if(bytes_avail >= 4)
+    {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(500)); 
+    
+    _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
+  }
+  
+  auto ret = _specproto->read(4,&actlen);
+  
+  
+  
+  
+  _lg.Debug("initial ret: "+ ret);
+  
+  if(actlen != 4)
+  {
+    throw DeviceError("didn't read 4 byte header...");
+  };
+  if(ret[0] != '<' )
+  {
+    _lg.Error("got RET: " + ret );
+    _lg.Error("request was: " + oss.str());
+    if(ret[0] == '?')
+    {
+    throw DeviceError("archon threw an error message! Check the logs..."); 
+    }  
+    throw ProtocolError("invalid archon response!");
+  };
   
   for(int i=0; i < num_blocks; i++)
   {
     unsigned actlen;
+      
+    for(int i=0 ; i < 100; i++)
+    {
+    auto bytes_avail = _specproto->bytes_available();
+    if(bytes_avail >= 1024)
+    {
+      break;
+    }
+    std::this_thread::sleep_for(std::chrono::microseconds(500)); 
+    _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
+    }
     auto ret = _specproto->read(1024,&actlen);
-    if(actlen != 1024)
+    unsigned retries = 0;
+    while(actlen != 1024)
     {
       _lg.Warning("cycle: " + std::to_string(i));
-      _lg.Warning("didn't read 1024 bytes...");
+      _lg.Warning("didn't read 1024 bytes...");   
+      _lg.Warning("read: " + std::to_string(actlen));
       
+	throw DeviceError("too many retries");
     }
-    if(ret[0] != '<' )
-    {
-      _lg.Error("got RET: " + ret );
-      _lg.Error("request was: " + oss.str());
-      if(ret[0] == '?')
-      {
-      throw DeviceError("archon threw an error message! Check the logs..."); 
-      }  
-      throw ProtocolError("invalid archon response!");
-    };
-    
-   auto bytes = parse_binary_response(ret.substr(3));
-   
+  
+   auto bytes = parse_binary_response(ret); 
    if(is32)
    {
       unsigned* ptr = reinterpret_cast<unsigned*>(bytes.data());
@@ -999,9 +1044,8 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
     
   };
   
+  _lg.Debug("read all blocks correctly");
   return out;
-  
-  
 }
 
 void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end)
