@@ -73,6 +73,7 @@ def _process_sync_response(repl,streamraw=False):
         rawbytes = bytearray()
         
         for chunk in repl:
+            _check_repl_err(chunk)
             dtp = chunk.dtp
             rawbytes += chunk.data
                         
@@ -94,6 +95,7 @@ def _process_sync_response(repl,streamraw=False):
         
         
     else:
+        _check_repl_err(repl)
         whichattr = repl.WhichOneof("return")
         if whichattr is None:
             return
@@ -266,7 +268,6 @@ class Capability:
         
     def __call__(self,*args,**kwargs):
         repl = self.call_cap_sync(self._cl,*args,**kwargs)
-        _check_repl_err(repl)
         return _process_sync_response(repl)
         
     
