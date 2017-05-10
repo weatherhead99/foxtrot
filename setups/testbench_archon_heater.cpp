@@ -117,6 +117,8 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setHeaterTarget(HeaterXHeaters::A, -100.);
     heater->setHeaterLimit(HeaterXHeaters::A, 25.);
     
+    heater->setHeaterEnable(HeaterXHeaters::A,true);
+    
     heater->setSource(1,gpio_source::clocked);
     heater->setLabel(1,"PCLAMP1");
     heater->setSource(2,gpio_source::clocked);
