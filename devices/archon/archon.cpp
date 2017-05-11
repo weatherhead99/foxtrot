@@ -240,12 +240,28 @@ std::vector<unsigned char> foxtrot::devices::archon::parse_binary_response(const
     std::vector<unsigned char> out;
     out.reserve(1024);
     
-//     if(response[0] != ':')
-//     {
-//         throw ProtocolError("expected a binary response but didn't get one!");
-//     }
+    if(response[0] != '<' )
+    {
+      
+      _lg.Error("invalid archon binary response!");
     
-    out.assign(response.begin() +1, response.end());
+   
+    if(response[0] == '?')
+    {
+      
+     throw DeviceError("archon threw an error message! Check the logs..."); 
+    }
+    
+    throw ProtocolError("invalid archon response!");
+    };
+  
+    
+    if(response[3] != ':')
+    {
+        throw ProtocolError("expected a binary response but didn't get one!");
+    }
+    
+    out.assign(response.begin() +4, response.end());
     return out;
     
 }
@@ -969,63 +985,27 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   unsigned actlen;
   
   
-  for(int i=0 ; i < 100; i++)
-  {
-    auto bytes_avail = _specproto->bytes_available();
-    if(bytes_avail >= 4)
-    {
-      break;
-    }
-    std::this_thread::sleep_for(std::chrono::microseconds(500)); 
-    
-    _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
-  }
-  
-  auto ret = _specproto->read(4,&actlen);
-  
-  
-  
-  
-  _lg.Debug("initial ret: "+ ret);
-  
-  if(actlen != 4)
-  {
-    throw DeviceError("didn't read 4 byte header...");
-  };
-  if(ret[0] != '<' )
-  {
-    _lg.Error("got RET: " + ret );
-    _lg.Error("request was: " + oss.str());
-    if(ret[0] == '?')
-    {
-    throw DeviceError("archon threw an error message! Check the logs..."); 
-    }  
-    throw ProtocolError("invalid archon response!");
-  };
-  
   for(int i=0; i < num_blocks; i++)
   {
     unsigned actlen;
       
-    for(int i=0 ; i < 100; i++)
+    for(int j=0 ; i < 100; i++)
     {
-    auto bytes_avail = _specproto->bytes_available();
-    if(bytes_avail >= 1024)
-    {
-      break;
+      auto bytes_avail = _specproto->bytes_available();
+      if(bytes_avail >= 1028)
+      {
+	break;
+      }
+      std::this_thread::sleep_for(std::chrono::microseconds(500)); 
+      _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
     }
-    std::this_thread::sleep_for(std::chrono::microseconds(500)); 
-    _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
-    }
-    auto ret = _specproto->read(1024,&actlen);
+    auto ret = _specproto->read(1028,&actlen);
     unsigned retries = 0;
-    while(actlen != 1024)
+    if(actlen != 1028)
     {
-      _lg.Warning("cycle: " + std::to_string(i));
-      _lg.Warning("didn't read 1024 bytes...");   
-      _lg.Warning("read: " + std::to_string(actlen));
-      
-	throw DeviceError("too many retries");
+	_lg.Warning("didn't read 1028 bytes...");   
+	_lg.Warning("read: " + std::to_string(actlen));
+	  throw DeviceError("too many retries");
     }
   
    auto bytes = parse_binary_response(ret); 
