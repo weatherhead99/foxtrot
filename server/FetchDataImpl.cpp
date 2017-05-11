@@ -13,9 +13,7 @@ foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 }
 
 
-
-
-bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
+bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
     _lg.Debug("processing fetch data request" );
     
@@ -31,7 +29,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     {
         set_repl_err(repl,err,error_types::out_of_range);
         respond.Write(repl,tag);
-// 	respond.Finish(grpc::Status::OK,tag);
         return true;
         
     }
@@ -46,8 +43,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       errstat->set_msg("no matching method found");
       errstat->set_tp(error_types::out_of_range);
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
-      
       return true;
     }
     
@@ -57,7 +52,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       auto msg = "tried to call a method that doesn't support streaming";
       set_repl_err_msg(repl,msg,error_types::out_of_range);
       respond.Write(repl,tag);
-      respond.Finish(grpc::Status::OK,tag);
       return true;
     }
     
@@ -66,7 +60,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
 	auto msg = "tried to call a method that doesn't support streaming";
       set_repl_err_msg(repl,msg,error_types::out_of_range);
       respond.Write(repl,tag);
-      respond.Finish(grpc::Status::OK,tag);
       return true;
       };
       
@@ -97,7 +90,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       _lg.Error("caught device error: " + std::string(err.what()));
       set_repl_err(repl,err,error_types::DeviceError);
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
       return true;
     }
     catch(class foxtrot::ProtocolError& err)
@@ -105,7 +97,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       _lg.Error("caught protocol error: " + std::string(err.what()));
       set_repl_err(repl,err,error_types::ProtocolError);
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
       return true;
     }
     catch(std::exception& err)
@@ -113,7 +104,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       _lg.Error("caught general error: " + std::string(err.what()));
       set_repl_err(repl,err,error_types::ProtocolError);
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
       return true;
     }
     
@@ -122,81 +112,81 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       _lg.Error("return type is not an array type");
       set_repl_err_msg(repl,"return type is not an array type",error_types::Error); 
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
       return true;
     }
     
-        
-    //get the cq, we'll need it later
-    _lg.Debug("getting completion queue");
-    auto cq = reinterpret_cast<FetchDataImpl*>(tag)->GetCQ();
-    
-    unsigned byte_size;
     foxtrot::byte_data_types dt;
-    auto data = foxtrot::byte_view_data(retval,byte_size,dt);
+    _data = foxtrot::byte_view_data(retval,_byte_size,dt);
     
-    if(data == nullptr )
+    if(_data == nullptr )
     {
       _lg.Error("can't convert return type to vector ");
       set_repl_err_msg(repl,"can't convert return type to vector",error_types::Error);
       respond.Write(repl,tag);
-//       respond.Finish(grpc::Status::OK,tag);
       return true;
     }
-
+    
     repl.set_dtp(dt);
-    auto csize = req.chunksize();
+    _csize = req.chunksize();
+
+    _num_full_chunks = (_byte_size / _csize);
+    _extra_chunk = _byte_size % _csize ? true : false;
     
     
+    _lg.Trace("num full chunks: " + std::to_string(_num_full_chunks));
+    _lg.Trace("extra chunk: " + std::to_string(_extra_chunk));
     
+    _currval = _data.get();
     
-    
-    unsigned num_chunks = byte_size / csize;
-    bool extra_chunk = byte_size % csize ? true : false;
-    
-    _lg.Trace("num chunks: " + std::to_string(num_chunks));
-    
-    auto currval = data.get();
-    
-    
-    bool ok;
-    for(int i =0 ; i < num_chunks; i++)
+    return false;
+};
+
+
+bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
+{
+    if(_thischunk == 0)
     {
-     auto outdat = repl.mutable_data();
-     outdat->assign(currval, currval + csize);
-     currval += csize;
-     _lg.Trace("writing chunk to wire: " + std::to_string(i));
-//      respond.Write(repl,reinterpret_cast<void*>(atag++));
-     respond.Write(repl,tag);
-     cq->Next((void**) &tag,&ok);
-     if(!ok)
-     {
-      _lg.Error("completion queue next failed!"); 
-     }
+        if(initial_request(req,repl,respond,tag))
+        {
+            //if that returned true, there's an error which has already been dispatched
+            _alldone = true;
+        };
     }
     
-    if(extra_chunk)
+    if(_alldone)
+    {
+        respond.Finish(grpc::Status::OK,tag);
+        //NOTE: reset thischunk, logic instances are singular
+        _thischunk = 0;
+        _alldone = false;
+        return true;
+    }
+    
+    
+    if(_thischunk < _num_full_chunks)
+    {
+        auto outdat = repl.mutable_data();
+        outdat->assign(_currval, _currval+_csize);
+        _currval += _csize;
+        _lg.Trace("writing chunk to wire: " + std::to_string(_thischunk));
+        respond.Write(repl,tag);
+        _thischunk++;
+        return false;
+        
+    }
+        
+    if(_extra_chunk)
     {
       _lg.Debug("extra chunk writing...");
-      repl = init_chunk<foxtrot::datachunk>(req);
-      repl.set_dtp(dt);
       auto outdat = repl.mutable_data();
       _lg.Trace("WARNING, possible seGFAULT!");
-      outdat->assign(currval,data.get() + byte_size);
-//       respond.Write(repl,reinterpret_cast<void*>(atag++));
-      respond.Write(repl,tag);
-      cq->Next( (void**) &tag,&ok);
-      if(!ok)
-      {
-        _lg.Error("completion queue next failed!");
-      }
+      outdat->assign(_currval,_data.get() + _byte_size);
+      respond.Write(repl,tag); 
+      _lg.Trace("all chunks written...");
     }
     
-    _lg.Trace("all chunks written...");
+      _alldone = true;
+      return false;
     
-    respond.Finish(grpc::Status::OK,tag);
-    
-    _lg.Trace("marked stream finished");
-    return true;
-    
+        
 }

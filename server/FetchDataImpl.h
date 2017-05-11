@@ -23,11 +23,22 @@ namespace foxtrot
 	
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
         
+        
+        
 	
     private:
+        bool initial_request(reqtp& req, repltp& repl, respondertp& respond, void* tag);
         DeviceHarness& _harness;
 	foxtrot::Logging _lg;
-        
+    
+    unsigned _thischunk = 0;
+      unsigned _num_full_chunks;  
+      bool _extra_chunk;
+      bool _alldone = false;
+      unsigned _csize;
+      unsigned _byte_size;
+      std::unique_ptr<unsigned char[]> _data;
+      unsigned char* _currval;
     };
     
     

@@ -42,8 +42,6 @@ void ServerImpl::Run()
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
     
-    
-    
     std::cout << "server listening on " << addrstr << std::endl;
     
     HandleRpcs();
@@ -59,23 +57,26 @@ void foxtrot::ServerImpl::HandleRpcs()
     new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
     new FetchDataImpl(&_service,_cq.get(),fetch_logic);
     
-    
-    
     void* tag;
     bool ok;
     
     while(true)
     {
       //TODO: check this for return, shutdown etc
-     _cq->Next(&tag,&ok);
-     if(ok)
+     if(_cq->Next(&tag,&ok))
      {
-      static_cast<HandlerTag*>(tag)->Proceed();
+         if(!ok)
+         {
+             std::cout << "WARNING: NOT OK!" << std::endl;
+         }
+        static_cast<HandlerTag*>(tag)->Proceed();
      }
      else
      {
-       throw std::logic_error("couldn't get completion queue next!");
+         std::cout << ("queue shut down..") << std::endl;
+         return;
      }
+     
         
     }
     
