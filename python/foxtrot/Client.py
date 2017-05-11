@@ -85,11 +85,16 @@ def _process_sync_response(repl,streamraw=False):
             return list(rawbytes)
         elif dtp is USHORT:
             structstr = '<%dH' % (len(rawbytes) // 2)
+        
+        elif dtp is UINT:
+            structstr = '<%dI' % (len(rawbytes) // 4)
             
         elif dtp is BDOUBLE:
             print("BDOUBLE")
             structstr = '<%dd' % (len(rawbytes) // 8)
         
+        else:
+            raise NotImplementedError("data type not supported yet")
         
         return list(struct.unpack(structstr,rawbytes))
         
