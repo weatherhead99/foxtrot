@@ -6,6 +6,7 @@
 #include "DeviceError.h"
 #include "ProtocolError.h"
 
+
 foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 : _harness(harness), _lg("FetchDataLogic")
 {
@@ -146,6 +147,10 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     repl.set_dtp(dt);
     auto csize = req.chunksize();
     
+    
+    
+    
+    
     unsigned num_chunks = byte_size / csize;
     bool extra_chunk = byte_size % csize ? true : false;
     
@@ -153,11 +158,6 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     
     auto currval = data.get();
     
-    
-    
-    long unsigned atag = reinterpret_cast<long unsigned>(tag) +1;
-    
-    _lg.Trace("atag: " + std::to_string(atag));
     
     bool ok;
     for(int i =0 ; i < num_chunks; i++)
@@ -168,7 +168,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
      _lg.Trace("writing chunk to wire: " + std::to_string(i));
 //      respond.Write(repl,reinterpret_cast<void*>(atag++));
      respond.Write(repl,tag);
-     cq->Next((void**) &atag,&ok);
+     cq->Next((void**) &tag,&ok);
      if(!ok)
      {
       _lg.Error("completion queue next failed!"); 
@@ -185,7 +185,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       outdat->assign(currval,data.get() + byte_size);
 //       respond.Write(repl,reinterpret_cast<void*>(atag++));
       respond.Write(repl,tag);
-      cq->Next( (void**) &atag,&ok);
+      cq->Next( (void**) &tag,&ok);
       if(!ok)
       {
         _lg.Error("completion queue next failed!");
@@ -194,7 +194,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     
     _lg.Trace("all chunks written...");
     
-    respond.Finish(grpc::Status::OK,reinterpret_cast<void*>(atag++));
+    respond.Finish(grpc::Status::OK,tag);
     
     _lg.Trace("marked stream finished");
     return true;

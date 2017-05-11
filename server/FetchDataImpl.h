@@ -14,9 +14,10 @@ namespace foxtrot
         typedef chunk_request reqtp;
         typedef datachunk repltp; 
 	typedef grpc::ServerAsyncWriter<datachunk> respondertp;
-	
+	  
         constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
-        
+        const static bool newcall = true;
+	
         FetchDataLogic(DeviceHarness& harness);
         
 	

@@ -12,7 +12,7 @@ namespace foxtrot
      typedef capability_request reqtp;
      typedef capability_response repltp;
      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp; 
-     
+     const static bool newcall = true;
      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestInvokeCapability;
      
      InvokeCapabilityLogic(DeviceHarness& harness);

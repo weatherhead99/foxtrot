@@ -68,7 +68,14 @@ void foxtrot::ServerImpl::HandleRpcs()
     {
       //TODO: check this for return, shutdown etc
      _cq->Next(&tag,&ok);
-     static_cast<HandlerTag*>(tag)->Proceed();
+     if(ok)
+     {
+      static_cast<HandlerTag*>(tag)->Proceed();
+     }
+     else
+     {
+       throw std::logic_error("couldn't get completion queue next!");
+     }
         
     }
     
