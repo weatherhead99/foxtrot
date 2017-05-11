@@ -969,8 +969,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   bool is32 = get_32bit(buf);
   unsigned num_bytes = is32 ? pixels * 4 : pixels * 2;
   
-  auto num_blocks = num_bytes / 1024 ;
-  num_blocks = (num_bytes % 1024 == 0) ? num_blocks: num_blocks + 1;
+  auto num_blocks = num_bytes / 1024  + (num_bytes % 1024 !=0) ;
   
   _lg.Debug("num_blocks: " + std::to_string(num_blocks));
   
@@ -989,7 +988,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   {
     unsigned actlen;
       
-    for(int j=0 ; i < 100; i++)
+    for(int j=0 ; i < 100; j++)
     {
       auto bytes_avail = _specproto->bytes_available();
       if(bytes_avail >= 1028)
@@ -1000,22 +999,24 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
       _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
     }
     auto ret = _specproto->read(1028,&actlen);
-    unsigned retries = 0;
+    
     if(actlen != 1028)
     {
 	_lg.Warning("didn't read 1028 bytes...");   
 	_lg.Warning("read: " + std::to_string(actlen));
-	  throw DeviceError("too many retries");
     }
   
    auto bytes = parse_binary_response(ret); 
+   //WARNING: insert adds values BEFORE stuff??
    if(is32)
    {
+//      _lg.Trace("reinterpreting to int");
       unsigned* ptr = reinterpret_cast<unsigned*>(bytes.data());
       out.insert(out.end(),ptr, ptr + 1024 / 4);
    }
    else
    {
+//      _lg.Trace("reinterpreting to unsigned short");
      //WARNING: does this do the stride properly?
      unsigned short* ptr = reinterpret_cast<unsigned short*>(bytes.data());
      out.insert(out.end(),ptr, ptr + 1024 / 2);
@@ -1025,6 +1026,8 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   };
   
   _lg.Debug("read all blocks correctly");
+  _lg.Debug("bytes still available: " + std::to_string(_specproto->bytes_available()));
+  _lg.Debug("size of output: " + std::to_string(out.size()));
   return out;
 }
 
