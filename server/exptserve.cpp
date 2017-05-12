@@ -23,11 +23,13 @@ int main(int argc, char** argv)
     backward::SignalHandling sh;
     std::string setupfile;
     std::string servname;
+    int debuglevel;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
     ("servername,n",po::value<std::string>(&servname),"server name")
-    ("dump", po::value<std::string>(), "dump server JSON description");
+    ("dump", po::value<std::string>(), "dump server JSON description")
+    ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1);
@@ -36,6 +38,13 @@ int main(int argc, char** argv)
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
     
     po::notify(vm);
+    
+    if(debuglevel < 0 || debuglevel > 5)
+    {
+      cout << "invalid debug level specified!" << endl;
+      return 1;
+    }
+    foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
     foxtrot::setDefaultSink();
     
     if(!vm.count("setupfile"))
