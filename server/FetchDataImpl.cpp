@@ -149,18 +149,13 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
         if(initial_request(req,repl,respond,tag))
         {
             //if that returned true, there's an error which has already been dispatched
-            _alldone = true;
+	  //TODO: consistent respond finish logic
+            return true;
         };
     }
     
-    if(_alldone)
-    {
-        respond.Finish(grpc::Status::OK,tag);
-        //NOTE: reset thischunk, logic instances are singular
-        _thischunk = 0;
-        _alldone = false;
-        return true;
-    }
+    _lg.Trace("thischunk: " + std::to_string(_thischunk));
+    
     
     
     if(_thischunk < _num_full_chunks)
@@ -183,10 +178,15 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       outdat->assign(_currval,_data.get() + _byte_size);
       respond.Write(repl,tag); 
       _lg.Trace("all chunks written...");
+      return false;
     }
     
-      _alldone = true;
-      return false;
+    
+    _lg.Trace("finishing responder...");
+    respond.Finish(grpc::Status::OK,tag);
+    _thischunk = 0;
+    return true;
+    
     
         
 }

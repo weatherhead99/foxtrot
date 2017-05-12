@@ -50,7 +50,12 @@ namespace foxtrot
                 {
                     _lg.Debug("request successful, marking finished");
                     _status = status::FINISH;
-                };
+                }
+                else
+		{
+		  
+		  _lg.Debug("request not finished yet");
+		}
             
             }
             else
