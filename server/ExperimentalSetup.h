@@ -7,6 +7,7 @@ namespace foxtrot
 {
     class DeviceHarness;
     class TelemetryServer;
+    class Client;
     
     class ft_plugin
     {
@@ -47,7 +48,7 @@ namespace foxtrot
     class TelemetrySetup : public ft_plugin
     {
     public:
-        TelemetrySetup(const std::string& file,  TelemetryServer& telemserv);
+        TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);
         
     private:
         Logging _lg;

@@ -1,4 +1,4 @@
-set(setups testbench_archon_heater.cpp dummy_setup.cpp)
+set(setups testbench_archon_heater.cpp dummy_setup.cpp testbench_telemetry.cpp)
 
 
 foreach(setup ${setups})
@@ -9,7 +9,6 @@ set_target_properties(${setup_we} PROPERTIES PREFIX "")
 target_include_directories(${setup_we} PRIVATE
 $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
 
-target_link_libraries(${setup_we} archon dummy TPG362 newport2936R cornerstone260 Q250 stellarnet)
 
 #needed so we have already generated the protobuf files
 add_dependencies(${setup_we} foxtrotserv)
@@ -17,6 +16,10 @@ add_dependencies(${setup_we} foxtrotserv)
 install(TARGETS ${setup_we} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/setups/)
 
 endforeach()
+
+target_link_libraries(testbench_archon_heater archon TPG362 newport2936R cornerstone260 Q250 stellarnet)
+target_link_libraries(dummy_setup dummy)
+target_link_libraries(testbench_telemetry foxtrotclient foxtrot_telemetry)
 
 set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 # set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
@@ -28,5 +31,6 @@ target_include_directories(setuptest PRIVATE
 $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
 
 target_link_libraries(setuptest foxtrot foxtrotserv)
+
 
 

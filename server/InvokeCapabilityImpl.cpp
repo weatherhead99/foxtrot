@@ -35,6 +35,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
 //     cout << "debug string" << req.DebugString() << endl;
     
+    //TODO: MUTEX?
     try{
         dev = _harness.GetDevice(devid);    
     }

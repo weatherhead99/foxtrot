@@ -33,9 +33,9 @@ foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxt
 };
 
 
-foxtrot::TelemetrySetup::TelemetrySetup(const std::string& file, foxtrot::TelemetryServer& telemserv)
+foxtrot::TelemetrySetup::TelemetrySetup(const std::string& file, foxtrot::TelemetryServer& telemserv, foxtrot::Client& cl)
 : ft_plugin(file), _telemserv(telemserv), _lg("TelemetrySertup")
 {
-    auto fun = get_function<int(*)(foxtrot::TelemetryServer&)>("setup_telem");
-    fun(_telemserv);
+    auto fun = get_function<int(*)(foxtrot::TelemetryServer&, foxtrot::Client&)>("setup_telem");
+    fun(_telemserv,cl);
 }

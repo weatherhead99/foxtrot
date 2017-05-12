@@ -20,7 +20,6 @@ namespace foxtrot
 {
     
     typedef boost::variant<double,int,bool,std::string> ft_variant;
-    
     typedef boost::variant<std::vector<unsigned char> , std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double> > ft_vector_variant;
     
     
@@ -39,6 +38,7 @@ namespace foxtrot
         capability_argument& _arg;
         
     };
+    
     
     ft_variant ft_variant_from_response(const capability_response& repl);
     ft_vector_variant ft_variant_from_data(const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data);
@@ -120,6 +120,9 @@ namespace foxtrot
     };
     
     int find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp);
+    int get_number_of_args(foxtrot::servdescribe& sd, int devid, const std::string& capability_name);
+    int get_arg_position(foxtrot::servdescribe& sd, int devid, const std::string& capability_name, const std::string arg_name);
+    
     template<typename iteratortp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
     {
         

@@ -220,3 +220,14 @@ void foxtrot::TelemetryServer::sort_funs_vector()
     
 }
 
+void foxtrot::TelemetryServer::set_tick_ms(int tick_ms)
+{
+  _tick_ms = tick_ms;
+
+}
+
+void foxtrot::TelemetryServer::set_topic(const std::string& topic)
+{
+  _topic = topic;
+}
+

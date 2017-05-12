@@ -184,9 +184,6 @@ foxtrot::ft_vector_variant foxtrot::ft_variant_from_data(const foxtrot::byte_dat
 
 
 
-
-
-
 int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp)
 {
     auto device = std::find_if(sd.devs_attached().begin(), sd.devs_attached().end(),
@@ -196,6 +193,10 @@ int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& 
                                    {
                                        return true;
                                    }
+                                   else  if(val.second.devcomment() == devtp)
+				   {
+				     return true;
+				   }
                                    return false;
                             }
                        );
@@ -210,6 +211,34 @@ int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& 
 
 }
 
+int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, const std::string& capability_name)
+{
+  auto caps = sd.devs_attached().at(devid).caps();
+  
+  auto cap = caps.Get(0);
+  
+  
+  auto capability_index = std::find_if(caps.begin(), caps.end(),
+				       [&capability_name] (decltype(*caps.begin())& val)
+				       {
+					 if(val.capname() == capability_name)
+					 {
+					   return true;
+					 }
+					 return false;
+					 
+					 
+				       }
+			       );
+  
+  
+  if(capability_index == caps.end())
+  {
+    return -1;
+  }
+  
+  return capability_index->argnames_size();
+}
 
 
 

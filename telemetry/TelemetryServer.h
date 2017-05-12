@@ -20,11 +20,13 @@ namespace foxtrot
         ~TelemetryServer();
         
         void BindSocket(const std::string& bindaddr);
-        
         void AddTelemetryItem(telemfun fun, unsigned ticks, const std::string& name, const std::string& subtopic ="");
         
         std::future<std::exception_ptr> runserver();
         
+	
+	void set_tick_ms(int tick_ms);
+	void set_topic(const std::string& topic);
         
     private:
         foxtrot::Client& _client;
