@@ -155,7 +155,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
     }
     
     _lg.Trace("thischunk: " + std::to_string(_thischunk));
-    
+    _lg.Trace("num_full_chunks: " + std::to_string(_num_full_chunks));
     
     
     if(_thischunk < _num_full_chunks)
@@ -178,9 +178,9 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       outdat->assign(_currval,_data.get() + _byte_size);
       respond.Write(repl,tag); 
       _lg.Trace("all chunks written...");
+      _extra_chunk = false;
       return false;
     }
-    
     
     _lg.Trace("finishing responder...");
     respond.Finish(grpc::Status::OK,tag);
