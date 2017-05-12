@@ -1028,6 +1028,11 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   _lg.Debug("read all blocks correctly");
   _lg.Debug("bytes still available: " + std::to_string(_specproto->bytes_available()));
   _lg.Debug("size of output: " + std::to_string(out.size()));
+  
+  //drop extra bytes off the end
+  out.resize(pixels);
+  
+  
   return out;
 }
 
