@@ -68,7 +68,10 @@ void devices::ArchonGenericBias::setV(int channel, double V)
   std::ostringstream oss;
   oss << _biasnmemonic << "_V" << channel;
 
-  _mod.writeConfigKey(oss.str(),std::to_string(V));
+  std::ostringstream valss;
+  valss << std::setprecision(3) << V;
+  
+  _mod.writeConfigKey(oss.str(),valss.str());
 }
 
 double devices::ArchonGenericBias::getV(int channel)
