@@ -185,7 +185,7 @@ double devices::ArchonLVX::measureV(bool HC, int channel)
   }
   else
   {
-    return _lcbias.measureI(channel);
+    return _lcbias.measureV(channel);
   }
 
 }
