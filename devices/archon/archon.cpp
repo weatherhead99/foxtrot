@@ -321,9 +321,18 @@ const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::g
 void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
+  _framedata.clear();
   _config_lines = 0;
   _configlinemap.clear();
-
+  _statenames.clear();
+  _parammap.clear();
+  _constantmap.clear();
+  
+  _ADtaplinemap.clear();
+  _taplines = 0;
+  _states=  0;
+  
+  
 }
 
 
@@ -884,7 +893,7 @@ bool devices::archon::get_32bit(int buf)
 void devices::archon::set_tap_pixels(short unsigned npixels)
 {
   writeKeyValue("PIXELCOUNT", std::to_string(npixels));
-
+  cmd("APPLYCDS");
 }
 
 short unsigned devices::archon::get_tap_pixels()
@@ -896,7 +905,7 @@ short unsigned devices::archon::get_tap_pixels()
 void devices::archon::set_tap_lines(short unsigned lines)
 {
   writeKeyValue("LINECOUNT",std::to_string(lines));
-
+  cmd("APPLYCDS");
 
 }
 
@@ -910,34 +919,35 @@ short unsigned devices::archon::get_tap_lines()
 void devices::archon::setrawchannel(int ch)
 {
   writeKeyValue("RAWSEL",std::to_string(ch));
+  cmd("APPLYCDS");
 
 }
 void devices::archon::setrawenable(bool onoff)
 {
   writeKeyValue("RAWENABLE",std::to_string(onoff));
-
+  cmd("APPLYCDS");
 }
 
 void devices::archon::setrawendline(int line)
 {
   writeKeyValue("RAWENDLINE", std::to_string(line));
-
+  cmd("APPLYCDS");
 }
 void devices::archon::setrawsamples(int n)
 {
   writeKeyValue("RAWSAMPLES", std::to_string(n));
-
+  cmd("APPLYCDS");
 }
 
 void devices::archon::setrawstartline(int line)
 {
   writeKeyValue("RAWSTARTLINE",std::to_string(line));
-
+  cmd("APPLYCDS");
 }
 void devices::archon::setrawstartpixel(int pix)
 {
   writeKeyValue("RAWSTARTPIXEL",std::to_string(pix));
-
+  cmd("APPLYCDS");
 }
 
 
@@ -1075,20 +1085,20 @@ int foxtrot::devices::archon::getsignal_end()
 void devices::archon::settrigoutinvert(bool invert)
 {
   writeKeyValue("TRIGOUTINVERT",std::to_string((int) invert));
-
+  cmd("APPLYSYSTEM");
 }
 
 void devices::archon::settrigoutpower(bool onoff)
 {
   writeKeyValue("TRIGOUTPOWER", std::to_string((int) onoff));
-
+  cmd("APPLYSYSTEM");
 }
 
 
 void devices::archon::setframemode(int mode)
 {
   writeKeyValue("FRAMEMODE", std::to_string(mode));
-
+  cmd("APPLYCDS");
 }
 
 void devices::archon::load_timing()
