@@ -288,11 +288,11 @@ const ssmap & foxtrot::devices::archon::getFrame() const
 void devices::archon::update_state()
 {
   
-  std::cout << "system.." << std::endl;
+  _lg.Trace("system..");
   _system = parse_parameter_response(cmd("SYSTEM"));
-  std::cout << "status.." << std::endl;
+  _lg.Trace("status..");
   _status = parse_parameter_response(cmd("STATUS"));
-  std::cout << "frame.." << std::endl;
+  _lg.Trace("frame..");
   _frame = parse_parameter_response(cmd("FRAME"));
   
   for(auto& mod: _modules)
@@ -1167,6 +1167,8 @@ RTTR_REGISTRATION
  (parameter_names("buf"))
  .method("fetch_buffer",&archon::fetch_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
+ .method("isbuffercomplete",&archon::isbuffercomplete)
+ (parameter_names("buf"))
  .property_readonly("getreset_start",&archon::getreset_start)
  .property_readonly("getreset_end",&archon::getreset_end)
  .property_readonly("getsignal_start",&archon::getsignal_start)
