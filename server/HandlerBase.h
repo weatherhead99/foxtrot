@@ -60,6 +60,8 @@ namespace foxtrot
             }
             else
             {
+	      _lg.Debug("finishing request");
+	      
                 _lg.Debug("request finished, deleting HandlerBase");
                 GPR_CODEGEN_ASSERT(_status == status::FINISH);
                 delete this;
@@ -72,6 +74,25 @@ namespace foxtrot
         return _cq;
         }
         
+        
+        void FinishRequest(typename T::respondertp& respond, typename T::repltp& repl)
+	{
+	  constexpr bool twoargs = std::is_base_of<grpc::ServerAsyncWriter<typename T::repltp>, typename T::respondertp>::value;
+	
+	  //NOTE: should be constexpr as well?
+	  if(twoargs)
+	  {
+	    respond.Finish(grpc::Status::OK,this);
+	  }
+	  else
+	  {
+	    respond.Finish(repl,grpc::Status::OK,this);
+	  
+	  }
+	  
+	};
+        
+	
     private:
         bool _newrequest = true;
         grpc::ServerCompletionQueue* _cq;

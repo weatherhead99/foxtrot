@@ -1,11 +1,12 @@
 [requires]
 gRPC/1.1.0-dev@a_teammate/stable
-Protobuf/3.1.0@a_teammate/stable
+nanomsg/1.0.0@Wi3ard/stable
+rttr/0.9.5@weatherhead99/testing
+Boost/1.62.0@lasote/stable
 
 [generators]
 cmake
 
 [options]
-Protobuf:shared=True
+Boost:shared=True
 gRPC:shared=True
-gRPC:non_cpp_plugins=True

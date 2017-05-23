@@ -1,4 +1,4 @@
-set(setups testbench_archon_heater.cpp dummy_setup.cpp testbench_telemetry.cpp)
+set(setups testbench_archon_heater.cpp dummy_setup.cpp)
 
 
 foreach(setup ${setups})
@@ -19,7 +19,6 @@ endforeach()
 
 target_link_libraries(testbench_archon_heater archon TPG362 newport2936R cornerstone260 Q250 stellarnet)
 target_link_libraries(dummy_setup dummy)
-target_link_libraries(testbench_telemetry foxtrotclient foxtrot_telemetry)
 
 set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 # set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)

@@ -6,11 +6,12 @@ Created on Wed Apr 19 12:05:26 2017
 @author: weatherill
 """
 
-from foxtrot.Client import Client
+from foxtrot.Client import Client, DummyClient
 import foxtrot.foxtrot_pb2 
 
 
-cl = Client("localhost:50051")
+#cl = Client("localhost:50051")
+#cl = DummyClient("/home/weatherill/Software/OPMD_acq/servdesc.ftsd")
 
 dev = cl._devices[0]
 

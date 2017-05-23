@@ -18,6 +18,15 @@ option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
 option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
 
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  message(WARNING "conanbuildinfo found, building using conan packages")
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+else()
+  message(STATUS "conanbuildinfo not found, proceeding with standard build")
+endif()
+
+
 set(boost_cmps "log;system;date_time;program_options")
 
 if(BUILD_TESTS)

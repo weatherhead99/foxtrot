@@ -39,7 +39,7 @@ if(BUILD_SERVER)
   
 endif()
 
-
+#ONLY required for detector_wl_sweep at the moment!
 find_library(CCfits CCfits)
 find_library(cfitsio cfitsio)
 find_path(CFITSIO_INCLUDE_DIR fitsio.h PATH_SUFFIXES cfitsio)

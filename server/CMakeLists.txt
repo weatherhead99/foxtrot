@@ -20,7 +20,7 @@ message("generated protobuf hdrs: ${PROTO_HDRS}")
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(foxtrotserv SHARED ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapabilityImpl.cpp  DeviceHarness.cpp 
+add_library(foxtrotserv ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapabilityImpl.cpp  DeviceHarness.cpp 
 FetchDataImpl.cpp ExperimentalSetup.cpp ServerUtil.cpp ChunkStreamImpl.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
@@ -33,7 +33,7 @@ ${ZLIB_LIBRARIES} ${dl})
 
 target_include_directories(foxtrotserv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-install(TARGETS foxtrotserv LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+install(TARGETS foxtrotserv LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 add_executable(exptserve exptserve.cpp exptserve_funcs.cpp)
 
