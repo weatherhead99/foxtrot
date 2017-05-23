@@ -9,3 +9,7 @@ add_dependencies(foxtrotclient foxtrotserv)
 
 add_executable(fetchdatatest fetchdatatest.cpp)
 target_link_libraries(fetchdatatest foxtrotclient)
+
+
+install(TARGETS foxtrotclient LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot 
+	  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot)

@@ -45,3 +45,6 @@ target_include_directories(testClient PRIVATE ${CMAKE_SOURCE_DIR}/client/)
 add_executable(harnesstest harnesstest.cpp)
 target_include_directories(harnesstest PRIVATE ${CMAKE_SOURCE_DIR}/devices/dummy/)
 target_link_libraries(harnesstest ${OPENSSL_LIBRARIES} foxtrot dummy foxtrotserv)
+
+install(FILES ${CMAKE_SOURCE_DIR}/server/foxtrot.proto DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/)
+install(TARGETS exptserve RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

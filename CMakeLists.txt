@@ -45,6 +45,7 @@ include_directories(${rttr_include})
 
 include_directories(util/PRT/)
 
+include(GNUInstallDirs)
 
 add_subdirectory(src)
 include_directories(devices protocols)
