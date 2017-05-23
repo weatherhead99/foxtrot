@@ -174,6 +174,38 @@ double foxtrot::devices::BME280::GetTemperature_C()
 }
 
 
+//adapted from https://github.com/BoschSensortec/BME280_driver
+double foxtrot::devices::BME280::compensate_temperature(int raw_temp, int& t_fine)
+{
+  unsigned x1 =  ((raw_temp >> 3) - (_caldata.T1 << 1)) * (_caldata.T2 >>11);
+  unsigned x2 = (((((raw_temp >> 4) - (_caldata.T1)) * 
+  ((raw_temp>> 4) - (_caldata.T1))) >> 12) * (_caldata.T3)) >> 14;
+  
+  t_fine = x1 + x2;
+  
+  auto temp = (t_fine * 5 + 128) >> 8;
+  return temp / 100.;
+  
+}
+
+double foxtrot::devices::BME280::compensate_pressure(int raw_pressure, int t_fine)
+{
+  unsigned x1 = (t_fine >> 1) - 64000;
+  unsigned x2 = (((x1 >> 2) * (x1 >>2)) >> 11) * _caldata.P6;
+
+  x2 += ((x1 * (_caldata.P5)) << 1);
+  x2 = (x2 >> 2) + ((_caldata.P4) << 16);
+  
+  x1 = (((_caldata.P3 * (((x1 >> 2) * (x1 >>2)) >>13 )) >> 3) + (((_caldata.P2) * x1) >> 1)) >> 18;
+  x1 = ((32768 + x1) *(_caldata.P1)) >> 15;
+  
+  
+  
+}
+
+
+
+
 RTTR_REGISTRATION{
  using namespace rttr;
  using foxtrot::devices::BME280;

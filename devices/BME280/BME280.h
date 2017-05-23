@@ -22,6 +22,10 @@ namespace devices
      
      void ReadData();
      
+     
+     double compensate_temperature(int raw_temp);
+     double compensate_pressure(int raw_pressure);
+     
  private:
 #pragma pack(push,1)
      struct caldata_struct
