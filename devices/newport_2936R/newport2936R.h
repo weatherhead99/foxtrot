@@ -3,6 +3,8 @@
 #include "SerialProtocol.h"
 #include <memory>
 #include "Logging.h"
+#include <string>
+using std::string;
 
 namespace foxtrot
 {
@@ -52,6 +54,9 @@ namespace foxtrot
     powerunits getUnits();
     void setUnits(powerunits unit);
     
+    double getTemperature();
+    
+    string getSerialNumber();
     
     powermodes getMode();
     void setMode(powermodes mode);

@@ -257,6 +257,11 @@ double foxtrot::devices::newport2936R::getcaltemp()
 }
 
 
+double foxtrot::devices::newport2936R::getTemperature()
+{
+  auto repl = cmd("PM:TEMP?");
+  return std::stod(repl);
+}
 
 
 
@@ -303,6 +308,13 @@ foxtrot::devices::powerunits convert_string_to_powerunit(std::string s, bool& ok
   
 }
 
+string foxtrot::devices::newport2936R::getSerialNumber()
+{
+  return cmd("PM:DETSN?");
+
+}
+
+
   
 
 RTTR_REGISTRATION
@@ -330,6 +342,15 @@ RTTR_REGISTRATION
   (
     parameter_names("unit")
     )
+  .property_readonly("getMode", &newport2936R::getMode)
+  .method("setMode",&newport2936R::setMode)
+  (parameter_names("mode"))
+  .method("manualTriggerState", &newport2936R::manualTriggerState)
+  (parameter_names("state"))
+  .property_readonly("getcaldate",&newport2936R::getcaldate)
+  .property_readonly("getcaltemp",&newport2936R::getcaltemp)
+  .property_readonly("getTemperature", &newport2936R::getTemperature)
+  .property_readonly("getSerialNumber",&newport2936R::getSerialNumber)
   ;
   
   
