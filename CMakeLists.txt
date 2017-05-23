@@ -47,7 +47,6 @@ include_directories(util/PRT/)
 
 
 add_subdirectory(src)
-
 include_directories(devices protocols)
 add_subdirectory(protocols)
 add_subdirectory(devices)

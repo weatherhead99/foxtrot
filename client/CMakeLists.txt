@@ -7,10 +7,5 @@ target_link_libraries(foxtrotclient INTERFACE foxtrotserv)
 
 add_dependencies(foxtrotclient foxtrotserv)
 
-install(TARGETS foxtrotclient LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot)
-
-file(GLOB ft_client_includes *.h)
-install(FILES ${ft_client_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot)
-
 add_executable(fetchdatatest fetchdatatest.cpp)
 target_link_libraries(fetchdatatest foxtrotclient)
