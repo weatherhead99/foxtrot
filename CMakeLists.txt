@@ -50,7 +50,6 @@ add_subdirectory(src)
 include_directories(devices protocols)
 add_subdirectory(protocols)
 add_subdirectory(devices)
-add_subdirectory(expruns)
 add_subdirectory(util)
 
 if(BUILD_SERVER)
