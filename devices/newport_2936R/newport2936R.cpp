@@ -308,6 +308,63 @@ foxtrot::devices::powerunits convert_string_to_powerunit(std::string s, bool& ok
   
 }
 
+int foxtrot::devices::newport2936R::getExternalTriggerMode()
+{
+  auto repl = cmd("PM:TRIG:EXT?");
+  return std::stoi(repl);
+
+}
+
+void foxtrot::devices::newport2936R::setExternalTriggerMode(int mode)
+{
+  std::ostringstream oss;
+  oss << "PM:TRIG:EXT " << mode;
+  cmd(oss.str());
+}
+
+int foxtrot::devices::newport2936R::getTriggerEndMode()
+{
+  auto repl = cmd("PM:TRIG:STOP?");
+  return std::stoi(repl);
+
+}
+
+void foxtrot::devices::newport2936R::setTriggerEndMode(int mode)
+{
+  std::ostringstream oss;
+  oss << "PM:TRIG:STOP " << mode;
+  cmd(oss.str());
+}
+
+int foxtrot::devices::newport2936R::getTriggerStartMode()
+{
+  auto repl = cmd("PM:TRIG:START?");
+  return std::stoi(repl);
+
+}
+
+void foxtrot::devices::newport2936R::setTriggerStartMode(int mode)
+{
+  std::ostringstream oss;
+  oss << "PM:TRIG:START " << mode;
+  cmd(oss.str());
+
+}
+
+int foxtrot::devices::newport2936R::getTriggerEdge()
+{
+  auto repl = cmd("PM:TRIG:EDGE?");
+  return std::stoi(repl);
+}
+
+void foxtrot::devices::newport2936R::setTriggerEdge(int edge)
+{
+  std::ostringstream oss;
+  oss << "PM:TRIG:EDGE " << edge;
+  cmd(oss.str());
+
+}
+
 string foxtrot::devices::newport2936R::getSerialNumber()
 {
   return cmd("PM:DETSN?");
@@ -343,14 +400,21 @@ RTTR_REGISTRATION
     parameter_names("unit")
     )
   .property_readonly("getMode", &newport2936R::getMode)
-  .method("setMode",&newport2936R::setMode)
-  (parameter_names("mode"))
-  .method("manualTriggerState", &newport2936R::manualTriggerState)
-  (parameter_names("state"))
+  .method("setMode",&newport2936R::setMode)(parameter_names("mode"))
+  .method("manualTriggerState", &newport2936R::manualTriggerState)(parameter_names("state"))
   .property_readonly("getcaldate",&newport2936R::getcaldate)
   .property_readonly("getcaltemp",&newport2936R::getcaltemp)
   .property_readonly("getTemperature", &newport2936R::getTemperature)
   .property_readonly("getSerialNumber",&newport2936R::getSerialNumber)
+  .method("setTriggerStartMode" , &newport2936R::setTriggerStartMode)(parameter_names("mode"))
+  .property_readonly("getTriggerStartMode", &newport2936R::getTriggerStartMode)
+  .method("setTriggerEndMode", &newport2936R::setTriggerEndMode)(parameter_names("mode"))
+  .property_readonly("getTriggerEndMode", &newport2936R::getTriggerEndMode)
+  .method("setExternalTriggerMode", &newport2936R::setExternalTriggerMode)(parameter_names("mode"))
+  .property_readonly("getExternalTriggerMode",&newport2936R::getExternalTriggerMode)
+  .method("setTriggerEdge", &newport2936R::setTriggerEdge)(parameter_names("edge"))
+  .property_readonly("getTriggerEdge",&newport2936R::getTriggerEdge)
+  
   ;
   
   

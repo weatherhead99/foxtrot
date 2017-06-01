@@ -63,6 +63,18 @@ namespace foxtrot
     
     void manualTriggerState(bool state);
     
+    void setTriggerStartMode(int mode);
+    int getTriggerStartMode();
+    
+    void setTriggerEndMode(int mode);
+    int getTriggerEndMode();
+    
+    void setExternalTriggerMode(int mode);
+    int getExternalTriggerMode();
+    
+    void setTriggerEdge(int edge);
+    int getTriggerEdge();
+    
     std::string getcaldate();
     double getcaltemp();
     
