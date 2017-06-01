@@ -127,13 +127,18 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& vr)
         return value_types::FLOAT;
     }
     
-    if(!tp.is_arithmetic() || !tp.is_enumeration())
+    if( tp == type::get<std::string>())
     {
-      if(vr.can_convert<int>() || vr.can_convert<unsigned>() )
-      {
-	return value_types::INT;
-      }
-      
+      return value_types::STRING;
+    }
+    
+    if(vr.can_convert<int>() || vr.can_convert<unsigned>() )
+    {
+      return value_types::INT;
+    }
+    
+    if(!tp.is_arithmetic() )
+    {
         return value_types::STRING;
     }
     
