@@ -326,8 +326,8 @@ int foxtrot::devices::newport2936R::getExternalTriggerMode()
 void foxtrot::devices::newport2936R::setExternalTriggerMode(int mode)
 {
   std::ostringstream oss;
-  oss << "PM:TRIG:EXT " << mode;
-  cmd(oss.str());
+  oss << "PM:TRIG:EXT " << mode <<'\r';
+  _proto->write(oss.str());
 }
 
 int foxtrot::devices::newport2936R::getTriggerEndMode()
@@ -340,8 +340,8 @@ int foxtrot::devices::newport2936R::getTriggerEndMode()
 void foxtrot::devices::newport2936R::setTriggerEndMode(int mode)
 {
   std::ostringstream oss;
-  oss << "PM:TRIG:STOP " << mode;
-  cmd(oss.str());
+  oss << "PM:TRIG:STOP " << mode <<'\r';
+  _proto->write(oss.str());
 }
 
 int foxtrot::devices::newport2936R::getTriggerStartMode()
@@ -354,8 +354,8 @@ int foxtrot::devices::newport2936R::getTriggerStartMode()
 void foxtrot::devices::newport2936R::setTriggerStartMode(int mode)
 {
   std::ostringstream oss;
-  oss << "PM:TRIG:START " << mode;
-  cmd(oss.str());
+  oss << "PM:TRIG:START " << mode <<'\r';
+  _proto->write(oss.str());
 
 }
 
@@ -368,8 +368,8 @@ int foxtrot::devices::newport2936R::getTriggerEdge()
 void foxtrot::devices::newport2936R::setTriggerEdge(int edge)
 {
   std::ostringstream oss;
-  oss << "PM:TRIG:EDGE " << edge;
-  cmd(oss.str());
+  oss << "PM:TRIG:EDGE " << edge << '\r';
+  _proto->write(oss.str());
 
 }
 
