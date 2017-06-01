@@ -242,6 +242,14 @@ void foxtrot::devices::newport2936R::manualTriggerState(bool state)
 
 }
 
+bool foxtrot::devices::newport2936R::getTriggerState()
+{
+  auto repl = cmd("PM:TRIG:STATE?");
+  return std::stoi(repl);
+
+}
+
+
 std::string foxtrot::devices::newport2936R::getcaldate()
 {
   auto repl = cmd("CALDATE?");
@@ -402,6 +410,7 @@ RTTR_REGISTRATION
   .property_readonly("getMode", &newport2936R::getMode)
   .method("setMode",&newport2936R::setMode)(parameter_names("mode"))
   .method("manualTriggerState", &newport2936R::manualTriggerState)(parameter_names("state"))
+  .property_readonly("getTriggerState", &newport2936R::getTriggerState)
   .property_readonly("getcaldate",&newport2936R::getcaldate)
   .property_readonly("getcaltemp",&newport2936R::getcaltemp)
   .property_readonly("getTemperature", &newport2936R::getTemperature)

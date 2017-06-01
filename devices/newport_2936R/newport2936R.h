@@ -62,6 +62,7 @@ namespace foxtrot
     void setMode(powermodes mode);
     
     void manualTriggerState(bool state);
+    bool getTriggerState();
     
     void setTriggerStartMode(int mode);
     int getTriggerStartMode();
