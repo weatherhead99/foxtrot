@@ -85,7 +85,7 @@ namespace foxtrot
     rttr::variant get_arg(const capability_argument& arg, bool& success);
     
     bool set_returntype(rttr::variant& retval, foxtrot::capability_response& repl);
-    value_types get_appropriate_wire_type(const rttr::type& tp);
+    value_types get_appropriate_wire_type(const rttr::variant& vr);
     
     template <typename reqtp, typename repltp> std::vector<rttr::variant> get_callargs(rttr::method& meth, 
 									reqtp& req,
