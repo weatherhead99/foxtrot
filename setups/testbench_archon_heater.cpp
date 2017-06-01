@@ -295,7 +295,7 @@ int setup(foxtrot::DeviceHarness& harness)
     //calibrate monochromator - TODO do from configuration file somewhere
     monoch->setGratingCalibration(1,600,0.99510,0.0872665,0.086534,"g1");
     monoch->setGratingCalibration(2,600,1.000800,3.22885911,0.085817,"g2");
-    
+    monoch->setGratingCalibration(3,600,0.0000,3.22885911,0.000,"");
     harness.AddDevice(std::move(monoch));
 
 
