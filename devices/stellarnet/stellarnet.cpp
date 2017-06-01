@@ -246,7 +246,7 @@ void foxtrot::devices::stellarnet::setup_reenumerated_device(libusb_device_descr
   _lg.Trace("getting lambda coefficients...");
   auto lambda_coeff_1 = get_stored_bytes(COEFF_C1_ADDR);
   auto lambda_coeff_2 = get_stored_bytes(COEFF_C2_ADDR);
-  auto lambda_coeff_3 = get_stored_bytes(COEFF_C2_ADDR);
+  auto lambda_coeff_3 = get_stored_bytes(COEFF_C3_ADDR);
   auto lambda_coeff_4 = get_stored_bytes(COEFF_C4_ADDR);
   
   //TODO: convert coeffs properly to float
