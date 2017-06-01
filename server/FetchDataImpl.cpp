@@ -179,6 +179,7 @@ bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondert
       respond.Write(repl,tag); 
       _lg.Trace("all chunks written...");
       _extra_chunk = false;
+      _thischunk++;
       return false;
     }
     
