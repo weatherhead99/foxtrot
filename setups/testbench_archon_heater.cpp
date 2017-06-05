@@ -29,6 +29,7 @@ foxtrot::parameterset archon_params
     {"timeout", 30}
 };
 
+
 foxtrot::parameterset tpg_params {
   {"port" , "/dev/ttyUSB0"},
   {"baudrate" , 9600u},
@@ -129,6 +130,7 @@ int setup(foxtrot::DeviceHarness& harness)
     heater->setLabel(1,"PCLAMP4");
     
     heater->setDirection(1,true);
+    heater->setDirection(2,true);
     
     heater->setDIOPower(true);
     
@@ -221,6 +223,12 @@ int setup(foxtrot::DeviceHarness& harness)
     auto clockdriver2 = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(2));
     auto cdptr2 = get_ptr_for_harness(clockdriver2);
     clockdriver2->setDeviceComment("spare_clocks");
+    clockdriver2->setLabel(3,"EXTLINESYNC");
+    clockdriver2->setLabel(4,"PMINTEGRATE");
+    clockdriver2->setEnable(3,true);
+    clockdriver2->setEnable(4,true);
+    clockdriver2->setFastSlewRate(3,100);
+    clockdriver2->setFastSlewRate(3,100);
     harness.AddDevice(std::move(cdptr2));
     
     //==============Archon A/Ds =====================//
