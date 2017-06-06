@@ -41,7 +41,7 @@ rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
     return outarg;
     }
     
-    
+
     
 bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
 {
@@ -49,7 +49,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
   
       _lg.Trace("setting return type" );
       _lg.Trace("raw type name is: " + retval.get_type().get_name());
-        auto rettp = get_appropriate_wire_type(retval.get_type());
+      auto rettp = get_appropriate_wire_type(retval);
         _lg.Trace("rettp is: " + std::to_string(rettp) );
             bool convertsuccess = true;
          if(rettp == value_types::FLOAT)
@@ -104,21 +104,15 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          return convertsuccess;
 }
 
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
+foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& vr)
 {
     using namespace rttr;
     
-    
-    
+    auto tp = vr.get_type();
     
     if(tp == type::get<void>())
     {
         return value_types::VOID;
-    }
-    
-    if(!tp.is_arithmetic())
-    {
-        return value_types::STRING;
     }
     
     //check for bool
@@ -133,10 +127,26 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
         return value_types::FLOAT;
     }
     
+    if( tp == type::get<std::string>())
+    {
+      return value_types::STRING;
+    }
+    
+    if(vr.can_convert<int>() || vr.can_convert<unsigned>() )
+    {
+      return value_types::INT;
+    }
+    
+    if(!tp.is_arithmetic() )
+    {
+        return value_types::STRING;
+    }
+    
+    
     return value_types::INT;
-    
-    
 }
+
+
 
 template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
 { 

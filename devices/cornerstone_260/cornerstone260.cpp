@@ -288,6 +288,7 @@ RTTR_REGISTRATION
   
   registration::class_<cornerstone260>("foxtrot::devices::cornerstone260")
   .property_readonly("getShutterStatus",&cornerstone260::getShutterStatus)
+    .method("setShutterStatus",&cornerstone260::setShutterStatus)
   .property_readonly("getWave",&cornerstone260::getWave)
   .property_readonly("getFilter",&cornerstone260::getFilter)
   .property_readonly("getGrating", &cornerstone260::getGrating)

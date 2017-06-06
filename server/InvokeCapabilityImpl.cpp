@@ -137,7 +137,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             }
                 if(prop.is_readonly())
                 {
-//                     cout << "readonly property" << endl;
+		    _lg.Trace("readonly property");
                     retval = prop.get_value(*dev);
                 }
                 else
@@ -151,11 +151,11 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     }
                     else if (req.args_size() == 1)
                     {
-                    auto& mut = _harness.GetMutex(devid);
-                    std::lock_guard<std::mutex> lock(mut);
-                    bool success;
-                    auto arg = get_arg(req.args().Get(0),success);
-                    prop.set_value(*dev,arg);
+		      auto& mut = _harness.GetMutex(devid);
+		      std::lock_guard<std::mutex> lock(mut);
+		      bool success;
+		      auto arg = get_arg(req.args().Get(0),success);
+		      prop.set_value(*dev,arg);
                     }
                     else if(req.args_size() == 0)
                     {
