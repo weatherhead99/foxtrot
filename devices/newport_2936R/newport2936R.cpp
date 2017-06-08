@@ -388,7 +388,7 @@ int foxtrot::devices::newport2936R::getChannel()
 void foxtrot::devices::newport2936R::setChannel(int chan)
 {
   std::ostringstream oss;
-  oss << "PM:CHAN " << chan ;
+  oss << "PM:CHAN " << chan  <<'\r' ;
   _proto->write(oss.str());
 }
 
@@ -402,7 +402,7 @@ int foxtrot::devices::newport2936R::getAnalogFilter()
 void foxtrot::devices::newport2936R::setAnalogFilter(int value)
 {
   std::ostringstream oss;
-  oss << "PM:ANALOGFILTER " << value;
+  oss << "PM:ANALOGFILTER " << value <<'\r';
   _proto->write(oss.str());
 }
 
@@ -415,7 +415,7 @@ int foxtrot::devices::newport2936R::getDigitalFilter()
 void foxtrot::devices::newport2936R::setDigitalFilter(int value)
 {
   std::ostringstream oss;
-  oss << "PM:DIGITALFILTER " << value;
+  oss << "PM:DIGITALFILTER " << value <<'\r';
   _proto->write(oss.str());
 }
 
@@ -429,7 +429,7 @@ int foxtrot::devices::newport2936R::getFilterMode()
 void foxtrot::devices::newport2936R::setFilterMode(int mode)
 {
   std::ostringstream oss;
-  oss << "PM:FILTER " << mode;
+  oss << "PM:FILTER " << mode  <<'\r';
   _proto->write(oss.str());
   
 }
@@ -477,7 +477,14 @@ RTTR_REGISTRATION
   .property_readonly("getExternalTriggerMode",&newport2936R::getExternalTriggerMode)
   .method("setTriggerEdge", &newport2936R::setTriggerEdge)(parameter_names("edge"))
   .property_readonly("getTriggerEdge",&newport2936R::getTriggerEdge)
-  
+  .property_readonly("getChannel", &newport2936R::getChannel)
+  .method("setChannel", &newport2936R::setChannel)
+  .property_readonly("getAnalogFilter",&newport2936R::getAnalogFilter)
+  .method("setAnalogFilter",&newport2936R::setAnalogFilter)
+  .property_readonly("getDigitalFilter",&newport2936R::getDigitalFilter)
+  .method("setDigitalFilter",&newport2936R::setDigitalFilter)
+  .property_readonly("getFilterMode",&newport2936R::getFilterMode)
+  .method("setFilterMode",&newport2936R::setFilterMode)
   ;
   
   
