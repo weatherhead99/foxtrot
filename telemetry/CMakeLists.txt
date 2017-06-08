@@ -1,5 +1,6 @@
 find_library(nanomsg nanomsg)
 
+
 if(NOT nanomsg)
     message(ERROR "couldn't find nanomsg library...")
 endif()
@@ -15,11 +16,11 @@ target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DI
 add_executable(telem_test telem_test.cpp)
 target_link_libraries(telem_test foxtrot_telemetry)
 
-install(TARGETS foxtrot_telemetry LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot 
-ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+install(TARGETS foxtrot_telemetry LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
+file(GLOB telem_includes *.h)
+install(FILES ${telem_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 
 add_executable(telem_bcast telem_bcast.cpp telem_util.cpp)
 target_link_libraries(telem_bcast foxtrot_telemetry ${Boost_PROGRAM_OPTIONS_LIBRARY})
-
 install(TARGETS telem_bcast RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
