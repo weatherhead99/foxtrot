@@ -79,6 +79,19 @@ namespace foxtrot
     std::string getcaldate();
     double getcaltemp();
     
+    int getChannel();
+    void setChannel(int chan);
+    
+    int getFilterMode();
+    void setFilterMode(int mode);
+    
+    int getDigitalFilter();
+    void setDigitalFilter(int value);
+    
+    int getAnalogFilter();
+    void setAnalogFilter(int value);
+    
+    
     private:
       foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);

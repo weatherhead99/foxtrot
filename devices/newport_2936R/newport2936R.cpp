@@ -379,6 +379,60 @@ string foxtrot::devices::newport2936R::getSerialNumber()
 
 }
 
+int foxtrot::devices::newport2936R::getChannel()
+{
+  return std::stoi(cmd("PM:CHAN?"));
+
+}
+
+void foxtrot::devices::newport2936R::setChannel(int chan)
+{
+  std::ostringstream oss;
+  oss << "PM:CHAN " << chan ;
+  _proto->write(oss.str());
+}
+
+
+int foxtrot::devices::newport2936R::getAnalogFilter()
+{
+  return std::stoi(cmd("PM:ANALOGFILTER?"));
+
+}
+
+void foxtrot::devices::newport2936R::setAnalogFilter(int value)
+{
+  std::ostringstream oss;
+  oss << "PM:ANALOGFILTER " << value;
+  _proto->write(oss.str());
+}
+
+
+int foxtrot::devices::newport2936R::getDigitalFilter()
+{
+  return std::stoi(cmd("PM:DIGITALFILTER?"));
+}
+
+void foxtrot::devices::newport2936R::setDigitalFilter(int value)
+{
+  std::ostringstream oss;
+  oss << "PM:DIGITALFILTER " << value;
+  _proto->write(oss.str());
+}
+
+
+int foxtrot::devices::newport2936R::getFilterMode()
+{
+  return std::stoi(cmd("PM:FILTER?"));
+
+}
+
+void foxtrot::devices::newport2936R::setFilterMode(int mode)
+{
+  std::ostringstream oss;
+  oss << "PM:FILTER " << mode;
+  _proto->write(oss.str());
+  
+}
 
   
 
