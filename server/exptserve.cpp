@@ -11,6 +11,8 @@
 #include "Logging.h"
 #include <rttr/type>
 #include "exptserve.h"
+#include <thread>
+#include <future>
 
 
 using namespace foxtrot;
@@ -29,13 +31,15 @@ int main(int argc, char** argv)
     std::string servname;
     std::string parameterfile;
     int debuglevel;
+    int nthreads;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
     ("parameterfile,p",po::value<std::string>(&parameterfile),"device setup parameters (JSON file)")
     ("servername,n",po::value<std::string>(&servname),"server name")
     ("dump", po::value<std::string>(), "dump server JSON description")
-    ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level");
+    ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level")
+    ("threads,t",po::value<int>(&nthreads)->default_value(4),"number of server threads to run");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);

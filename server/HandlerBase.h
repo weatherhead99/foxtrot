@@ -69,10 +69,6 @@ namespace foxtrot
        
         }
         
-        grpc::ServerCompletionQueue* GetCQ()
-        {
-        return _cq;
-        }
         
         
         void FinishRequest(typename T::respondertp& respond, typename T::repltp& repl)

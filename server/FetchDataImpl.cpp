@@ -78,12 +78,12 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
       return true;
     }
     
-    auto& mut = _harness.GetMutex(req.devid());
-    std::lock_guard<std::mutex> lock(mut);
     
     try{
       std::vector<rttr::argument> callargs(args.begin(), args.end());
-    retval = meth.invoke_variadic(*dev,callargs);
+      auto& mut = _harness.GetMutex(req.devid());
+      std::lock_guard<std::mutex> lock(mut);
+      retval = meth.invoke_variadic(*dev,callargs);
     }
     catch(class foxtrot::DeviceError& err)
     {

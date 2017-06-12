@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <typeinfo>
+#include <future>
 
 using std::string;
 using namespace foxtrot;
@@ -26,11 +27,8 @@ ServerImpl::~ServerImpl()
     
 }
 
-
-void ServerImpl::Run()
+void ServerImpl::setup_common(const std::string& addrstr)
 {
-    //TODO: SETTING OF ADDRESS PROPERLY
-    string addrstr("0.0.0.0:50051");
     
     
     ServerBuilder builder;
@@ -42,11 +40,49 @@ void ServerImpl::Run()
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
-    
     std::cout << "server listening on " << addrstr << std::endl;
+    
+
+}
+
+
+
+void ServerImpl::Run()
+{
+    setup_common("0.0.0.0:50051");
     
     HandleRpcs();
 }
+
+std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::RunMultithread(int nthreads)
+{
+  setup_common("0.0.0.0:50051");
+  
+  auto handlerpccatch = [this] () {  
+    try
+    {
+      HandleRpcs();
+    }
+    catch(...)
+    {
+      return std::current_exception();
+    }
+    
+    return static_cast<std::exception_ptr>(nullptr);
+    
+  };
+  
+  std::vector<std::future<std::exception_ptr>> out;
+  out.reserve(nthreads);
+  for(auto i =0; i < nthreads; i++)
+  {
+    out.push_back(std::async(std::launch::async,handlerpccatch)); 
+  }
+  
+  return out;
+
+}
+
 
 void foxtrot::ServerImpl::HandleRpcs()
 {

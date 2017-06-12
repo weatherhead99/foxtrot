@@ -8,6 +8,9 @@
 #include "DeviceHarness.h"
 #include "Logging.h"
 
+#include <future>
+#include <exception>
+
 using grpc::Server;
 using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
@@ -25,7 +28,13 @@ public:
     void Run();
     void HandleRpcs();
     
+    std::vector<std::future<std::exception_ptr>> RunMultithread(int nthreads);
+    
+    
+    
 private:
+    void setup_common(const std::string& addrstr);
+  
     std::unique_ptr<ServerCompletionQueue> _cq;
     std::unique_ptr<Server> _server;
     
