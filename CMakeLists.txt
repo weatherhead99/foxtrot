@@ -71,7 +71,7 @@ endif()
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} RTTR::Core ${dl} ${CMAKE_THREAD_LIBS_INIT})
 
-install(TARGETS foxtrot EXPORT ft_targets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
+install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
 
 file(GLOB ft_includes include/*.h)
 message(STATUS "ft includes: ${ft_includes}")
@@ -121,4 +121,6 @@ COMPATIBILITY SameMajorVersion)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotVersion.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/ COMPONENT devel)
 
+
+install(EXPORT foxtrotTargets DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
 
