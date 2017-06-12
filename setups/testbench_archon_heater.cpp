@@ -295,7 +295,7 @@ int setup(foxtrot::DeviceHarness& harness)
     
     
     //setup power meter
-    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(newport_timeout_params);
+    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_timeout_params);
     auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
     
     harness.AddDevice(std::move(powermeter));
