@@ -91,13 +91,9 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 respond.Finish(repl,grpc::Status::OK,tag);
                 return true;
                 }
-                
-            auto& mut = _harness.GetMutex(devid);
-            std::lock_guard<std::mutex> lock(mut);
-	    
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
-        
-        
+                
+            
             //check if it's a stream data method
             auto streammeta = meth.get_metadata("streamdata");
             if(streammeta.is_valid())
@@ -113,7 +109,8 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 
         
             }
-        
+	    auto& mut = _harness.GetMutex(devid);
+            std::lock_guard<std::mutex> lock(mut);
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
