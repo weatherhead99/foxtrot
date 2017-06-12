@@ -6,6 +6,7 @@
 #include <grpc++/grpc++.h>
 #include <string>
 #include "DeviceHarness.h"
+#include "Logging.h"
 
 using grpc::Server;
 using grpc::ServerCompletionQueue;
@@ -33,6 +34,7 @@ private:
     std::string _servcomment;
     DeviceHarness& _harness;
     
+    Logging _lg;
 };
 
 }

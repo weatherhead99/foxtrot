@@ -5,6 +5,7 @@
 #include "InvokeCapabilityImpl.h"
 #include "FetchDataImpl.h"
 
+
 #include <iostream>
 #include <typeinfo>
 
@@ -12,7 +13,7 @@ using std::string;
 using namespace foxtrot;
 
 foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, foxtrot::DeviceHarness& harness)
-: _servcomment(servcomment), _harness(harness)
+: _servcomment(servcomment), _harness(harness), _lg("ServerImpl")
 {
 }
 

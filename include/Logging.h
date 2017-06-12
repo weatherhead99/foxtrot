@@ -8,7 +8,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <string>
-
+#include <iostream>
+#include <sstream>
 
 using boost::log::sources::severity_logger;
 using boost::log::sources::severity_channel_logger;
@@ -44,6 +45,22 @@ namespace foxtrot
         void Error(const std::string& message);
         void Fatal(const std::string& message);
         
+	class streamLogging{
+	public:
+	  friend class Logging;
+	  template<typename T> streamLogging& operator<<(T const& value);
+	  ~streamLogging();
+	private:
+	  streamLogging(Logging& lg, sl level);
+	  streamLogging(const streamLogging& other);
+	  streamLogging(streamLogging&& other);
+	  Logging& _lg;
+	  sl _level;
+	  std::ostringstream _oss;
+	};
+	
+	streamLogging strm(sl level);
+	
     private:
         inline void GeneralStreamRecord(const std::string& message, boost::log::trivial::severity_level sev)
         {
@@ -64,6 +81,12 @@ namespace foxtrot
         
     };
     
-    
-    
+}
+   
+template<typename T>
+foxtrot::Logging::streamLogging& foxtrot::Logging::streamLogging::operator<<(T const& value)
+{
+  _oss << value;
+  return *this;
+
 }

@@ -1,17 +1,12 @@
-find_library(nanomsg nanomsg)
+include(FindPkgConfig)
+pkg_search_module(NANOMSG REQUIRED nanomsg)
 
-
-if(NOT nanomsg)
-    message(ERROR "couldn't find nanomsg library...")
-endif()
-
-message("nanomsg: ${nanomsg}")
-
+message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
 
 add_library(foxtrot_telemetry TelemetryServer.cpp)
-target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${nanomsg})
+target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES})
 
-target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${NANOMSG_INCLUDE_DIRS})
 
 add_executable(telem_test telem_test.cpp)
 target_link_libraries(telem_test foxtrot_telemetry)
