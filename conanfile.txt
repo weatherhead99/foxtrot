@@ -10,3 +10,4 @@ cmake
 [options]
 Boost:shared=True
 gRPC:shared=True
+nanomsg:shared=True

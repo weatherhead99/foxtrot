@@ -78,9 +78,6 @@ message(STATUS "ft includes: ${ft_includes}")
 install(FILES ${ft_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/ COMPONENT devel)
 
 
-get_target_property(foxtrot_transitive_link foxtrot INTERFACE_LINK_LIBRARIES)
-message("foxtrot ILLs: ${foxtrot_transitive_link}")
-
 if(BUILD_PROGS)
 add_subdirectory(tbprogs)
 endif()
