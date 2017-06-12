@@ -22,7 +22,7 @@
 
 #include <memory>
 
-foxtrot::parameterset archon_params
+const foxtrot::parameterset archon_params
 {
     {"addr" , "10.0.0.2"},
     {"port" , 4242u},
@@ -30,13 +30,13 @@ foxtrot::parameterset archon_params
 };
 
 
-foxtrot::parameterset tpg_params {
+const foxtrot::parameterset tpg_params {
   {"port" , "/dev/ttyUSB0"},
   {"baudrate" , 9600u},
   };
  
   
-foxtrot::parameterset cornerstone_params
+const foxtrot::parameterset cornerstone_params
 {
   {"port", "/dev/ttyS0"}
 };
@@ -48,6 +48,13 @@ const foxtrot::parameterset psu_params
   {"timeout", 2000u}
 };
 
+
+const foxtrot::parameterset newport_timeout_params
+{
+    {"read_timeout", 100},
+    {"write_timeout", 100}
+    
+};
 
 //     auto heaterptr = std::unique_ptr<foxtrot::Device,
 //     void(*)(foxtrot::Device*)> 
@@ -288,7 +295,7 @@ int setup(foxtrot::DeviceHarness& harness)
     
     
     //setup power meter
-    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(nullptr);
+    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(newport_timeout_params);
     auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
     
     harness.AddDevice(std::move(powermeter));
