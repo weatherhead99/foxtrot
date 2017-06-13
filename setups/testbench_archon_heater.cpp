@@ -44,7 +44,7 @@ const foxtrot::parameterset cornerstone_params
 
 const foxtrot::parameterset psu_params
 {
-  {"devnode", "/dev/sdb"},
+  {"devnode", "/dev/sdc"},
   {"timeout", 2000u}
 };
 
