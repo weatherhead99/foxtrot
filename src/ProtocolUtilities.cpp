@@ -9,7 +9,9 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/optional.hpp>
-
+#include <type_traits>
+#include <typeinfo>
+#include <iostream>
 #include "Logging.h"
 
 using boost::property_tree::ptree;
@@ -17,12 +19,13 @@ using boost::property_tree::ptree;
 
 struct variant_ptree_wrapper
 {
- variant_ptree_wrapper(const ptree& pt) : _pt(pt) {};
+ variant_ptree_wrapper(const ptree& pt) : _pt(pt), _null(true) {};
   
- template<typename T> void operator()(T)
+ template<typename T> void operator()(const T&)
  {
+   std::cout << "type: " << typeid(T).name() << std::endl;
    auto res = _pt.get_value_optional<T>();
-   if(res )
+   if(res.is_initialized())
    {
      _variant = *res;
      _null = false;
@@ -30,7 +33,7 @@ struct variant_ptree_wrapper
    
  }
   
-  bool _null = true;
+  bool _null ;
   const ptree& _pt;
   foxtrot::parameter _variant;
 };
@@ -40,7 +43,13 @@ struct variant_ptree_wrapper
 foxtrot::parameter get_variant_from_ptree(const ptree& pt)
 {
   auto wrap = variant_ptree_wrapper(pt);
-  boost::mpl::for_each<foxtrot::parameter_types_minimal>(wrap);
+  std::cout << "null: " << wrap._null << std::endl;
+  
+  wrap(1);
+  wrap(1u);
+  wrap(std::string(""));
+  
+  std::cout << "null: " << wrap._null << std::endl;
   
   if(wrap._null)
   {
@@ -70,9 +79,17 @@ std::map< std::string, foxtrot::parameterset > foxtrot::read_parameter_json_file
 
     for(auto& entry : ch.second)
     {
+      try
+      {
+	auto val = get_variant_from_ptree(entry.second);
+	paramset[entry.first] = val;
+      }
+      catch(std::out_of_range& err)
+      {
+	lg.Error("error occurred at value: " + entry.first);
+	throw err;
+      }
       
-      auto val = get_variant_from_ptree(entry.second);
-      paramset[entry.first] = val;
     };
     
     out[parametersetname] = paramset;

@@ -73,12 +73,13 @@ int main(int argc, char** argv)
     }
     else
     {
+	*params = foxtrot::read_parameter_json_file(parameterfile);
       
     }
     
     
     DeviceHarness harness;
-    foxtrot::ExperimentalSetup setup(setupfile,harness);
+    foxtrot::ExperimentalSetup setup(setupfile,harness,params.get());
     
     if(vm.count("dump"))
     {
