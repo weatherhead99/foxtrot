@@ -23,12 +23,16 @@ foxtrot::ft_plugin::~ft_plugin()
 }
 
 
-foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness)
-: ft_plugin(setupfile), _harness(harness), _lg("ExperimentalSetup")
+foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets )
+: ft_plugin(setupfile), _harness(harness), _lg("ExperimentalSetup"), _paramsets(paramsets)
 {
   
-    auto setup_fun = get_function<int(*)(foxtrot::DeviceHarness&)>("setup");
-    setup_fun(harness);
+    auto setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
+    if(!setup_fun)
+    {
+      throw std::runtime_error("no valid setup function found in setupfile...");
+    }
+    setup_fun(harness, _paramsets);
       
 };
 

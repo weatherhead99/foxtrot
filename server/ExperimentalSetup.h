@@ -2,6 +2,9 @@
 #include <string>
 #include "Logging.h"
 #include <dlfcn.h>
+#include <boost/variant.hpp>
+
+using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
 
 namespace foxtrot
 {
@@ -38,11 +41,12 @@ namespace foxtrot
     class ExperimentalSetup : public ft_plugin
     {
     public:
-        ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness);
+        ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
         
     private:
        Logging _lg;
         DeviceHarness& _harness;
+	const mapofparametersets* const _paramsets;
     };
     
     class TelemetrySetup : public ft_plugin

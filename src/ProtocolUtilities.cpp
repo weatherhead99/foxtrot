@@ -5,29 +5,80 @@
 #include <thread>
 #include <chrono>
 
-// std::string foxtrot::read_until_endl(foxtrot::SerialProtocol* proto, unsigned readlen, char endlchar, unsigned wait_ms=0)
-// {
-//   //TODO: functionality to test how many reads were required
-  
-//   auto ret = proto->read(readlen);
-//   decltype(ret.begin()) endlpos;
-  
-//   while( (endlpos = std::find(ret.begin(), ret.end(), endlchar) )  == ret.end())
-//   {
-//     std::this_thread::sleep_for(std::chrono::milliseconds(wait_ms));
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/mpl/for_each.hpp>
+#include <boost/optional.hpp>
 
-//     //std::cout << "need to read more" << std::endl;
-//     auto this_repl = proto->read(readlen);
+#include "Logging.h"
+
+using boost::property_tree::ptree;
+
+
+struct variant_ptree_wrapper
+{
+ variant_ptree_wrapper(const ptree& pt) : _pt(pt) {};
+  
+ template<typename T> void operator()(T)
+ {
+   auto res = _pt.get_value_optional<T>();
+   if(res )
+   {
+     _variant = *res;
+     _null = false;
+   }
+   
+ }
+  
+  bool _null = true;
+  const ptree& _pt;
+  foxtrot::parameter _variant;
+};
+
+
+
+foxtrot::parameter get_variant_from_ptree(const ptree& pt)
+{
+  auto wrap = variant_ptree_wrapper(pt);
+  boost::mpl::for_each<foxtrot::parameter_types_minimal>(wrap);
+  
+  if(wrap._null)
+  {
+    throw std::out_of_range("couldn't convert ptree value to variant");
+  };
+  
+  return wrap._variant;
+  
+};
+
+
+
+
+std::map< std::string, foxtrot::parameterset > foxtrot::read_parameter_json_file(const std::string& fname)
+{
+  foxtrot::Logging lg("read_parameter_json_file");
+  
+  std::map<std::string,foxtrot::parameterset> out;
+  
+  ptree pt;
+  boost::property_tree::json_parser::read_json(fname,pt);
+  
+  for(auto& ch : pt)
+  {
+    std::string parametersetname = ch.first;
+    foxtrot::parameterset paramset;
+
+    for(auto& entry : ch.second)
+    {
+      
+      auto val = get_variant_from_ptree(entry.second);
+      paramset[entry.first] = val;
+    };
     
-
-
-//     ret += proto->read(readlen);    
-
-//   }
+    out[parametersetname] = paramset;
+    
+  };
   
- 
-//   return std::string(ret.begin(), endlpos );
-  
-  
-// }
+  return out;
+}
 

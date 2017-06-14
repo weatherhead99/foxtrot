@@ -1,4 +1,6 @@
 
+//WARNING: some bug appears if this include is moved down the list...
+#include "ProtocolUtilities.h"
 #include "ServerImpl.h"
 #include "DeviceHarness.h"
 #include "dummy/dummyDevice.h"
@@ -10,11 +12,13 @@
 #include <rttr/type>
 #include "exptserve.h"
 
+
 using namespace foxtrot;
 using std::cout;
 using std::endl;
 
 #include <boost/program_options.hpp>
+
 
 namespace po = boost::program_options;
 
@@ -23,16 +27,18 @@ int main(int argc, char** argv)
     backward::SignalHandling sh;
     std::string setupfile;
     std::string servname;
+    std::string parameterfile;
     int debuglevel;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
+    ("parameterfile,p",po::value<std::string>(&parameterfile),"device setup parameters (JSON file)")
     ("servername,n",po::value<std::string>(&servname),"server name")
     ("dump", po::value<std::string>(), "dump server JSON description")
     ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level");
     
     po::positional_options_description pdesc;
-    pdesc.add("setupfile",1).add("servername",1);
+    pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
     
     po::variables_map vm;
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
@@ -57,6 +63,17 @@ int main(int argc, char** argv)
     {
       cout << "server name is required..." << endl;
       return 1;
+    }
+
+    std::unique_ptr<std::map<std::string,foxtrot::parameterset>> params = nullptr;
+    
+    if(!vm.count("parameterfile"))
+    {
+      cout << "WARNING: no parameter file supplied, continuing without parameters..." << endl;
+    }
+    else
+    {
+      
     }
     
     

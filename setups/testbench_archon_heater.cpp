@@ -21,6 +21,10 @@
 #include "devices/stellarnet/stellarnet.h"
 
 #include <memory>
+#include <map>
+#include <boost/variant.hpp>
+
+using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
 
 const foxtrot::parameterset archon_params
 {
@@ -73,9 +77,8 @@ get_ptr_for_harness( const T* ptr)
 }
 
 
-
 extern "C" { 
-int setup(foxtrot::DeviceHarness& harness)
+int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
 {   
     
     auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);

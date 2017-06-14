@@ -1,13 +1,13 @@
 #pragma once
 
-#include "CommunicationProtocol.h"
+#include "SerialProtocol.h"
 #include "ProtocolError.h"
 #include <string>
 #include <type_traits>
 #include <typeinfo>
 #include <map>
 
-#include "SerialProtocol.h"
+
 
 namespace foxtrot {
   
@@ -22,14 +22,16 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   }
   catch(boost::bad_get)
   {
-    throw ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname );
+    
+    throw ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname ) ;
+
     
   }
   catch(std::out_of_range)
   {
    if(required)
    {
-    throw ProtocolError(std::string("the required parameter ") + paramname + " is undefined"); 
+    throw std::runtime_error(std::string("the required parameter ") + paramname + " is undefined"); 
    }
    //TODO: logging here
    else
@@ -41,7 +43,7 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   
   return true;
   
-}
+};
 
 
 template <typename keytp, typename valtp> 
@@ -63,14 +65,16 @@ void extract_parameter_map_cast(const std::map<keytp,valtp>& map, valtp& param_o
   }
   catch(std::out_of_range)
   {
-    throw ProtocolError(std::string("invalid value for parameter: " ) + paramname);
+    throw std::runtime_error(std::string("invalid value for parameter: " ) + paramname);
   }
   
 
-}
+};
 
 
 //std::string read_until_endl(SerialProtocol* proto, unsigned readlen, char endlchar='\n');
+
+std::map<std::string,foxtrot::parameterset> read_parameter_json_file(const std::string& fname);
 
 
 };
