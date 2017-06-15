@@ -1,0 +1,27 @@
+{
+  "archon_params" : {
+    "addr" : "10.0.0.2",
+    "port" : 4242,
+    "timeout" : 30
+  },
+  
+  "tpg_params" : {
+    "port" : "/dev/ttyUSB0",
+    "baudrate" : 9600
+  },
+  
+  "cornerstone_params" : {
+    "port" : "/dev/ttyS0"
+  },
+  
+  "psu_params" : {
+    "devnode" : "/dev/sdc",
+    "timeout" : 2000 
+  },
+  
+  "newport_params" : {
+    "read_timeout" : 100,
+    "write_timeout" : 100
+  }
+
+}
