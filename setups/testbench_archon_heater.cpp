@@ -66,18 +66,18 @@ get_ptr_for_harness( const T* ptr)
 }
 
 extern "C" { 
-int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
+int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const params)
 {
     foxtrot::Logging lg("setup");
   
-    if(mapofparametersets == nullptr)
+    if(params == nullptr)
     {
       lg.Fatal("no parametersets received, cannot continue..");
       throw std::runtime_error("setup cannot continue");
     }
     
     
-    auto archon_params = mapofparametersets->at("archon_params");
+    auto archon_params = params->at("archon_params");
     auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
     
     auto archon = std::unique_ptr<foxtrot::devices::archon> (
@@ -85,7 +85,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
     
     archon->settrigoutpower(true);
     
-    auto tpg_params = mapofparametersets->at("tpg_params");
+    auto tpg_params = params->at("tpg_params");
     auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
     
     auto presgauge = std::unique_ptr<foxtrot::devices::TPG362> (new foxtrot::devices::TPG362(sport));
@@ -296,7 +296,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
     
     
     //setup power meter
-    auto newport_params = mapofparametersets->at("newport_params");
+    auto newport_params = params->at("newport_params");
     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
     auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
     
@@ -306,7 +306,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
     
     //====================illumination system========================//
     //setup monochromator
-    auto cornerstone_params = mapofparametersets->at("cornerstone_params");
+    auto cornerstone_params = params->at("cornerstone_params");
     auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
     auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
     
@@ -316,7 +316,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const)
     monoch->setGratingCalibration(3,600,0.0000,3.22885911,0.000,"");
     harness.AddDevice(std::move(monoch));
 
-    auto psu_params = mapofparametersets->at("psu_params");
+    auto psu_params = params->at("psu_params");
     auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
     auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
     
