@@ -7,6 +7,7 @@
 #include "Logging.h"
 #include <map>
 #include <boost/variant.hpp>
+#include <sstream>
 
 using std::cout;
 using std::endl;
@@ -25,6 +26,19 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
   {
     lg.Warning("no parameter sets supplied");
   }
+  else
+  {
+    std::ostringstream oss;
+    for(auto& paramset : *paramsets)
+    {
+      oss << paramset.first << ", ";
+    }
+    
+   lg.Info("parameter sets received: "  + oss.str());
+    
+  }
+  
+  
     
   lg.Info("new function");
   lg.Info("in setup function...");

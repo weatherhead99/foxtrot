@@ -9,8 +9,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/optional.hpp>
-#include <type_traits>
-#include <typeinfo>
+
 #include <iostream>
 #include "Logging.h"
 
@@ -23,7 +22,6 @@ struct variant_ptree_wrapper
   
  template<typename T> void operator()(const T&)
  {
-   std::cout << "type: " << typeid(T).name() << std::endl;
    auto res = _pt.get_value_optional<T>();
    if(res.is_initialized())
    {
@@ -43,13 +41,11 @@ struct variant_ptree_wrapper
 foxtrot::parameter get_variant_from_ptree(const ptree& pt)
 {
   auto wrap = variant_ptree_wrapper(pt);
-  std::cout << "null: " << wrap._null << std::endl;
   
   wrap(1);
   wrap(1u);
   wrap(std::string(""));
   
-  std::cout << "null: " << wrap._null << std::endl;
   
   if(wrap._null)
   {
@@ -82,7 +78,7 @@ std::map< std::string, foxtrot::parameterset > foxtrot::read_parameter_json_file
       try
       {
 	auto val = get_variant_from_ptree(entry.second);
-	paramset[entry.first] = val;
+	paramset.insert({entry.first,val});
       }
       catch(std::out_of_range& err)
       {
@@ -92,7 +88,8 @@ std::map< std::string, foxtrot::parameterset > foxtrot::read_parameter_json_file
       
     };
     
-    out[parametersetname] = paramset;
+    out.insert({parametersetname,paramset});
+    
     
   };
   
