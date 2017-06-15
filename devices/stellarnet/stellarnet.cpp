@@ -17,8 +17,6 @@
 #include <map>
 
 
-
-
 const std::map<int,int> pixel_map
 {
   {1 , 2048},
@@ -107,6 +105,13 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
          
 
 }
+
+foxtrot::devices::stellarnet::stellarnet(const foxtrot::parameterset& params)
+: stellarnet(boost::get<std::string>(params.at("firmware_file")),boost::get<int>(params.at("timeout_ms")))
+{
+
+}
+
 
 
 foxtrot::devices::stellarnet::~stellarnet()

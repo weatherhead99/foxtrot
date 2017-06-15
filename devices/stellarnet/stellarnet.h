@@ -15,6 +15,7 @@
 #define COEFF_C4_ADDR 0xE0
 
 #include <rttr/registration>
+#include "CommunicationProtocol.h"
 
 class libusb_device;
 class libusb_context;
@@ -30,6 +31,7 @@ namespace foxtrot
      RTTR_ENABLE(Device)
    public:
      stellarnet(const std::string& firmware_file, int timeout_ms);
+     stellarnet(const foxtrot::parameterset& params);
       virtual const std::string getDeviceTypeName() const;
       virtual ~stellarnet();
       
