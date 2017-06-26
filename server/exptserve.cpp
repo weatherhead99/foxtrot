@@ -1,6 +1,4 @@
 
-//WARNING: some bug appears if this include is moved down the list...
-#include "ProtocolUtilities.h"
 #include "ServerImpl.h"
 #include "DeviceHarness.h"
 #include "dummy/dummyDevice.h"
@@ -14,13 +12,11 @@
 #include <thread>
 #include <future>
 
-
 using namespace foxtrot;
 using std::cout;
 using std::endl;
 
 #include <boost/program_options.hpp>
-
 
 namespace po = boost::program_options;
 
