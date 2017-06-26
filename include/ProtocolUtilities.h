@@ -23,7 +23,7 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   catch(boost::bad_get)
   {
     
-    throw ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname ) ;
+    throw foxtrot::ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname ) ;
 
     
   }

@@ -1,3 +1,4 @@
+#include "ProtocolUtilities.h"
 
 #include "ServerImpl.h"
 #include "DeviceHarness.h"
@@ -11,6 +12,7 @@
 #include "exptserve.h"
 #include <thread>
 #include <future>
+
 
 using namespace foxtrot;
 using std::cout;
