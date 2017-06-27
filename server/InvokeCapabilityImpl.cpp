@@ -3,8 +3,7 @@
 #include "foxtrot.pb.h"
 #include "DeviceError.h"
 #include "ProtocolError.h"
-
-#include "devices/dummy/dummyDevice.h"
+#include <chrono>
 
 #include <mutex>
 #include "ServerUtil.h"
@@ -45,6 +44,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     };
     
     auto devtp = rttr::type::get(*dev);
+    
     
     
     auto prop = devtp.get_property(req.capname().c_str());
@@ -104,7 +104,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         
             }
 	    auto& mut = _harness.GetMutex(devid);
-            std::lock_guard<std::mutex> lock(mut);
+            std::lock_guard<decltype(mut)> lock(mut);
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
@@ -127,8 +127,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 if(prop.is_readonly())
                 {
 		    _lg.Trace("readonly property");
-		    auto& mut = _harness.GetMutex(devid);
-		    std::lock_guard<std::mutex> lock(mut);
+		     auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
                     retval = prop.get_value(*dev);
                 }
                 else
@@ -144,17 +143,23 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     }
                     else if (req.args_size() == 1)
                     {
-		      auto& mut = _harness.GetMutex(devid);
-		      std::lock_guard<std::mutex> lock(mut);
+		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
 		      bool success;
 		      auto arg = get_arg(req.args().Get(0),success);
+		      if(!success)
+		      {
+			foxtrot_server_specific_error("coultn't get argument for setting property",
+						      repl,respond,_lg,this);
+			return true;
+			
+		      }
+		      
 		      prop.set_value(*dev,arg);
                     }
                     else if(req.args_size() == 0)
                     {
-		      auto& mut = _harness.GetMutex(devid);
-		      std::lock_guard<std::mutex> lock(mut);
-                        retval  = prop.get_value(dev);
+		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
+                       retval  = prop.get_value(dev);
                     }
                     
                 }

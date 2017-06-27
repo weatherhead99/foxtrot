@@ -64,8 +64,8 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     try{
       std::vector<rttr::argument> callargs(args.begin(), args.end());
-      auto& mut = _harness.GetMutex(req.devid());
-      std::lock_guard<std::mutex> lock(mut);
+      
+      auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
       retval = meth.invoke_variadic(*dev,callargs);
     }
     catch(...)

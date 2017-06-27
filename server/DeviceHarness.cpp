@@ -1,5 +1,6 @@
 #include "DeviceHarness.h"
 #include "ServerUtil.h"
+#include "ContentionError.h"
 
 #include <iostream>
 #include <utility>
@@ -61,7 +62,7 @@ Device* const foxtrot::DeviceHarness::GetDevice(int id)
     
 }
 
-std::mutex & foxtrot::DeviceHarness::GetMutex(int id)
+std::timed_mutex & foxtrot::DeviceHarness::GetMutex(int id)
 {
     return _devmutexes[id];
 }
@@ -184,6 +185,46 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     
 }
 
+
+variant DeviceHarness::call_capability(int devid, property& prop, unsigned int contention_timeout_ms)
+{
+  if(!prop.is_readonly())
+  {
+    throw std::logic_error("not a readonly property");
+  };
+  
+  auto lock = lock_device_contentious(devid,contention_timeout_ms);
+  
+  auto dev = GetDevice(devid);
+  auto retval = prop.get_value(*dev);
+      
+  return retval;
+  
+
+}
+
+std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
+{
+  auto& mut = GetMutex(devid);
+  std::unique_lock<std::remove_reference<decltype(mut)>::type> lock(mut,std::defer_lock);
+  
+  if(contention_timeout_ms == 0)
+  {
+    lock.lock();
+  }
+  
+  else
+  {
+    lock.try_lock_for(std::chrono::milliseconds(contention_timeout_ms));
+    if(!lock.owns_lock())
+    {
+       throw ContentionError("couldn't lock device with id:" + std::to_string(devid));
+    }
+  
+  
+  }
+
+}
 
 
 

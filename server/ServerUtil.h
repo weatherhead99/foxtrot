@@ -7,6 +7,7 @@
 
 #include "DeviceError.h"
 #include "ProtocolError.h"
+#include "ContentionError.h"
 
 namespace rttr
 {
@@ -50,7 +51,6 @@ namespace foxtrot
     
     template<typename T> struct responder_error_call<grpc::ServerAsyncResponseWriter<T>>
     {
-      constexpr static auto callfun = &grpc::ServerAsyncResponseWriter<T>::Finish;
       void operator()(grpc::ServerAsyncResponseWriter<T>& responder, const T& repl, void* tag)
       {
 	responder.Finish(repl, grpc::Status::OK, tag);
@@ -59,7 +59,6 @@ namespace foxtrot
     
     template<typename T> struct responder_error_call<grpc::ServerAsyncWriter<T>>
     {
-      constexpr static auto callfun = &grpc::ServerAsyncWriter<T>::Write;
       void operator()(grpc::ServerAsyncWriter<T>& responder, const T& repl, void* tag)
       {
 	responder.Write(repl,tag);
@@ -70,7 +69,7 @@ namespace foxtrot
     {
       responder_error_call<respondtp> errcall;
       
-      try{
+     try{
 	if(eptr)
 	{
 	  std::rethrow_exception(eptr);
@@ -87,6 +86,12 @@ namespace foxtrot
       {
 	lg.Error("caught protocol error: " + std::string(err.what()));
 	set_repl_err(repl,err,error_types::ProtocolError);
+	errcall(responder,repl,tag);
+      }
+      catch(class foxtrot::ContentionError& err)
+      {
+	lg.Error("caught contention error: " + std::string(err.what()));
+	set_repl_err(repl,err,error_types::contention_timeout);
 	errcall(responder,repl,tag);
       }
       catch(std::out_of_range& err)
@@ -120,10 +125,7 @@ namespace foxtrot
     };
     
     
-   
-
     std::unique_ptr<unsigned char[]> byte_view_data(rttr::variant& arr, unsigned& byte_size, foxtrot::byte_data_types& dtype);
-
 
     rttr::variant get_arg(const capability_argument& arg, bool& success);
     
@@ -189,8 +191,7 @@ namespace foxtrot
 	  //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
 	  success = outarg.convert(target_argtp);
 	  
-	  argvec[arg.position()] = outarg;
-	  
+	  argvec[arg.position()] = outarg;	  
       };
       
       for(auto& arg : argvec)
@@ -207,12 +208,8 @@ namespace foxtrot
 	
       }
       
-      
       return argvec;
-      
-
     }
       
-    
     
 }
