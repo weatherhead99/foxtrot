@@ -5,10 +5,19 @@
 #include <iostream>
 #include "DeviceError.h"
 
+#include <thread>
+#include <chrono>
+
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
 {
 }
+
+foxtrot::devices::dummyDevice::dummyDevice(const std::string& devcomment): Device(nullptr, devcomment)
+{
+
+}
+
 
 // int dummyDevice::getCounter()
 int foxtrot::devices::dummyDevice::getCounter()
@@ -85,6 +94,13 @@ std::vector<double> foxtrot::devices::dummyDevice::getRandomVector(int n)
     return out;
 }
 
+int foxtrot::devices::dummyDevice::longdurationmethod(int n_sec)
+{
+  std::this_thread::sleep_for(std::chrono::seconds(n_sec));
+
+  return 0;
+}
+
 
 
 RTTR_REGISTRATION
@@ -111,6 +127,8 @@ RTTR_REGISTRATION
      parameter_names("n"),
      metadata("streamdata",true)
      )
- 
+ .method("longdurationmethod",&dummyDevice::longdurationmethod)
+ ( parameter_names("n_sec")
+ )
  ;
 }

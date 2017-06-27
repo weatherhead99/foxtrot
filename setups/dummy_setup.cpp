@@ -49,10 +49,15 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
   
   
     auto devptr = std::unique_ptr<foxtrot::devices::dummyDevice,void(*)(Device*)>(
-        new foxtrot::devices::dummyDevice,devfun);
+        new foxtrot::devices::dummyDevice("dummy1"),devfun);
+    
+    auto devptr2 = std::unique_ptr<foxtrot::devices::dummyDevice,void(*)(Device*)>(
+	new foxtrot::devices::dummyDevice("dummy2"),devfun);
+    
     
     lg.Debug("adding to harness..");
     harness.AddDevice(std::move(devptr));
+    harness.AddDevice(std::move(devptr2));
     
     
     return 0;

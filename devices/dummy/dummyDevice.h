@@ -16,6 +16,7 @@ namespace foxtrot
         RTTR_ENABLE(Device)
     public:
         dummyDevice();
+	dummyDevice(const std::string& devcomment);
         
         double getRandomDouble() ;
 	
@@ -34,7 +35,9 @@ namespace foxtrot
 	
 	std::vector<unsigned char> getCountStream(int n);
     std::vector<double> getRandomVector(int n);
-        
+
+    int longdurationmethod(int n_sec);
+    
     protected:
         
         
