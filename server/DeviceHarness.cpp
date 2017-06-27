@@ -210,11 +210,13 @@ std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int 
   
   if(contention_timeout_ms == 0)
   {
+    _lg.Debug("no timeout, locking mutex...");
     lock.lock();
   }
   
   else
   {
+    _lg.Debug("have timeout, trying to lock...");
     lock.try_lock_for(std::chrono::milliseconds(contention_timeout_ms));
     if(!lock.owns_lock())
     {
@@ -224,6 +226,8 @@ std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int 
   
   }
 
+  return lock;
+  
 }
 
 

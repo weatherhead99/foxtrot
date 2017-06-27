@@ -160,6 +160,12 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     {
 		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
                        retval  = prop.get_value(dev);
+		       
+		       if(!lock.owns_lock())
+		       {
+			 _lg.Fatal("lock doesn't own...");
+		       }
+		       
                     }
                     
                 }

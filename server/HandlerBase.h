@@ -57,6 +57,8 @@ namespace foxtrot
               else
 	      {
 		  _lg.Debug("request not finished yet");
+		  _status = status::PROCESS;
+		  
 	      }
             
             }
