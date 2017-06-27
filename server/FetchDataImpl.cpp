@@ -12,7 +12,6 @@ foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 {
 }
 
-
 bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, respondertp& respond, void* tag)
 {
     _lg.Debug("processing fetch data request" );
@@ -27,10 +26,8 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     catch(std::out_of_range& err)
     {
-        set_repl_err(repl,err,error_types::out_of_range);
-        respond.Write(repl,tag);
+      foxtrot_server_specific_error("invalid device", repl,respond, _lg,this,error_types::out_of_range);
         return true;
-        
     }
     
     auto devtp = rttr::type::get(*dev);
@@ -38,31 +35,18 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     if(!meth)
     {
-      _lg.Error("no matching method found for capability: " + req.capname());
-      auto errstat = repl.mutable_err();
-      errstat->set_msg("no matching method found");
-      errstat->set_tp(error_types::out_of_range);
-      respond.Write(repl,tag);
+      auto msg = "no matching method found for capability: " + req.capname();
+      foxtrot_server_specific_error(msg,repl,respond,_lg,this,error_types::out_of_range);
       return true;
     }
     
     auto streamdatameta = meth.get_metadata("streamdata");
-    if(!streamdatameta.is_valid())
+    if(!streamdatameta.is_valid() || !streamdatameta.to_bool()) 
     {
       auto msg = "tried to call a method that doesn't support streaming";
-      set_repl_err_msg(repl,msg,error_types::out_of_range);
-      respond.Write(repl,tag);
+      foxtrot_server_specific_error(msg,repl,respond,_lg,this);
       return true;
     }
-    
-      if(!streamdatameta.to_bool())
-      {
-	auto msg = "tried to call a method that doesn't support streaming";
-      set_repl_err_msg(repl,msg,error_types::out_of_range);
-      respond.Write(repl,tag);
-      return true;
-      };
-      
     
     rttr::variant retval;
     
@@ -73,8 +57,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     catch(int& i)
     {
-      set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
-      respond.Write(repl,tag);
+      foxtrot_server_specific_error("couldn't get callargs", repl, respond, _lg,this);
       return true;
     }
     
@@ -85,33 +68,15 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
       std::lock_guard<std::mutex> lock(mut);
       retval = meth.invoke_variadic(*dev,callargs);
     }
-    catch(class foxtrot::DeviceError& err)
+    catch(...)
     {
-      _lg.Error("caught device error: " + std::string(err.what()));
-      set_repl_err(repl,err,error_types::DeviceError);
-      respond.Write(repl,tag);
+      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,this);
       return true;
-    }
-    catch(class foxtrot::ProtocolError& err)
-    {
-      _lg.Error("caught protocol error: " + std::string(err.what()));
-      set_repl_err(repl,err,error_types::ProtocolError);
-      respond.Write(repl,tag);
-      return true;
-    }
-    catch(std::exception& err)
-    {
-      _lg.Error("caught general error: " + std::string(err.what()));
-      set_repl_err(repl,err,error_types::ProtocolError);
-      respond.Write(repl,tag);
-      return true;
-    }
+    };
     
     if(!retval.is_array())
     {
-      _lg.Error("return type is not an array type");
-      set_repl_err_msg(repl,"return type is not an array type",error_types::Error); 
-      respond.Write(repl,tag);
+      foxtrot_server_specific_error("return type is not an array type", repl, respond,_lg,tag);
       return true;
     }
     
@@ -120,9 +85,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     if(_data == nullptr )
     {
-      _lg.Error("can't convert return type to vector ");
-      set_repl_err_msg(repl,"can't convert return type to vector",error_types::Error);
-      respond.Write(repl,tag);
+      foxtrot_server_specific_error("can't convert return type to vector", repl, respond, _lg,tag);
       return true;
     }
     
@@ -131,7 +94,6 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
 
     _num_full_chunks = (_byte_size / _csize);
     _extra_chunk = _byte_size % _csize ? true : false;
-    
     
     _lg.Trace("num full chunks: " + std::to_string(_num_full_chunks));
     _lg.Trace("extra chunk: " + std::to_string(_extra_chunk));

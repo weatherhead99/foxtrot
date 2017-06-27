@@ -2,7 +2,11 @@
 #include "foxtrot.grpc.pb.h"
 #include <rttr/type>
 #include "Logging.h"
+#include <exception>
 // #include "byteview.h"
+
+#include "DeviceError.h"
+#include "ProtocolError.h"
 
 namespace rttr
 {
@@ -39,45 +43,84 @@ namespace foxtrot
       
     }
     
-    template <typename T> bool foxtrot_error_checking(T fun, capability_response& repl)
+    
+    template<typename respondtp> struct responder_error_call
     {
-             try{    
-                fun();
-                return true;
-         }
-         catch(class DeviceError& err)
-         {
-             set_repl_err(repl,err,error_types::DeviceError);
-             return false;
-         }
-         catch(class ProtocolError& err)
-         {
-             set_repl_err(repl,err,error_types::ProtocolError);
-             return false;
-         }
-         catch(std::out_of_range& err)
-         {
-             set_repl_err(repl,err,error_types::out_of_range);
-             return false;
-             
-         }
-         catch(std::exception& err)
-         {
-             set_repl_err(repl,err,error_types::Error);
-             return false;
-         }
-         catch(...)
-         {
-             auto errstat = repl.mutable_err();
-             errstat->set_msg("");
-             errstat->set_tp(error_types::unknown_error);
-             return false;
-             
-         }
-         ;
-             
-};
-
+    };
+    
+    template<typename T> struct responder_error_call<grpc::ServerAsyncResponseWriter<T>>
+    {
+      constexpr static auto callfun = &grpc::ServerAsyncResponseWriter<T>::Finish;
+      void operator()(grpc::ServerAsyncResponseWriter<T>& responder, const T& repl, void* tag)
+      {
+	responder.Finish(repl, grpc::Status::OK, tag);
+      };
+    };
+    
+    template<typename T> struct responder_error_call<grpc::ServerAsyncWriter<T>>
+    {
+      constexpr static auto callfun = &grpc::ServerAsyncWriter<T>::Write;
+      void operator()(grpc::ServerAsyncWriter<T>& responder, const T& repl, void* tag)
+      {
+	responder.Write(repl,tag);
+      };
+    };
+    
+    template <typename repltp, typename respondtp> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, respondtp& responder, foxtrot::Logging& lg, void* tag)
+    {
+      responder_error_call<respondtp> errcall;
+      
+      try{
+	if(eptr)
+	{
+	  std::rethrow_exception(eptr);
+	}
+	
+      }
+      catch(class foxtrot::DeviceError& err)
+      {
+	lg.Error("caught device error: " + std::string(err.what()));
+	set_repl_err(repl,err,error_types::DeviceError);
+	errcall(responder,repl,tag);
+      }
+      catch(class foxtrot::ProtocolError& err)
+      {
+	lg.Error("caught protocol error: " + std::string(err.what()));
+	set_repl_err(repl,err,error_types::ProtocolError);
+	errcall(responder,repl,tag);
+      }
+      catch(std::out_of_range& err)
+      {
+	lg.Error("caught out of range error");
+	set_repl_err(repl,err,error_types::out_of_range);
+	errcall(responder,repl,tag);
+      }
+      catch(std::exception& err)
+      {
+	lg.Error("caught general error: " + std::string(err.what()));
+	set_repl_err(repl,err,error_types::Error);
+	errcall(responder,repl,tag);
+      }
+      catch(...)
+      {
+	lg.Error("caught otherwise unspecified exception");
+	set_repl_err_msg(repl,"unknown error",error_types::unknown_error);
+	errcall(responder,repl,tag);
+      }
+      
+    };
+    
+    template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, void* tag, error_types&& errtp=error_types::Error)
+    {
+      lg.Error(msg);
+      set_repl_err_msg(repl,msg,errtp);
+      responder_error_call<respondtp> errcall;
+      errcall(respond, repl, tag);
+      
+    };
+    
+    
+   
 
     std::unique_ptr<unsigned char[]> byte_view_data(rttr::variant& arr, unsigned& byte_size, foxtrot::byte_data_types& dtype);
 

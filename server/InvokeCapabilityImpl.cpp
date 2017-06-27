@@ -26,6 +26,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     _lg.Debug("processing invoke capability request" );
     
     auto devid = req.devid();
+    
     repl.set_msgid(req.msgid());
     repl.set_devid(req.devid());
     repl.set_capname(req.capname());
@@ -33,16 +34,13 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     foxtrot::Device* dev;
     _lg.Debug("capability requested is: " + req.capname() );
     
-//     cout << "debug string" << req.DebugString() << endl;
-    
-    //TODO: MUTEX?
     try{
         dev = _harness.GetDevice(devid);    
     }
     catch(std::out_of_range& err)
     {
-      set_repl_err(repl,err,error_types::out_of_range);
-      respond.Finish(repl,grpc::Status::OK,tag);
+      foxtrot_server_specific_error(
+	"invalid device id supplied", repl,respond,_lg,this, error_types::out_of_range);
       return true;
     };
     
@@ -57,20 +55,18 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     try{
         if (!meth && !prop)
         {
-            _lg.Error("no matching property or method error" );
-        errstatus* errstat = repl.mutable_err();
-        errstat->set_msg("no matching property or method");
-        errstat->set_tp(error_types::out_of_range);
-	respond.Finish(repl,grpc::Status::OK,tag);
-        return true;
+	  foxtrot_server_specific_error(
+	    "no matching property or method", repl,respond,_lg,this);
+	  return true;
         }
         else if (!prop)
         {
             //method
             if(!meth.is_valid())
             {
+	      foxtrot_server_specific_error(
+		"invalid method", repl, respond, _lg, this);
                 _lg.Error("invalid method!");
-                set_repl_err_msg(repl,"invalid method", error_types::Error);
                 return true;
             }
             
@@ -79,16 +75,15 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 args = get_callargs(meth,req,repl);	    
                 for(auto& arg: args)
                 {
-                rttr::variant v = arg;
-                _lg.Trace("arg: " + v.to_string());
-	      
+		  rttr::variant v = arg;
+		  _lg.Trace("arg: " + v.to_string());
                 }
 	    
                 }  
                 catch(int& i)
                 {
-                set_repl_err_msg(repl,"couldn't get callargs",error_types::Error);
-                respond.Finish(repl,grpc::Status::OK,tag);
+		  foxtrot_server_specific_error(
+		    "couldn't get callargs", repl,respond,_lg,this);
                 return true;
                 }
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
@@ -100,10 +95,9 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             {
                 if(streammeta.to_bool())
                 {
-                    _lg.Error("tried to InvokeCapability on a bulk data method!");
-                    auto msg = "tried to InvokeCapability on a bulk data method!";
-                    set_repl_err_msg(repl,msg,error_types::Error);
-                    respond.Finish(repl,grpc::Status::OK,tag);
+		  foxtrot_server_specific_error(
+		    "tried to InvokeCapability on a bulk data method!",
+		    repl,respond,_lg,this);
                     return true;
                 }
                 
@@ -123,10 +117,8 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             {
                 if(streammeta.to_bool())
                 {
-                    _lg.Error("tried to InvokeCapability on a bulk data property!");
-                    auto msg = "tried to InvokeCapability on a bulk data property!";
-                    set_repl_err_msg(repl,msg,error_types::Error);
-                    respond.Finish(repl,grpc::Status::OK,tag);
+		    foxtrot_server_specific_error( 
+		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, this);
                     return true;
                 }
                 
@@ -135,6 +127,8 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 if(prop.is_readonly())
                 {
 		    _lg.Trace("readonly property");
+		    auto& mut = _harness.GetMutex(devid);
+		    std::lock_guard<std::mutex> lock(mut);
                     retval = prop.get_value(*dev);
                 }
                 else
@@ -142,9 +136,11 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     if( req.args_size() >1)
                     {
                         //ERRROR: should only have one number to set a property
-                        errstatus* errstat = repl.mutable_err();
-                        errstat->set_msg("require only 1 argument to writeable property");
-                        errstat->set_tp(error_types::ProtocolError);
+		      foxtrot_server_specific_error(
+			  "require only 1 argument to writable property",
+			  repl, respond, _lg,this);
+		      return true;
+		      
                     }
                     else if (req.args_size() == 1)
                     {
@@ -156,6 +152,8 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     }
                     else if(req.args_size() == 0)
                     {
+		      auto& mut = _harness.GetMutex(devid);
+		      std::lock_guard<std::mutex> lock(mut);
                         retval  = prop.get_value(dev);
                     }
                     
@@ -164,45 +162,13 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         };
         
     }
-    catch(class DeviceError& err)
-        {
-            _lg.Error("caught device error" );
-            set_repl_err(repl,err,error_types::DeviceError);
-            respond.Finish(repl,grpc::Status::OK,tag);
-             return true;
-         }
-    catch(class ProtocolError& err)
-         {
-             _lg.Error("caught protocol error" );
-             set_repl_err(repl,err,error_types::ProtocolError);
-            respond.Finish(repl,grpc::Status::OK,tag);
-             return true;
-         }
-    catch(std::out_of_range& err)
-    {
-        _lg.Error("caught out of range error");
-        set_repl_err(repl,err,error_types::out_of_range);
-        respond.Finish(repl,grpc::Status::OK,tag);
-        return true;
-    }
-    catch(std::exception& err)
-    {
-          _lg.Error("caught generic error" );
-        set_repl_err(repl,err,error_types::Error);
-        respond.Finish(repl,grpc::Status::OK,tag);
-        return true;
-    }
     catch(...)
     {
-        _lg.Error("caught otherwise unspecified error");
-        set_repl_err_msg(repl, "unknown error", error_types::Error);
-        
-    }
-        
-            
-//     cout << "repl has error: " << repl.has_err() << endl;
-//     cout << "repl return: " << repl.dblret() << endl;
-         
+      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,this);
+      return true;
+    };
+                 
+    
     set_returntype(retval,repl);
     respond.Finish(repl,grpc::Status::OK,tag);
     return true;
