@@ -68,21 +68,22 @@ int main(int argc, char** argv)
       return 1;
     }
 
-    std::map<std::string,foxtrot::parameterset> params;
+    std::unique_ptr<std::map<std::string,foxtrot::parameterset>> params;
     
     if(!vm.count("parameterfile"))
     {
       cout << "WARNING: no parameter file supplied, continuing without parameters..." << endl;
+      params.reset(nullptr);
     }
     else
     {
       cout << "reading parameter sets..."<< endl; 
-      params = foxtrot::read_parameter_json_file(parameterfile);
+      params.reset( new std::map<std::string,foxtrot::parameterset>(foxtrot::read_parameter_json_file(parameterfile)));
       
     }
     
     DeviceHarness harness;
-    foxtrot::ExperimentalSetup setup(setupfile,harness,&params);
+    foxtrot::ExperimentalSetup setup(setupfile,harness,params.get());
     
     if(vm.count("dump"))
     {
@@ -112,8 +113,6 @@ int main(int argc, char** argv)
     }
     
     cout << "server exited without error..." << endl;
-    
-    
     
     
 };
