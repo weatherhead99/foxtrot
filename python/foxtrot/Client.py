@@ -6,9 +6,9 @@ Created on Wed Apr 19 11:44:13 2017
 @author: weatherill
 """
 from functools import wraps
-from .foxtrot_pb2_grpc import *
-from .foxtrot_pb2 import *
-from .Errors import *
+from foxtrot.foxtrot_pb2_grpc import *
+from foxtrot.foxtrot_pb2 import *
+from foxtrot.Errors import *
 
 import types
 import struct
@@ -123,6 +123,8 @@ def _check_repl_err(repl):
         raise ProtocolError(repl.err.msg)
     elif repl.err.tp == 3:
         raise ValueError(repl.err.msg)
+    elif repl.err.tp == 5:
+        raise ContentionError(repl.err.msg)
     else:
         raise RuntimeError("unknown error")
         

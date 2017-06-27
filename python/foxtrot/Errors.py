@@ -11,3 +11,6 @@ class DeviceError(Exception):
 
 class ProtocolError(Exception):
     pass
+
+class ContentionError(Exception):
+    pass

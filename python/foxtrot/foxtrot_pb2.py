@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='foxtrot.proto',
   package='foxtrot',
   syntax='proto3',
-  serialized_pb=_b('\n\rfoxtrot.proto\x12\x07\x66oxtrot\"\x07\n\x05\x65mpty\":\n\terrstatus\x12 \n\x02tp\x18\x01 \x01(\x0e\x32\x14.foxtrot.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t\"\xe0\x01\n\rdevcapability\x12%\n\x02tp\x18\x01 \x01(\x0e\x32\x19.foxtrot.capability_types\x12\x0f\n\x07\x63\x61pname\x18\x02 \x01(\t\x12\x10\n\x08\x61rgnames\x18\x03 \x03(\t\x12&\n\x08\x61rgtypes\x18\x04 \x03(\x0e\x32\x14.foxtrot.value_types\x12%\n\x05rettp\x18\x05 \x01(\x0e\x32\x14.foxtrot.value_typesH\x00\x12,\n\x08vecrettp\x18\x06 \x01(\x0e\x32\x18.foxtrot.byte_data_typesH\x00\x42\x08\n\x06return\"g\n\x0b\x64\x65vdescribe\x12\r\n\x05\x64\x65vid\x18\x01 \x01(\r\x12\x0f\n\x07\x64\x65vtype\x18\x02 \x01(\t\x12\x12\n\ndevcomment\x18\x03 \x01(\t\x12$\n\x04\x63\x61ps\x18\x04 \x03(\x0b\x32\x16.foxtrot.devcapability\"\xae\x01\n\x0cservdescribe\x12\x13\n\x0bservcomment\x18\x01 \x01(\t\x12>\n\rdevs_attached\x18\x02 \x03(\x0b\x32\'.foxtrot.servdescribe.DevsAttachedEntry\x1aI\n\x11\x44\x65vsAttachedEntry\x12\x0b\n\x03key\x18\x01 \x01(\r\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.foxtrot.devdescribe:\x02\x38\x01\"y\n\x13\x63\x61pability_argument\x12\x10\n\x08position\x18\x01 \x01(\r\x12\x10\n\x06\x64\x62larg\x18\x02 \x01(\x01H\x00\x12\x10\n\x06intarg\x18\x03 \x01(\x11H\x00\x12\x11\n\x07\x62oolarg\x18\x04 \x01(\x08H\x00\x12\x10\n\x06strarg\x18\x05 \x01(\tH\x00\x42\x07\n\x05value\"o\n\x12\x63\x61pability_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\"\xbb\x01\n\x13\x63\x61pability_response\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lret\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x07 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x08 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\xa0\x01\n\ttelemetry\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06tstamp\x18\x02 \x01(\x04\x12\x10\n\x06\x64\x62lret\x18\x03 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x04 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x05 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x06 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x07 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"}\n\rchunk_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x11\n\tchunksize\x18\x06 \x01(\r\"\x90\x01\n\tdatachunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x03 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x04 \x01(\t\x12\x1f\n\x03\x65rr\x18\x06 \x01(\x0b\x32\x12.foxtrot.errstatus\x12%\n\x03\x64tp\x18\x07 \x01(\x0e\x32\x18.foxtrot.byte_data_types*S\n\x10\x63\x61pability_types\x12\x12\n\x0eVALUE_READONLY\x10\x00\x12\x13\n\x0fVALUE_READWRITE\x10\x01\x12\n\n\x06\x41\x43TION\x10\x02\x12\n\n\x06STREAM\x10\x03*P\n\x0bvalue_types\x12\t\n\x05\x46LOAT\x10\x00\x12\x07\n\x03INT\x10\x01\x12\x08\n\x04\x42OOL\x10\x02\x12\n\n\x06STRING\x10\x03\x12\r\n\tBYTE_DATA\x10\x04\x12\x08\n\x04VOID\x10\x05*u\n\x0f\x62yte_data_types\x12\t\n\x05UCHAR\x10\x00\x12\n\n\x06USHORT\x10\x01\x12\x08\n\x04UINT\x10\x02\x12\t\n\x05ULONG\x10\x03\x12\t\n\x05SHORT\x10\x04\x12\x08\n\x04IINT\x10\x05\x12\x08\n\x04LONG\x10\x06\x12\n\n\x06\x42\x46LOAT\x10\x07\x12\x0b\n\x07\x42\x44OUBLE\x10\x08*a\n\x0b\x65rror_types\x12\t\n\x05\x45rror\x10\x00\x12\x0f\n\x0b\x44\x65viceError\x10\x01\x12\x11\n\rProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x32\xce\x01\n\texptserve\x12M\n\x10InvokeCapability\x12\x1b.foxtrot.capability_request\x1a\x1c.foxtrot.capability_response\x12\x37\n\x0e\x44\x65scribeServer\x12\x0e.foxtrot.empty\x1a\x15.foxtrot.servdescribe\x12\x39\n\tFetchData\x12\x16.foxtrot.chunk_request\x1a\x12.foxtrot.datachunk0\x01\x62\x06proto3')
+  serialized_pb=_b('\n\rfoxtrot.proto\x12\x07\x66oxtrot\"\x07\n\x05\x65mpty\":\n\terrstatus\x12 \n\x02tp\x18\x01 \x01(\x0e\x32\x14.foxtrot.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t\"\xe0\x01\n\rdevcapability\x12%\n\x02tp\x18\x01 \x01(\x0e\x32\x19.foxtrot.capability_types\x12\x0f\n\x07\x63\x61pname\x18\x02 \x01(\t\x12\x10\n\x08\x61rgnames\x18\x03 \x03(\t\x12&\n\x08\x61rgtypes\x18\x04 \x03(\x0e\x32\x14.foxtrot.value_types\x12%\n\x05rettp\x18\x05 \x01(\x0e\x32\x14.foxtrot.value_typesH\x00\x12,\n\x08vecrettp\x18\x06 \x01(\x0e\x32\x18.foxtrot.byte_data_typesH\x00\x42\x08\n\x06return\"g\n\x0b\x64\x65vdescribe\x12\r\n\x05\x64\x65vid\x18\x01 \x01(\r\x12\x0f\n\x07\x64\x65vtype\x18\x02 \x01(\t\x12\x12\n\ndevcomment\x18\x03 \x01(\t\x12$\n\x04\x63\x61ps\x18\x04 \x03(\x0b\x32\x16.foxtrot.devcapability\"\xae\x01\n\x0cservdescribe\x12\x13\n\x0bservcomment\x18\x01 \x01(\t\x12>\n\rdevs_attached\x18\x02 \x03(\x0b\x32\'.foxtrot.servdescribe.DevsAttachedEntry\x1aI\n\x11\x44\x65vsAttachedEntry\x12\x0b\n\x03key\x18\x01 \x01(\r\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.foxtrot.devdescribe:\x02\x38\x01\"y\n\x13\x63\x61pability_argument\x12\x10\n\x08position\x18\x01 \x01(\r\x12\x10\n\x06\x64\x62larg\x18\x02 \x01(\x01H\x00\x12\x10\n\x06intarg\x18\x03 \x01(\x11H\x00\x12\x11\n\x07\x62oolarg\x18\x04 \x01(\x08H\x00\x12\x10\n\x06strarg\x18\x05 \x01(\tH\x00\x42\x07\n\x05value\"\x8b\x01\n\x12\x63\x61pability_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x1a\n\x12\x63ontention_timeout\x18\x05 \x01(\r\"\xbb\x01\n\x13\x63\x61pability_response\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lret\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x07 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x08 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\xa0\x01\n\ttelemetry\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06tstamp\x18\x02 \x01(\x04\x12\x10\n\x06\x64\x62lret\x18\x03 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x04 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x05 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x06 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x07 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\x99\x01\n\rchunk_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x11\n\tchunksize\x18\x06 \x01(\r\x12\x1a\n\x12\x63ontention_timeout\x18\x07 \x01(\r\"\x90\x01\n\tdatachunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x03 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x04 \x01(\t\x12\x1f\n\x03\x65rr\x18\x06 \x01(\x0b\x32\x12.foxtrot.errstatus\x12%\n\x03\x64tp\x18\x07 \x01(\x0e\x32\x18.foxtrot.byte_data_types*S\n\x10\x63\x61pability_types\x12\x12\n\x0eVALUE_READONLY\x10\x00\x12\x13\n\x0fVALUE_READWRITE\x10\x01\x12\n\n\x06\x41\x43TION\x10\x02\x12\n\n\x06STREAM\x10\x03*P\n\x0bvalue_types\x12\t\n\x05\x46LOAT\x10\x00\x12\x07\n\x03INT\x10\x01\x12\x08\n\x04\x42OOL\x10\x02\x12\n\n\x06STRING\x10\x03\x12\r\n\tBYTE_DATA\x10\x04\x12\x08\n\x04VOID\x10\x05*u\n\x0f\x62yte_data_types\x12\t\n\x05UCHAR\x10\x00\x12\n\n\x06USHORT\x10\x01\x12\x08\n\x04UINT\x10\x02\x12\t\n\x05ULONG\x10\x03\x12\t\n\x05SHORT\x10\x04\x12\x08\n\x04IINT\x10\x05\x12\x08\n\x04LONG\x10\x06\x12\n\n\x06\x42\x46LOAT\x10\x07\x12\x0b\n\x07\x42\x44OUBLE\x10\x08*y\n\x0b\x65rror_types\x12\t\n\x05\x45rror\x10\x00\x12\x0f\n\x0b\x44\x65viceError\x10\x01\x12\x11\n\rProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x12\x16\n\x12\x63ontention_timeout\x10\x05\x32\xce\x01\n\texptserve\x12M\n\x10InvokeCapability\x12\x1b.foxtrot.capability_request\x1a\x1c.foxtrot.capability_response\x12\x37\n\x0e\x44\x65scribeServer\x12\x0e.foxtrot.empty\x1a\x15.foxtrot.servdescribe\x12\x39\n\tFetchData\x12\x16.foxtrot.chunk_request\x1a\x12.foxtrot.datachunk0\x01\x62\x06proto3')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -49,8 +49,8 @@ _CAPABILITY_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1467,
-  serialized_end=1550,
+  serialized_start=1525,
+  serialized_end=1608,
 )
 _sym_db.RegisterEnumDescriptor(_CAPABILITY_TYPES)
 
@@ -88,8 +88,8 @@ _VALUE_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1552,
-  serialized_end=1632,
+  serialized_start=1610,
+  serialized_end=1690,
 )
 _sym_db.RegisterEnumDescriptor(_VALUE_TYPES)
 
@@ -139,8 +139,8 @@ _BYTE_DATA_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=1634,
-  serialized_end=1751,
+  serialized_start=1692,
+  serialized_end=1809,
 )
 _sym_db.RegisterEnumDescriptor(_BYTE_DATA_TYPES)
 
@@ -171,11 +171,15 @@ _ERROR_TYPES = _descriptor.EnumDescriptor(
       name='unknown_error', index=4, number=4,
       options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='contention_timeout', index=5, number=5,
+      options=None,
+      type=None),
   ],
   containing_type=None,
   options=None,
-  serialized_start=1753,
-  serialized_end=1850,
+  serialized_start=1811,
+  serialized_end=1932,
 )
 _sym_db.RegisterEnumDescriptor(_ERROR_TYPES)
 
@@ -204,6 +208,7 @@ DeviceError = 1
 ProtocolError = 2
 out_of_range = 3
 unknown_error = 4
+contention_timeout = 5
 
 
 
@@ -562,6 +567,13 @@ _CAPABILITY_REQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='contention_timeout', full_name='foxtrot.capability_request.contention_timeout', index=4,
+      number=5, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -574,8 +586,8 @@ _CAPABILITY_REQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=727,
-  serialized_end=838,
+  serialized_start=728,
+  serialized_end=867,
 )
 
 
@@ -657,8 +669,8 @@ _CAPABILITY_RESPONSE = _descriptor.Descriptor(
       name='return', full_name='foxtrot.capability_response.return',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=841,
-  serialized_end=1028,
+  serialized_start=870,
+  serialized_end=1057,
 )
 
 
@@ -733,8 +745,8 @@ _TELEMETRY = _descriptor.Descriptor(
       name='return', full_name='foxtrot.telemetry.return',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1031,
-  serialized_end=1191,
+  serialized_start=1060,
+  serialized_end=1220,
 )
 
 
@@ -780,6 +792,13 @@ _CHUNK_REQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='contention_timeout', full_name='foxtrot.chunk_request.contention_timeout', index=5,
+      number=7, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -792,8 +811,8 @@ _CHUNK_REQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1193,
-  serialized_end=1318,
+  serialized_start=1223,
+  serialized_end=1376,
 )
 
 
@@ -858,8 +877,8 @@ _DATACHUNK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1321,
-  serialized_end=1465,
+  serialized_start=1379,
+  serialized_end=1523,
 )
 
 _ERRSTATUS.fields_by_name['tp'].enum_type = _ERROR_TYPES
@@ -1027,10 +1046,10 @@ try:
   # THESE ELEMENTS WILL BE DEPRECATED.
   # Please use the generated *_pb2_grpc.py files instead.
   import grpc
-  from grpc.framework.common import cardinality
-  from grpc.framework.interfaces.face import utilities as face_utilities
   from grpc.beta import implementations as beta_implementations
   from grpc.beta import interfaces as beta_interfaces
+  from grpc.framework.common import cardinality
+  from grpc.framework.interfaces.face import utilities as face_utilities
 
 
   class exptserveStub(object):
