@@ -14,8 +14,15 @@ using std::string;
 using namespace foxtrot;
 
 foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, foxtrot::DeviceHarness& harness)
-: _servcomment(servcomment), _harness(harness), _lg("ServerImpl")
+: _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051")
 {
+}
+
+ServerImpl::ServerImpl(const string& servcomment, DeviceHarness& harness, const string& connstr)
+: ServerImpl(servcomment,harness)
+{
+  _connstr = connstr;
+
 }
 
 
@@ -55,7 +62,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
 
 void ServerImpl::Run()
 {
-    setup_common("0.0.0.0:50051");
+    setup_common(_connstr);
     
     
     HandleRpcs();
@@ -63,7 +70,7 @@ void ServerImpl::Run()
 
 std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::RunMultithread(int nthreads)
 {
-  setup_common("0.0.0.0:50051");
+  setup_common(_connstr);
   
   std::vector<std::future<std::exception_ptr>> out;
   out.reserve(nthreads);

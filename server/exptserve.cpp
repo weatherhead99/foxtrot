@@ -31,6 +31,7 @@ int main(int argc, char** argv)
     std::string parameterfile;
     int debuglevel;
     int nthreads;
+    short unsigned port;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
@@ -38,7 +39,8 @@ int main(int argc, char** argv)
     ("servername,n",po::value<std::string>(&servname),"server name")
     ("dump", po::value<std::string>(), "dump server JSON description")
     ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level")
-    ("threads,t",po::value<int>(&nthreads)->default_value(4),"number of server threads to run");
+    ("threads,t",po::value<int>(&nthreads)->default_value(4),"number of server threads to run")
+    ("port",po::value<short unsigned>(&port)->default_value(50051),"port to use");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
@@ -96,7 +98,9 @@ int main(int argc, char** argv)
     }
     
     
-    foxtrot::ServerImpl serv(servname,harness);
+    std::string connstr = "0.0.0.0:" + std::to_string(port);
+    
+    foxtrot::ServerImpl serv(servname,harness,connstr);
     
     auto excepts = serv.RunMultithread(nthreads);
     

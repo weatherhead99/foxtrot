@@ -25,6 +25,7 @@ class ServerImpl final
 {
 public:
     ServerImpl(const std::string& servcomment, DeviceHarness& harness);
+    ServerImpl(const std::string& servcomment, DeviceHarness& harness, const std::string& connstr);
     
     ~ServerImpl();
     void Run();
@@ -36,7 +37,7 @@ public:
     
 private:
   
-  
+    std::string _connstr;
   
     void setup_common(const std::string& addrstr);
   
