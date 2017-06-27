@@ -40,9 +40,15 @@ void ServerImpl::setup_common(const std::string& addrstr)
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
-    std::cout << "server listening on " << addrstr << std::endl;
+    _lg.Info("server listening on " + addrstr );
     
-
+    std::shared_ptr<ServerDescribeLogic> describe_logic(new ServerDescribeLogic(_servcomment,_harness));
+    std::shared_ptr<InvokeCapabilityLogic> capability_logic(new InvokeCapabilityLogic(_harness));	
+    std::shared_ptr<FetchDataLogic> fetch_logic(new FetchDataLogic(_harness));
+    
+    new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
+    new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
+    new FetchDataImpl(&_service,_cq.get(),fetch_logic);
 }
 
 
@@ -51,6 +57,7 @@ void ServerImpl::Run()
 {
     setup_common("0.0.0.0:50051");
     
+    
     HandleRpcs();
 }
 
@@ -58,24 +65,30 @@ std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::Ru
 {
   setup_common("0.0.0.0:50051");
   
-  auto handlerpccatch = [this] () {  
-    try
-    {
-      HandleRpcs();
-    }
-    catch(...)
-    {
-      return std::current_exception();
-    }
-    
-    return static_cast<std::exception_ptr>(nullptr);
-    
-  };
-  
   std::vector<std::future<std::exception_ptr>> out;
   out.reserve(nthreads);
   for(auto i =0; i < nthreads; i++)
   {
+    auto handlerpccatch = [this,i] () {  
+    std::exception_ptr except = nullptr;
+    try
+    {
+      
+      HandleRpcs();
+    }
+    catch(...)
+    {
+      except = std::current_exception(); 
+    }
+    
+    _exitthreadnum = i;
+    _condvar.notify_all();
+    
+    return except;
+    
+    };
+        
+    _lg.Debug("starting server thread...");
     out.push_back(std::async(std::launch::async,handlerpccatch)); 
   }
   
@@ -83,19 +96,27 @@ std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::Ru
 
 }
 
+int ServerImpl::join_multithreaded()
+{
+  std::unique_lock<std::mutex> lock(_exitmut);
+  _lg.Debug("waiting on exit condition...");
+  _condvar.wait(lock);
+  _lg.Info("thread " + std::to_string(_exitthreadnum) + " exited");
+  
+  return _exitthreadnum;
+}
+
+
+
 
 void foxtrot::ServerImpl::HandleRpcs()
 {
-    ServerDescribeLogic describe_logic(_servcomment,_harness);
-    InvokeCapabilityLogic capability_logic(_harness);
-    FetchDataLogic fetch_logic(_harness);
     
-    new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
-    new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
-    new FetchDataImpl(&_service,_cq.get(),fetch_logic);
+    
     
     void* tag;
     bool ok;
+    
     
     while(true)
     {
@@ -116,7 +137,5 @@ void foxtrot::ServerImpl::HandleRpcs()
      
         
     }
-    
-        
     
 }

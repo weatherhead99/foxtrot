@@ -12,6 +12,7 @@
 #include "exptserve.h"
 #include <thread>
 #include <future>
+#include <exception>
 
 
 using namespace foxtrot;
@@ -95,6 +96,24 @@ int main(int argc, char** argv)
     
     
     foxtrot::ServerImpl serv(servname,harness);
-    serv.Run();
+    
+    auto excepts = serv.RunMultithread(nthreads);
+    
+    
+    cout << "running in multithreaded mode..." << endl;
+    
+    auto exitthread = serv.join_multithreaded();
+    
+    auto except_ptr = excepts[exitthread].get();
+    
+    if(except_ptr)
+    {
+      std::rethrow_exception(except_ptr);
+    }
+    
+    cout << "server exited without error..." << endl;
+    
+    
+    
     
 };

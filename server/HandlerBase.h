@@ -20,7 +20,7 @@ namespace foxtrot
       
     public:
         
-        HandlerBase(exptserve::AsyncService* service, grpc::ServerCompletionQueue* cq, T& logic)
+        HandlerBase(exptserve::AsyncService* service, grpc::ServerCompletionQueue* cq, std::shared_ptr<T> logic)
         : _service(service), _cq(cq), _responder(&_ctxt),  _logic(logic), _status(status::CREATE),
         _lg("HandlerBase")
         {
@@ -35,29 +35,35 @@ namespace foxtrot
                 //TODO: dispatch on this
             
                 (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
+                 
             }
             else if(_status == status::PROCESS)
             {
-	       
-                if(_newrequest)
-                {
-                    _lg.Debug("new request, spawning new handler");
-                    new HandlerBase<T>(_service, _cq,_logic);
-                    _newrequest = false;
-                }
-		
-                if(_logic.HandleRequest(_req,_reply, _responder, this))
-                {
+	       _status = status::IN_FLIGHT;
+	      _lg.Debug("request id is: " + std::to_string((long unsigned) this));
+	      if(_newrequest)
+	      {
+		  _lg.Debug("spawning new handler");
+		  new HandlerBase<T>(_service, _cq,_logic);
+		  _newrequest = false;
+	      }
+	      
+              if(_logic->HandleRequest(_req,_reply, _responder, this))
+              {
+		  
                     _lg.Debug("request successful, marking finished");
                     _status = status::FINISH;
-                }
-                else
-		{
-		  
+              }
+              else
+	      {
 		  _lg.Debug("request not finished yet");
-		}
+	      }
             
             }
+            else if (_status == status::IN_FLIGHT)
+	    {
+	      _lg.Debug("already in flight, skipping...");
+	    }
             else
             {
 	      _lg.Debug("finishing request");
@@ -90,18 +96,21 @@ namespace foxtrot
         
 	
     private:
+      
+	
+        std::shared_ptr<T> _logic;
         bool _newrequest = true;
         grpc::ServerCompletionQueue* _cq;
         grpc::ServerContext _ctxt;
         exptserve::AsyncService* _service;
         
-        T& _logic;
+        
         
         typename T::reqtp _req;
         typename T::repltp _reply;
         
         typename T::respondertp _responder;
-        enum class status {CREATE,PROCESS,FINISH};
+        enum class status {CREATE,PROCESS,IN_FLIGHT,FINISH};
         status _status;
         
         foxtrot::Logging _lg;
