@@ -22,7 +22,7 @@ using namespace boost::asio;
 using boost::asio::serial_port_base;
 
 
-const std::map<unsigned, serial_port_base::stop_bits::type> sbitmap 
+const std::map<int, serial_port_base::stop_bits::type> sbitmap 
 { {1, serial_port_base::stop_bits::one },
   {2, serial_port_base::stop_bits::two}
 };

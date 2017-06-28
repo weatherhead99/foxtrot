@@ -26,12 +26,12 @@ namespace foxtrot
     private:
       libusb_context* _ctxt;
       libusb_device_handle* _hdl;
-      unsigned _vid;
-      unsigned _pid;
-      unsigned _epout;
-      unsigned _epin;
-      unsigned _write_timeout = 0;
-      unsigned _read_timeout = 0;
+      int _vid;
+      int _pid;
+      int _epout;
+      int _epin;
+      int _write_timeout = 0;
+      int _read_timeout = 0;
       foxtrot::Logging _lg;
     };
     

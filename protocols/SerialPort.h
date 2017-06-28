@@ -36,15 +36,15 @@ namespace foxtrot
       boost::asio::serial_port _sport;
       
       std::string _port;
-      unsigned _baudrate;
+      int _baudrate;
       
       serial_port_base::parity::type _parity = serial_port_base::parity::none;
       serial_port_base::flow_control::type _flowcont = serial_port_base::flow_control::none;
       serial_port_base::stop_bits::type _stopbits = serial_port_base::stop_bits::one;
-      unsigned _bits = 8;
-      unsigned _timeout = 5;//timeout in 10ths of a second
+      int _bits = 8;
+      int _timeout = 5;//timeout in 10ths of a second
       
-      unsigned _wait_ms = 0;
+      int _wait_ms = 0;
       
     };
     

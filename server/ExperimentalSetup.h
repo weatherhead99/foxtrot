@@ -3,8 +3,11 @@
 #include "Logging.h"
 #include <dlfcn.h>
 #include <boost/variant.hpp>
+#include "CommunicationProtocol.h"
 
-using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
+
+
+using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
 namespace foxtrot
 {

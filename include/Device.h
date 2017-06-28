@@ -12,9 +12,9 @@
 namespace foxtrot
 {
     
- enum class CapabilityMeta
+ enum class CapabilityMetay
  {
-  STREAMINGDATA   
+  STREAMINGDATA 
      
  };
 

@@ -36,8 +36,8 @@ public:
     static bool verify_class_parameters(const parameterset& class_parameters);
     
 private:
-    unsigned _chunk_size = 1024;
-    unsigned _port;
+    int _chunk_size = 1024;
+    int _port;
     std::string _addr;
     
     int _sockfd;

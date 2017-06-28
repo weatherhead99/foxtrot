@@ -11,8 +11,8 @@ namespace foxtrot
 {
   
   using parameter_types = boost::mpl::vector<unsigned,char, int , std::string>;
-  using parameter_types_minimal = boost::mpl::vector<unsigned,int,std::string>;
-  using parameter = boost::variant<unsigned, int, std::string>;
+  using parameter_types_minimal = boost::mpl::vector<int,std::string>;
+  using parameter = boost::variant<int, std::string>;
   using parameterset = std::map<std::string, parameter>;
   
   

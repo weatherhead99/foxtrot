@@ -25,7 +25,7 @@
 #include <boost/variant.hpp>
 #include "Logging.h"
 
-using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
+using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
 // const foxtrot::parameterset archon_params
 // {

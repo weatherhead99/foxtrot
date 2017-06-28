@@ -60,11 +60,11 @@ namespace foxtrot
 
       std::string _devnode;
       int _fd;
-      unsigned _timeout;
+      int _timeout;
       std::array<unsigned char, 32> _sense_buffer;
       
-      unsigned _LBA;
-      unsigned _blen;
+      int _LBA;
+      int _blen;
       
     };
     
