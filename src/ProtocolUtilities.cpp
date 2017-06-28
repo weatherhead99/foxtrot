@@ -43,7 +43,6 @@ foxtrot::parameter get_variant_from_ptree(const ptree& pt)
   auto wrap = variant_ptree_wrapper(pt);
   
   wrap(1);
-  wrap(1u);
   wrap(std::string(""));
   
   
