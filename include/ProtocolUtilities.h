@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <map>
-
+#include "Logging.h"
 
 
 namespace foxtrot {
@@ -22,9 +22,11 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   }
   catch(boost::bad_get)
   {
+    foxtrot::Logging lg("extract_parameter_value");
+    lg.Error("type held by variant: " + std::to_string(params.at(paramname).which()));
+    lg.Error(std::string("type expected: ") + typeid(T).name());
+    throw foxtrot::ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " );
     
-    throw foxtrot::ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " + paramname ) ;
-
     
   }
   catch(std::out_of_range)
@@ -44,6 +46,7 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   return true;
   
 };
+
 
 
 template <typename keytp, typename valtp> 
