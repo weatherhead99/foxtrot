@@ -159,13 +159,15 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     else if(req.args_size() == 0)
                     {
 		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                       retval  = prop.get_value(dev);
 		       
 		       if(!lock.owns_lock())
 		       {
 			 _lg.Fatal("lock doesn't own...");
+			 foxtrot_server_specific_error("device contention error",
+						       repl, respond,_lg,this);
 		       }
 		       
+                       retval  = prop.get_value(dev);
                     }
                     
                 }
@@ -176,6 +178,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     catch(...)
     {
       foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,this);
+      _lg.Trace("returned from error handling");
       return true;
     };
                  

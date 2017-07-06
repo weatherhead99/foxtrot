@@ -27,18 +27,17 @@ ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
     
     
     oss << "MOD" << _modpos << "_TYPE";
-//     std::cout << "reqstr: " << oss.str() << std::endl;
+
     
     _modtype = static_cast<archon_module_types>(std::stoi(statmap.at(oss.str())));
-//     std::cout << "modtype recorded" << std::endl;
+
     oss.str("");
     oss.clear();
     
     oss << "MOD" << _modpos << "_REV";
-//     std::cout << "reqstr: " << oss.str() << std::endl;
     
     _rev = static_cast<short unsigned>(std::stoi(statmap.at(oss.str())));
-//     std::cout << "rev:" << _rev << std::endl;
+
     oss.str("");
     oss.clear();
     
@@ -59,7 +58,8 @@ ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
     oss << "MOD" << _modpos << "_ID" ;
     _id = statmap.at(oss.str());
     
-    std::cout << "id: " << _id << std::endl;
+    arch._lg.Info("id: " + _id);
+   
     
 }
 

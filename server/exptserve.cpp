@@ -49,10 +49,13 @@ int main(int argc, char** argv)
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
     
     po::notify(vm);
+
+
+    foxtrot::Logging lg("exptserve");
     
     if(debuglevel < 0 || debuglevel > 5)
     {
-      cout << "invalid debug level specified!" << endl;
+      lg.Fatal("invalid debug level specified!");
       return 1;
     }
     foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
@@ -60,13 +63,13 @@ int main(int argc, char** argv)
     
     if(!vm.count("setupfile"))
     {
-     cout << "a setupfile is requried..." << endl; 
+     lg.Fatal("a setupfile is requried...");
       return 1;
     }
     
     if(!vm.count("servername"))
     {
-      cout << "server name is required..." << endl;
+      lg.Fatal("server name is required...");
       return 1;
     }
 
@@ -74,12 +77,12 @@ int main(int argc, char** argv)
     
     if(!vm.count("parameterfile"))
     {
-      cout << "WARNING: no parameter file supplied, continuing without parameters..." << endl;
+      lg.Warning("no parameter file supplied, continuing without parameters...");
       params.reset(nullptr);
     }
     else
     {
-      cout << "reading parameter sets..."<< endl; 
+      lg.Info("reading parameter sets...");
       params.reset( new std::map<std::string,foxtrot::parameterset>(foxtrot::read_parameter_json_file(parameterfile)));
       
     }
@@ -89,7 +92,7 @@ int main(int argc, char** argv)
     
     if(vm.count("dump"))
     {
-      cout << "dumping setup..." << endl;
+      lg.Info("dumping setup...");
       
       auto dumpfile = vm["dump"].as<std::string>();
       dump_setup(harness, dumpfile);
@@ -104,8 +107,7 @@ int main(int argc, char** argv)
     
     auto excepts = serv.RunMultithread(nthreads);
     
-    
-    cout << "running in multithreaded mode..." << endl;
+    lg.Info("running in multithreaded mode...");
     
     auto exitthread = serv.join_multithreaded();
     
@@ -116,7 +118,7 @@ int main(int argc, char** argv)
       std::rethrow_exception(except_ptr);
     }
     
-    cout << "server exited without error..." << endl;
+    lg.Info("server exited without error...");
     
     
 };

@@ -184,7 +184,7 @@ namespace foxtrot
 	  
 	  if(outarg.get_type() != target_argtp)
 	  {
-	      lg.Warning(" need to convert an arg from " + outarg.get_type().get_name() + " to " 
+	      lg.Debug(" need to convert an arg from " + outarg.get_type().get_name() + " to " 
 	       + target_argtp.get_name() );
 	  };
 	  

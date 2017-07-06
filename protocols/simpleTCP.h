@@ -2,6 +2,8 @@
 
 #include "SerialProtocol.h"
 #include <string>
+#include "Logging.h"
+
 
 using namespace foxtrot;
 
@@ -41,6 +43,8 @@ private:
     std::string _addr;
     
     int _sockfd;
+    
+    foxtrot::Logging _lg;
     
 }; 
   

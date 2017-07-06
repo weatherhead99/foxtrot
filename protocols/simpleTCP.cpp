@@ -24,7 +24,7 @@ using namespace foxtrot::protocols;
 
 
 simpleTCP::simpleTCP(const parameterset*const instance_parameters)
-: SerialProtocol(instance_parameters)
+: SerialProtocol(instance_parameters), _lg("simpleTCP")
 {
 
 }
@@ -73,19 +73,14 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   //unique_ptr to make sure freeaddrinfo gets called
   
   auto hosterr = getaddrinfo(_addr.c_str(),std::to_string(_port).c_str(),&hints,&host);
-
-  
   std::unique_ptr<addrinfo, void(*)(addrinfo*)> addrp(host,freeaddrinfo);
-  
   
   if(hosterr < 0)
   {
     throw ProtocolError(std::string("host resolution error: " ) + gai_strerror(hosterr));
   };
   
-  
-  std::cout << "ai_flags output: " << host->ai_flags << std::endl;
-  
+  _lg.Debug("ai_flags output: " + std::to_string(host->ai_flags));
   
   auto conerr = connect(_sockfd, host->ai_addr,host->ai_addrlen);
   if( conerr < 0)

@@ -117,7 +117,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    }
    else
    {
-     std::cout << "module not present at position " << (i+1) << std::endl;
+     _lg.Info("module not present at position " + std::to_string(i+1));
    };
    
    
@@ -173,8 +173,8 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   if(ret[0] != '<' )
   {
    
-    std::cout << "got RET: " << ret << std::endl;
-    std::cout << "request was: " << request << std::endl;
+    _lg.Error("got RET: " + ret);
+    _lg.Error("request was: " + request);
     if(ret[0] == '?')
     {
       
@@ -211,11 +211,8 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
     auto eqpos = std::find(item.begin(), item.end(),'=');
     if(eqpos == item.end())
     {
-      std::cout << "problematic item: _" << item << "_" << std::endl;
-      std::cout << "ignoring" << std::endl;
-      
+      _lg.Warning("ignoring problematic item: _" + item + "_" );
       continue;
-//       throw ProtocolError("malformed archon parameter response");
     };
     
     std::string key(item.begin(), eqpos);
