@@ -105,20 +105,26 @@ int main(int argc, char** argv)
     
     foxtrot::ServerImpl serv(servname,harness,connstr);
     
-    auto excepts = serv.RunMultithread(nthreads);
     
-    lg.Info("running in multithreaded mode...");
-    
-    auto exitthread = serv.join_multithreaded();
-    
-    auto except_ptr = excepts[exitthread].get();
-    
-    if(except_ptr)
+    if(nthreads > 1)
     {
-      std::rethrow_exception(except_ptr);
+      lg.Info("running in multithreaded mode...");
+      auto excepts = serv.RunMultithread(nthreads);
+      auto exitthread = serv.join_multithreaded();
+      auto except_ptr = excepts[exitthread].get();
+    
+      if(except_ptr)
+      {
+	std::rethrow_exception(except_ptr);
+      }
+    
+      lg.Info("server exited without error...");
+    
     }
-    
-    lg.Info("server exited without error...");
-    
+    else
+    {
+      lg.Info("running in single threaded mode...");
+      serv.Run();
+    }
     
 };
