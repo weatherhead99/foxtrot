@@ -21,13 +21,13 @@ namespace foxtrot
         FetchDataLogic(DeviceHarness& harness);
         
 	
-        bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
+        bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
         
         
         
 	
     private:
-        bool initial_request(reqtp& req, repltp& repl, respondertp& respond, void* tag);
+        bool initial_request(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
         DeviceHarness& _harness;
 	foxtrot::Logging _lg;
     

@@ -20,7 +20,7 @@ namespace foxtrot
   const static bool newcall = true;
   constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDescribeServer;
   
-  bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
+  bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
 
   
  private:

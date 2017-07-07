@@ -20,7 +20,7 @@ foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 }
 
 
-bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
+bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
     _lg.Debug("processing invoke capability request" );
     
@@ -39,7 +39,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     catch(std::out_of_range& err)
     {
       foxtrot_server_specific_error(
-	"invalid device id supplied", repl,respond,_lg,this, error_types::out_of_range);
+	"invalid device id supplied", repl,respond,_lg,tag, error_types::out_of_range);
       return true;
     };
     
@@ -56,7 +56,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         if (!meth && !prop)
         {
 	  foxtrot_server_specific_error(
-	    "no matching property or method", repl,respond,_lg,this);
+	    "no matching property or method", repl,respond,_lg,tag);
 	  return true;
         }
         else if (!prop)
@@ -65,7 +65,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
             if(!meth.is_valid())
             {
 	      foxtrot_server_specific_error(
-		"invalid method", repl, respond, _lg, this);
+		"invalid method", repl, respond, _lg, tag);
                 _lg.Error("invalid method!");
                 return true;
             }
@@ -83,7 +83,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 catch(int& i)
                 {
 		  foxtrot_server_specific_error(
-		    "couldn't get callargs", repl,respond,_lg,this);
+		    "couldn't get callargs", repl,respond,_lg,tag);
                 return true;
                 }
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
@@ -97,7 +97,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 {
 		  foxtrot_server_specific_error(
 		    "tried to InvokeCapability on a bulk data method!",
-		    repl,respond,_lg,this);
+		    repl,respond,_lg,tag);
                     return true;
                 }
                 
@@ -118,7 +118,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 if(streammeta.to_bool())
                 {
 		    foxtrot_server_specific_error( 
-		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, this);
+		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
                     return true;
                 }
                 
@@ -137,7 +137,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                         //ERRROR: should only have one number to set a property
 		      foxtrot_server_specific_error(
 			  "require only 1 argument to writable property",
-			  repl, respond, _lg,this);
+			  repl, respond, _lg,tag);
 		      return true;
 		      
                     }
@@ -149,7 +149,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 		      if(!success)
 		      {
 			foxtrot_server_specific_error("coultn't get argument for setting property",
-						      repl,respond,_lg,this);
+						      repl,respond,_lg,tag);
 			return true;
 			
 		      }
@@ -164,7 +164,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 		       {
 			 _lg.Fatal("lock doesn't own...");
 			 foxtrot_server_specific_error("device contention error",
-						       repl, respond,_lg,this);
+						       repl, respond,_lg,tag);
 		       }
 		       
                        retval  = prop.get_value(dev);
@@ -177,7 +177,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     }
     catch(...)
     {
-      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,this);
+      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,tag);
       _lg.Trace("returned from error handling");
       return true;
     };

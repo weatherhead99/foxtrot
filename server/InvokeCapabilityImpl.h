@@ -17,7 +17,7 @@ namespace foxtrot
      
      InvokeCapabilityLogic(DeviceHarness& harness);
      
-     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
+     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
      
     private:
         DeviceHarness& _harness;

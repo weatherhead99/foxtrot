@@ -12,7 +12,7 @@ foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 {
 }
 
-bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, respondertp& respond, void* tag)
+bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
     _lg.Debug("processing fetch data request" );
     
@@ -26,7 +26,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     catch(std::out_of_range& err)
     {
-      foxtrot_server_specific_error("invalid device", repl,respond, _lg,this,error_types::out_of_range);
+      foxtrot_server_specific_error("invalid device", repl,respond, _lg,tag,error_types::out_of_range);
         return true;
     }
     
@@ -36,7 +36,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     if(!meth)
     {
       auto msg = "no matching method found for capability: " + req.capname();
-      foxtrot_server_specific_error(msg,repl,respond,_lg,this,error_types::out_of_range);
+      foxtrot_server_specific_error(msg,repl,respond,_lg,tag,error_types::out_of_range);
       return true;
     }
     
@@ -44,7 +44,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     if(!streamdatameta.is_valid() || !streamdatameta.to_bool()) 
     {
       auto msg = "tried to call a method that doesn't support streaming";
-      foxtrot_server_specific_error(msg,repl,respond,_lg,this);
+      foxtrot_server_specific_error(msg,repl,respond,_lg,tag);
       return true;
     }
     
@@ -57,7 +57,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     catch(int& i)
     {
-      foxtrot_server_specific_error("couldn't get callargs", repl, respond, _lg,this);
+      foxtrot_server_specific_error("couldn't get callargs", repl, respond, _lg,tag);
       return true;
     }
     
@@ -70,7 +70,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     catch(...)
     {
-      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,this);
+      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,tag);
       return true;
     };
     
@@ -104,7 +104,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
 };
 
 
-bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag)
+bool foxtrot::FetchDataLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
     if(_thischunk == 0)
     {

@@ -8,6 +8,7 @@
 #include "DeviceError.h"
 #include "ProtocolError.h"
 #include "ContentionError.h"
+#include "HandlerBase.h"
 
 namespace rttr
 {
@@ -51,7 +52,7 @@ namespace foxtrot
     
     template<typename T> struct responder_error_call<grpc::ServerAsyncResponseWriter<T>>
     {
-      void operator()(grpc::ServerAsyncResponseWriter<T>& responder, const T& repl, void* tag)
+      void operator()(grpc::ServerAsyncResponseWriter<T>& responder, const T& repl, HandlerTag* tag)
       {
 	responder.Finish(repl, grpc::Status::OK, tag);
       };
@@ -59,13 +60,13 @@ namespace foxtrot
     
     template<typename T> struct responder_error_call<grpc::ServerAsyncWriter<T>>
     {
-      void operator()(grpc::ServerAsyncWriter<T>& responder, const T& repl, void* tag)
+      void operator()(grpc::ServerAsyncWriter<T>& responder, const T& repl, HandlerTag* tag)
       {
 	responder.Write(repl,tag);
       };
     };
     
-    template <typename repltp, typename respondtp> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, respondtp& responder, foxtrot::Logging& lg, void* tag)
+    template <typename repltp, typename respondtp> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, respondtp& responder, foxtrot::Logging& lg, HandlerTag* tag)
     {
       responder_error_call<respondtp> errcall;
       
@@ -115,7 +116,7 @@ namespace foxtrot
       
     };
     
-    template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, void* tag, error_types&& errtp=error_types::Error)
+    template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, HandlerTag* tag, error_types&& errtp=error_types::Error)
     {
       lg.Error(msg);
       set_repl_err_msg(repl,msg,errtp);
