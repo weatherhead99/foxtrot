@@ -1,7 +1,7 @@
 {
   "archon_params" : {
     "addr" : "10.0.0.2",
-    "port" : 4242,
+    "port" : 4242 ,
     "timeout" : 30
   },
   
@@ -15,12 +15,12 @@
   },
   
   "psu_params" : {
-    "devnode" : "/dev/sdc",
+    "devnode" : "/dev/sdb",
     "timeout" : 2000 
   },
   
   "newport_params" : {
-    "read_timeout" : 100,
+    "read_timeout" : 100 ,
     "write_timeout" : 100
   }
 

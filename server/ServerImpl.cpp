@@ -63,8 +63,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
 void ServerImpl::Run()
 {
     setup_common(_connstr);
-    
-    
+        
     HandleRpcs();
 }
 
@@ -77,22 +76,22 @@ std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::Ru
   for(auto i =0; i < nthreads; i++)
   {
     auto handlerpccatch = [this,i] () {  
-    std::exception_ptr except = nullptr;
-    try
-    {
+      std::exception_ptr except;
+      try
+      {  
+	HandleRpcs();
+      }
+      catch(...)
+      {
+	_lg.Error("caught exception in handlerpclambda");
+	except = std::current_exception(); 
+      }
       
-      HandleRpcs();
-    }
-    catch(...)
-    {
-      except = std::current_exception(); 
-    }
-    
-    _exitthreadnum = i;
-    _condvar.notify_all();
-    
-    return except;
-    
+      _exitthreadnum = i;
+      _condvar.notify_all();
+      
+      return except;
+      
     };
         
     _lg.Debug("starting server thread...");

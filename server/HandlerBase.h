@@ -53,6 +53,7 @@ namespace foxtrot
 		  
                     _lg.Debug("request successful, marking finished");
                     _status = status::FINISH;
+		    
               }
               else
 	      {
@@ -76,8 +77,6 @@ namespace foxtrot
             }
        
         }
-        
-        
         
         void FinishRequest(typename T::respondertp& respond, typename T::repltp& repl)
 	{
