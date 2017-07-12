@@ -995,7 +995,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   {
     unsigned actlen;
       
-    for(int j=0 ; i < 100; j++)
+    for(int j=0 ; j < 100; j++)
     {
       auto bytes_avail = _specproto->bytes_available();
       if(bytes_avail >= 1028)
@@ -1003,8 +1003,15 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
 	break;
       }
       std::this_thread::sleep_for(std::chrono::microseconds(500)); 
-      _lg.Info("waiting for bytes available, currently:" + std::to_string(bytes_avail));
+      _lg.Debug("waiting for bytes available, currently:" + std::to_string(bytes_avail));
+
+    if(j == 99)
+      {
+	throw foxtrot::DeviceError("ran out of retries waiting for buffer read");
+      };
+
     }
+
     auto ret = _specproto->read(1028,&actlen);
     
     if(actlen != 1028)
