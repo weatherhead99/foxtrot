@@ -28,6 +28,7 @@ namespace foxtrot
         }
         virtual void Proceed() final
         {
+	    std::lock_guard<std::mutex> lk(_procmut);
             if(_status == status::CREATE)
             {       
                 _lg.Debug("request status is CREATE, processing");
@@ -39,7 +40,7 @@ namespace foxtrot
             }
             else if(_status == status::PROCESS)
             {
-	       _status = status::IN_FLIGHT;
+	      _status = status::IN_FLIGHT;
 	      _lg.Debug("request id is: " + std::to_string((long unsigned) this));
 	      if(_newrequest)
 	      {
@@ -53,7 +54,6 @@ namespace foxtrot
 		  
                     _lg.Debug("request successful, marking finished");
                     _status = status::FINISH;
-		    
               }
               else
 	      {
@@ -63,20 +63,20 @@ namespace foxtrot
 	      }
             
             }
-            else if (_status == status::IN_FLIGHT)
-	    {
-	      _lg.Debug("already in flight, skipping...");
-	    }
+//             else if (_status == status::IN_FLIGHT)
+// 	    {
+// 	      _lg.Debug("already in flight, skipping...");
+// 	    }
             else
             {
 	      _lg.Debug("finishing request");
 	      
                 _lg.Debug("request finished, deleting HandlerBase");
-                GPR_CODEGEN_ASSERT(_status == status::FINISH);
+//                 GPR_CODEGEN_ASSERT(_status == status::FINISH);
                 delete this;
             }
        
-        }
+        } 
         
         void FinishRequest(typename T::respondertp& respond, typename T::repltp& repl)
 	{
@@ -104,9 +104,7 @@ namespace foxtrot
         grpc::ServerCompletionQueue* _cq;
         grpc::ServerContext _ctxt;
         exptserve::AsyncService* _service;
-        
-        
-        
+	
         typename T::reqtp _req;
         typename T::repltp _reply;
         
@@ -115,6 +113,8 @@ namespace foxtrot
         status _status;
         
         foxtrot::Logging _lg;
+	
+	std::mutex _procmut;
 
     };
 };
