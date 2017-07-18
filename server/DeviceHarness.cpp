@@ -186,6 +186,9 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
 }
 
 
+
+
+
 variant DeviceHarness::call_capability(int devid, property& prop, unsigned int contention_timeout_ms)
 {
   if(!prop.is_readonly())
@@ -231,8 +234,6 @@ std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int 
 }
 
 
-
-
 const std::map<int, const Device *>  foxtrot::DeviceHarness::GetDevMap() const
 {
     //TODO: this is SLOOOOOOOW!
@@ -247,3 +248,36 @@ const std::map<int, const Device *>  foxtrot::DeviceHarness::GetDevMap() const
     return out;
     
 }
+
+prop_or_meth getCapability(Device* dev, const std::string& capname)
+{
+  auto devtp = rttr::type::get(*dev);
+  
+  auto prop = devtp.get_property(capname.c_str());
+  auto meth = devtp.get_method(capname.c_str());
+
+  if(!(meth || prop) )
+  { 
+    throw std::out_of_range("no matching property or method");
+  }
+  else if (meth.is_valid() && prop.is_valid())
+  {
+    throw std::logic_error("both method and property matched!");
+  }
+  
+  if(meth.is_valid())
+  {
+    return meth;
+  }
+  
+  if(prop.is_valid())
+  {
+    return prop;
+  }
+  
+  throw std::logic_error("method or property not valid");
+  
+}
+
+
+

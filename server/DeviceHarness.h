@@ -8,6 +8,10 @@
 #include <mutex>
 #include <deque>
 #include "Logging.h"
+#include <boost/variant.hpp>
+
+typedef boost::variant<rttr::property, rttr::method> prop_or_meth;
+
 
 namespace foxtrot
 {
@@ -25,7 +29,6 @@ namespace foxtrot
         std::vector<std::string> GetCapabilityNames(int devid);
         devcapability GetDeviceCapability(int devid, const std::string& capname);
         
-        
         //TODO:must be a more elegant way to do this trick
         const std::map<int,const Device*> GetDevMap() const;
         
@@ -34,8 +37,9 @@ namespace foxtrot
         rttr::variant call_capability(int devid, rttr::method& meth, std::vector<rttr::variant>& args, unsigned contention_timeout_ms);
 	std::unique_lock<std::timed_mutex> lock_device_contentious(int devid, unsigned contention_timeout_ms);
 	
+	
+	
     private:
-      
       
         int _id = 0;
         foxtrot::Logging _lg;
@@ -44,6 +48,10 @@ namespace foxtrot
         std::deque<std::timed_mutex> _devmutexes;
         
     };
+    
+    
+    prop_or_meth getCapability(Device* dev, const std::string& capname);
+    
     
 
 }
