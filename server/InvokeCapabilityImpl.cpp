@@ -130,7 +130,6 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                     }
                     else if (req.args_size() == 1)
                     {
-		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
 		      bool success;
 		      auto arg = get_arg(req.args().Get(0),success);
 		      if(!success)
@@ -141,19 +140,12 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 			
 		      }
 		      
+		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
 		      prop.set_value(*dev,arg);
                     }
                     else if(req.args_size() == 0)
                     {
 		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-		       
-		       if(!lock.owns_lock())
-		       {
-			 _lg.Fatal("lock doesn't own...");
-			 foxtrot_server_specific_error("device contention error",
-						       repl, respond,_lg,tag);
-		       }
-		       
                        retval  = prop.get_value(dev);
                     }
                     
