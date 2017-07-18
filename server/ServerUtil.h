@@ -211,6 +211,20 @@ namespace foxtrot
       
       return argvec;
     }
-      
+   
+   
+   template<typename T> bool is_ft_call_streaming(const T& propmeth)
+   {
+     auto streammeta = propmeth.get_metadata("streamdata");
+     if(streammeta.is_valid())
+     {
+       if(streammeta.to_bool())
+       {
+	  return true;
+       };
+     
+     };
+     return false;
+   };
     
 }

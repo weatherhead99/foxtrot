@@ -45,8 +45,6 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
     auto devtp = rttr::type::get(*dev);
     
-    
-    
     auto prop = devtp.get_property(req.capname().c_str());
     auto meth = devtp.get_method(req.capname().c_str());
     
@@ -90,21 +88,14 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 
             
             //check if it's a stream data method
-            auto streammeta = meth.get_metadata("streamdata");
-            if(streammeta.is_valid())
-            {
-                if(streammeta.to_bool())
-                {
-		  foxtrot_server_specific_error(
-		    "tried to InvokeCapability on a bulk data method!",
-		    repl,respond,_lg,tag);
+	    if(is_ft_call_streaming(prop))
+	      {
+		    foxtrot_server_specific_error( 
+		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
                     return true;
-                }
-                
-        
-            }
-	    auto& mut = _harness.GetMutex(devid);
-            std::lock_guard<decltype(mut)> lock(mut);
+	      }
+	  
+	    auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
             retval = meth.invoke_variadic(*dev,callargs);
                         
         }
@@ -112,18 +103,14 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
         else
         {
             //property            
-            auto streammeta = prop.get_metadata("streamdata");
-            if(streammeta.is_valid())
-            {
-                if(streammeta.to_bool())
-                {
+	    if(is_ft_call_streaming(prop))
+	      {
 		    foxtrot_server_specific_error( 
 		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
                     return true;
-                }
-                
-        
-            }
+	      }
+	  
+	  
                 if(prop.is_readonly())
                 {
 		    _lg.Trace("readonly property");

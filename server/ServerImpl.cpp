@@ -118,8 +118,6 @@ int ServerImpl::join_multithreaded()
 void foxtrot::ServerImpl::HandleRpcs()
 {
     
-    
-    
     void* tag;
     bool ok;
     
