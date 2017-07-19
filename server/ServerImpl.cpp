@@ -34,13 +34,20 @@ ServerImpl::~ServerImpl()
     
 }
 
-void ServerImpl::setup_common(const std::string& addrstr)
+void ServerImpl::setup_common(const std::string& addrstr, std::shared_ptr<grpc::ServerCredentials> creds)
 {
+  
+    if(creds == nullptr)
+    {
+      creds = grpc::InsecureServerCredentials();
+    };
+  
+    
     
     
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
-    builder.AddListeningPort(addrstr,grpc::InsecureServerCredentials());
+    builder.AddListeningPort(addrstr,creds);
     
     //TODO: Register Service
     builder.RegisterService(&_service);

@@ -53,5 +53,26 @@ namespace foxtrot
     prop_or_meth getCapability(Device* dev, const std::string& capname);
     
     
+    class propmethcallvisitor : public boost::static_visitor<>
+    {
+    public:
+      propmethcallvisitor(DeviceHarness& harness, unsigned contention_timeout_ms);
+      propmethcallvisitor(DeviceHarness& harness, rttr::variant arg, unsigned contention_timeout_ms);
+      propmethcallvisitor(DeviceHarness& harness, std::vector<rttr::variant>& args, unsigned contention_timeout_ms);
+      
+      void operator()(rttr::method& meth);
+      void operator()(rttr::property& prop);
+      
+    private:
+      unsigned _timeout_ms;
+      std::vector<rttr::variant>& _args;
+      DeviceHarness& _harness;
+      
+      
+    };
+    
+    
+    
+    
 
 }

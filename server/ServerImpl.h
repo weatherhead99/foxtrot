@@ -39,7 +39,7 @@ private:
   
     std::string _connstr;
   
-    void setup_common(const std::string& addrstr);
+    void setup_common(const std::string& addrstr, std::shared_ptr<grpc::ServerCredentials> creds = nullptr);
   
     std::mutex _exitmut;
     std::condition_variable _condvar;
