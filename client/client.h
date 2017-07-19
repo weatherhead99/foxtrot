@@ -120,8 +120,10 @@ namespace foxtrot
     };
     
     int find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp);
-    int get_number_of_args(foxtrot::servdescribe& sd, int devid, const std::string& capability_name);
-    int get_arg_position(foxtrot::servdescribe& sd, int devid, const std::string& capability_name, const std::string arg_name);
+    int find_capability(foxtrot::servdescribe& sd, int devid, const std::string& capability_name);
+    int get_number_of_args(foxtrot::servdescribe& sd, int devid, int capidx);
+    int get_arg_position(foxtrot::servdescribe& sd, int devid, int capidx, const std::string arg_name);
+    
     
     template<typename iteratortp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
     {

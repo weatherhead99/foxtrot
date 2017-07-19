@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include <iostream>
+
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)
 {
@@ -211,18 +213,22 @@ int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& 
 
 }
 
-int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, const std::string& capability_name)
+int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, int capidx)
+{
+  
+  auto cap  = sd.devs_attached().at(devid).caps()[capidx];
+  return cap.argnames_size();
+}
+
+int foxtrot::find_capability(foxtrot::servdescribe& sd, int devid, const std::string& capability_name)
 {
   auto caps = sd.devs_attached().at(devid).caps();
-  
-  auto cap = caps.Get(0);
-  
   
   auto capability_index = std::find_if(caps.begin(), caps.end(),
 				       [&capability_name] (decltype(*caps.begin())& val)
 				       {
 					 if(val.capname() == capability_name)
-					 {
+					 {   
 					   return true;
 					 }
 					 return false;
@@ -237,8 +243,37 @@ int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, const std:
     return -1;
   }
   
-  return capability_index->argnames_size();
+  return std::distance(caps.begin(), capability_index);
+  
 }
+
+int foxtrot::get_arg_position(foxtrot::servdescribe& sd, int devid, int capidx, const std::string arg_name)
+{
+  auto argnames = sd.devs_attached().at(devid).caps()[capidx].argnames();
+  
+  auto arg_idx = std::find_if(argnames.begin(), argnames.end(),
+			      [&arg_name] (decltype(*argnames.begin())&val)
+			      {
+				if(val == arg_name)
+				{
+				  return true;
+				}
+				return false;
+			      }
+		      );
+  
+  if(arg_idx == argnames.end())
+  {
+    return -1;
+  };
+  
+  return std::distance(argnames.begin(),arg_idx);
+
+}
+
+
+
+
 
 
 

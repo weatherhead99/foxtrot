@@ -24,12 +24,14 @@ int main(int argc, char** argv)
   int port;
   std::string addr;
   int debuglevel;
+  std::string bindstr;
   
   desc.add_options()
   ("configfile,c",po::value<std::string>(&configfile),"config file")
   ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
   ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),"address of server")
-  ("debuglevel,d", po::value<int>(&debuglevel)->default_value(3),"debugging output level");
+  ("debuglevel,d", po::value<int>(&debuglevel)->default_value(3),"debugging output level")
+  ("bindstr,b",po::value<std::string>(&bindstr)->default_value("tcp://127.0.0.1:50052"),"bind string for server");
 
   po::positional_options_description pdesc;
   pdesc.add("configfile",-1);
@@ -46,6 +48,14 @@ int main(int argc, char** argv)
     return -1;
   }
   
+  if(debuglevel < 0 || debuglevel > 5)
+  {
+    cerr << "invalid debug level specified!" << endl;
+    return -1;
+  }
+  
+  foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
+  foxtrot::setDefaultSink();
   
   std::ostringstream oss;
   oss << addr << ":" << port;
@@ -53,7 +63,16 @@ int main(int argc, char** argv)
   foxtrot::Client cl(oss.str());
   foxtrot::TelemetryServer telemserv("",cl,2000);
   
+  telemserv.BindSocket("tcp://127.0.0.1:50052");
+  
   configure_telemetry_server(configfile,cl,telemserv);
-
+  
+  auto servtask = telemserv.runserver();
+  
+  auto except = servtask.get();
+  if(except)
+  {
+    std::rethrow_exception(except);
+  };
 
 }

@@ -4,6 +4,7 @@
 #include "TelemetryServer.h"
 #include <string>
 #include <iostream>
+#include <rttr/variant.h>
 #include "Logging.h"
 using std::cout;
 using std::endl;
@@ -27,6 +28,7 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
   
   auto sd = cl.DescribeServer();
   
+  
   for(auto& dev : pt.get_child("devices"))
   {
       auto devname = dev.first;
@@ -48,25 +50,77 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	cout << "---ticks: " << ticks << endl;
 	cout << "---name: " << name << endl;
 	cout << "---subtopic: " << subtopic << endl;
-	
-	auto fun = [devid,name] (foxtrot::Client& cl) {
-	      return cl.InvokeCapability(devid,name);
-	};
 	  
-	auto args = capability.second.get_child_optional("args");      
+	
+	auto capidx = foxtrot::find_capability(sd,devid,name);
+	if(capidx < 0)
+	{
+	  lg.Error("can't find capability on device");
+	  throw std::runtime_error("can't find capability on device");
+	}
+	
+	
+	auto args = capability.second.get_child_optional("args");
+	auto numargs_required = foxtrot::get_number_of_args(sd,devid,capidx);
+	lg.Debug("numargs_required: " + std::to_string(numargs_required));
+	
+	if(numargs_required && !args.is_initialized())
+	{
+	  lg.Error("require arguments but got none");
+	  lg.Info("args required: " + std::to_string(numargs_required));
+	  throw std::runtime_error("require arguments but didn't get any");
+	};
+	
+	
+	if(args.is_initialized() && ( args.get().size() != numargs_required))
+	{
+	  lg.Error("incorrect number of arguments supplied");
+	  throw std::runtime_error("incorrect number of arguments");
+	}
+	
+	std::vector<foxtrot::ft_variant> rttrargs;
+	rttrargs.resize(numargs_required);
+	
 	if(args)
 	{
 	  cout << "----- have args" << endl; 
 	  //TODO: CHECK arg suitability BEFORE adding to server
 	  for(auto& arg : *args)
 	  {
-	    
-	    
+	      auto arg_position = foxtrot::get_arg_position(sd,devid,capidx,arg.first);
+	      if(arg_position <0 )
+	      {
+		lg.Error("incorrect arg name for function");
+		throw std::runtime_error("incorrect arg name");
+	      }
+	      
+	      auto argtp = static_cast<foxtrot::value_types>(sd.devs_attached().at(devid).caps()[capidx].argtypes()[arg_position]);
+	      
+	      switch(argtp)
+	      {
+		case(foxtrot::value_types::FLOAT): 
+		  rttrargs[arg_position] = arg.second.get_value<double>(); break;
+		case(foxtrot::value_types::INT): 
+		  rttrargs[arg_position] = arg.second.get_value<int>(); break;
+		case(foxtrot::value_types::BOOL): 
+		  rttrargs[arg_position] = arg.second.get_value<bool>(); break;
+		case(foxtrot::value_types::STRING):
+		  rttrargs[arg_position] = arg.second.get_value<std::string>(); break;
+		
+		default:
+		  throw std::logic_error("argument type not yet implemented for telemetry");
+		
+	      }
+	      
 	  }
 	  
+	    
 	}
 	
 	
+	auto fun = [devid,name,rttrargs] (foxtrot::Client& cl) {
+	      return cl.InvokeCapability(devid,name,rttrargs);
+	};
 	
 	telemserv.AddTelemetryItem(fun,ticks,name,subtopic);
 	
