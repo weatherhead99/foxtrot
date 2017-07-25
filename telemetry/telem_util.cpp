@@ -72,7 +72,6 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	  throw std::runtime_error("require arguments but didn't get any");
 	};
 	
-	
 	if(args.is_initialized() && ( args.get().size() != numargs_required))
 	{
 	  lg.Error("incorrect number of arguments supplied");
@@ -119,12 +118,24 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	    
 	}
 	
+	bool do_bcast = true;
 	
-	auto fun = [devid,name,rttrargs] (foxtrot::Client& cl) {
-	      return cl.InvokeCapability(devid,name,rttrargs);
+	auto  bcast = capability.second.get_optional<bool>("broadcast");
+	if(bcast.is_initialized())
+	{
+	  do_bcast = *bcast;  
 	};
 	
-	telemserv.AddTelemetryItem(fun,ticks,telemname,subtopic);
+	if(do_bcast)
+	{
+	  
+	  auto fun = [devid,name,rttrargs] (foxtrot::Client& cl) {
+		return cl.InvokeCapability(devid,name,rttrargs);
+	  };
+	  
+	  telemserv.AddTelemetryItem(fun,ticks,telemname,subtopic);
+	}
+	
 	
       }
 	

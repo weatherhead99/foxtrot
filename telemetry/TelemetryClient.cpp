@@ -86,6 +86,7 @@ foxtrot::telemetry_message foxtrot::TelemetryClient::waitMessageSync()
   auto epoch = boost::posix_time::from_time_t(0);
   
   out.timestamp = epoch + usec;
+  _lg.Trace("return case: "  + std::to_string(pbuf.return_case()));
   
   switch(pbuf.return_case())
   {
@@ -114,7 +115,7 @@ foxtrot::telemetry foxtrot::TelemetryClient::decode_from_string(const std::strin
     
     foxtrot::telemetry out;
     
-    std::string msg(pos,instr.end());
+    std::string msg(pos + 1,instr.end());
     out.ParseFromString(msg);
     
     return out;

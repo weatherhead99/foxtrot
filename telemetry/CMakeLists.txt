@@ -31,4 +31,4 @@ install(TARGETS telem_bcast RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
 add_executable(telem_recv_test telem_recv_test.cpp)
-target_link_libraries(telem_recv_test foxtrot_telemetry )
+target_link_libraries(telem_recv_test foxtrot_telemetry ${Boost_DATE_TIME_LIBRARY})
