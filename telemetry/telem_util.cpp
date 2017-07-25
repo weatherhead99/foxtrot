@@ -94,7 +94,8 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 		throw std::runtime_error("incorrect arg name");
 	      }
 	      
-	      auto argtp = static_cast<foxtrot::value_types>(sd.devs_attached().at(devid).caps()[capidx].argtypes()[arg_position]);
+	      //auto argtp = static_cast<foxtrot::value_types>(sd.devs_attached().at(devid).caps()[capidx].argtypes()[arg_position]);
+	      auto argtp = static_cast<foxtrot::value_types>( *( (sd.devs_attached().at(devid).caps().begin() + capidx)->argtypes().begin() + arg_position ) );
 	      
 	      switch(argtp)
 	      {

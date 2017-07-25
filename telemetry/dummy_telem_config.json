@@ -6,6 +6,9 @@
     
     "devices" : {
 	"dummyDevice" : {
+	    "doNothing" : {
+	    },
+
 	    "getCounter" : {
 		"ticks" : 1,
 		"name" : "getCounter",
