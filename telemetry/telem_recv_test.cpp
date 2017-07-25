@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 {
   
   foxtrot::setDefaultSink();
-//   foxtrot::setLogFilterLevel(sl::info);
+  foxtrot::setLogFilterLevel(sl::info);
   
   
   foxtrot::TelemetryClient client;
@@ -23,17 +23,13 @@ int main(int argc, char** argv)
   
   while(true)
   {
-    cout << "waiting for message...." << endl;
+    
     auto msg = client.waitMessageSync();
+    auto now = boost::posix_time::microsec_clock::universal_time();
+    auto deliv_time = (now - msg.timestamp).total_microseconds();
     
-    cout << "received message!" << endl;
-    cout << "---------------------------" << endl;
     auto dtstr = boost::posix_time::to_iso_string(msg.timestamp);
-    cout << "message timestamp: " << dtstr << " GMT" << endl;
-    cout << "message name: " << msg.name << endl;
-    cout << "message value: " << msg.value << endl;
-    
-    
+    cout << "[" << dtstr << " GMT] " << msg.name << " : " << msg.value << endl;
     
   };
   
