@@ -41,9 +41,7 @@ void ServerImpl::setup_common(const std::string& addrstr, std::shared_ptr<grpc::
     {
       creds = grpc::InsecureServerCredentials();
     };
-  
-    
-    
+      
     
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
@@ -136,13 +134,14 @@ void foxtrot::ServerImpl::HandleRpcs()
      {
          if(!ok)
          {
-             std::cout << "WARNING: NOT OK!" << std::endl;
+	   _lg.Warning("completion queue has a non-OK status!");
          }
         static_cast<HandlerTag*>(tag)->Proceed();
      }
      else
      {
-         std::cout << ("queue shut down..") << std::endl;
+       _lg.Info("completion queue shutdown.");
+         
          return;
      }
      
