@@ -43,6 +43,7 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
       for(auto& capability: dev.second)
       {
 	auto ticks = capability.second.get<int>("ticks",default_ticks);
+	auto telemname = capability.first;
 	auto name = capability.second.get<string>("name",capability.first);
 	auto subtopic = capability.second.get<string>("subtopic",default_subtopic);
 	
@@ -123,7 +124,7 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	      return cl.InvokeCapability(devid,name,rttrargs);
 	};
 	
-	telemserv.AddTelemetryItem(fun,ticks,name,subtopic);
+	telemserv.AddTelemetryItem(fun,ticks,telemname,subtopic);
 	
       }
 	
