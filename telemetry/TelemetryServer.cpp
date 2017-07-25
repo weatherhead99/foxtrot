@@ -125,7 +125,7 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                     telem_visitor vst(msg);
                     //TODO error handling here
                     boost::apply_visitor(vst,telem_value);
-                    
+                    _lg.Trace("which return case: " + std::to_string(msg.return_case()));
                     success = true;
                   }
                   catch(class foxtrot::DeviceError& err)
@@ -164,9 +164,7 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                   std::ostringstream oss;
                   
                   oss << _topic << "|" << std::get<3>(funtup) << std::get<2>(funtup) <<">";
-                  
-                  
-                  
+                                    
                   _lg.Trace("topic string: " + oss.str());
                   
                   if(!msg.SerializeToOstream(&oss))

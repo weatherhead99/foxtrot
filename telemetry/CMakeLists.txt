@@ -10,7 +10,7 @@ if(FOXTROT_CONAN_BUILD)
   
 endif()
 
-add_library(foxtrot_telemetry TelemetryServer.cpp)
+add_library(foxtrot_telemetry TelemetryServer.cpp TelemetryClient.cpp)
 target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl})
 
 target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${NANOMSG_INCLUDE_DIRS})
@@ -28,3 +28,7 @@ install(FILES ${telem_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
 add_executable(telem_bcast telem_bcast.cpp telem_util.cpp)
 target_link_libraries(telem_bcast foxtrot_telemetry ${Boost_PROGRAM_OPTIONS_LIBRARY} )
 install(TARGETS telem_bcast RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+add_executable(telem_recv_test telem_recv_test.cpp)
+target_link_libraries(telem_recv_test foxtrot_telemetry )
