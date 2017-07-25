@@ -1,0 +1,46 @@
+{
+    "server" : {
+	"tick_ms" : 1000,
+	"topic" : "testbench"
+    },
+
+    "devices" : {
+	"archon" : {
+	    "update_state": {
+		"ticks" : 5
+		}
+	},
+	
+	"ArchonHeaterX" : {
+	    "stage_temp" : {
+		"name" : "getTempA",
+		"ticks" : 5
+	    },
+	    "tank_temp" : {
+		"name" : "getTempA",
+		"ticks" : 5
+	    },
+	    "heater" : {
+		"name" : "getHeaterAOutput",
+		"ticks" : 5
+	    }
+	},
+	
+	"TPG362" : {
+	    "pump_pressure" : {
+		"name" : "getPressure",
+		"args" : {
+		    "channel" : 1
+		}
+	    },
+	    "cryo_pressure" : {
+		"name" : "getPressure",
+		"args" : {
+		    "channel" : 2
+		}
+	    }
+	}
+	
+    }
+
+}
