@@ -74,9 +74,16 @@ foxtrot::TelemetryServer::~TelemetryServer()
 
 void foxtrot::TelemetryServer::AddTelemetryItem(telemfun fun, unsigned ticks, const std::string& name, const std::string& subtopic)
 {
-    _funs.push_back(std::make_tuple(ticks,fun,name,subtopic));
+    _funs.push_back(std::make_tuple(ticks,fun,name,subtopic,true));
     
 }
+
+
+void foxtrot::TelemetryServer::AddNonTelemetryItem(telemfun fun, unsigned int ticks, const std::string& name)
+{
+    _funs.push_back(std::make_tuple(ticks,fun,name,"",false));
+}
+
 
 void foxtrot::TelemetryServer::BindSocket(const std::string& bindaddr)
 {
@@ -174,14 +181,17 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                   
                   auto total_msg = oss.str();
                   
-                  auto nbytes = nn_send(_nn_pub_skt, total_msg.c_str(),total_msg.size(),0);
+		  if(std::get<4>(funtup))
+		  {
+		    auto nbytes = nn_send(_nn_pub_skt, total_msg.c_str(),total_msg.size(),0);
+		    if(nbytes != total_msg.size())
+		    {
+		    _lg.Error("invalid number of bytes written!");   
+		    _lg.Error("expected: " + std::to_string(total_msg.size()));
+		    _lg.Error("actual: " + std::to_string(nbytes));
+		    }
+		  }
                   
-                  if(nbytes != total_msg.size())
-                  {
-                   _lg.Error("invalid number of bytes written!");   
-                   _lg.Error("expected: " + std::to_string(total_msg.size()));
-                   _lg.Error("actual: " + std::to_string(nbytes));
-                  }
                   
               }
               
@@ -207,7 +217,9 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
 
 void foxtrot::TelemetryServer::sort_funs_vector()
 {
-    using funpair = std::tuple<unsigned, telemfun, std::string, std::string>;
+    
+    using funpair = decltype(_funs)::value_type;
+    
     
     auto cmpfun = [] (const funpair& first, const funpair& second)
     {

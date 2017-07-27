@@ -21,7 +21,9 @@ namespace foxtrot
         
         void BindSocket(const std::string& bindaddr);
         void AddTelemetryItem(telemfun fun, unsigned ticks, const std::string& name, const std::string& subtopic ="");
-        
+        void AddNonTelemetryItem(telemfun fun, unsigned ticks, const std::string& name);
+	
+	
         std::future<std::exception_ptr> runserver();
         
 	
@@ -35,7 +37,7 @@ namespace foxtrot
         
         int _tick_ms;
         std::string _topic;
-        std::vector<std::tuple<unsigned, telemfun, std::string, std::string>> _funs;
+        std::vector<std::tuple<unsigned, telemfun, std::string, std::string,bool>> _funs;
         int _nn_pub_skt;
         foxtrot::Logging _lg;
         

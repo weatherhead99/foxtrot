@@ -126,16 +126,19 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	  do_bcast = *bcast;  
 	};
 	
-	if(do_bcast)
-	{
 	  
 	  auto fun = [devid,name,rttrargs] (foxtrot::Client& cl) {
 		return cl.InvokeCapability(devid,name,rttrargs);
 	  };
-	  
+	
+	if(do_bcast)
+	{	  
 	  telemserv.AddTelemetryItem(fun,ticks,telemname,subtopic);
 	}
-	
+	else
+	{
+	  telemserv.AddNonTelemetryItem(fun,ticks,telemname);
+	}
 	
       }
 	
