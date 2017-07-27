@@ -55,7 +55,6 @@ int main(int argc, char** argv)
   }
   
   foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
-  foxtrot::setDefaultSink();
   
   std::ostringstream oss;
   oss << addr << ":" << port;

@@ -135,34 +135,10 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                     _lg.Trace("which return case: " + std::to_string(msg.return_case()));
                     success = true;
                   }
-                  catch(class foxtrot::DeviceError& err)
-                  {
-                      _lg.Error("device error while getting telemetry");
-                      set_repl_err(msg,err,error_types::DeviceError);
-                      
-                  }
-                  catch(class foxtrot::ProtocolError& err)
-                  {
-                      _lg.Error("protocol error while getting telemetry");
-                      set_repl_err(msg,err,error_types::ProtocolError);
-                      
-                  }
-                  catch(std::out_of_range& err)
-                  {
-                      _lg.Error("out of range error trapped while getting telemetry");
-                      set_repl_err(msg,err,error_types::out_of_range);
-                  }
-                  catch(std::exception& err)
-                  {
-                      _lg.Error("generic exception while getting telemetry");
-                      set_repl_err(msg,err,error_types::Error);
-                  }
                   catch(...)
-                  {
-                      _lg.Error("unhandled error while getting telemetry");
-                      set_repl_err_msg(msg,"unknown error",error_types::unknown_error);
-                  }
-                  
+		  {
+		    foxtrot_rpc_error_handling(std::current_exception(),msg,_lg,nullptr); 
+		  }
                   
                   auto now = boost::posix_time::microsec_clock::universal_time();
                   msg.set_name(std::get<2>(funtup));
@@ -181,17 +157,35 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                   
                   auto total_msg = oss.str();
                   
+		  
 		  if(std::get<4>(funtup))
 		  {
+		    _lg.Trace("transmitting telemetry message...");
 		    auto nbytes = nn_send(_nn_pub_skt, total_msg.c_str(),total_msg.size(),0);
 		    if(nbytes != total_msg.size())
 		    {
 		    _lg.Error("invalid number of bytes written!");   
 		    _lg.Error("expected: " + std::to_string(total_msg.size()));
 		    _lg.Error("actual: " + std::to_string(nbytes));
-		    }
+		    }  
+		    
 		  }
-                  
+		  else
+		  {
+		    _lg.Trace("non-transmission.");
+		    if(msg.has_err())
+		    {
+		      _lg.Trace("got error though, transmitting anyway");
+		      auto nbytes = nn_send(_nn_pub_skt,total_msg.c_str(),total_msg.size(),0);
+		      if(nbytes != total_msg.size())
+		      {
+			_lg.Error("invalid number of bytes written!");   
+			_lg.Error("expected: " + std::to_string(total_msg.size()));
+			_lg.Error("actual: " + std::to_string(nbytes));
+		      }
+		    }    
+		  }
+		  
                   
               }
               

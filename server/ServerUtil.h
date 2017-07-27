@@ -46,9 +46,26 @@ namespace foxtrot
     }
     
     
+    template <typename T> struct empty_struct
+    {
+      
+    };
+    
+    
     template<typename respondtp> struct responder_error_call
     {
+      
     };
+    
+    template <typename T> struct responder_error_call<empty_struct<T>>
+    {
+      void operator()(empty_struct<T>& responder, const T& repl, HandlerTag* tag)
+      {
+	
+      };
+      
+    };
+    
     
     template<typename T> struct responder_error_call<grpc::ServerAsyncResponseWriter<T>>
     {
@@ -66,7 +83,8 @@ namespace foxtrot
       };
     };
     
-    template <typename repltp, typename respondtp> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, respondtp& responder, foxtrot::Logging& lg, HandlerTag* tag)
+    
+    template <typename repltp, typename respondtp=empty_struct<repltp>> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, respondtp& responder, foxtrot::Logging& lg, HandlerTag* tag)
     {
       responder_error_call<respondtp> errcall;
       
@@ -115,6 +133,15 @@ namespace foxtrot
       }
       
     };
+    
+    template <typename repltp> void foxtrot_rpc_error_handling(std::exception_ptr eptr, repltp& repl, foxtrot::Logging lg, HandlerTag* tag)
+    {
+      empty_struct<repltp> responder;
+      
+      foxtrot_rpc_error_handling(eptr,repl,responder,lg,tag);
+      
+    };
+    
     
     template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, HandlerTag* tag, error_types&& errtp=error_types::Error)
     {
