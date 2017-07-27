@@ -13,7 +13,7 @@
 	
 	"ArchonHeaterX" : {
 	    "stage_temp" : {
-		"name" : "getTempA",
+		"name" : "getTempB",
 		"ticks" : 5
 	    },
 	    "tank_temp" : {
