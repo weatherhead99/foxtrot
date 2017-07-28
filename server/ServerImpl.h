@@ -4,6 +4,7 @@
 #include "foxtrot.grpc.pb.h"
 
 #include <grpc++/grpc++.h>
+#include <grpc++/security/credentials.h>
 #include <string>
 #include "DeviceHarness.h"
 #include "Logging.h"
@@ -21,7 +22,7 @@ using grpc::ServerBuilder;
 
 namespace foxtrot{
 
-class ServerImpl final
+class ServerImpl 
 {
 public:
     ServerImpl(const std::string& servcomment, DeviceHarness& harness);
@@ -35,11 +36,14 @@ public:
     
     int join_multithreaded();
     
+    void SetupSSL(const std::string& crtfile, const std::string& keyfile,
+		  bool force_client_auth = false);
+    
 private:
   
     std::string _connstr;
   
-    void setup_common(const std::string& addrstr, std::shared_ptr<grpc::ServerCredentials> creds = nullptr);
+    void setup_common(const std::string& addrstr );
   
     std::mutex _exitmut;
     std::condition_variable _condvar;
@@ -55,6 +59,10 @@ private:
     DeviceHarness& _harness;
     
     Logging _lg;
+    
+    std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
+    
 };
+
 
 }

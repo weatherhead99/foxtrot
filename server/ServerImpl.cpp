@@ -1,5 +1,7 @@
 #include "ServerImpl.h"
 #include <string>
+#include <fstream>
+#include <sstream>
 
 #include "ServerDescribeImpl.h"
 #include "InvokeCapabilityImpl.h"
@@ -9,6 +11,7 @@
 #include <iostream>
 #include <typeinfo>
 #include <future>
+#include </local/home/weatherill/include/grpc++/security/credentials.h>
 
 using std::string;
 using namespace foxtrot;
@@ -34,18 +37,19 @@ ServerImpl::~ServerImpl()
     
 }
 
-void ServerImpl::setup_common(const std::string& addrstr, std::shared_ptr<grpc::ServerCredentials> creds)
+void ServerImpl::setup_common(const std::string& addrstr)
 {
   
-    if(creds == nullptr)
+    if(_creds == nullptr)
     {
-      creds = grpc::InsecureServerCredentials();
-    };
+      _creds = grpc::InsecureServerCredentials();
       
-    
+    };
+  
+  
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
-    builder.AddListeningPort(addrstr,creds);
+    builder.AddListeningPort(addrstr,_creds);
     
     //TODO: Register Service
     builder.RegisterService(&_service);
@@ -147,5 +151,43 @@ void foxtrot::ServerImpl::HandleRpcs()
      
         
     }
-    
 }
+
+
+void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool force_client_auth)
+{
+  grpc::SslServerCredentialsOptions::PemKeyCertPair kp;
+  
+  std::ifstream ifs;
+  std::stringstream iss;
+  
+  
+  ifs.open(crtfile);
+  iss << ifs.rdbuf();
+  
+  kp.cert_chain = iss.str();
+  ifs.close();
+  ifs.clear();
+  
+  
+  ifs.open(keyfile);
+  iss.str("");
+  iss << ifs.rdbuf();
+  
+  
+  kp.private_key = iss.str();
+  
+  
+  grpc::SslServerCredentialsOptions opts;
+  opts.pem_key_cert_pairs.push_back(kp);
+  
+  opts.force_client_auth = force_client_auth;
+  
+  
+  _creds = grpc::SslServerCredentials(opts);
+  
+}
+
+
+
+

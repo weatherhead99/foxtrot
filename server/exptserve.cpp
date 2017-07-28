@@ -29,6 +29,10 @@ int main(int argc, char** argv)
     std::string setupfile;
     std::string servname;
     std::string parameterfile;
+    
+    std::string keyfile;
+    std::string crtfile;
+    
     int debuglevel;
     int nthreads;
     short unsigned port;
@@ -40,7 +44,10 @@ int main(int argc, char** argv)
     ("dump", po::value<std::string>(), "dump server JSON description")
     ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level")
     ("threads,t",po::value<int>(&nthreads)->default_value(4),"number of server threads to run")
-    ("port",po::value<short unsigned>(&port)->default_value(50051),"port to use");
+    ("port",po::value<short unsigned>(&port)->default_value(50051),"port to use")
+    ("key",po::value<std::string>(&keyfile),"pem for SSL")
+    ("crt",po::value<std::string>(&crtfile),"crt for SSL")
+    ;
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
@@ -104,6 +111,25 @@ int main(int argc, char** argv)
     std::string connstr = "0.0.0.0:" + std::to_string(port);
     
     foxtrot::ServerImpl serv(servname,harness,connstr);
+    
+    
+    
+    
+    if(vm.count("key"))
+    {
+      if(!vm.count("crt"))
+      {
+	lg.Fatal("asked for SSL but only provided PEM file");
+	return -1;
+	
+      }
+      
+      serv.SetupSSL(crtfile,keyfile);
+      
+      
+    };
+    
+    
     
     
     if(nthreads > 1)
