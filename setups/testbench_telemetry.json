@@ -7,13 +7,14 @@
     "devices" : {
 	"archon" : {
 	    "update_state": {
-		"ticks" : 5
+		"ticks" : 5,
+		"broadcast" : false
 		}
 	},
 	
 	"ArchonHeaterX" : {
 	    "stage_temp" : {
-		"name" : "getTempA",
+		"name" : "getTempB",
 		"ticks" : 5
 	    },
 	    "tank_temp" : {
