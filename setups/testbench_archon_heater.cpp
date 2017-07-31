@@ -303,8 +303,9 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     harness.AddDevice(std::move(archon));
     
     //===================radiometry system========================//
-    
-    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet("/home/dweatherill/Software/stellarnet/files_to_copy/stellarnet.hex",1000));
+    auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
+
+    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
     harness.AddDevice(std::move(spectrometer));
     
     

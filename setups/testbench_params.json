@@ -25,7 +25,8 @@
   },
   
   "setup" : {
-    "archon_reset" : false
+    "archon_reset" : false,
+    "stellarnet_firmware" : "/home/weatherill/stellarnet.hex"
   }
   
 
