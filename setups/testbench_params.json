@@ -2,7 +2,7 @@
   "archon_params" : {
     "addr" : "10.0.0.2",
     "port" : 4242 ,
-    "timeout" : 30,
+    "timeout" : 30
   },
   
   "tpg_params" : {

@@ -11,7 +11,8 @@
 #include <iostream>
 #include <typeinfo>
 #include <future>
-#include </local/home/weatherill/include/grpc++/security/credentials.h>
+#include <grpc++/security/credentials.h>
+
 
 using std::string;
 using namespace foxtrot;
