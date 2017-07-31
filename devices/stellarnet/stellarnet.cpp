@@ -16,7 +16,6 @@
 
 #include <map>
 
-
 const std::map<int,int> pixel_map
 {
   {1 , 2048},
@@ -24,8 +23,7 @@ const std::map<int,int> pixel_map
   {3 , 2048},
   {4 , 1024},
   {5 , 512},
-  {6, 1024}
-  
+  {6, 1024}  
 };
 
 auto reqtp_out = LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE;
@@ -64,13 +62,14 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
 	_lg.Info("found empty FX2 chip, uploading firmware...");
 	reenumerate_device(&desc,*(listptr+i));
 	//NOTE: loop will run again and init real device
-	std::this_thread::sleep_for(std::chrono::seconds(3));
 	break;
 	
       }
     };
     libusb_free_device_list(listptr,true);
-    
+    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+
+
     
     num_devs = libusb_get_device_list(_ctxt,&listptr);
    bool dev_found = false;
@@ -170,7 +169,15 @@ void foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* 
   }
   
   //load firmware
+  _lg.Debug("firmware file: " + _firmware_file);
   std::ifstream ifs(_firmware_file);
+  if(!ifs.is_open())
+    {
+      _lg.Error("can't open firmware file");
+      throw ProtocolError("can't open firmware file");
+
+    }
+
   std::string line;
   while(std::getline(ifs,line))
   {
@@ -211,6 +218,15 @@ void foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* 
   
   _lg.Info("firmware upload finished");
   
+
+  // if(auto ret = libusb_reset_device(_hdl) <0 )
+  //   {
+  //     _lg.Error("error resetting USB device...");
+      
+  //   }
+
+
+
   libusb_close(_hdl);
   
 
