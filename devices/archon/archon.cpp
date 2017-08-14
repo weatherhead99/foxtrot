@@ -154,17 +154,14 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   std::ostringstream oss;
   oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
   
-//   std::cout << "request is: " << oss.str();
-
+  std::unique_lock<std::mutex> lck(_cmdmut);
+  
   _specproto->write(oss.str());
-  
-//   std::cout << "command written, waiting for reply..." << std::endl;
-  //maximum message size,"<xx:" +  1024 bytes of binary  = 1028
-  
-  
-  
+    
   auto ret = _specproto->read_until_endl();
   
+  lck.unlock();
+    
   //sanitize response
   ret.erase(std::remove_if(ret.begin(),ret.end(),[] (char c) { return !std::isprint(c); }),ret.end());
   
@@ -984,6 +981,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << std::setw(8) << std::setfill('0') << num_blocks <<'\n';
   
   //construct command manually
+  std::unique_lock<std::mutex> lck(_cmdmut);
   _specproto->write(oss.str());
   
   
@@ -1039,8 +1037,10 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
     
   };
   
+  
   _lg.Debug("read all blocks correctly");
   _lg.Debug("bytes still available: " + std::to_string(_specproto->bytes_available()));
+  lck.unlock();
   _lg.Debug("size of output: " + std::to_string(out.size()));
   
   //drop extra bytes off the end

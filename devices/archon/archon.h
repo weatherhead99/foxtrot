@@ -12,6 +12,8 @@
 #include <rttr/registration>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#include <mutex>
+
 #include "Logging.h"
 
 using std::string;
@@ -194,6 +196,9 @@ namespace foxtrot {
     unsigned long long _arch_tmr;
     boost::posix_time::ptime _sys_tmr;
     foxtrot::Logging _lg;
+    
+    //NOTE: should this be a timed mutex?
+    std::mutex _cmdmut;
     
   };
   
