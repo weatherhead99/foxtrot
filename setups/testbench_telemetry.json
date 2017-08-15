@@ -4,7 +4,7 @@
 	"topic" : "testbench"
     },
 
-    "de vices" : {
+    "devices" : {
 	"archon" : {
 	    "update_state": {
 		"ticks" : 5,
@@ -26,20 +26,25 @@
 		"ticks" : 5
 	    },
 	    "heaterP" : {
-        "name" : "getHeaterAP",
-        "ticks" : 5
+		"name" : "getHeaterAP",
+		"ticks" : 5
 	    },
 	    "heaterI" : {
-	    "name" : "getHeaterAI",
-	    "ticks" : 5
+		"name" : "getHeaterAI",
+		"ticks" : 5
 	    },
 	    "heaterD" : {
-	    "name" : "getHeaterAD",
-	    "ticks" : 5
+		"name" : "getHeaterAD",
+		"ticks" : 5
+	    },
+	    "heater_target" : {
+		"name" : "getHeaterTarget",
+		"args" : {"heater" : 1},
+		"ticks" : 5
 	    }
 	},
 	
-	"TPG362" : {
+    "TPG362" : {
 	    "pump_pressure" : {
 		"name" : "getPressure",
 		"args" : {
