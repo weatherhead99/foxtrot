@@ -46,7 +46,7 @@ namespace foxtrot {
   {
       RTTR_ENABLE(CmdDevice)
     friend class foxtrot::devices::ArchonModule;
-    virtual const string getDeviceTypeName() const;
+    virtual const string getDeviceTypeName() const override;
   public:
     archon(std::shared_ptr<simpleTCP> proto);
     ~archon();
@@ -167,12 +167,15 @@ namespace foxtrot {
     
     std::vector<unsigned char> parse_binary_response(const std::string& response);
     
+    //NOTE: should this be a timed mutex?
+    std::mutex _cmdmut;
+    
+    std::shared_ptr<simpleTCP> _specproto;
     
   private:
       void read_parse_existing_config();
     
     short unsigned _order;
-    std::shared_ptr<simpleTCP> _specproto;
     
     ssmap _system;
     ssmap _status;
@@ -197,8 +200,6 @@ namespace foxtrot {
     boost::posix_time::ptime _sys_tmr;
     foxtrot::Logging _lg;
     
-    //NOTE: should this be a timed mutex?
-    std::mutex _cmdmut;
     
   };
   
