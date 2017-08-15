@@ -1,5 +1,6 @@
 #include "dashboard_main.h"
 #include "client.h"
+#include <telemetry/TelemetryClient.h>
 #include <future>
 #include <thread>
 #include <chrono>
@@ -7,12 +8,16 @@
 #include <QDateTime>
 #include <cmath>
 
+#include "TelemetryClient.h"
+
 
 Dashboard::Dashboard(QWidget* parent)
 : QMainWindow(parent), _timer(this)
 {
     ui.setupUi(this);
 
+    
+    
   
 #if QWT_VERSION >= 0x060103
 #pragma message("using QWT new version hacks")
@@ -44,102 +49,103 @@ Dashboard::Dashboard(QWidget* parent)
 
 Dashboard::~Dashboard()
 {
- if(_client)
+ 
+ if(_telemcl)
  {
-     delete _client;
+   delete _telemcl;
  }
     
 }
 
 void Dashboard::connectServer()
 {
+  
+    _telemcl = new foxtrot::TelemetryClient;  
+    _telemcl->ConnectSocket("tcp://localhost:5000");
+    _telemcl->Subscribe("testbench");
+  
     
-    auto async_connect_client = [this] () {
-        
-        try{
-        ui.statusbar->showMessage("connecting...");      
-      _client = new foxtrot::Client("localhost:50051");
-      ui.statusbar->showMessage("connected to server"); 
-
-      ui.statusbar->showMessage("finding archon heater device...");
-      
-      auto servdesc = _client->DescribeServer();
-      
-      _heater_devid = foxtrot::find_devid_on_server(servdesc,"ArchonHeaterX");
-      if(_heater_devid < 0)
+    auto async_update = [this]() {
+      while(true)
       {
-	ui.statusbar->showMessage("no heater module found");
-      }
-      _presgauge_devid = foxtrot::find_devid_on_server(servdesc, "TPG362");
-      if(_presgauge_devid < 0)
-      {
-	ui.statusbar->showMessage("no pressure gauge found");
-      }
+	auto msg = _telemcl->waitMessageSync();
+	
+	if(msg.name == "stage_temp")
+	{
+	  _stage_temp = boost::get<double>(msg.value);
+	  updateTempReadings();
+	  continue;
+	}
+	if(msg.name == "tank_temp")
+	{
+	  _tank_temp = boost::get<double>(msg.value);
+	  updateTempReadings();
+	  continue;
+	}
+	if(msg.name == "heater")
+	{
+	  _heater_output = boost::get<double>(msg.value);
+	  updateTempReadings();
+	  continue;
+	};
+	
+	if(msg.name == "heaterP")
+	{
+	  _heater_P = boost::get<int>(msg.value);
+	  updateTempReadings();
+	  continue;
+	};
+	
+	if(msg.name == "heaterI")
+	{
+	  _heater_I = boost::get<int>(msg.value);
+	  updateTempReadings();
+	  continue;
+	};
+	
+	if(msg.name == "heaterD")
+	{
+	  _heater_D = boost::get<int>(msg.value);
+	  updateTempReadings();
+	  continue;
+	}
+	
+	if(msg.name == "heater_target")
+	{
+	  _heater_target = boost::get<int>(msg.value);
+	  updateTempReadings();
+	  continue;
+	}
+	
+      };
       
-      _archon_devid = foxtrot::find_devid_on_server(servdesc,"archon");
-      if(_archon_devid < 0)
-      {
-	ui.statusbar->showMessage("no archon found");
-      }
-      
-      
-      
-        }
-        catch(...)
-        {
-            ui.statusbar->showMessage("caught exception...");
-	    rethrow_error(std::current_exception());   
-        }
       
       
     };
     
-    auto result = std::async(std::launch::async,async_connect_client);
+    
+    std::async(std::launch::async,async_update);
     
     
 }
 
 void Dashboard::updateTempReadings()
 {
-  if(_heater_devid < 0 || _presgauge_devid < 0 || _archon_devid < 0)
-  {
-   ui.statusbar->showMessage("no devices setup, cannot update");
-   return;
-  }
   
-  if(!_client)
-  {
-    ui.statusbar->showMessage("no client setup, cannot update");
-    return; 
-  }
-  
-  _client->InvokeCapability(_archon_devid,"update_state");
-  auto tank_temp = boost::get<double>(_client->InvokeCapability(_heater_devid,"getTempA"));
-  auto stage_temp = boost::get<double>(_client->InvokeCapability(_heater_devid,"getTempB"));
-
-  ui.tank_temp_display->display(tank_temp);
-  ui.stage_temp_display->display(stage_temp);
+  ui.tank_temp_display->display(_tank_temp);
+  ui.stage_temp_display->display(_stage_temp);
   
   
-  std::vector<foxtrot::ft_variant> args{0};
-  auto heater_target = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterTarget",args.begin(),args.end()));
+  ui.heater_target->display(_heater_target);
+    
+  ui.heater_output->setValue(_heater_output / 25. * 100);
   
-  ui.heater_target->display(heater_target);
-  
-  auto heater_output = boost::get<double>(_client->InvokeCapability(_heater_devid,"getHeaterAOutput"));
-  
-  
-  ui.heater_output->setValue(heater_output / 25. * 100);
-  
-  auto heater_P = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAP"));
-  auto heater_I = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAI"));
-  auto heater_D = boost::get<int>(_client->InvokeCapability(_heater_devid,"getHeaterAD"));
                                       
-  auto heater_total = heater_P + heater_I + heater_D;
+  auto heater_total = _heater_P + _heater_I + _heater_D;
   
-  double P_pc = heater_P / std::abs(heater_total);
-  double I_pc = heater_I / std::abs(heater_total);
-  double D_pc = heater_D / std::abs(heater_total);
+  double P_pc = _heater_P / std::abs(heater_total);
+  double I_pc = _heater_I / std::abs(heater_total);
+  double D_pc = _heater_D / std::abs(heater_total);
   
   ui.heater_D->setValue(D_pc);
   ui.heater_I->setValue(I_pc);
