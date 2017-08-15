@@ -81,7 +81,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 catch(int& i)
                 {
 		  foxtrot_server_specific_error(
-		    "couldn't get callargs", repl,respond,_lg,tag);
+		    repl.err().msg(), repl,respond,_lg,tag);
                 return true;
                 }
 	    std::vector<rttr::argument> callargs(args.begin(), args.end());
