@@ -6,6 +6,7 @@
 namespace foxtrot
 {
     class Client;
+    class TelemetryClient;
 }
 
 class Dashboard : public QMainWindow
@@ -27,9 +28,21 @@ private:
     void rethrow_error(std::exception_ptr pt);
     QTimer _timer;
     Ui::MainWindow ui;
-    foxtrot::Client * _client;
-    int _heater_devid = -1;
-    int _presgauge_devid = -1;
-    int _archon_devid = -1;
+    foxtrot::TelemetryClient* _telemcl;
+    
+    double _tank_temp;
+    double _stage_temp;
+    
+    double _heater_target;
+    double _heater_output;
+    double _heater_P;
+    double _heater_I;
+    double _heater_D;
+    
+    
+    
     
 };
+
+
+

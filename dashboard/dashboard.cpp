@@ -14,6 +14,9 @@ int main(int argc, char** argv)
     
     dash.show();
     
+    dash.setWindowState(Qt::WindowFullScreen);
+    
+    
     return app.exec();
     
 }
