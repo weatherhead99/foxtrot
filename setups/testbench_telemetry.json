@@ -4,7 +4,7 @@
 	"topic" : "testbench"
     },
 
-    "devices" : {
+    "de vices" : {
 	"archon" : {
 	    "update_state": {
 		"ticks" : 5,
@@ -24,6 +24,18 @@
 	    "heater" : {
 		"name" : "getHeaterAOutput",
 		"ticks" : 5
+	    },
+	    "heaterP" : {
+        "name" : "getHeaterAP",
+        "ticks" : 5
+	    },
+	    "heaterI" : {
+	    "name" : "getHeaterAI",
+	    "ticks" : 5
+	    },
+	    "heaterD" : {
+	    "name" : "getHeaterAD",
+	    "ticks" : 5
 	    }
 	},
 	
