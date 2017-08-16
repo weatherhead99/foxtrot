@@ -190,6 +190,7 @@ namespace foxtrot
 	  bool success;
 	  rttr::variant outarg = get_arg(arg,success);
 	  
+	  
 	      
 	  if(!success)
 	  {          
@@ -203,8 +204,9 @@ namespace foxtrot
 	  if(!outarg.can_convert(target_argtp))
 	  {
 	      lg.Error("error converting argument ");
-	      auto msg = "argument at position " + std::to_string(arg.position()) + 
-	      "cannot be converted to type " + target_argtp.get_name();
+	      auto msg = "argument at position " + std::to_string(arg.position()) + " of type: " + outarg.get_type().get_name()
+	      + "cannot be converted to type " + target_argtp.get_name();
+	      lg.Debug(msg);
 	      set_repl_err_msg(repl,msg, error_types::out_of_range);
 	      throw 1;
 	      
