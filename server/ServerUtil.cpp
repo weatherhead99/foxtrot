@@ -104,11 +104,23 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          return convertsuccess;
 }
 
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& vr)
+foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
+{
+  auto tp = var.get_type();
+  
+  
+  if(var.can_convert<int>() || var.can_convert<unsigned>() )
+    {
+      return value_types::INT;
+    }
+    
+  return get_appropriate_wire_type(tp);
+}
+
+foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 {
     using namespace rttr;
     
-    auto tp = vr.get_type();
     
     if(tp == type::get<void>())
     {
@@ -132,10 +144,11 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& vr)
       return value_types::STRING;
     }
     
-    if(vr.can_convert<int>() || vr.can_convert<unsigned>() )
+    if(tp.is_enumeration())
     {
       return value_types::INT;
     }
+    
     
     if(!tp.is_arithmetic() )
     {

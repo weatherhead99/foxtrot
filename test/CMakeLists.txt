@@ -1,2 +1,4 @@
 foxtrot_test(CommunicationProtocol_test)
 
+add_executable(heater_valuetype_test heater_valuetype_test.cpp)
+target_link_libraries(heater_valuetype_test foxtrotclient archon)
