@@ -4,7 +4,7 @@
 	"topic" : "testbench"
     },
 
-    "de vices" : {
+    "devices" : {
 	"archon" : {
 	    "update_state": {
 		"ticks" : 5,
@@ -35,6 +35,11 @@
 	    },
 	    "heaterD" : {
 	    "name" : "getHeaterAD",
+	    "ticks" : 5
+	    },
+	    "heater_target" : {
+	    "name" : "getHeaterTarget",
+	    "args" : { "heater" : 0},
 	    "ticks" : 5
 	    }
 	},
