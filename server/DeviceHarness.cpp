@@ -168,7 +168,7 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
                 auto argtp = arg.get_type();
                 
                 //get a wire type
-                auto wire_type = get_appropriate_wire_type(arg);
+                auto wire_type = get_appropriate_wire_type(argtp);
                 
                 cap.add_argtypes(wire_type);
                 
