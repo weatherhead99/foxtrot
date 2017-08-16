@@ -117,7 +117,7 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
       
       if(prop.get_type().is_array())
       {
-	cap.set_tp(capability_types::STREAM);
+        cap.set_tp(capability_types::STREAM);
 	
       }
       
@@ -125,8 +125,8 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
       {
             
           cap.set_tp(capability_types::VALUE_READONLY);
-	  std::ostringstream oss;
-	  oss << cap.tp();
+          std::ostringstream oss;
+          oss << cap.tp();
           _lg.Debug(oss.str() );
       }
       else
@@ -168,7 +168,8 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
                 auto argtp = arg.get_type();
                 
                 //get a wire type
-                auto wire_type = get_appropriate_wire_type(argtp);
+                auto wire_type = get_appropriate_wire_type(arg);
+                
                 cap.add_argtypes(wire_type);
                 
             }
