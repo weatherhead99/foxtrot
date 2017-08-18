@@ -10,6 +10,8 @@ namespace foxtrot {
         {
             RTTR_ENABLE(archon)
         public:
+	    archonraw(std::shared_ptr<simpleTCP> proto);	
+	    
             std::string rawcmd(const std::string& request);
             
             

@@ -6,6 +6,8 @@
 #include "devices/archon/archon_module_driver.h"
 #include "devices/archon/archon_module_AD.h"
 #include "devices/archon/archon_module_xvbias.h"
+#include "devices/archon/archonraw.h"
+
 
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
@@ -55,8 +57,13 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto archon_params = params->at("archon_params");
     auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
     
-    auto archon = std::unique_ptr<foxtrot::devices::archon> (
-        new foxtrot::devices::archon(archontcp));
+//     auto archon = std::unique_ptr<foxtrot::devices::archon> (
+//         new foxtrot::devices::archon(archontcp));
+//     
+    
+    auto archon = std::unique_ptr<foxtrot::devices::archonraw> (
+	new foxtrot::devices::archonraw(archontcp));
+    
     
     archon->settrigoutpower(true);
     

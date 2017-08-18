@@ -1,5 +1,11 @@
 #include "archonraw.h"
 
+devices::archonraw::archonraw(std::shared_ptr<foxtrot::protocols::simpleTCP> proto)
+: foxtrot::devices::archon(proto)
+{
+
+}
+
 
 
 std::string foxtrot::devices::archonraw::rawcmd(const std::string& request)
