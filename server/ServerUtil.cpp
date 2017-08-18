@@ -111,7 +111,10 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var
   
   if(var.can_convert<int>() || var.can_convert<unsigned>() )
     {
-      return value_types::INT;
+      if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
+	{
+	  return value_types::INT;
+	}
     }
     
   return get_appropriate_wire_type(tp);
