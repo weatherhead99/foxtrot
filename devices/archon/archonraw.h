@@ -15,7 +15,6 @@ namespace foxtrot {
             std::string rawcmd(const std::string& request);
             
             
-            
         };
             
         
