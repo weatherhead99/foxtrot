@@ -144,6 +144,7 @@ devices::archon::~archon()
 
 std::string foxtrot::devices::archon::cmd(const std::string& request)
 {
+  std::unique_lock<std::mutex> lck(_cmdmut);
   if(_order == 0xFE)
   {
     _order = 0;
@@ -154,7 +155,6 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   std::ostringstream oss;
   oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
   
-  std::unique_lock<std::mutex> lck(_cmdmut);
   
   _specproto->write(oss.str());
     
