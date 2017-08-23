@@ -171,7 +171,7 @@ namespace foxtrot {
     std::mutex _cmdmut;
     
     std::shared_ptr<simpleTCP> _specproto;
-    
+    foxtrot::Logging _lg;
   private:
       void read_parse_existing_config();
     
@@ -198,7 +198,7 @@ namespace foxtrot {
     
     unsigned long long _arch_tmr;
     boost::posix_time::ptime _sys_tmr;
-    foxtrot::Logging _lg;
+    
     
     
   };
