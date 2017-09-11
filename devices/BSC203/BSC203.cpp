@@ -146,6 +146,23 @@ bool foxtrot::devices::BSC203::get_channelenable(foxtrot::devices::destination d
 }
 
 
+void foxtrot::devices::BSC203::set_updatemsgs(foxtrot::devices::destination dest, bool onoff)
+{
+    
+    
+};
 
+
+foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::destination dest)
+{
+    hwinfo out;
+    
+    transmit_message(bsc203_opcodes::MGMSG_MOD_GET_HWINFO,0x00,0x00,dest);
+    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
+    
+    
+    
+    
+};
 
 

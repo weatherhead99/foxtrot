@@ -37,8 +37,8 @@ namespace foxtrot {
       MGMSG_MOD_REQ_CHANENABLESTATE = 0x0211,
       MGMSG_MOD_GET_CHANENABLESTATE = 0x0212,
       MGMSG_MOD_START_UPDATEMSGS = 0x0011,
-      MGMSG_MOD_STOP_UPDATEMSGS = 0x0012
-        
+      MGMSG_MOD_STOP_UPDATEMSGS = 0x0012,
+      MGMSG_MOD_GET_HWINFO = 0x0006
     };
     
     struct bsc203_reply
@@ -46,6 +46,19 @@ namespace foxtrot {
       unsigned char p1;
       unsigned char p2;
       std::vector<unsigned char> data;      
+    };
+    
+    
+    struct hwinfo
+    {
+      unsigned int serno;
+      unsigned long modelno;
+      unsigned short type;
+      unsigned int fwvers;
+      std::array<char,48> notes;
+      unsigned short HWvers;
+      unsigned short modstate;
+      unsigned short nchans;
     };
     
     
@@ -58,8 +71,11 @@ namespace foxtrot {
     void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
+    hwinfo get_hwinfo(destination dest);
       
     protected:
+      void set_updatemsgs(destination dest, bool onoff);
+        
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
 			    destination src = destination::host);
       
