@@ -12,6 +12,7 @@
 
 #include <byteswap.h>
 
+#include <iostream>
 
 
 const foxtrot::parameterset bsc203_class_params
@@ -70,6 +71,15 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
         _lg.Error("bad reply length: " + std::to_string(actlen));
         throw DeviceError("received bad reply length...");
     };
+    
+    std::cout << "headerstr len: " << headerstr.size() << std::endl;
+    
+    for(auto& c : headerstr)
+    {
+      std::cout << std::hex << (unsigned) c << "\t";
+    }
+    std::cout << std::endl;
+    
     
     unsigned short opcode = (headerstr[1] <<8 ) & headerstr[0]; 
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
@@ -157,12 +167,12 @@ foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::
 {
     hwinfo out;
     
-    transmit_message(bsc203_opcodes::MGMSG_MOD_GET_HWINFO,0x00,0x00,dest);
+    transmit_message(bsc203_opcodes::MGMSG_HW_GET_INFO,0x00,0x00,dest);
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
     
     
-    
+    return out;
 };
 
 

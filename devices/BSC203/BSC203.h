@@ -38,7 +38,7 @@ namespace foxtrot {
       MGMSG_MOD_GET_CHANENABLESTATE = 0x0212,
       MGMSG_MOD_START_UPDATEMSGS = 0x0011,
       MGMSG_MOD_STOP_UPDATEMSGS = 0x0012,
-      MGMSG_MOD_GET_HWINFO = 0x0006
+      MGMSG_HW_GET_INFO = 0x0006
     };
     
     struct bsc203_reply
