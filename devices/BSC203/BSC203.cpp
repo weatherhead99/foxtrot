@@ -12,7 +12,6 @@
 
 #include <byteswap.h>
 
-#include <iostream>
 
 
 const foxtrot::parameterset bsc203_class_params
@@ -31,6 +30,10 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
 {
   
   _serport->Init(&bsc203_class_params);
+  
+  //send this random magical message that makes stuff work for some reason
+  transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::rack);
+  
   
   //disable status update messages as they will mess with out synchronous messaging model
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::rack);
@@ -145,8 +148,8 @@ void foxtrot::devices::BSC203::set_channelenable(foxtrot::devices::destination d
 
 bool foxtrot::devices::BSC203::get_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel)
 {
-    transmit_message(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,static_cast<unsigned char>(channel),
-                     0, dest);
+    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE
+    ,static_cast<unsigned char>(channel),0, dest);
     
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
@@ -156,18 +159,12 @@ bool foxtrot::devices::BSC203::get_channelenable(foxtrot::devices::destination d
 }
 
 
-void foxtrot::devices::BSC203::set_updatemsgs(foxtrot::devices::destination dest, bool onoff)
-{
-    
-    
-};
-
 
 foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::destination dest)
 {
     hwinfo out;
     
-    transmit_message(bsc203_opcodes::MGMSG_HW_GET_INFO,0x00,0x00,dest);
+    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,0x00,0x00,dest);
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
     

@@ -38,7 +38,9 @@ namespace foxtrot {
       MGMSG_MOD_GET_CHANENABLESTATE = 0x0212,
       MGMSG_MOD_START_UPDATEMSGS = 0x0011,
       MGMSG_MOD_STOP_UPDATEMSGS = 0x0012,
-      MGMSG_HW_GET_INFO = 0x0006
+      MGMSG_MOD_REQ_HWINFO = 0x0005,
+      MGMSG_MOD_GET_HWINFO = 0x0006,
+      MGMSG_HW_NO_FLASH_PROGRAMMING=0x0018
     };
     
     struct bsc203_reply
@@ -74,8 +76,6 @@ namespace foxtrot {
     hwinfo get_hwinfo(destination dest);
       
     protected:
-      void set_updatemsgs(destination dest, bool onoff);
-        
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
 			    destination src = destination::host);
       
