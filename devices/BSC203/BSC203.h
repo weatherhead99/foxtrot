@@ -40,7 +40,15 @@ namespace foxtrot {
       MGMSG_MOD_STOP_UPDATEMSGS = 0x0012,
       MGMSG_MOD_REQ_HWINFO = 0x0005,
       MGMSG_MOD_GET_HWINFO = 0x0006,
-      MGMSG_HW_NO_FLASH_PROGRAMMING=0x0018
+      MGMSG_HW_NO_FLASH_PROGRAMMING = 0x0018,
+      MGMSG_RACK_REQ_BAYUSED = 0x0060,
+      MGMSG_RACK_GET_BAYUSED = 0x0061,
+      MGMSG_RACK_REQ_STATUSBITS = 0x0226,
+      MGMSG_RACK_GET_STATUSBITS = 0x0227,
+      MGMSG_RACK_SET_DIGOUTPUTS = 0x0228,
+      MGMSG_RACK_REQ_DIGOUTPUTS = 0x0229,
+      MGMSG_RACK_GET_DIGOUTPUTS = 0x0230
+      
     };
     
     struct bsc203_reply
@@ -75,6 +83,8 @@ namespace foxtrot {
     
     hwinfo get_hwinfo(destination dest);
       
+    bool get_bayused_rack(destination dest, unsigned char bay);
+    
     protected:
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
 			    destination src = destination::host);

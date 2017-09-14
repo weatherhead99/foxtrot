@@ -32,9 +32,22 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   _serport->Init(&bsc203_class_params);
   
   //send this random magical message that makes stuff work for some reason
+  _lg.Debug("disabling flash programming on rack...")
   transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::rack);
   
+  for(unsigned char i =1 ; i <4; i++)
+  {
+      if(get_bayused_rack(destination::rack, i))
+      {
+          _lg.Debug("disabling flash programming on controller " + std::to_string(i))
+          transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,
+                           static_cast<destination>(i + 0x20));
+          
+      }
+      
+  };
   
+  _lg.Debug("stopping update messages...");
   //disable status update messages as they will mess with out synchronous messaging model
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::rack);
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
@@ -167,9 +180,24 @@ foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::
     transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,0x00,0x00,dest);
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
-    
+    //TODO: fill in hwinfo struct sensibly
     
     return out;
 };
 
+bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination dest, unsigned char bay)
+{
+    transmit_message(bsc203_opcodes::MGMSG_RACK_REQ_BAYUSED,bay,0,dest);
+    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_RACK_GET_BAYUSED,dest);
+    
+    if(ret.p1 != bay)
+    {
+      _lg.Error("requested bay: " + std::to_string(bay) + " got bay: " + std::to_string(ret.p1));
+      throw DeviceError("invalid bay returned...");
+    }
+    
+    bool used = (ret.p2 == 0x02) ? false : true;
+    
+    return used;
+};
 
