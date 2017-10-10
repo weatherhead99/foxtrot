@@ -12,6 +12,8 @@
 
 #include <byteswap.h>
 
+#include <thread>
+#include <chrono>
 
 
 const foxtrot::parameterset bsc203_class_params
@@ -68,9 +70,12 @@ void foxtrot::devices::BSC203::transmit_message( foxtrot::devices::bsc203_opcode
 {
   
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
+  _lg.Trace("optpr[1]: " + std::to_string(optpr[1]));
+  _lg.Trace("optpr[0]: " + std::to_string(optpr[0]));
   
-  std::array<unsigned char, 6> header{ optpr[1], optpr[0], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
+  std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
   
+  _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
 
 }
@@ -80,15 +85,17 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     unsigned actlen;
     bsc203_reply out;
     
+    std::this_thread::sleep_for(std::chrono::microseconds(100));
+    
     auto headerstr = _serport->read(6,&actlen);
     
     if(actlen != 6)
     {
         _lg.Error("bad reply length: " + std::to_string(actlen));
-        throw DeviceError("received bad reply length...");
+        throw DeviceError("received bad reply length..." );
     };
     
-    std::cout << "headerstr len: " << headerstr.size() << std::endl;
+//     std::cout << "headerstr len: " << headerstr.size() << std::endl;
     
     for(auto& c : headerstr)
     {
@@ -97,10 +104,14 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     std::cout << std::endl;
     
     
-    unsigned short opcode = (headerstr[1] <<8 ) & headerstr[0]; 
+    unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0]); 
+    std::cout << (unsigned ) opcode << std::endl;
+    
+    
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
     {
         _lg.Error("unexpected opcode: " + std::to_string(opcode));
+	_lg.Error("expected: " + std::to_string(static_cast<decltype(opcode)>(expected_opcode)));
         throw DeviceError("received unexpected opcode");
     }
     
