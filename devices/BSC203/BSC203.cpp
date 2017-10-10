@@ -32,14 +32,14 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   _serport->Init(&bsc203_class_params);
   
   //send this random magical message that makes stuff work for some reason
-  _lg.Debug("disabling flash programming on rack...")
+  _lg.Debug("disabling flash programming on rack...");
   transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::rack);
   
   for(unsigned char i =1 ; i <4; i++)
   {
       if(get_bayused_rack(destination::rack, i))
       {
-          _lg.Debug("disabling flash programming on controller " + std::to_string(i))
+          _lg.Debug("disabling flash programming on controller " + std::to_string(i));
           transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,
                            static_cast<destination>(i + 0x20));
           
@@ -200,4 +200,38 @@ bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination de
     
     return used;
 };
+
+
+void foxtrot::devices::BSC203::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
+{
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOME,static_cast<unsigned char>(chan),0,dest);
+    
+    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,dest);
+    
+    if(ret.p1 != static_cast<unsigned char>(chan))
+    {
+        throw DeviceError("invalid channel returned...");
+    }
+    
+    
+};
+
+
+void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
+{
+    
+    
+    
+}
+
+void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
+{
+    
+    
+}
+
+
+
+
+
 
