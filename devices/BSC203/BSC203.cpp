@@ -37,15 +37,20 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   _lg.Debug("disabling flash programming on rack...");
   transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::rack);
   
-  for(unsigned char i =1 ; i <4; i++)
+  for(unsigned char i =0 ; i <3; i++)
   {
       if(get_bayused_rack(destination::rack, i))
       {
+	_lg.Debug("bay is used: " + std::to_string(i));
           _lg.Debug("disabling flash programming on controller " + std::to_string(i));
           transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,
                            static_cast<destination>(i + 0x20));
           
       }
+      else
+      {
+	_lg.Debug("bay is unused: " + std::to_string(i));
+      };
       
   };
   
@@ -55,6 +60,8 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay2);
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay3);
+  
+  _lg.Debug("update messages stopped");
   
 }
 
@@ -70,13 +77,12 @@ void foxtrot::devices::BSC203::transmit_message( foxtrot::devices::bsc203_opcode
 {
   
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
-  _lg.Trace("optpr[1]: " + std::to_string(optpr[1]));
-  _lg.Trace("optpr[0]: " + std::to_string(optpr[0]));
   
   std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
   
   _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
+  
 
 }
 
@@ -85,7 +91,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     unsigned actlen;
     bsc203_reply out;
     
-    std::this_thread::sleep_for(std::chrono::microseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     
     auto headerstr = _serport->read(6,&actlen);
     
@@ -189,7 +195,7 @@ foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::
     hwinfo out;
     
     transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,0x00,0x00,dest);
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
+    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_HWINFO,dest);
     
     //TODO: fill in hwinfo struct sensibly
     
