@@ -45,6 +45,13 @@ enum error_types
     contention_timeout = 5;
 }
 
+enum server_commands
+{
+    ReloadSetup = 0;
+
+
+}
+
 message errstatus
 {
     error_types tp =1;
@@ -152,10 +159,23 @@ message datachunk
 
 }
 
+message servercommand_request
+{
+    server_commands command = 1;
+    uint32 msgid = 2;
+    
+}
+
+message serverrequest_return
+{
+    errstatus err = 1;
+    uint32 msgid = 2;
+}
 
 service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
     rpc FetchData(chunk_request) returns (stream datachunk);
+    rpc ServerCommand (servercommand_request) returns (serverrequest_return);
 }
