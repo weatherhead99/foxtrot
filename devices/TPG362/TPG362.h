@@ -54,6 +54,10 @@ namespace foxtrot {
     std::string getDeviceName(short unsigned channel=1);
     
     bool getGaugeOnOff(short unsigned channel=1);
+    void setGaugeOnOff(short unsigned channel,bool onoff);
+    
+    bool getDegass(short unsigned channel = 1);
+    void setDegass(short unsigned channel, bool onoff);
     
     virtual const string getDeviceTypeName() const;
     
