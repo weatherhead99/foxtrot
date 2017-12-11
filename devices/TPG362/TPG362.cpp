@@ -15,7 +15,7 @@
 #include <climits>
 
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
-: CmdDevice(proto), _serproto(proto)
+  : CmdDevice(proto), _serproto(proto), _lg("TPG362")
 {
   
   auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);

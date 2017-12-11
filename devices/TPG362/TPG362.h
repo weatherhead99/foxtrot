@@ -1,6 +1,7 @@
 #pragma once
 #include "CmdDevice.h"
 #include "SerialProtocol.h"
+#include "Logging.h"
 #include <memory>
 #include <sstream>
 #include <iomanip>
@@ -60,7 +61,9 @@ namespace foxtrot {
     void setDegass(short unsigned channel, bool onoff);
     
     virtual const string getDeviceTypeName() const;
-    
+   
+   protected:
+    Logging _lg;
     
    private:
      template<typename T> string str_from_number(const T& number, unsigned short width=3)
