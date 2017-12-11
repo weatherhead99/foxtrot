@@ -236,8 +236,9 @@ void foxtrot::devices::BSC203::home_channel(foxtrot::devices::destination dest, 
 
 void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
 {
+    std::array<unsigned char,6> data {static_cast<unsigned char>(chan),0,0,0,0,0};
     
-    
+//      transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
     
 }
 
