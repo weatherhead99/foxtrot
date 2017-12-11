@@ -79,10 +79,7 @@ bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
 void foxtrot::devices::TPG362::setGaugeOnOff(unsigned short channel, bool onoff)
 {
     
-    std::ostringstream oss;
-    oss << std::setw(3) << std::setfill('0') << static_cast<int>(onoff);
-    auto st = oss.str();
-    
+    auto st = str_from_number(static_cast<unsigned short>(onoff));
     auto ret = semantic_cmd(channel,parameter_no::sensEnable,action::describe,&st);
     auto interpret = interpret_response_telegram(ret);
     validate_response_telegram_parameters(channel,parameter_no::sensEnable,interpret);
@@ -101,9 +98,7 @@ bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
 
 void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
 {
-    std::ostringstream oss;
-    oss << std::setw(3) << std::setfill('0') << static_cast<int>(onoff);
-    auto st = oss.str();
+    auto st = str_from_number(static_cast<short unsigned>(onoff));
     
     auto ret=  semantic_cmd(channel,parameter_no::degas,action::describe,&st);
     auto interpret = interpret_response_telegram(ret);
