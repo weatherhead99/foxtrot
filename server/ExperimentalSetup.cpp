@@ -1,9 +1,10 @@
 #include "ExperimentalSetup.h"
 #include "Error.h"
+#include "DeviceHarness.h"
 
 using namespace foxtrot;
 
-foxtrot::ft_plugin::ft_plugin(const std::string& file)
+foxtrot::ft_plugin::ft_plugin(const std::string& file) : _fname(file)
 {
     _dl = dlopen(file.c_str(), RTLD_LAZY);
   if(_dl == nullptr)
@@ -13,21 +14,36 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
   
   //clear dlerror
   dlerror();
-  
     
 }
 
 foxtrot::ft_plugin::~ft_plugin()
 {
-    dlclose(_dl);
+    if(_dl != nullptr)
+    {
+        dlclose(_dl);
+    }
 }
+
+void foxtrot::ft_plugin::reload()
+{
+    if(_dl != nullptr)
+    {
+        dlclose(_dl);
+    }
+    
+    _dl = dlopen(_fname.c_str(), RTLD_LAZY);
+    
+    dlerror();
+    
+};
 
 
 foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets )
 : ft_plugin(setupfile), _harness(harness), _lg("ExperimentalSetup"), _paramsets(paramsets)
 {
   
-    auto setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
+    setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
     if(!setup_fun)
     {
       throw std::runtime_error("no valid setup function found in setupfile...");
@@ -36,9 +52,33 @@ foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxt
       
 };
 
+void foxtrot::ExperimentalSetup::reset()
+{
+    _lg.Debug("clearing all devices...");
+    _harness.ClearDevices(1000);
+    
+    _lg.Debug("reloading setup file...");
+    reload();
+    
+    
+    
+    
+    if(setup_fun == nullptr)
+    {
+        throw std::runtime_error("setup function handle is stale!");
+    }
+    
+    _lg.Debug("running setup function...");
+    
+    setup_fun(_harness,_paramsets);
+    
+    
+}
+
+
 
 foxtrot::TelemetrySetup::TelemetrySetup(const std::string& file, foxtrot::TelemetryServer& telemserv, foxtrot::Client& cl)
-: ft_plugin(file), _telemserv(telemserv), _lg("TelemetrySertup")
+: ft_plugin(file), _telemserv(telemserv), _lg("TelemetrySetup")
 {
     auto fun = get_function<int(*)(foxtrot::TelemetryServer&, foxtrot::Client&)>("setup_telem");
     fun(_telemserv,cl);

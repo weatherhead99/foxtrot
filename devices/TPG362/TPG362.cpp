@@ -76,6 +76,39 @@ bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
   
 }
 
+void foxtrot::devices::TPG362::setGaugeOnOff(unsigned short channel, bool onoff)
+{
+    
+    auto st = str_from_number(static_cast<unsigned short>(onoff));
+    auto ret = semantic_cmd(channel,parameter_no::sensEnable,action::describe,&st);
+    auto interpret = interpret_response_telegram(ret);
+    validate_response_telegram_parameters(channel,parameter_no::sensEnable,interpret);
+    
+}
+
+bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
+{
+    auto ret = semantic_cmd(channel,parameter_no::degas,action::read);
+    auto interpret = interpret_response_telegram(ret);
+    validate_response_telegram_parameters(channel,parameter_no::degas,interpret);
+    
+    return static_cast<bool>(std::stoi(std::get<2>(interpret)));
+    
+}
+
+void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
+{
+    auto st = str_from_number(static_cast<short unsigned>(onoff));
+    
+    auto ret=  semantic_cmd(channel,parameter_no::degas,action::describe,&st);
+    auto interpret = interpret_response_telegram(ret);
+    validate_response_telegram_parameters(channel,parameter_no::degas,interpret);
+    
+}
+
+
+
+
 const string foxtrot::devices::TPG362::getDeviceTypeName() const
 {
   return "TPG362";
@@ -263,7 +296,19 @@ RTTR_REGISTRATION{
     .method("getGaugeOnOff",&TPG362::getGaugeOnOff)
     (
         parameter_names("channel")
-    );
+    )
+    .method("setGaugeOnOff",&TPG362::setGaugeOnOff)
+    (
+        parameter_names("channel","onoff")
+    )
+    .method("getDegass", &TPG362::getDegass)
+    (
+        parameter_names("channel")
+        )
+    .method("setDegass",&TPG362::setDegass)
+    (
+        parameter_names("channel","onoff")
+        );
     
     rttr::type::register_converter_func(convert_int_to_short_unsigned);
 }

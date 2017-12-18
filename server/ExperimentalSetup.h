@@ -21,6 +21,8 @@ namespace foxtrot
         ft_plugin(const std::string& file);
         ~ft_plugin();
         
+        void reload();
+        
     protected:
         
         template<typename funtp> funtp get_function(const std::string& name)
@@ -37,7 +39,8 @@ namespace foxtrot
         };
         
     private:
-        void* _dl;
+        void* _dl = nullptr;
+        std::string _fname;
     };
     
     
@@ -45,11 +48,13 @@ namespace foxtrot
     {
     public:
         ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
+        void reset();
         
     private:
        Logging _lg;
         DeviceHarness& _harness;
 	const mapofparametersets* const _paramsets;
+     int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
     };
     
     class TelemetrySetup : public ft_plugin

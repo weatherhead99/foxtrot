@@ -26,6 +26,9 @@ namespace foxtrot
         Device* const GetDevice(int id);
         std::timed_mutex& GetMutex(int id);
         
+        void ClearDevices(unsigned contention_timeout_ms);
+        
+        
         std::vector<std::string> GetCapabilityNames(int devid);
         devcapability GetDeviceCapability(int devid, const std::string& capname);
         

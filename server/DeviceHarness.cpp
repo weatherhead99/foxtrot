@@ -52,6 +52,22 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
     AddDevice(std::move(newptr));
 }
 
+void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
+{
+    _lg.Info("clearing all devices");
+    _lg.Debug("locking all devices");
+    std::vector<std::unique_lock<std::timed_mutex>> locks;
+    for(int id=0; id < _devvec.size(); id++)
+    {
+        locks.push_back(lock_device_contentious(id,contention_timeout_ms));
+        
+    }
+    _lg.Debug("all devices locked");
+    
+    _devvec.clear();
+    _lg.Debug("all devices cleared");
+    
+}
 
 
 Device* const foxtrot::DeviceHarness::GetDevice(int id)
