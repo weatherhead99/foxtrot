@@ -1,5 +1,6 @@
 
 #include <boost/date_time.hpp>
+#include <tuple>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -17,6 +18,8 @@
 #include <archon/archon_module_heaterx.h>
 #include <DeviceError.h>
 #include <ProtocolError.h>
+#include "client.h"
+#include "Logging.h"
 
 #include <boost/program_options.hpp>
 
@@ -28,40 +31,22 @@ using std::endl;
 namespace pt = boost::posix_time;
 
 
-
-foxtrot::parameterset dm_params {
-  {"devnode" , "/dev/usbtmc0"}
+double getPressure(foxtrot::Client& cl, int devid, int channel)
+{
+  auto response = cl.InvokeCapability(devid,"getPressure",{channel});
+  return boost::get<double>(response);
 };
 
+std::tuple<double,double> getTemps(foxtrot::Client& cl, int archon_devid, int heater_devid)
+{
+  cl.InvokeCapability(archon_devid,"update_state");
+  
+  auto TA = boost::get<double>(cl.InvokeCapability(heater_devid,"getTempA"));
+  auto TB = boost::get<double>(cl.InvokeCapability(heater_devid,"getTempB"));
 
-foxtrot::parameterset tpg_params {
-  {"port" , "/dev/ttyUSB0"},
-  {"baudrate" , 9600u},
-  };
- 
-
-foxtrot::parameterset archon_params {
-  {"addr" , "10.0.0.2"},
-  {"port" , 4242u},
-  {"timeout", 30}
-};
-
-std::vector<string> config_lines
-{ {"MOD11/SENSORACURRENT=10000"},
-{"MOD11/SENSORALABEL=TANK"},
-{"MOD11/SENSORALOWERLIMIT=-150.0"},
-{"MOD11/SENSORATYPE=2"},
-{"MOD11/SENSORAUPPERLIMIT=50.0"},
-{"MOD11/SENSORBCURRENT=10000"},
-{"MOD11/SENSORBLABEL=STAGE"},
-{"MOD11/SENSORBUPPERLIMIT=50.0"},
-{"MOD11/SENSORBLOWERLIMIT=-150.0"},
-{"MOD11/SENSORBTYPE=2"},
-{"LINES=0"},
-{"STATES=0"},
-{"PARAMETERS=0"},
-{"CONSTANTS=0"}
-};
+  return std::make_tuple(TA,TB);
+  
+}
 
 
 
@@ -69,11 +54,13 @@ int main(int argc, char**argv)
 {
   backward::SignalHandling sh;
   
+  int debug_level;
   //program options setup
   po::options_description desc("Allowed Options");
   desc.add_options()("outfname",po::value<string>(),"set logging file name")
 		  ("interval_s",po::value<int>()->default_value(120),"seconds between logging points")
-		  ("fname",po::value<string>()->default_value("temp_pres_"),"filename base to store data");
+		  ("fname",po::value<string>()->default_value("temp_pres_"),"filename base to store data")
+		  ("debug,d",po::value<int>(&debug_level)->default_value(4),"set debug level");
 		  
   po::variables_map vm;
   po::store(po::parse_command_line(argc,argv,desc),vm);
@@ -83,44 +70,8 @@ int main(int argc, char**argv)
   auto interval_s = vm["interval_s"].as<int>();
   auto fname_base = vm["fname"].as<string>();
   
-  auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
-  foxtrot::devices::TPG362 vacuumgauge(sport);
-  
-//   auto usbtmc = std::make_shared<foxtrot::protocols::characterdevice>(&dm_params);
-//   foxtrot::devices::DM3068 multimeter(usbtmc);
-  cout << "socket init..>" << endl;
-  auto sock = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
-  
-  cout << "archon init.." << endl;
-  foxtrot::devices::archon archon(sock);
-  
-  cout << "clearing config.." << endl;
-  archon.clear_config();
-  
-  cout << "applying simple archon config script..." << endl;
-  for(const auto& s : config_lines)
-  {
-    archon.writeConfigLine(s);
-  }
-  
-  try{
-    archon.applyall();
-  }
-  catch(foxtrot::DeviceError& err)
-  {
-    cout << "archon error logs follow :" << endl;
-    auto all_logs = archon.fetch_all_logs();
-    for(auto& log: all_logs)
-    {
-      cout << log << endl;
-    };
-    
-    throw err;
-    
-  }
-    
-  auto modules = archon.getAllModules();
-  auto heater = static_cast<const foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
+  foxtrot::Logging lg("simple_pressure_temp_log");
+  foxtrot::setLogFilterLevel(static_cast<sl>(6 - debug_level));
   
   //setup log file
   //string folder = "/home/dweatherill/teststation_logs/";
@@ -155,36 +106,64 @@ int main(int argc, char**argv)
   };
   
   
+  foxtrot::Client cl("localhost:50051");
+  auto servdesc = cl.DescribeServer();
+  lg.Info("server comment: " + servdesc.servcomment());
+  
+  
+  auto pressure_gauge_devid = foxtrot::find_devid_on_server(servdesc,"TPG362");
+  if(pressure_gauge_devid == -1)
+  {
+    lg.Fatal("no pressure gauge on server!");
+    exit(1);
+  }
+  lg.Debug("pressure gauge devid: " + std::to_string(pressure_gauge_devid));
+  
+  
+  auto archon_devid = foxtrot::find_devid_on_server(servdesc,"archon");
+  if(archon_devid == -1)
+  {
+    lg.Fatal("no archon on server!");
+    exit(1);
+  }
+  lg.Debug("archon devid: " + std::to_string(archon_devid));
+  
+  auto heater_devid = foxtrot::find_devid_on_server(servdesc,"ArchonHeaterX");
+  if(heater_devid == -1)
+  {
+    lg.Fatal("no heater on server!");
+    exit(1);
+  }
+  lg.Debug("heater devid: " + std::to_string(heater_devid));
+  
   
   while(true)
   {
    
    auto now = pt::second_clock::local_time();
-   auto pressure_pump = vacuumgauge.getPressure(2);
-   auto pressure_cryostat = vacuumgauge.getPressure(1);
+   auto pressure_pump = getPressure(cl,pressure_gauge_devid,2);
+   auto pressure_cryostat = getPressure(cl,pressure_gauge_devid,1);
     
    double tank_temp = -273.15;
    double stage_temp = -273.15;
    try{
-   
-      archon.update_state();
-      tank_temp = heater->getTempA();
-      stage_temp = heater->getTempB();
+    
+      auto temps = getTemps(cl,archon_devid,heater_devid);
+      tank_temp = std::get<0>(temps);
+      stage_temp = std::get<1>(temps);
    }
-   catch(foxtrot::ProtocolError)
+   catch(typename foxtrot::ProtocolError)
    {
-     cout <<"archon seems to have failed.... " << endl;
-     cout << "logging only pressure..." << endl;
+     lg.Error( "archon seems to have failed.... " );
+     lg.Error("logging only pressure...");
      
    }
-   cout << "-------------------------------------------" << endl;
-   cout << "date time is: " << pt::to_simple_string(now) << endl;
-   cout << "pressure at cryostat is: " << pressure_cryostat << "hPa" <<  endl;
-   cout << "pressure at pump is: " << pressure_pump << "hPa" <<  endl;
+   lg.Debug( "date time is: " + pt::to_simple_string(now) );
+   lg.Debug( "pressure at cryostat is: " + std::to_string(pressure_cryostat) +  " hPa" );
+   lg.Debug("pressure at pump is: " + std::to_string(pressure_pump) +  " hPa" );
    
-   cout << "LN2 tank temperature: " << tank_temp << " degC " << endl;
-   cout << "stage temperature: " << stage_temp << " degC " << endl;
-   
+   lg.Debug("LN2 tank temperature: " + std::to_string(tank_temp) + " degC ");
+   lg.Debug("stage temperature: " + std::to_string(stage_temp) +  " degC ");
    
    auto unix_epoch = (now - pt::from_time_t(0)).total_seconds();
    
@@ -192,7 +171,7 @@ int main(int argc, char**argv)
    << pressure_pump << "," << stage_temp << "," << tank_temp << endl;// "," << res << "," << temperature << endl;
    fs.flush();
    
-   cout << "sleeping for " << interval_s << " seconds..." <<endl;
+   lg.Debug("sleeping for " + std::to_string(interval_s) +  " seconds..." );
    
    std::this_thread::sleep_for(std::chrono::seconds(interval_s));
     
