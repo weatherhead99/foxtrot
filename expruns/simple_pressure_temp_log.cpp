@@ -23,7 +23,9 @@
 
 #include <boost/program_options.hpp>
 
+
 namespace po = boost::program_options;
+
 
 using std::string;
 using std::cout;
@@ -34,12 +36,15 @@ namespace pt = boost::posix_time;
 double getPressure(foxtrot::Client& cl, int devid, int channel)
 {
   auto response = cl.InvokeCapability(devid,"getPressure",{channel});
+
+  
   return boost::get<double>(response);
 };
 
 std::tuple<double,double> getTemps(foxtrot::Client& cl, int archon_devid, int heater_devid)
 {
   cl.InvokeCapability(archon_devid,"update_state");
+
   
   auto TA = boost::get<double>(cl.InvokeCapability(heater_devid,"getTempA"));
   auto TB = boost::get<double>(cl.InvokeCapability(heater_devid,"getTempB"));

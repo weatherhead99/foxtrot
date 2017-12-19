@@ -70,7 +70,7 @@ std::vector< unsigned char > foxtrot::devices::dummyDevice::getCountStream(int n
 {
   std::vector<unsigned char> out;
   out.reserve(n);
-  unsigned char o;
+  unsigned char o = 0;
   for(int i=0; i< n; i++)
   {  
     out.push_back(o++);

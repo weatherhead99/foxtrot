@@ -21,9 +21,9 @@ int main(int argc, char** argv)
   foxtrot::setDefaultSink();
   
   std::string configfile;
-  int port;
+  int port = 0;
   std::string addr;
-  int debuglevel;
+  int debuglevel = 0;
   std::string bindstr;
   
   desc.add_options()

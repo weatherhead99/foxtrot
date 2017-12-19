@@ -33,9 +33,9 @@ int main(int argc, char** argv)
     std::string keyfile;
     std::string crtfile;
     
-    int debuglevel;
-    int nthreads;
-    short unsigned port;
+    int debuglevel =0;
+    int nthreads =0 ;
+    short unsigned port = 0;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
     ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
