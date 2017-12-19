@@ -384,7 +384,7 @@ namespace termcolor
         }
         return stream;
     }
-
+// 
     inline
     std::ostream& on_magenta(std::ostream& stream)
     {

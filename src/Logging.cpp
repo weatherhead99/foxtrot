@@ -16,6 +16,7 @@
 
 #include <boost/log/utility/setup/common_attributes.hpp>
 
+#include <termcolor.hpp>
 
 namespace logging = boost::log;
 
@@ -33,6 +34,48 @@ void foxtrot::setLogFilterLevel(sl level)
         logging::trivial::severity >= level
                          );
     
+}
+
+
+void foxtrot::formatter(const logging::record_view& rec, logging::formatting_ostream& strm)
+{
+    namespace attr = boost::log::attributes;
+    namespace expr = boost::log::expressions;
+    
+    auto has_color = termcolor::_internal::is_colorized(strm.stream());
+    if(!has_color)
+    {
+        strm.stream() << termcolor::colorize;
+    }
+    
+    sl level = logging::extract<sl>("Severity",rec).get();
+    switch(level)
+    {
+        case(sl::fatal):
+            strm.stream() << termcolor::red << termcolor::on_yellow;
+            break;
+        case(sl::error):
+            strm.stream() << termcolor::on_red;
+            break;
+        case(sl::warning):
+            strm.stream() << termcolor::yellow;
+            break;
+//         case(sl::info):
+//             strm.stream() << termcolor::green;
+//             break;
+        case(sl::debug):
+            strm.stream() << termcolor::cyan;
+            break;
+    }
+    
+    
+    
+    strm << "(" << logging::extract<boost::posix_time::ptime>("TimeStamp",rec) << ") " 
+         << "<" << logging::extract<std::string>("Channel",rec) << "> "
+         << "[" << level << "] "
+         << "[" << logging::extract<attr::current_thread_id::value_type>("ThreadID",rec) << "] "
+         << rec[expr::message];
+    strm.stream() << termcolor::reset;
     
 }
 
@@ -58,16 +101,22 @@ void foxtrot::setDefaultSink()
     
     logging::add_common_attributes();
     
-    sink->set_formatter(
-        expr::stream 
-        << "(" << expr::attr<boost::posix_time::ptime>("TimeStamp") << ") " 
-        << "<" << expr::attr<std::string>("Channel") << "> "
-        << "[" << logging::trivial::severity  << "] "
-        << "[" << expr::attr<attr::current_thread_id::value_type>("ThreadID") << "] "
-        << expr::message
-          );
+    
+    sink->set_formatter(&formatter);
+    
+//     sink->set_formatter(
+//         expr::stream << colourswitch(logging::trivial::severity)
+//         << "(" << expr::attr<boost::posix_time::ptime>("TimeStamp") << ") " 
+//         << "<" << expr::attr<std::string>("Channel") << "> "
+//         << "[" << logging::trivial::severity  << "] "
+//         << "[" << expr::attr<attr::current_thread_id::value_type>("ThreadID") << "] "
+//         << expr::message << termcolor::reset
+//           );
+
     
 }
+
+
 
 
 

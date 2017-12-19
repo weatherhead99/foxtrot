@@ -29,6 +29,7 @@ namespace foxtrot
     void setLogFilterLevel(sl level);
     void setLogChannel(const std::string& chan);
     
+    void formatter(const logging::record_view& rec, logging::formatting_ostream& strm);
     void setDefaultSink();
     
     
@@ -70,7 +71,7 @@ namespace foxtrot
             if(rec)
             {
             logging::record_ostream strm(rec);   
-                strm << message;
+                strm << message ;
                 strm.flush();
                 lg.push_record(boost::move(rec));
             }

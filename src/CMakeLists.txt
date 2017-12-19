@@ -7,3 +7,6 @@ add_library(foxtrot_obj OBJECT ${foxtrot_srcs})
 target_include_directories(foxtrot_obj INTERFACE $<TARGET_PROPERTY:RTTR::Core,INTERFACE_INCLUDE_DIRECTORIES>)
 
 target_include_directories(foxtrot_obj PRIVATE ${CMAKE_BINARY_DIR}/server/)
+
+add_executable(logdev logdev.cpp)
+target_link_libraries(logdev foxtrot)
