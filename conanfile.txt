@@ -1,8 +1,8 @@
 [requires]
 gRPC/1.1.0-dev@a_teammate/stable
-nanomsg/1.0.0@Wi3ard/stable
+nanomsg/1.1.2@bincrafters/stable
 rttr/0.9.5@weatherhead99/testing
-Boost/1.62.0@lasote/stable
+Boost/1.64.0@bincrafters/stable
 avahi/0.6.32@Outurnate/stable
 
 [generators]
