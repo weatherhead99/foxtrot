@@ -24,11 +24,15 @@ int main(int argc, char** argv)
   auto cap = foxtrot::find_capability(sd,devid,"getHeaterTarget");
   
   
-  auto argnames = sd.devs_attached().at(devid).caps()[cap].argnames();
-  auto argtypes = sd.devs_attached().at(devid).caps()[cap].argtypes();
+//   auto argnames = sd.devs_attached().at(devid).caps()[cap].argnames();
+//   auto argtypes = sd.devs_attached().at(devid).caps()[cap].argtypes();
+  auto argnames = sd.devs_attached().at(devid).caps().Get(cap).argnames();
+  auto argtypes = sd.devs_attached().at(devid).caps().Get(cap).argtypes();
+
+
   
-  cout << argnames[0] << endl;
-  cout << argtypes[0] << endl;
+  cout << argnames.Get(0) << endl;
+  cout << argtypes.Get(0) << endl;
   
   auto fromtp = rttr::type::get<foxtrot::devices::HeaterXHeaters>();
   

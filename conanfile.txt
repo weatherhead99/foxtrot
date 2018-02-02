@@ -2,10 +2,10 @@
 gRPC/1.8.3@inexorgame/stable
 nanomsg/1.1.2@bincrafters/stable
 rttr/0.9.5@weatherhead99/testing
-boost_log/1.66.0@bincrafters/stable
-boost_date_time/1.66.0@bincrafters/stable
-boost_program_options/1.66.0@bincrafters/stable
-boost_system/1.66.0@bincrafters/stable
+boost_log/1.66.0@bincrafters/testing
+boost_date_time/1.66.0@bincrafters/testing 
+boost_program_options/1.66.0@bincrafters/testing
+boost_system/1.66.0@bincrafters/testing
 
 [generators]
 cmake
