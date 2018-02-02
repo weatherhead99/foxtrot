@@ -72,6 +72,7 @@ namespace foxtrot {
     void applyall();
 
     std::vector<unsigned int> fetch_buffer(int buf);
+    std::vector<unsigned int> fetch_raw_buffer(int buf);
     
     int get_frameno(int buf);
     int get_width(int buf);
@@ -151,11 +152,22 @@ namespace foxtrot {
     
     
     void setrawenable(bool onoff);
+    bool getrawenable();
+    
     void setrawchannel(int ch);
+    int getrawchannel();
+    
     void setrawstartline(int line);
+    int getrawstartline();
+    
     void setrawendline(int line);
+    int getrawendline();
+    
     void setrawstartpixel(int pix);
+    int getrawendpixel();
+    
     void setrawsamples(int n);
+    int getrawsamples();
     
     
     void setframemode(int mode);

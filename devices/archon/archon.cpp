@@ -914,13 +914,27 @@ void devices::archon::setrawchannel(int ch)
 {
   writeKeyValue("RAWSEL",std::to_string(ch));
   cmd("APPLYCDS");
-
 }
+
+int foxtrot::devices::archon::getrawchannel()
+{
+    return std::stoi(readKeyValue("RAWSEL"));
+}
+
+
+
 void devices::archon::setrawenable(bool onoff)
 {
   writeKeyValue("RAWENABLE",std::to_string(onoff));
   cmd("APPLYCDS");
 }
+
+bool foxtrot::devices::archon::getrawenable()
+{
+    return std::stoi(readKeyValue("RAWENABLE"));
+}
+
+
 
 void devices::archon::setrawendline(int line)
 {
