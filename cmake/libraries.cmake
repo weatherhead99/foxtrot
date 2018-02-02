@@ -26,7 +26,7 @@ if(BUILD_SERVER)
   find_package(Protobuf REQUIRED)
   set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
   message(STATUS "CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}")
-  
+  message(STATUS "Protobuf version: ${Protobuf_VERSION}")
   find_package(grpc REQUIRED)
   
   find_package(ZLIB REQUIRED )

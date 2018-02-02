@@ -213,10 +213,12 @@ int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& 
 
 }
 
+
+
 int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, int capidx)
 {
   
-  auto cap  = sd.devs_attached().at(devid).caps()[capidx];
+  auto cap  = sd.devs_attached().at(devid).caps().Get(capidx);
   return cap.argnames_size();
 }
 
@@ -247,12 +249,12 @@ int foxtrot::find_capability(foxtrot::servdescribe& sd, int devid, const std::st
   
 }
 
-int foxtrot::get_arg_position(foxtrot::servdescribe& sd, int devid, int capidx, const std::string arg_name)
+int foxtrot::get_arg_position(foxtrot::servdescribe& sd, int devid, int capidx, const std::string& arg_name)
 {
-  auto argnames = sd.devs_attached().at(devid).caps()[capidx].argnames();
+  auto argnames = sd.devs_attached().at(devid).caps().Get(capidx).argnames();
   
   auto arg_idx = std::find_if(argnames.begin(), argnames.end(),
-			      [&arg_name] (decltype(*argnames.begin())&val)
+			      [&arg_name] (const std::string& val)
 			      {
 				if(val == arg_name)
 				{
