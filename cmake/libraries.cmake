@@ -1,4 +1,11 @@
-find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
+#hack to build with current bincrafters boost
+if(FOXTROT_CONAN_BUILD)
+  set(${Boost_PROGRAM_OPTIONS_LIBRARY} CONAN_PKG::boost_program_options)
+
+else()
+  find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
+endif()
+  
 
 message("Boost libraries ${Boost_LIBRARIES}")
 
