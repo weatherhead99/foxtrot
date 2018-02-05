@@ -3,7 +3,10 @@
 #include <boost/variant.hpp>
 
 #define BOOST_TEST_MODULE CommunicationProtocol
+
+#ifndef FOXTROT_CONAN_BUILD
 #define BOOST_TEST_DYN_LINK
+#endif
 #include <boost/test/unit_test.hpp>
 
 using namespace foxtrot;

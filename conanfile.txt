@@ -10,6 +10,9 @@ boost_program_options/1.66.0@bincrafters/stable
 boost_system/1.66.0@bincrafters/stable
 boost_asio/1.66.0@bincrafters/stable
 cmake_findboost_modular/0.1.0@bincrafters/stable
+boost_thread/1.66.0@bincrafters/stable
+Protobuf/3.5.1@inexorgame/stable
+
 
 [generators]
 cmake
@@ -17,5 +20,6 @@ cmake
 [options]
 nanomsg:shared=True
 gPRC:non_cpp_plugins=True
-gRPC:shared=False
+gRPC:shared=True
+Protobuf:shared=True
 rttr:shared=True

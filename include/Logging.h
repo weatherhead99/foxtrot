@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef FOXTROT_CONAN_BUILD
+#define BOOST_LOG_DYN_LINK
+#endif
 
 #include <boost/log/sources/severity_channel_logger.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>

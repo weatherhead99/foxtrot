@@ -17,7 +17,6 @@ option(BUILD_OPMD "build OPMD high level client library" ON)
 option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
 option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
-option(BOOST_LOG_SHARED "using shared boost log library" ON)
 
 
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -25,6 +24,7 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   set(FOXTROT_CONAN_BUILD TRUE)
   conan_basic_setup()
+  add_definitions(-DFOXTROT_CONAN_BUILD=TRUE)
 else()
   message(STATUS "conanbuildinfo not found, proceeding with standard build")
 endif()
@@ -73,12 +73,13 @@ endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 
-if(BOOST_LOG_SHARED)
-    target_compile_definitions(foxtrot PUBLIC BOOST_LOG_DYN_LINK)
-
-endif()
 
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+
+if(FOXTROT_CONAN_BUILD)
+target_link_libraries(foxtrot ${Boost_THREAD_LIBRARY})
+endif()
+
 
 install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
 

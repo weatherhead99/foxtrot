@@ -1,14 +1,21 @@
-include(FindPkgConfig)
-pkg_search_module(NANOMSG REQUIRED nanomsg)
 
+if(FOXTROT_CONAN_BUILD)
+  set(NANOMSG_LIBRARIES ${CONAN_LIBS_NANOMSG})
+  
+else()
+  include(FindPkgConfig)
+  pkg_search_module(NANOMSG REQUIRED nanomsg)
+endif()
+  
 message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
 
 
-if(FOXTROT_CONAN_BUILD)
-  find_library(anl anl)
-  message(STATUS "libanl: ${anl}")
+# if(FOXTROT_CONAN_BUILD)
+#   find_library(anl anl)
+#   message(STATUS "libanl: ${anl}")
   
-endif()
+# endif()
+
 
 add_library(foxtrot_telemetry TelemetryServer.cpp TelemetryClient.cpp)
 target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl})
