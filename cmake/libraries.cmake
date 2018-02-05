@@ -16,7 +16,18 @@ find_library(gslcblas gslcblas)
 
 
 find_package(rttr REQUIRED)
-get_property(rttr_include TARGET RTTR::Core PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+if(TARGET RTTR::Core)
+message(STATUS "found RTTR shared build")
+set(RTTR_TARGET RTTR::Core)
+elseif(TARGET RTTR::Core_Lib)
+message(STATUS "found RTTR static build")
+set(RTTR_TARGET RTTR::Core_Lib)
+else()
+message(ERROR "no RTTR found, can't build foxtrot core")
+message(STATUS "considered files: ${rttr_CONSIDERED_CONFIGS}")
+endif()
+
+
 
 find_package(Threads REQUIRED)
 
