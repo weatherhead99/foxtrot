@@ -3,6 +3,7 @@
 #include <string>
 
 #include <boost/asio/serial_port.hpp>
+#include <boost/asio/io_service.hpp>
 
 using namespace boost::asio;
 
