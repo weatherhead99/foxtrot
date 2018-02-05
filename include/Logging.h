@@ -1,6 +1,5 @@
 #pragma once
 
-#define BOOST_LOG_DYN_LINK 
 
 #include <boost/log/sources/severity_channel_logger.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>

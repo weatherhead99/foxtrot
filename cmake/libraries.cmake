@@ -1,6 +1,10 @@
 #hack to build with current bincrafters boost
 if(FOXTROT_CONAN_BUILD)
-  set(${Boost_PROGRAM_OPTIONS_LIBRARY} CONAN_PKG::boost_program_options)
+  set(${Boost_PROGRAM_OPTIONS_LIBRARY} ${CONAN_LIBS_BOOST_PROGRAM_OPTIONS})
+  set(${Boost_LOG_LIBRARY} ${CONAN_LIBS_BOOST_LOG})
+  
+
+  set(${Boost_SYSTEM_LIBRARY} CONAN_PKG::boost_system)
 
 else()
   find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
