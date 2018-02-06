@@ -27,6 +27,8 @@ ServerCommandImpl.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
+
+
 file(GLOB ft_server_includes *.h)
 install(FILES ${ft_server_includes} ${PROTO_HDRS} ${PROTO_GRPC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 

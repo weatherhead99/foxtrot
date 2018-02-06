@@ -72,7 +72,7 @@ namespace foxtrot {
     void applyall();
 
     std::vector<unsigned int> fetch_buffer(int buf);
-    std::vector<unsigned int> fetch_raw_buffer(int buf);
+    std::vector<unsigned short> fetch_raw_buffer(int buf);
     
     int get_frameno(int buf);
     int get_width(int buf);
@@ -164,13 +164,14 @@ namespace foxtrot {
     int getrawendline();
     
     void setrawstartpixel(int pix);
-    int getrawendpixel();
+    int getrawstartpixel();
     
     void setrawsamples(int n);
     int getrawsamples();
     
     
     void setframemode(int mode);
+    int getframemode();
     
     
   protected:
@@ -185,6 +186,11 @@ namespace foxtrot {
     std::shared_ptr<simpleTCP> _specproto;
     foxtrot::Logging _lg;
   private:
+      
+      template<typename T, typename Tdiff=T>
+      std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
+      
+      
       void read_parse_existing_config();
     
     short unsigned _order;

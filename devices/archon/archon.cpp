@@ -941,17 +941,40 @@ void devices::archon::setrawendline(int line)
   writeKeyValue("RAWENDLINE", std::to_string(line));
   cmd("APPLYCDS");
 }
+
+
+int foxtrot::devices::archon::getrawendline()
+{
+    return std::stoi(readKeyValue("RAWENDLINE"));
+}
+
+
 void devices::archon::setrawsamples(int n)
 {
   writeKeyValue("RAWSAMPLES", std::to_string(n));
   cmd("APPLYCDS");
 }
 
+int foxtrot::devices::archon::getrawsamples()
+{
+    return std::stoi(readKeyValue("RAWSAMPLES"));
+}
+
+
+
 void devices::archon::setrawstartline(int line)
 {
   writeKeyValue("RAWSTARTLINE",std::to_string(line));
   cmd("APPLYCDS");
 }
+
+int foxtrot::devices::archon::getrawstartline()
+{
+    return std::stoi(readKeyValue("RAWSTARTLINE"));
+}
+
+
+
 void devices::archon::setrawstartpixel(int pix)
 {
   writeKeyValue("RAWSTARTPIXEL",std::to_string(pix));
@@ -959,7 +982,70 @@ void devices::archon::setrawstartpixel(int pix)
 }
 
 
+int foxtrot::devices::archon::getrawstartpixel()
+{
+    return std::stoi(readKeyValue("RAWSTARTPIXEL"));
+}
 
+
+
+template<typename T, typename Tdiff>
+std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, unsigned address)
+{
+    std::ostringstream oss;
+    std::unique_lock<std::mutex> lck(_cmdmut);
+    _specproto->write(oss.str());
+    oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << address
+    << std::setw(8) << std::setfill('0') << num_blocks << '\n';
+    
+    std::vector<T> out;
+    out.reserve(num_blocks * 1024);
+    
+    unsigned actlen;
+    
+    for (int i = 0; i < num_blocks; i++)
+    {
+        
+        for(int j =0; j < retries; j++)
+        {
+            auto bytes_avail = _specproto->bytes_available();
+            if(bytes_avail >= 1028)
+            {
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::microseconds(500));
+            _lg.Debug("waiting for bytes available, currently:" + std::to_string(bytes_avail));
+            
+            if(j == retries - 1)
+            {
+                throw foxtrot::DeviceError("ran out of retries waiting for buffer read");
+            }
+            
+        }
+        
+        auto ret = _specproto->read(1028,&actlen);
+        if(actlen != 1028)
+        {
+            _lg.Warning("didn't read 1028 bytes...");   
+            _lg.Warning("read: " + std::to_string(actlen));
+        }
+        
+        auto bytes = parse_binary_response(ret);
+        
+        T* ptr = reinterpret_cast<T*>(bytes.data());
+        out.insert(out.end(),ptr, ptr + 1024 / sizeof(Tdiff));
+           
+    }
+      
+  _lg.Debug("read all blocks correctly");
+  _lg.Debug("bytes still available: " + std::to_string(_specproto->bytes_available()));
+  lck.unlock();
+  _lg.Debug("size of output: " + std::to_string(out.size()));
+  
+    return out;
+    
+    
+};
 
 
 std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
@@ -977,7 +1063,7 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   auto pixels = get_width(buf) * get_height(buf);
   
-  out.reserve(pixels);
+  
   std::ostringstream oss;
   oss << "BUF" << buf << "BASE";
   //WARNING: baseaddr is NOT HEXADECIMAL IN FRAME DICT.... WTF...
@@ -991,71 +1077,15 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   _lg.Debug("num_blocks: " + std::to_string(num_blocks));
   
-  oss.str("");
-  oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << baseaddr << std::setw(8) << std::setfill('0') << num_blocks <<'\n';
   
-  //construct command manually
-  std::unique_lock<std::mutex> lck(_cmdmut);
-  _specproto->write(oss.str());
-  
-  
-  //this should be the response "header"
-  unsigned actlen;
-  
-  
-  for(int i=0; i < num_blocks; i++)
+  if(is32)
   {
-    unsigned actlen;
-      
-    for(int j=0 ; j < 100; j++)
-    {
-      auto bytes_avail = _specproto->bytes_available();
-      if(bytes_avail >= 1028)
-      {
-	break;
-      }
-      std::this_thread::sleep_for(std::chrono::microseconds(500)); 
-      _lg.Debug("waiting for bytes available, currently:" + std::to_string(bytes_avail));
-
-    if(j == 99)
-      {
-	throw foxtrot::DeviceError("ran out of retries waiting for buffer read");
-      };
-
-    }
-
-    auto ret = _specproto->read(1028,&actlen);
-    
-    if(actlen != 1028)
-    {
-	_lg.Warning("didn't read 1028 bytes...");   
-	_lg.Warning("read: " + std::to_string(actlen));
-    }
-  
-   auto bytes = parse_binary_response(ret); 
-   //WARNING: insert adds values BEFORE stuff??
-   if(is32)
-   {
-//      _lg.Trace("reinterpreting to int");
-      unsigned* ptr = reinterpret_cast<unsigned*>(bytes.data());
-      out.insert(out.end(),ptr, ptr + 1024 / 4);
-   }
-   else
-   {
-//      _lg.Trace("reinterpreting to unsigned short");
-     //WARNING: does this do the stride properly?
-     unsigned short* ptr = reinterpret_cast<unsigned short*>(bytes.data());
-     out.insert(out.end(),ptr, ptr + 1024 / 2);
-     
-   }
-    
-  };
-  
-  
-  _lg.Debug("read all blocks correctly");
-  _lg.Debug("bytes still available: " + std::to_string(_specproto->bytes_available()));
-  lck.unlock();
-  _lg.Debug("size of output: " + std::to_string(out.size()));
+      out = read_back_buffer<unsigned>(num_blocks,100,baseaddr);
+  }
+  else
+  {
+      out = read_back_buffer<unsigned, short unsigned>(num_blocks,100,baseaddr);
+  }
   
   //drop extra bytes off the end
   out.resize(pixels);
@@ -1063,6 +1093,44 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   return out;
 }
+
+std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
+{
+    std::vector<unsigned short> out;
+    update_state();
+    
+    if(!isbuffercomplete(buf))
+    {
+        throw DeviceError("buffer not complete for reading!");
+    }
+    lockbuffer(buf);
+    
+    auto rawsamp = getrawsamples();
+    auto samples_per_line =  (rawsamp / 1024 ) + ( ( rawsamp % 1024) ? 1 : 0); 
+    auto total_samples = samples_per_line * (getrawendline() - getrawstartline() ) ;
+    
+    out.reserve(total_samples);
+    
+    std::ostringstream oss;
+    oss << "BUF" << buf << "BASE";
+    auto baseaddr = std::stoul(_frame.at(oss.str()));
+    
+    oss.str("");
+    
+    oss << "BUF" << buf << "RAWOFFSET";
+    auto offset = std::stoul(_frame.at(oss.str()));
+    oss.str("");
+    
+    auto num_blocks = total_samples / 1024;
+    
+    out = read_back_buffer<unsigned short>(num_blocks,100,baseaddr + offset);
+    
+    return out;
+    
+}
+
+
+
 
 void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end)
 {
@@ -1118,6 +1186,12 @@ void devices::archon::setframemode(int mode)
   writeKeyValue("FRAMEMODE", std::to_string(mode));
   cmd("APPLYCDS");
 }
+
+int foxtrot::devices::archon::getframemode()
+{
+    return std::stoi(readKeyValue("FRAMEMODE"));
+}
+
 
 void devices::archon::load_timing()
 {
@@ -1199,20 +1273,23 @@ RTTR_REGISTRATION
  (parameter_names("invert"))
  .method("settrigoutpower", &archon::settrigoutpower)
  (parameter_names("onoff"))
- .method("setrawenable",&archon::setrawenable)
+ 
+ .property("rawenable", &archon::getrawenable, &archon::setrawenable)
  (parameter_names("onoff"))
- .method("setrawchannel",&archon::setrawchannel)
+ .property("rawchannel",&archon::getrawchannel,&archon::setrawchannel)
  (parameter_names("ch"))
- .method("setrawstartline",&archon::setrawstartline)
+ .property("rawstartline", &archon::getrawstartline, &archon::setrawstartline)
  (parameter_names("line"))
- .method("setrawendline",&archon::setrawendline)
+ .property("rawendline", &archon::getrawendline, &archon::setrawendline)
  (parameter_names("line"))
- .method("setrawstartpixel",&archon::setrawstartpixel)
+ .property("rawstartpixel", &archon::getrawstartpixel, &archon::setrawstartpixel)
  (parameter_names("pix"))
- .method("setrawsamples", &archon::setrawsamples)
+ .property("rawsamples", &archon::getrawsamples, &archon::setrawsamples)
  (parameter_names("n"))
+ 
  .method("setframemode", &archon::setframemode)
  (parameter_names("mode"))
+ .property_readonly("getframemode",&archon::getframemode)
  .property_readonly("get_timing_lines",&archon::get_timing_lines)
  .property_readonly("get_states",&archon::get_states)
  .property_readonly("get_constants",&archon::get_constants)
@@ -1231,6 +1308,7 @@ RTTR_REGISTRATION
   .method("load_timing", &archon::load_timing)
  ;
     
+ 
     
 }
 
