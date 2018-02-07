@@ -994,9 +994,10 @@ std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, un
 {
     std::ostringstream oss;
     std::unique_lock<std::mutex> lck(_cmdmut);
-    _specproto->write(oss.str());
     oss << ">00FETCH" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << address
     << std::setw(8) << std::setfill('0') << num_blocks << '\n';
+
+    _specproto->write(oss.str());
     
     std::vector<T> out;
     out.reserve(num_blocks * 1024);
@@ -1016,9 +1017,9 @@ std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, un
             std::this_thread::sleep_for(std::chrono::microseconds(500));
             _lg.Debug("waiting for bytes available, currently:" + std::to_string(bytes_avail));
             
-            if(j == retries - 1)
+            if(j == (retries - 1) )
             {
-                throw foxtrot::DeviceError("ran out of retries waiting for buffer read");
+	      throw foxtrot::DeviceError("ran out of retries waiting for buffer read, block:" + std::to_string(i));
             }
             
         }
