@@ -1260,6 +1260,8 @@ RTTR_REGISTRATION
  (parameter_names("buf"))
  .method("fetch_buffer",&archon::fetch_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
+ .method("fetch_raw_buffer",&archon::fetch_raw_buffer)
+ (parameter_names("buf"), metadata("streamdata",true))
  .method("isbuffercomplete",&archon::isbuffercomplete)
  (parameter_names("buf"))
  .property_readonly("getreset_start",&archon::getreset_start)
