@@ -148,6 +148,11 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
       else
       {
           cap.set_tp(capability_types::VALUE_READWRITE);
+          
+          auto proptp = prop.get_type();
+          cap.add_argnames(proptp.get_name());
+          cap.add_argtypes(get_appropriate_wire_type(proptp));
+          
       }
       
       _lg.Debug( "rettp: " + prop.get_type().get_name() );

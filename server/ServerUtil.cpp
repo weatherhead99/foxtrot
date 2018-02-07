@@ -54,7 +54,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
             bool convertsuccess = true;
          if(rettp == value_types::FLOAT)
          {
-	   _lg.Trace("it's a double!");
+            _lg.Trace("it's a double!");
             repl.set_dblret(retval.to_double(&convertsuccess));
          }
          else if (rettp == value_types::BOOL)
@@ -87,11 +87,11 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          }
          //if it's VOID, no need to set rettp
          else if(rettp == value_types::VOID)
-	 {
-	    _lg.Trace("void");
-	    repl.set_stringret("");
+        { 
+            _lg.Trace("void");
+            repl.set_stringret("");
 	   
-	 }
+        }   
          
          if(!convertsuccess)
          {
@@ -123,6 +123,12 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var
 foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 {
     using namespace rttr;
+    
+    
+    if(!tp.is_valid())
+    {
+        throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
+    }
     
     
     if(tp == type::get<void>())

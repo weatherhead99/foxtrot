@@ -89,12 +89,12 @@ std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::Ru
       std::exception_ptr except;
       try
       {  
-	HandleRpcs();
+        HandleRpcs();
       }
       catch(...)
       {
-	_lg.Error("caught exception in handlerpclambda");
-	except = std::current_exception(); 
+        _lg.Error("caught exception in handlerpclambda");
+        except = std::current_exception(); 
       }
       
       _exitthreadnum = i;

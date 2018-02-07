@@ -54,6 +54,7 @@ def _construct_args(argnames, *args,**kwargs):
         pos = argnames.index(name)
         rawargs[pos] = val
 
+    
     if len(args) + len(kwargs) > len(argnames):
         raise ValueError("too many arguments provided")
         
@@ -248,14 +249,29 @@ class Capability:
         self._cl = client
         
     def __repr__(self):
+        if self._captp is VALUE_READONLY :
+            infostr = " (readonly value)"
+        elif self._captp is VALUE_READWRITE:
+            infostr = " (read/write value)"
+        elif self._captp is ACTION:
+            infostr = " (action)"
+        else:
+            infostr = " (data stream)"
+        
         if len(self._argnames) > 0:
-            return self._capname + "(" + " ".join(self._argnames)  + ")" 
+            return self._capname + "(" + " ".join(self._argnames)  + ")"  + infostr
         
         else:
-            return self._capname
+            return self._capname + infostr
         
     def construct_request(self,*args,**kwargs):
-        capargs = _construct_args(self._argnames,*args,**kwargs)
+        if self._captp is not VALUE_READWRITE:
+            capargs = _construct_args(self._argnames,*args,**kwargs)
+        elif len(args) > 0 or len(kwargs) > 0:
+            capargs = _construct_args(self._argnames,*args,**kwargs)
+        else:
+            capargs = _construct_args([],*args,**kwargs)
+            
         
         reqtp = chunk_request if self._captp is STREAM else capability_request
         

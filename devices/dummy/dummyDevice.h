@@ -24,6 +24,10 @@ namespace foxtrot
         
         void setWomble(double val);
         
+        double getWomble();
+        
+        
+        
         void resetCounter();
 
         void brokenMethod();
@@ -32,6 +36,12 @@ namespace foxtrot
         int add(int a1, int a2);
             
         const std::string getDeviceTypeName() const override;
+        
+        void setInt(int a);
+        int getInt() const;
+        
+        
+        
 	
 	std::vector<unsigned char> getCountStream(int n);
     std::vector<double> getRandomVector(int n);
@@ -47,6 +57,8 @@ namespace foxtrot
         
         int _counter = 0;
         
+        int _int = 0;
+        double _womble = 0.0;
         
     };
     

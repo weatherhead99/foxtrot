@@ -101,7 +101,29 @@ int foxtrot::devices::dummyDevice::longdurationmethod(int n_sec)
   return 0;
 }
 
+void foxtrot::devices::dummyDevice::setInt(int a)
+{
+    _int = a;
+    
+}
 
+int foxtrot::devices::dummyDevice::getInt() const
+{
+    return _int;
+    
+}
+
+
+void foxtrot::devices::dummyDevice::setWomble(double val)
+{
+    _womble = val;
+};
+
+
+double foxtrot::devices::dummyDevice::getWomble()
+{
+    return _womble;
+}
 
 RTTR_REGISTRATION
 {
@@ -130,5 +152,11 @@ RTTR_REGISTRATION
  .method("longdurationmethod",&dummyDevice::longdurationmethod)
  ( parameter_names("n_sec")
  )
+ .property("Int",&dummyDevice::getInt, &dummyDevice::setInt)
+ (parameter_names("a"))
+ .method("setWomble",&dummyDevice::setWomble)
+ (parameter_names("val"))
+ .method("getWomble", &dummyDevice::getWomble)
+ 
  ;
 }

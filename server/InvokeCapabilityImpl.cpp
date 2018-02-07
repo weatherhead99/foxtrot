@@ -19,6 +19,12 @@ foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
 {
 }
 
+void voidfun()
+{
+    
+};
+
+
 
 bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
@@ -97,6 +103,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 	  
 	    auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
             retval = meth.invoke_variadic(*dev,callargs);
+            set_returntype(retval,repl);
                         
         }
         
@@ -116,43 +123,52 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 		    _lg.Trace("readonly property");
 		     auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
                     retval = prop.get_value(*dev);
+                    set_returntype(retval,repl);
                 }
                 else
                 {
                     if( req.args_size() >1)
                     {
                         //ERRROR: should only have one number to set a property
-		      foxtrot_server_specific_error(
-			  "require only 1 argument to writable property",
-			  repl, respond, _lg,tag);
-		      return true;
+                        foxtrot_server_specific_error(
+                        "require only 1 argument to writable property",
+                        repl, respond, _lg,tag);
+                        return true;
 		      
                     }
                     else if (req.args_size() == 1)
                     {
-		      bool success;
-		      auto arg = get_arg(req.args().Get(0),success);
-		      if(!success)
-		      {
-			foxtrot_server_specific_error("coultn't get argument for setting property",
-						      repl,respond,_lg,tag);
-			return true;
+                        bool success;
+                        auto arg = get_arg(req.args().Get(0),success);
+                        if(!success)
+                        {
+                            foxtrot_server_specific_error("couldn't get argument for setting property",
+                                repl,respond,_lg,tag);
+                            return true;
 			
-		      }
+                        }
 		      
-		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-		      prop.set_value(*dev,arg);
+                        auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
+                        prop.set_value(*dev,arg);
+                        
+                        repl.set_stringret("");
+                        
                     }
                     else if(req.args_size() == 0)
                     {
-		      auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                       retval  = prop.get_value(dev);
+                        auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
+                        retval  = prop.get_value(dev);
+                        set_returntype(retval,repl);
                     }
                     
                 }
                 
         };
         
+    
+    respond.Finish(repl,grpc::Status::OK,tag);
+    return true;
+    
     }
     catch(...)
     {
@@ -162,7 +178,4 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     };
                  
     
-    set_returntype(retval,repl);
-    respond.Finish(repl,grpc::Status::OK,tag);
-    return true;
 }

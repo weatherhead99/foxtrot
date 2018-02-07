@@ -32,7 +32,8 @@ RTTR_REGISTRATION
  using namespace rttr;
  using foxtrot::Device;
  registration::class_<Device>("foxtrot::Device")
- .method("getDeviceTypeName", &Device::getDeviceTypeName)
+ .property_readonly("getDeviceTypeName", &Device::getDeviceTypeName)
+ .property_readonly("getDeviceComment", &Device::getDeviceComment)
  ;
        
 }
