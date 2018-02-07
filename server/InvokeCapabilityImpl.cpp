@@ -150,6 +150,13 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 		      
                         auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
                         _lg.Trace("setting property value...");
+                        
+                        if(arg.get_type() != prop.get_type())
+                        {
+                            throw std::runtime_error("mismatch between argument and property types");
+                        }
+                        
+                        
                         success = prop.set_value(*dev,arg);
                         if(!success)
                         {
