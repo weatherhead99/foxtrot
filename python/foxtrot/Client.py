@@ -26,7 +26,9 @@ def _capability_argument_from_value(val):
     
     if isinstance(val,float):
         arg.dblarg = val
-    elif isinstance(val,int):
+    #not isinstance(True,int) is True, so using 
+    #isinstance() here false positives bool values
+    elif type(val) is int:
         arg.intarg = val
     elif isinstance(val,bool):
         arg.boolarg = val

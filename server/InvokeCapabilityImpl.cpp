@@ -153,6 +153,9 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                         
                         if(arg.get_type() != prop.get_type())
                         {
+			  _lg.Error("arg type: " + arg.get_type().get_name());
+			  _lg.Error("property type: " + prop.get_type().get_name());
+
                             throw std::runtime_error("mismatch between argument and property types");
                         }
                         
