@@ -925,7 +925,7 @@ int foxtrot::devices::archon::getrawchannel()
 
 void devices::archon::setrawenable(bool onoff)
 {
-  writeKeyValue("RAWENABLE",std::to_string(onoff));
+  writeKeyValue("RAWENABLE",std::to_string((int) onoff));
   cmd("APPLYCDS");
 }
 

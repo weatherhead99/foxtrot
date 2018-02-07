@@ -149,7 +149,12 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                         }
 		      
                         auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                        prop.set_value(*dev,arg);
+                        _lg.Trace("setting property value...");
+                        success = prop.set_value(*dev,arg);
+                        if(!success)
+                        {
+                            throw std::runtime_error("failed to set property");
+                        }
                         
                         repl.set_stringret("");
                         
