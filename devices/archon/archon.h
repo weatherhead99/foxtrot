@@ -80,6 +80,9 @@ namespace foxtrot {
     int get_mode(int buf);
     bool get_32bit(int buf);
     int get_pixels(int buf);
+
+    int get_rawlines(int buf);
+    int get_rawblocks(int buf);
     
     
     void set_tap_pixels(short unsigned npixels);

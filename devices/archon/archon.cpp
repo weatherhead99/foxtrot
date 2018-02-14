@@ -845,6 +845,24 @@ int devices::archon::get_pixels(int buf)
 };
 
 
+int devices::archon::get_rawlines(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "RAWLINES";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+
+int devices::archon::get_rawblocks(int buf)
+{
+   std::ostringstream oss;
+  oss << "BUF" << buf << "RAWBLOCKS";
+  return std::stoi(_frame.at(oss.str()));
+}
+
+
+
 int devices::archon::get_width(int buf)
 {
   std::ostringstream oss ;
@@ -1310,6 +1328,10 @@ RTTR_REGISTRATION
    .method("get_pixels",&archon::get_pixels)
    (parameter_names("buf"))
   .method("load_timing", &archon::load_timing)
+   .method("get_rawlines", &archon::get_rawlines)
+   (parameter_names("buf"))
+   .method("get_rawblocks", &archon::get_rawblocks)
+   (parameter_names("buf"))
  ;
     
  
