@@ -1033,7 +1033,7 @@ std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, un
         
         auto bytes = parse_binary_response(ret);
         
-        T* ptr = reinterpret_cast<T*>(bytes.data());
+        Tdiff* ptr = reinterpret_cast<Tdiff*>(bytes.data());
         out.insert(out.end(),ptr, ptr + 1024 / sizeof(Tdiff));
            
     }
