@@ -1124,15 +1124,15 @@ std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
     }
     lockbuffer(buf);
     
-    auto rawsamp = getrawsamples();
+    //auto rawsamp = getrawsamples();
+    auto rawsamp = get_rawblocks(buf);
     _lg.Debug("raw samples per line: " + std::to_string(rawsamp));
 
-    
 
-    auto total_blocks = rawsamp  * (getrawendline() - getrawstartline() ) ;
+    auto rawlines = get_rawlines(buf);
+    auto total_blocks = rawsamp  * rawlines ;
     _lg.Debug("total blocks: " + std::to_string(total_blocks));
 
-    
     std::ostringstream oss;
     oss << "BUF" << buf << "BASE";
     auto baseaddr = std::stoul(_frame.at(oss.str()));
