@@ -223,6 +223,64 @@ int main(int argc, char** argv)
       std::cout << "power: " << power <<  " " << units << std::endl;
     }
 
+    else if(cmd == "gauge") 
+      {
+
+	auto devid = find_pressure_gauge(servdesc);
+	if(devid < 0)
+	  {
+	    lg.Fatal("no TPG362 gauge controller found on server");
+	    exit(1);
+	  }
+     
+
+	po::options_description gauge_desc("gauge options");
+        gauge_desc.add_options()
+        ("subcmd",po::value<std::string>(), "gauge subcommand")
+        ("value",po::value<std::string>(), "subcommand value");
+        
+        po::positional_options_description gauge_pdesc;
+        gauge_pdesc.add("subcmd",1)
+        .add("value",2);
+	
+	auto opts = po::collect_unrecognized(parsed.options, po::include_positional);
+        opts.erase(opts.begin());
+	
+        po::store(po::command_line_parser(opts).options(gauge_desc).positional(gauge_pdesc)
+	.run(),vm);
+    
+	
+	if(!vm.count("subcmd"))
+	  {
+	    std::cout << "require a subcmd!" << std::endl;
+	    exit(1);
+
+	  }
+
+	auto subcmd = vm["subcmd"].as<std::string>();
+	if(subcmd == "on")
+	  {
+	    lg.Info("turning gauges on");
+	    gauges_onoff(client,devid, true);
+	  }
+	else if(subcmd == "off")
+	  {
+	    lg.Info("turning gauges off");
+	    gauges_onoff(client,devid,false);
+	  }
+
+	
+
+
+      }
+
+
+
+    else
+      {
+	std::cout << "unregognised command: " << cmd << std::endl;
+      }
+
 
 
 }

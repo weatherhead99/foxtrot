@@ -41,3 +41,14 @@ double get_pump_pressure(foxtrot::Client& cl, int devid)
     return pres;
     
 }
+
+void gauges_onoff(foxtrot::Client& cl, int devid, bool onoff)
+{
+  std::vector<foxtrot::ft_variant> args{1, onoff};
+
+  cl.InvokeCapability(devid,"setGaugeOnOff", args.begin(), args.end());
+  args[0] = 2;
+  cl.InvokeCapability(devid,"setGaugeOnOff", args.begin(), args.end());
+
+
+};
