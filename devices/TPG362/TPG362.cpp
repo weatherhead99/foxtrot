@@ -200,9 +200,11 @@ string foxtrot::devices::TPG362::nmemonic_cmd(short unsigned int channel, const 
 std::tuple<int,int,string> foxtrot::devices::TPG362::interpret_response_telegram(const string& response)
 {
   //calculate a checksum: the last 4 characters are 3 char checksum + carriage return
+
   auto csum_calc = calculate_checksum(response.begin(), response.end() - 4);
 //   std::cout << "calculated response checksum is: " << csum_calc << std::endl;
-  
+  _lg.strm(sl::debug) << "calculated checksum is: " << csum_calc;
+
   //validate checksum
   if(response.compare(response.size()-4,3,csum_calc)  != 0)
     {
