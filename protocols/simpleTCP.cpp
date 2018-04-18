@@ -61,6 +61,21 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("couldn't open socket file descriptor. Error was:") + perr);  
   };
   
+  
+  //set linger option
+  linger ling;
+  ling.l_onoff = 1;
+  ling.l_linger = 1;
+  
+  int err = setsockopt(_sockfd, SOL_SOCKET, SO_LINGER, &ling, sizeof(linger));
+  if(err <0 )
+  {
+    throw ProtocolError(std::string("error setting linger: " ) + gai_strerror(err));
+  };
+  
+  
+  
+  
   //bind to server;
   
   addrinfo hints;  
