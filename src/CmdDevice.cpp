@@ -4,3 +4,8 @@ foxtrot::CmdDevice::CmdDevice(std::shared_ptr< foxtrot::CommunicationProtocol > 
 {
 
 }
+
+foxtrot::CmdDevice::CmdDevice(std::shared_ptr< CommunicationProtocol > proto, const std::string& comment)
+: Device(proto, comment)
+{
+}

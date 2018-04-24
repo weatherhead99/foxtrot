@@ -9,6 +9,7 @@ namespace foxtrot
   {
   public:
     CmdDevice(std::shared_ptr< CommunicationProtocol > proto);
+    CmdDevice(std::shared_ptr< CommunicationProtocol > proto, const std::string& comment);
     
   private:
     virtual std::string cmd(const std::string& request) = 0;
