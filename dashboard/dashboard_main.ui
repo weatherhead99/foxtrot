@@ -7,17 +7,27 @@
     <x>0</x>
     <y>0</y>
     <width>890</width>
-    <height>611</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="1">
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
+   <layout class="QGridLayout" name="gridLayout_5">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout_4">
+      <item row="1" column="1">
+       <widget class="QLCDNumber" name="stage_temp_display">
+        <property name="smallDecimalPoint">
+         <bool>true</bool>
+        </property>
+        <property name="digitCount">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
        <widget class="QLabel" name="label_3">
         <property name="font">
          <font>
@@ -29,79 +39,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLCDNumber" name="heater_target">
-        <property name="smallDecimalPoint">
-         <bool>true</bool>
-        </property>
-        <property name="digitCount">
-         <number>4</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="1">
-     <widget class="QSpinBox" name="updatetimeout">
-      <property name="minimum">
-       <number>500</number>
-      </property>
-      <property name="maximum">
-       <number>20000</number>
-      </property>
-      <property name="value">
-       <number>2000</number>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QLabel" name="stage_label">
-        <property name="font">
-         <font>
-          <pointsize>24</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>stage temperature (C)</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLCDNumber" name="stage_temp_display">
-        <property name="smallDecimalPoint">
-         <bool>true</bool>
-        </property>
-        <property name="digitCount">
-         <number>5</number>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>auto update timeout (ms)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QLabel" name="tank_label">
-        <property name="font">
-         <font>
-          <pointsize>24</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>tank temperature (C)</string>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="0" column="1">
        <widget class="QLCDNumber" name="tank_temp_display">
         <property name="smallDecimalPoint">
          <bool>true</bool>
@@ -117,12 +55,51 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="tank_label">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>tank temperature (C)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLCDNumber" name="heater_target">
+        <property name="smallDecimalPoint">
+         <bool>true</bool>
+        </property>
+        <property name="digitCount">
+         <number>4</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="stage_label">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>stage temperature (C)</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
-    <item row="1" column="0">
+    <item row="0" column="1">
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="1" column="0">
        <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Heater P</string>
         </property>
@@ -144,6 +121,11 @@
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Heater I</string>
         </property>
@@ -161,6 +143,11 @@
       </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Heater Output (%)</string>
         </property>
@@ -168,6 +155,11 @@
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
         <property name="text">
          <string>Heater D</string>
         </property>
@@ -182,6 +174,112 @@
       </item>
      </layout>
     </item>
+    <item row="1" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="wavelength_label">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Wavelength (nm)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLCDNumber" name="wavelength_display">
+        <property name="smallDecimalPoint">
+         <bool>true</bool>
+        </property>
+        <property name="digitCount">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QLabel" name="wavelength_label_2">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>CCD Power</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLCDNumber" name="VBB_display">
+        <property name="smallDecimalPoint">
+         <bool>true</bool>
+        </property>
+        <property name="digitCount">
+         <number>5</number>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QLabel" name="wavelength_label_3">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Back Bias voltage (V)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="1">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="wavelength_label_4">
+        <property name="font">
+         <font>
+          <pointsize>24</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Experiment Status</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QTextBrowser" name="textBrowser">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>auto update timeout (ms)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="1">
+     <widget class="QSpinBox" name="updatetimeout">
+      <property name="minimum">
+       <number>500</number>
+      </property>
+      <property name="maximum">
+       <number>20000</number>
+      </property>
+      <property name="value">
+       <number>2000</number>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -190,7 +288,7 @@
      <x>0</x>
      <y>0</y>
      <width>890</width>
-     <height>19</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -206,12 +304,12 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionConnect">
    <property name="text">
-    <string>Connect</string>
+    <string>&amp;Connect</string>
    </property>
   </action>
   <action name="actionManual_update">
    <property name="text">
-    <string>manual update</string>
+    <string>&amp;manual update</string>
    </property>
   </action>
   <action name="actionAuto_update">
@@ -219,7 +317,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>auto update</string>
+    <string>&amp;auto update</string>
    </property>
   </action>
  </widget>
