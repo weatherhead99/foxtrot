@@ -186,7 +186,7 @@ foxtrot::ft_vector_variant foxtrot::ft_variant_from_data(const foxtrot::byte_dat
 
 
 
-int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& devtp)
+int foxtrot::find_devid_on_server(const foxtrot::servdescribe& sd, const std::string& devtp)
 {
     auto device = std::find_if(sd.devs_attached().begin(), sd.devs_attached().end(),
                                [&devtp] (decltype(*sd.devs_attached().begin())& val) 
@@ -215,14 +215,14 @@ int foxtrot::find_devid_on_server(foxtrot::servdescribe& sd, const std::string& 
 
 
 
-int foxtrot::get_number_of_args(foxtrot::servdescribe& sd, int devid, int capidx)
+int foxtrot::get_number_of_args(const foxtrot::servdescribe& sd, int devid, int capidx)
 {
   
   auto cap  = sd.devs_attached().at(devid).caps().Get(capidx);
   return cap.argnames_size();
 }
 
-int foxtrot::find_capability(foxtrot::servdescribe& sd, int devid, const std::string& capability_name)
+int foxtrot::find_capability(const foxtrot::servdescribe& sd, int devid, const std::string& capability_name)
 {
   auto caps = sd.devs_attached().at(devid).caps();
   
@@ -249,7 +249,7 @@ int foxtrot::find_capability(foxtrot::servdescribe& sd, int devid, const std::st
   
 }
 
-int foxtrot::get_arg_position(foxtrot::servdescribe& sd, int devid, int capidx, const std::string& arg_name)
+int foxtrot::get_arg_position(const foxtrot::servdescribe& sd, int devid, int capidx, const std::string& arg_name)
 {
   auto argnames = sd.devs_attached().at(devid).caps().Get(capidx).argnames();
   
