@@ -61,6 +61,7 @@ add_subdirectory(protocols)
 add_subdirectory(devices)
 add_subdirectory(expruns)
 add_subdirectory(util)
+add_subdirectory(watchdog)
 
 if(BUILD_SERVER)
 add_subdirectory(server)
