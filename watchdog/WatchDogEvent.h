@@ -13,6 +13,8 @@ namespace foxtrot {
         virtual void setup_devices(const foxtrot::servdescribe& desc) = 0;
         virtual bool check_trigger(foxtrot::Client& cl) = 0;
         virtual bool action(foxtrot::Client& cl) = 0;
+	
+	foxtrot::Logging& lg();
         
     private:
         std::string eventname_;

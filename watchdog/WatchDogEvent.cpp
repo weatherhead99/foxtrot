@@ -5,3 +5,8 @@ foxtrot::WatchDogEvent::WatchDogEvent(const std::string& eventname, unsigned int
 {
 }
 
+foxtrot::Logging& foxtrot::WatchDogEvent::lg()
+{
+  return lg_;
+
+}

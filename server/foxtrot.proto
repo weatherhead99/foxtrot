@@ -172,10 +172,28 @@ message serverrequest_return
     uint32 msgid = 2;
 }
 
+
+message serverflag
+{
+    errstatus err = 1;
+    uint32 msgid = 2;
+    string flagname = 3;
+    
+    oneof arg {
+      double dblval = 4;
+      sint32 intval = 5;
+      bool boolval = 6;
+      string stringval = 7;
+    }
+}
+
+
 service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
     rpc FetchData(chunk_request) returns (stream datachunk);
     rpc ServerCommand (servercommand_request) returns (serverrequest_return);
+    rpc SetServerFlag (serverflag) returns (serverflag);
+    rpc GetServerFlag (serverflag) returns (serverflag);
 }

@@ -6,6 +6,22 @@
 #include "tbcli_heater_logic.h"
 #include "tbcli_pressure_logic.h"
 
+// void subcmd_args_process(const std::string& name)
+// {
+//   namespace po = boost::program_options;
+// 
+//   po::options_description subdesc(name + " options");
+//   subdesc.add_options()
+//     ("subcmd", po::value<std::string>(), name + " subcommand")
+//     ("value", po::value<std::string>(), name + "value")
+// 
+//     po::positional_options_description subpdesc;
+//   subpdesc.add("subcmd",1).add("value",2);
+// 
+// };
+
+
+
 int main(int argc, char** argv)
 {
     backward::SignalHandling sh;

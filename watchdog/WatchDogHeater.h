@@ -12,8 +12,8 @@ namespace foxtrot {
         void setup_devices(const foxtrot::servdescribe& desc) override;
     
     protected:
-        double get_stage_temp(foxtrot::Client& cl);
-        double get_tank_temp(foxtrot::Client& cl);
+        double get_stage_temp(foxtrot::Client& cl, bool store = true);
+        double get_tank_temp(foxtrot::Client& cl, bool store = true);
         double get_heater_target(foxtrot::Client& cl);
         
         double partial_average(const std::deque<double>& history, int average_size);
@@ -21,14 +21,16 @@ namespace foxtrot {
         
         bool rising(const std::deque<double>& history, int size);
         
+	void update_archon_state(foxtrot::Client& cl);
         void set_heater_target(foxtrot::Client& cl, double target);
+        std::deque<double> stage_history;
+        std::deque<double> tank_history;
         
     private:
         void store_value(std::deque<double>& history, double val);
         int history_limit_;
         int devid_heater_;
-        std::deque<double> stage_history;
-        std::deque<double> tank_history;
+	int devid_archon_;
         
     };
     
@@ -38,13 +40,15 @@ namespace foxtrot {
     public:
         KeepStageWarm(int tick_check, int history_limit, int average_size);
         
-        bool check_trigger(int & cl) override;
-        bool action(int & cl) override;
+        bool check_trigger(foxtrot::Client& cl) override;
+        bool action(foxtrot::Client& cl) override;
         
     private:
         int average_size_;
         
     };
+    
+    
     
     
 }

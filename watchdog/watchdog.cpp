@@ -5,57 +5,47 @@
 #include <chrono>
 #include <iostream>
 #include <boost/variant.hpp>
+#include "WatchDogHeater.h"
+#include <iomanip>
 
 using std::cout;
 using std::endl;
 
-class DummyEvent : public foxtrot::WatchDogEvent
+
+class WDDummy : public foxtrot::WatchDogHeater
 {
 public:
+  WDDummy() : WatchDogHeater("WDDummy", 10,1000)
+  {}
+  
+  virtual bool action(foxtrot::Client& cl)
+  {
     
-    DummyEvent()
-    : WatchDogEvent("dummy_event", 20)
-    {
-        
-    }
+  }
+  
+  virtual bool check_trigger(foxtrot::Client& cl)
+  {
+    update_archon_state(cl);
+    auto st = get_stage_temp(cl);
+    auto tt = get_tank_temp(cl);
+    auto ht = get_heater_target(cl);
     
-    bool action(foxtrot::Client& cl) override
-    {
-        
-        
-    };
+    cout << " st: " << st << " tt: " << tt << " ht: " << ht << endl; 
+    cout << "<moving avs> st: " <<  partial_average(stage_history,10) <<  " tt: " << partial_average(tank_history,10) << endl;
+    cout << "<rate of change> st: " << rate_of_change(stage_history,10) << " tt: " << rate_of_change(tank_history,10) << endl;
     
-    bool check_trigger(foxtrot::Client& cl) override
-    {
-        
-        auto dbl = cl.InvokeCapability(devid_,"getRandomDouble");
-        cout << "double: " << dbl << endl;
-        
-        if(boost::get<double>(dbl) > 0 )
-            return true;
-        return false;
-        
-    };
-    
-    void setup_devices(const foxtrot::servdescribe& desc) override
-    {
-        devid_ = foxtrot::find_devid_on_server(desc, "dummyDevice");
-        cout << "devid: " << devid_ << endl;
-        
-    };
-    
-    
-private:
-    int devid_;
-    
+    return false;
+  }
+  
 };
-
-
+  
 
 int main(int argc, char** argv)
 {
     foxtrot::Logging lg("watchdog");
     foxtrot::setDefaultSink();
+    foxtrot::setLogFilterLevel(sl::trace);
+    
     
     lg.Info("watchdog starting up");
     
@@ -65,19 +55,14 @@ int main(int argc, char** argv)
     auto desc = cl.DescribeServer();
     
     
-    auto de = DummyEvent();
-    de.setup_devices(desc);
+    auto wde = WDDummy();
+    wde.setup_devices(desc);
+    
     
     while(true) 
     {
-        lg.Trace("tick...");
-        if(de.check_trigger(cl))
-        {
-            lg.Info("triggered!");
-        }
-        
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-        
+	auto res = wde.check_trigger(cl);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
 
