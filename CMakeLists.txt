@@ -8,6 +8,7 @@ include(cmake/host_specific.cmake)
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 
+
 option(BUILD_TESTS "build test code" ON)
 option(BUILD_SERVER "build foxtrot server" ON)
 option(BUILD_SETUPS "build experimental setups" ON)

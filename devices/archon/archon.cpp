@@ -23,6 +23,8 @@
 #include <utility>
 
 
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/date_time/gregorian/gregorian_io.hpp>
 
 #include "ProtocolError.h"
 
@@ -49,6 +51,8 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
 
   //update the stateful dictionaries
   update_state();
+  
+  sync_archon_timer();
   
   //update the modules vector;
 //   _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
@@ -843,6 +847,22 @@ int devices::archon::get_pixels(int buf)
     return std::stoi(_frame.at(oss.str()));
         
 };
+
+
+string devices::archon::get_tstamp(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "TIEMSTAMP";
+  auto tstamp = std::stoul(_frame.at(oss.str()),0,16);
+  
+  auto archontdiff = tstamp - _arch_tmr;
+  
+  //one tick of counter is 10ns
+  auto frametime = _sys_tmr + boost::posix_time::microseconds(archontdiff / 10);
+  
+  return boost::posix_time::to_iso_extended_string(_sys_tmr);
+}
+
 
 
 int devices::archon::get_rawlines(int buf)

@@ -10,7 +10,7 @@
 #include <boost/iterator/iterator_concepts.hpp>
 
 #include <rttr/registration>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time.hpp>
 
 #include <mutex>
 
@@ -80,6 +80,8 @@ namespace foxtrot {
     int get_mode(int buf);
     bool get_32bit(int buf);
     int get_pixels(int buf);
+    std::string get_tstamp(int buf);
+    
 
     int get_rawlines(int buf);
     int get_rawblocks(int buf);
