@@ -21,6 +21,8 @@ namespace foxtrot {
         
         bool rising(const std::deque<double>& history, int size);
         
+        void set_heater_target(foxtrot::Client& cl, double target);
+        
     private:
         void store_value(std::deque<double>& history, double val);
         int history_limit_;
@@ -31,7 +33,18 @@ namespace foxtrot {
     };
     
     
-    
+    class KeepStageWarm : public WatchDogHeater
+    {
+    public:
+        KeepStageWarm(int tick_check, int history_limit, int average_size);
+        
+        bool check_trigger(int & cl) override;
+        bool action(int & cl) override;
+        
+    private:
+        int average_size_;
+        
+    };
     
     
 }

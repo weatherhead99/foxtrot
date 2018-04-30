@@ -38,6 +38,12 @@ double foxtrot::WatchDogHeater::get_tank_temp(foxtrot::Client& cl)
     return boost::get<double>(resp);
 }
 
+void foxtrot::WatchDogHeater::set_heater_target(foxtrot::Client& cl, double target)
+{
+    std::vector<foxtrot::ft_variant> args{0, target};
+    cl.InvokeCapability(devid_heater_, "setHeaterTarget",args.begin(), args.end());
+}
+
 
 void foxtrot::WatchDogHeater::store_value(std::deque<double>& history, double val)
 {
@@ -72,4 +78,16 @@ bool foxtrot::WatchDogHeater::rising(const std::deque<double>& history, int size
 };
 
 
+foxtrot::KeepStageWarm::KeepStageWarm(int tick_check, int history_limit, int average_size)
+: average_size_(average_size)
+{
+}
+
+bool foxtrot::KeepStageWarm::check_trigger(foxtrot::Client& cl)
+{
+}
+
+bool foxtrot::KeepStageWarm::action(foxtrot::Client& cl)
+{
+}
 
