@@ -8,7 +8,9 @@ setup(
       author_email='daniel.weatherill@physics.ox.ac.uk',
       install_requires = [  
               'grpcio-tools',
-              'nanomsg >= 1.0'
+              'nanomsg >= 1.0',
+              'compiler',
+              'visitor'
               ]
       
       )
