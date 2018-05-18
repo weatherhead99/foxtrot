@@ -34,6 +34,7 @@ int main(int argc, char** argv)
     
     std::string keyfile;
     std::string crtfile;
+    bool forceauth;
     
     auto config_file = foxtrot::get_config_file_path();
     foxtrot::create_config_file(config_file);
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
     ("port",po::value<short unsigned>(&port)->default_value(50051),"port to use")
     ("key",po::value<std::string>(&keyfile),"pem for SSL")
     ("crt",po::value<std::string>(&crtfile),"crt for SSL")
+    ("forceauth", po::value<bool>(&forceauth)->default_value(true),"force client auth")
     ;
     
     po::positional_options_description pdesc;
@@ -108,6 +110,7 @@ int main(int argc, char** argv)
       
     }
     
+    
     DeviceHarness harness;
     foxtrot::ExperimentalSetup setup(setupfile,harness,params.get());
     
@@ -137,7 +140,10 @@ int main(int argc, char** argv)
         return -1;
       }
       
-      serv.SetupSSL(crtfile,keyfile);
+      if(!forceauth)
+          lg.Warning("client authentication not forced!");
+      
+      serv.SetupSSL(crtfile,keyfile,forceauth);
       
     };
     
