@@ -48,6 +48,8 @@ namespace foxtrot
         void Error(const std::string& message);
         void Fatal(const std::string& message);
         
+        void setLogChannel(const std::string& chan);
+        
 	class streamLogging{
 	public:
 	  friend class Logging;

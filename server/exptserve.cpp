@@ -13,13 +13,15 @@
 #include <thread>
 #include <future>
 #include <exception>
-
+#include "config.h"
+#include <fstream>
 
 using namespace foxtrot;
 using std::cout;
 using std::endl;
 
 #include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
 
 namespace po = boost::program_options;
 
@@ -32,6 +34,10 @@ int main(int argc, char** argv)
     
     std::string keyfile;
     std::string crtfile;
+    
+    auto config_file = foxtrot::get_config_file_path();
+    foxtrot::create_config_file(config_file);
+    cout << "config file:" << config_file << endl;
     
     int debuglevel =0;
     int nthreads =0 ;
@@ -53,7 +59,15 @@ int main(int argc, char** argv)
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
     
     po::variables_map vm;
+    
+    
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
+    
+    std::ifstream ifs(config_file);
+    if(ifs.good())
+    {
+        po::store(po::parse_config_file(ifs,desc),vm);
+    };
     
     po::notify(vm);
 

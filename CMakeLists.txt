@@ -31,7 +31,7 @@ else()
 endif()
 
 
-set(boost_cmps "log;system;date_time;program_options")
+set(boost_cmps "log;system;date_time;program_options;filesystem")
 
 if(BUILD_TESTS)
   enable_testing()
@@ -52,6 +52,7 @@ include_directories(${rttr_include})
 
 
 include_directories(util/PRT/)
+
 
 include(GNUInstallDirs)
 

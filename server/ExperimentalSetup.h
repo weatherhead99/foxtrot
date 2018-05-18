@@ -38,6 +38,7 @@ namespace foxtrot
             
         };
         
+        Logging _lg;
     private:
         void* _dl = nullptr;
         std::string _fname;
@@ -51,7 +52,6 @@ namespace foxtrot
         void reset();
         
     private:
-       Logging _lg;
         DeviceHarness& _harness;
 	const mapofparametersets* const _paramsets;
      int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
@@ -63,7 +63,7 @@ namespace foxtrot
         TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);
         
     private:
-        Logging _lg;
+        
         TelemetryServer& _telemserv;
           
     };

@@ -23,7 +23,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(foxtrotserv ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapabilityImpl.cpp  DeviceHarness.cpp 
 FetchDataImpl.cpp ExperimentalSetup.cpp ServerUtil.cpp ChunkStreamImpl.cpp ServerFlagsImpl.cpp
-ServerCommandImpl.cpp
+ServerCommandImpl.cpp config.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
@@ -42,7 +42,12 @@ install(TARGETS foxtrotserv LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
 add_executable(exptserve exptserve.cpp exptserve_funcs.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
-target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY})
+target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY}
+${Boost_FILESYSTEM_LIBRARY})
+
+if(FOXTROT_CONAN_BUILD)
+    target_include_directories(exptserve PRIVATE ${CONAN_INCLUDE_DIRS_BOOST_PROGRAM_OPTIONS})
+endif() 
 
 install(TARGETS exptserve RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

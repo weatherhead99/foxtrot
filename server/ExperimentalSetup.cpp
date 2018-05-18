@@ -1,11 +1,15 @@
 #include "ExperimentalSetup.h"
 #include "Error.h"
 #include "DeviceHarness.h"
+#include <Logging.h>
 
 using namespace foxtrot;
 
-foxtrot::ft_plugin::ft_plugin(const std::string& file) : _fname(file)
+foxtrot::ft_plugin::ft_plugin(const std::string& file) 
+: _fname(file), _lg("ft_plugin")
 {
+    
+    _lg.strm(sl::debug) << "file: " << file;
     _dl = dlopen(file.c_str(), RTLD_LAZY);
   if(_dl == nullptr)
   {    
@@ -40,9 +44,9 @@ void foxtrot::ft_plugin::reload()
 
 
 foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets )
-: ft_plugin(setupfile), _harness(harness), _lg("ExperimentalSetup"), _paramsets(paramsets)
+: ft_plugin(setupfile), _harness(harness),  _paramsets(paramsets)
 {
-  
+    _lg.setLogChannel("ExperimentalSetup");
     setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
     if(!setup_fun)
     {
@@ -61,8 +65,6 @@ void foxtrot::ExperimentalSetup::reset()
     reload();
     
     
-    
-    
     if(setup_fun == nullptr)
     {
         throw std::runtime_error("setup function handle is stale!");
@@ -78,8 +80,13 @@ void foxtrot::ExperimentalSetup::reset()
 
 
 foxtrot::TelemetrySetup::TelemetrySetup(const std::string& file, foxtrot::TelemetryServer& telemserv, foxtrot::Client& cl)
-: ft_plugin(file), _telemserv(telemserv), _lg("TelemetrySetup")
+: ft_plugin(file), _telemserv(telemserv)
 {
+    _lg.setLogChannel("TelemetrySetup");
     auto fun = get_function<int(*)(foxtrot::TelemetryServer&, foxtrot::Client&)>("setup_telem");
     fun(_telemserv,cl);
 }
+
+
+
+

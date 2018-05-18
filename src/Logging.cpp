@@ -126,6 +126,11 @@ foxtrot::Logging::Logging(const std::string& channelname)
         
 };
 
+void foxtrot::Logging::setLogChannel(const std::string& chan)
+{
+    _channelname = chan;
+}
+
 
 void foxtrot::Logging::Trace(const std::string& message)
 {
