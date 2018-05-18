@@ -136,8 +136,14 @@ def _reinterpret_cast_bytes(bts,tp):
 
 
 class Client:
-    def __init__(self,connstr):
-        self._channel = grpc.insecure_channel(connstr)
+    def __init__(self,connstr,certfile=None):
+        if certfile is None:
+            self._channel = grpc.insecure_channel(connstr)
+        else:
+            with open(certfile,"rb") as f:
+                cert = f.read()
+            creds = grpc.ssl_channel_credentials(root_certificates=cert)
+            self._channel = grpc.secure_channel(connstr,creds)
         self._stub = exptserveStub(self._channel)
         
         self._servdescribe = self._stub.DescribeServer(empty())

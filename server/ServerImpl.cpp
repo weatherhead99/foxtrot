@@ -159,11 +159,9 @@ void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool for
 {
   grpc::SslServerCredentialsOptions::PemKeyCertPair kp;
   
-  std::ifstream ifs;
+  std::ifstream ifs(crtfile);
   std::stringstream iss;
   
-  
-  ifs.open(crtfile);
   iss << ifs.rdbuf();
   
   kp.cert_chain = iss.str();
@@ -175,9 +173,7 @@ void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool for
   iss.str("");
   iss << ifs.rdbuf();
   
-  
   kp.private_key = iss.str();
-  
   
   grpc::SslServerCredentialsOptions opts;
   opts.pem_key_cert_pairs.push_back(kp);

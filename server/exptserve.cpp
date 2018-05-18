@@ -133,13 +133,11 @@ int main(int argc, char** argv)
     {
       if(!vm.count("crt"))
       {
-	lg.Fatal("asked for SSL but only provided PEM file");
-	return -1;
-	
+        lg.Fatal("asked for SSL but only provided key file");
+        return -1;
       }
       
       serv.SetupSSL(crtfile,keyfile);
-      
       
     };
     
