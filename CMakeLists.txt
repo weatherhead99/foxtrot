@@ -30,8 +30,9 @@ else()
   message(STATUS "conanbuildinfo not found, proceeding with standard build")
 endif()
 
-
 set(boost_cmps "log;system;date_time;program_options;filesystem")
+include(cmake/libraries.cmake)
+
 
 if(BUILD_TESTS)
   enable_testing()
@@ -45,10 +46,6 @@ macro(foxtrot_test testname)
     target_link_libraries(${testname} foxtrot ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY})
 endmacro(foxtrot_test)
 
-include(cmake/libraries.cmake)
-
-
-include_directories(${rttr_include})
 
 
 include_directories(util/PRT/)

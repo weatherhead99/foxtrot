@@ -5,7 +5,7 @@
 #include <cmath>
 #include "OPMD_setup.h"
 
-#include <plplot/plstream.h>
+//#include <plplot/plstream.h>
 #include "wl_sweep_io.h"
 
 // #include <root/TCanvas.h>

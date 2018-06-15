@@ -186,6 +186,10 @@ namespace foxtrot
 	  
       }
       
+#ifdef NEW_RTTR_API
+    auto paraminfsit = param_infs.begin();
+#endif
+      
       for(auto& arg: args)
       {
 	  bool success;
@@ -200,8 +204,11 @@ namespace foxtrot
 	      set_repl_err_msg(repl,msg,error_types::Error);
 	      throw 1;
 	  }
-	  
+#ifdef NEW_RTTR_API
+      const auto target_argtp = (paraminfsit++)->get_type();
+#else
 	  const auto target_argtp = param_infs[arg.position()].get_type();
+#endif
 	  if(!outarg.can_convert(target_argtp))
 	  {
 	      lg.Error("error converting argument ");
@@ -215,8 +222,8 @@ namespace foxtrot
 	  
 	  if(outarg.get_type() != target_argtp)
 	  {
-	      lg.Debug(" need to convert an arg from " + outarg.get_type().get_name() + " to " 
-	       + target_argtp.get_name() );
+          lg.strm(sl::debug) << " need to convert an arg from: " << outarg.get_type().get_name() << " to " << target_argtp.get_name();
+	      
 	  };
 	  
 	  //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!

@@ -11,6 +11,9 @@ if(NOT ${FOXTROT_PROTO_HASH} STREQUAL ${THIS_PROTO_HASH})
 endif()
 
 
+if(NOT ${Protobuf_FOUND})
+    message(ERROR "no protobuf!")
+endif()
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
@@ -23,9 +26,14 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_library(foxtrotserv ServerImpl.cpp ServerDescribeImpl.cpp  InvokeCapabilityImpl.cpp  DeviceHarness.cpp 
 FetchDataImpl.cpp ExperimentalSetup.cpp ServerUtil.cpp ChunkStreamImpl.cpp ServerFlagsImpl.cpp
-ServerCommandImpl.cpp config.cpp
+ServerCommandImpl.cpp #config.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
+
+if(${rttr_VERSION} STREQUAL "0.9.6")
+    message(WARNING "new RTTR api used!")
+    target_compile_definitions(foxtrotserv PRIVATE -DNEW_RTTR_API)
+endif()
 
 
 

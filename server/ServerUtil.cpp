@@ -48,7 +48,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
       foxtrot::Logging _lg("set_returntype");
   
       _lg.Trace("setting return type" );
-      _lg.Trace("raw type name is: " + retval.get_type().get_name());
+      _lg.strm(sl::trace) << "raw type name is: " << retval.get_type().get_name();
       auto rettp = get_appropriate_wire_type(retval);
         _lg.Trace("rettp is: " + std::to_string(rettp) );
             bool convertsuccess = true;

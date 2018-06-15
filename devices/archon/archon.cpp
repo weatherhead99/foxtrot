@@ -366,7 +366,6 @@ int devices::archon::writeConfigLine(const string& line,int num)
 }
 
 
-
 std::string devices::archon::readConfigLine(int num, bool override_existing)
 {
   if( num > _config_lines && !override_existing)

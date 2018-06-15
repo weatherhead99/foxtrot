@@ -245,7 +245,7 @@ std::string foxtrot::protocols::scsiserial::prepend_length_chrs(const std::strin
     auto sz  = req.size();
   unsigned char* szp = reinterpret_cast<unsigned char*>(&sz);
   
-  std::string out{szp[0], szp[1]  };
+  std::string out{static_cast<char>(szp[0]), static_cast<char>(szp[1]) };
   
   return out + req;
   

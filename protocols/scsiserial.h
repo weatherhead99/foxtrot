@@ -26,12 +26,12 @@ namespace foxtrot
     public:
     scsiserial(const parameterset*const instance_parameters);
     virtual ~scsiserial();
-    virtual void Init(const parameterset*const class_parameters);
+    virtual void Init(const parameterset*const class_parameters) override;
     
     virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
     
-    virtual std::string read_until_endl(char endlchar = '\n');
+    virtual std::string read_until_endl(char endlchar = '\n') override;
     
     
     unsigned getLBA() const;

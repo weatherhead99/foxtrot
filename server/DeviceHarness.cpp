@@ -92,7 +92,7 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
     _lg.Info("getting device...");
     auto dev = GetDevice(devid);
     auto tp = rttr::type::get(*dev);
-    _lg.Info( "tp: " + tp.get_name() );
+    _lg.strm(sl::info) << "tp: " << tp.get_name();
     
     auto props = tp.get_properties();
     auto meths = tp.get_methods();
@@ -101,13 +101,21 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
     
     for(auto& prop : props)
     {
+#ifdef NEW_RTTR_API
+     out.push_back(std::string{prop.get_name()});
+#else
      out.push_back(prop.get_name());   
+#endif
     }
     
     
     for(auto& meth: meths)
     {
+#ifdef NEW_RTTR_API
+        out.push_back(std::string{meth.get_name()});
+#else
         out.push_back(meth.get_name());
+#endif
     };
     
     return out;
@@ -150,12 +158,18 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
           cap.set_tp(capability_types::VALUE_READWRITE);
           
           auto proptp = prop.get_type();
+          
+#ifdef NEW_RTTR_API
+          //TODO: probably much more elegant way to do this!
+          cap.add_argnames(std::string(proptp.get_name()));
+#else
           cap.add_argnames(proptp.get_name());
+#endif
           cap.add_argtypes(get_appropriate_wire_type(proptp));
           
       }
       
-      _lg.Debug( "rettp: " + prop.get_type().get_name() );
+      _lg.strm(sl::debug) << "rettp: " << prop.get_type().get_name();
       foxtrot::value_types rettp = get_appropriate_wire_type(prop.get_type());
       _lg.Debug( "rettp wire type : " + rettp );
       
@@ -184,7 +198,11 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
             
             for(auto& arg : args)
             {
+#ifdef NEW_RTTR_API
+                cap.add_argnames(std::string(arg.get_name()));
+#else
                 cap.add_argnames(arg.get_name());
+#endif
                 
                 auto argtp = arg.get_type();
                 

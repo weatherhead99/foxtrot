@@ -74,7 +74,11 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
       return true;
     };
     
+#ifdef NEW_RTTR_API
+    if(!retval.is_sequential_container())
+#else
     if(!retval.is_array())
+#endif
     {
       foxtrot_server_specific_error("return type is not an array type", repl, respond,_lg,tag);
       return true;

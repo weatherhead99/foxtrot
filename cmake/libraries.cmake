@@ -8,11 +8,10 @@ if(FOXTROT_CONAN_BUILD)
   set(Boost_DATE_TIME_LIBRARY ${CONAN_LIBS_BOOST_DATE_TIME})
   set(Boost_FILESYSTEM_LIBRARY ${CONAN_LIBS_BOOST_FILESYSTEM})
 else()
+  message(STATUS "finding Boost libraries, components: ${boost_cmps}")
   find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
 endif()
   
-
-message("Boost libraries ${Boost_LIBRARIES}")
 
 find_library(libusb usb-1.0 REQUIRED)
 message(STATUS "libusb: ${libusb}")
@@ -28,6 +27,7 @@ find_library(gslcblas gslcblas)
 
 
 find_package(rttr REQUIRED)
+message("rttr version: ${rttr_VERSION}")
 if(TARGET RTTR::Core)
 message(STATUS "found RTTR shared build")
 set(RTTR_TARGET RTTR::Core)
@@ -38,6 +38,9 @@ else()
 message(ERROR "no RTTR found, can't build foxtrot core")
 message(STATUS "considered files: ${rttr_CONSIDERED_CONFIGS}")
 endif()
+
+get_target_property(rttr_include_dir ${RTTR_TARGET} INTERFACE_INCLUDE_DIRECTORIES)
+message("rttr_include_dir: ${rttr_include_dir}")
 
 
 
@@ -56,7 +59,6 @@ if(BUILD_SERVER)
   find_package(ZLIB REQUIRED )
   find_package(OpenSSL REQUIRED)
   include_directories(${GRPCPP_INCLUDE_DIR})
-
 
   find_library(dl dl)
   message(STATUS "libdl: ${dl}")
