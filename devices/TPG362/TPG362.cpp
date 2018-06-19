@@ -21,7 +21,7 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
   auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
   if(specproto != nullptr)
   {
-    std::cout << "using serial connected gauge controller" << std::endl;
+    _lg.Info("using serial connected gauge controller");
     _serialmode = true;
     _serproto->Init(nullptr);
     
@@ -33,7 +33,6 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
   };
   
   
-    
 }
 
 
@@ -42,12 +41,10 @@ double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
   
   auto ret = semantic_cmd(channel,parameter_no::Pressure,action::read);
   
-//   std::cout << "got response: " << ret << std::endl;
   
   auto interpret = interpret_response_telegram(ret);
   validate_response_telegram_parameters(channel,parameter_no::Pressure,interpret);
   
-//   std::cout << "data: " << std::get<2>(interpret) << std::endl;
   return interpret_u_expo_raw(std::get<2>(interpret));
 
 }
@@ -69,7 +66,6 @@ bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
   auto interpret = interpret_response_telegram(ret);
   validate_response_telegram_parameters(channel,parameter_no::sensEnable,interpret);
   
-//   std::cout << std::get<2>(interpret) << std::endl;
   
   return static_cast<bool>(std::stoi(std::get<2>(interpret)));
   

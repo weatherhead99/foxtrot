@@ -19,7 +19,8 @@ namespace foxtrot
         
       
     private:
-        void ReloadSetup();
+//         void ReloadSetup(repltp& repl);
+        void ChangeDebugLevel(const reqtp& req, repltp& repl);
         
     private:
         Logging _lg;

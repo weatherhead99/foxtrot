@@ -48,6 +48,7 @@ enum error_types
 enum server_commands
 {
     ReloadSetup = 0;
+    ChangeDebugLevel = 1;
 
 
 }
@@ -163,6 +164,7 @@ message servercommand_request
 {
     server_commands command = 1;
     uint32 msgid = 2;
+    repeated capability_argument args = 3;
     
 }
 
@@ -170,6 +172,7 @@ message serverrequest_return
 {
     errstatus err = 1;
     uint32 msgid = 2;
+    capability_response ret = 3;
 }
 
 

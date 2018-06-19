@@ -6,7 +6,7 @@ foxtrot::ServerCommandLogic::ServerCommandLogic(foxtrot::ExperimentalSetup& setu
     
 }
 
-
+/*
 bool foxtrot::ServerCommandLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, foxtrot::HandlerTag* tag)
 {
     _lg.Debug("processing server command");
@@ -18,7 +18,8 @@ bool foxtrot::ServerCommandLogic::HandleRequest(reqtp& req, repltp& repl, respon
     try{
     switch(cmd)
     {
-        case(server_commands::ReloadSetup): ReloadSetup(); break;
+//         case(server_commands::ReloadSetup): ReloadSetup(); break;
+        case(server_commands::ChangeDebugLevel): break;
         
         default:
             foxtrot_server_specific_error("invalid server command requested",
@@ -37,6 +38,9 @@ bool foxtrot::ServerCommandLogic::HandleRequest(reqtp& req, repltp& repl, respon
         
 }
 
+*/
+
+/*
 void foxtrot::ServerCommandLogic::ReloadSetup()
 {
     _lg.Debug("running reloadsetup command");
@@ -44,3 +48,11 @@ void foxtrot::ServerCommandLogic::ReloadSetup()
 
 };
 
+void foxtrot::ServerCommandLogic::ChangeDebugLevel(const reqtp& req)
+{
+  _lg.Debug("changing debug level");
+  foxtrot::setLogFilterLevel(level);
+
+  
+};
+*/
