@@ -3,6 +3,7 @@
 #include "SerialPort.h"
 #include <iostream>
 #include "DeviceError.h"
+#include "ProtocolError.h"
 #include <algorithm>
 #include <string>
 #include <rttr/registration>
@@ -63,7 +64,10 @@ foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialPro
     
   }
   
-  
+  else
+  {
+      throw DeviceError("invalid protocol for power meter connection!");
+  }
 
 }
 
@@ -468,6 +472,14 @@ foxtrot::devices::powerunits foxtrot::devices::newport2936R::getDataStoreUnits()
     auto str = cmd("PM:DS:UNIT?");
     bool ok;
     auto out = convert_string_to_powerunit(str,ok);
+    
+    if(!ok)
+    {
+        std::string msg( "couldn't convert string to power unit: ");
+        msg += str;
+        throw DeviceError(msg);
+    }
+        
     //TODO: error reporting here!
     return out;    
 }
