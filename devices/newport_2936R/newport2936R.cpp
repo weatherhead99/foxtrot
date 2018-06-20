@@ -508,6 +508,13 @@ void foxtrot::devices::newport2936R::setDataStoreSize(int size)
     _proto->write(oss.str());
 }
 
+double foxtrot::devices::newport2936R::getDataStoreValue(int idx)
+{
+    std::ostringstream oss;
+    oss << "PM:DS:GET? " << idx << '\r';
+    return std::stod(cmd(oss.str()));    
+}
+
 
 
 RTTR_REGISTRATION

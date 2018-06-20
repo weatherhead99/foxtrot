@@ -110,6 +110,11 @@ namespace foxtrot
     int getDataStoreInterval();
     void setDataStoreInterval(int interval);
     
+    double getDataStoreValue(int idx);
+    std::vector<double> fetchDataStore(int begin, int end);
+    std::vector<double> fetchDataStoreOldest(int n);
+    std::vector<double> fetchDataStoreNewest(int n);
+    
     private:
       foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);
@@ -119,7 +124,7 @@ namespace foxtrot
     };
     
     
-    
+
   }//namespace devices
   
 }//namespace foxtrot
