@@ -817,7 +817,14 @@ void devices::archon::apply_param(const string& name)
 
 void foxtrot::devices::archon::sync_archon_timer()
 {
-    _arch_tmr = std::stoull(cmd("TIMER"));
+    _lg.Info("syncing timer");
+    auto str = cmd("TIMER");
+    auto eqpos = std::find(str.begin(), str.end(),'=');
+    std::string count(eqpos+1,str.end());
+    
+    _lg.strm(sl::debug) << "timerstr: '" << count << "'";
+    
+    _arch_tmr = std::stoull(count);
     _sys_tmr = boost::posix_time::microsec_clock::universal_time();
 }
 
