@@ -121,6 +121,15 @@ namespace foxtrot
       
       std::shared_ptr<SerialProtocol> _proto;
       bool _usbmode;
+
+      template<typename T> void command_write(const std::string& cmd, 
+					      const T& arg)
+	{
+	  std::ostringstream oss;
+	  oss << cmd << " " << arg << '\r';
+	  _proto->write(oss.str());
+	};
+
     };
     
     

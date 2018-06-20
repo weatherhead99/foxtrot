@@ -462,9 +462,8 @@ bool foxtrot::devices::newport2936R::getDataStoreEnable()
 
 void foxtrot::devices::newport2936R::setDataStoreEnable(bool onoff)
 {
-    std::ostringstream oss;
-    oss << "PM:DS:EN" << onoff << '\r';
-    _proto->write(oss.str());
+  command_write("PM:DS:EN",onoff);
+  
 }
 
 foxtrot::devices::powerunits foxtrot::devices::newport2936R::getDataStoreUnits()
@@ -492,7 +491,7 @@ void foxtrot::devices::newport2936R::setDataStoreUnits(foxtrot::devices::powerun
 
 void foxtrot::devices::newport2936R::clearDataStore()
 {
-    cmd("PM:DS:CL");
+  _proto->write("PM:DS:CL");
 }
 
 int foxtrot::devices::newport2936R::getDataStoreInterval()
