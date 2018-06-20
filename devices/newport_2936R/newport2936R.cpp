@@ -434,7 +434,81 @@ void foxtrot::devices::newport2936R::setFilterMode(int mode)
   
 }
 
-  
+bool foxtrot::devices::newport2936R::getBufferBehaviour()
+{
+    return std::stoi(cmd("PM:DS:BUF?"));
+}
+
+void foxtrot::devices::newport2936R::setBufferBehaviour(bool mode)
+{
+    std::ostringstream oss;
+    oss << "PM:DS:BUF " << mode << '\r';
+    _proto->write(oss.str());
+}
+
+int foxtrot::devices::newport2936R::getDataStoreCount()
+{
+    return std::stoi(cmd("PM:DS:C?"));
+}
+
+bool foxtrot::devices::newport2936R::getDataStoreEnable()
+{
+    return std::stoi(cmd("PM:DS:EN?"));
+}
+
+void foxtrot::devices::newport2936R::setDataStoreEnable(bool onoff)
+{
+    std::ostringstream oss;
+    oss << "PM:DS:EN" << onoff << '\r';
+    _proto->write(oss.str());
+}
+
+foxtrot::devices::powerunits foxtrot::devices::newport2936R::getDataStoreUnits()
+{
+    auto str = cmd("PM:DS:UNIT?");
+    bool ok;
+    auto out = convert_string_to_powerunit(str,ok);
+    //TODO: error reporting here!
+    return out;    
+}
+
+void foxtrot::devices::newport2936R::setDataStoreUnits(foxtrot::devices::powerunits units)
+{
+    _proto->write(std::string("PM:DS:UNIT ") + std::to_string(static_cast<unsigned>(units))+'\r');
+}
+
+
+void foxtrot::devices::newport2936R::clearDataStore()
+{
+    cmd("PM:DS:CL");
+}
+
+int foxtrot::devices::newport2936R::getDataStoreInterval()
+{
+    return std::stoi(cmd("PM:DS:INT?"));
+}
+
+void foxtrot::devices::newport2936R::setDataStoreInterval(int interval)
+{
+    std::ostringstream oss;
+    oss << "PM:DS:INT " << interval <<'\r';
+    _proto->write(oss.str());
+}
+
+
+int foxtrot::devices::newport2936R::getDataStoreSize()
+{
+    return std::stoi(cmd("PM:DS:SIZE?"));
+}
+
+void foxtrot::devices::newport2936R::setDataStoreSize(int size)
+{
+    std::ostringstream oss;
+    oss << "PM:DS:SIZE " << size << '\r';
+    _proto->write(oss.str());
+}
+
+
 
 RTTR_REGISTRATION
 {
@@ -448,43 +522,34 @@ RTTR_REGISTRATION
   
   registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits");
   registration::class_<newport2936R>("foxtrot::devices::newport2936R")
-  .method("setLambda",&newport2936R::setLambda)
-  (
-    parameter_names("l")
-    )
-  .property_readonly("getLambda",&newport2936R::getLambda)
-  .property_readonly("getPower",&newport2936R::getPower)
-  .property_readonly("getResponsivity", &newport2936R::getResponsivity)
-  .property_readonly("getArea",&newport2936R::getArea)
-  .property_readonly("getUnits",&newport2936R::getUnits)
-  .method("setUnits",&newport2936R::setUnits)
-  (
-    parameter_names("unit")
-    )
-  .property_readonly("getMode", &newport2936R::getMode)
-  .method("setMode",&newport2936R::setMode)(parameter_names("mode"))
+  .property("Lambda",&newport2936R::getLambda, &newport2936R::setLambda)
+  .property_readonly("Power",&newport2936R::getPower)
+  .property_readonly("Responsivity", &newport2936R::getResponsivity)
+  .property_readonly("Area",&newport2936R::getArea)
+  .property("Units",&newport2936R::getUnits, &newport2936R::setUnits)
+  .property("Mode", &newport2936R::getMode, &newport2936R::setMode)
   .method("manualTriggerState", &newport2936R::manualTriggerState)(parameter_names("state"))
-  .property_readonly("getTriggerState", &newport2936R::getTriggerState)
-  .property_readonly("getcaldate",&newport2936R::getcaldate)
-  .property_readonly("getcaltemp",&newport2936R::getcaltemp)
-  .property_readonly("getTemperature", &newport2936R::getTemperature)
-  .property_readonly("getSerialNumber",&newport2936R::getSerialNumber)
-  .method("setTriggerStartMode" , &newport2936R::setTriggerStartMode)(parameter_names("mode"))
-  .property_readonly("getTriggerStartMode", &newport2936R::getTriggerStartMode)
-  .method("setTriggerEndMode", &newport2936R::setTriggerEndMode)(parameter_names("mode"))
-  .property_readonly("getTriggerEndMode", &newport2936R::getTriggerEndMode)
-  .method("setExternalTriggerMode", &newport2936R::setExternalTriggerMode)(parameter_names("mode"))
-  .property_readonly("getExternalTriggerMode",&newport2936R::getExternalTriggerMode)
-  .method("setTriggerEdge", &newport2936R::setTriggerEdge)(parameter_names("edge"))
-  .property_readonly("getTriggerEdge",&newport2936R::getTriggerEdge)
-  .property_readonly("getChannel", &newport2936R::getChannel)
-  .method("setChannel", &newport2936R::setChannel)
-  .property_readonly("getAnalogFilter",&newport2936R::getAnalogFilter)
-  .method("setAnalogFilter",&newport2936R::setAnalogFilter)
-  .property_readonly("getDigitalFilter",&newport2936R::getDigitalFilter)
-  .method("setDigitalFilter",&newport2936R::setDigitalFilter)
-  .property_readonly("getFilterMode",&newport2936R::getFilterMode)
-  .method("setFilterMode",&newport2936R::setFilterMode)
+  .property_readonly("TriggerState", &newport2936R::getTriggerState)
+  .property_readonly("caldate",&newport2936R::getcaldate)
+  .property_readonly("caltemp",&newport2936R::getcaltemp)
+  .property_readonly("Temperature", &newport2936R::getTemperature)
+  .property_readonly("SerialNumber",&newport2936R::getSerialNumber)
+  .property("TriggerStartModMode", &newport2936R::getTriggerStartMode,
+            &newport2936R::setTriggerStartMode)
+  .property("TriggerEndMode", &newport2936R::getTriggerEndMode,
+            &newport2936R::setTriggerEndMode)
+  .property("ExternalTriggerMode", &newport2936R::getExternalTriggerMode,
+            &newport2936R::setExternalTriggerMode)
+  .property("TriggerEdge", &newport2936R::getTriggerEdge, &newport2936R::setTriggerEdge)
+  .property("Channel", &newport2936R::getChannel, &newport2936R::setChannel)
+  .property("AnalogFilter", &newport2936R::getAnalogFilter, &newport2936R::setAnalogFilter)
+  .property("DigitalFilter", &newport2936R::getDigitalFilter, &newport2936R::setDigitalFilter)
+  .property("FilterMode", &newport2936R::getFilterMode, &newport2936R::setFilterMode)
+  .method("clearDataStore", &newport2936R::clearDataStore)
+  .property_readonly("DataStoreCount", &newport2936R::getDataStoreCount)
+  .property("BufferBehaviour", &newport2936R::getBufferBehaviour,
+            &newport2936R::setBufferBehaviour)
+  
   ;
   
   

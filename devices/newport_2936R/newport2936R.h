@@ -91,6 +91,24 @@ namespace foxtrot
     int getAnalogFilter();
     void setAnalogFilter(int value);
     
+    bool getBufferBehaviour();
+    void setBufferBehaviour(bool mode);
+    
+    int getDataStoreCount();
+    
+    int getDataStoreSize();
+    void setDataStoreSize(int size);
+    
+    void clearDataStore();
+    
+    bool getDataStoreEnable();
+    void setDataStoreEnable(bool onoff);
+    
+    foxtrot::devices::powerunits getDataStoreUnits();
+    void setDataStoreUnits(foxtrot::devices::powerunits units);
+    
+    int getDataStoreInterval();
+    void setDataStoreInterval(int interval);
     
     private:
       foxtrot::Logging _lg;
