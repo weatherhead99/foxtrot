@@ -105,7 +105,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     heater->setHeaterSensor(HeaterXHeaters::A, HeaterXSensors::B);
     heater->setHeaterLabel(HeaterXHeaters::A, "stage");
     
-    heater->setHeaterTarget(HeaterXHeaters::A, -100.);
+    heater->setHeaterTarget(HeaterXHeaters::A, -95.);
     heater->setHeaterLimit(HeaterXHeaters::A, 25.);
     
     heater->setHeaterEnable(HeaterXHeaters::A,true);
@@ -151,6 +151,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     }
   
     auto hvxptr = get_ptr_for_harness(hvxbias);
+    
     harness.AddDevice(std::move(hvxptr));
 
     auto lvxbias = static_cast<foxtrot::devices::ArchonLVX*>(&modules.at(3));
@@ -236,7 +237,9 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
       clockdriver2->setEnable(3,true);
       clockdriver2->setEnable(4,true);
       clockdriver2->setFastSlewRate(3,100);
-      clockdriver2->setFastSlewRate(3,100);
+      clockdriver2->setSlowSlewRate(3,100);
+      clockdriver2->setFastSlewRate(4,100);
+      clockdriver2->setSlowSlewRate(4,100);
     }
     
     harness.AddDevice(std::move(cdptr2));
@@ -320,6 +323,11 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto newport_params = params->at("newport_params");
     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
     auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
+    
+    powermeter->setChannel(1);
+    powermeter->setMode(foxtrot::devices::powermodes::Integrate);
+    powermeter->setExternalTriggerMode(1);
+    powermeter->setTriggerEdge(1);
     
     harness.AddDevice(std::move(powermeter));
     
