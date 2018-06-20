@@ -4,6 +4,8 @@
 #include <memory>
 #include "Logging.h"
 #include <string>
+#include "DeviceError.h"
+
 using std::string;
 
 namespace foxtrot
@@ -34,6 +36,24 @@ namespace foxtrot
       RMS = 7      
     };
     
+    namespace detail {
+      
+      template<typename T> struct return_converter
+      {
+	static T get(const std::string& in) {};
+      };
+      
+      template<> struct return_converter<int>
+      {
+	static int get(const std::string& in) {return std::stoi(in);};
+      };
+      
+      template<> struct return_converter<double>
+      {
+	static int get(const std::string& in) {return std::stod(in);};
+      };
+      
+    }
     
     class newport2936R : public CmdDevice
     {
@@ -45,6 +65,9 @@ namespace foxtrot
     
     void setLambda(int l);
     int getLambda();
+
+    int getErrorCode();
+    std::string getErrorString();
     
     double getPower();
         
@@ -116,6 +139,11 @@ namespace foxtrot
     std::vector<double> fetchDataStoreNewest(int n);
     
     private:
+      std::string fetch_store_buffer();
+      
+      void check_and_throw_error();
+      
+      
       foxtrot::Logging _lg;
       void strip_CRLF(std::string& buffer);
       
@@ -129,6 +157,26 @@ namespace foxtrot
 	  oss << cmd << " " << arg << '\r';
 	  _proto->write(oss.str());
 	};
+	
+      template<typename T> T command_get(const std::string& req)
+      {
+	std::ostringstream oss;
+	auto str = cmd(req);
+	
+	try{
+	  T out = detail::return_converter<T>::get(str);
+	  return out;
+	}
+	catch(std::invalid_argument& err)
+	{
+	  _lg.strm(sl::error) << " error return from request: " << req;
+	  check_and_throw_error();
+	};
+	
+	
+      }
+	
+	
 
     };
     
@@ -137,5 +185,7 @@ namespace foxtrot
   }//namespace devices
   
 }//namespace foxtrot
+
+std::vector<double> parse_datastore_string(const std::string& in);
 
 std::string convert_powerunit_to_string(foxtrot::devices::powerunits p, bool& ok);

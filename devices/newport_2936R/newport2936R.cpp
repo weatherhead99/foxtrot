@@ -84,6 +84,9 @@ std::string foxtrot::devices::newport2936R::cmd(const std::string& request)
   }
   
   unsigned actlen;
+  
+  std::this_thread::sleep_for(std::chrono::microseconds(100));
+  
   auto buffer = _proto->read(64, &actlen);
   
   //TODO: off by one error here?
@@ -110,6 +113,18 @@ void foxtrot::devices::newport2936R::setLambda(int l)
 {
   _proto->write(std::string("PM:L ") + std::to_string(l) +'\r');
   
+}
+
+int foxtrot::devices::newport2936R::getErrorCode()
+{
+  return std::stoi(cmd("ERRORS?"));
+}
+
+string foxtrot::devices::newport2936R::getErrorString()
+{
+  
+  return cmd("ERRSTR?");
+
 }
 
 
@@ -452,7 +467,7 @@ void foxtrot::devices::newport2936R::setBufferBehaviour(bool mode)
 
 int foxtrot::devices::newport2936R::getDataStoreCount()
 {
-    return std::stoi(cmd("PM:DS:C?"));
+  return command_get<int>("PM:DS:C?");
 }
 
 bool foxtrot::devices::newport2936R::getDataStoreEnable()
@@ -491,12 +506,13 @@ void foxtrot::devices::newport2936R::setDataStoreUnits(foxtrot::devices::powerun
 
 void foxtrot::devices::newport2936R::clearDataStore()
 {
-  _proto->write("PM:DS:CL");
+      _proto->write("PM:DS:CL\r");
+  
 }
 
 int foxtrot::devices::newport2936R::getDataStoreInterval()
 {
-    return std::stoi(cmd("PM:DS:INT?"));
+   return command_get<int>("PM:DS:INT?");
 }
 
 void foxtrot::devices::newport2936R::setDataStoreInterval(int interval)
@@ -509,21 +525,116 @@ void foxtrot::devices::newport2936R::setDataStoreInterval(int interval)
 
 int foxtrot::devices::newport2936R::getDataStoreSize()
 {
-    return std::stoi(cmd("PM:DS:SIZE?"));
+  return command_get<int>("PM:DS:SIZE?");
 }
 
 void foxtrot::devices::newport2936R::setDataStoreSize(int size)
 {
-    std::ostringstream oss;
-    oss << "PM:DS:SIZE " << size << '\r';
-    _proto->write(oss.str());
+  command_write("PM:DS:SIZE",size);
 }
 
 double foxtrot::devices::newport2936R::getDataStoreValue(int idx)
 {
+   command_write("PM:DS:GET?", idx);
     std::ostringstream oss;
     oss << "PM:DS:GET? " << idx << '\r';
-    return std::stod(cmd(oss.str()));    
+    return command_get<double>(oss.str()); 
+}
+
+
+std::vector<double> foxtrot::devices::newport2936R::fetchDataStore(int begin, int end)
+{
+  std::ostringstream oss;
+  oss << begin << "-" << end;
+  command_write("PM:DS:GET?", oss.str() ); 
+  auto st = fetch_store_buffer();
+  
+  return parse_datastore_string(st);
+  
+}
+
+std::vector< double > foxtrot::devices::newport2936R::fetchDataStoreNewest(int n)
+{
+  std::ostringstream oss;
+  oss << "+" << n;
+  command_write("PM:DS:GET?", oss.str());
+  auto st = fetch_store_buffer();
+  return parse_datastore_string(st);
+
+}
+
+std::vector< double > foxtrot::devices::newport2936R::fetchDataStoreOldest(int n)
+{
+  std::ostringstream oss;
+  oss << "-" << n;
+  command_write("PM:DS:GET?", oss.str());
+
+  auto st = fetch_store_buffer();
+  return parse_datastore_string(st);
+  
+}
+
+string foxtrot::devices::newport2936R::fetch_store_buffer()
+{
+  std::ostringstream oss;
+  unsigned actlen;
+  
+  while(true)
+  {
+    auto buffer = _proto->read(64, &actlen);
+    _lg.strm(sl::debug) << "actlen: " << actlen;
+    oss << std::string(buffer.begin(), buffer.begin() + actlen);
+    
+    if(actlen < 64)
+    {
+      break;
+    }
+    
+  }
+  
+  return oss.str();
+  
+}
+
+
+void foxtrot::devices::newport2936R::check_and_throw_error()
+{
+  int errc = getErrorCode();
+    _lg.strm(sl::error) << "caught an error, request, code: " << errc;
+    throw DeviceError("powermeter error: " + std::to_string(errc));
+
+}
+
+std::vector< double > parse_datastore_string(const string& in)
+{
+  std::istringstream iss(in);
+  std::string line;
+  
+  std::vector<double> out;
+  
+  while(std::getline(iss,line))
+  {
+    auto pos = line.find("End");
+    if(pos != line.npos)
+    {
+      break;
+    }
+  };
+  
+  
+  while(std::getline(iss,line))
+  {
+    auto pos = line.find("End");
+    if(pos != line.npos)
+    {
+      break;
+    }
+    
+    out.push_back(std::stod(line));
+    
+  };
+  
+  return out;
 }
 
 
@@ -552,7 +663,7 @@ RTTR_REGISTRATION
   .property_readonly("caltemp",&newport2936R::getcaltemp)
   .property_readonly("Temperature", &newport2936R::getTemperature)
   .property_readonly("SerialNumber",&newport2936R::getSerialNumber)
-  .property("TriggerStartModMode", &newport2936R::getTriggerStartMode,
+  .property("TriggerStartMode", &newport2936R::getTriggerStartMode,
             &newport2936R::setTriggerStartMode)
   .property("TriggerEndMode", &newport2936R::getTriggerEndMode,
             &newport2936R::setTriggerEndMode)

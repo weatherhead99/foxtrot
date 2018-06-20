@@ -8,6 +8,8 @@
 #include "newport2936R.h"
 #include <backward.hpp>
 #include "Logging.h"
+#include "DeviceError.h"
+#include "ProtocolTimeoutError.h"
 
 using std::cout;
 using std::endl;
@@ -27,30 +29,41 @@ int main(int argc, char** argv)
 //      auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
      auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
      foxtrot::devices::newport2936R OPM(proto);
+
+     try{
+      cout << "DS count: " << OPM.getDataStoreCount() << endl;
+     }
+     catch(foxtrot::DeviceError& err)
+     {
+       cout << "continuing regardless..." << endl;
+     }
+     catch(foxtrot::ProtocolTimeoutError& err)
+     {
+       cout << "continuing regardless of timeout... " << endl;
+     };
      
-     auto dsenable = OPM.getDataStoreEnable();
-     cout << "dsenable: " << dsenable << endl;
-
-     //enable data store
-     cout << "DS size: " << OPM.getDataStoreSize() << endl;
-     cout << "DS count: " << OPM.getDataStoreCount() << endl;
-
-     OPM.setBufferBehaviour(0);
-     OPM.setDataStoreEnable(true);
-     dsenable = OPM.getDataStoreEnable();
-     cout << "dsenable: " << dsenable << endl;
-
-
-     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-     cout << "DS count: " << OPM.getDataStoreCount() << endl;
-
-     auto ret = OPM.cmd("PM:DS:GET? 1-20");
-     cout << "return: " << ret << endl;
-
+     OPM.setChannel(2);
+     OPM.setMode(foxtrot::devices::powermodes::Integrate);
+     OPM.setExternalTriggerMode(1);
+     OPM.setTriggerEdge(1);
+     
+     cout << OPM.getAnalogFilter() << endl;
+     
      OPM.clearDataStore();
-     cout << "DS count: " << OPM.getDataStoreCount() << endl;
-
-
      
-
+     OPM.setDataStoreEnable(true);
+     std::this_thread::sleep_for(std::chrono::milliseconds(100));     
+     cout << "ops done.." << endl;
+     cout << "DS count: " << OPM.getDataStoreCount() << endl;
+     
+     cout << "DS size: " << OPM.getDataStoreSize() << endl;
+     
+     auto st = OPM.fetchDataStore(10,21);
+     for(auto& v : st)
+     {
+	cout << "v: " << v << endl;
+     }
+     
+     cout << "trigger state: " << OPM.getTriggerState() << endl;
+     
 }
