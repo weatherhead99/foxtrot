@@ -21,15 +21,19 @@ int main(int argc, char** argv)
      foxtrot::setLogFilterLevel(sl::trace);
      
      foxtrot::parameterset params
-     { {"port", "/dev/ttyS5"},
-       {"read_timeout", 1000u}
-       
+     { {"port", "/dev/ttyUSB1"},
+       {"read_timeout", 1000u},
+       {"baudrate", 38400}
      };
+     
   
 //      auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
-     auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
+//      auto proto = std::make_shared<foxtrot::protocols::BulkUSB>(&params);
+        auto proto = std::make_shared<foxtrot::protocols::SerialPort>(&params);
      foxtrot::devices::newport2936R OPM(proto);
 
+     cout << "errcode: " << OPM.getErrorCode() << endl;
+     
      try{
       cout << "DS count: " << OPM.getDataStoreCount() << endl;
      }
@@ -65,5 +69,11 @@ int main(int argc, char** argv)
      }
      
      cout << "trigger state: " << OPM.getTriggerState() << endl;
+     
+     
+     for(int i =0; i < 20 ; i++)
+     {
+       cout << "power measurement: " << OPM.getPower() << endl;
+     }
      
 }

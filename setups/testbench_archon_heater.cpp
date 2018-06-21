@@ -320,9 +320,11 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     
     //setup power meter
-    auto newport_params = params->at("newport_params");
-    auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
-    auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterusb));
+    auto newport_params = params->at("newport_params_serial");
+    auto powermeterserial = std::make_shared<foxtrot::protocols::SerialPort>(&newport_params);
+    
+//     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
+    auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterserial));
     
     powermeter->setChannel(1);
     powermeter->setMode(foxtrot::devices::powermodes::Integrate);

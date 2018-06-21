@@ -53,6 +53,7 @@ namespace foxtrot
 	static int get(const std::string& in) {return std::stod(in);};
       };
       
+      
     }
     
     class newport2936R : public CmdDevice
@@ -139,6 +140,9 @@ namespace foxtrot
     std::vector<double> fetchDataStoreNewest(int n);
     
     private:
+      
+      void flush_buffers_after_timeout(int n);
+      
       std::string fetch_store_buffer();
       
       void check_and_throw_error();

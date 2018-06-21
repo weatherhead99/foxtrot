@@ -2,6 +2,7 @@
 #include "TPG362.h"
 #include "SerialPort.h"
 #include <memory>
+#include <backward.hpp>
 
 using std::cout;
 using std::endl;
@@ -15,13 +16,22 @@ foxtrot::parameterset sport_params {
 
 int main(int argc, char** argv)
 {
+  backward::SignalHandling sh;
+  
+  cout << "initializing serial port" << endl;
   auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&sport_params);
   
   
+  cout << "init vacuum gauge" << endl;
   foxtrot::devices::TPG362 vacuumgauge(sport);
 
   
+  cout << "vacuum gauge ready" << endl;
+  
+  
+//   vacuumgauge.getDeviceName(1);
+  
   std::cout << "gauge 1 (" << vacuumgauge.getDeviceName(1) <<") active: " << vacuumgauge.getGaugeOnOff(1) << " pressure: "  << vacuumgauge.getPressure(1) << " hPa"  << std::endl;
   std::cout << "gauge 2 (" << vacuumgauge.getDeviceName(2) <<") active: " << vacuumgauge.getGaugeOnOff(2) << " pressure: "  << vacuumgauge.getPressure(2) << " hPa"  << std::endl;
-  
+//   
 }

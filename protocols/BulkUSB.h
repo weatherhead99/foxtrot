@@ -22,6 +22,7 @@ namespace foxtrot
     virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;
     
+    void clear_halts();
     
     private:
       libusb_context* _ctxt;

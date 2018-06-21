@@ -4,6 +4,7 @@
 #include <iostream>
 #include "DeviceError.h"
 #include "ProtocolError.h"
+#include "ProtocolTimeoutError.h"
 #include <algorithm>
 #include <string>
 #include <rttr/registration>
@@ -86,20 +87,71 @@ std::string foxtrot::devices::newport2936R::cmd(const std::string& request)
   unsigned actlen;
   
   std::this_thread::sleep_for(std::chrono::microseconds(100));
+  std::ostringstream oss;
   
-  auto buffer = _proto->read(64, &actlen);
-  
+    if(_usbmode)
+    {
+    
+    while(true)
+    {
+      try{
+	auto buffer = _proto->read(512, &actlen);
+	oss << buffer;
+      }
+      catch(foxtrot::ProtocolTimeoutError& err)
+      {
+	_lg.Debug("protocol timeout error caught, breaking");
+	if(_usbmode)
+	{
+	  auto specproto = static_cast<foxtrot::protocols::BulkUSB*>(_proto.get());
+	  specproto->clear_halts();
+	}
+	break;
+      }
+      if(actlen < 64)
+      {
+	_lg.Trace("received length != 64, breaking");
+	break;
+      }
+    }
+    }
+    else
+    {
+      auto specproto = static_cast<foxtrot::protocols::SerialPort*>(_proto.get());
+      auto bytes_avail = specproto->bytes_available();
+      
+      while(bytes_avail == 0)
+      {
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	bytes_avail = specproto->bytes_available();
+      }
+      
+      unsigned dbytes;
+      do
+      {
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
+	auto newbytesavail = specproto->bytes_available();
+	dbytes  = newbytesavail - bytes_avail;
+	bytes_avail = newbytesavail;
+	_lg.strm(sl::trace) << "dbytes: " << dbytes;
+      }
+      while(dbytes > 0);
+      
+      
+      _lg.strm(sl::debug) << "bytes available: " << bytes_avail;
+      auto buffer = _proto->read(bytes_avail,&actlen);
+      oss << buffer;
+      
+      }
+
   //TODO: off by one error here?
-  
-  
-  return std::string(buffer.begin(), buffer.begin() + actlen);
-  
+  return oss.str();
   
 }
 
 
 int foxtrot::devices::newport2936R::getLambda()
-{
+{ 
   auto lambdastr = cmd("PM:L?");
   strip_CRLF(lambdastr);
   
@@ -117,14 +169,12 @@ void foxtrot::devices::newport2936R::setLambda(int l)
 
 int foxtrot::devices::newport2936R::getErrorCode()
 {
-  return std::stoi(cmd("ERRORS?"));
+  return command_get<int>("ERRORS?");
 }
 
 string foxtrot::devices::newport2936R::getErrorString()
 {
-  
   return cmd("ERRSTR?");
-
 }
 
 
@@ -141,6 +191,7 @@ double foxtrot::devices::newport2936R::getPower()
 double foxtrot::devices::newport2936R::getResponsivity()
 {
   auto repl = cmd("PM:Responsivity?");
+  _lg.strm(sl::trace) << "repl: " << repl;
   strip_CRLF(repl);
   return std::stod(repl);
 
@@ -154,12 +205,10 @@ double foxtrot::devices::newport2936R::getArea()
 
 }
 
-
 void foxtrot::devices::newport2936R::strip_CRLF(std::string& buffer)
 {
   auto crpos = std::find(buffer.begin(),buffer.end(),'\r');
-  buffer = std::string(buffer.begin(),crpos);
-  
+  buffer = std::string(buffer.begin(),crpos);  
 }
 
   
@@ -167,7 +216,6 @@ foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
 {
   auto repl = cmd("PM:UNIT?");
   repl.erase(std::remove_if(repl.begin(),repl.end(), ::isspace),repl.end());
-  
   
   _lg.Trace("units reply: " + repl);
   _lg.Trace("units reply length: " + std::to_string(repl.size()));
@@ -243,29 +291,18 @@ int convert_mode_to_int(foxtrot::devices::powermodes mode, bool& ok)
 void foxtrot::devices::newport2936R::setMode(foxtrot::devices::powermodes mode)
 {
   short unsigned sw = static_cast<short unsigned>(mode);
-  
-  std::ostringstream oss;
-  oss << "PM:MODE " << sw <<'\r';
-  _proto->write(oss.str());
-  
-
+  command_write("PM:MODE",sw);
 }
 
 
 void foxtrot::devices::newport2936R::manualTriggerState(bool state)
 {
-  std::ostringstream oss;
-  oss << "PM:TRIG:STATE " << (int) state <<'\r';
-  _proto->write(oss.str());
-  
-
+  command_write("PM:TRIG:STATE", (int) state);
 }
 
 bool foxtrot::devices::newport2936R::getTriggerState()
 {
-  auto repl = cmd("PM:TRIG:STATE?");
-  return std::stoi(repl);
-
+  return command_get<int>("PM:TRIG:STATE?");
 }
 
 
@@ -286,8 +323,7 @@ double foxtrot::devices::newport2936R::getcaltemp()
 
 double foxtrot::devices::newport2936R::getTemperature()
 {
-  auto repl = cmd("PM:TEMP?");
-  return std::stod(repl);
+  return command_get<double>("PM:TEMP?");
 }
 
 
@@ -594,6 +630,23 @@ string foxtrot::devices::newport2936R::fetch_store_buffer()
   
   return oss.str();
   
+}
+
+void foxtrot::devices::newport2936R::flush_buffers_after_timeout(int n)
+{
+    _lg.Info("flusing powermeter USB buffers");
+    unsigned actlen;
+    for(int i=0 ; i < n ; i++)
+    {
+      try{
+	_proto->read(64,&actlen);
+      }
+      catch(foxtrot::ProtocolTimeoutError& err)
+      {
+	_lg.Trace("caught a timeout error..");
+	continue;
+      }; 
+    }
 }
 
 

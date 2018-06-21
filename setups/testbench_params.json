@@ -19,7 +19,12 @@
     "timeout" : 2000 
   },
   
-  "newport_params" : {
+  "newport_params_serial"  : {
+    "port" : "/dev/ttyUSB1",
+    "baudrate" : 38400
+  },
+  
+  "newport_params_usb" : {
     "read_timeout" : 100 ,
     "write_timeout" : 100
   },

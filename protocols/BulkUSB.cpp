@@ -182,3 +182,20 @@ void foxtrot::protocols::BulkUSB::write(const std::string& data)
   };
   
 }
+
+void foxtrot::protocols::BulkUSB::clear_halts()
+{
+  _lg.Debug("attempting clearing halts on endpoints...");
+  int ret;
+  if( (ret = libusb_clear_halt(_hdl,_epout)) < 0)
+  {
+    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+  }
+  
+  if( ( ret = libusb_clear_halt(_hdl,_epin)) < 0)
+  {
+    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
+  }
+
+}
+
