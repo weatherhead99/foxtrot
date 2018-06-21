@@ -24,6 +24,8 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
     _lg.Info("using serial connected gauge controller");
     _serialmode = true;
     _serproto->Init(nullptr);
+    specproto->flush();
+    _lg.Info("initialization done...");
     
   }
   else
@@ -140,7 +142,6 @@ std::string foxtrot::devices::TPG362::cmd(const std::string& request)
 
   std::ostringstream oss;
   
-
   oss << request << calculate_checksum(request) << '\r';
   
 //   std::cout <<"request with checksum is: " << oss.str() << std::endl;
@@ -199,12 +200,16 @@ std::tuple<int,int,string> foxtrot::devices::TPG362::interpret_response_telegram
 
   auto csum_calc = calculate_checksum(response.begin(), response.end() - 4);
 //   std::cout << "calculated response checksum is: " << csum_calc << std::endl;
-  _lg.strm(sl::debug) << "calculated checksum is: " << csum_calc;
 
+  auto csumstr = response.substr(response.size() -4,3);
+  
   //validate checksum
   if(response.compare(response.size()-4,3,csum_calc)  != 0)
     {
-      throw DeviceError("got invalid checksum!");
+      _lg.strm(sl::error) << "complete response is: " << response;
+      _lg.strm(sl::error) << "calculated checksum is: " << csum_calc;
+      _lg.strm(sl::error) << "received checksum: " << csumstr;
+      throw DeviceError("got invalid checksum");
     };
 
   
