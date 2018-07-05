@@ -9,16 +9,16 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
 
 
-option(BUILD_TESTS "build test code" ON)
+option(BUILD_TESTS "build test code" OFF)
 option(BUILD_SERVER "build foxtrot server" ON)
 option(BUILD_SETUPS "build experimental setups" ON)
 option(BUILD_PROGS "build utility programs" ON)
 option(BUILD_DASHBOARD "build monitoring dashboard program" ON)
-option(BUILD_OPMD "build OPMD high level client library" ON)
-option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
+option(BUILD_OPMD "build OPMD high level client library" OFF)
+option(BUILD_KEYPAD "build nostromo n52 keypad library" OFF)
 option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
-option(BUILD_UDEV "build udev bindings" ON)
+option(BUILD_UDEV "build udev bindings" OFF)
 
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   message(WARNING "conanbuildinfo found, building using conan packages")
