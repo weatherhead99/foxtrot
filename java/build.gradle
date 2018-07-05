@@ -53,5 +53,9 @@ sourceSets {
             srcDir "$foxtrotProtoDir"
         }
         
+        java {
+            srcDir "src"
+        }
+        
     }
 }
