@@ -18,7 +18,7 @@ option(BUILD_OPMD "build OPMD high level client library" ON)
 option(BUILD_KEYPAD "build nostromo n52 keypad library" ON)
 option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
-
+option(BUILD_UDEV "build udev bindings" ON)
 
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   message(WARNING "conanbuildinfo found, building using conan packages")
@@ -118,6 +118,10 @@ endif()
 
 if(BUILD_TELEMETRY)
   add_subdirectory(telemetry)
+endif()
+
+if(BUILD_UDEV)
+  add_subdirectory(udev)
 endif()
 
 include(CMakePackageConfigHelpers)
