@@ -100,6 +100,9 @@ namespace foxtrot
     void setTriggerEdge(int edge);
     int getTriggerEdge();
     
+    void setTriggerTimeout(int time_ms);
+    int getTriggerTimeout();
+    
     std::string getcaldate();
     double getcaltemp();
     

@@ -428,6 +428,17 @@ void foxtrot::devices::newport2936R::setTriggerEdge(int edge)
 
 }
 
+void foxtrot::devices::newport2936R::setTriggerTimeout(int time_ms)
+{
+    command_write<int>("PM:TRIG:TIME",time_ms);
+}
+
+int foxtrot::devices::newport2936R::getTriggerTimeout()
+{
+    return command_get<int>("PM:TRIG:TIME?");
+}
+
+
 string foxtrot::devices::newport2936R::getSerialNumber()
 {
   return cmd("PM:DETSN?");
@@ -723,6 +734,7 @@ RTTR_REGISTRATION
   .property("ExternalTriggerMode", &newport2936R::getExternalTriggerMode,
             &newport2936R::setExternalTriggerMode)
   .property("TriggerEdge", &newport2936R::getTriggerEdge, &newport2936R::setTriggerEdge)
+  .property("TriggerTimeout", &newport2936R::getTriggerTimeout, &newport2936R::setTriggerTimeout)
   .property("Channel", &newport2936R::getChannel, &newport2936R::setChannel)
   .property("AnalogFilter", &newport2936R::getAnalogFilter, &newport2936R::setAnalogFilter)
   .property("DigitalFilter", &newport2936R::getDigitalFilter, &newport2936R::setDigitalFilter)
