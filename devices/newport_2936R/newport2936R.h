@@ -103,6 +103,9 @@ namespace foxtrot
     void setTriggerTimeout(int time_ms);
     int getTriggerTimeout();
     
+    void setTriggerValue(double meas_val);
+    double getTriggerValue();
+    
     std::string getcaldate();
     double getcaltemp();
     

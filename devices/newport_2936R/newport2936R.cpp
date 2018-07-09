@@ -394,16 +394,19 @@ int foxtrot::devices::newport2936R::getTriggerEndMode()
 
 void foxtrot::devices::newport2936R::setTriggerEndMode(int mode)
 {
-  std::ostringstream oss;
-  oss << "PM:TRIG:STOP " << mode <<'\r';
-  _proto->write(oss.str());
+  
+  if(mode <0 || mode > 5)
+  {
+    throw std::out_of_range("invalid value for trigger end mode: " + std::to_string(mode));
+  }
+  
+  command_write("PM:TRIG:STOP",mode);
+  
 }
 
 int foxtrot::devices::newport2936R::getTriggerStartMode()
 {
-  auto repl = cmd("PM:TRIG:START?");
-  return std::stoi(repl);
-
+  return command_get<int>("PM:TRIG:START");
 }
 
 void foxtrot::devices::newport2936R::setTriggerStartMode(int mode)
@@ -437,6 +440,19 @@ int foxtrot::devices::newport2936R::getTriggerTimeout()
 {
     return command_get<int>("PM:TRIG:TIME?");
 }
+
+double foxtrot::devices::newport2936R::getTriggerValue()
+{
+  return command_get<double>("PM:TRIG:VALUE?");
+}
+
+void foxtrot::devices::newport2936R::setTriggerValue(double meas_val)
+{
+  command_write("PM:TRIG:VALUE",meas_val);
+
+}
+
+
 
 
 string foxtrot::devices::newport2936R::getSerialNumber()
@@ -735,6 +751,7 @@ RTTR_REGISTRATION
             &newport2936R::setExternalTriggerMode)
   .property("TriggerEdge", &newport2936R::getTriggerEdge, &newport2936R::setTriggerEdge)
   .property("TriggerTimeout", &newport2936R::getTriggerTimeout, &newport2936R::setTriggerTimeout)
+  .property("TriggerValue", &newport2936R::getTriggerValue, &newport2936R::setTriggerValue)
   .property("Channel", &newport2936R::getChannel, &newport2936R::setChannel)
   .property("AnalogFilter", &newport2936R::getAnalogFilter, &newport2936R::setAnalogFilter)
   .property("DigitalFilter", &newport2936R::getDigitalFilter, &newport2936R::setDigitalFilter)
