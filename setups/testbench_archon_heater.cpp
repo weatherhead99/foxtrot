@@ -54,28 +54,30 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto archon_reset = static_cast<bool>(boost::get<int>(setup_params.at("archon_reset")));
     
     
+    lg.Info("setting up Archon....");
     auto archon_params = params->at("archon_params");
     auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
     
 //     auto archon = std::unique_ptr<foxtrot::devices::archon> (
 //         new foxtrot::devices::archon(archontcp));
 //     
-    
     auto archon = std::unique_ptr<foxtrot::devices::archonraw> (
 	new foxtrot::devices::archonraw(archontcp));
     
     
     archon->settrigoutpower(true);
     
+    lg.Info("setting up TPG pressure gauge...");
     auto tpg_params = params->at("tpg_params");
     auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&tpg_params);
     
     auto presgauge = std::unique_ptr<foxtrot::devices::TPG362> (new foxtrot::devices::TPG362(sport));
-    
+    harness.AddDevice(std::move(presgauge));
     auto modules = archon->getAllModules();
     
     
     //============== Archon Heater ====================//
+    lg.Info("setting up ArchonHeaterX module...");
     auto heater = static_cast<foxtrot::devices::ArchonHeaterX*>(&modules.at(10));
     
     using foxtrot::devices::HeaterXSensors;
@@ -130,7 +132,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto heaterptr = get_ptr_for_harness(heater);
     harness.AddDevice(std::move(heaterptr));
     //============Archon biases & drivers================//
-    
+    lg.Info("setting up Archo HVXBias module...");
     auto hvxbias = static_cast<foxtrot::devices::ArchonHVX*>(&modules.at(8));
     
     for(int i=1; i<=16; i++)
@@ -154,6 +156,8 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     harness.AddDevice(std::move(hvxptr));
 
+    lg.Info("setting up Archon LVXBias module...");
+    
     auto lvxbias = static_cast<foxtrot::devices::ArchonLVX*>(&modules.at(3));
     
     
@@ -196,12 +200,17 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto lvxptr = get_ptr_for_harness(lvxbias);
     harness.AddDevice(std::move(lvxptr));
     
+    lg.Info("setting up Archon XVBias module...");
+    
     auto xvbias = static_cast<foxtrot::devices::ArchonXV*>(&modules.at(1));
     
     xvbias->setLabel(false,1,"VBB");
     
     auto xvptr = get_ptr_for_harness(xvbias);
     harness.AddDevice(std::move(xvptr));
+    
+    
+    lg.Info("setting up archon Clock Driver Module 1");
     
     auto clockdriver = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(9));
     
@@ -226,6 +235,8 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     clockdriver->setDeviceComment("CCD_clocks");
     harness.AddDevice(std::move(cdptr));
     
+    lg.Info("setting up Archon Clock Driver Module 2");
+    
     auto clockdriver2 = static_cast<foxtrot::devices::ArchonDriver*>(&modules.at(2));
     auto cdptr2 = get_ptr_for_harness(clockdriver2);
     clockdriver2->setDeviceComment("spare_clocks");
@@ -245,6 +256,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     harness.AddDevice(std::move(cdptr2));
     
     //==============Archon A/Ds =====================//
+    lg.Info("setting up Archon ADC Modules...");
     auto AD1 = static_cast<foxtrot::devices::ArchonAD*>(&modules.at(4));
     auto ad1ptr = get_ptr_for_harness(AD1);
     AD1->setDeviceComment("AD1");
@@ -309,10 +321,11 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     }
     
         
-    harness.AddDevice(std::move(presgauge));
+    
     harness.AddDevice(std::move(archon));
     
     //===================radiometry system========================//
+    lg.Info("setting up Stellarnet Spectrometer");
     auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
 
     auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
@@ -320,6 +333,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     
     //setup power meter
+    lg.Info("setting up Newport 2936R power meter...");
     auto newport_params = params->at("newport_params_serial");
     auto powermeterserial = std::make_shared<foxtrot::protocols::SerialPort>(&newport_params);
     
@@ -337,6 +351,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     //====================illumination system========================//
     //setup monochromator
+    lg.Info("setting up Cornerstone 260 monochromator");
     auto cornerstone_params = params->at("cornerstone_params");
     auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
     auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
@@ -347,6 +362,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     monoch->setGratingCalibration(3,600,0.0000,3.22885911,0.000,"");
     harness.AddDevice(std::move(monoch));
 
+    lg.Info("setting up Newport Q250 Power Supply");
     auto psu_params = params->at("psu_params");
     auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
     auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
