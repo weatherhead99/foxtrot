@@ -243,14 +243,15 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     clockdriver2->setLabel(3,"EXTLINESYNC");
     clockdriver2->setLabel(4,"PMINTEGRATE");
+    clockdriver2->setLabel(5,"LEDTRIGGER");
     if(archon_reset)
-    {    
-      clockdriver2->setEnable(3,true);
-      clockdriver2->setEnable(4,true);
-      clockdriver2->setFastSlewRate(3,100);
-      clockdriver2->setSlowSlewRate(3,100);
-      clockdriver2->setFastSlewRate(4,100);
-      clockdriver2->setSlowSlewRate(4,100);
+    { 
+      for (int chan = 3; chan <=6; chan++)
+      {
+	clockdriver2->setEnable(chan,true);
+	clockdriver2->setFastSlewRate(chan,100);
+	clockdriver2->setSlowSlewRate(chan,100);
+      };
     }
     
     harness.AddDevice(std::move(cdptr2));
