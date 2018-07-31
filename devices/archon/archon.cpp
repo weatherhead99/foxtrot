@@ -129,13 +129,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   }
   
   
-  //setup lines, timing lines etc...
-  set_timing_lines(0);
-  set_states(0);
-  set_parameters(0); 
-  set_constants(0);
-  writeKeyValue("TAPLINES","0");
-  
+
   
 }
 
@@ -330,6 +324,12 @@ void devices::archon::clear_config()
   _taplines = 0;
   _states=  0;
   
+    //setup lines, timing lines etc...
+  set_timing_lines(0);
+  set_states(0);
+  set_parameters(0); 
+  set_constants(0);
+  writeKeyValue("TAPLINES","0");
   
 }
 
