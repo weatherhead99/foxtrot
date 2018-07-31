@@ -244,9 +244,10 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     clockdriver2->setLabel(3,"EXTLINESYNC");
     clockdriver2->setLabel(4,"PMINTEGRATE");
     clockdriver2->setLabel(5,"LEDTRIGGER");
+    clockdriver2->setLabel(6,"CT_INJECT");
     if(archon_reset)
     { 
-      for (int chan = 3; chan <=6; chan++)
+      for (int chan = 3; chan <=7; chan++)
       {
 	clockdriver2->setEnable(chan,true);
 	clockdriver2->setFastSlewRate(chan,100);
