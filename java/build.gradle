@@ -18,7 +18,7 @@ apply plugin: "com.google.protobuf"
 def protobufVersion = "3.5.1"
 def grpcVersion = "1.13.1"
 def protocVersion = "3.5.1-1"
-def foxtrotProtoDir = "../server/"
+def foxtrotProtoDir = new File("../server/").getCanonicalFile()
 
 
 dependencies {
@@ -43,14 +43,14 @@ protobuf {
         all()*.plugins {grpc {}}
     }
     
-    generatedFilesBaseDir = "$projectDir/src/generated"
+    generatedFilesBaseDir = "$projectDir/build/generated"
     
 }
 
 sourceSets {
     main { 
         proto {
-            srcDir "$foxtrotProtoDir"
+            srcDir foxtrotProtoDir
         }
         
         java {
