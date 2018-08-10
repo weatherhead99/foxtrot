@@ -132,7 +132,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     auto heaterptr = get_ptr_for_harness(heater);
     harness.AddDevice(std::move(heaterptr));
     //============Archon biases & drivers================//
-    lg.Info("setting up Archo HVXBias module...");
+    lg.Info("setting up Archon HVXBias module...");
     auto hvxbias = static_cast<foxtrot::devices::ArchonHVX*>(&modules.at(8));
     
     for(int i=1; i<=16; i++)
@@ -173,21 +173,18 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     lvxbias->setLabel(true,3,"13V5");
     lvxbias->setLabel(true,5,"m13V5");
     
+    const int PREAMP_CURRENT_LIMIT_MA = 350;
+
     for(int i=1 ;i <= 4; i++)
     {
-    lvxbias->setLimit(i,300);
+    lvxbias->setLimit(i,PREAMP_CURRENT_LIMIT_MA);
       if(archon_reset)
       {
 	lvxbias->setEnable(true,i,true);
       }
     lvxbias->setOrder(true,i,0);
     }
-    
-      lvxbias->setLimit(1,300);
-      lvxbias->setLimit(2,300);
-      lvxbias->setLimit(3,300);
-      lvxbias->setLimit(4,300);
-      
+          
       if(archon_reset)
       {
 	lvxbias->setV(true,1,7.5);
