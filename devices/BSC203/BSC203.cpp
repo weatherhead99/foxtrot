@@ -9,8 +9,9 @@
 #define DEST_BAY_3 0x23
 #define DEST_GENERIC_USB_HW_UNIT 0x50
 
-
+#ifdef linux
 #include <byteswap.h>
+#endif
 
 #include <thread>
 #include <chrono>

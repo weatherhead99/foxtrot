@@ -1,8 +1,11 @@
 #include "SerialPort.h"
 #include "ProtocolError.h"
+#ifdef linux
 #include <termios.h>
+#endif
 
 #include "ProtocolUtilities.h"
+#include "StubError.h"
 
 #include <fcntl.h>
 #include <string.h>
@@ -158,17 +161,22 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
 
 void foxtrot::protocols::SerialPort::flush()
 {
+#ifdef linux
+	
   auto ret = tcflush(  _sport.native_handle(), TCIOFLUSH);
   if(ret < 0)
   {
     throw ProtocolError(std::string("failed to flush serial port: ") + strerror(ret));
   }
-
+#else	
+	throw StubError("flush() is a stub on windows!");
+#endif
 }
 
 
 unsigned foxtrot::protocols::SerialPort::bytes_available()
 {
+#ifdef linux
   unsigned bytes_available;
   auto ret = ioctl(_sport.native_handle(), FIONREAD, &bytes_available);
 
@@ -178,7 +186,10 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
     };
 
   return bytes_available;
-
+#else
+	throw StubError("bytes_available() is a stub on windows!");
+#endif
+  
 }
 
 
