@@ -19,6 +19,12 @@ option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
 option(BUILD_UDEV "build udev bindings" OFF)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#sets which winapi versions are needed, including e.g. killing
+#a boost_log_abi error
+	add_definitions(-D_WIN32_WINNT=0x601)
+endif()
+
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   message(WARNING "conanbuildinfo found, building using conan packages")
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -27,6 +33,11 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   add_definitions(-DFOXTROT_CONAN_BUILD=TRUE)
 else()
   message(STATUS "conanbuildinfo not found, proceeding with standard build")
+endif()
+
+
+if(FOXTROT_CONAN_BUILD)
+	add_definitions(-DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
 endif()
 
 set(boost_cmps "log;system;date_time;program_options;filesystem")

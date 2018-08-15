@@ -1,5 +1,9 @@
 
-set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp scsiserial.cpp characterdevice.cpp)
+set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp characterdevice.cpp)
+
+if(CMAKE_PLATFORM_NAME STREQUAL "LINUX")
+	list(APPEND proto_srcs scsiserial.cpp)
+endif()
 
 option(BUILD_I2C OFF)
 if(BUILD_I2C)
