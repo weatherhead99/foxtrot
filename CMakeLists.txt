@@ -80,8 +80,8 @@ if(FOXTROT_CONAN_BUILD)
 target_link_libraries(foxtrot ${Boost_THREAD_LIBRARY})
 endif()
 
-
-install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
+install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ 
+ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 file(GLOB ft_includes include/*.h)
 message(STATUS "ft includes: ${ft_includes}")

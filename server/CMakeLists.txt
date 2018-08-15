@@ -17,6 +17,7 @@ endif()
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
+
 install(FILES foxtrot.proto DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/)
 
 message("generated protobuf stubs: ${PROTO_SRCS}")
