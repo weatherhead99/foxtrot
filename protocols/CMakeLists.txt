@@ -22,8 +22,12 @@ target_link_libraries(simpletcp_play foxtrot )
 add_executable(serialport_play serialport_play.cpp)
 target_link_libraries(serialport_play foxtrot)
 
-add_executable(chardevice_play chardevice_play.cpp)
-target_link_libraries(chardevice_play foxtrot foxtrot_util gsl gslcblas)
+if(${gsl} STREQUAL gsl-NOTFOUND)
+   message(WARNING "no gsl, can't build chardevice_play")
+else()
+   add_executable(chardevice_play chardevice_play.cpp)
+   target_link_libraries(chardevice_play foxtrot foxtrot_util gsl gslcblas)
+endif()
 
 
 if(BUILD_TESTS)
