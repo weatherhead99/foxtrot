@@ -5,6 +5,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 include(cmake/host_specific.cmake)
+include(cmake/platform.cmake)
 
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
 
