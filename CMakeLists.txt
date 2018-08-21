@@ -3,11 +3,15 @@ cmake_minimum_required(VERSION 3.2)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 include(cmake/host_specific.cmake)
 include(cmake/platform.cmake)
 
-include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
+include(GenerateExportHeader)
+
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+
+
+
 
 option(BUILD_TESTS "build test code" OFF)
 option(BUILD_SERVER "build foxtrot server" ON)
@@ -83,6 +87,10 @@ add_subdirectory(setups)
 endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
+message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
+target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+generate_export_header(foxtrot)
 
 
 message(WARNING "rttr target: ${RTTR_TARGET}")
