@@ -31,6 +31,9 @@ ServerCommandImpl.cpp config.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
 
+target_compile_definitions(foxtrotserv PRIVATE -Dfoxtrot_EXPORTS)
+
+
 if(${rttr_VERSION} STREQUAL "0.9.6")
     message(WARNING "new RTTR api used!")
     target_compile_definitions(foxtrotserv PRIVATE -DNEW_RTTR_API)

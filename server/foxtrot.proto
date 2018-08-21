@@ -15,25 +15,25 @@ enum capability_types
 
 enum value_types
 {
-    FLOAT = 0;
-    INT = 1;
-    BOOL = 2;
-    STRING = 3;
-    BYTE_DATA = 4;
-    VOID = 5;
+    FLOAT_TYPE = 0;
+    INT_TYPE = 1;
+    BOOL_TYPE = 2;
+    STRING_TYPE = 3;
+    BYTE_DATA_TYPE = 4;
+    VOID_TYPE = 5;
 }
 
 enum byte_data_types
 {
-    UCHAR = 0;
-    USHORT = 1;
-    UINT = 2;
-    ULONG = 3;
-    SHORT = 4;
-    IINT = 5;
-    LONG = 6;
-    BFLOAT =7;
-    BDOUBLE = 8;
+    UCHAR_TYPE = 0;
+    USHORT_TYPE = 1;
+    UINT_TYPE = 2;
+    ULONG_TYPE = 3;
+    SHORT_TYPE = 4;
+    IINT_TYPE = 5;
+    LONG_TYPE = 6;
+    BFLOAT_TYPE =7;
+    BDOUBLE_TYPE = 8;
 }
 
 enum error_types

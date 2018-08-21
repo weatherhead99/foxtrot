@@ -43,12 +43,20 @@ void foxtrot::ft_plugin::reload()
 {
     if(_dl != nullptr)
     {
+		#ifdef linux
         dlclose(_dl);
+		#else
+			throw StubError("not implemented on Windows yet!");
+		#endif
     }
-    
+	
+	#ifdef linux
     _dl = dlopen(_fname.c_str(), RTLD_LAZY);
     
     dlerror();
+	#else
+		throw StubError("not implemented on Windows yet!");
+	#endif
     
 };
 

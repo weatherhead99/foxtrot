@@ -52,7 +52,7 @@ namespace foxtrot
     };
     
     
-    class ExperimentalSetup FOXTROT_EXPORT : public ft_plugin
+    class FOXTROT_EXPORT ExperimentalSetup : public ft_plugin
     {
     public:
         ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
