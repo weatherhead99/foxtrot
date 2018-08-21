@@ -1,9 +1,12 @@
 #pragma once
 #include <string>
 #include "Logging.h"
+#ifdef linux
 #include <dlfcn.h>
+#endif
 #include <boost/variant.hpp>
 #include "CommunicationProtocol.h"
+#include "StubError.h"
 
 
 
@@ -15,7 +18,7 @@ namespace foxtrot
     class TelemetryServer;
     class Client;
     
-    class ft_plugin
+    class FOXTROT_EXPORT ft_plugin
     {
     public:
         ft_plugin(const std::string& file);
@@ -27,7 +30,9 @@ namespace foxtrot
         
         template<typename funtp> funtp get_function(const std::string& name)
         {
+		#ifdef linux
           auto sym = dlsym(_dl,name.c_str());
+			
           if(sym == nullptr)
           {
               throw std::runtime_error("couldn't find matching function " + name + " in plugin file");
@@ -35,7 +40,9 @@ namespace foxtrot
           
           auto fun = reinterpret_cast<funtp>(sym);
           return fun;
-            
+        #else
+			throw StubError("not implemented on windows yet...");
+		#endif
         };
         
         Logging _lg;
@@ -45,7 +52,7 @@ namespace foxtrot
     };
     
     
-    class ExperimentalSetup : public ft_plugin
+    class ExperimentalSetup FOXTROT_EXPORT : public ft_plugin
     {
     public:
         ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
@@ -57,7 +64,7 @@ namespace foxtrot
      int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
     };
     
-    class TelemetrySetup : public ft_plugin
+    class FOXTROT_EXPORT TelemetrySetup : public ft_plugin
     {
     public:
         TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);
