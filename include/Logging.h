@@ -4,6 +4,8 @@
 #define BOOST_LOG_DYN_LINK
 #endif
 
+#include "foxtrot_export.h"
+
 #include <boost/log/sources/severity_channel_logger.hpp>
 #include <boost/log/sources/global_logger_storage.hpp>
 #include <boost/log/sources/record_ostream.hpp>
@@ -28,14 +30,14 @@ BOOST_LOG_GLOBAL_LOGGER(foxtrot_general_logging, logtp);
 
 namespace foxtrot
 {
-    void setLogFilterLevel(sl level);
-    void setLogChannel(const std::string& chan);
+    void FOXTROT_EXPORT setLogFilterLevel(sl level);
+    void FOXTROT_EXPORT setLogChannel(const std::string& chan);
     
-    void formatter(const logging::record_view& rec, logging::formatting_ostream& strm);
-    void setDefaultSink();
+    void FOXTROT_EXPORT formatter(const logging::record_view& rec, logging::formatting_ostream& strm);
+    void FOXTROT_EXPORT setDefaultSink();
     
     
-    class Logging 
+    class FOXTROT_EXPORT Logging 
     {
            
     public:
@@ -50,7 +52,7 @@ namespace foxtrot
         
         void setLogChannel(const std::string& chan);
         
-	class streamLogging{
+	class FOXTROT_EXPORT streamLogging{
 	public:
 	  friend class Logging;
 	  template<typename T> streamLogging& operator<<(T const& value);

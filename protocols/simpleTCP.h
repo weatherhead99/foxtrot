@@ -12,7 +12,7 @@ namespace foxtrot {
   namespace protocols
   {
 
-class simpleTCP : public SerialProtocol
+class FOXTROT_EXPORT simpleTCP : public SerialProtocol
 {
 public:
   

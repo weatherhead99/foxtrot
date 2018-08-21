@@ -3,7 +3,7 @@
 #include <Error.h>
 
 namespace foxtrot {
-	class StubError: public Error
+	class FOXTROT_EXPORT StubError: public Error
 	{
 		public:
 		StubError(const std::string& msg);

@@ -12,7 +12,7 @@ namespace foxtrot
 {
   namespace protocols
   {
-    class BulkUSB : public SerialProtocol
+    class FOXTROT_EXPORT BulkUSB : public SerialProtocol
     {
     public:
     BulkUSB(const parameterset*const instance_parameters);

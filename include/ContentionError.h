@@ -4,7 +4,7 @@
 
 namespace foxtrot
 {
-  class ContentionError : public Error 
+  class FOXTROT_EXPORT ContentionError : public Error 
   {
   public:
     ContentionError(const std::string& msg);

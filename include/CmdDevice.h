@@ -5,7 +5,7 @@
 namespace foxtrot
 {
   
-  class CmdDevice : public Device 
+  class FOXTROT_EXPORT CmdDevice : public Device 
   {
   public:
     CmdDevice(std::shared_ptr< CommunicationProtocol > proto);

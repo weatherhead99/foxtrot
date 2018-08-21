@@ -8,7 +8,7 @@ namespace foxtrot
 {
     namespace protocols
     {
-        class i2c : public CommunicationProtocol
+        class FOXTROT_EXPORT i2c : public CommunicationProtocol
         {
         public:
             i2c(const parameterset* const instance_parameters);

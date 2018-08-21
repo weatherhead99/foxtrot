@@ -4,7 +4,7 @@
 
 namespace foxtrot
 {
- class ProtocolError : public Error 
+ class FOXTROT_EXPORT ProtocolError : public Error 
  {
  public:
     ProtocolError(const std::string& msg);

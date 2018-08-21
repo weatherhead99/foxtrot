@@ -21,7 +21,7 @@ namespace foxtrot
     };
     
     
-    class scsiserial : public SerialProtocol
+    class FOXTROT_EXPORT scsiserial : public SerialProtocol
     {
     public:
     scsiserial(const parameterset*const instance_parameters);
