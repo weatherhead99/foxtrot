@@ -7,6 +7,7 @@ namespace foxtrot
   
   class FOXTROT_EXPORT CmdDevice : public Device 
   {
+	RTTR_ENABLE(Device);
   public:
     CmdDevice(std::shared_ptr< CommunicationProtocol > proto);
     CmdDevice(std::shared_ptr< CommunicationProtocol > proto, const std::string& comment);
