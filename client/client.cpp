@@ -152,31 +152,31 @@ foxtrot::ft_vector_variant foxtrot::ft_variant_from_data(const foxtrot::byte_dat
     
     switch(tp)
     {
-        case(byte_data_types::UCHAR):
+        case(byte_data_types::UCHAR_TYPE):
             out = data;
             break;
-        case(byte_data_types::USHORT):
+        case(byte_data_types::USHORT_TYPE):
             out = copy_to_out_type<unsigned short>(data);
             break;
-        case(byte_data_types::UINT):
+        case(byte_data_types::UINT_TYPE):
             out = copy_to_out_type<unsigned>(data);
             break;
-        case(byte_data_types::ULONG):
+        case(byte_data_types::ULONG_TYPE):
             out = copy_to_out_type<unsigned long>(data);
             break;
-        case(byte_data_types::SHORT):
+        case(byte_data_types::SHORT_TYPE):
             out = copy_to_out_type<short>(data);
             break;
-        case(byte_data_types::IINT):
+        case(byte_data_types::IINT_TYPE):
             out = copy_to_out_type<int>(data);
             break;
-        case(byte_data_types::LONG):
+        case(byte_data_types::LONG_TYPE):
             out = copy_to_out_type<long>(data);
             break;
-        case(byte_data_types::BFLOAT):
+        case(byte_data_types::BFLOAT_TYPE):
             out = copy_to_out_type<float>(data);
             break;
-        case(byte_data_types::BDOUBLE):
+        case(byte_data_types::BDOUBLE_TYPE):
             out =  copy_to_out_type<double>(data);
             break;
     }

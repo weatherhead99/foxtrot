@@ -99,13 +99,13 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
 	      
 	      switch(argtp)
 	      {
-		case(foxtrot::value_types::FLOAT): 
+		case(foxtrot::value_types::FLOAT_TYPE): 
 		  rttrargs[arg_position] = arg.second.get_value<double>(); break;
-		case(foxtrot::value_types::INT): 
+		case(foxtrot::value_types::INT_TYPE): 
 		  rttrargs[arg_position] = arg.second.get_value<int>(); break;
-		case(foxtrot::value_types::BOOL): 
+		case(foxtrot::value_types::BOOL_TYPE): 
 		  rttrargs[arg_position] = arg.second.get_value<bool>(); break;
-		case(foxtrot::value_types::STRING):
+		case(foxtrot::value_types::STRING_TYPE):
 		  rttrargs[arg_position] = arg.second.get_value<std::string>(); break;
 		
 		default:

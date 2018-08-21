@@ -15,7 +15,11 @@ endmacro()
 
 
 
-build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet")
+if(${CMAKE_SYSTEM_NAME STREQUAL "LINUX")
+	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet")
+else()
+	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet;libusb")
+endif()
 build_setup(dummy_setup dummy_setup.cpp dummy)
 
 

@@ -11,7 +11,8 @@ include(GenerateExportHeader)
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 
-
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+set(CMAKE_CXX_VISIBILITY_PRESET OFF)
 
 option(BUILD_TESTS "build test code" OFF)
 option(BUILD_SERVER "build foxtrot server" ON)
@@ -89,7 +90,8 @@ endif()
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
 target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(foxtrot PRIVATE ${Boost_LOG_LIBRARY} ${libusb} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(foxtrot PUBLIC ${RTTR_TARGET} ${Boost_SYSTEM_LIBRARY})
 generate_export_header(foxtrot)
 
 
@@ -97,7 +99,7 @@ message(WARNING "rttr target: ${RTTR_TARGET}")
 target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
 
 if(FOXTROT_CONAN_BUILD)
-target_link_libraries(foxtrot ${Boost_THREAD_LIBRARY})
+target_link_libraries(foxtrot PRIVATE ${Boost_THREAD_LIBRARY})
 endif()
 
 install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ 

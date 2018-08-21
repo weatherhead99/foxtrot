@@ -17,5 +17,6 @@ if(MSVC)
 	#sets which winapi versions are needed, including e.g. killing
 	#a boost_log_abi error
 	add_definitions(-D_WIN32_WINNT=0x601)
+	set(EXTRA_WINLIBS "ws2_32")
 	
 endif()

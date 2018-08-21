@@ -18,7 +18,7 @@ namespace foxtrot
     class TelemetryServer;
     class Client;
     
-    class FOXTROT_EXPORT ft_plugin
+    class ft_plugin
     {
     public:
         ft_plugin(const std::string& file);
@@ -52,7 +52,7 @@ namespace foxtrot
     };
     
     
-    class FOXTROT_EXPORT ExperimentalSetup : public ft_plugin
+    class ExperimentalSetup : public ft_plugin
     {
     public:
         ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
@@ -64,7 +64,7 @@ namespace foxtrot
      int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
     };
     
-    class FOXTROT_EXPORT TelemetrySetup : public ft_plugin
+    class TelemetrySetup : public ft_plugin
     {
     public:
         TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);

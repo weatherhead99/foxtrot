@@ -3,7 +3,7 @@
 #include "foxtrot_export.h"
 #include <memory>
 #include <string>
-#include <rttr/registration>
+#include <rttr/type>
 
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
