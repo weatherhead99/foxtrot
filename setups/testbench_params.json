@@ -20,7 +20,7 @@
   },
   
   "newport_params_serial"  : {
-    "port" : "/dev/ttyUSB1",
+    "port" : "/dev/ttyUSB3",
     "baudrate" : 38400
   },
   
