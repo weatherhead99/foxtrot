@@ -53,7 +53,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     auto archon_reset = static_cast<bool>(boost::get<int>(setup_params.at("archon_reset")));
     
-    
+       
     lg.Info("setting up Archon....");
     auto archon_params = params->at("archon_params");
     auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
@@ -324,12 +324,16 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     harness.AddDevice(std::move(archon));
     
     //===================radiometry system========================//
-    lg.Info("setting up Stellarnet Spectrometer");
-    auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
-
-    auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
-    harness.AddDevice(std::move(spectrometer));
     
+    if(!boost::get<int>(setup_params["disable_stellarnet"]))
+    {
+      lg.Info("setting up Stellarnet Spectrometer");
+      auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
+
+      auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
+      harness.AddDevice(std::move(spectrometer));
+    }
+      
     
     //setup power meter
     lg.Info("setting up Newport 2936R power meter...");
@@ -361,13 +365,17 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     monoch->setGratingCalibration(3,600,0.0000,3.22885911,0.000,"");
     harness.AddDevice(std::move(monoch));
 
-    lg.Info("setting up Newport Q250 Power Supply");
-    auto psu_params = params->at("psu_params");
-    auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
-    auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
     
-    harness.AddDevice(std::move(lamp_psu));
-    
+    if(!boost::get<int>(setup_params["disable_Q250"]))
+    {
+      lg.Info("setting up Newport Q250 Power Supply");
+      auto psu_params = params->at("psu_params");
+      auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
+      auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
+      
+      harness.AddDevice(std::move(lamp_psu));
+
+    }      
     
     return 0;  
 };
