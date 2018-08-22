@@ -1,7 +1,7 @@
 [requires]
 grpc/1.14.1@inexorgame/stable
 nanomsg/1.1.2@bincrafters/stable
-rttr/0.9.5@weatherhead99/testing
+rttr/0.9.6@weatherhead99/testing
 boost_log/1.66.0@bincrafters/stable
 boost_date_time/1.66.0@bincrafters/stable
 boost_system/1.66.0@bincrafters/stable
@@ -20,5 +20,4 @@ cmake
 
 [options]
 nanomsg:shared=True
-protobuf:shared=True
 rttr:shared=True

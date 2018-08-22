@@ -13,7 +13,7 @@ add_library(foxtrot_proto OBJECT ${proto_srcs})
 target_include_directories(foxtrot_proto INTERFACE $<TARGET_PROPERTY:RTTR::Core,INTERFACE_INCLUDE_DIRECTORIES>)
 
 add_executable(simpletcp_play simpletcp_play.cpp)
-target_link_libraries(simpletcp_play foxtrot)
+target_link_libraries(simpletcp_play foxtrot )
 
 add_executable(serialport_play serialport_play.cpp)
 target_link_libraries(serialport_play foxtrot)

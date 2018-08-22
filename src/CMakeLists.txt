@@ -5,7 +5,6 @@ SerialProtocol.cpp ProtocolUtilities.cpp CmdDevice.cpp DeviceError.cpp Logging.c
 
 add_library(foxtrot_obj OBJECT ${foxtrot_srcs})
 
-message(ERROR "rttr include dir: ${rttr_include_dir}")
 target_include_directories(foxtrot_obj PUBLIC ${rttr_include_dir})
 
 

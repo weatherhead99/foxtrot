@@ -40,8 +40,10 @@ endif()
 file(GLOB ft_server_includes *.h)
 install(FILES ${ft_server_includes} ${PROTO_HDRS} ${PROTO_GRPC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 
-target_link_libraries(foxtrotserv PUBLIC foxtrot ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES} ${OPENSSL_LIBRARIES} 
-${ZLIB_LIBRARIES} ${dl})
+target_link_libraries(foxtrotserv PUBLIC foxtrot ${GRPC_LIBRARIES} ${cares} ${PROTOBUF_LIBRARIES} ${OPENSSL_LIBRARIES} 
+${ZLIB_LIBRARIES} ${dl} ${address_sorting})
+
+message("GRPXC_LIBRARIES: ${GRPC_LIBRARIES}")
 
 target_include_directories(foxtrotserv PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -60,7 +62,7 @@ endif()
 install(TARGETS exptserve RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_executable(testClient testClient.cpp)
-target_link_libraries(testClient foxtrotserv foxtrotclient)
+target_link_libraries(testClient foxtrotserv foxtrotclient ${cares})
 target_include_directories(testClient PRIVATE ${CMAKE_SOURCE_DIR}/client/)
 
 
