@@ -38,6 +38,24 @@ get_ptr_for_harness( const T* ptr)
       const_cast<T*>(ptr)),[](foxtrot::Device*){});
 }
 
+
+template<typename T> void setup_with_disable(const std::string& device_name, std::map<std::string,parameter>& params,
+					     foxtrot::Logging& lg, T fun)
+{
+  
+  auto disable_str = "disable_" + device_name;
+  if(!boost::get<int>(params[disable_str]))
+  {
+    fun();
+  }
+  else
+  {
+    lg.strm(sl::warning) << "device: " << device_name << " was disabled in the config file...";
+  }
+  
+};
+
+
 extern "C" { 
 int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const params)
 {
@@ -325,30 +343,35 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     //===================radiometry system========================//
     
-    if(!boost::get<int>(setup_params["disable_stellarnet"]))
-    {
-      lg.Info("setting up Stellarnet Spectrometer");
-      auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
+    setup_with_disable("stellarnet", setup_params, lg,
+		       [&harness, &lg, &setup_params] ()
+		       {
+			 lg.Info("setting up Stellarnet Spectrometer");
+			 auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
 
-      auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
-      harness.AddDevice(std::move(spectrometer));
-    }
+			 auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
+			 harness.AddDevice(std::move(spectrometer));
+		       });
       
     
-    //setup power meter
-    lg.Info("setting up Newport 2936R power meter...");
-    auto newport_params = params->at("newport_params_serial");
-    auto powermeterserial = std::make_shared<foxtrot::protocols::SerialPort>(&newport_params);
     
-//     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
-    auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterserial));
-    
-    powermeter->setChannel(1);
-    powermeter->setMode(foxtrot::devices::powermodes::Integrate);
-    powermeter->setExternalTriggerMode(1);
-    powermeter->setTriggerEdge(1);
-    
-    harness.AddDevice(std::move(powermeter));
+    setup_with_disable("powermeter", setup_params, lg,
+		       [&harness, &lg, &params] ()
+		       {
+			  lg.Info("setting up Newport 2936R power meter...");
+			  auto newport_params = params->at("newport_params_serial");
+			  auto powermeterserial = std::make_shared<foxtrot::protocols::SerialPort>(&newport_params);
+			  
+		      //     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
+			  auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterserial));
+			  
+			  powermeter->setChannel(1);
+			  powermeter->setMode(foxtrot::devices::powermodes::Integrate);
+			  powermeter->setExternalTriggerMode(1);
+			  powermeter->setTriggerEdge(1);
+			  
+			  harness.AddDevice(std::move(powermeter));
+		       });
     
     
     
@@ -366,16 +389,15 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     harness.AddDevice(std::move(monoch));
 
     
-    if(!boost::get<int>(setup_params["disable_Q250"]))
-    {
-      lg.Info("setting up Newport Q250 Power Supply");
-      auto psu_params = params->at("psu_params");
-      auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
-      auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
-      
-      harness.AddDevice(std::move(lamp_psu));
+    setup_with_disable("Q250", setup_params, lg,
+	[&harness, &lg, &params] () { 
+	  lg.Info("setting up Newport Q250 Power Supply");
+	  auto psu_params = params->at("psu_params");
+	  auto scsiser = std::make_shared<foxtrot::protocols::scsiserial>(&psu_params);
+	  auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
+	  harness.AddDevice(std::move(lamp_psu));
+	});
 
-    }      
     
     return 0;  
 };
