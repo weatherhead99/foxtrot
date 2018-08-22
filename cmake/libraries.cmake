@@ -13,9 +13,9 @@ else()
 endif()
   
 
-find_library(libusb usb-1.0 REQUIRED)
+find_library(libusb NAMES usb-1.0 libusb-1.0 usb)
 message(STATUS "libusb: ${libusb}")
-find_path(libusb_include libusb.h PATH_SUFFIXES libusb-1.0)
+find_path(libusb_include NAMES libusb.h usb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 
@@ -26,7 +26,8 @@ message("gsl: ${gsl}")
 find_library(gslcblas gslcblas)
 
 
-find_package(rttr REQUIRED)
+
+find_package(rttr 0.9.5 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 if(TARGET RTTR::Core)
 message(STATUS "found RTTR shared build")
@@ -60,13 +61,19 @@ if(BUILD_SERVER)
   find_package(OpenSSL REQUIRED)
   include_directories(${GRPCPP_INCLUDE_DIR})
 
-  find_library(dl dl)
-  message(STATUS "libdl: ${dl}")
-  
+	if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+		find_library(dl dl)
+		message(STATUS "libdl: ${dl}")
+	else()
+		message(STATUS "windows build, don't need libdl")
+		set(dl "")
+	endif()
 endif()
 
 #ONLY required for detector_wl_sweep at the moment!
 find_library(CCfits CCfits)
 find_library(cfitsio cfitsio)
 find_path(CFITSIO_INCLUDE_DIR fitsio.h PATH_SUFFIXES cfitsio)
-include_directories(${CFITSIO_INCLUDE_DIR})
+if(NOT ${cfitsio} STREQUAL cfitsio-NOTFOUND)
+	include_directories(${CFITSIO_INCLUDE_DIR})
+endif()
