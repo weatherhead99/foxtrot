@@ -74,7 +74,7 @@ endif()
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 
 
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
 
 if(FOXTROT_CONAN_BUILD)
 target_link_libraries(foxtrot ${Boost_THREAD_LIBRARY})
@@ -101,7 +101,7 @@ find_package(Qwt REQUIRED)
 set(CMAKE_AUTOMOC ON)
 
 add_subdirectory(dashboard)
-add_subdirectory(dashboard2)
+#add_subdirectory(dashboard2)
 endif()
 
 if(BUILD_TESTS)  

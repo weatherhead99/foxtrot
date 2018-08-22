@@ -18,6 +18,10 @@ message(STATUS "libusb: ${libusb}")
 find_path(libusb_include NAMES libusb.h usb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
+include(FindPkgConfig)
+pkg_search_module(udev REQUIRED libudev)
+message("udev libraries: ${udev_LIBRARIES}")
+
 
 
 #gsl libraries

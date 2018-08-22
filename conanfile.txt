@@ -1,5 +1,5 @@
 [requires]
-gRPC/1.8.3@inexorgame/stable
+grpc/1.14.1@inexorgame/stable
 nanomsg/1.1.2@bincrafters/stable
 rttr/0.9.5@weatherhead99/testing
 boost_log/1.66.0@bincrafters/stable
@@ -12,7 +12,7 @@ boost_asio/1.66.0@bincrafters/stable
 boost_filesystem/1.66.0@bincrafters/stable
 cmake_findboost_modular/0.1.0@bincrafters/stable
 boost_thread/1.66.0@bincrafters/stable
-Protobuf/3.5.1@inexorgame/stable
+libusb/1.0.22@bincrafters/stable
 
 
 [generators]
@@ -20,7 +20,5 @@ cmake
 
 [options]
 nanomsg:shared=True
-gPRC:non_cpp_plugins=True
-gRPC:shared=True
-Protobuf:shared=True
+protobuf:shared=True
 rttr:shared=True

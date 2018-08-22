@@ -1,5 +1,6 @@
 #!/bin/bash
 BUILD_TYPE=$1
+PYTHON=`which python`
 if [ "$BUILD_TYPE" = "" ];
 then 
   echo "build type not specified, choosing Release"
@@ -15,6 +16,6 @@ conan remote add weatherhead99 https://api.bintray.com/conan/weatherhead99/conan
 mkdir ../conanbuild
 cd ../conanbuild
 echo "installing conan dependencies..."
-conan install .. --build=missing -sbuild_type=$BUILD_TYPE
+conan install .. --build=missing -sbuild_type=$BUILD_TYPE -oboost_python:python=$PYTHON 
 echo "running cmake..."
 cmake .. -DBUILD_DASHBOARD=OFF
