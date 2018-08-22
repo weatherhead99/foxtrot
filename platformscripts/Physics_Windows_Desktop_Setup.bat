@@ -1,7 +1,11 @@
 set BUILD_TYPE=%1
+IF "%BUILD_TYPE%"=="" (
+    ECHO "no build type defined, assuming Release"
+    set BUILD_TYPE=Release
+    )
 ECHO "build type: %BUILD_TYPE%"
 ECHO "setting path to include local python scripts..."
-set PATH=%PATH%;%APPDATA%\Python\Python36\scripts
+set PATH=%PATH%;%APPDATA%\Python\Python36\scripts;"c:\Program Files\CMake\bin";%PROGRAMDATA%\Anaconda3\Scripts
 set VCVARS_BAT=C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat
 ECHO "installing conan..."
 pip install --user conan > NUL
