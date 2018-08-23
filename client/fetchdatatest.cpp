@@ -42,7 +42,7 @@ int main(int argc, char** argv)
   
   for(int i=0; i < dvec2.size(); i++)
   {
-   cout <<  (int) dvec2[i] << " ";
+   cout <<  dvec2[i] << " ";
       
   }
   cout << endl;

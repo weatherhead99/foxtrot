@@ -169,15 +169,14 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 }
 
 
-#ifndef NEW_RTTR_API
 
 template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
 { 
     foxtrot::Logging lg("variant_to_bytes");
+#ifndef NEW_RTTR_API
     rttr::type tp = rttr::type::get<std::vector<T>>();
     lg.strm(sl::debug) << "reference type: " << tp.get_name();
     lg.strm(sl::debug) << "received type: " << vt.get_type().get_name();
-    
     
     if(!vt.can_convert(tp))
     {
@@ -185,15 +184,36 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
     }
     
     auto arr = vt.convert<std::vector<T>>();
-    
     byte_size = sizeof(T) / sizeof(unsigned char) * arr.size();
     auto data  = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
-    
     auto targetptr = reinterpret_cast<unsigned char*>(arr.data());
-    
-    std::copy(targetptr , targetptr + byte_size, data.get());
-    
+    std::copy(targetptr , targetptr + byte_size, data.get());    
     return data;
+
+#else
+  lg.strm(sl::trace) << "received type: " << vt.get_type().get_name();
+  
+  auto view = vt.create_sequential_view();
+  auto value_type = view.get_value_type();
+
+  lg.strm(sl::trace) << " value type: " << value_type.get_name();
+  
+  if(rttr::type::get<T>() != value_type)
+  {
+      lg.Trace("unequal types...");
+      return nullptr;
+  }
+  
+  byte_size = sizeof(T) / sizeof(unsigned char) * view.get_size();
+  auto data = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
+  
+  auto& source = rttr::variant_cast<std::vector<T>&>(vt);
+  auto targetptr = reinterpret_cast<unsigned char*>(source.data());
+  std::copy(targetptr, targetptr + byte_size, data.get());
+  
+  return data;
+  
+#endif
     
 }
 
@@ -258,7 +278,6 @@ std::unique_ptr<unsigned char[]> old_rttr_array_converter(rttr::variant& arr, fo
     throw std::logic_error("function couldn't convert to recognized array type...");
     
 };
-#endif
 
 
 std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
@@ -274,32 +293,8 @@ std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, un
     
     lg.strm(sl::debug) << "variant type: " << arr.get_type().get_name();
     
-#ifndef NEW_RTTR_API
+
     return old_rttr_array_converter(arr,lg,byte_size,dt);
-#else
-    auto seqview = arr.create_sequential_view();
-    if(seqview.get_rank() > 1)
-    {
-      lg.Error("multiple dimension arrays not implemented");
-      throw std::logic_error("tried to get a byte view of multi-dimensional array!");
-    }
-    
-    
-    lg.strm(sl::debug) << "variant item type: " << seqview.get_value_type().get_name();
-    auto valtype = seqview.get_value_type();
-    
-    if(rttr::type::get<unsigned char>() == valtype)
-    {
-      lg.strm(sl::debug) << "UCHAR";
-      
-      
-    };
-    
-    
-    throw std::logic_error("didn't find a value type to match!");
-    
-    
-#endif
     
 }
 
