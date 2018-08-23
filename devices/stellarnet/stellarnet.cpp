@@ -60,6 +60,7 @@ _lg("stellarnet"), _firmware_file(firmware_file), _timeout_ms(timeout_ms)
       if(desc.idVendor == FX2_VID && desc.idProduct == FX2_PID )
       {
 	_lg.Info("found empty FX2 chip, uploading firmware...");
+	std::this_thread::sleep_for(std::chrono::milliseconds(20));
 	reenumerate_device(&desc,*(listptr+i));
 	//NOTE: loop will run again and init real device
 	break;
@@ -138,15 +139,19 @@ const std::string foxtrot::devices::stellarnet::getDeviceTypeName() const
 void foxtrot::devices::stellarnet::reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev)
 {
   
-  //set configuration
-  if(int ret = libusb_open(dev,&_hdl) < 0)
+  //set 
+  
+  int ret = libusb_open(dev,&_hdl);
+  if( ret < 0)
   {
     _lg.Error("error opening device...");
+    _lg.strm(sl::error) << "error code: " << ret;
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
   }
 
   int cfg;
-  if( int ret = libusb_get_configuration(_hdl,&cfg) < 0)
+  ret = libusb_get_configuration(_hdl, &cfg);
+  if( ret < 0)
   {
     _lg.Error("error checking active config..>");
     throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
