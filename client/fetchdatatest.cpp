@@ -39,7 +39,8 @@ int main(int argc, char** argv)
   cout << "get from variant.." << endl;
   auto dvec2 = boost::get<std::vector<double>>(dat2);
   cout << "data size: " << dvec2.size() << endl;
-  for(int i=0; i < 10; i++)
+  
+  for(int i=0; i < dvec2.size(); i++)
   {
    cout <<  (int) dvec2[i] << " ";
       

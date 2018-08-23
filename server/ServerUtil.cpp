@@ -169,11 +169,16 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
 }
 
 
+#ifndef NEW_RTTR_API
 
 template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
 { 
-    
+    foxtrot::Logging lg("variant_to_bytes");
     rttr::type tp = rttr::type::get<std::vector<T>>();
+    lg.strm(sl::debug) << "reference type: " << tp.get_name();
+    lg.strm(sl::debug) << "received type: " << vt.get_type().get_name();
+    
+    
     if(!vt.can_convert(tp))
     {
         return nullptr;
@@ -192,11 +197,9 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
     
 }
 
-
-std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
+std::unique_ptr<unsigned char[]> old_rttr_array_converter(rttr::variant& arr, foxtrot::Logging& lg, unsigned int& byte_size, foxtrot::byte_data_types& dt)
 {
-    foxtrot::Logging lg("byte_view_data");
-    std::unique_ptr<unsigned char[]> data;
+  std::unique_ptr<unsigned char[]> data;
     //find type
     if(data = variant_to_bytes<unsigned char>(arr,byte_size))
     {
@@ -252,8 +255,51 @@ std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, un
         dt = foxtrot::byte_data_types::BDOUBLE;
         return data;
     }
-    
     throw std::logic_error("function couldn't convert to recognized array type...");
+    
+};
+#endif
+
+
+std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
+{
+    foxtrot::Logging lg("byte_view_data");
+    
+    if(!arr.get_type().is_sequential_container())
+    {
+      lg.Error("asked for byte view of a type that is not a sequential container!");
+      throw std::logic_error("type not a sequential container!");
+    }
+    
+    
+    lg.strm(sl::debug) << "variant type: " << arr.get_type().get_name();
+    
+#ifndef NEW_RTTR_API
+    return old_rttr_array_converter(arr,lg,byte_size,dt);
+#else
+    auto seqview = arr.create_sequential_view();
+    if(seqview.get_rank() > 1)
+    {
+      lg.Error("multiple dimension arrays not implemented");
+      throw std::logic_error("tried to get a byte view of multi-dimensional array!");
+    }
+    
+    
+    lg.strm(sl::debug) << "variant item type: " << seqview.get_value_type().get_name();
+    auto valtype = seqview.get_value_type();
+    
+    if(rttr::type::get<unsigned char>() == valtype)
+    {
+      lg.strm(sl::debug) << "UCHAR";
+      
+      
+    };
+    
+    
+    throw std::logic_error("didn't find a value type to match!");
+    
+    
+#endif
     
 }
 
