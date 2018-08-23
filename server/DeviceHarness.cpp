@@ -135,12 +135,20 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     devcapability cap;
     cap.set_capname(capname);
     
+    _lg.strm(sl::debug) << "getting capability for: " << capname;
+    
     
     if(prop)
     {
+        _lg.strm(sl::trace) << "it's a property...";
       
+#ifndef NEW_RTTR_API
       if(prop.get_type().is_array())
+#else
+      if(prop.get_type().is_sequential_container())
+#endif
       {
+          _lg.strm(sl::trace) << "it's a stream...";
         cap.set_tp(capability_types::STREAM);
 	
       }
@@ -179,13 +187,24 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     }
     else if (meth)
     {
+        _lg.strm(sl::trace) << "it's a method...";
+        
+#ifndef NEW_RTTR_API
+        _lg.strm(sl::trace) << "old rttr api in use...";
 	  if(meth.get_return_type().is_array())
+#else
+          
+     _lg.strm(sl::trace) << "return type: " << meth.get_return_type().get_name(); 
+          
+      if(meth.get_return_type().is_sequential_container())
+#endif
 	  {
+        _lg.strm(sl::trace) << "it's a stream...";
 	   cap.set_tp(capability_types::STREAM);
 	   
 	  }
 	  else{
-      
+        _lg.strm(sl::trace) << "it's an action...";
             cap.set_tp(capability_types::ACTION);
 	  }
             

@@ -20,6 +20,12 @@ int main(int argc, char** argv)
   cout << "connected to server: " << servdescribe.servcomment() << endl;
   cout << "dummy devid : " << dummy_devid << endl;
   
+  
+  auto cap = foxtrot::find_capability(servdescribe,dummy_devid,"getRandomVector");
+  
+  
+  
+  
   std::vector<foxtrot::ft_variant> args {1259};
   auto dat = cl.FetchData(dummy_devid,"getCountStream",0,100,args.begin(),args.end());
   
