@@ -135,7 +135,7 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     devcapability cap;
     cap.set_capname(capname);
     
-    _lg.strm(sl::debug) << "getting capability for: " << capname;
+    _lg.strm(sl::trace) << "getting capability for: " << capname;
     
     
     if(prop)
@@ -177,9 +177,9 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
           
       }
       
-      _lg.strm(sl::debug) << "rettp: " << prop.get_type().get_name();
+      _lg.strm(sl::trace) << "rettp: " << prop.get_type().get_name();
       foxtrot::value_types rettp = get_appropriate_wire_type(prop.get_type());
-      _lg.Debug( "rettp wire type : " + rettp );
+      _lg.strm(sl::trace) <<  "rettp wire type : " <<  rettp ;
       
       cap.set_rettp(rettp);
       

@@ -41,7 +41,7 @@ namespace foxtrot
             else if(_status == status::PROCESS)
             {
 	      _status = status::IN_FLIGHT;
-	      _lg.Debug("request id is: " + std::to_string((long unsigned) this));
+          _lg.strm(sl::trace) << "request id is: " << (long unsigned) this;
 	      if(_newrequest)
 	      {
 		  _lg.Debug("spawning new handler");
