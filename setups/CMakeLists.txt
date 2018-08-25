@@ -9,16 +9,16 @@ $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}
 add_dependencies(${setupname} foxtrotserv)
 install(TARGETS ${setupname} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/setups/)
 
-target_link_libraries(${setupname} ${libs})
+target_link_libraries(${setupname} PUBLIC ${libs})
 
 endmacro()
 
 
 
-if(${CMAKE_SYSTEM_NAME STREQUAL "LINUX")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet")
 else()
-	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet;libusb")
+	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet")
 endif()
 build_setup(dummy_setup dummy_setup.cpp dummy)
 

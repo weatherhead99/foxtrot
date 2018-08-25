@@ -1,7 +1,7 @@
 
 set(proto_srcs simpleTCP.cpp SerialPort.cpp BulkUSB.cpp characterdevice.cpp)
 
-if(CMAKE_PLATFORM_NAME STREQUAL "LINUX")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	list(APPEND proto_srcs scsiserial.cpp)
 endif()
 

@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.2)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+
+#visibility settings for static libs etc on newer cmake
+cmake_policy(SET CMP0063 NEW)
+
 include(cmake/host_specific.cmake)
 include(cmake/platform.cmake)
 
@@ -12,7 +16,7 @@ include_directories(include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-set(CMAKE_CXX_VISIBILITY_PRESET OFF)
+set(CMAKE_CXX_VISIBILITY_PRESET default)
 
 option(BUILD_TESTS "build test code" OFF)
 option(BUILD_SERVER "build foxtrot server" ON)
@@ -96,7 +100,7 @@ generate_export_header(foxtrot)
 
 
 message(WARNING "rttr target: ${RTTR_TARGET}")
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
+target_link_libraries(foxtrot PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
 
 if(FOXTROT_CONAN_BUILD)
 target_link_libraries(foxtrot PRIVATE ${Boost_THREAD_LIBRARY})
