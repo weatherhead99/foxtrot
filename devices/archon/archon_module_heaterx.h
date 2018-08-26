@@ -26,6 +26,13 @@ namespace devices
        B = 'B'
      };
   
+     
+    HeaterXSensors int_to_sensor(int i, bool& success);
+    int sensor_to_int(HeaterXSensors sensor, bool& success);
+    
+    HeaterXHeaters int_to_heater(int i, bool& success);
+    int heater_to_int(HeaterXHeaters heater, bool&success);
+     
     class ArchonHeaterX : public ArchonModule, public archonGPIO
     {
     RTTR_ENABLE(ArchonModule,archonGPIO)
@@ -60,6 +67,11 @@ namespace devices
     
     void setHeaterTarget(HeaterXHeaters heater, double target);
     double getHeaterTarget(HeaterXHeaters heater);
+#ifdef NEW_RTTR_API
+    //HACK: FIX THIS PROPERLY!!
+    void setHeaterTarget(int heater, double target);
+    double getHeaterTarget(int heater);
+#endif
     
     void setHeaterSensor(HeaterXHeaters heater, HeaterXSensors sensor);
     HeaterXSensors getHeaterSensor(HeaterXHeaters heater);

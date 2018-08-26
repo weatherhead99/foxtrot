@@ -48,6 +48,13 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
       foxtrot::Logging _lg("set_returntype");
   
       _lg.Trace("setting return type" );
+      
+      if(!retval.is_valid())
+      {
+	_lg.Error("invalid variant supplied!");
+	throw std::logic_error("invalid variant supplied");
+      };
+      
       _lg.strm(sl::trace) << "raw type name is: " << retval.get_type().get_name();
       auto rettp = get_appropriate_wire_type(retval);
         _lg.Trace("rettp is: " + std::to_string(rettp) );
@@ -106,7 +113,18 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
 
 foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
 {
+  
+  if(!var.is_valid())
+  {
+    throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
+  }
+  
   auto tp = var.get_type();
+  
+  if(!tp.is_valid())
+  {
+    throw std::logic_error("invalid type check previous!");
+  }
   
   
 //   if( var.can_convert<int>() || var.can_convert<unsigned>() )

@@ -3,7 +3,7 @@ archonraw.cpp
 )
 
 add_library(archon STATIC ${archon_srcs})
-
+target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
 
 
 add_executable(archon_test archon_test.cpp)

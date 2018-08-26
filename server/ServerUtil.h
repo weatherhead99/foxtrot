@@ -195,6 +195,12 @@ namespace foxtrot
 	  bool success;
 	  rttr::variant outarg = get_arg(arg,success);
 	  
+	  if(!outarg.is_valid())
+	  {
+	    lg.Error("variant is invalid");
+	    throw std::logic_error("variant is invalid! in get_callargs");
+	    
+	  };
 	  
 	      
 	  if(!success)
@@ -209,6 +215,8 @@ namespace foxtrot
 #else
 	  const auto target_argtp = param_infs[arg.position()].get_type();
 #endif
+	  lg.strm(sl::debug) << "can convert? : " << (int) outarg.can_convert(target_argtp);
+	  
 	  if(!outarg.can_convert(target_argtp))
 	  {
 	      lg.Error("error converting argument ");
@@ -223,11 +231,21 @@ namespace foxtrot
 	  if(outarg.get_type() != target_argtp)
 	  {
           lg.strm(sl::debug) << " need to convert an arg from: " << outarg.get_type().get_name() << " to " << target_argtp.get_name();
-	      
+	    
+	  lg.strm(sl::debug) << "arg value (int): " << outarg.to_int() ;
 	  };
 	  
 	  //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
+	  
 	  success = outarg.convert(target_argtp);
+
+	  if(!success)
+	  {
+	    lg.strm(sl::error) << "failed to convert arg..." ;
+	    throw std::logic_error("failed to convert arg");
+	  };
+	  
+	  lg.strm(sl::debug) << "arg type is now: " << outarg.get_type().get_name();
 	  
 	  argvec[arg.position()] = outarg;	  
       };

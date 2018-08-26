@@ -125,6 +125,21 @@ double foxtrot::devices::dummyDevice::getWomble()
     return _womble;
 }
 
+int foxtrot::devices::dummyDevice::takes_custom_type(foxtrot::devices::dummyType in)
+{
+  return 1;
+
+}
+
+
+foxtrot::devices::dummyType foxtrot::devices::dummyDevice::returns_custom_type(int in)
+{
+  return dummyType::dummy_1;
+
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -157,6 +172,8 @@ RTTR_REGISTRATION
  .method("setWomble",&dummyDevice::setWomble)
  (parameter_names("val"))
  .method("getWomble", &dummyDevice::getWomble)
+ .method("takes_custom_type", &dummyDevice::takes_custom_type)
+ .method("returns_custom_type", &dummyDevice::returns_custom_type)
  
  ;
 }

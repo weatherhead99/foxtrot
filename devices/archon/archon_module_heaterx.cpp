@@ -1,7 +1,7 @@
 #include "archon_module_heaterx.h"
 #include <sstream>
 #include "DeviceError.h"
-
+#include "Logging.h"
 
 using foxtrot::DeviceError;
 using namespace foxtrot;
@@ -204,6 +204,26 @@ double ArchonHeaterX::getHeaterTarget(HeaterXHeaters heater)
   oss << "HEATER" << static_cast<char>(heater) << "TARGET";
   return std::stod(readConfigKey(oss.str()));
 }
+
+//HACK: make it work in an emergency
+#ifdef NEW_RTTR_API
+void ArchonHeaterX::setHeaterTarget(int heater, double target)
+{
+  bool success;
+ auto htr = int_to_heater(heater,success);
+  setHeaterTarget(htr,target);
+  
+}
+
+double ArchonHeaterX::getHeaterTarget(int heater)
+{
+  bool success;
+  auto htr = int_to_heater(heater,success);
+  return getHeaterTarget(htr);
+};
+
+#endif
+
 
 void ArchonHeaterX::setHeaterSensor(HeaterXHeaters heater, HeaterXSensors sensor)
 {
@@ -449,7 +469,7 @@ void ArchonHeaterX::setHeaterLimit(HeaterXHeaters heater, double lim)
 
 
 
-int heater_to_int(devices::HeaterXHeaters heater, bool& success)
+int foxtrot::devices::heater_to_int(devices::HeaterXHeaters heater, bool& success)
 {
     success = true;
     switch(heater)
@@ -462,8 +482,9 @@ int heater_to_int(devices::HeaterXHeaters heater, bool& success)
     
 }
 
-devices::HeaterXHeaters int_to_heater(int i, bool& success)
+devices::HeaterXHeaters foxtrot::devices::int_to_heater(int i, bool& success)
 {
+  
     success = true;
     switch(i)
     {
@@ -478,7 +499,7 @@ devices::HeaterXHeaters int_to_heater(int i, bool& success)
     
 }
 
-int sensor_to_int(devices::HeaterXSensors sensor, bool& success)
+int foxtrot::devices::sensor_to_int(devices::HeaterXSensors sensor, bool& success)
 {
     success = true;
     switch(sensor)
@@ -493,7 +514,7 @@ int sensor_to_int(devices::HeaterXSensors sensor, bool& success)
     
 }
 
-devices::HeaterXSensors int_to_sensor(int i, bool& success)
+devices::HeaterXSensors foxtrot::devices::int_to_sensor(int i, bool& success)
 {
     success = true;
     switch(i)
@@ -517,10 +538,10 @@ RTTR_REGISTRATION
  using namespace rttr;
  using devices::ArchonHeaterX;
 
- type::register_converter_func(int_to_heater);
- type::register_converter_func(heater_to_int);
- type::register_converter_func(int_to_sensor);
- type::register_converter_func(sensor_to_int);
+ type::register_converter_func(foxtrot::devices::int_to_heater);
+ type::register_converter_func(foxtrot::devices::heater_to_int);
+ type::register_converter_func(foxtrot::devices::int_to_sensor);
+ type::register_converter_func(foxtrot::devices::sensor_to_int);
  
  registration::class_<ArchonHeaterX>("foxtrot::devices::ArchonHeaterX")
  .property_readonly("getHeaterAOutput",&ArchonHeaterX::getHeaterAOutput)
@@ -550,6 +571,16 @@ RTTR_REGISTRATION
  ( 
     parameter_names("sensor")
     )
+#ifdef NEW_RTTR_API
+ .method("setHeaterTarget",static_cast<void(ArchonHeaterX::*)(int,double)>(&ArchonHeaterX::setHeaterTarget))
+ (
+     parameter_names("heater","target")
+     )
+ .method("getHeaterTarget",static_cast<double(ArchonHeaterX::*)(int)>(&ArchonHeaterX::getHeaterTarget))
+ (
+     parameter_names("heater")
+     )
+#else
  .method("setHeaterTarget",&ArchonHeaterX::setHeaterTarget)
  (
      parameter_names("heater","target")
@@ -558,6 +589,7 @@ RTTR_REGISTRATION
  (
      parameter_names("heater")
      )
+#endif
  .method("setHeaterSensor",&ArchonHeaterX::setHeaterSensor)
  (
      parameter_names("heater","sensor")

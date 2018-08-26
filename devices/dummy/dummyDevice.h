@@ -11,6 +11,13 @@ namespace foxtrot
 {
     namespace devices
     {
+      
+      enum class dummyType {
+	dummy_1,
+	dummy_2
+      };
+      
+      
     class dummyDevice : public foxtrot::Device 
     {
         RTTR_ENABLE(Device)
@@ -40,6 +47,8 @@ namespace foxtrot
         void setInt(int a);
         int getInt() const;
         
+	dummyType returns_custom_type(int in);
+	int takes_custom_type(dummyType in);
         
         
 	
