@@ -191,19 +191,15 @@ namespace foxtrot
         if(repl.has_err())
         {
             auto err = repl.err();
-            
-            class foxtrot::Error except(err.msg());
-            class foxtrot::DeviceError exceptdev(err.msg());
-            class foxtrot::ProtocolError exceptproto(err.msg());
-        
+                    
             switch(err.tp())
             {
-                case(error_types::Error):
-                    throw except;
-                case(error_types::DeviceError):
-                    throw exceptdev;
-                case(error_types::ProtocolError):
-                    throw exceptproto;
+                case(error_types::ft_Error):
+		    throw foxtrot::Error(err.msg());
+                case(error_types::ft_DeviceError):
+		    throw foxtrot::DeviceError(err.msg());
+                case(error_types::ft_ProtocolError):
+                    throw foxtrot::ProtocolError(err.msg());
                 case(error_types::out_of_range):
                     throw std::out_of_range(err.msg());
                     

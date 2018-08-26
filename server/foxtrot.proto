@@ -38,9 +38,9 @@ enum byte_data_types
 
 enum error_types
 {
-    Error = 0;
-    DeviceError = 1;
-    ProtocolError = 2;
+    ft_Error = 0;
+    ft_DeviceError = 1;
+    ft_ProtocolError = 2;
     out_of_range = 3;
     unknown_error = 4;
     contention_timeout = 5;

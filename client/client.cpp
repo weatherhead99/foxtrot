@@ -82,28 +82,24 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     //error checking
     if(repl.has_err())
     {
-        std::cout << "there's an error in this response..." << std::endl;
-        
-        std::cout << "error type: " << repl.err().tp() << std::endl;
-        
+      foxtrot::Logging lg("ft_variant_from_response");
+
+      lg.Error("there's an error in this response...");
+      lg.strm(sl::debug) << "error type: " << repl.err().tp();
+
         auto err = repl.err();
         
-        std::cout << "constructing exceptions" << std::endl;
+      lg.Info("constructing exceptions...");
         
-//         std::string msg = err.
-        
-        class foxtrot::Error except(err.msg());
-        class foxtrot::DeviceError exceptdev(err.msg());
-        class foxtrot::ProtocolError exceptproto(err.msg());
-        
+                
         switch(err.tp())
         {
-            case(error_types::Error):
-                throw except;
-            case(error_types::DeviceError):
-                throw exceptdev;
-            case(error_types::ProtocolError):
-                throw exceptproto;
+            case(error_types::ft_Error):
+	      throw foxtrot::Error(err.msg());
+	    case(error_types::ft_DeviceError):
+	      throw foxtrot::DeviceError(err.msg());
+            case(error_types::ft_ProtocolError):
+	      throw foxtrot::ProtocolError(err.msg());
             case(error_types::out_of_range):
                 throw std::out_of_range(err.msg());
                 

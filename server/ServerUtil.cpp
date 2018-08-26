@@ -97,7 +97,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          {
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg("couldn't successfully convert return type");
-             errstat->set_tp(error_types::Error);
+             errstat->set_tp(error_types::ft_Error);
          };
          
          _lg.Debug("convertsuccess: " + std::to_string(convertsuccess) );
