@@ -20,6 +20,7 @@ public:
   
   virtual bool action(foxtrot::Client& cl)
   {
+    return false;
     
   }
   

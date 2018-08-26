@@ -16,13 +16,14 @@
 #include "devices/DM3068/DM3068.h"
 #include <archon/archon.h>
 #include <archon/archon_module_heaterx.h>
-#include <DeviceError.h>
-#include <ProtocolError.h>
+#include "DeviceError.h"
+#include "ProtocolError.h"
 #include "client.h"
 #include "Logging.h"
 
 #include <boost/program_options.hpp>
 
+using LocalProtocolError = typename foxtrot::ProtocolError;
 
 namespace po = boost::program_options;
 
@@ -157,7 +158,11 @@ int main(int argc, char**argv)
       tank_temp = std::get<0>(temps);
       stage_temp = std::get<1>(temps);
    }
+#ifdef linux
    catch(typename foxtrot::ProtocolError)
+#else
+     catch(LocalProtocolError)
+#endif
    {
      lg.Error( "archon seems to have failed.... " );
      lg.Error("logging only pressure...");
