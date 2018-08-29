@@ -29,7 +29,8 @@ std::string foxtrot::get_config_file_path()
         
 #endif
         auto home = boost::filesystem::path(homeenv);
-        home /= ".foxtrot/exptserve.config" ;
+        home /= ".foxtrot" ;
+        home /= "exptserve.config" ;
         return home.string();
     }
     else
@@ -46,8 +47,17 @@ void foxtrot::create_config_file(const string& filename)
     foxtrot::Logging lg("create_config_file");
     if(!boost::filesystem::exists(filename))
     {
+        auto path = boost::filesystem::path(filename);
+        boost::filesystem::create_directories(path.parent_path());
         lg.Info("creating config file...");
-        boost::filesystem::ofstream(filename);
+        boost::filesystem::ofstream ofs(filename);
+        
+        if(!ofs)
+        {
+            lg.Error("couldn't create config file!");
+            throw std::runtime_error("couldn't create config file!");
+        };
+        
     };
 };
 

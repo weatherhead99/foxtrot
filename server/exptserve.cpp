@@ -38,9 +38,10 @@ int main(int argc, char** argv)
     
     std::string bindstr;
     
+    foxtrot::Logging lg("exptserve");
     auto config_file = foxtrot::get_config_file_path();
     foxtrot::create_config_file(config_file);
-    cout << "config file:" << config_file << endl;
+    lg.strm(sl::info) <<  "config file:" << config_file;
     
     int debuglevel =0;
     int nthreads =0 ;
@@ -71,12 +72,15 @@ int main(int argc, char** argv)
     if(ifs.good())
     {
         po::store(po::parse_config_file(ifs,desc),vm);
+    }
+    else
+    {
+        lg.Debug("couldn't open specified config file...");
     };
     
     po::notify(vm);
 
 
-    foxtrot::Logging lg("exptserve");
     
     if(debuglevel < 0 || debuglevel > 5)
     {
