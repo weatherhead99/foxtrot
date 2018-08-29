@@ -26,20 +26,18 @@ else()
 endif()
 
 
-if(UNIX)
-#disable this for now, seems to break on windows
-    set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
-    # set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 
-    configure_file(setuptest.cpp.in setuptest.cpp)
+set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
+# set(TEST_SETUP_FILE ${CMAKE_CURRENT_BINARY_DIR}/testbench_archon_heater.so)
 
-    add_executable(setuptest ${CMAKE_CURRENT_BINARY_DIR}/setuptest.cpp setuptest.cpp.in)
+configure_file(setuptest.cpp.in setuptest.cpp)
 
-    target_include_directories(setuptest PRIVATE
-    $<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
+add_executable(setuptest ${CMAKE_CURRENT_BINARY_DIR}/setuptest.cpp setuptest.cpp.in)
 
-    target_link_libraries(setuptest foxtrot foxtrotserv)
-endif()
+target_include_directories(setuptest PRIVATE
+$<TARGET_PROPERTY:foxtrotserv,INTERFACE_INCLUDE_DIRECTORIES> ${CMAKE_SOURCE_DIR}/server/ ${CMAKE_BINARY_DIR}/server/)
+
+target_link_libraries(setuptest foxtrot foxtrotserv)
 
 
 
