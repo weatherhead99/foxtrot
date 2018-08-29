@@ -23,5 +23,5 @@ rttr:shared=True
 
 
 [imports]
-bin, *.dll, *.pdb -> ./bin
-lib, *.pdb -> ./lib
+bin, *.dll -> ./bin
+bin, *.pdb -> ./bin
