@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "Logging.h"
+#include "dummy_setup.h"
 #include <map>
 #include <boost/variant.hpp>
 #include <sstream>
@@ -13,9 +14,9 @@ using std::cout;
 using std::endl;
 
 using namespace foxtrot;
-using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
 
 extern "C" {
+    
 int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets)
 {
   

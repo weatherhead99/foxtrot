@@ -18,7 +18,17 @@ std::string foxtrot::get_config_file_path()
     if(path == nullptr)
     {
         lg.Info("no environment variable, getting config from default path");
-        auto home = boost::filesystem::path(std::getenv("HOME"));
+#ifdef linux
+        char* homeenv = std::getenv("HOME");
+#else
+        char* homedrive = std::getenv("HOMEDRIVE");
+        char* homepath = std::getenv("HOMEPATH");
+        
+        auto homeenv = boost::filesystem::path(homedrive);
+        homeenv /= homepath;
+        
+#endif
+        auto home = boost::filesystem::path(homeenv);
         home /= ".foxtrot/exptserve.config" ;
         return home.string();
     }

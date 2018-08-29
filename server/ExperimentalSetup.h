@@ -3,6 +3,9 @@
 #include "Logging.h"
 #ifdef linux
 #include <dlfcn.h>
+#else
+#define NOMINMAX
+#include <windows.h>
 #endif
 #include <boost/variant.hpp>
 #include "CommunicationProtocol.h"
@@ -31,23 +34,30 @@ namespace foxtrot
         template<typename funtp> funtp get_function(const std::string& name)
         {
 		#ifdef linux
-          auto sym = dlsym(_dl,name.c_str());
-			
+            _lg.Trace("calling dlsym...");
+            auto sym = dlsym(_dl,name.c_str());
+        #else
+            _lg.Trace("calling GetProcAddress...");
+            auto sym = GetProcAddress(_dl,name.c_str());
+		#endif
+            
           if(sym == nullptr)
           {
+              _lg.Error("couldn't find matching function " + name + " in plugin file");
               throw std::runtime_error("couldn't find matching function " + name + " in plugin file");
           }
           
           auto fun = reinterpret_cast<funtp>(sym);
           return fun;
-        #else
-			throw StubError("not implemented on windows yet...");
-		#endif
         };
         
         Logging _lg;
     private:
+#ifdef linux
         void* _dl = nullptr;
+#else
+        HMODULE _dl = nullptr;
+#endif
         std::string _fname;
     };
     

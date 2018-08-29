@@ -14,17 +14,24 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
 	#ifdef linux
 	
 		_dl = dlopen(file.c_str(), RTLD_LAZY);
-	  if(_dl == nullptr)
-	  {    
-		throw std::runtime_error(dlerror());
-	  }
 		  
 		//clear dlerror
-		dlerror();
 	#else
-		throw foxtrot::StubError("not implemented on Windows yet..");
+        _dl = LoadLibrary(file.c_str());
 	#endif
     
+	  if(_dl == nullptr)
+	  {    
+#ifdef linux
+		throw std::runtime_error(dlerror());
+#else
+        throw std::runtime_error(std::to_string(GetLastError()));
+#endif
+	  }
+
+#ifdef linux
+	  dlerror();
+#endif
 }
 
 foxtrot::ft_plugin::~ft_plugin()
@@ -34,7 +41,7 @@ foxtrot::ft_plugin::~ft_plugin()
 		#ifdef linux
         dlclose(_dl);
 		#else
-			_lg.Error("FIXME: not implemented on windows yet");
+        FreeLibrary(_dl);
 		#endif
     }
 }
@@ -46,7 +53,7 @@ void foxtrot::ft_plugin::reload()
 		#ifdef linux
         dlclose(_dl);
 		#else
-			throw StubError("not implemented on Windows yet!");
+			FreeLibrary(_dl);
 		#endif
     }
 	
@@ -55,7 +62,7 @@ void foxtrot::ft_plugin::reload()
     
     dlerror();
 	#else
-		throw StubError("not implemented on Windows yet!");
+        _dl = LoadLibrary(_fname.c_str());
 	#endif
     
 };

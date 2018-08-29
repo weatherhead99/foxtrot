@@ -36,6 +36,8 @@ int main(int argc, char** argv)
     std::string crtfile;
     bool forceauth;
     
+    std::string bindstr;
+    
     auto config_file = foxtrot::get_config_file_path();
     foxtrot::create_config_file(config_file);
     cout << "config file:" << config_file << endl;
@@ -55,7 +57,7 @@ int main(int argc, char** argv)
     ("key",po::value<std::string>(&keyfile),"pem for SSL")
     ("crt",po::value<std::string>(&crtfile),"crt for SSL")
     ("forceauth", po::value<bool>(&forceauth)->default_value(true),"force client auth")
-    ;
+    ("bindstr", po::value<std::string>(&bindstr)->default_value("0.0.0.0"), "socket listen string");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
@@ -125,7 +127,7 @@ int main(int argc, char** argv)
     }
     
     
-    std::string connstr = "0.0.0.0:" + std::to_string(port);
+    std::string connstr = bindstr + ":" + std::to_string(port);
     
     foxtrot::ServerImpl serv(servname,harness,connstr);
     
