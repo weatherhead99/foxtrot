@@ -50,7 +50,7 @@ if(FOXTROT_CONAN_BUILD)
 	add_definitions(-DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
 endif()
 
-set(boost_cmps "log;system;date_time;program_options;filesystem")
+set(boost_cmps "log;system;date_time;program_options;filesystem;thread")
 include(cmake/libraries.cmake)
 
 

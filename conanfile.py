@@ -44,6 +44,9 @@ class FoxtrotConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         cmake.definitions["BUILD_DASHBOARD"] = "OFF"
+        cmake.configure()
+
+        
         env_build = tools.RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake.build()
