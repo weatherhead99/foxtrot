@@ -18,6 +18,8 @@ class FoxtrotConan(ConanFile):
     "boost_log%s" % bbcs, \
     "boost_date_time%s" % bbcs, \
     "boost_system%s" % bbcs, \
+    "boost_test%s" % bbcs, \
+    "boost_program_options%s" % bbcs, \
     "boost_asio%s" % bbcs, \
     "boost_filesystem%s" % bbcs, \
     "cmake_findboost_modular%s" % bbcs, \
@@ -32,4 +34,17 @@ class FoxtrotConan(ConanFile):
             self.options["protobuf"].shared = True
 
 
-    
+    def imports(self):
+        if self.settings.os == "Windows":
+            self.copy("*.dll", dst="bin", src="bin")
+            if self.settings.build_type == "Debug":
+                self.copy("*.pdb", dst="bin", src="bin")
+            
+
+    def build(self):
+        cmake = CMake(self)
+        cmake.definitions["BUILD_DASHBOARD"] = "OFF"
+        env_build = tools.RunEnvironment(self)
+        with tools.environment_append(env_build.vars):
+            cmake.build()
+        

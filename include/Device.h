@@ -11,7 +11,7 @@
 namespace foxtrot
 {
     
- enum class FOXTROT_EXPORT CapabilityMeta
+ enum class CapabilityMeta
  {
   STREAMINGDATA 
      

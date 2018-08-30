@@ -5,7 +5,8 @@ archon_module_AD.cpp archon_module_driver.cpp archon_module_xvbias.cpp archon_GP
 #TODO: find a better way to do this!
 add_library(archon STATIC ${archon_srcs})
 target_link_libraries(archon PRIVATE ${RTTR_TARGET})
+target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
 
 
 add_executable(archon_test archon_test.cpp)
-target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot  ${Boost_DATE_TIME_LIBRARY} archon )
+target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )
