@@ -13,6 +13,7 @@ boost_filesystem/1.66.0@bincrafters/stable
 cmake_findboost_modular/0.1.0@bincrafters/stable
 boost_thread/1.66.0@bincrafters/stable
 libusb/1.0.22@bincrafters/stable
+protobuf/3.5.2@bincrafters/stable
 
 [generators]
 cmake
