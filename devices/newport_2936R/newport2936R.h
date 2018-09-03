@@ -82,9 +82,13 @@ namespace foxtrot
     
     string getSerialNumber();
     
+#ifndef NEW_RTTR_API
     powermodes getMode();
     void setMode(powermodes mode);
-    
+#else
+    int getMode();
+    void setMode(int mode);
+#endif
     void manualTriggerState(bool state);
     bool getTriggerState();
     

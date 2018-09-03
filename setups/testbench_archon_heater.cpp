@@ -151,7 +151,11 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			  auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterserial));
 			  
 			  powermeter->setChannel(1);
+			  #ifndef NEW_RTTR_API
 			  powermeter->setMode(foxtrot::devices::powermodes::Integrate);
+			  #else
+			  powermeter->setMode(2);
+			  #endif
 			  powermeter->setExternalTriggerMode(1);
 			  powermeter->setTriggerEdge(1);
 			  

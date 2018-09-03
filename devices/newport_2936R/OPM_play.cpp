@@ -47,7 +47,11 @@ int main(int argc, char** argv)
      };
      
      OPM.setChannel(2);
+     #ifndef NEW_RTTR_API
      OPM.setMode(foxtrot::devices::powermodes::Integrate);
+     #else
+     OPM.setMode(2);
+     #endif
      OPM.setExternalTriggerMode(1);
      OPM.setTriggerEdge(1);
      

@@ -262,6 +262,9 @@ std::string convert_powerunit_to_string(foxtrot::devices::powerunits unit, bool&
   
 }
 
+
+#ifndef NEW_RTTR_API
+
 foxtrot::devices::powermodes foxtrot::devices::newport2936R::getMode()
 {
   auto repl = cmd("PM:MODE?");
@@ -269,6 +272,19 @@ foxtrot::devices::powermodes foxtrot::devices::newport2936R::getMode()
   powermodes  sw = static_cast<powermodes>(std::stoi(repl));
   return sw;
 }
+#else
+#warning ("WARNING: using hacked functions for custom return types")
+int foxtrot::devices::newport2936R::getMode()
+{
+  auto repl = cmd("PM:MODE?");
+  return std::stoi(repl);
+  
+};
+
+#endif
+
+
+
 
 
 foxtrot::devices::powermodes convert_int_to_mode(int s, bool& ok)
@@ -288,11 +304,22 @@ int convert_mode_to_int(foxtrot::devices::powermodes mode, bool& ok)
   return static_cast<int>(mode);
 };
 
+#ifndef NEW_RTTR_API
+
 void foxtrot::devices::newport2936R::setMode(foxtrot::devices::powermodes mode)
 {
   short unsigned sw = static_cast<short unsigned>(mode);
   command_write("PM:MODE",sw);
 }
+#else
+void foxtrot::devices::newport2936R::setMode(int mode)
+{
+  command_write("PM:MODE",static_cast<short unsigned>(mode));
+  
+};
+
+
+#endif
 
 
 void foxtrot::devices::newport2936R::manualTriggerState(bool state)
