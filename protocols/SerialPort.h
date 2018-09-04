@@ -5,6 +5,8 @@
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/io_service.hpp>
 
+#include "Logging.h"
+
 using namespace boost::asio;
 
 namespace foxtrot
@@ -23,6 +25,10 @@ namespace foxtrot
     virtual std::string read(unsigned int len, unsigned* actlen= nullptr) override;
     virtual void write(const std::string& data) override;
     
+    
+    bool getDrain() const;
+    void setDrain(bool drain);
+    
     void flush();
     unsigned bytes_available();
     
@@ -33,6 +39,8 @@ namespace foxtrot
     
     
     private:
+      foxtrot::Logging _lg;
+        
       boost::asio::io_service _io_service;
       boost::asio::serial_port _sport;
       
@@ -46,6 +54,7 @@ namespace foxtrot
       int _timeout = 5;//timeout in 10ths of a second
       
       int _wait_ms = 0;
+      bool _drain = false;
       
     };
     

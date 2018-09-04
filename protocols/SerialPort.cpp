@@ -45,7 +45,7 @@ const std::map<std::string, serial_port_base::flow_control::type> flowmap
 
 
 foxtrot::protocols::SerialPort::SerialPort(const foxtrot::parameterset*const instance_parameters)
-: SerialProtocol(instance_parameters), _sport(_io_service)
+: SerialProtocol(instance_parameters), _sport(_io_service), _lg("SerialPort")
 {
   
 
@@ -140,6 +140,24 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
   
   auto num_written = boost::asio::write(_sport,buffer(data),ec);
 //   _sport.write_some(buffer(data),ec);
+
+    if(_drain)
+    {
+  
+    #ifdef linux
+    //drain serial port
+    auto ret = tcdrain( _sport.native_handle() );
+    if(ret)
+    {
+        _lg.strm(sl::error) << "serial port drain error: " << std::to_string(errno);
+        
+    }
+    #else
+    
+    throw std::logic_error("draining serial port not implemented on Windows");
+
+    #endif
+    }
   
   
   if(ec)
@@ -153,6 +171,16 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
   }
   
   
+}
+
+bool foxtrot::protocols::SerialPort::getDrain() const
+{
+    return _drain;
+}
+
+void foxtrot::protocols::SerialPort::setDrain(bool drain)
+{
+    _drain = drain;
 }
 
 
