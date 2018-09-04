@@ -91,7 +91,12 @@ int main(int argc, char** argv)
 //   psu_power_switch(psu,true);
   
   monoch.setWave(300);
+#ifndef NEW_RTTR_API
   OPM.setUnits(foxtrot::devices::powerunits::Amps);
+  
+#else
+  OPM.setUnits(0);
+#endif
   wait_ms(2000);
   
   psu_power_switch(psu,true);

@@ -211,7 +211,7 @@ void foxtrot::devices::newport2936R::strip_CRLF(std::string& buffer)
   buffer = std::string(buffer.begin(),crpos);  
 }
 
-  
+#ifndef NEW_RTTR_API
 foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
 {
   auto repl = cmd("PM:UNIT?");
@@ -226,12 +226,39 @@ foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
   return static_cast<foxtrot::devices::powerunits>(std::stoi(repl));
 
 }
+#else
+int foxtrot::devices::newport2936R::getUnits()
+{
+    auto repl = cmd("PM:UNIT?");
+  repl.erase(std::remove_if(repl.begin(),repl.end(), ::isspace),repl.end());
+  
+  _lg.Trace("units reply: " + repl);
+  _lg.Trace("units reply length: " + std::to_string(repl.size()));
+  
+  _lg.Trace("stoi: " + std::to_string(std::stoi(repl)));
+  
+  
+  return std::stoi(repl);
 
+};
+
+
+#endif
+
+#ifndef NEW_RTTR_API
 void foxtrot::devices::newport2936R::setUnits(foxtrot::devices::powerunits unit)
 {
+  command_write("PM:UNIT",static_cast<unsigned>(unit));
   _proto->write(std::string("PM:UNIT ") + std::to_string(static_cast<unsigned>(unit))+'\r');
   
 }
+#else
+void foxtrot::devices::newport2936R::setUnits(int unit)
+{
+  command_write("PM:UNIT",static_cast<unsigned>(unit));
+  
+}
+#endif
 
 
 const std::string foxtrot::devices::newport2936R::getDeviceTypeName() const

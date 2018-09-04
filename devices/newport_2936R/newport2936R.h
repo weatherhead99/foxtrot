@@ -75,8 +75,14 @@ namespace foxtrot
     double getResponsivity();
     double getArea();
     
+#ifndef NEW_RTTR_API
     powerunits getUnits();
     void setUnits(powerunits unit);
+#else
+    int getUnits();
+    void setUnits(int unit);
+#endif
+    
     
     double getTemperature();
     
