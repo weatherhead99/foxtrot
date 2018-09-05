@@ -88,7 +88,16 @@ int devices::Q250::getLampHours()
 void devices::Q250::setAmpPreset(double amps)
 {
   std::ostringstream oss;
-  oss << "A-PRESET " << std::setprecision(2) << amps;
+
+  if(amps >= 10.0)
+  {
+      oss << "A-PRESET " << std::setprecision(3) << amps;
+  }
+  else
+  {
+      oss << "A-PRESET " << std::setprecision(2) << amps;
+  }
+
   _scsiproto->write(oss.str());
 
 }
