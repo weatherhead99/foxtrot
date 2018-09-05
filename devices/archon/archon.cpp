@@ -1226,6 +1226,19 @@ void devices::archon::settrigoutpower(bool onoff)
   cmd("APPLYSYSTEM");
 }
 
+bool foxtrot::devices::archon::gettrigoutinvert()
+{
+    auto val = readKeyValue("TRIGOUTINVERT");
+    return std::stoi(val);
+}
+
+bool foxtrot::devices::archon::gettrigoutpower()
+{
+    auto val = readKeyValue("TRIGOUTPOWER");
+    return std::stoi(val);
+}
+
+
 
 void devices::archon::setframemode(int mode)
 {
@@ -1317,11 +1330,9 @@ RTTR_REGISTRATION
  (parameter_names("reset_start","reset_end","signal_start","signal_end"))
  .method("settapline", &archon::settapline)
  (parameter_names("n","tapline"))
- .method("settrigoutinvert", &archon::settrigoutinvert)
+ .property("trigoutinvert", &archon::gettrigoutinvert, &archon::settrigoutinvert)
  (parameter_names("invert"))
- .method("settrigoutpower", &archon::settrigoutpower)
- (parameter_names("onoff"))
- 
+ .property("trigoutpower", &archon::gettrigoutpower, &archon::settrigoutpower)
  .property("rawenable", &archon::getrawenable, &archon::setrawenable)
  (parameter_names("onoff"))
  .property("rawchannel",&archon::getrawchannel,&archon::setrawchannel)
