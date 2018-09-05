@@ -59,23 +59,23 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
       auto rettp = get_appropriate_wire_type(retval);
         _lg.Trace("rettp is: " + std::to_string(rettp) );
             bool convertsuccess = true;
-         if(rettp == value_types::FLOAT)
+         if(rettp == value_types::FLOAT_TYPE)
          {
             _lg.Trace("it's a double!");
             repl.set_dblret(retval.to_double(&convertsuccess));
          }
-         else if (rettp == value_types::BOOL)
+         else if (rettp == value_types::BOOL_TYPE)
          {
 	   _lg.Trace("bool");
              convertsuccess = retval.can_convert(rttr::type::get<bool>());
              repl.set_boolret(retval.to_bool());
          }
-         else if(rettp == value_types::INT)
+         else if(rettp == value_types::INT_TYPE)
          {
              _lg.Trace("int");
              repl.set_intret(retval.to_int(&convertsuccess));
          }
-         else if(rettp == value_types::STRING)
+         else if(rettp == value_types::STRING_TYPE)
          {
              _lg.Trace("string");
 	     
@@ -93,7 +93,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
              repl.set_stringret(retval.to_string(&convertsuccess));
          }
          //if it's VOID, no need to set rettp
-         else if(rettp == value_types::VOID)
+         else if(rettp == value_types::VOID_TYPE)
         { 
             _lg.Trace("void");
             repl.set_stringret("");
@@ -104,7 +104,7 @@ bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
          {
              errstatus* errstat = repl.mutable_err();
              errstat->set_msg("couldn't successfully convert return type");
-             errstat->set_tp(error_types::Error);
+             errstat->set_tp(error_types::ft_Error);
          };
          
          _lg.Debug("convertsuccess: " + std::to_string(convertsuccess) );
@@ -151,39 +151,39 @@ foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
     
     if(tp == type::get<void>())
     {
-        return value_types::VOID;
+        return value_types::VOID_TYPE;
     }
     
     //check for bool
     if(tp == type::get<bool>())
     {
-        return value_types::BOOL;
+        return value_types::BOOL_TYPE;
     }
     
     //check for float
     if( (tp == type::get<double>()) || (tp == type::get<float>())) 
     {
-        return value_types::FLOAT;
+        return value_types::FLOAT_TYPE;
     }
     
     if( tp == type::get<std::string>())
     {
-      return value_types::STRING;
+      return value_types::STRING_TYPE;
     }
     
     if(tp.is_enumeration())
     {
-      return value_types::INT;
+      return value_types::INT_TYPE;
     }
     
     
     if(!tp.is_arithmetic() )
     {
-        return value_types::STRING;
+        return value_types::STRING_TYPE;
     }
     
     
-    return value_types::INT;
+    return value_types::INT_TYPE;
 }
 
 
@@ -242,55 +242,55 @@ std::unique_ptr<unsigned char[]> old_rttr_array_converter(rttr::variant& arr, fo
     if(data = variant_to_bytes<unsigned char>(arr,byte_size))
     {
       lg.Trace("UCHAR");
-     dt = foxtrot::byte_data_types::UCHAR;   
+     dt = foxtrot::byte_data_types::UCHAR_TYPE;   
      return data;
     }
     else if(data = variant_to_bytes<unsigned short>(arr,byte_size))
     {
       lg.Trace("USHORT");
-        dt = foxtrot::byte_data_types::USHORT;
+        dt = foxtrot::byte_data_types::USHORT_TYPE;
         return data;
     }
     else if(data = variant_to_bytes<unsigned int>(arr,byte_size))
     {
       lg.Trace("UINT");
-        dt = foxtrot::byte_data_types::UINT;
+        dt = foxtrot::byte_data_types::UINT_TYPE;
         return data;
     }
     else if(data = variant_to_bytes<unsigned long>(arr,byte_size))
     {
       lg.Trace("ULONG");
-        dt = foxtrot::byte_data_types::ULONG;
+        dt = foxtrot::byte_data_types::ULONG_TYPE;
         return data;
     }
     else if(data = variant_to_bytes<short>(arr,byte_size))
     {
       lg.Trace("SHORT");
-        dt = foxtrot::byte_data_types::SHORT;
+        dt = foxtrot::byte_data_types::SHORT_TYPE;
         return data;
     }
     else if(data= variant_to_bytes<int>(arr,byte_size))
     {
       lg.Trace("IINT");
-        dt = foxtrot::byte_data_types::IINT;
+        dt = foxtrot::byte_data_types::IINT_TYPE;
         return data;
     }
     else if(data =  variant_to_bytes<long>(arr,byte_size))
     {
       lg.Trace("LONG");
-        dt = foxtrot::byte_data_types::LONG;
+        dt = foxtrot::byte_data_types::LONG_TYPE;
         return data;
     }
     else if(data = variant_to_bytes<float>(arr,byte_size))
     {
       lg.Trace("BFLOAT");
-        dt = foxtrot::byte_data_types::BFLOAT;
+        dt = foxtrot::byte_data_types::BFLOAT_TYPE;
         return data;
     }
     else if(data = variant_to_bytes<double>(arr,byte_size))
     {
       lg.Trace("BDOUBLE");
-        dt = foxtrot::byte_data_types::BDOUBLE;
+        dt = foxtrot::byte_data_types::BDOUBLE_TYPE;
         return data;
     }
     throw std::logic_error("function couldn't convert to recognized array type...");

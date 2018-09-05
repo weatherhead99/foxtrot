@@ -2,8 +2,6 @@
 #include "Device.h"
 
 #include <random>
-
-#include <rttr/type>
 #include <vector>
 
 

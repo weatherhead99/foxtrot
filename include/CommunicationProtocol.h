@@ -6,6 +6,7 @@
 #include <boost/mpl/vector.hpp>
 
 #include <utility>
+#include "foxtrot_export.h"
 
 namespace foxtrot
 {
@@ -24,7 +25,7 @@ namespace foxtrot
   };
   
   
-  class CommunicationProtocol
+  class FOXTROT_EXPORT CommunicationProtocol
   {
   public:
     CommunicationProtocol(const parameterset* const instance_parameters);

@@ -1,4 +1,4 @@
 add_device_lib(stellarnet stellarnet.cpp)
 
 add_executable(stellarnet_play stellarnet_play.cpp)
-target_link_libraries(stellarnet_play stellarnet foxtrot foxtrotclient)
+target_link_libraries(stellarnet_play stellarnet foxtrot foxtrotclient ${libusb})

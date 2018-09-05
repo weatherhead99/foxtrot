@@ -153,8 +153,10 @@ namespace foxtrot {
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset);
     
     void settrigoutpower(bool onoff);
-    void settrigoutinvert(bool invert);
+    bool gettrigoutpower();
     
+    void settrigoutinvert(bool invert);
+    bool gettrigoutinvert();
     
     void setrawenable(bool onoff);
     bool getrawenable();

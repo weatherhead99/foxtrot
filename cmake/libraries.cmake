@@ -1,23 +1,10 @@
-#hack to build with current bincrafters boost
+find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
+
 if(FOXTROT_CONAN_BUILD)
-  set(Boost_PROGRAM_OPTIONS_LIBRARY ${CONAN_LIBS_BOOST_PROGRAM_OPTIONS})
-  set(Boost_LOG_LIBRARY ${CONAN_LIBS_BOOST_LOG})
-  set(Boost_SYSTEM_LIBRARY ${CONAN_LIBS_BOOST_SYSTEM})
-  set(Boost_UNIT_TEST_FRAMEWORK_LIBRARY ${CONAN_LIBS_BOOST_TEST})
-  set(Boost_THREAD_LIBRARY ${CONAN_LIBS_BOOST_THREAD})
-  set(Boost_DATE_TIME_LIBRARY ${CONAN_LIBS_BOOST_DATE_TIME})
-  set(Boost_FILESYSTEM_LIBRARY ${CONAN_LIBS_BOOST_FILESYSTEM})
-  
-  
   #hack for grpc address sorting!!
   find_library(address_sorting NAMES address_sorting PATHS ${CONAN_LIB_DIRS_GRPC})
   message(STATUS "address sorting: ${address_sorting}")
-  
-else()
-  message(STATUS "finding Boost libraries, components: ${boost_cmps}")
-  find_package(Boost REQUIRED COMPONENTS ${boost_cmps})
-endif()
-  
+endif()  
 
 find_library(libusb NAMES usb-1.0 libusb-1.0 usb)
 message(STATUS "libusb: ${libusb}")
@@ -25,8 +12,10 @@ find_path(libusb_include NAMES libusb.h usb.h PATH_SUFFIXES libusb-1.0)
 message(STATUS "libusb path: ${libusb_include}" )
 include_directories(${libusb_include})
 include(FindPkgConfig)
-pkg_search_module(udev REQUIRED libudev)
-message("udev libraries: ${udev_LIBRARIES}")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	pkg_search_module(udev REQUIRED libudev)
+	message("udev libraries: ${udev_LIBRARIES}")
+endif()
 
 
 #C-ares
@@ -44,14 +33,14 @@ find_library(gslcblas gslcblas)
 find_package(rttr 0.9.5 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 if(TARGET RTTR::Core)
-message(STATUS "found RTTR shared build")
-set(RTTR_TARGET RTTR::Core)
+  message(STATUS "found RTTR shared build")
+  set(RTTR_TARGET RTTR::Core)
 elseif(TARGET RTTR::Core_Lib)
-message(STATUS "found RTTR static build")
-set(RTTR_TARGET RTTR::Core_Lib)
+  message(STATUS "found RTTR static build")
+  set(RTTR_TARGET RTTR::Core_Lib)
 else()
-message(ERROR "no RTTR found, can't build foxtrot core")
-message(STATUS "considered files: ${rttr_CONSIDERED_CONFIGS}")
+  message(ERROR "no RTTR found, can't build foxtrot core")
+  message(STATUS "considered files: ${rttr_CONSIDERED_CONFIGS}")
 endif()
 
 get_target_property(rttr_include_dir ${RTTR_TARGET} INTERFACE_INCLUDE_DIRECTORIES)

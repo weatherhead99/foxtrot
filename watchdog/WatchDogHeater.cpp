@@ -77,7 +77,11 @@ double foxtrot::WatchDogHeater::partial_average(const std::deque<double>& histor
 {
     if( history.size() < average_size )
 	average_size = history.size();
+#ifdef linux
     auto sum = std::accumulate(history.end() - average_size, history.end(), 0.0d);
+#else
+    auto sum = std::accumulate(history.end() - average_size, history.end(), 0.0);
+#endif    
     lg().strm(sl::trace) << "sum: " << sum;
     lg().strm(sl::trace) << "av: " << sum / average_size;
     return sum / average_size;
@@ -141,7 +145,9 @@ bool foxtrot::KeepStageWarm::action(foxtrot::Client& cl)
   auto tt = get_tank_temp(cl,false);
   lg().strm(sl::warning) << "triggered KeepStageWarm, adjusting heater target!";
   set_heater_target(cl, tt + 30);
-  
+
+  //TODO:FIX THIS!
+  return false;
   
 }
 

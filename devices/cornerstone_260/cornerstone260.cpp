@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <rttr/registration>
 
 const foxtrot::parameterset cornerstone_class_params_serial
 {

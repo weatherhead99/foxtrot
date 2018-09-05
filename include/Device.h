@@ -1,10 +1,9 @@
 #pragma once
 
+#include "foxtrot_export.h"
 #include <memory>
 #include <string>
-#include <rttr/registration>
-
-
+#include <rttr/type>
 
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
@@ -12,7 +11,7 @@
 namespace foxtrot
 {
     
- enum class CapabilityMetay
+ enum class CapabilityMeta
  {
   STREAMINGDATA 
      
@@ -20,7 +19,7 @@ namespace foxtrot
 
   class CommunicationProtocol;
   
-  class Device
+  class FOXTROT_EXPORT Device
   {
     RTTR_ENABLE()
   public:
@@ -40,4 +39,3 @@ namespace foxtrot
 
 
 }
-

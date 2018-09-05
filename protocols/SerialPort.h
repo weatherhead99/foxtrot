@@ -16,7 +16,7 @@ namespace foxtrot
   {
     
     
-    class SerialPort : public SerialProtocol
+    class FOXTROT_EXPORT SerialPort : public SerialProtocol
     {
     public:
     SerialPort(const parameterset*const instance_parameters);

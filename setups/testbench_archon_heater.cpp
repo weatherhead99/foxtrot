@@ -1,6 +1,7 @@
 #include "DeviceHarness.h"
 #include "devices/archon/archon.h"
 #include "devices/archon/archon_modules.h"
+#include "devices/archon/archon_module_heaterx.h"
 #include "devices/archon/archon_module_hvxbias.h"
 #include "devices/archon/archon_module_driver.h"
 #include "devices/archon/archon_module_AD.h"
@@ -18,7 +19,10 @@
 
 #include "devices/cornerstone_260/cornerstone260.h"
 
+#ifdef linux
 #include "devices/OPS-Q250/Q250.h"
+#endif
+
 #include "devices/stellarnet/stellarnet.h"
 
 #include <memory>
@@ -146,8 +150,8 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			  lg.Info("setting up Newport 2936R power meter...");
 			  auto newport_params = params->at("newport_params_serial");
 			  auto powermeterserial = std::make_shared<foxtrot::protocols::SerialPort>(&newport_params);
-			  
-			  powermeterserial->setDrain(true);
+
+              powermeterserial->setDrain(true);
 
 		      //     auto powermeterusb = std::make_shared<foxtrot::protocols::BulkUSB>(&newport_params);
 			  auto powermeter = std::unique_ptr<foxtrot::devices::newport2936R>(new foxtrot::devices::newport2936R(powermeterserial));
@@ -184,6 +188,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			  monoch->setGratingCalibration(3,600,0.0000,3.22885911,0.000,"");
 			  harness.AddDevice(std::move(monoch));});
 
+#ifdef linux
     setup_with_disable("Q250", setup_params, lg,
 	[&harness, &lg, &params] () { 
 	  lg.Info("setting up Newport Q250 Power Supply");
@@ -192,6 +197,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 	  auto lamp_psu = std::unique_ptr<foxtrot::devices::Q250>(new foxtrot::devices::Q250(scsiser));
 	  harness.AddDevice(std::move(lamp_psu));
 	});
+#endif
 
     
     return 0;  

@@ -4,9 +4,19 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-include(cmake/host_specific.cmake)
+#visibility settings for static libs etc on newer cmake
+cmake_policy(SET CMP0063 NEW)
 
-include_directories(include ${CMAKE_CURRENT_SOURCE_DIR})
+include(cmake/host_specific.cmake)
+include(cmake/platform.cmake)
+
+include(GenerateExportHeader)
+
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+
+
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+set(CMAKE_CXX_VISIBILITY_PRESET default)
 
 option(BUILD_TESTS "build test code" OFF)
 option(BUILD_SERVER "build foxtrot server" ON)
@@ -19,6 +29,12 @@ option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
 option(BUILD_UDEV "build udev bindings" OFF)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#sets which winapi versions are needed, including e.g. killing
+#a boost_log_abi error
+	add_definitions(-D_WIN32_WINNT=0x601)
+endif()
+
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
   message(WARNING "conanbuildinfo found, building using conan packages")
   include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -29,7 +45,12 @@ else()
   message(STATUS "conanbuildinfo not found, proceeding with standard build")
 endif()
 
-set(boost_cmps "log;system;date_time;program_options;filesystem")
+
+if(FOXTROT_CONAN_BUILD)
+	add_definitions(-DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
+endif()
+
+set(boost_cmps "log;system;date_time;program_options;filesystem;thread")
 include(cmake/libraries.cmake)
 
 
@@ -71,17 +92,22 @@ add_subdirectory(setups)
 endif()
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
+message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
+target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+target_link_libraries(foxtrot PRIVATE ${Boost_LOG_LIBRARY} ${libusb} ${dl} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(foxtrot PUBLIC ${RTTR_TARGET} ${Boost_SYSTEM_LIBRARY})
+generate_export_header(foxtrot)
 
 
 message(WARNING "rttr target: ${RTTR_TARGET}")
-target_link_libraries(foxtrot ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
+target_link_libraries(foxtrot PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
 
 if(FOXTROT_CONAN_BUILD)
-target_link_libraries(foxtrot ${Boost_THREAD_LIBRARY})
+target_link_libraries(foxtrot PRIVATE ${Boost_THREAD_LIBRARY})
 endif()
 
-
-install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ )
+install(TARGETS foxtrot EXPORT foxtrotTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/ 
+ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 file(GLOB ft_includes include/*.h)
 message(STATUS "ft includes: ${ft_includes}")

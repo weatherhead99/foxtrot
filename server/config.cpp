@@ -18,8 +18,19 @@ std::string foxtrot::get_config_file_path()
     if(path == nullptr)
     {
         lg.Info("no environment variable, getting config from default path");
-        auto home = boost::filesystem::path(std::getenv("HOME"));
-        home /= ".foxtrot/exptserve.config" ;
+#ifdef linux
+        char* homeenv = std::getenv("HOME");
+#else
+        char* homedrive = std::getenv("HOMEDRIVE");
+        char* homepath = std::getenv("HOMEPATH");
+        
+        auto homeenv = boost::filesystem::path(homedrive);
+        homeenv /= homepath;
+        
+#endif
+        auto home = boost::filesystem::path(homeenv);
+        home /= ".foxtrot" ;
+        home /= "exptserve.config" ;
         return home.string();
     }
     else
@@ -36,8 +47,17 @@ void foxtrot::create_config_file(const string& filename)
     foxtrot::Logging lg("create_config_file");
     if(!boost::filesystem::exists(filename))
     {
+        auto path = boost::filesystem::path(filename);
+        boost::filesystem::create_directories(path.parent_path());
         lg.Info("creating config file...");
-        boost::filesystem::ofstream(filename);
+        boost::filesystem::ofstream ofs(filename);
+        
+        if(!ofs)
+        {
+            lg.Error("couldn't create config file!");
+            throw std::runtime_error("couldn't create config file!");
+        };
+        
     };
 };
 

@@ -1,5 +1,7 @@
 macro(add_device_lib name srcfiles)
 add_library(${name} STATIC ${srcfiles})
+#NOTE: needed on windows to prevent ODR violations
+target_link_libraries(${name} PRIVATE ${RTTR_TARGET})
 list(APPEND device_libs ${name})
 install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/devices/)
 endmacro()

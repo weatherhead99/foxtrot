@@ -7,6 +7,8 @@
 #include "InvokeCapabilityImpl.h"
 #include "FetchDataImpl.h"
 
+//might be needed on windows?
+#include <exception>
 
 #include <iostream>
 #include <typeinfo>
@@ -77,7 +79,7 @@ void ServerImpl::Run()
     HandleRpcs();
 }
 
-std::vector< std::future< std::__exception_ptr::exception_ptr > > ServerImpl::RunMultithread(int nthreads)
+std::vector< std::future< std::exception_ptr > > ServerImpl::RunMultithread(int nthreads)
 {
   setup_common(_connstr);
   

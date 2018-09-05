@@ -10,22 +10,39 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
 {
     
     _lg.strm(sl::debug) << "file: " << file;
-    _dl = dlopen(file.c_str(), RTLD_LAZY);
-  if(_dl == nullptr)
-  {    
-    throw std::runtime_error(dlerror());
-  }
-  
-  //clear dlerror
-  dlerror();
+	
+	#ifdef linux
+	
+		_dl = dlopen(file.c_str(), RTLD_LAZY);
+		  
+		//clear dlerror
+	#else
+        _dl = LoadLibrary(file.c_str());
+	#endif
     
+	  if(_dl == nullptr)
+	  {    
+#ifdef linux
+		throw std::runtime_error(dlerror());
+#else
+        throw std::runtime_error(std::to_string(GetLastError()));
+#endif
+	  }
+
+#ifdef linux
+	  dlerror();
+#endif
 }
 
 foxtrot::ft_plugin::~ft_plugin()
 {
     if(_dl != nullptr)
     {
+		#ifdef linux
         dlclose(_dl);
+		#else
+        FreeLibrary(_dl);
+		#endif
     }
 }
 
@@ -33,12 +50,20 @@ void foxtrot::ft_plugin::reload()
 {
     if(_dl != nullptr)
     {
+		#ifdef linux
         dlclose(_dl);
+		#else
+			FreeLibrary(_dl);
+		#endif
     }
-    
+	
+	#ifdef linux
     _dl = dlopen(_fname.c_str(), RTLD_LAZY);
     
     dlerror();
+	#else
+        _dl = LoadLibrary(_fname.c_str());
+	#endif
     
 };
 

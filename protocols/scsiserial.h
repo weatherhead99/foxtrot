@@ -3,7 +3,9 @@
 #include "SerialProtocol.h"
 #include <string>
 #include <vector>
+#ifdef linux
 #include <scsi/sg.h>
+#endif
 #include <array>
 #include <utility>
 #include <type_traits>
@@ -13,15 +15,21 @@ namespace foxtrot
 {
   namespace protocols
   {
+	#ifdef linux
     enum class scsidirection
     {
       NONE = SG_DXFER_NONE,
       TO_DEV = SG_DXFER_TO_DEV,
       FROM_DEV = SG_DXFER_FROM_DEV
     };
+	#else
+	enum class scsidirection 
+	{
+	};
+	#endif
     
     
-    class scsiserial : public SerialProtocol
+    class FOXTROT_EXPORT scsiserial : public SerialProtocol
     {
     public:
     scsiserial(const parameterset*const instance_parameters);

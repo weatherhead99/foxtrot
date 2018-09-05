@@ -98,13 +98,13 @@ namespace foxtrot
       catch(class foxtrot::DeviceError& err)
       {
 	lg.Error("caught device error: " + std::string(err.what()));
-	set_repl_err(repl,err,error_types::DeviceError);
+	set_repl_err(repl,err,error_types::ft_DeviceError);
 	errcall(responder,repl,tag);
       }
       catch(class foxtrot::ProtocolError& err)
       {
 	lg.Error("caught protocol error: " + std::string(err.what()));
-	set_repl_err(repl,err,error_types::ProtocolError);
+	set_repl_err(repl,err,error_types::ft_ProtocolError);
 	errcall(responder,repl,tag);
       }
       catch(class foxtrot::ContentionError& err)
@@ -122,7 +122,7 @@ namespace foxtrot
       catch(std::exception& err)
       {
 	lg.Error("caught general error: " + std::string(err.what()));
-	set_repl_err(repl,err,error_types::Error);
+	set_repl_err(repl,err,error_types::ft_Error);
 	errcall(responder,repl,tag);
       }
       catch(...)
@@ -143,7 +143,7 @@ namespace foxtrot
     };
     
     
-    template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, HandlerTag* tag, error_types&& errtp=error_types::Error)
+    template <typename repltp, typename respondtp> void foxtrot_server_specific_error(const std::string& msg, repltp& repl, respondtp& respond, foxtrot::Logging& lg, HandlerTag* tag, error_types&& errtp=error_types::ft_Error)
     {
       lg.Error(msg);
       set_repl_err_msg(repl,msg,errtp);
@@ -207,7 +207,7 @@ namespace foxtrot
 	  {          
 	      lg.Error("error in getting arguments...");
 	      auto msg = "argument at position " + std::to_string(arg.position()) + "is not set";
-	      set_repl_err_msg(repl,msg,error_types::Error);
+	      set_repl_err_msg(repl,msg,error_types::ft_Error);
 	      throw 1;
 	  }
 #ifdef NEW_RTTR_API

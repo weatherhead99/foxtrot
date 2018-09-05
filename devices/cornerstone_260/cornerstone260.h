@@ -1,7 +1,7 @@
 #pragma once
 #include "CmdDevice.h"
 #include "SerialProtocol.h"
-#include <rttr/registration>
+
 
 namespace foxtrot
 {

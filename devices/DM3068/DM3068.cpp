@@ -18,7 +18,7 @@ foxtrot::devices::DM3068::~DM3068()
 
 string foxtrot::devices::DM3068::getIDNString()
 {
-
+	return "not_implemented_yet";
 }
 
 

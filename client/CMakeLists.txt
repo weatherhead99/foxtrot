@@ -4,7 +4,7 @@ target_compile_definitions(foxtrotclient PRIVATE -DPROTOBUF_VERSION=${Protobuf_V
 target_include_directories(foxtrotclient PUBLIC ${CMAKE_BINARY_DIR}/server/)
 target_include_directories(foxtrotclient INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_link_libraries(foxtrotclient INTERFACE foxtrotserv)
+target_link_libraries(foxtrotclient INTERFACE foxtrotserv ${EXTRA_WINLIBS})
 
 add_dependencies(foxtrotclient foxtrotserv)
 

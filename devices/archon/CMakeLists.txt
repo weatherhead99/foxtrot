@@ -3,8 +3,10 @@ archonraw.cpp
 )
 
 add_library(archon STATIC ${archon_srcs})
+target_link_libraries(archon PRIVATE ${RTTR_TARGET})
+target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
 target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
 
 
 add_executable(archon_test archon_test.cpp)
-target_link_libraries(archon_test ${RTTR_TARGET} foxtrot archon ${Boost_DATE_TIME_LIBRARY})
+target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )

@@ -4,13 +4,18 @@
 #include <vector>
 
 #include <memory>
-#include <sys/socket.h>
 
+#ifdef linux
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#endif
+
+#include "StubError.h"
 
 #include <string.h>
-#include <unistd.h>
 #include "ProtocolError.h"
 
 #include <errno.h>
@@ -18,7 +23,6 @@
 
 #include <iostream>
 #include <algorithm>
-#include <sys/ioctl.h>
 
 using namespace foxtrot::protocols;
 
@@ -35,8 +39,12 @@ simpleTCP::simpleTCP(const parameterset*const instance_parameters)
 
 simpleTCP::~simpleTCP()
 {
-    
+  
+#ifdef linux  
   close(_sockfd);
+#else
+	_lg.Error("destructor is a stub on windows");
+#endif
 
 }
 
@@ -44,6 +52,10 @@ simpleTCP::~simpleTCP()
 
 void simpleTCP::Init(const parameterset* const class_parameters)
 {
+#ifndef linux
+	throw StubError("simpleTCP::Init is a stub on windows!");
+#else
+	
   //call base class to merge parameterset
   CommunicationProtocol::Init(class_parameters);
   
@@ -61,7 +73,6 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("couldn't open socket file descriptor. Error was:") + perr);  
   };
   
-  
   //set linger option
   linger ling;
   ling.l_onoff = 1;
@@ -73,9 +84,7 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("error setting linger: " ) + gai_strerror(err));
   };
   
-  
-  
-  
+   
   //bind to server;
   
   addrinfo hints;  
@@ -103,11 +112,18 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("couldn't connect to host. Error was: " ) + strerror(errno));
   };
   
+#endif
+  
 }
 
 
 std::string simpleTCP::read(unsigned int len, unsigned* actlen)
 {
+#ifndef linux
+
+	throw StubError("simpleTCP::read is a stub on windows!");
+#else
+	
   std::vector<unsigned char> out;
   out.resize(len);
   
@@ -124,6 +140,8 @@ std::string simpleTCP::read(unsigned int len, unsigned* actlen)
   }
   
   return std::string(out.begin(),out.end());
+#endif
+  
 }
 
 
@@ -131,6 +149,9 @@ std::string simpleTCP::read(unsigned int len, unsigned* actlen)
 
 void simpleTCP::write(const std::string& data)
 {
+#ifndef linux
+	throw StubError("simpleTCP::write is a stub on windows!");
+#else
   
   auto err = ::write(_sockfd,const_cast<char*>(data.data()),data.size());
   if(err <0)
@@ -139,6 +160,8 @@ void simpleTCP::write(const std::string& data)
     
   }
 
+ #endif
+  
 }
 
 std::string simpleTCP::read_until_endl(char endlchar)
@@ -158,6 +181,11 @@ std::string simpleTCP::read_until_endl(char endlchar)
 
 unsigned int simpleTCP::bytes_available()
 {
+	#ifndef linux
+	throw StubError("simpleTCP::bytes_available() is a stub on windows!");
+	#else
+	
+	
   int count;
   auto ret = ioctl(_sockfd,FIONREAD,&count);
   if(ret <0)
@@ -166,6 +194,8 @@ unsigned int simpleTCP::bytes_available()
   }
 
   return count;
+  
+  #endif
 }
 
 

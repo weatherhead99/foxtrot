@@ -17,6 +17,7 @@ endif()
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
+
 install(FILES foxtrot.proto DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/)
 
 message("generated protobuf stubs: ${PROTO_SRCS}")
@@ -29,6 +30,10 @@ FetchDataImpl.cpp ExperimentalSetup.cpp ServerUtil.cpp ChunkStreamImpl.cpp Serve
 ServerCommandImpl.cpp config.cpp
 ${PROTO_SRCS} ${PROTO_GRPC_SRCS} ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 )
+
+generate_export_header(foxtrotserv)
+target_compile_definitions(foxtrotserv PRIVATE -Dfoxtrotserv_EXPORTS)
+
 
 if(${rttr_VERSION} STREQUAL "0.9.6")
     message(WARNING "new RTTR api used!")
@@ -53,7 +58,7 @@ add_executable(exptserve exptserve.cpp exptserve_funcs.cpp)
 
 #NOTE: WTF? If you don't link foxtrot here, it seems to have some weird gprof error 
 target_link_libraries(exptserve foxtrotserv ${Boost_PROGRAM_OPTIONS_LIBRARY}
-${Boost_FILESYSTEM_LIBRARY})
+${Boost_FILESYSTEM_LIBRARY} ${EXTRA_WINLIBS})
 
 if(FOXTROT_CONAN_BUILD)
     target_include_directories(exptserve PRIVATE ${CONAN_INCLUDE_DIRS_BOOST_PROGRAM_OPTIONS})
