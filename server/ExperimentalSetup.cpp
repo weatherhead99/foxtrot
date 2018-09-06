@@ -2,6 +2,7 @@
 #include "Error.h"
 #include "DeviceHarness.h"
 #include <Logging.h>
+#include <boost/filesystem.hpp>
 
 using namespace foxtrot;
 
@@ -11,6 +12,11 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
     
     _lg.strm(sl::debug) << "file: " << file;
 	
+    if(!boost::filesystem::exists(file))
+    {
+        _lg.Warning("file doesn't seem to exist...");
+    }
+    
 	#ifdef linux
 	
 		_dl = dlopen(file.c_str(), RTLD_LAZY);
@@ -23,8 +29,10 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
 	  if(_dl == nullptr)
 	  {    
 #ifdef linux
+          _lg.strm(sl::error) << "error loading library: " << dlerror();
 		throw std::runtime_error(dlerror());
 #else
+        _lg.strm(sl::error) << "error loading library: " << GetLastError();
         throw std::runtime_error(std::to_string(GetLastError()));
 #endif
 	  }

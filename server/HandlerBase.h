@@ -7,6 +7,25 @@
 using std::cout;
 using std::endl;
 
+namespace detail
+{
+    template<int> struct int_helper {
+        
+    };
+    
+    template <> struct int_helper<4> {
+        typedef unsigned long type;
+    };
+    
+    template<> struct int_helper<8> {
+        typedef unsigned long long type;
+    };
+    
+    typedef typename int_helper<sizeof(void*)>::type pointer_print_type;
+    
+    
+}
+
 namespace foxtrot
 {
     class HandlerTag
@@ -28,54 +47,50 @@ namespace foxtrot
         }
         virtual void Proceed() final
         {
-	    std::lock_guard<std::mutex> lk(_procmut);
-            if(_status == status::CREATE)
-            {       
-                _lg.Debug("request status is CREATE, processing");
-                _status = status::PROCESS;   
-                //TODO: dispatch on this
-            
-                (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
-                 
-            }
-            else if(_status == status::PROCESS)
+            if(_status == status::CREATE || _status == status::PROCESS)
             {
-	      _status = status::IN_FLIGHT;
-          _lg.strm(sl::trace) << "request id is: " << (long unsigned) this;
-	      if(_newrequest)
-	      {
-		  _lg.Debug("spawning new handler");
-		  new HandlerBase<T>(_service, _cq,_logic);
-		  _newrequest = false;
-	      }
-	      
-              if(_logic->HandleRequest(_req,_reply, _responder, this))
-              {
-		  
-                    _lg.Debug("request successful, marking finished");
-                    _status = status::FINISH;
-              }
-              else
-	      {
-		  _lg.Debug("request not finished yet");
-		  _status = status::PROCESS;
-		  
-	      }
             
+                std::lock_guard<std::mutex> lk(_procmut);
+                if(_status == status::CREATE)
+                {       
+                    _lg.Debug("request status is CREATE, processing");
+                    _status = status::PROCESS;   
+                    //TODO: dispatch on this
+                
+                    (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
+                    
+                }
+                else if(_status == status::PROCESS)
+                {
+                    _lg.strm(sl::trace) << "request id is: " << reinterpret_cast<detail::pointer_print_type>(this);
+                    if(_newrequest)
+                    {
+                        _lg.Debug("spawning new handler");
+                        new HandlerBase<T>(_service, _cq,_logic);
+                        _newrequest = false;
+                    }
+            
+                    if(_logic->HandleRequest(_req,_reply, _responder, this))
+                    {
+                        _lg.Debug("request successful, marking finished");
+                        _status = status::FINISH;
+                    }
+                    else
+                    {
+                        _lg.Debug("request not finished yet");
+                        _status = status::PROCESS;
+                    }
+            
+                }
             }
-//             else if (_status == status::IN_FLIGHT)
-// 	    {
-// 	      _lg.Debug("already in flight, skipping...");
-// 	    }
             else
             {
-	      _lg.Debug("finishing request");
-	      
+                _lg.Debug("finishing request");
+        
                 _lg.Debug("request finished, deleting HandlerBase");
-//                 GPR_CODEGEN_ASSERT(_status == status::FINISH);
                 delete this;
             }
-       
+    
         } 
         
         void FinishRequest(typename T::respondertp& respond, typename T::repltp& repl)
