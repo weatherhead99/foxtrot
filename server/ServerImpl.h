@@ -14,6 +14,8 @@
 #include <condition_variable>
 #include <mutex>
 
+#include <boost/variant.hpp>
+
 using grpc::Server;
 using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
@@ -21,6 +23,8 @@ using grpc::ServerBuilder;
 
 
 namespace foxtrot{
+    typedef boost::variant<double,int,bool,std::string> ft_variant;
+    using flagmap =  std::map<std::string, ft_variant> ;
 
 class ServerImpl 
 {
@@ -40,7 +44,8 @@ public:
 		  bool force_client_auth = false);
     
 private:
-  
+    std::shared_ptr<flagmap> _serverflags;
+    
     std::string _connstr;
   
     void setup_common(const std::string& addrstr );

@@ -41,6 +41,7 @@ foxtrot::SetServerFlagsLogic::SetServerFlagsLogic(std::shared_ptr<flagmap> vars)
 bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::reqtp& req, foxtrot::SetServerFlagsLogic::repltp& repl, foxtrot::SetServerFlagsLogic::respondertp& respond, foxtrot::HandlerTag* tag)
 {
   lg_.Debug("processing set server flag request");
+  lg_.strm(sl::debug) << "flag name: " << req.flagname();
   
   
   try{
@@ -50,19 +51,28 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
     switch(req.arg_case())
     {
       case(reqtp::ArgCase::kDblval):
-	var = req.dblval();
-	break;
+          lg_.Debug("dbl value");
+          var = req.dblval();
+        break;
       case(reqtp::ArgCase::kIntval):
-	var = req.intval();
-	break;
+          lg_.Debug("int value");
+            var = req.intval();
+        break;
       case(reqtp::ArgCase::kBoolval):
-	var = req.boolval();
-	break;
+          lg_.Debug("bool value");
+            var = req.boolval();
+        break;
       case(reqtp::ArgCase::kStringval):
-	var = req.stringval();
-	break;
+          lg_.Debug("string value");
+        var = req.stringval();
+        
+        break;
+      default:
+          throw std::logic_error("invalid flag value type!");
+          
     };
 
+    lg_.Trace("setting value in flagmap");
       vars_->operator[](req.flagname()) = var;
   }
   catch(...)
@@ -72,7 +82,8 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
     return true;
     
   }
-      
+    
+    respond.Finish(repl,grpc::Status::OK,tag);
     return true;
   
 }
@@ -110,6 +121,7 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
     return true;
   }
 
+  respond.Finish(repl,grpc::Status::OK,tag);
   return true;
 }
 

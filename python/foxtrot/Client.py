@@ -15,10 +15,10 @@ import struct
 
 DEFAULT_CHUNKSIZE=1000
 
-value_type_to_return_field_dict = {FLOAT : ('dblret', float),
-                                   INT   : ('intret',int),
-                                    BOOL : ('boolret',bool),
-                                  STRING : ('stringret',bytes)
+value_type_to_return_field_dict = {FLOAT_TYPE : ('dblret', float),
+                                   INT_TYPE   : ('intret',int),
+                                    BOOL_TYPE : ('boolret',bool),
+                                  STRING_TYPE : ('stringret',bytes)
 }
 
 def _capability_argument_from_value(val):
@@ -300,5 +300,48 @@ class Capability:
     def __call__(self,*args,**kwargs):
         repl = self.call_cap_sync(self._cl,*args,**kwargs)
         return _process_sync_response(repl)
-        
     
+class ServerFlag:
+    def __init__(self,client,flagname):
+        self._flagname = flagname
+        self._client = client
+
+    def construct_request(self,flagname, val=0):
+        req = serverflag()
+        req.msgid = 0
+        req.flagname = flagname
+        if isinstance(val,float):
+            req.dblval = val
+        elif isinstance(val,int):
+            req.intval = val
+        elif isinstance(val,bool):
+            req.boolval = val
+        elif isinstance(val,str):
+            req.stringval = val.encode("ASCII")
+        else:
+            raise TypeError("invalid value type %s for server flag" % type(val))
+        
+        return req
+
+    @property
+    def value(self):
+        req = self.construct_request(self._flagname)
+        stubfun = self._client._stub.GetServerFlag
+        ret = stubfun(req)
+        _check_repl_err(ret)
+        whichattr = ret.WhichOneof("arg")
+        if whichattr is None:
+            return None
+        return getattr(ret,whichattr)
+
+    @value.setter
+    def value(self,val):
+        req = self.construct_request(self._flagname,val)
+        stubfun = self._client._stub.SetServerFlag
+        repl = stubfun(req)
+        _check_repl_err(repl)
+        whichattr = repl.WhichOneof("arg")
+        if whichattr is None:
+            return None
+        return getattr(repl,whichattr)    
+
