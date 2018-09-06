@@ -2,6 +2,8 @@
 #include "ProtocolError.h"
 #ifdef linux
 #include <termios.h>
+#else
+#include <Windows.h>
 #endif
 
 #include "ProtocolUtilities.h"
@@ -169,7 +171,16 @@ void foxtrot::protocols::SerialPort::flush()
     throw ProtocolError(std::string("failed to flush serial port: ") + strerror(ret));
   }
 #else	
-	throw StubError("flush() is a stub on windows!");
+    auto ret = PurgeComm(_sport.native_handle(), PURGE_RXCLEAR);
+    if(ret)
+    {
+        throw ProtocolError(std::string("failed to clear rx buffer: " ) + std::to_string(GetLastError()));
+    }
+    ret = PurgeComm(_sport.native_handle(), PURGE_TXCLEAR);
+    if(ret)
+    {
+        throw ProtocolError(std::string("failed to clear tx buffer: " ) + std::to_string(GetLastError()));
+    }
 #endif
 }
 
@@ -187,7 +198,17 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
 
   return bytes_available;
 #else
-	throw StubError("bytes_available() is a stub on windows!");
+    unsigned bytes_available;
+    DWORD Errors;
+    COMSTAT Stat;
+    auto ret = ClearCommError(_sport.native_handle(), &Errors, &Stat);
+    if(!ret)
+    {
+        throw ProtocolError(std::string("windows API error: ") + std::to_string(GetLastError()));
+    }
+    
+    return Stat.cbInQue;
+    
 #endif
   
 }
