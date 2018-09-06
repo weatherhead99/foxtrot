@@ -27,6 +27,31 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
+#ifndef linux
+    std::set_terminate([] () 
+    {
+       auto eptr = std::current_exception();
+       try{
+        if(eptr)
+        {
+            std::rethrow_exception(eptr);
+        }
+       }
+       catch(std::exception& err)
+       {
+           cout << "caught exception, message: " << endl;
+           cout  << err.what() << endl;
+           cout << "now aborting.." << endl;
+           
+       };
+        
+       std::abort();
+    });
+        
+#endif
+    
+    
+    
     backward::SignalHandling sh;
     std::string setupfile;
     std::string servname;
@@ -65,23 +90,36 @@ int main(int argc, char** argv)
     
     po::variables_map vm;
     
+    lg.strm(sl::debug) << "options setup, about to open config file..";
     
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
     
     std::ifstream ifs(config_file);
     if(ifs.good())
     {
-        po::store(po::parse_config_file(ifs,desc),vm);
+        lg.strm(sl::debug) << "successfully opened config file, parsing...";
+        
+        try{
+            po::store(po::parse_config_file(ifs,desc),vm);
+        }
+        catch(std::exception& err)
+        {
+            std::cout << "caught an exception here..." << std::endl;
+            std::cout << "what? " <<  err.what() << std::endl;   
+        };
+        lg.strm(sl::trace) << "stored parsed variables";
+        
     }
     else
     {
         lg.Debug("couldn't open specified config file...");
     };
-    
+
+    lg.strm(sl::trace) << "notifying..";
     po::notify(vm);
 
 
-    
+    lg.strm(sl::trace) << " checking debuglevel";
     if(debuglevel < 0 || debuglevel > 5)
     {
       lg.Fatal("invalid debug level specified!");
@@ -115,6 +153,8 @@ int main(int argc, char** argv)
       params.reset( new std::map<std::string,foxtrot::parameterset>(foxtrot::read_parameter_json_file(parameterfile)));
       
     }
+    
+    lg.strm(sl::debug) << "passed all the option tests..";
     
     
     DeviceHarness harness;

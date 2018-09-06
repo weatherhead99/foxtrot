@@ -46,7 +46,7 @@ file(GLOB ft_server_includes *.h)
 install(FILES ${ft_server_includes} ${PROTO_HDRS} ${PROTO_GRPC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 
 target_link_libraries(foxtrotserv PUBLIC foxtrot ${GRPC_LIBRARIES} ${cares} ${PROTOBUF_LIBRARIES} ${OPENSSL_LIBRARIES} 
-${ZLIB_LIBRARIES} ${dl} ${address_sorting})
+${ZLIB_LIBRARIES} ${dl} ${address_sorting} ${Boost_FILESYSTEM_LIBRARY})
 
 message("GRPXC_LIBRARIES: ${GRPC_LIBRARIES}")
 
