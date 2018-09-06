@@ -5,6 +5,7 @@
 #include "backward.hpp"
 #include "tbcli_heater_logic.h"
 #include "tbcli_pressure_logic.h"
+#include "tbcli_mono_logic.h"
 
 // void subcmd_args_process(const std::string& name)
 // {
@@ -233,10 +234,8 @@ int main(int argc, char** argv)
 	exit(1);
       }
       
-      auto power = boost::get<double>(client.InvokeCapability(devid,"getPower",{}));
-      auto units = boost::get<std::string>(client.InvokeCapability(devid,"getUnits",{})); 
-      std::cout << "units length: " << units.size() << std::endl;
-      std::cout << "power: " << power <<  " " << units << std::endl;
+      auto power = boost::get<double>(client.InvokeCapability(devid,"Power",{}));
+      std::cout << "power: " << power <<  std::endl;
     }
 
     else if(cmd == "gauge") 
@@ -289,9 +288,49 @@ int main(int argc, char** argv)
 
 
       }
-
-
-
+    else if(cmd == "mono")
+    {
+      auto devid = find_monochromator(servdesc);
+      if (devid < 0)
+      {
+	lg.Fatal("no monochromator found on server");
+	exit(1);
+      }
+      
+	po::options_description mono_desc("monochromator options");
+	mono_desc.add_options()
+	("subcmd",po::value<std::string>() ,"monochromator subcommand")
+	("value", po::value<std::string>(), "subcommand value");
+	
+	po::positional_options_description mono_pdesc;
+	mono_pdesc.add("subcmd",1)
+	.add("value",2);
+	
+	auto opts = po::collect_unrecognized(parsed.options, po::include_positional);
+	opts.erase(opts.begin());
+	
+	po::store(po::command_line_parser(opts).options(mono_desc).positional(mono_pdesc).run(),vm);
+	
+	auto subcmd = vm["subcmd"].as<std::string>();
+	if(subcmd == "wave")
+	{
+	  if(!vm.count("value"))
+	  {
+	    lg.Info("printing wavelength");
+	    std::cout << get_wavelength(client,devid) << " nm " <<std::endl;
+	  }
+	  else
+	  {
+	    lg.Info("setting wavelength");
+	    double wl_target = std::stod(vm["value"].as<std::string>());
+	    lg.Info("wavelength target: " + std::to_string(wl_target));
+	    set_wavelength_smart(client,devid,wl_target);
+	  }
+	};
+	    
+	
+      
+    }
     else
       {
 	std::cout << "unregognised command: " << cmd << std::endl;
