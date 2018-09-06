@@ -169,7 +169,7 @@ class Client:
         ss = self._servdescribe.SerializeToString()
         with open(fname,'wb') as f:
             f.write(ss)
-                
+        
     def __getitem__(self,keystr):
         if not hasattr(self,"_devtypes"):
             self._devtypes = [_._devtp for _ in self._devices]
@@ -312,10 +312,10 @@ class ServerFlag:
         req.flagname = flagname
         if isinstance(val,float):
             req.dblval = val
-        elif isinstance(val,int):
-            req.intval = val
         elif isinstance(val,bool):
             req.boolval = val
+        elif isinstance(val,int):
+            req.intval = val
         elif isinstance(val,str):
             req.stringval = val.encode("ASCII")
         else:
