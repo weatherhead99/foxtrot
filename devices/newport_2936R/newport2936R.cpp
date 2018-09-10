@@ -300,7 +300,12 @@ foxtrot::devices::powermodes foxtrot::devices::newport2936R::getMode()
   return sw;
 }
 #else
-#warning ("WARNING: using hacked functions for custom return types")
+
+#ifdef linux
+    #warning ("WARNING: using hacked functions for custom return types")
+#else
+    #pragma message ("WARNING: using hacked functions for custom return types")
+#endif 
 int foxtrot::devices::newport2936R::getMode()
 {
   auto repl = cmd("PM:MODE?");
