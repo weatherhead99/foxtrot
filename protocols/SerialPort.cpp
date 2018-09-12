@@ -151,6 +151,7 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
   
     #ifdef linux
     //drain serial port
+      _lg.strm(sl::trace) << "draining serial port";
     auto ret = tcdrain( _sport.native_handle() );
     if(ret)
     {
