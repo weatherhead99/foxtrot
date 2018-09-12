@@ -180,6 +180,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			  lg.Info("setting up Cornerstone 260 monochromator");
 			  auto cornerstone_params = params->at("cornerstone_params");
 			  auto cornerstone_serial = std::make_shared<foxtrot::protocols::SerialPort>(&cornerstone_params);
+			  cornerstone_serial->setDrain(true);
 			  auto monoch = std::unique_ptr<foxtrot::devices::cornerstone260>(new foxtrot::devices::cornerstone260(cornerstone_serial));
 			  
 			  //calibrate monochromator - TODO do from configuration file somewhere
