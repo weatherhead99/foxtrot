@@ -15,6 +15,14 @@ include(GenerateExportHeader)
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 
 
+
+#enable ccache if available
+find_program(CCACHE_PROGRAM ccache)
+if(CCACHE_PROGRAM)
+  message(STATUS "ccache found, enabling on build")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+endif()
+
 set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 set(CMAKE_CXX_VISIBILITY_PRESET default)
 
