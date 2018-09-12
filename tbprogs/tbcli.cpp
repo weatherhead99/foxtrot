@@ -326,9 +326,23 @@ int main(int argc, char** argv)
 	    lg.Info("wavelength target: " + std::to_string(wl_target));
 	    set_wavelength_smart(client,devid,wl_target);
 	  }
-	};
-	    
-	
+	}
+	else if(subcmd == "filter")
+	 {
+	   if(!vm.count("value"))
+	   {
+	     lg.Info("printing filter");
+	     std::cout << "filter number: " << get_filter(client,devid) << std::endl;
+	   }
+	  else
+	  {
+	    lg.Info("setting filter");
+	    int filter_target = std::stoi(vm["value"].as<std::string>());
+	    lg.Info("filter target: " + std::to_string(filter_target));
+	    set_filter_dumb(client,devid,filter_target);
+	  }
+	  
+	 }
       
     }
     else
