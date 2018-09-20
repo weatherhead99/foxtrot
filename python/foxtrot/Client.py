@@ -83,16 +83,16 @@ def _process_sync_response(repl,streamraw=False):
         if streamraw:
             return rawbytes
             
-        if dtp is UCHAR:
+        if dtp is UCHAR_TYPE:
             print("UCHAR")
             return list(rawbytes)
-        elif dtp is USHORT:
+        elif dtp is USHORT_TYPE:
             structstr = '<%dH' % (len(rawbytes) // 2)
         
-        elif dtp is UINT:
+        elif dtp is UINT_TYPE:
             structstr = '<%dI' % (len(rawbytes) // 4)
             
-        elif dtp is BDOUBLE:
+        elif dtp is BDOUBLE_TYPE:
             print("BDOUBLE")
             structstr = '<%dd' % (len(rawbytes) // 8)
         
