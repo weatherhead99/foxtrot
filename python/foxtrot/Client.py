@@ -83,16 +83,16 @@ def _process_sync_response(repl,streamraw=False):
         if streamraw:
             return rawbytes
             
-        if dtp is UCHAR_TYPE:
+        if dtp == UCHAR_TYPE:
             print("UCHAR")
             return list(rawbytes)
-        elif dtp is USHORT_TYPE:
+        elif dtp == USHORT_TYPE:
             structstr = '<%dH' % (len(rawbytes) // 2)
         
-        elif dtp is UINT_TYPE:
+        elif dtp == UINT_TYPE:
             structstr = '<%dI' % (len(rawbytes) // 4)
             
-        elif dtp is BDOUBLE_TYPE:
+        elif dtp == BDOUBLE_TYPE:
             print("BDOUBLE")
             structstr = '<%dd' % (len(rawbytes) // 8)
         
@@ -192,13 +192,13 @@ def _fake_call_sync(obj,client,*args,**kwargs):
     if len(args) + len(kwargs) != len(req.args):
         raise IndexError("incorrect number of arguments to dummy func")
     
-    repl = datachunk() if obj._captp is STREAM else capability_response()
+    repl = datachunk() if obj._captp == STREAM else capability_response()
     
     repl.msgid = req.msgid
     repl.capname = req.capname
     repl.devid = req.devid
     
-    if obj._captp is STREAM:
+    if obj._captp == STREAM:
         pass    
     else:
         if obj._rettp in value_type_to_return_field_dict:
@@ -257,11 +257,11 @@ class Capability:
         self._cl = client
         
     def __repr__(self):
-        if self._captp is VALUE_READONLY :
+        if self._captp == VALUE_READONLY :
             infostr = " (readonly value)"
-        elif self._captp is VALUE_READWRITE:
+        elif self._captp == VALUE_READWRITE:
             infostr = " (read/write value)"
-        elif self._captp is ACTION:
+        elif self._captp == ACTION:
             infostr = " (action)"
         else:
             infostr = " (data stream)"
@@ -273,7 +273,7 @@ class Capability:
             return self._capname + infostr
         
     def construct_request(self,*args,**kwargs):
-        if self._captp is not VALUE_READWRITE:
+        if self._captp != VALUE_READWRITE:
             capargs = _construct_args(self._argnames,*args,**kwargs)
         elif len(args) > 0 or len(kwargs) > 0:
             capargs = _construct_args(self._argnames,*args,**kwargs)
@@ -281,18 +281,18 @@ class Capability:
             capargs = _construct_args([],*args,**kwargs)
             
         
-        reqtp = chunk_request if self._captp is STREAM else capability_request
+        reqtp = chunk_request if self._captp == STREAM else capability_request
         
         req = reqtp(msgid = self._msgid, devid = self._devid, capname = self._capname, args = capargs)        
         self._msgid +=1
         
-        if self._captp is STREAM:
+        if self._captp == STREAM:
             req.chunksize = self.chunksize
             
         return req
     
     def call_cap_sync(self,client,*args,**kwargs):
-        stubfun = client._stub.FetchData if self._captp is STREAM else client._stub.InvokeCapability
+        stubfun = client._stub.FetchData if self._captp == STREAM else client._stub.InvokeCapability
         ret = stubfun(self.construct_request(*args,**kwargs))
         
         return ret
