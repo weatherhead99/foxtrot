@@ -92,9 +92,15 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			auto archon = std::unique_ptr<foxtrot::devices::archonraw> (
 			    new foxtrot::devices::archonraw(archontcp));
 			
+			//archon trigger setup etc
+			archon->settrigoutinvert(false);
+			archon->settrigoutforce(false);
+			archon->settrigoutlevel(false);
 			archon->settrigoutpower(true);
 			auto modules = archon->getAllModules();
 			setup_heaterX(modules, harness, lg);
+			
+			
 			
 			//============Archon biases & drivers================//
 			setup_hvxbias(modules,harness,lg);
