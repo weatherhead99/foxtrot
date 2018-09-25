@@ -158,6 +158,13 @@ namespace foxtrot {
     void settrigoutinvert(bool invert);
     bool gettrigoutinvert();
     
+    void settrigoutlevel(bool onoff);
+    bool gettrigoutlevel();
+    
+    void settrigoutforce(bool onoff);
+    bool gettrigoutforce();
+    
+    
     void setrawenable(bool onoff);
     bool getrawenable();
     

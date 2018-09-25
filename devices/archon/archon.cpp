@@ -1239,6 +1239,32 @@ bool foxtrot::devices::archon::gettrigoutpower()
 }
 
 
+bool devices::archon::gettrigoutforce()
+{
+  auto val = readKeyValue("TRIGOUTFORCE");
+  return std::stoi(val);
+}
+
+void devices::archon::settrigoutforce(bool onoff)
+{
+  writeKeyValue("TRIGOUTFORCE", std::to_string((int) onoff));
+  cmd("APPLYSYSTEM");
+}
+
+void devices::archon::settrigoutlevel(bool onoff)
+{
+  writeKeyValue("TRIGOUTLEVEL", std::to_string((int) onoff));
+  cmd("APPLYSYSTEM");
+}
+
+bool devices::archon::gettrigoutlevel()
+{
+  auto val = readKeyValue("TRIGOUTLEVEL");
+  return std::stoi(val);
+}
+
+
+
 
 void devices::archon::setframemode(int mode)
 {
@@ -1334,6 +1360,10 @@ RTTR_REGISTRATION
  (parameter_names("invert"))
  .property("trigoutpower", &archon::gettrigoutpower, &archon::settrigoutpower)
  .property("rawenable", &archon::getrawenable, &archon::setrawenable)
+ (parameter_names("onoff"))
+ .property("trigoutlevel", &archon::gettrigoutlevel, &archon::settrigoutlevel)
+ (parameter_names("onoff"))
+ .property("trigoutforce", &archon::gettrigoutforce, &archon::settrigoutforce)
  (parameter_names("onoff"))
  .property("rawchannel",&archon::getrawchannel,&archon::setrawchannel)
  (parameter_names("ch"))
