@@ -95,26 +95,8 @@ int main(int argc, char** argv)
     
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
     
-    std::ifstream ifs(config_file);
-    if(ifs.good())
-    {
-        lg.strm(sl::debug) << "successfully opened config file, parsing...";
-        
-        try{
-            po::store(po::parse_config_file(ifs,desc),vm);
-        }
-        catch(std::exception& err)
-        {
-            std::cout << "caught an exception here..." << std::endl;
-            std::cout << "what? " <<  err.what() << std::endl;   
-        };
-        lg.strm(sl::trace) << "stored parsed variables";
-        
-    }
-    else
-    {
-        lg.Debug("couldn't open specified config file...");
-    };
+    
+    foxtrot::load_config_file(config_file,desc,vm,&lg);
 
     lg.strm(sl::trace) << "notifying..";
     po::notify(vm);

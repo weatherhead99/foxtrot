@@ -5,6 +5,7 @@
 #include <Logging.h>
 #include <fstream>
 #include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
 
 
 namespace pt = boost::property_tree;
@@ -89,7 +90,7 @@ foxtrot::exptserve_options foxtrot::load_config_from_file(const string& filename
     return out;
 }
 
-void load_config_file(const std::string& path,
+bool load_config_file(const std::string& path,
                           boost::program_options::options_description& desc,
                           boost::program_options::variables_map& vm,
                           foxtrot::Logging* logger = nullptr)
@@ -102,9 +103,17 @@ void load_config_file(const std::string& path,
         
     
             po::store(po::parse_config_file(ifs,desc),vm);
+        if(logger)
+            logger->strm(sl::trace) << "stored parsed variables from config file";
+        
+        return true;
     }
-    
-    
+    else
+    {
+        if(logger)
+            logger->strm(sl::debug) << "can't open specified config file for reading...";
+        return false;
+    }
     
 }
     

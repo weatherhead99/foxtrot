@@ -34,7 +34,7 @@ namespace foxtrot
     void create_config_file(const string& filename);
     exptserve_options load_config_from_file(const string& filename);
     
-    void load_config_file(const std::string& path,
+    bool load_config_file(const std::string& path,
                           boost::program_options::options_description& desc,
                           boost::program_options::variables_map& vm,
                           foxtrot::Logging* logger = nullptr);
