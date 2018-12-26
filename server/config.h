@@ -32,7 +32,6 @@ namespace foxtrot
     
     
     void create_config_file(const string& filename);
-    exptserve_options load_config_from_file(const string& filename);
     
     bool load_config_file(const std::string& path,
                           boost::program_options::options_description& desc,

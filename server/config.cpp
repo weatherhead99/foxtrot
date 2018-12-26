@@ -67,28 +67,6 @@ void foxtrot::create_config_file(const string& filename)
 };
 
 
-foxtrot::exptserve_options foxtrot::load_config_from_file(const string& filename)
-{
-    exptserve_options out;
-    boost::filesystem::path path(filename);
-    
-    if(!boost::filesystem::exists(path))
-    {
-        throw std::runtime_error("couldn't open config file...");
-    };
-    
-    pt::ptree tree;
-    pt::read_ini(filename,tree);
-    
-    out.setupfile = tree.get_optional<string>("exptserve.setupfile");
-    out.parameterfile = tree.get_optional<string>("exptserve.parameterfile");
-    out.threads = tree.get_optional<int>("exptserve.threads");
-    out.debuglevel = tree.get_optional<int>("exptserve.debuglevel");
-    out.keyfile = tree.get_optional<string>("exptserve.keyfile");
-    out.certfile = tree.get_optional<string>("exptserve.certfile");
-    
-    return out;
-}
 
 bool load_config_file(const std::string& path,
                           boost::program_options::options_description& desc,
