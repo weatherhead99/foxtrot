@@ -3,17 +3,21 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <Logging.h>
+#include <fstream>
+#include <boost/program_options.hpp>
+
 
 namespace pt = boost::property_tree;
+namespace po = boost::program_options;
 
 
-
-std::string foxtrot::get_config_file_path()
+std::string foxtrot::get_config_file_path(const std::string& envvarname, 
+                                             const std::string& defaultfilename)
 {
-    
+       
     foxtrot::Logging lg("get_config_file_path");
     
-    char* path = std::getenv("FOXTROT_CONFIG");
+    char* path = std::getenv(envvarname.c_str());
     
     if(path == nullptr)
     {
@@ -30,7 +34,7 @@ std::string foxtrot::get_config_file_path()
 #endif
         auto home = boost::filesystem::path(homeenv);
         home /= ".foxtrot" ;
-        home /= "exptserve.config" ;
+        home /= defaultfilename ;
         return home.string();
     }
     else
@@ -38,8 +42,8 @@ std::string foxtrot::get_config_file_path()
         return std::string(path);
     }
     
+    
 }
-
 
 
 void foxtrot::create_config_file(const string& filename)
@@ -84,3 +88,25 @@ foxtrot::exptserve_options foxtrot::load_config_from_file(const string& filename
     
     return out;
 }
+
+void load_config_file(const std::string& path,
+                          boost::program_options::options_description& desc,
+                          boost::program_options::variables_map& vm,
+                          foxtrot::Logging* logger = nullptr)
+{
+    std::ifstream ifs(path);
+    if(ifs.good())
+    {
+        if(logger)
+            logger->strm(sl::debug) << "successfully opened config file, parsing...";
+        
+    
+            po::store(po::parse_config_file(ifs,desc),vm);
+    }
+    
+    
+    
+}
+    
+
+

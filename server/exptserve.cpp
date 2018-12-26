@@ -64,7 +64,8 @@ int main(int argc, char** argv)
     std::string bindstr;
     
     foxtrot::Logging lg("exptserve");
-    auto config_file = foxtrot::get_config_file_path();
+    
+    auto config_file = foxtrot::get_config_file_path("FOXTROT_CONFIG", "exptserve.config");
     foxtrot::create_config_file(config_file);
     lg.strm(sl::info) <<  "config file:" << config_file;
     

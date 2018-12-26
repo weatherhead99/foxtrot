@@ -6,6 +6,7 @@
 #include <sstream>
 #include "client.h"
 #include "Logging.h"
+#include "config.h"
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -20,31 +21,43 @@ int main(int argc, char** argv)
   po::options_description desc("telemetry broadcaster for foxtrot telemetry.");
   foxtrot::setDefaultSink();
   
-  std::string configfile;
+  std::string telemfile;
   int port = 0;
   std::string addr;
   int debuglevel = 0;
   std::string bindstr;
   
+  foxtrot::Logging lg("telem_bcast");
+  auto config_file = foxtrot::get_config_file_path("FOXTROT_TELEM_CONFIG", "telemetry.config");
+  foxtrot::create_config_file(config_file);
+  lg.strm(sl::info) << "config file path: " << config_file;
+  
+  
+  
+  
   desc.add_options()
-  ("configfile,c",po::value<std::string>(&configfile),"config file")
+  ("telemfile,t",po::value<std::string>(&telemfile),"config file")
   ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
   ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),"address of foxtrot server")
   ("debuglevel,d", po::value<int>(&debuglevel)->default_value(3),"debugging output level")
   ("bindstr,b",po::value<std::string>(&bindstr)->default_value("tcp://*:50052"),"bind string for server");
 
   po::positional_options_description pdesc;
-  pdesc.add("configfile",-1);
+  pdesc.add("telemfile",-1);
   
   
   po::variables_map vm;
   po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(), vm);
   
+  std::ifstream ifs(config_file);
+  
+  
+  
   po::notify(vm);
   
-  if(!vm.count("configfile"))
+  if(!vm.count("telemfile"))
   {
-    cerr << "a configfile is required..." << endl;
+    cerr << "a telemetry configfile is required..." << endl;
     return -1;
   }
   
@@ -56,6 +69,7 @@ int main(int argc, char** argv)
   
   foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
   
+  
   std::ostringstream oss;
   oss << addr << ":" << port;
 
@@ -64,7 +78,7 @@ int main(int argc, char** argv)
   
   telemserv.BindSocket(bindstr);
   
-  configure_telemetry_server(configfile,cl,telemserv);
+  configure_telemetry_server(telemfile,cl,telemserv);
   
   auto servtask = telemserv.runserver();
   
