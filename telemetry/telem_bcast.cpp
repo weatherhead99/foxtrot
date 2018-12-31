@@ -26,6 +26,8 @@ int main(int argc, char** argv)
   std::string addr;
   int debuglevel = 0;
   std::string bindstr;
+  std::string payload_type;
+  std::string transport_type;
   
   foxtrot::Logging lg("telem_bcast");
   auto config_file = foxtrot::get_config_file_path("FOXTROT_TELEM_CONFIG", "telemetry.config");
@@ -38,9 +40,16 @@ int main(int argc, char** argv)
   desc.add_options()
   ("telemfile,t",po::value<std::string>(&telemfile),"config file")
   ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
-  ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),"address of foxtrot server")
+  ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),
+            "address of foxtrot server")
   ("debuglevel,d", po::value<int>(&debuglevel)->default_value(3),"debugging output level")
-  ("bindstr,b",po::value<std::string>(&bindstr)->default_value("tcp://*:50052"),"bind string for server");
+  ("bindstr,b",po::value<std::string>(&bindstr)->default_value("tcp://*:50052"),
+            "bind string for server")
+  ("payload_type,m", po::value<std::string>(&payload_type)->default_value("protobuf"),
+            "telemetry message payload type (protobuf or json)")
+  ("transport_type,c", po::value<std::string>(&transport_type)->default_value("nanomsg"),
+            "transport type for telemetry (nanomsg or mqtt)")
+  ;
 
   po::positional_options_description pdesc;
   pdesc.add("telemfile",-1);
