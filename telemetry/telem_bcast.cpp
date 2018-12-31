@@ -38,7 +38,7 @@ int main(int argc, char** argv)
   
   
   desc.add_options()
-  ("telemfile,t",po::value<std::string>(&telemfile),"config file")
+  ("telemfile,t",po::value<std::string>(&telemfile)->required(),"config file")
   ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
   ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),
             "address of foxtrot server")
@@ -63,18 +63,17 @@ int main(int argc, char** argv)
   
   foxtrot::load_config_file(config_file, desc,vm,&lg);
   
-  
-  po::notify(vm);
-  
-  if(!vm.count("telemfile"))
+  try{
+    po::notify(vm);
+  }
+  catch(boost::program_options::required_option& err)
   {
-    cerr << "a telemetry configfile is required..." << endl;
-    return -1;
+      lg.strm(sl::fatal) << "required option missing...";
+      lg.strm(sl::fatal) << err.what();
+      std::exit(1);
   }
   
   foxtrot::check_debug_level_and_exit(debuglevel, lg);
-  
-  
   
   std::ostringstream oss;
   oss << addr << ":" << port;

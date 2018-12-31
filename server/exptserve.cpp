@@ -74,9 +74,9 @@ int main(int argc, char** argv)
     short unsigned port = 0;
     po::options_description desc("experiment server for foxtrot devices. Allowed options:");
     desc.add_options()
-    ("setupfile,s",po::value<std::string>(&setupfile),"device setup file")
+    ("setupfile,s",po::value<std::string>(&setupfile)->required(),"device setup file")
     ("parameterfile,p",po::value<std::string>(&parameterfile),"device setup parameters (JSON file)")
-    ("servername,n",po::value<std::string>(&servname),"server name")
+    ("servername,n",po::value<std::string>(&servname)->required(),"server name")
     ("dump", po::value<std::string>(), "dump server JSON description")
     ("debuglevel,d",po::value<int>(&debuglevel)->default_value(3),"debugging output level")
     ("threads,t",po::value<int>(&nthreads)->default_value(4),"number of server threads to run")
@@ -99,25 +99,24 @@ int main(int argc, char** argv)
     foxtrot::load_config_file(config_file,desc,vm,&lg);
 
     lg.strm(sl::trace) << "notifying..";
-    po::notify(vm);
+    
+    try{
+        po::notify(vm);
+    }
+    catch(boost::program_options::required_option& err)
+    {
+        lg.strm(sl::fatal) << "required option missing...";
+        lg.strm(sl::fatal) << err.what();
+        std::exit(1);
+        
+    }
 
 
     foxtrot::check_debug_level_and_exit(debuglevel,lg);
     
     foxtrot::setDefaultSink();
     
-    if(!vm.count("setupfile"))
-    {
-     lg.Fatal("a setupfile is requried...");
-      return 1;
-    }
     
-    if(!vm.count("servername"))
-    {
-      lg.Fatal("server name is required...");
-      return 1;
-    }
-
     std::unique_ptr<std::map<std::string,foxtrot::parameterset>> params;
     
     if(!vm.count("parameterfile"))
