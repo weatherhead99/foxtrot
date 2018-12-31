@@ -135,6 +135,10 @@ void foxtrot::NanomsgTransport::BroadcastTelemetry(const foxtrot::TelemetryMessa
         _lg.Error("invalid number of bytes written!");
         _lg.strm(sl::error) << "expected: " << oss.str().size() << ", actual: " << nbytes;
     }
+    else
+    {
+        _lg.strm(sl::trace) << "wrote: " << nbytes << "bytes";
+    }
     
 };
 
