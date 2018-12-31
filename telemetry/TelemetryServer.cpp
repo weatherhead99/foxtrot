@@ -153,16 +153,6 @@ const std::string& foxtrot::NanomsgTransport::getTopic() const
 }
 
 
-foxtrot::TelemetryServer::TelemetryServer( const std::string& topic, foxtrot::Client& client, int tick_ms)
-:  _lg("TelemetryServer"), _client(client), _tick_ms(tick_ms)
-{
-    _legacy = true;
-    GOOGLE_PROTOBUF_VERIFY_VERSION;
-    
-    _transport.reset(new NanomsgTransport(topic));
-    
-    
-}
 
 foxtrot::TelemetryServer::TelemetryServer(foxtrot::Client& client, 
                                           std::unique_ptr<TelemetryTransport> transport,
@@ -170,8 +160,10 @@ foxtrot::TelemetryServer::TelemetryServer(foxtrot::Client& client,
                                          )
 : _lg("TelemetryServer") , _client(client), _tick_ms(tick_ms)
 {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     _transport = std::move(transport);
 };
+
 
 foxtrot::TelemetryServer::~TelemetryServer()
 {
@@ -189,19 +181,6 @@ void foxtrot::TelemetryServer::AddTelemetryItem(telemfun fun, unsigned ticks, co
 void foxtrot::TelemetryServer::AddNonTelemetryItem(telemfun fun, unsigned int ticks, const std::string& name)
 {
     _funs.push_back(std::make_tuple(ticks,fun,name,"",false));
-}
-
-
-void foxtrot::TelemetryServer::BindSocket(const std::string& bindaddr)
-{
-    if(_legacy)
-        static_cast<NanomsgTransport*>(_transport.get())->BindSocket(bindaddr);
-    else
-    {
-        _lg.Error("non legacy transport not implemented yet!");
-        throw std::logic_error("non legacy transport not implemented yet!");
-    }
-    
 }
 
 
@@ -319,17 +298,3 @@ void foxtrot::TelemetryServer::set_tick_ms(int tick_ms)
   _tick_ms = tick_ms;
 
 }
-
-void foxtrot::TelemetryServer::set_topic(const std::string& topic)
-{
-  if(_legacy)
-  {
-      static_cast<NanomsgTransport*>(_transport.get())->setTopic(topic);
-  }
-  else
-  {
-      _lg.Error("non legacy transport not implemented yet!");
-      throw std::logic_error("non legacy transport not implemented yet!");
-  }
-}
-

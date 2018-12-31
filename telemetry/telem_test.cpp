@@ -5,6 +5,7 @@
 #include "client.h"
 
 #include <nanomsg/nn.h>
+#include <memory>
 
 using std::cout;
 using std::endl;
@@ -27,12 +28,15 @@ int main(int argc, char** argv)
     
     foxtrot::Client cl("localhost:50051");
     
-    foxtrot::TelemetryServer telem("test_telem",cl,100);
+    
+    auto transport = std::make_unique<foxtrot::NanomsgTransport>("test_telem");
+    transport->BindSocket("tcp://127.0.0.1:50052");
+    
+    foxtrot::TelemetryServer telem(cl,std::move(transport),100);
     
     telem.AddTelemetryItem(counter_telem,5,"counter");
     telem.AddTelemetryItem(rdb_telem,7,"randomdouble");
     
-    telem.BindSocket("tcp://127.0.0.1:50052");
 
     
     auto fut = telem.runserver();

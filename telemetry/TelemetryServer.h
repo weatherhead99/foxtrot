@@ -59,22 +59,18 @@ namespace foxtrot
     class TelemetryServer
     {
     public:
-        TelemetryServer(const std::string& topic, foxtrot::Client& client, int tick_ms);
         TelemetryServer(foxtrot::Client& client, std::unique_ptr<TelemetryTransport> transport, int tick_ms);
-        
         
         
         ~TelemetryServer();
         
-        void BindSocket(const std::string& bindaddr);
         void AddTelemetryItem(telemfun fun, unsigned ticks, const std::string& name, const std::string& subtopic ="");
         void AddNonTelemetryItem(telemfun fun, unsigned ticks, const std::string& name);
 	
         std::future<std::exception_ptr> runserver();
         
 	
-	void set_tick_ms(int tick_ms);
-	void set_topic(const std::string& topic);
+        void set_tick_ms(int tick_ms);
     
     private:
         foxtrot::Client& _client;
