@@ -40,4 +40,6 @@ namespace foxtrot
     
     
     
+    void check_debug_level_and_exit(int lvl, foxtrot::Logging& lg);
+    
 }

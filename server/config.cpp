@@ -95,5 +95,15 @@ bool foxtrot::load_config_file(const std::string& path,
     
 }
     
-
+void foxtrot::check_debug_level_and_exit(int lvl, foxtrot::Logging& lg)
+{
+    if(lvl < 0 || lvl > 5)
+    {
+        lg.Fatal("invalid debug level specified!");
+        std::exit(1);
+    }
+    
+    foxtrot::setLogFilterLevel(static_cast<sl>(5 - lvl));
+    
+}
 

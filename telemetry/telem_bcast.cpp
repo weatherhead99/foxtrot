@@ -56,10 +56,12 @@ int main(int argc, char** argv)
   
   
   po::variables_map vm;
+  
+  lg.strm(sl::debug) << "options setup, about to open config file...";
+  
   po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(), vm);
   
-  std::ifstream ifs(config_file);
-  
+  foxtrot::load_config_file(config_file, desc,vm,&lg);
   
   
   po::notify(vm);
@@ -70,13 +72,8 @@ int main(int argc, char** argv)
     return -1;
   }
   
-  if(debuglevel < 0 || debuglevel > 5)
-  {
-    cerr << "invalid debug level specified!" << endl;
-    return -1;
-  }
+  foxtrot::check_debug_level_and_exit(debuglevel, lg);
   
-  foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
   
   
   std::ostringstream oss;

@@ -102,13 +102,8 @@ int main(int argc, char** argv)
     po::notify(vm);
 
 
-    lg.strm(sl::trace) << " checking debuglevel";
-    if(debuglevel < 0 || debuglevel > 5)
-    {
-      lg.Fatal("invalid debug level specified!");
-      return 1;
-    }
-    foxtrot::setLogFilterLevel(static_cast<sl>(5 - debuglevel));
+    foxtrot::check_debug_level_and_exit(debuglevel,lg);
+    
     foxtrot::setDefaultSink();
     
     if(!vm.count("setupfile"))
