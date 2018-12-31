@@ -4,9 +4,7 @@ if(FOXTROT_CONAN_BUILD)
   
 else()
   include(FindPkgConfig)
-  #pkg_search_module(NANOMSG REQUIRED nanomsg)
-  #NOTE: the below works on ubuntu, is it different on suse?
-  pkg_search_module(NANOMSG REQUIRED libnanomsg)
+  pkg_search_module(NANOMSG nanomsg libnanomsg)
 endif()
   
 message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
