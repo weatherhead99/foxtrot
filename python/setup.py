@@ -10,7 +10,8 @@ setup(
               'grpcio-tools',
               'nanomsg >= 1.0',
               'compiler',
-              'visitor'
+              'visitor',
+              'mypy'
               ]
       
       )

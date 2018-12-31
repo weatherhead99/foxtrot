@@ -13,6 +13,8 @@ from foxtrot.Errors import *
 import types
 import struct
 
+import mypy
+
 DEFAULT_CHUNKSIZE=1000
 
 value_type_to_return_field_dict = {FLOAT_TYPE : ('dblret', float),
@@ -136,7 +138,7 @@ def _reinterpret_cast_bytes(bts,tp):
 
 
 class Client:
-    def __init__(self,connstr,certfile=None):
+    def __init__(self,connstr: str,certfile:str=None) -> None:
         if certfile is None:
             self._channel = grpc.insecure_channel(connstr)
         else:
@@ -151,7 +153,7 @@ class Client:
         
         self._setup_device_tree()
         
-    def _setup_device_tree(self):
+    def _setup_device_tree(self) -> None: 
         self._devices = []
         
         for devkey in self._servdescribe.devs_attached.keys():
@@ -302,11 +304,11 @@ class Capability:
         return _process_sync_response(repl)
     
 class ServerFlag:
-    def __init__(self,client,flagname):
+    def __init__(self,client: Client,flagname: str):
         self._flagname = flagname
         self._client = client
 
-    def construct_request(self,flagname, val=0):
+    def construct_request(self,flagname: str, val=0) -> serverflag:
         req = serverflag()
         req.msgid = 0
         req.flagname = flagname
