@@ -68,10 +68,10 @@ void foxtrot::create_config_file(const string& filename)
 
 
 
-bool load_config_file(const std::string& path,
+bool foxtrot::load_config_file(const std::string& path,
                           boost::program_options::options_description& desc,
                           boost::program_options::variables_map& vm,
-                          foxtrot::Logging* logger = nullptr)
+                          foxtrot::Logging* logger)
 {
     std::ifstream ifs(path);
     if(ifs.good())
