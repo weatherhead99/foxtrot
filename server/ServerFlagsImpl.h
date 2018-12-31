@@ -72,4 +72,23 @@ namespace foxtrot {
       
   };
   
+  struct DropServerFlagLogic
+  {
+      typedef serverflag reqtp;
+      typedef serverflag repltp;
+      
+      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
+      const static bool newcall = true;
+      
+      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDropServerFlag;
+      DropServerFlagLogic(std::shared_ptr<flagmap> vars);
+      bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
+      
+  private:
+      std::shared_ptr<flagmap> vars_;
+      foxtrot::Logging lg_;
+      
+          
+  };
+  
 }

@@ -69,7 +69,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     add_logic<SetServerFlagsLogic>(_serverflags);
     add_logic<GetServerFlagsLogic>(_serverflags);
     add_logic<ListServerFlagsLogic>(_serverflags);
-    
+    add_logic<DropServerFlagLogic>(_serverflags);
 }
 
 

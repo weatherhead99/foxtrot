@@ -49,6 +49,11 @@ class exptserveStub(object):
         request_serializer=foxtrot__pb2.empty.SerializeToString,
         response_deserializer=foxtrot__pb2.serverflaglist.FromString,
         )
+    self.DropServerFlag = channel.unary_unary(
+        '/foxtrot.exptserve/DropServerFlag',
+        request_serializer=foxtrot__pb2.serverflag.SerializeToString,
+        response_deserializer=foxtrot__pb2.serverflag.FromString,
+        )
 
 
 class exptserveServicer(object):
@@ -104,6 +109,13 @@ class exptserveServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def DropServerFlag(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_exptserveServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -141,6 +153,11 @@ def add_exptserveServicer_to_server(servicer, server):
           servicer.ListServerFlags,
           request_deserializer=foxtrot__pb2.empty.FromString,
           response_serializer=foxtrot__pb2.serverflaglist.SerializeToString,
+      ),
+      'DropServerFlag': grpc.unary_unary_rpc_method_handler(
+          servicer.DropServerFlag,
+          request_deserializer=foxtrot__pb2.serverflag.FromString,
+          response_serializer=foxtrot__pb2.serverflag.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

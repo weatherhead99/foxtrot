@@ -209,4 +209,5 @@ service exptserve
     rpc SetServerFlag (serverflag) returns (serverflag);
     rpc GetServerFlag (serverflag) returns (serverflag);
     rpc ListServerFlags (empty) returns (serverflaglist);
+    rpc DropServerFlag (serverflag) returns (serverflag);
 }

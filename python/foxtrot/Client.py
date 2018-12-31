@@ -204,6 +204,16 @@ class Client:
         sf = ServerFlag(self,name)
         sf.value = initval
         return sf
+    
+    def drop_server_flag(self, flag) -> None:
+        req = serverflag()
+        if isinstance(flag,str):
+            req.flagname = flag
+        elif isinstance(flag,ServerFlag):
+            req.flagname = flag._flagname
+        repl = self._stub.DropServerFlag(req)
+        _check_repl_err(repl)
+        
 
 def _fake_call_sync(obj,client,*args,**kwargs):
     req = obj.construct_request(*args,**kwargs)

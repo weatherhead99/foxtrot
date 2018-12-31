@@ -165,6 +165,41 @@ bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic:
 }
 
 
+foxtrot::DropServerFlagLogic::DropServerFlagLogic(std::shared_ptr<flagmap> vars)
+: lg_("DropServerFlagLogic"), vars_(vars)
+{}
+
+bool foxtrot::DropServerFlagLogic::HandleRequest(foxtrot::DropServerFlagLogic::reqtp& req, foxtrot::DropServerFlagLogic::repltp& repl, foxtrot::DropServerFlagLogic::respondertp& respond, foxtrot::HandlerTag* tag)
+{
+    lg_.Debug("processing drop server flag request");
+    
+    try {
+            repl.set_msgid(req.msgid());
+           lg_.strm(sl::debug) << "flag name: \"" << req.flagname() << "\""; 
+           auto it = vars_->find(req.flagname());
+           if(it == vars_->end())
+           {
+               throw std::out_of_range("no such flag");
+           }
+           
+           vars_->erase(it);
+           lg_.Debug("flag removed");
+           repl.set_flagname(req.flagname());
+           
+        
+    }
+    catch(...)
+    {
+        foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg_, tag);
+        lg_.Trace("returned from error handling");
+        return true;
+    }
+    
+    respond.Finish(repl,grpc::Status::OK, tag);
+    return true;
+    
+}
+
 
 
 
