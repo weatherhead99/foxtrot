@@ -21,6 +21,10 @@ namespace foxtrot
       std::string subtopic;
       std::string payload;
       ft_variant val;
+      
+      TelemetryMessage(const foxtrot::telemetry& telem_msg,
+          foxtrot::Logging* lg = nullptr);
+      TelemetryMessage();
     };
     
     class TelemetryTransport
@@ -41,6 +45,9 @@ namespace foxtrot
         void BindSocket(const std::string& bindaddr);
         void BroadcastTelemetry(const TelemetryMessage& msg) override;
         
+        void setTopic(const std::string& topic);
+        const std::string& getTopic() const;
+        
     private:
         int _bindid = 0;
         int _nn_pub_skt = 0;
@@ -53,7 +60,7 @@ namespace foxtrot
     {
     public:
         TelemetryServer(const std::string& topic, foxtrot::Client& client, int tick_ms);
-        TelemetryServer(foxtrot::Client& client, std::shared_ptr<TelemetryTransport> transport);
+        TelemetryServer(foxtrot::Client& client, std::unique_ptr<TelemetryTransport> transport, int tick_ms);
         
         
         
@@ -74,11 +81,13 @@ namespace foxtrot
         std::exception_ptr runforever();
         void sort_funs_vector();
         
+        std::unique_ptr<TelemetryTransport> _transport;
+        
         int _tick_ms;
-        std::string _topic;
         std::vector<std::tuple<unsigned, telemfun, std::string, std::string,bool>> _funs;
-        int _nn_pub_skt;
         foxtrot::Logging _lg;
+        
+        bool _legacy = false;
         
     };
     

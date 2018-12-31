@@ -39,6 +39,26 @@ private:
     
 };
 
+foxtrot::TelemetryMessage::TelemetryMessage()
+{}
+
+foxtrot::TelemetryMessage::TelemetryMessage(const foxtrot::telemetry& telem_msg, foxtrot::Logging* lg)
+{
+    name = telem_msg.name();
+    
+    if(!telem_msg.SerializeToString(&payload))
+    {
+        if(lg)
+        {
+            lg->Error("failed to serialize message!");
+            throw std::runtime_error("failed to serialize protobuf message!");
+        }
+        
+    };
+    
+}
+
+
 
 foxtrot::TelemetryTransport::TelemetryTransport()
 : _lg("TelemetryTransport")
@@ -118,35 +138,39 @@ void foxtrot::NanomsgTransport::BroadcastTelemetry(const foxtrot::TelemetryMessa
     
 };
 
+void foxtrot::NanomsgTransport::setTopic(const std::string& topic)
+{
+    _topic = topic;
+}
+
+const std::string& foxtrot::NanomsgTransport::getTopic() const
+{
+    return _topic;
+}
+
 
 foxtrot::TelemetryServer::TelemetryServer( const std::string& topic, foxtrot::Client& client, int tick_ms)
-:  _topic(topic), _lg("TelemetryServer"), _client(client), _tick_ms(tick_ms)
+:  _lg("TelemetryServer"), _client(client), _tick_ms(tick_ms)
 {
+    _legacy = true;
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     
-    _nn_pub_skt = nn_socket(AF_SP, NN_PUB);
-    if(_nn_pub_skt <0)
-    {
-        _lg.Error("error opening nanomsg socket");
-        throw std::runtime_error("nanomsg error! errno: " + std::to_string(errno));
-        
-    }
+    _transport.reset(new NanomsgTransport(topic));
+    
     
 }
 
+foxtrot::TelemetryServer::TelemetryServer(foxtrot::Client& client, 
+                                          std::unique_ptr<TelemetryTransport> transport,
+                                          int tick_ms
+                                         )
+: _lg("TelemetryServer") , _client(client), _tick_ms(tick_ms)
+{
+    _transport = std::move(transport);
+};
+
 foxtrot::TelemetryServer::~TelemetryServer()
 {
-    if(_nn_pub_skt >0)
-    {
-        
-        auto ret = nn_close(_nn_pub_skt);   
-        if(ret <0)
-        {
-            _lg.Error("error closing nanomsg socket");
-            _lg.Error("code : " + std::to_string(ret));
-        }
-    }
-    
     
 }
 
@@ -166,13 +190,13 @@ void foxtrot::TelemetryServer::AddNonTelemetryItem(telemfun fun, unsigned int ti
 
 void foxtrot::TelemetryServer::BindSocket(const std::string& bindaddr)
 {
-    auto ret = nn_bind(_nn_pub_skt,bindaddr.c_str());
-    if(ret < 0)
+    if(_legacy)
+        static_cast<NanomsgTransport*>(_transport.get())->BindSocket(bindaddr);
+    else
     {
-        throw std::runtime_error("nanomsg error: " + std::string(strerror(errno)));
+        _lg.Error("non legacy transport not implemented yet!");
+        throw std::logic_error("non legacy transport not implemented yet!");
     }
-    
-    _lg.Debug("endpoint id: " + std::to_string(ret));
     
 }
 
@@ -215,57 +239,38 @@ std::exception_ptr foxtrot::TelemetryServer::runforever()
                     success = true;
                   }
                   catch(...)
-		  {
-		    foxtrot_rpc_error_handling(std::current_exception(),msg,_lg,nullptr); 
-		  }
+                    {
+                        foxtrot_rpc_error_handling(std::current_exception(),msg,_lg,nullptr); 
+                    }
                   
                   auto now = boost::posix_time::microsec_clock::universal_time();
                   msg.set_name(std::get<2>(funtup));
                   msg.set_tstamp( (now-epoch).total_microseconds());
                   
-                  std::ostringstream oss;
+                  //note could throw...
+                  TelemetryMessage send_msg;
                   
-                  oss << _topic << "|" << std::get<3>(funtup) << std::get<2>(funtup) <<">";
-                                    
-                  _lg.Trace("topic string: " + oss.str());
-                  
-                  if(!msg.SerializeToOstream(&oss))
+                  try{
+                      send_msg = TelemetryMessage{msg};
+                  }
+                  catch(std::runtime_error& err)
                   {
-                      _lg.Error("failed to serialize message!");
+                      _lg.Debug("couldn't serialize, sending anyway...");
                   };
                   
-                  auto total_msg = oss.str();
+                  send_msg.subtopic = std::get<3>(funtup);
                   
-		  
-		  if(std::get<4>(funtup))
-		  {
-		    _lg.Trace("transmitting telemetry message...");
-		    auto nbytes = nn_send(_nn_pub_skt, total_msg.c_str(),total_msg.size(),0);
-		    if(nbytes != total_msg.size())
-		    {
-		    _lg.Error("invalid number of bytes written!");   
-		    _lg.Error("expected: " + std::to_string(total_msg.size()));
-		    _lg.Error("actual: " + std::to_string(nbytes));
-		    }  
-		    
-		  }
-		  else
-		  {
-		    _lg.Trace("non-transmission.");
-		    if(msg.has_err())
-		    {
-		      _lg.Trace("got error though, transmitting anyway");
-		      auto nbytes = nn_send(_nn_pub_skt,total_msg.c_str(),total_msg.size(),0);
-		      if(nbytes != total_msg.size())
-		      {
-			_lg.Error("invalid number of bytes written!");   
-			_lg.Error("expected: " + std::to_string(total_msg.size()));
-			_lg.Error("actual: " + std::to_string(nbytes));
-		      }
-		    }    
-		  }
-		  
-                  
+                    if(std::get<4>(funtup))
+                    {
+                        _lg.Trace("transmitting telemetry message...");
+                        _transport->BroadcastTelemetry(send_msg);
+                        
+                    }
+                    else
+                    {
+                        _lg.Trace("non-transmission.");
+                    }
+                    
               }
               
             }
@@ -313,6 +318,14 @@ void foxtrot::TelemetryServer::set_tick_ms(int tick_ms)
 
 void foxtrot::TelemetryServer::set_topic(const std::string& topic)
 {
-  _topic = topic;
+  if(_legacy)
+  {
+      static_cast<NanomsgTransport*>(_transport.get())->setTopic(topic);
+  }
+  else
+  {
+      _lg.Error("non legacy transport not implemented yet!");
+      throw std::logic_error("non legacy transport not implemented yet!");
+  }
 }
 
