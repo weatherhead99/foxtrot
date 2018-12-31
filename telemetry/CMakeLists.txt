@@ -17,7 +17,7 @@ message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
 # endif()
 
 
-add_library(foxtrot_telemetry TelemetryServer.cpp TelemetryClient.cpp)
+add_library(foxtrot_telemetry TelemetryServer.cpp TelemetryClient.cpp TelemetryTransport.cpp NanomsgTransport.cpp)
 target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl})
 
 target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${NANOMSG_INCLUDE_DIRS})

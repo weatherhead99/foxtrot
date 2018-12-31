@@ -7,53 +7,13 @@
 #include <map>
 #include <future>
 #include <tuple>
+#include "TelemetryTransport.h"
 
 typedef std::function<foxtrot::ft_variant(foxtrot::Client&)> telemfun;
 
 
-
 namespace foxtrot
 {
-    
-    struct TelemetryMessage
-    {
-      std::string name;
-      std::string subtopic;
-      std::string payload;
-      ft_variant val;
-      
-      TelemetryMessage(const foxtrot::telemetry& telem_msg,
-          foxtrot::Logging* lg = nullptr);
-      TelemetryMessage();
-    };
-    
-    class TelemetryTransport
-    {
-    public:
-        TelemetryTransport();
-        virtual ~TelemetryTransport();
-        virtual void BroadcastTelemetry(const TelemetryMessage& msg) = 0;
-    protected:
-        foxtrot::Logging _lg;
-    };
-    
-    class NanomsgTransport : public TelemetryTransport
-    {
-    public:
-        NanomsgTransport(const std::string& topic);
-        ~NanomsgTransport() override;
-        void BindSocket(const std::string& bindaddr);
-        void BroadcastTelemetry(const TelemetryMessage& msg) override;
-        
-        void setTopic(const std::string& topic);
-        const std::string& getTopic() const;
-        
-    private:
-        int _bindid = 0;
-        int _nn_pub_skt = 0;
-        std::string _topic;
-        
-    };
     
     
     class TelemetryServer

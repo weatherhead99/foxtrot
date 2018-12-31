@@ -1,4 +1,5 @@
 #include "TelemetryServer.h"
+#include "NanomsgTransport.h"
 #include "telem_util.h"
 #include <boost/program_options.hpp>
 #include <backward.hpp>

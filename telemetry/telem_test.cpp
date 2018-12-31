@@ -1,10 +1,10 @@
 #include "TelemetryServer.h"
+#include "NanomsgTransport.h"
 #include <iostream>
 #include <backward.hpp>
 
 #include "client.h"
 
-#include <nanomsg/nn.h>
 #include <memory>
 
 using std::cout;
