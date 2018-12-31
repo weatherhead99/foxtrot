@@ -33,6 +33,8 @@ private:
 };
 
 
+
+
 foxtrot::SetServerFlagsLogic::SetServerFlagsLogic(std::shared_ptr<flagmap> vars)
 : lg_("SetServerFlagsLogic"), vars_(vars)
 {
@@ -124,4 +126,45 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
   respond.Finish(repl,grpc::Status::OK,tag);
   return true;
 }
+
+
+
+foxtrot::ListServerFlagsLogic::ListServerFlagsLogic(std::shared_ptr<flagmap> vars)
+: lg_("ListServerFlagsLogic")
+{
+    
+    
+};
+
+bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic::reqtp& req, foxtrot::ListServerFlagsLogic::repltp& repl, foxtrot::ListServerFlagsLogic::respondertp& respond, foxtrot::HandlerTag* tag)
+{
+    lg_.Debug("processing list server flags request");
+    
+    //TODO: set message id somehow?
+    
+    try {
+    
+        for(auto& flag: *vars_)
+        {
+            auto* newflag = repl.add_flags();
+            newflag->set_flagname(flag.first);
+            boost::apply_visitor( server_flag_visitor(*newflag), flag.second);
+        }
+            
+    }
+    catch(...)
+    {
+        foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg_, tag);
+        lg_.Trace("returned from error handling");
+        return true;
+    }
+    
+    respond.Finish(repl,grpc::Status::OK, tag);
+    return true; 
+        
+}
+
+
+
+
 

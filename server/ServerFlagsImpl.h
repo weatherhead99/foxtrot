@@ -55,7 +55,23 @@ namespace foxtrot {
   typedef HandlerBase<GetServerFlagsLogic> GetServerFlagsImpl;
   
 
- 
+  struct ListServerFlagsLogic
+  {
+      typedef empty reqtp;
+      typedef serverflaglist repltp;
+      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
+      
+      const static bool newcall = true;
+      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestListServerFlags;
+      
+      ListServerFlagsLogic(std::shared_ptr<flagmap> vars);
+      bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
+      
+  private:
+      std::shared_ptr<flagmap> vars_;
+      foxtrot::Logging lg_;
+      
+  };
   
   
 }
