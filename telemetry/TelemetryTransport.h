@@ -22,11 +22,18 @@ struct TelemetryMessage
     class TelemetryTransport
     {
     public:
-        TelemetryTransport();
+        TelemetryTransport(const std::string& topic);
         virtual ~TelemetryTransport();
         virtual void BroadcastTelemetry(const TelemetryMessage& msg) = 0;
+        
+        void setTopic(const std::string& topic);
+        const std::string& getTopic() const;
+        
     protected:
         foxtrot::Logging _lg;
+        
+    private:
+        std::string _topic;
     };
     
 }

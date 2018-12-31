@@ -36,6 +36,9 @@ option(BUILD_KEYPAD "build nostromo n52 keypad library" OFF)
 option(BUILD_TELEMETRY "build telemetry server" ON)
 option(BUILD_PYTHON "build python bindings" ON)
 option(BUILD_UDEV "build udev bindings" OFF)
+option(BUILD_NANOMSG_TRANSPORT "build telemetry nanomsg transport" ON)
+option(BUILD_MQTT_TRANSPORT "build telemetry MQTT transport" ON)
+
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 #sets which winapi versions are needed, including e.g. killing

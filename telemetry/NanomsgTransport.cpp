@@ -15,7 +15,7 @@ template<typename funtp>void nn_err_proc(funtp&& fun, foxtrot::Logging& lg)
 
 
 foxtrot::NanomsgTransport::NanomsgTransport(const std::string& topic):
-_topic(topic)
+foxtrot::TelemetryTransport(topic)
 {
     
     nn_err_proc( [this]() {        this->_nn_pub_skt = nn_socket(AF_SP,NN_PUB);
@@ -57,7 +57,7 @@ void foxtrot::NanomsgTransport::BroadcastTelemetry(const foxtrot::TelemetryMessa
 {
     std::ostringstream oss;
     //TODO: this is where you implement the binary/ASCII transport
-    oss << _topic << "|" << msg.subtopic << "|" << msg.name << ">" << msg.payload;
+    oss << getTopic() << "|" << msg.subtopic << "|" << msg.name << ">" << msg.payload;
     
     _lg.Trace("topic string: " + oss.str());
     
@@ -74,15 +74,4 @@ void foxtrot::NanomsgTransport::BroadcastTelemetry(const foxtrot::TelemetryMessa
     }
     
 };
-
-void foxtrot::NanomsgTransport::setTopic(const std::string& topic)
-{
-    _topic = topic;
-}
-
-const std::string& foxtrot::NanomsgTransport::getTopic() const
-{
-    return _topic;
-}
-
 

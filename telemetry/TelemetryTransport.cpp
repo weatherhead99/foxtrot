@@ -20,11 +20,23 @@ foxtrot::TelemetryMessage::TelemetryMessage(const foxtrot::telemetry& telem_msg,
 }
 
 
-foxtrot::TelemetryTransport::TelemetryTransport()
-: _lg("TelemetryTransport")
+foxtrot::TelemetryTransport::TelemetryTransport(const std::string& topic)
+: _lg("TelemetryTransport"), _topic(topic)
 {
 }
 
 foxtrot::TelemetryTransport::~TelemetryTransport()
 {
 }
+
+void foxtrot::TelemetryTransport::setTopic(const std::string& topic)
+{
+    _topic = topic;
+}
+
+const std::string& foxtrot::TelemetryTransport::getTopic() const
+{
+    return _topic;
+}
+
+

@@ -1,23 +1,35 @@
 
-if(FOXTROT_CONAN_BUILD)
-  set(NANOMSG_LIBRARIES ${CONAN_LIBS_NANOMSG})
+set(telem_srcs TelemetryServer.cpp TelemetryClient.cpp TelemetryTransport.cpp)
+
+if(BUILD_NANOMSG_TRANSPORT)
+    list(APPEND telem_srcs NanomsgTransport.cpp)
+    if(FOXTROT_CONAN_BUILD)
+        set(NANOMSG_LIBRARIES ${CONAN_LIBS_NANOMSG})
   
-else()
-  include(FindPkgConfig)
-  pkg_search_module(NANOMSG nanomsg libnanomsg)
+    else()
+        include(FindPkgConfig)
+        pkg_search_module(NANOMSG nanomsg libnanomsg)
+        if(NOT NANOMSG_LIBRARIES)
+            message(FATAL_ERROR "couldn't find nanomsg libraries")
+        endif()
+    endif()
+    
+    message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
 endif()
-  
-message(STATUS "nanomsg libraries: ${NANOMSG_LIBRARIES}")
+
+if(BUILD_MQTT_TRANSPORT)
+    list(APPEND telem_srcs MQTTTransport.cpp)
+    
+    find_library(mqttpp_lib mosquittopp)
+    if(NOT mqttpp_lib)
+        message(FATAL_ERROR "couldn't find mosquittopp library")
+    endif()
+    message(STATUS "mosquittopp libraries: ${mqttpp_lib}")
+    
+endif()
 
 
-# if(FOXTROT_CONAN_BUILD)
-#   find_library(anl anl)
-#   message(STATUS "libanl: ${anl}")
-  
-# endif()
-
-
-add_library(foxtrot_telemetry TelemetryServer.cpp TelemetryClient.cpp TelemetryTransport.cpp NanomsgTransport.cpp)
+add_library(foxtrot_telemetry ${telem_srcs})
 target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl})
 
 target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${NANOMSG_INCLUDE_DIRS})
