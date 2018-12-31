@@ -130,7 +130,7 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
 
 
 foxtrot::ListServerFlagsLogic::ListServerFlagsLogic(std::shared_ptr<flagmap> vars)
-: lg_("ListServerFlagsLogic")
+: lg_("ListServerFlagsLogic"), vars_(vars)
 {
     
     
@@ -144,7 +144,7 @@ bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic:
     
     try {
     
-        for(auto& flag: *vars_)
+        for(auto& flag : *vars_)
         {
             auto* newflag = repl.add_flags();
             newflag->set_flagname(flag.first);

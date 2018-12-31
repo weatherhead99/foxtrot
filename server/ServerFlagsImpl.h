@@ -73,5 +73,5 @@ namespace foxtrot {
       
   };
   
-  
+  typedef HandlerBase<ListServerFlagsLogic> ListServerFlagsImpl;
 }
