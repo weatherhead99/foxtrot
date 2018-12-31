@@ -7,6 +7,9 @@
 #include "client.h"
 #include "Logging.h"
 #include "config.h"
+#include <memory>
+
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -28,17 +31,18 @@ int main(int argc, char** argv)
   std::string bindstr;
   std::string payload_type;
   std::string transport_type;
+  std::string topic;
   
   foxtrot::Logging lg("telem_bcast");
   auto config_file = foxtrot::get_config_file_path("FOXTROT_TELEM_CONFIG", "telemetry.config");
   foxtrot::create_config_file(config_file);
   lg.strm(sl::info) << "config file path: " << config_file;
   
-  
+  int tick_ms;
   
   
   desc.add_options()
-  ("telemfile,t",po::value<std::string>(&telemfile)->required(),"config file")
+  ("telemfile,f",po::value<std::string>(&telemfile)->required(),"config file")
   ("port,p",po::value<int>(&port)->default_value(50051),"port to connect to")
   ("addr,a", po::value<std::string>(&addr)->default_value("0.0.0.0"),
             "address of foxtrot server")
@@ -49,6 +53,9 @@ int main(int argc, char** argv)
             "telemetry message payload type (protobuf or json)")
   ("transport_type,c", po::value<std::string>(&transport_type)->default_value("nanomsg"),
             "transport type for telemetry (nanomsg or mqtt)")
+  ("tickms,t",po::value<int>(&tick_ms)->required(), "tick time in ms")
+  ("nanomsg_topic,nt",po::value<std::string>(&topic)->default_value(""),
+   "master topic for nanomsg transport")
   ;
 
   po::positional_options_description pdesc;
@@ -79,9 +86,11 @@ int main(int argc, char** argv)
   oss << addr << ":" << port;
 
   foxtrot::Client cl(oss.str());
-  foxtrot::TelemetryServer telemserv("",cl,2000);
   
-  telemserv.BindSocket(bindstr);
+  auto transport = std::make_unique<foxtrot::NanomsgTransport>(topic);
+  transport->BindSocket(bindstr);
+  
+  foxtrot::TelemetryServer telemserv(cl,std::move(transport),2000);
   
   configure_telemetry_server(telemfile,cl,telemserv);
   

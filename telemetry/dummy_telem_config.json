@@ -1,9 +1,4 @@
 {
-    "server" : {
-	"tick_ms" : 2000,
-	"topic" : "dummy"
-    },
-    
     "devices" : {
 	"dummyDevice" : {
 	    "doNothing" : {

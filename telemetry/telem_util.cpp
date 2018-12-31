@@ -23,9 +23,6 @@ void configure_telemetry_server(const std::string& fname, foxtrot::Client& cl, f
   ptree pt;
   boost::property_tree::json_parser::read_json(fname,pt);
   
-  telemserv.set_tick_ms(pt.get<int>("server.tick_ms"));
-  telemserv.set_topic(pt.get<string>("server.topic"));
-  
   auto sd = cl.DescribeServer();
   
   
