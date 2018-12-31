@@ -138,6 +138,9 @@ foxtrot::devices::dummyType foxtrot::devices::dummyDevice::returns_custom_type(i
 
 }
 
+void foxtrot::devices::dummyDevice::doNothing()
+{
+};
 
 
 RTTR_REGISTRATION
@@ -174,6 +177,7 @@ RTTR_REGISTRATION
  .method("getWomble", &dummyDevice::getWomble)
  .method("takes_custom_type", &dummyDevice::takes_custom_type)
  .method("returns_custom_type", &dummyDevice::returns_custom_type)
+ .method("doNothing", &dummyDevice::doNothing)
  
  ;
 }

@@ -31,7 +31,7 @@ namespace foxtrot
         
         double getWomble();
         
-        
+        void doNothing();
         
         void resetCounter();
 
