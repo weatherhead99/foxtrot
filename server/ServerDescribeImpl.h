@@ -2,7 +2,6 @@
 #include <grpc++/grpc++.h>
 #include "foxtrot.grpc.pb.h"
 
-#include "HandlerBase.h"
 #include <iostream>
 #include <string>
 #include "DeviceHarness.h"
@@ -10,6 +9,8 @@
 
 namespace foxtrot
 {
+    class HandlerTag;
+    
  struct ServerDescribeLogic
  {
     ServerDescribeLogic(const std::string& comment, DeviceHarness& harness);
@@ -30,7 +31,6 @@ namespace foxtrot
   
  };
     
- typedef HandlerBase<ServerDescribeLogic> ServerDescribeImpl;
  
     
 }

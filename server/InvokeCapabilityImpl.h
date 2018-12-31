@@ -1,12 +1,13 @@
 #pragma once
 #include <grpc++/grpc++.h>
 #include "foxtrot.grpc.pb.h"
-#include "HandlerBase.h"
 #include "DeviceHarness.h"
 #include "Logging.h"
 
 namespace foxtrot
 {
+    class HandlerTag;
+    
     struct InvokeCapabilityLogic
     {
      typedef capability_request reqtp;
@@ -24,6 +25,5 @@ namespace foxtrot
 	foxtrot::Logging _lg;
     };
     
-    typedef HandlerBase<InvokeCapabilityLogic> InvokeCapabilityImpl;
 
 }

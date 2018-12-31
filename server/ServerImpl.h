@@ -13,6 +13,7 @@
 #include <exception>
 #include <condition_variable>
 #include <mutex>
+#include "HandlerBase.h"
 
 #include <boost/variant.hpp>
 
@@ -44,6 +45,13 @@ public:
 		  bool force_client_auth = false);
     
 private:
+    template<typename T, typename... initargs> void add_logic(initargs&&... args)
+    {
+        std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...));
+        new HandlerBase<T>(&_service, _cq.get(), logic);
+    };
+    
+    
     std::shared_ptr<flagmap> _serverflags;
     
     std::string _connstr;

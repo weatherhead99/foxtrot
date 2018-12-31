@@ -1,7 +1,6 @@
 #pragma once
 #include <grpc++/grpc++.h>
 #include "foxtrot.grpc.pb.h"
-#include "HandlerBase.h"
 #include "DeviceHarness.h"
 #include "Logging.h"
 
@@ -9,6 +8,8 @@
 
 namespace foxtrot
 {
+    class HandlerTag;
+    
     struct FetchDataLogic
     {
         typedef chunk_request reqtp;
@@ -41,9 +42,6 @@ namespace foxtrot
       unsigned char* _currval;
     };
     
-    
-    typedef HandlerBase<FetchDataLogic> FetchDataImpl;
-
     
     
 }

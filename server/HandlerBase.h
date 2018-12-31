@@ -4,6 +4,7 @@
 #include <iostream>
 #include <type_traits>
 #include "Logging.h"
+#include "HandlerTag.h"
 using std::cout;
 using std::endl;
 
@@ -28,11 +29,6 @@ namespace detail
 
 namespace foxtrot
 {
-    class HandlerTag
-    {
-    public:
-        virtual void Proceed() = 0;
-    };
     
     template<typename T> class HandlerBase : public HandlerTag
     {

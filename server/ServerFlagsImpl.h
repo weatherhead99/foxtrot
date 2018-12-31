@@ -1,7 +1,6 @@
 #pragma once
 #include <grpc++/grpc++.h>
 #include "foxtrot.grpc.pb.h"
-#include "HandlerBase.h"
 #include "Logging.h"
 
 #include <boost/variant.hpp>
@@ -10,6 +9,8 @@
 #include <memory>
 
 namespace foxtrot {
+    
+    class HandlerTag;
   
   typedef boost::variant<double,int,bool,std::string> ft_variant;
   
@@ -33,7 +34,6 @@ namespace foxtrot {
     
   };
   
-  typedef HandlerBase<SetServerFlagsLogic> SetServerFlagsImpl;
   
   struct GetServerFlagsLogic
   {
@@ -52,7 +52,6 @@ namespace foxtrot {
     
   };
   
-  typedef HandlerBase<GetServerFlagsLogic> GetServerFlagsImpl;
   
 
   struct ListServerFlagsLogic
@@ -73,5 +72,4 @@ namespace foxtrot {
       
   };
   
-  typedef HandlerBase<ListServerFlagsLogic> ListServerFlagsImpl;
 }

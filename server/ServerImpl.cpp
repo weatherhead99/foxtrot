@@ -63,19 +63,12 @@ void ServerImpl::setup_common(const std::string& addrstr)
     _server = builder.BuildAndStart();
     _lg.Info("server listening on " + addrstr );
     
-    std::shared_ptr<ServerDescribeLogic> describe_logic(new ServerDescribeLogic(_servcomment,_harness));
-    std::shared_ptr<InvokeCapabilityLogic> capability_logic(new InvokeCapabilityLogic(_harness));	
-    std::shared_ptr<FetchDataLogic> fetch_logic(new FetchDataLogic(_harness));
-    std::shared_ptr<SetServerFlagsLogic> set_flags_logic(new SetServerFlagsLogic(_serverflags));
-    std::shared_ptr<GetServerFlagsLogic> get_flags_logic(new GetServerFlagsLogic(_serverflags));
-    std::shared_ptr<ListServerFlagsLogic> list_flags_logic(new ListServerFlagsLogic(_serverflags));
-    
-    new ServerDescribeImpl(&_service,_cq.get(),describe_logic);
-    new InvokeCapabilityImpl(&_service,_cq.get(),capability_logic);
-    new FetchDataImpl(&_service,_cq.get(),fetch_logic);
-    new SetServerFlagsImpl(&_service,_cq.get(),set_flags_logic);
-    new GetServerFlagsImpl(&_service,_cq.get(),get_flags_logic);
-    new ListServerFlagsImpl(&_service,_cq.get(),list_flags_logic);
+    add_logic<ServerDescribeLogic>(_servcomment,_harness);
+    add_logic<InvokeCapabilityLogic>(_harness);
+    add_logic<FetchDataLogic>(_harness);
+    add_logic<SetServerFlagsLogic>(_serverflags);
+    add_logic<GetServerFlagsLogic>(_serverflags);
+    add_logic<ListServerFlagsLogic>(_serverflags);
     
 }
 
