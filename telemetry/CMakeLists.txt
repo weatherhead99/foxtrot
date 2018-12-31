@@ -30,7 +30,7 @@ endif()
 
 
 add_library(foxtrot_telemetry ${telem_srcs})
-target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl})
+target_link_libraries(foxtrot_telemetry foxtrotclient foxtrotserv ${NANOMSG_LIBRARIES} ${anl} ${mqttpp_lib})
 
 target_include_directories(foxtrot_telemetry INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${NANOMSG_INCLUDE_DIRS})
 

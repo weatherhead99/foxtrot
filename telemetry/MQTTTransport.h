@@ -11,7 +11,8 @@ namespace detail {
     class mosquitto_adaptor : public mosqpp::mosquittopp
     {
     public:
-        mosquitto_adaptor();
+        mosquitto_adaptor(const char* id = nullptr, bool clean_session=true);
+        virtual ~mosquitto_adaptor();
     private:
         foxtrot::Logging _lg;
     };
@@ -26,7 +27,7 @@ namespace foxtrot {
         MQTTTransport(const std::string& topic);
         ~MQTTTransport() override;
         
-        void ConnectToBroker(const std::string& addr, int port);
+        void ConnectToBroker(const std::string& addr, int port, int keepalive);
         
         void BroadcastTelemetry(const TelemetryMessage& msg) override;
       

@@ -6,7 +6,8 @@ namespace foxtrot {
 
     class TelemetryError : public Error
     {
-        public TelemetryError(const std::string& msg);
+        public:
+        TelemetryError(const std::string& msg);
       
         
     };

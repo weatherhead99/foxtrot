@@ -1,5 +1,6 @@
 #include "TelemetryServer.h"
 #include "NanomsgTransport.h"
+#include "MQTTTransport.h"
 #include "telem_util.h"
 #include <boost/program_options.hpp>
 #include <backward.hpp>
@@ -88,8 +89,27 @@ int main(int argc, char** argv)
 
   foxtrot::Client cl(oss.str());
   
-  auto transport = std::make_unique<foxtrot::NanomsgTransport>(topic);
-  transport->BindSocket(bindstr);
+  std::unique_ptr<foxtrot::TelemetryTransport> transport;
+  
+  if(transport_type == "nanomsg")
+  {
+      lg.strm(sl::info) << "setting up nanomsg transport...";
+      auto* tptr = new foxtrot::NanomsgTransport(topic);
+      tptr->BindSocket(bindstr);
+      transport.reset(tptr);
+  }
+  else if(transport_type == "mqtt")
+  {
+      lg.strm(sl::info) << "setting up MQTT transport...";
+      auto* tptr = new foxtrot::MQTTTransport(topic);
+      
+      transport.reset(tptr);
+  }
+  else
+  {
+      lg.strm(sl::fatal) << "unknown transport type: " << transport_type << ". cannot continue";
+      std::exit(1);
+  }
   
   foxtrot::TelemetryServer telemserv(cl,std::move(transport),2000);
   
