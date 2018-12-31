@@ -187,6 +187,23 @@ class Client:
 
             return self._devices[self._devtypes.index(keystr)]    
 
+    def get_all_flags_dict(self) -> dict:
+        response = self._stub.ListServerFlags(empty())
+        _check_repl_err(response)
+        
+        flagdct = {_.flagname : ServerFlag(self,_.flagname) for _ in response.flags}
+        return flagdct
+    
+    def get_all_flags_list(self) -> list:
+        response = self._stub.ListServerFlags(empty())
+        _check_repl_err(response)    
+        return [ServerFlag(self, _.flagname) for _ in response.flags]
+
+        
+    def create_new_flag(self, name: str, initval):
+        sf = ServerFlag(self,name)
+        sf.value = initval
+        return sf
 
 def _fake_call_sync(obj,client,*args,**kwargs):
     req = obj.construct_request(*args,**kwargs)
@@ -239,10 +256,10 @@ class Device:
         
     def __repr__(self):
         if len(self._comment )> 0:
-            return str(self._devtp + ": " + self._comment)
+            return str("Device(" + self._devtp + ": " + self._comment + ")")
         
         else:
-            return str(self._devtp)
+            return str("Device(" + self._devtp + ")")
         
             
 
@@ -324,6 +341,11 @@ class ServerFlag:
             raise TypeError("invalid value type %s for server flag" % type(val))
         
         return req
+
+    def __repr__(self) -> str :
+        tval = self.value
+        tempstr = "ServerFlag( %s : %s (%s))"
+        return tempstr % (self._flagname, tval, type(tval).__name__)
 
     @property
     def value(self):
