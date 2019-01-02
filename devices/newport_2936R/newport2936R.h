@@ -61,8 +61,8 @@ namespace foxtrot
       RTTR_ENABLE()
     public:
     newport2936R(std::shared_ptr< SerialProtocol> proto);
-    virtual const std::string getDeviceTypeName() const override;
-    virtual std::string cmd(const std::string& request);
+    const std::string getDeviceTypeName() const override;
+    std::string cmd(const std::string& request) override;
     
     void setLambda(int l);
     int getLambda();

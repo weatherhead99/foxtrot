@@ -60,7 +60,7 @@ namespace foxtrot {
     bool getDegass(short unsigned channel = 1);
     void setDegass(short unsigned channel, bool onoff);
     
-    virtual const string getDeviceTypeName() const;
+    virtual const string getDeviceTypeName() const override;
    
    protected:
     Logging _lg;

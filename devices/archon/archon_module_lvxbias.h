@@ -18,10 +18,10 @@ namespace foxtrot
 	    
 	    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
 	    
-	    virtual const string getTypeName() const override;
-	    virtual const string getDeviceTypeName() const;
+	    const string getTypeName() const override;
+	    const string getDeviceTypeName() const override;
 	    
-	    virtual void update_variables() override;
+	    void update_variables() override;
 	  
             void setLabel(bool HC, int channel, const std::string& label);
             std::string getLabel(bool HC, int channel);

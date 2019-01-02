@@ -20,14 +20,14 @@ public:
     
     virtual ~simpleTCP();
     
-    virtual void Init(const parameterset*const class_parameters) override;
+    void Init(const parameterset*const class_parameters) override;
     void Init(const unsigned port, const std::string& addr);
     
     
-    virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
-    virtual void write(const std::string& data) override;
+    std::string read(unsigned int len, unsigned* actlen = nullptr) override;
+    void write(const std::string& data) override;
     
-    virtual std::string read_until_endl(char endlchar = '\n');
+    std::string read_until_endl(char endlchar = '\n') override;
     
     void setchunk_size(unsigned chunk);
     unsigned getchunk_size();
