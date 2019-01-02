@@ -535,6 +535,9 @@ bool devices::archon::get_power()
     case(4): return true;
     case(5): return false;
   }
+  
+  _lg.strm(sl::error) << "unrecognized power state: " << power;
+  throw std::logic_error("unknown power state in reply");
 
 }
 

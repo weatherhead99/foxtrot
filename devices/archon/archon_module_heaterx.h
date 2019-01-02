@@ -38,7 +38,7 @@ namespace devices
     RTTR_ENABLE(ArchonModule,archonGPIO)
       friend class archon;
 
-    virtual const string getDeviceTypeName() const;
+    const string getDeviceTypeName() const override;
       
     public:
     static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
@@ -118,7 +118,7 @@ namespace devices
     string getSensorLabel(HeaterXSensors sensor);
     
     
-    virtual const string getTypeName() const;	
+    const string getTypeName() const override;	
     
     private:
     virtual void update_variables() override;

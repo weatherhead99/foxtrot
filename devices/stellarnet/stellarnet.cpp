@@ -373,7 +373,8 @@ std::array< unsigned char, 0x20 > foxtrot::devices::stellarnet::get_stored_bytes
   }
   
   //WARNING: is this single bytes??
-  std::array<unsigned char,3> out_dat {0, addr, 0};
+  //NOTE: explicit cast silences warning...
+  std::array<unsigned char,3> out_dat {0, static_cast<unsigned char>(addr), 0};
   
   if(!_hdl)
   {

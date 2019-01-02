@@ -16,9 +16,9 @@ namespace foxtrot
     public:
       static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
       
-    virtual const string getTypeName() const override;
-    virtual void update_variables() override;
-      virtual const string getDeviceTypeName() const;
+    const string getTypeName() const override;
+    void update_variables() override;
+    const string getDeviceTypeName() const override;
       
     
     private:

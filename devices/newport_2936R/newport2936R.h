@@ -180,19 +180,21 @@ namespace foxtrot
 	
       template<typename T> T command_get(const std::string& req)
       {
-	std::ostringstream oss;
-	auto str = cmd(req);
+        std::ostringstream oss;
+        auto str = cmd(req);
+        
+        T out;
 	
-	try{
-	  T out = detail::return_converter<T>::get(str);
-	  return out;
-	}
-	catch(std::invalid_argument& err)
-	{
-	  _lg.strm(sl::error) << " error return from request: " << req;
-	  check_and_throw_error();
-	};
+        try{
+            out = detail::return_converter<T>::get(str);
+        }
+        catch(std::invalid_argument& err)
+        {
+            _lg.strm(sl::error) << " error return from request: " << req;
+            check_and_throw_error();
+        };
 	
+        return out;
 	
       }
 	

@@ -19,7 +19,7 @@ namespace foxtrot
             const std::string getTypeName() const override;
 	    void update_variables() override;
 	    
-	    virtual const string getDeviceTypeName() const;
+	    const string getDeviceTypeName() const override;
                         
             
         private:
