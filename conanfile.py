@@ -10,7 +10,8 @@ class FoxtrotConan(ConanFile):
     description="a simple device server"
     settings = "os", "compiler" , "build_type" , "arch"
     generators="cmake"
-    default_options = "rttr:shared=True", "nanomsg:shared=True"
+    default_options = "rttr:shared=True", "nanomsg:shared=True", \
+                      "mosquitto:shared=True"
 
     requires= "grpc/1.14.1@inexorgame/stable", \
     "nanomsg/1.1.2%s" % bcs, \
@@ -25,9 +26,11 @@ class FoxtrotConan(ConanFile):
     "cmake_findboost_modular%s" % bbcs, \
     "boost_thread%s" % bbcs, \
     "libusb/1.0.22%s" % bcs, \
-    "protobuf/3.5.2%s" % bcs
+    "protobuf/3.5.2%s" % bcs, \
+    "mosquitto/1.4.15%s" % bcs
 
     def configure(self):
+        pass
         #on linux, use shared protobuf & grpc builds
         if self.settings.os == "Linux":
             self.output.info("using shared protobuf build")

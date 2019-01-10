@@ -25,6 +25,9 @@ if(BUILD_MQTT_TRANSPORT)
         message(FATAL_ERROR "couldn't find mosquittopp library")
     endif()
     message(STATUS "mosquittopp libraries: ${mqttpp_lib}")
+else()
+    message(WARNING "building without MQTT transport")
+    set(mqttpp_lib "")
     
 endif()
 

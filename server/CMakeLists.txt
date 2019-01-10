@@ -14,6 +14,13 @@ endif()
 if(NOT ${Protobuf_FOUND})
     message(ERROR "no protobuf!")
 endif()
+
+if(FOXTROT_CONAN_BUILD)
+#hack around not finding libprotoc.c when using imported protobuf
+message(STATUS "setting up environment to run protoc")
+set(ENV{LD_LIBRARY_PATH} "$ENV{LD_LIBRARY_PATH}:${CONAN_LIB_DIRS_PROTOBUF}")
+endif()
+
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS foxtrot.proto)
 PROTOBUF_GENERATE_GRPC_CPP(PROTO_GRPC_SRCS PROTO_GRPC_HDRS foxtrot.proto)
 
@@ -46,7 +53,7 @@ file(GLOB ft_server_includes *.h)
 install(FILES ${ft_server_includes} ${PROTO_HDRS} ${PROTO_GRPC_HDRS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/)
 
 target_link_libraries(foxtrotserv PUBLIC foxtrot ${GRPC_LIBRARIES} ${cares} ${PROTOBUF_LIBRARIES} ${OPENSSL_LIBRARIES} 
-${ZLIB_LIBRARIES} ${dl} ${address_sorting} ${Boost_FILESYSTEM_LIBRARY})
+${ZLIB_LIBRARIES} ${dl} ${address_sorting} ${Boost_FILESYSTEM_LIBRARY} ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 message("GRPXC_LIBRARIES: ${GRPC_LIBRARIES}")
 
