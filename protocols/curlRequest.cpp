@@ -12,12 +12,8 @@ int CurlRequest::_nCurlInstances = 0;
 
 size_t detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
-          std::cerr << "casting user data" << std::endl;
         auto* req = reinterpret_cast<CurlRequest*>(userdata);
-
-      std::cerr << "copying data to string" << std::endl;
         std::string stringdat(ptr,nmemb);
-      std::cerr << "building string" << std::endl;
         req->getdatabuilder() << stringdat;
 
       return nmemb;
