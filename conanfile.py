@@ -24,11 +24,12 @@ class FoxtrotConan(ConanFile):
     "boost_asio%s" % bbcs, \
     "boost_filesystem%s" % bbcs, \
     "boost_thread%s" % bbcs, \
-    "libusb/1.0.22%s" % bcs, \
+        "libusb/1.0.22%s" % bcs, \
     "protobuf/3.6.1%s" % bcs, \
     "mosquitto/1.4.15%s" % bcs, \
     "libcurl/7.61.1%s" % bcs, \
     "cmake_findboost_modular%s" % bbcs, \
+    "rapidxml/1.13%s" % bcs, \
     "OpenSSL/1.0.2q@conan/stable"
 
         
