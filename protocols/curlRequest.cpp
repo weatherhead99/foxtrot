@@ -61,9 +61,15 @@ string CurlRequest::blocking_get_request(const string& path)
     
     auto write_cback = [] (char* ptr, size_t size, size_t nmemb, void* userdata)
     {
+      std::cerr << "casting user data" << std::endl;
         auto* req = reinterpret_cast<CurlRequest*>(userdata);
+
+      std::cerr << "copying data to string" << std::endl;
         std::string stringdat(ptr,nmemb);
+      std::cerr << "building string" << std::endl;
         req->getdatabuilder() << stringdat;
+
+      return nmemb;
         
         return nmemb;
         
@@ -77,9 +83,10 @@ string CurlRequest::blocking_get_request(const string& path)
     curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
         reinterpret_cast<void*>(this)));
     
-    _lg.strm(sl::debug) << "starting request";
+    _lg.strm(sl::debug) << "performing request";
     curl_checkerror(curl_easy_perform(_curlinstance));
-    
+
+    _lg.strm(sl::debug) << "request done";
     return thisreq_builder.str();
 }
 
