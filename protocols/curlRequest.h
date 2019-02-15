@@ -8,7 +8,7 @@ using std::string;
 
 
 namespace detail  {
-    
+    size_t write_cback(char* ptr, size_t size, size_t nmemb, void* userdata);
     
 }
         
@@ -17,6 +17,7 @@ namespace foxtrot {
         
         class CurlRequest : public CommunicationProtocol
         {
+        friend size_t detail::write_cback(char*, size_t, size_t, void*);
         public:
             CurlRequest();
             virtual ~CurlRequest();

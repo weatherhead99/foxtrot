@@ -10,6 +10,21 @@ using namespace foxtrot::protocols;
 int CurlRequest::_nCurlInstances = 0;
 
 
+size_t detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
+{
+          std::cerr << "casting user data" << std::endl;
+        auto* req = reinterpret_cast<CurlRequest*>(userdata);
+
+      std::cerr << "copying data to string" << std::endl;
+        std::string stringdat(ptr,nmemb);
+      std::cerr << "building string" << std::endl;
+        req->getdatabuilder() << stringdat;
+
+      return nmemb;
+        
+}
+
+
 CurlRequest::CurlRequest() 
 : CommunicationProtocol(nullptr), _lg("CurlRequest")
 {
@@ -58,27 +73,11 @@ string CurlRequest::blocking_get_request(const string& path)
 {
     thisreq_builder.str("");
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
-    
-    auto write_cback = [] (char* ptr, size_t size, size_t nmemb, void* userdata)
-    {
-      std::cerr << "casting user data" << std::endl;
-        auto* req = reinterpret_cast<CurlRequest*>(userdata);
-
-      std::cerr << "copying data to string" << std::endl;
-        std::string stringdat(ptr,nmemb);
-      std::cerr << "building string" << std::endl;
-        req->getdatabuilder() << stringdat;
-
-      return nmemb;
-        
-        return nmemb;
-        
-    };
-    
+//     
     _lg.strm(sl::debug) << "setting write function";
     //NOTE: the + here is drastically important if using a lambda, for ..... reasons.. 
     // (to do with C variadics)
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, +write_cback));
+    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, detail::write_cback));
     _lg.strm(sl::debug) << "setting write data";
     curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
         reinterpret_cast<void*>(this)));
