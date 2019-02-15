@@ -7,12 +7,15 @@
 #include "devices/archon/archon_module_AD.h"
 #include "devices/archon/archon_module_xvbias.h"
 #include "devices/archon/archonraw.h"
+#include "devices/webswitch_plus/webswitch_plus.h"
 
 
 #include "protocols/simpleTCP.h"
 #include "DeviceError.h"
 #include "protocols/SerialPort.h"
 #include <BulkUSB.h>
+#include "protocols/curlRequest.h"
+
 #include "devices/TPG362/TPG362.h"
 
 #include "devices/newport_2936R/newport2936R.h"
@@ -205,6 +208,20 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 	  harness.AddDevice(std::move(lamp_psu));
 	});
 #endif
+
+
+    //================autofill system==============================//
+    setup_with_disable("webswitch",setup_params,lg, 
+        [&harness, &lg, &params]() { 
+            lg.Info("setting up webswitch plus");
+            auto webswitch_params = params->at("webswitch_params");
+            auto proto = std::make_shared<foxtrot::protocols::CurlRequest>();
+            //NOTE: should refactor for consistency
+            auto webswitch = std::unique_ptr<foxtrot::devices::webswitch_plus>(
+                new foxtrot::devices::webswitch_plus(proto,webswitch_params));
+            harness.AddDevice(std::move(webswitch));
+        }
+    );
 
     
     return 0;  

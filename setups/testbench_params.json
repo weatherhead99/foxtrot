@@ -29,6 +29,10 @@
     "write_timeout" : 100
   },
   
+  "webswitch_params" : {
+    "url" : "192.168.1.2"
+  },
+  
   "setup" : {
     "archon_reset" : 1,
     "stellarnet_firmware" : "/home/weatherill/stellarnet.hex"
