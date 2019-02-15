@@ -1,5 +1,6 @@
 #include "webswitch_plus.h"
 #include <algorithm>
+#include "DeviceError.h"
 
 using namespace rapidxml;
 
@@ -33,15 +34,38 @@ bool foxtrot::devices::webswitch_plus::GetRelay(unsigned short chan)
     auto response = thisproto->blocking_get_request(_oss.str());
     
     std::unique_ptr<char> responsec( new char [response.size()+1]);
+    std::copy(response.c_str(), response.c_str() + response.size() + 1, responsec.get());
+    
     
     _lg.strm(sl::debug) << "parsing XML response";
     _doc.parse<0>(responsec.get());
     
+    _lg.strm(sl::trace) << "parsing done";
+    
     _oss.str("");
     _oss << "relay" << chan << "state";
+    
+    _lg.strm(sl::trace) << "nodename: " << _oss.str();
+    
     std::string nodename(_oss.str());
     
-    auto* relaynode = _doc.first_node(nodename.c_str(),nodename.size());
+    auto* datanode = _doc.first_node("datavalues",10);
+    
+    if(!datanode)
+    {
+        _lg.strm(sl::error) << "invalid XML node, couldn't parse properly!";
+        throw foxtrot::DeviceError("invalid XML node, couldn't parse properly!");
+    }
+    
+    
+    auto* relaynode = datanode->first_node(nodename.c_str(),nodename.size());
+    
+    _lg.strm(sl::trace) << "got node" ;
+    
+    if(!relaynode)
+        _lg.strm(sl::error) << "nullptr for node!";
+    
+    
     return std::stoi(relaynode->value());
 }
 
