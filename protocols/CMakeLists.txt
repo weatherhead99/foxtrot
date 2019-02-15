@@ -28,6 +28,9 @@ target_link_libraries(simpletcp_play foxtrot )
 add_executable(serialport_play serialport_play.cpp)
 target_link_libraries(serialport_play foxtrot)
 
+add_executable(curlrequest_play curlrequest_play.cpp)
+target_link_libraries(curlrequest_play foxtrot)
+
 
 if(${gsl} STREQUAL gsl-NOTFOUND)
    message(WARNING "no gsl, can't build chardevice_play")
