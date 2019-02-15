@@ -65,10 +65,14 @@ string CurlRequest::blocking_get_request(const string& path)
         std::string stringdat(ptr,nmemb);
         req->getdatabuilder() << stringdat;
         
+        return nmemb;
+        
     };
     
     _lg.strm(sl::debug) << "setting write function";
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, write_cback));
+    //NOTE: the + here is drastically important if using a lambda, for ..... reasons.. 
+    // (to do with C variadics)
+    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, +write_cback));
     _lg.strm(sl::debug) << "setting write data";
     curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
         reinterpret_cast<void*>(this)));
