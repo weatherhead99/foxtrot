@@ -67,10 +67,13 @@ string CurlRequest::blocking_get_request(const string& path)
         
     };
     
+    _lg.strm(sl::debug) << "setting write function";
     curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, write_cback));
+    _lg.strm(sl::debug) << "setting write data";
     curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
         reinterpret_cast<void*>(this)));
     
+    _lg.strm(sl::debug) << "starting request";
     curl_checkerror(curl_easy_perform(_curlinstance));
     
     return thisreq_builder.str();
