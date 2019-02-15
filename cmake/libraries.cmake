@@ -28,6 +28,9 @@ find_library(gsl gsl)
 message("gsl: ${gsl}")
 find_library(gslcblas gslcblas)
 
+#curl (for curl request protocol)
+find_package(CURL REQUIRED)
+
 
 
 find_package(rttr 0.9.5 REQUIRED)

@@ -9,11 +9,11 @@ class FoxtrotConan(ConanFile):
     name="foxtrot"
     description="a simple device server"
     settings = "os", "compiler" , "build_type" , "arch"
-    generators="cmake"
+    generators="cmake", "virtualrunenv"
     default_options = "rttr:shared=True", "nanomsg:shared=True", \
                       "mosquitto:shared=True"
 
-    requires= "grpc/1.14.1@inexorgame/stable", \
+    requires= "grpc/1.17.2@inexorgame/stable", \
     "nanomsg/1.1.2%s" % bcs, \
     "rttr/0.9.6@weatherhead99/testing", \
     "boost_log%s" % bbcs, \
@@ -23,18 +23,21 @@ class FoxtrotConan(ConanFile):
     "boost_program_options%s" % bbcs, \
     "boost_asio%s" % bbcs, \
     "boost_filesystem%s" % bbcs, \
-    "cmake_findboost_modular%s" % bbcs, \
     "boost_thread%s" % bbcs, \
     "libusb/1.0.22%s" % bcs, \
-    "protobuf/3.5.2%s" % bcs, \
-    "mosquitto/1.4.15%s" % bcs
+    "protobuf/3.6.1%s" % bcs, \
+    "mosquitto/1.4.15%s" % bcs, \
+    "libcurl/7.61.1%s" % bcs, \
+    "cmake_findboost_modular%s" % bbcs, \
+    "OpenSSL/1.0.2q@conan/stable"
 
+        
     def configure(self):
         pass
         #on linux, use shared protobuf & grpc builds
-        if self.settings.os == "Linux":
-            self.output.info("using shared protobuf build")
-            self.options["protobuf"].shared = True
+        #if self.settings.os == "Linux":
+            #self.output.info("using shared protobuf build")
+            #self.options["protobuf"].shared = True
 
 
     def imports(self):

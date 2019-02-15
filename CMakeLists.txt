@@ -111,7 +111,7 @@ generate_export_header(foxtrot)
 
 
 message(WARNING "rttr target: ${RTTR_TARGET}")
-target_link_libraries(foxtrot PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES})
+target_link_libraries(foxtrot PUBLIC ${Boost_SYSTEM_LIBRARY} ${Boost_LOG_LIBRARY} ${libusb} ${RTTR_TARGET} ${dl} ${CMAKE_THREAD_LIBS_INIT} ${udev_LIBRARIES} ${CURL_LIBRARIES} ${OPENSSL_LIBRARIES} ${ZLIB_LIBRARIES})
 
 if(FOXTROT_CONAN_BUILD)
 target_link_libraries(foxtrot PRIVATE ${Boost_THREAD_LIBRARY})
