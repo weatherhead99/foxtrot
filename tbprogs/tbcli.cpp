@@ -6,6 +6,7 @@
 #include "tbcli_heater_logic.h"
 #include "tbcli_pressure_logic.h"
 #include "tbcli_mono_logic.h"
+#include "tbcli_fill_logic.h"
 
 // void subcmd_args_process(const std::string& name)
 // {
@@ -345,6 +346,35 @@ int main(int argc, char** argv)
 	 }
       
     }
+    else if(cmd == "fill")
+    {
+        auto devid = find_webswitch(servdesc);
+        if(devid <0)
+        {
+            lg.Fatal("no webswitch found on server!");
+            exit(1);
+        }
+        
+        po::options_description fill_desc("fill options");
+        fill_desc.add_options()
+        ("relay,r", po::value<int>()->default_value(1), "relay to use")
+        ("filltime,f",po::value<float>()->default_value(0.5), "fill time in hours");
+        
+        auto opts = po::collect_unrecognized(parsed.options, po::include_positional);
+        opts.erase(opts.begin());
+        
+        po::store(po::command_line_parser(opts).options(fill_desc).run(),vm);
+        
+        int relay = vm["relay"].as<int>();
+        float filltime = vm["filltime"].as<float>();
+        
+        lg.strm(sl::info) << "using relay: " << relay ;
+        lg.strm(sl::info) << "fill time: " << filltime;
+        
+        do_fill(client, devid, filltime, relay);
+        exit(0);
+    }
+    
     else
       {
 	std::cout << "unregognised command: " << cmd << std::endl;
