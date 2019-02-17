@@ -119,7 +119,7 @@ int main(int argc, char**argv)
   
   if(!fexists)
   {
-  fs << "unixtime,date/time,pressure_cryostat(hPa),pressure_pump(hPa),temperature_stage(C),temperature_tank(C),heater_output(V),heater_target(C)" << endl;
+  fs << "#unixtime,date/time,pressure_cryostat(hPa),pressure_pump(hPa),temperature_stage(C),temperature_tank(C),heater_output(V),heater_target(C)" << endl;
   };
   
   
