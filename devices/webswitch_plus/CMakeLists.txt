@@ -1,4 +1,4 @@
-find_path(rapidxml_include "rapidxml.hpp")
+find_path(rapidxml_include "rapidxml.hpp" PATH_SUFFIXES rapidxml)
 if(NOT ${rapidxml_include})
     message(ERROR "couldn't find rapidxml path!")
 else()
