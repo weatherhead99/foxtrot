@@ -54,6 +54,17 @@ std::tuple<double,double> getTemps(foxtrot::Client& cl, int archon_devid, int he
   
 }
 
+std::tuple<double,double> getHeater(foxtrot::Client& cl, int heater_devid)
+{
+    
+    auto htr_output = boost::get<double>(cl.InvokeCapability(heater_devid,"getHeaterAOutput"));
+    
+    std::vector<foxtrot::ft_variant> args{0};
+    auto htr_target = boost::get<double>(cl.InvokeCapability(heater_devid, "getHeaterTarget",args.begin(), args.end()));
+    
+    return std::make_tuple(htr_output,htr_target);
+};
+
 
 
 int main(int argc, char**argv)
@@ -108,7 +119,7 @@ int main(int argc, char**argv)
   
   if(!fexists)
   {
-  fs << "unixtime,date/time,pressure_cryostat(hPa),pressure_pump(hPa),temperature_stage(C),temperature_tank(C)" << endl;
+  fs << "unixtime,date/time,pressure_cryostat(hPa),pressure_pump(hPa),temperature_stage(C),temperature_tank(C),heater_output(V),heater_target(C)" << endl;
   };
   
   
@@ -149,14 +160,19 @@ int main(int argc, char**argv)
    auto now = pt::second_clock::local_time();
    auto pressure_pump = getPressure(cl,pressure_gauge_devid,2);
    auto pressure_cryostat = getPressure(cl,pressure_gauge_devid,1);
-    
+   
    double tank_temp = -273.15;
    double stage_temp = -273.15;
+   double htr_output = 0.0;
+   double htr_target = -273.15;
    try{
     
+      auto output_target = getHeater(cl,heater_devid); 
       auto temps = getTemps(cl,archon_devid,heater_devid);
       tank_temp = std::get<0>(temps);
       stage_temp = std::get<1>(temps);
+      htr_output = std::get<0>(output_target);
+      htr_target = std::get<1>(output_target);
    }
 #ifdef linux
    catch(typename foxtrot::ProtocolError)
@@ -175,10 +191,13 @@ int main(int argc, char**argv)
    lg.Debug("LN2 tank temperature: " + std::to_string(tank_temp) + " degC ");
    lg.Debug("stage temperature: " + std::to_string(stage_temp) +  " degC ");
    
+   lg.strm(sl::debug) << "heater output is: " << htr_output << " V";
+   lg.strm(sl::debug) << "heater target is: " << htr_target << " degC";
+   
    auto unix_epoch = (now - pt::from_time_t(0)).total_seconds();
    
    fs  << unix_epoch << "," << pt::to_iso_string(now) << "," <<pressure_cryostat <<","
-   << pressure_pump << "," << stage_temp << "," << tank_temp << endl;// "," << res << "," << temperature << endl;
+   << pressure_pump << "," << stage_temp << "," << tank_temp << "," << htr_output << "," << htr_target << endl;// "," << res << "," << temperature << endl;
    fs.flush();
    
    lg.Debug("sleeping for " + std::to_string(interval_s) +  " seconds..." );
