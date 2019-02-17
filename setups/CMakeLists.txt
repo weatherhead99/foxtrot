@@ -18,10 +18,10 @@ endmacro()
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet")
+	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;Q250;stellarnet;webswitch_plus")
 	build_setup(dummy_setup dummy_setup.cpp dummy)
 else()
-	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;stellarnet;${RTTR_TARGET};foxtrot;${Boost_DATE_TIME_LIBRARY};foxtrotserv")
+	build_setup(testbench_archon_heater "testbench_archon_heater.cpp;testbench_setup_funcs.cpp" "archon;TPG362;newport2936R;cornerstone260;stellarnet;${RTTR_TARGET};foxtrot;${Boost_DATE_TIME_LIBRARY};foxtrotserv;webswitch_plus")
 	build_setup(dummy_setup dummy_setup.cpp "dummy;foxtrot;foxtrotserv")
 endif()
 
