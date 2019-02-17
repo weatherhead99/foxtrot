@@ -2,7 +2,7 @@ import os
 from conans import ConanFile, CMake, tools
 
 bcs = "@bincrafters/stable"
-bbcs = "/1.66.0%s" % bcs
+bbcs = "/1.69.0%s" % bcs
 
 
 class FoxtrotConan(ConanFile):
