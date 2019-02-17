@@ -219,6 +219,9 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
             //NOTE: should refactor for consistency
             auto webswitch = std::unique_ptr<foxtrot::devices::webswitch_plus>(
                 new foxtrot::devices::webswitch_plus(proto,webswitch_params));
+            
+            webswitch->SetRelay(1, false);
+            webswitch->SetRelay(2, false);
             harness.AddDevice(std::move(webswitch));
         }
     );
