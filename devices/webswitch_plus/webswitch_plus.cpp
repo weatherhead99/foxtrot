@@ -78,4 +78,18 @@ void foxtrot::devices::webswitch_plus::SetRelay(unsigned short chan, bool onoff)
     
 }
 
-
+RTTR_REGISTRATION {
+ using namespace rttr;
+ using foxtrot::devices::webswitch_plus;
+    
+ registration::class_<webswitch_plus>("foxtrot::devices::webswitch_plus")
+ .method("GetRelay",&webswitch_plus::GetRelay)
+ (
+     parameter_names("chan")
+ )
+ .method("SetRelay",&webswitch_plus::SetRelay)
+ (
+     parameter_names("chan","onoff")
+ );
+   
+}
