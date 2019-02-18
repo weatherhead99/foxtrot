@@ -25,7 +25,7 @@ foxtrot::devices::webswitch_plus::~webswitch_plus()
 {
 }
 
-bool foxtrot::devices::webswitch_plus::GetRelay(unsigned short chan)
+bool foxtrot::devices::webswitch_plus::GetRelay(int chan)
 {
     auto thisproto = std::static_pointer_cast<CurlRequest>(_proto);
     _oss.str("");
@@ -69,7 +69,7 @@ bool foxtrot::devices::webswitch_plus::GetRelay(unsigned short chan)
     return std::stoi(relaynode->value());
 }
 
-void foxtrot::devices::webswitch_plus::SetRelay(unsigned short chan, bool onoff)
+void foxtrot::devices::webswitch_plus::SetRelay(int chan, bool onoff)
 {
     auto thisproto = std::static_pointer_cast<CurlRequest>(_proto);
     _oss.str("");

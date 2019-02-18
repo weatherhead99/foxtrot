@@ -24,8 +24,8 @@ namespace foxtrot{
             const std::string getDeviceTypeName() const override;
             virtual ~webswitch_plus();
             
-            void SetRelay(unsigned short chan, bool onoff);
-            bool GetRelay( unsigned short chan);
+            void SetRelay(int chan, bool onoff);
+            bool GetRelay(int chan);
             
         private:
             std::string _url;

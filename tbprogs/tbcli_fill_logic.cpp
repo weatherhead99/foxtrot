@@ -14,6 +14,11 @@ int find_webswitch(const foxtrot::servdescribe& sd)
                                      return false;                                   
                                   });
     
+    if(webswitch == sd.devs_attached().end())
+      return -1;
+    
+    return webswitch->first;
+    
 };
 
 
