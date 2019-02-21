@@ -40,6 +40,42 @@ namespace foxtrot
     };
     
     
+    template<typename T> 
+    void check_repl_err(const T& repl, foxtrot::Logging* lg = nullptr)
+    {
+        if(repl.has_err())
+        {
+            if(lg)
+            {
+                lg->Error("there's an error in this response...");
+                lg->strm(sl::debug) << "error type:" << repl.err().tp();
+            };
+            
+            auto err = repl.err();
+            
+            if(lg)
+                lg->Info("constructing exceptions...");
+            
+            
+            switch(err.tp())
+            {
+            case(error_types::ft_Error):
+                throw foxtrot::Error(err.msg());
+            case(error_types::ft_DeviceError):
+                throw foxtrot::DeviceError(err.msg());
+            case(error_types::ft_ProtocolError):
+                throw foxtrot::ProtocolError(err.msg());
+            case(error_types::out_of_range):
+                throw std::out_of_range(err.msg());    
+            default:
+                throw std::runtime_error(err.msg());
+            }
+            
+        }
+        
+        
+    };
+    
     ft_variant ft_variant_from_response(const capability_response& repl);
     ft_vector_variant ft_variant_from_data(const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data);
     
@@ -84,6 +120,13 @@ namespace foxtrot
         ~Client();
         servdescribe DescribeServer();
 	
+        ft_variant get_server_flag(const std::string& flagname);
+        void set_server_flag(const std::string& flagname, const ft_variant& val);
+        void drop_server_flag(const std::string& flagname);
+        
+        std::vector<std::string> get_flag_names();
+        
+        
         template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
         template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);

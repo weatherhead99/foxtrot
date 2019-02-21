@@ -72,43 +72,12 @@ std::string foxtrot::ft_variant_printer::string()
 }
 
 
-
-
-
 foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
     foxtrot::ft_variant out;
+    foxtrot::Logging lg("ft_variang_from_response");
     
-    //error checking
-    if(repl.has_err())
-    {
-      foxtrot::Logging lg("ft_variant_from_response");
-
-      lg.Error("there's an error in this response...");
-      lg.strm(sl::debug) << "error type: " << repl.err().tp();
-
-        auto err = repl.err();
-        
-      lg.Info("constructing exceptions...");
-        
-                
-        switch(err.tp())
-        {
-            case(error_types::ft_Error):
-	      throw foxtrot::Error(err.msg());
-	    case(error_types::ft_DeviceError):
-	      throw foxtrot::DeviceError(err.msg());
-            case(error_types::ft_ProtocolError):
-	      throw foxtrot::ProtocolError(err.msg());
-            case(error_types::out_of_range):
-                throw std::out_of_range(err.msg());
-                
-            default:
-                throw std::runtime_error(err.msg());
-                
-        }
-        
-    }
+    check_repl_err(repl,&lg);
     
     
     auto rettp = repl.return_case();

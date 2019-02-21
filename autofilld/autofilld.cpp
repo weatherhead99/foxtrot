@@ -1,0 +1,55 @@
+#include <string>
+
+#include <boost/program_options.hpp>
+#include "client.h"
+#include "config.h"
+#include "Logging.h"
+#include <backward.hpp>
+
+
+namespace po = boost::program_options;
+using std::string;
+
+int main(int argc, char** argv)
+{
+    backward::SignalHandling sh;
+    foxtrot::Logging lg("autofilld");
+    
+    auto config_file = foxtrot::get_config_file_path("AUTOFILLD_CONFIG", "autofilld.config");
+    foxtrot::create_config_file(config_file);
+    lg.strm(sl::info) << "config file:" << config_file;
+    
+    
+    po::options_description desc("autofilld allowed options");
+    
+    int debug_level;
+    int log_interval_s;
+    int rotate_time_h;
+    string logdir;
+    
+    
+    desc.add_options()
+    ("logdir,l", po::value<string>(&logdir), "location to log events")
+    ("interval,i", po::value<int>(&log_interval_s)->default_value(10),"seconds between logging points")
+    ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")
+    ("rotate_h,r", po::value<int>(&rotate_time_h)->default_value(72), "hours before rotating a log file");
+    
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc,argv).options(desc).run(), vm);
+    foxtrot::load_config_file(config_file,desc,vm,&lg);
+    
+    try {
+        po::notify(vm);
+    }
+    catch(boost::program_options::required_option& err)
+    {
+        lg.strm(sl::fatal) << "required option missing...";
+        lg.strm(sl::fatal) << err.what();
+        std::exit(1);
+    }
+        
+    foxtrot::check_debug_level_and_exit(debug_level, lg);
+    foxtrot::setDefaultSink();
+    
+    
+};

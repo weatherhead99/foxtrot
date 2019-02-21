@@ -102,6 +102,8 @@ if(BUILD_SETUPS)
 add_subdirectory(setups)
 endif()
 
+add_subdirectory(autofilld)
+
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
 target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
