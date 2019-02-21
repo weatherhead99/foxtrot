@@ -37,6 +37,36 @@ void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
     _arg.set_strarg(s);
 }
 
+
+foxtrot::ft_variant_flag_visitor::ft_variant_flag_visitor(serverflag& flag)
+: _flag(flag)
+{    
+};
+
+
+void foxtrot::ft_variant_flag_visitor::operator()(const double& d) const
+{
+    _flag.set_dblval(d);
+}
+
+void foxtrot::ft_variant_flag_visitor::operator()(int& i) const
+{
+    _flag.set_intval(i);
+}
+
+void foxtrot::ft_variant_flag_visitor::operator()(bool& b) const
+{
+    _flag.set_boolval(b);
+}
+
+void foxtrot::ft_variant_flag_visitor::operator()(const std::string& s) const
+{ 
+    _flag.set_stringval(s);
+}
+
+
+
+
 foxtrot::ft_variant_printer::ft_variant_printer()
 {
 
@@ -75,7 +105,7 @@ std::string foxtrot::ft_variant_printer::string()
 foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
     foxtrot::ft_variant out;
-    foxtrot::Logging lg("ft_variang_from_response");
+    foxtrot::Logging lg("ft_variant_from_response");
     
     check_repl_err(repl,&lg);
     
@@ -102,6 +132,34 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     
 
 }
+
+foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::serverflag& repl)
+{
+    foxtrot::ft_variant out;
+    foxtrot::Logging lg("ft_variant_from_response");
+    check_repl_err(repl,&lg);
+    
+    auto rettp = repl.arg_case();
+    switch(rettp)
+    {
+        case(serverflag::ArgCase::kDblval):
+            out = repl.dblval();
+            break;
+        case(serverflag::ArgCase::kIntval):
+            out = repl.intval();
+            break;
+        case(serverflag::ArgCase::kBoolval):
+            out = repl.boolval();
+            break;
+        case(serverflag::ArgCase::kStringval):
+            out = repl.stringval();
+            break;
+    }
+
+    return out;
+    
+}
+
 
 template <typename T> std::vector<T> copy_to_out_type(const std::vector<unsigned char>& in)
 {
@@ -276,12 +334,114 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     }
     else
     {
-        std::cout << status.error_code() << ": " << status.error_message() << std::endl;
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
         throw std::runtime_error("GRPC Error");
-    
     }
     
 }
+
+
+foxtrot::ft_variant foxtrot::Client::get_server_flag(const std::string& flagname)
+{
+    serverflag req;
+    serverflag repl;
+    
+    req.set_msgid(_msgid++);
+    req.set_flagname(flagname);
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->GetServerFlag(&ctxt, req, &repl);
+    
+    if(status.ok())
+    {
+        check_repl_err(repl, &_lg);
+        return ft_variant_from_response(repl);
+    }
+    else
+    {
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
+        throw std::runtime_error("GRPC Error");
+    }
+    
+};
+
+void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_variant& val)
+{
+    serverflag req;
+    serverflag repl;
+    req.set_msgid(_msgid++);
+    req.set_flagname(flagname);
+    
+    boost::apply_visitor(ft_variant_flag_visitor(req), val);
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->SetServerFlag(&ctxt, req, &repl);
+    
+    if(status.ok())
+    {
+        check_repl_err(repl, &_lg);
+    }
+    else
+    {
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
+        throw std::runtime_error("GRPC Error");
+    }
+    
+};
+
+void foxtrot::Client::drop_server_flag(const std::string& flagname)
+{
+    serverflag req;
+    serverflag repl;
+    req.set_msgid(_msgid++);
+    req.set_flagname(flagname);
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->DropServerFlag(&ctxt, req, &repl);
+    
+    if(status.ok())
+    {
+        check_repl_err(repl, &_lg);
+    }
+    else
+    {
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
+        throw std::runtime_error("GRPC Error");
+    }
+    
+    
+};
+
+
+std::vector<std::string> foxtrot::Client::get_flag_names()
+{
+    serverflaglist repl;
+    empty req;
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->ListServerFlags(&ctxt, req, &repl);
+    
+    if(status.ok())
+    {
+        check_repl_err(repl, &_lg);
+        std::vector<std::string> out;
+        auto flags = repl.flags();
+        out.reserve(flags.size());
+        
+        for(auto& flag : flags)
+          out.push_back(flag.flagname());
+        
+        return out;
+        
+    }
+    else
+    {
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
+        throw std::runtime_error("GRPC Error");
+    }
+    
+};
+
 
 foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
 {

@@ -39,6 +39,20 @@ namespace foxtrot
         
     };
     
+    class ft_variant_flag_visitor : public boost::static_visitor<>
+    {
+    public:
+        ft_variant_flag_visitor(serverflag& flag);
+        
+        void operator()(const double& d) const;
+        void operator()(int& i) const;
+        void operator()(bool& b) const;
+        void operator()(const std::string& s) const;
+        
+    private:
+        serverflag& _flag;
+    };
+    
     
     template<typename T> 
     void check_repl_err(const T& repl, foxtrot::Logging* lg = nullptr)
@@ -77,6 +91,7 @@ namespace foxtrot
     };
     
     ft_variant ft_variant_from_response(const capability_response& repl);
+    ft_variant ft_variant_from_response(const serverflag& repl);
     ft_vector_variant ft_variant_from_data(const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data);
     
     
@@ -143,6 +158,10 @@ namespace foxtrot
 // 	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, std::initializer_list<ft_variant> args);
 	template <typename iteratortp> ft_vector_variant FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args);
 	
+    template<typename... Args>
+    ft_vector_variant FetchData(int devid, const std::string& capname, unsigned dataid,
+                                unsigned chunksize, Args... args);
+    
         
     private:
         template< typename reqtp, typename iteratortp> void fill_args(reqtp& req, iteratortp args_begin, iteratortp args_end)
@@ -240,17 +259,22 @@ namespace foxtrot
       {
         auto thisdat = repl.data();
         bytes.insert(bytes.end(),std::begin(thisdat), std::end(thisdat));
-        
         //TODO: error handling here!
         check_repl_err(repl);
-        
       }
-      
-      
+            
       return ft_variant_from_data(repl.dtp(),bytes);
       
     }
 
+    template<typename... Args>
+    ft_vector_variant Client::FetchData(int devid, const std::string& capname, 
+                                        unsigned dataid, unsigned chunksize, Args... args)
+    {
+            std::vector<ft_variant> callargs{args...};
+            return FetchData(devid, capname, dataid, chunksize, callargs.begin(), callargs.end());
+    }
+    
     
 }
 
