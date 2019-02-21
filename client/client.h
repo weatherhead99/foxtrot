@@ -130,6 +130,10 @@ namespace foxtrot
         template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
         template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);
+        
+        template<typename... Args>
+        ft_variant InvokeCapability(int devid, const std::string& capname, Args... args);
+        
         ft_variant InvokeCapability(int devid, const std::string& capname);
 	
 	ft_variant InvokeCapability(int devid, const std::string& capname, std::initializer_list<ft_variant> args);
@@ -199,6 +203,13 @@ namespace foxtrot
       
     }
     
+    template<typename... Args> ft_variant Client::InvokeCapability(int devid, const std::string& capname, Args... args)
+    {
+        std::vector<ft_variant> callargs{args...};
+        return InvokeCapability(devid, capname, callargs.begin(), callargs.end());
+    };
+    
+    
     template<typename containertp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, containertp args)
     {
         return InvokeCapability(devid,capname,args.begin(),args.end());
@@ -231,26 +242,7 @@ namespace foxtrot
         bytes.insert(bytes.end(),std::begin(thisdat), std::end(thisdat));
         
         //TODO: error handling here!
-        if(repl.has_err())
-        {
-            auto err = repl.err();
-                    
-            switch(err.tp())
-            {
-                case(error_types::ft_Error):
-		    throw foxtrot::Error(err.msg());
-                case(error_types::ft_DeviceError):
-		    throw foxtrot::DeviceError(err.msg());
-                case(error_types::ft_ProtocolError):
-                    throw foxtrot::ProtocolError(err.msg());
-                case(error_types::out_of_range):
-                    throw std::out_of_range(err.msg());
-                    
-                default:
-                    throw std::runtime_error(err.msg());
-            }
-            
-        };
+        check_repl_err(repl);
         
       }
       
