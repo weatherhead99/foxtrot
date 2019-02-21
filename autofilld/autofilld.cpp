@@ -6,6 +6,8 @@
 #include "Logging.h"
 #include <backward.hpp>
 
+#include "autofill_logger.hh"
+
 
 namespace po = boost::program_options;
 using std::string;
