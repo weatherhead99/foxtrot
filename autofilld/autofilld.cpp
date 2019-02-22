@@ -28,18 +28,29 @@ int main(int argc, char** argv)
     int log_interval_s;
     int rotate_time_h;
     string logdir;
+    string connstr;
     
     
     desc.add_options()
-    ("logdir,l", po::value<string>(&logdir), "location to log events")
-    ("interval,i", po::value<int>(&log_interval_s)->default_value(10),"seconds between logging points")
+    ("logdir,l", po::value<string>(&logdir)->required(), "location to log events")
+    ("interval,i", po::value<int>(&log_interval_s)->default_value(10),
+     "seconds between logging points")
     ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")
-    ("rotate_h,r", po::value<int>(&rotate_time_h)->default_value(72), "hours before rotating a log file");
+    ("rotate_h,r", po::value<int>(&rotate_time_h)->default_value(72),
+     "hours before rotating a log file")
+    ("connstr,c",po::value<string>(&connstr)->default_value("localhost:50051"), "connection string for foxtrot client");
+    ("help","produce help message");
     
     po::variables_map vm;
     po::store(po::command_line_parser(argc,argv).options(desc).run(), vm);
     foxtrot::load_config_file(config_file,desc,vm,&lg);
     
+    if(vm.count("help"))
+    {
+        std::cout << desc << std::endl;
+        std::exit(0);
+    }
+        
     try {
         po::notify(vm);
     }
@@ -49,9 +60,11 @@ int main(int argc, char** argv)
         lg.strm(sl::fatal) << err.what();
         std::exit(1);
     }
-        
+    
     foxtrot::check_debug_level_and_exit(debug_level, lg);
     foxtrot::setDefaultSink();
-    
+        
+    lg.strm(sl::info) << "connecting client..." ;
+    foxtrot::Client cl(connstr);
     
 };

@@ -15,6 +15,8 @@ namespace foxtrot {
         void LogEnvData(const foxtrot::env_data& dat);
         
     private:
+        void start_new_logfile(const string& name);
+        
         
     };
     

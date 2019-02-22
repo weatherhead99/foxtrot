@@ -36,15 +36,9 @@ int main(int argc, char** argv)
     
     auto flagval = cl.get_server_flag("test");
     cout << "flag type: " << flagval.type().name() << endl;
-    
     cout << "reading flag value: " << boost::get<bool>(flagval) << endl;
-    
     
     cout << "dropping flag" << endl;
     cl.drop_server_flag("test");
-
-    
-    
-
 
 }
