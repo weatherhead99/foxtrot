@@ -45,8 +45,8 @@ namespace foxtrot
         ft_variant_flag_visitor(serverflag& flag);
         
         void operator()(const double& d) const;
-        void operator()(int& i) const;
-        void operator()(bool& b) const;
+        void operator()(const int& i) const;
+        void operator()(const bool& b) const;
         void operator()(const std::string& s) const;
         
     private:

@@ -49,12 +49,12 @@ void foxtrot::ft_variant_flag_visitor::operator()(const double& d) const
     _flag.set_dblval(d);
 }
 
-void foxtrot::ft_variant_flag_visitor::operator()(int& i) const
+void foxtrot::ft_variant_flag_visitor::operator()(const int& i) const
 {
     _flag.set_intval(i);
 }
 
-void foxtrot::ft_variant_flag_visitor::operator()(bool& b) const
+void foxtrot::ft_variant_flag_visitor::operator()(const bool& b) const
 {
     _flag.set_boolval(b);
 }

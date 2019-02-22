@@ -15,3 +15,6 @@ install(FILES ${ft_client_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxt
 
 add_executable(fetchdatatest fetchdatatest.cpp)
 target_link_libraries(fetchdatatest foxtrotclient)
+
+add_executable(flagtest flagtest.cpp)
+target_link_libraries(flagtest foxtrotclient)
