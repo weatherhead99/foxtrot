@@ -2,9 +2,11 @@
 #include "CommunicationProtocol.h"
 #include "Logging.h"
 #include <sstream>
+#include <map>
 
 using namespace foxtrot;
 using std::string;
+using std::map;
 
 
 namespace detail  {
@@ -23,10 +25,18 @@ namespace foxtrot {
             virtual ~CurlRequest();
             
             void Init(const parameterset* const ) override;
-            std::string blocking_get_request(const string& path);
+            std::string blocking_get_request(const string& path,
+                                             const map<string,string>* header = nullptr,
+                                             const map<string,string>* urldata = nullptr);
+            std::string blocking_post_request(const string& path,
+                                              const string& body,
+                                              const map<string,string>* header = nullptr,
+                                              const map<string,string>* urldata = nullptr); 
             
         private:
             void curl_checkerror(int code);
+            
+            void curl_common_performreq();
             
             std::ostringstream& getdatabuilder();
             

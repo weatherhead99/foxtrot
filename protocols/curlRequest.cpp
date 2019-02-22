@@ -65,25 +65,31 @@ void CurlRequest::Init(const parameterset *const)
 }
 
 
-string CurlRequest::blocking_get_request(const string& path)
+string CurlRequest::blocking_get_request(const string& path,
+                                         const map<string,string>*,
+                                         const map<string,string>*
+)
 {
     thisreq_builder.str("");
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
 //     
-    _lg.strm(sl::debug) << "setting write function";
-    //NOTE: the + here is drastically important if using a lambda, for ..... reasons.. 
-    // (to do with C variadics)
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, detail::write_cback));
-    _lg.strm(sl::debug) << "setting write data";
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
-        reinterpret_cast<void*>(this)));
-    
-    _lg.strm(sl::debug) << "performing request";
-    curl_checkerror(curl_easy_perform(_curlinstance));
-
-    _lg.strm(sl::debug) << "request done";
+    curl_common_performreq();
     return thisreq_builder.str();
 }
+
+string CurlRequest::blocking_post_request(const string& path,
+                                          const string& body,
+                                          const map<string,string>*,
+                                          const map<string,string>*)
+{
+    
+    thisreq_builder.str("");
+    
+    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
+  
+    return "";
+};
+
 
 void foxtrot::protocols::CurlRequest::curl_checkerror(int code)
 {
@@ -96,6 +102,24 @@ void foxtrot::protocols::CurlRequest::curl_checkerror(int code)
     }
     
 }
+
+void foxtrot::protocols::CurlRequest::curl_common_performreq()
+{
+    _lg.strm(sl::debug) << "setting write function";
+    //NOTE: the + here is drastically important if using a lambda, for ..... reasons.. 
+    // (to do with C variadics)
+    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, detail::write_cback));
+    _lg.strm(sl::debug) << "setting write data";
+    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
+        reinterpret_cast<void*>(this)));
+    
+    _lg.strm(sl::debug) << "performing request";
+    curl_checkerror(curl_easy_perform(_curlinstance));
+
+    _lg.strm(sl::debug) << "request done";
+    
+    
+};
 
 
 std::ostringstream & foxtrot::protocols::CurlRequest::getdatabuilder()
