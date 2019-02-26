@@ -29,10 +29,12 @@ int main(int argc, char** argv)
     int rotate_time_h;
     string logdir;
     string connstr;
+    string webconf;
     
     
     desc.add_options()
     ("logdir,l", po::value<string>(&logdir)->required(), "location to log events")
+    ("webconfig,w", po::value<string>(&webconf)->default_value(""),"path to config file for web services")
     ("interval,i", po::value<int>(&log_interval_s)->default_value(10),
      "seconds between logging points")
     ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")

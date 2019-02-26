@@ -21,7 +21,10 @@ enum class event_types {
 };
 
 
-
+struct event_data {
+    boost::posix_time::ptime timestamp;
+    event_types evtp;
+};
 
 
 }
