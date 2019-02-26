@@ -163,6 +163,8 @@ if(BUILD_UDEV)
   add_subdirectory(udev)
 endif()
 
+add_subdirectory(pushbullet_notifications)
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/foxtrotConfig.cmake.in foxtrotConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
 
