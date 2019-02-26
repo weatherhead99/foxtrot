@@ -1,19 +1,37 @@
 #include "curlRequest.h"
-
+#include <backward.hpp>
+#include <string>
 #include <iostream>
 
 using namespace foxtrot::protocols;
 
+using std::cout;
+using std::endl;
+using std::string;
+
 int main(int, char**)
 {
+    backward::SignalHandling sh;
     CurlRequest proto;
     
-    std::cout << "starting request" << std::endl;
-    auto out = proto.blocking_get_request("http://localhost:60000/state.xml");
-//     auto out = proto.blocking_get_request("https://www.google.com");
+    string token{"REPLACE_ME"};
     
-    std::cout << "request finished..." << std::endl;
+    cout << "user request to pushbullet" << endl;
     
-    std::cout << "received data: " << out << std::endl;
+    std::vector<string> header { "Access-Token: " +token};
+    auto repl = proto.blocking_get_request("https://api.pushbullet.com/v2/users/me",
+                                           &header);
+    
+    cout << "reply: " << repl << endl;
+    
+    string postreq = "{ \"body\" : \"test push\", \"title\" : \"test title\" }";
+    std::vector<string> posthdr { header[0], "Content-type: application/json"};
+    
+    repl = proto.blocking_post_request("https://api.pushbullet.com/v2/pushes",
+                                       postreq, & posthdr);
+    
+    
+    cout << "reply: " << repl << endl;
+    
     
 }

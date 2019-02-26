@@ -66,13 +66,21 @@ void CurlRequest::Init(const parameterset *const)
 
 
 string CurlRequest::blocking_get_request(const string& path,
-                                         const map<string,string>*,
-                                         const map<string,string>*
+                                         const vector<string>* header
 )
 {
+    curl_easy_reset(_curlinstance);
     thisreq_builder.str("");
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
-//     
+    
+    slistuptr headerptr(nullptr, curl_slist_free_all);
+    
+    if(header)
+    {
+        _lg.Debug("header present");
+        headerptr = set_curl_header(*header);
+    }
+    
     curl_common_performreq();
     return thisreq_builder.str();
 }
@@ -81,26 +89,18 @@ string CurlRequest::blocking_post_request(const string& path,
                                           const string& body,
                                           const vector<string>* header)
 {
-    
+    curl_easy_reset(_curlinstance);
     thisreq_builder.str("");
-    
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
-  
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_POSTFIELDS, body.data()));
+    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_POSTFIELDS, body.c_str()));
     
-    
-    std::unique_ptr<curl_slist, void(*)(curl_slist*)> list(nullptr, curl_slist_free_all);
-    
+    slistuptr headerptr(nullptr,curl_slist_free_all);
     if(header)
     {
-        for(auto& item : *header)
-        {
-            list.reset(curl_slist_append(list.get(), item.c_str()));
-        }
-        
+        _lg.Debug("header present");
+        headerptr = set_curl_header(*header);
     }
     
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_HTTPHEADER, list.get()));
     curl_common_performreq();
     
     
@@ -137,6 +137,24 @@ void foxtrot::protocols::CurlRequest::curl_common_performreq()
     
     
 };
+
+slistuptr foxtrot::protocols::CurlRequest::set_curl_header(const vector<std::string>& headerfields)
+{
+    std::unique_ptr<curl_slist, void(*)(curl_slist*)> list(nullptr, curl_slist_free_all);
+    
+    curl_slist* raw_list = nullptr;
+    
+    for(auto& item : headerfields)
+    {
+        raw_list = curl_slist_append(raw_list, item.c_str());
+    }
+    list.reset(raw_list);
+    
+    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_HTTPHEADER, list.get()));
+    
+    return std::move(list);
+}
+
 
 
 std::ostringstream & foxtrot::protocols::CurlRequest::getdatabuilder()
