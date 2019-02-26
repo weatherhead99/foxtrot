@@ -79,15 +79,32 @@ string CurlRequest::blocking_get_request(const string& path,
 
 string CurlRequest::blocking_post_request(const string& path,
                                           const string& body,
-                                          const map<string,string>*,
-                                          const map<string,string>*)
+                                          const vector<string>* header)
 {
     
     thisreq_builder.str("");
     
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
   
-    return "";
+    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_POSTFIELDS, body.data()));
+    
+    
+    std::unique_ptr<curl_slist, void(*)(curl_slist*)> list(nullptr, curl_slist_free_all);
+    
+    if(header)
+    {
+        for(auto& item : *header)
+        {
+            list.reset(curl_slist_append(list.get(), item.c_str()));
+        }
+        
+    }
+    
+    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_HTTPHEADER, list.get()));
+    curl_common_performreq();
+    
+    
+    return thisreq_builder.str();
 };
 
 

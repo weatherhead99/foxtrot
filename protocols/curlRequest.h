@@ -7,6 +7,7 @@
 using namespace foxtrot;
 using std::string;
 using std::map;
+using std::vector;
 
 
 namespace detail  {
@@ -30,8 +31,7 @@ namespace foxtrot {
                                              const map<string,string>* urldata = nullptr);
             std::string blocking_post_request(const string& path,
                                               const string& body,
-                                              const map<string,string>* header = nullptr,
-                                              const map<string,string>* urldata = nullptr); 
+                                              const vector<string>* header = nullptr); 
             
         private:
             void curl_checkerror(int code);
