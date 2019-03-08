@@ -13,11 +13,11 @@ namespace foxtrot {
     class pushbullet_api {
       
     public:
-        pushbullet_api(const string&& api_key)
-        
+        pushbullet_api(const string&& api_key);                                                                                                                                                                                                                                                                                                           
+        void create_push_channel(const string& title, const string& body, const string& channel);
     private:
         string api_key_;
-        std::shared_ptr<foxtrot::curlRequest> proto_;
+        std::shared_ptr<foxtrot::protocols::CurlRequest> proto_;
         Logging lg_;
     };
     
