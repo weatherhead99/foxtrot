@@ -103,6 +103,7 @@ add_subdirectory(setups)
 endif()
 
 add_subdirectory(autofilld)
+add_subdirectory(pushbullet)
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
 message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
@@ -162,6 +163,7 @@ endif()
 if(BUILD_UDEV)
   add_subdirectory(udev)
 endif()
+
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/foxtrotConfig.cmake.in foxtrotConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
