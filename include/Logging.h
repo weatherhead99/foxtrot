@@ -75,6 +75,7 @@ namespace foxtrot
 	
     template<typename T>
     class FOXTROT_EXPORT streamThrowLogging : public streamLogging {
+        friend class Logging;
     public:
         virtual ~streamThrowLogging() final;
     private:
