@@ -84,21 +84,19 @@ int main(int argc, char** argv)
     ("key",po::value<std::string>(&keyfile),"pem for SSL")
     ("crt",po::value<std::string>(&crtfile),"crt for SSL")
     ("forceauth", po::value<bool>(&forceauth)->default_value(true),"force client auth")
-    ("bindstr", po::value<std::string>(&bindstr)->default_value("0.0.0.0"), "socket listen string");
+    ("bindstr", po::value<std::string>(&bindstr)->default_value("0.0.0.0"), "socket listen string")
+    ("help","display usage information");
     
     po::positional_options_description pdesc;
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
     
     po::variables_map vm;
     
-    lg.strm(sl::debug) << "options setup, about to open config file..";
-    
+//     lg.strm(sl::debug) << "options setup, about to open config file..";
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
-    
-    
-    foxtrot::load_config_file(config_file,desc,vm,&lg);
-
-    lg.strm(sl::trace) << "notifying..";
+//     foxtrot::load_config_file(config_file,desc,vm,&lg);
+    foxtrot::load_config_file(config_file,desc,vm);
+//     lg.strm(sl::trace) << "notifying..";
     
     try{
         po::notify(vm);
@@ -110,11 +108,18 @@ int main(int argc, char** argv)
         std::exit(1);
         
     }
-
-
     foxtrot::check_debug_level_and_exit(debuglevel,lg);
     
     foxtrot::setDefaultSink();
+    
+    if(vm.count("help"))
+    {
+        std::cout << "Usage:" << argv[0] << " setupfile servername parameterfile [options]" << std::endl;
+        std::cout << "description of options: " << std::endl;
+        std::cout << desc << std::endl;
+        std::exit(0);
+    }
+    
     
     
     std::unique_ptr<std::map<std::string,foxtrot::parameterset>> params;
