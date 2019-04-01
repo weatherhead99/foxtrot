@@ -52,21 +52,39 @@ namespace foxtrot
         
         void setLogChannel(const std::string& chan);
         
+        void Log(const std::string& message, sl level);
+        
+        template<typename T>
+        void logAndThrow(const std::string& message, sl level = sl::error);
+        
+        
 	class FOXTROT_EXPORT streamLogging{
 	public:
 	  friend class Logging;
 	  template<typename T> streamLogging& operator<<(T const& value);
-	  ~streamLogging();
-	private:
+	  virtual ~streamLogging();
+	protected:
 	  streamLogging(Logging& lg, sl level);
 	  streamLogging(const streamLogging& other);
 	  streamLogging(streamLogging&& other);
+      bool nolog= false;
 	  Logging& _lg;
 	  sl _level;
 	  std::ostringstream _oss;
 	};
 	
+    template<typename T>
+    class FOXTROT_EXPORT streamThrowLogging : public streamLogging {
+    public:
+        virtual ~streamThrowLogging() final;
+    private:
+        streamThrowLogging(Logging& lg, sl level);
+    };
+    
+    
 	streamLogging strm(sl level);
+    template<typename T> 
+    streamThrowLogging<T> strmthrow(sl level);
 	
     private:
         inline void GeneralStreamRecord(const std::string& message, boost::log::trivial::severity_level sev)
@@ -97,3 +115,33 @@ foxtrot::Logging::streamLogging& foxtrot::Logging::streamLogging::operator<<(T c
   return *this;
 
 }
+
+template<typename T>
+foxtrot::Logging::streamThrowLogging<T>::streamThrowLogging(Logging& lg, sl level)
+: streamLogging(lg,level)
+{
+    nolog = true;
+};
+
+template<typename T>
+foxtrot::Logging::streamThrowLogging<T>::~streamThrowLogging()
+{
+    _lg.logAndThrow<T>(_oss.str(),_level);
+    
+};
+
+
+template<typename T>
+void foxtrot::Logging::logAndThrow(const std::string& message, sl level)
+{
+    Log(message,level);
+    throw T(message);
+}
+
+
+template<typename T>
+foxtrot::Logging::streamThrowLogging<T> foxtrot::Logging::strmthrow(sl level)
+{
+    return streamThrowLogging<T>(*this,level);
+    
+};
