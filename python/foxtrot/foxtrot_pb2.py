@@ -8,7 +8,6 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf import descriptor_pb2
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -20,7 +19,8 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='foxtrot.proto',
   package='foxtrot',
   syntax='proto3',
-  serialized_pb=_b('\n\rfoxtrot.proto\x12\x07\x66oxtrot\"\x07\n\x05\x65mpty\":\n\terrstatus\x12 \n\x02tp\x18\x01 \x01(\x0e\x32\x14.foxtrot.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t\"\xe0\x01\n\rdevcapability\x12%\n\x02tp\x18\x01 \x01(\x0e\x32\x19.foxtrot.capability_types\x12\x0f\n\x07\x63\x61pname\x18\x02 \x01(\t\x12\x10\n\x08\x61rgnames\x18\x03 \x03(\t\x12&\n\x08\x61rgtypes\x18\x04 \x03(\x0e\x32\x14.foxtrot.value_types\x12%\n\x05rettp\x18\x05 \x01(\x0e\x32\x14.foxtrot.value_typesH\x00\x12,\n\x08vecrettp\x18\x06 \x01(\x0e\x32\x18.foxtrot.byte_data_typesH\x00\x42\x08\n\x06return\"g\n\x0b\x64\x65vdescribe\x12\r\n\x05\x64\x65vid\x18\x01 \x01(\r\x12\x0f\n\x07\x64\x65vtype\x18\x02 \x01(\t\x12\x12\n\ndevcomment\x18\x03 \x01(\t\x12$\n\x04\x63\x61ps\x18\x04 \x03(\x0b\x32\x16.foxtrot.devcapability\"\xae\x01\n\x0cservdescribe\x12\x13\n\x0bservcomment\x18\x01 \x01(\t\x12>\n\rdevs_attached\x18\x02 \x03(\x0b\x32\'.foxtrot.servdescribe.DevsAttachedEntry\x1aI\n\x11\x44\x65vsAttachedEntry\x12\x0b\n\x03key\x18\x01 \x01(\r\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.foxtrot.devdescribe:\x02\x38\x01\"y\n\x13\x63\x61pability_argument\x12\x10\n\x08position\x18\x01 \x01(\r\x12\x10\n\x06\x64\x62larg\x18\x02 \x01(\x01H\x00\x12\x10\n\x06intarg\x18\x03 \x01(\x11H\x00\x12\x11\n\x07\x62oolarg\x18\x04 \x01(\x08H\x00\x12\x10\n\x06strarg\x18\x05 \x01(\tH\x00\x42\x07\n\x05value\"\x8b\x01\n\x12\x63\x61pability_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x1a\n\x12\x63ontention_timeout\x18\x05 \x01(\r\"\xbb\x01\n\x13\x63\x61pability_response\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lret\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x07 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x08 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\xa0\x01\n\ttelemetry\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06tstamp\x18\x02 \x01(\x04\x12\x10\n\x06\x64\x62lret\x18\x03 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x04 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x05 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x06 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x07 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\x99\x01\n\rchunk_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x11\n\tchunksize\x18\x06 \x01(\r\x12\x1a\n\x12\x63ontention_timeout\x18\x07 \x01(\r\"\x90\x01\n\tdatachunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x03 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x04 \x01(\t\x12\x1f\n\x03\x65rr\x18\x06 \x01(\x0b\x32\x12.foxtrot.errstatus\x12%\n\x03\x64tp\x18\x07 \x01(\x0e\x32\x18.foxtrot.byte_data_types\"}\n\x15servercommand_request\x12)\n\x07\x63ommand\x18\x01 \x01(\x0e\x32\x18.foxtrot.server_commands\x12\r\n\x05msgid\x18\x02 \x01(\r\x12*\n\x04\x61rgs\x18\x03 \x03(\x0b\x32\x1c.foxtrot.capability_argument\"q\n\x14serverrequest_return\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12)\n\x03ret\x18\x03 \x01(\x0b\x32\x1c.foxtrot.capability_response\"\xa1\x01\n\nserverflag\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\x10\n\x08\x66lagname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lval\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolval\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x07 \x01(\tH\x00\x42\x05\n\x03\x61rg\"d\n\x0eserverflaglist\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\"\n\x05\x66lags\x18\x03 \x03(\x0b\x32\x13.foxtrot.serverflag*S\n\x10\x63\x61pability_types\x12\x12\n\x0eVALUE_READONLY\x10\x00\x12\x13\n\x0fVALUE_READWRITE\x10\x01\x12\n\n\x06\x41\x43TION\x10\x02\x12\n\n\x06STREAM\x10\x03*n\n\x0bvalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\r\n\tBOOL_TYPE\x10\x02\x12\x0f\n\x0bSTRING_TYPE\x10\x03\x12\x12\n\x0e\x42YTE_DATA_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*\xa2\x01\n\x0f\x62yte_data_types\x12\x0e\n\nUCHAR_TYPE\x10\x00\x12\x0f\n\x0bUSHORT_TYPE\x10\x01\x12\r\n\tUINT_TYPE\x10\x02\x12\x0e\n\nULONG_TYPE\x10\x03\x12\x0e\n\nSHORT_TYPE\x10\x04\x12\r\n\tIINT_TYPE\x10\x05\x12\r\n\tLONG_TYPE\x10\x06\x12\x0f\n\x0b\x42\x46LOAT_TYPE\x10\x07\x12\x10\n\x0c\x42\x44OUBLE_TYPE\x10\x08*\x82\x01\n\x0b\x65rror_types\x12\x0c\n\x08\x66t_Error\x10\x00\x12\x12\n\x0e\x66t_DeviceError\x10\x01\x12\x14\n\x10\x66t_ProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x12\x16\n\x12\x63ontention_timeout\x10\x05*8\n\x0fserver_commands\x12\x0f\n\x0bReloadSetup\x10\x00\x12\x14\n\x10\x43hangeDebugLevel\x10\x01\x32\xd0\x03\n\texptserve\x12M\n\x10InvokeCapability\x12\x1b.foxtrot.capability_request\x1a\x1c.foxtrot.capability_response\x12\x37\n\x0e\x44\x65scribeServer\x12\x0e.foxtrot.empty\x1a\x15.foxtrot.servdescribe\x12\x39\n\tFetchData\x12\x16.foxtrot.chunk_request\x1a\x12.foxtrot.datachunk0\x01\x12N\n\rServerCommand\x12\x1e.foxtrot.servercommand_request\x1a\x1d.foxtrot.serverrequest_return\x12\x39\n\rSetServerFlag\x12\x13.foxtrot.serverflag\x1a\x13.foxtrot.serverflag\x12\x39\n\rGetServerFlag\x12\x13.foxtrot.serverflag\x1a\x13.foxtrot.serverflag\x12:\n\x0fListServerFlags\x12\x0e.foxtrot.empty\x1a\x17.foxtrot.serverflaglistB\x0c\n\nio.foxtrotb\x06proto3')
+  serialized_options=_b('\n\nio.foxtrot'),
+  serialized_pb=_b('\n\rfoxtrot.proto\x12\x07\x66oxtrot\"\x07\n\x05\x65mpty\":\n\terrstatus\x12 \n\x02tp\x18\x01 \x01(\x0e\x32\x14.foxtrot.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t\"\xe0\x01\n\rdevcapability\x12%\n\x02tp\x18\x01 \x01(\x0e\x32\x19.foxtrot.capability_types\x12\x0f\n\x07\x63\x61pname\x18\x02 \x01(\t\x12\x10\n\x08\x61rgnames\x18\x03 \x03(\t\x12&\n\x08\x61rgtypes\x18\x04 \x03(\x0e\x32\x14.foxtrot.value_types\x12%\n\x05rettp\x18\x05 \x01(\x0e\x32\x14.foxtrot.value_typesH\x00\x12,\n\x08vecrettp\x18\x06 \x01(\x0e\x32\x18.foxtrot.byte_data_typesH\x00\x42\x08\n\x06return\"g\n\x0b\x64\x65vdescribe\x12\r\n\x05\x64\x65vid\x18\x01 \x01(\r\x12\x0f\n\x07\x64\x65vtype\x18\x02 \x01(\t\x12\x12\n\ndevcomment\x18\x03 \x01(\t\x12$\n\x04\x63\x61ps\x18\x04 \x03(\x0b\x32\x16.foxtrot.devcapability\"\xcf\x01\n\x0cservdescribe\x12\x13\n\x0bservcomment\x18\x01 \x01(\t\x12>\n\rdevs_attached\x18\x02 \x03(\x0b\x32\'.foxtrot.servdescribe.DevsAttachedEntry\x12\x1f\n\x03\x65rr\x18\x03 \x01(\x0b\x32\x12.foxtrot.errstatus\x1aI\n\x11\x44\x65vsAttachedEntry\x12\x0b\n\x03key\x18\x01 \x01(\r\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.foxtrot.devdescribe:\x02\x38\x01\"y\n\x13\x63\x61pability_argument\x12\x10\n\x08position\x18\x01 \x01(\r\x12\x10\n\x06\x64\x62larg\x18\x02 \x01(\x01H\x00\x12\x10\n\x06intarg\x18\x03 \x01(\x11H\x00\x12\x11\n\x07\x62oolarg\x18\x04 \x01(\x08H\x00\x12\x10\n\x06strarg\x18\x05 \x01(\tH\x00\x42\x07\n\x05value\"\x8b\x01\n\x12\x63\x61pability_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x1a\n\x12\x63ontention_timeout\x18\x05 \x01(\r\"\xbb\x01\n\x13\x63\x61pability_response\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lret\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x07 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x08 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\xa0\x01\n\ttelemetry\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06tstamp\x18\x02 \x01(\x04\x12\x10\n\x06\x64\x62lret\x18\x03 \x01(\x01H\x00\x12\x10\n\x06intret\x18\x04 \x01(\x11H\x00\x12\x11\n\x07\x62oolret\x18\x05 \x01(\x08H\x00\x12\x13\n\tstringret\x18\x06 \x01(\tH\x00\x12\x1f\n\x03\x65rr\x18\x07 \x01(\x0b\x32\x12.foxtrot.errstatusB\x08\n\x06return\"\x99\x01\n\rchunk_request\x12\r\n\x05msgid\x18\x01 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x02 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x03 \x01(\t\x12*\n\x04\x61rgs\x18\x04 \x03(\x0b\x32\x1c.foxtrot.capability_argument\x12\x11\n\tchunksize\x18\x06 \x01(\r\x12\x1a\n\x12\x63ontention_timeout\x18\x07 \x01(\r\"\x90\x01\n\tdatachunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\r\n\x05\x64\x65vid\x18\x03 \x01(\r\x12\x0f\n\x07\x63\x61pname\x18\x04 \x01(\t\x12\x1f\n\x03\x65rr\x18\x06 \x01(\x0b\x32\x12.foxtrot.errstatus\x12%\n\x03\x64tp\x18\x07 \x01(\x0e\x32\x18.foxtrot.byte_data_types\"}\n\x15servercommand_request\x12)\n\x07\x63ommand\x18\x01 \x01(\x0e\x32\x18.foxtrot.server_commands\x12\r\n\x05msgid\x18\x02 \x01(\r\x12*\n\x04\x61rgs\x18\x03 \x03(\x0b\x32\x1c.foxtrot.capability_argument\"q\n\x14serverrequest_return\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12)\n\x03ret\x18\x03 \x01(\x0b\x32\x1c.foxtrot.capability_response\"\xa1\x01\n\nserverflag\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\x10\n\x08\x66lagname\x18\x03 \x01(\t\x12\x10\n\x06\x64\x62lval\x18\x04 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x05 \x01(\x11H\x00\x12\x11\n\x07\x62oolval\x18\x06 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x07 \x01(\tH\x00\x42\x05\n\x03\x61rg\"d\n\x0eserverflaglist\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\"\n\x05\x66lags\x18\x03 \x03(\x0b\x32\x13.foxtrot.serverflag\"\xb5\x01\n\x16\x62roadcast_notification\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\r\n\x05msgid\x18\x02 \x01(\r\x12\x19\n\x11use_default_title\x18\x03 \x01(\x08\x12\r\n\x05title\x18\x04 \x01(\t\x12\x0c\n\x04\x62ody\x18\x05 \x01(\t\x12\x1b\n\x13use_default_channel\x18\x06 \x01(\x08\x12\x16\n\x0e\x63hannel_target\x18\x07 \x01(\t*S\n\x10\x63\x61pability_types\x12\x12\n\x0eVALUE_READONLY\x10\x00\x12\x13\n\x0fVALUE_READWRITE\x10\x01\x12\n\n\x06\x41\x43TION\x10\x02\x12\n\n\x06STREAM\x10\x03*n\n\x0bvalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\r\n\tBOOL_TYPE\x10\x02\x12\x0f\n\x0bSTRING_TYPE\x10\x03\x12\x12\n\x0e\x42YTE_DATA_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*\xa2\x01\n\x0f\x62yte_data_types\x12\x0e\n\nUCHAR_TYPE\x10\x00\x12\x0f\n\x0bUSHORT_TYPE\x10\x01\x12\r\n\tUINT_TYPE\x10\x02\x12\x0e\n\nULONG_TYPE\x10\x03\x12\x0e\n\nSHORT_TYPE\x10\x04\x12\r\n\tIINT_TYPE\x10\x05\x12\r\n\tLONG_TYPE\x10\x06\x12\x0f\n\x0b\x42\x46LOAT_TYPE\x10\x07\x12\x10\n\x0c\x42\x44OUBLE_TYPE\x10\x08*\x82\x01\n\x0b\x65rror_types\x12\x0c\n\x08\x66t_Error\x10\x00\x12\x12\n\x0e\x66t_DeviceError\x10\x01\x12\x14\n\x10\x66t_ProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x12\x16\n\x12\x63ontention_timeout\x10\x05*8\n\x0fserver_commands\x12\x0f\n\x0bReloadSetup\x10\x00\x12\x14\n\x10\x43hangeDebugLevel\x10\x01\x32\xe7\x04\n\texptserve\x12M\n\x10InvokeCapability\x12\x1b.foxtrot.capability_request\x1a\x1c.foxtrot.capability_response\x12\x37\n\x0e\x44\x65scribeServer\x12\x0e.foxtrot.empty\x1a\x15.foxtrot.servdescribe\x12\x39\n\tFetchData\x12\x16.foxtrot.chunk_request\x1a\x12.foxtrot.datachunk0\x01\x12N\n\rServerCommand\x12\x1e.foxtrot.servercommand_request\x1a\x1d.foxtrot.serverrequest_return\x12\x39\n\rSetServerFlag\x12\x13.foxtrot.serverflag\x1a\x13.foxtrot.serverflag\x12\x39\n\rGetServerFlag\x12\x13.foxtrot.serverflag\x1a\x13.foxtrot.serverflag\x12:\n\x0fListServerFlags\x12\x0e.foxtrot.empty\x1a\x17.foxtrot.serverflaglist\x12:\n\x0e\x44ropServerFlag\x12\x13.foxtrot.serverflag\x1a\x13.foxtrot.serverflag\x12Y\n\x15\x42roadcastNotification\x12\x1f.foxtrot.broadcast_notification\x1a\x1f.foxtrot.broadcast_notificationB\x0c\n\nio.foxtrotb\x06proto3')
 )
 
 _CAPABILITY_TYPES = _descriptor.EnumDescriptor(
@@ -31,25 +31,25 @@ _CAPABILITY_TYPES = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='VALUE_READONLY', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='VALUE_READWRITE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ACTION', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='STREAM', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2033,
-  serialized_end=2116,
+  serialized_options=None,
+  serialized_start=2250,
+  serialized_end=2333,
 )
 _sym_db.RegisterEnumDescriptor(_CAPABILITY_TYPES)
 
@@ -62,33 +62,33 @@ _VALUE_TYPES = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='FLOAT_TYPE', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='INT_TYPE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='BOOL_TYPE', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='STRING_TYPE', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='BYTE_DATA_TYPE', index=4, number=4,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='VOID_TYPE', index=5, number=5,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2118,
-  serialized_end=2228,
+  serialized_options=None,
+  serialized_start=2335,
+  serialized_end=2445,
 )
 _sym_db.RegisterEnumDescriptor(_VALUE_TYPES)
 
@@ -101,45 +101,45 @@ _BYTE_DATA_TYPES = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='UCHAR_TYPE', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='USHORT_TYPE', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='UINT_TYPE', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ULONG_TYPE', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='SHORT_TYPE', index=4, number=4,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='IINT_TYPE', index=5, number=5,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='LONG_TYPE', index=6, number=6,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='BFLOAT_TYPE', index=7, number=7,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='BDOUBLE_TYPE', index=8, number=8,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2231,
-  serialized_end=2393,
+  serialized_options=None,
+  serialized_start=2448,
+  serialized_end=2610,
 )
 _sym_db.RegisterEnumDescriptor(_BYTE_DATA_TYPES)
 
@@ -152,33 +152,33 @@ _ERROR_TYPES = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='ft_Error', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ft_DeviceError', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ft_ProtocolError', index=2, number=2,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='out_of_range', index=3, number=3,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='unknown_error', index=4, number=4,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='contention_timeout', index=5, number=5,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2396,
-  serialized_end=2526,
+  serialized_options=None,
+  serialized_start=2613,
+  serialized_end=2743,
 )
 _sym_db.RegisterEnumDescriptor(_ERROR_TYPES)
 
@@ -191,17 +191,17 @@ _SERVER_COMMANDS = _descriptor.EnumDescriptor(
   values=[
     _descriptor.EnumValueDescriptor(
       name='ReloadSetup', index=0, number=0,
-      options=None,
+      serialized_options=None,
       type=None),
     _descriptor.EnumValueDescriptor(
       name='ChangeDebugLevel', index=1, number=1,
-      options=None,
+      serialized_options=None,
       type=None),
   ],
   containing_type=None,
-  options=None,
-  serialized_start=2528,
-  serialized_end=2584,
+  serialized_options=None,
+  serialized_start=2745,
+  serialized_end=2801,
 )
 _sym_db.RegisterEnumDescriptor(_SERVER_COMMANDS)
 
@@ -249,7 +249,7 @@ _EMPTY = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -273,21 +273,21 @@ _ERRSTATUS = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msg', full_name='foxtrot.errstatus.msg', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -311,49 +311,49 @@ _DEVCAPABILITY = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='capname', full_name='foxtrot.devcapability.capname', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='argnames', full_name='foxtrot.devcapability.argnames', index=2,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='argtypes', full_name='foxtrot.devcapability.argtypes', index=3,
       number=4, type=14, cpp_type=8, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='rettp', full_name='foxtrot.devcapability.rettp', index=4,
       number=5, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='vecrettp', full_name='foxtrot.devcapability.vecrettp', index=5,
       number=6, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -380,35 +380,35 @@ _DEVDESCRIBE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devtype', full_name='foxtrot.devdescribe.devtype', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devcomment', full_name='foxtrot.devdescribe.devcomment', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='caps', full_name='foxtrot.devdescribe.caps', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -432,28 +432,28 @@ _SERVDESCRIBE_DEVSATTACHEDENTRY = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='value', full_name='foxtrot.servdescribe.DevsAttachedEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=_descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001')),
+  serialized_options=_b('8\001'),
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=529,
-  serialized_end=602,
+  serialized_start=562,
+  serialized_end=635,
 )
 
 _SERVDESCRIBE = _descriptor.Descriptor(
@@ -469,28 +469,35 @@ _SERVDESCRIBE = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devs_attached', full_name='foxtrot.servdescribe.devs_attached', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='err', full_name='foxtrot.servdescribe.err', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[_SERVDESCRIBE_DEVSATTACHEDENTRY, ],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
   serialized_start=428,
-  serialized_end=602,
+  serialized_end=635,
 )
 
 
@@ -507,42 +514,42 @@ _CAPABILITY_ARGUMENT = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dblarg', full_name='foxtrot.capability_argument.dblarg', index=1,
       number=2, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='intarg', full_name='foxtrot.capability_argument.intarg', index=2,
       number=3, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='boolarg', full_name='foxtrot.capability_argument.boolarg', index=3,
       number=4, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='strarg', full_name='foxtrot.capability_argument.strarg', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -551,8 +558,8 @@ _CAPABILITY_ARGUMENT = _descriptor.Descriptor(
       name='value', full_name='foxtrot.capability_argument.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=604,
-  serialized_end=725,
+  serialized_start=637,
+  serialized_end=758,
 )
 
 
@@ -569,49 +576,49 @@ _CAPABILITY_REQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devid', full_name='foxtrot.capability_request.devid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='capname', full_name='foxtrot.capability_request.capname', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='args', full_name='foxtrot.capability_request.args', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='contention_timeout', full_name='foxtrot.capability_request.contention_timeout', index=4,
       number=5, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=728,
-  serialized_end=867,
+  serialized_start=761,
+  serialized_end=900,
 )
 
 
@@ -628,63 +635,63 @@ _CAPABILITY_RESPONSE = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devid', full_name='foxtrot.capability_response.devid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='capname', full_name='foxtrot.capability_response.capname', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dblret', full_name='foxtrot.capability_response.dblret', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='intret', full_name='foxtrot.capability_response.intret', index=4,
       number=5, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='boolret', full_name='foxtrot.capability_response.boolret', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='stringret', full_name='foxtrot.capability_response.stringret', index=6,
       number=7, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='err', full_name='foxtrot.capability_response.err', index=7,
       number=8, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -693,8 +700,8 @@ _CAPABILITY_RESPONSE = _descriptor.Descriptor(
       name='return', full_name='foxtrot.capability_response.return',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=870,
-  serialized_end=1057,
+  serialized_start=903,
+  serialized_end=1090,
 )
 
 
@@ -711,56 +718,56 @@ _TELEMETRY = _descriptor.Descriptor(
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='tstamp', full_name='foxtrot.telemetry.tstamp', index=1,
       number=2, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dblret', full_name='foxtrot.telemetry.dblret', index=2,
       number=3, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='intret', full_name='foxtrot.telemetry.intret', index=3,
       number=4, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='boolret', full_name='foxtrot.telemetry.boolret', index=4,
       number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='stringret', full_name='foxtrot.telemetry.stringret', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='err', full_name='foxtrot.telemetry.err', index=6,
       number=7, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -769,8 +776,8 @@ _TELEMETRY = _descriptor.Descriptor(
       name='return', full_name='foxtrot.telemetry.return',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1060,
-  serialized_end=1220,
+  serialized_start=1093,
+  serialized_end=1253,
 )
 
 
@@ -787,56 +794,56 @@ _CHUNK_REQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devid', full_name='foxtrot.chunk_request.devid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='capname', full_name='foxtrot.chunk_request.capname', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='args', full_name='foxtrot.chunk_request.args', index=3,
       number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='chunksize', full_name='foxtrot.chunk_request.chunksize', index=4,
       number=6, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='contention_timeout', full_name='foxtrot.chunk_request.contention_timeout', index=5,
       number=7, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1223,
-  serialized_end=1376,
+  serialized_start=1256,
+  serialized_end=1409,
 )
 
 
@@ -853,56 +860,56 @@ _DATACHUNK = _descriptor.Descriptor(
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msgid', full_name='foxtrot.datachunk.msgid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='devid', full_name='foxtrot.datachunk.devid', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='capname', full_name='foxtrot.datachunk.capname', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='err', full_name='foxtrot.datachunk.err', index=4,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dtp', full_name='foxtrot.datachunk.dtp', index=5,
       number=7, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1379,
-  serialized_end=1523,
+  serialized_start=1412,
+  serialized_end=1556,
 )
 
 
@@ -919,35 +926,35 @@ _SERVERCOMMAND_REQUEST = _descriptor.Descriptor(
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msgid', full_name='foxtrot.servercommand_request.msgid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='args', full_name='foxtrot.servercommand_request.args', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1525,
-  serialized_end=1650,
+  serialized_start=1558,
+  serialized_end=1683,
 )
 
 
@@ -964,35 +971,35 @@ _SERVERREQUEST_RETURN = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msgid', full_name='foxtrot.serverrequest_return.msgid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='ret', full_name='foxtrot.serverrequest_return.ret', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1652,
-  serialized_end=1765,
+  serialized_start=1685,
+  serialized_end=1798,
 )
 
 
@@ -1009,56 +1016,56 @@ _SERVERFLAG = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msgid', full_name='foxtrot.serverflag.msgid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='flagname', full_name='foxtrot.serverflag.flagname', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='dblval', full_name='foxtrot.serverflag.dblval', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='intval', full_name='foxtrot.serverflag.intval', index=4,
       number=5, type=17, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='boolval', full_name='foxtrot.serverflag.boolval', index=5,
       number=6, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='stringval', full_name='foxtrot.serverflag.stringval', index=6,
       number=7, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
@@ -1067,8 +1074,8 @@ _SERVERFLAG = _descriptor.Descriptor(
       name='arg', full_name='foxtrot.serverflag.arg',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=1768,
-  serialized_end=1929,
+  serialized_start=1801,
+  serialized_end=1962,
 )
 
 
@@ -1085,35 +1092,108 @@ _SERVERFLAGLIST = _descriptor.Descriptor(
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='msgid', full_name='foxtrot.serverflaglist.msgid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='flags', full_name='foxtrot.serverflaglist.flags', index=2,
       number=3, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
-      options=None, file=DESCRIPTOR),
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
   nested_types=[],
   enum_types=[
   ],
-  options=None,
+  serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1931,
-  serialized_end=2031,
+  serialized_start=1964,
+  serialized_end=2064,
+)
+
+
+_BROADCAST_NOTIFICATION = _descriptor.Descriptor(
+  name='broadcast_notification',
+  full_name='foxtrot.broadcast_notification',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='err', full_name='foxtrot.broadcast_notification.err', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='msgid', full_name='foxtrot.broadcast_notification.msgid', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='use_default_title', full_name='foxtrot.broadcast_notification.use_default_title', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='title', full_name='foxtrot.broadcast_notification.title', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='body', full_name='foxtrot.broadcast_notification.body', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='use_default_channel', full_name='foxtrot.broadcast_notification.use_default_channel', index=5,
+      number=6, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='channel_target', full_name='foxtrot.broadcast_notification.channel_target', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=2067,
+  serialized_end=2248,
 )
 
 _ERRSTATUS.fields_by_name['tp'].enum_type = _ERROR_TYPES
@@ -1131,6 +1211,7 @@ _DEVDESCRIBE.fields_by_name['caps'].message_type = _DEVCAPABILITY
 _SERVDESCRIBE_DEVSATTACHEDENTRY.fields_by_name['value'].message_type = _DEVDESCRIBE
 _SERVDESCRIBE_DEVSATTACHEDENTRY.containing_type = _SERVDESCRIBE
 _SERVDESCRIBE.fields_by_name['devs_attached'].message_type = _SERVDESCRIBE_DEVSATTACHEDENTRY
+_SERVDESCRIBE.fields_by_name['err'].message_type = _ERRSTATUS
 _CAPABILITY_ARGUMENT.oneofs_by_name['value'].fields.append(
   _CAPABILITY_ARGUMENT.fields_by_name['dblarg'])
 _CAPABILITY_ARGUMENT.fields_by_name['dblarg'].containing_oneof = _CAPABILITY_ARGUMENT.oneofs_by_name['value']
@@ -1192,6 +1273,7 @@ _SERVERFLAG.oneofs_by_name['arg'].fields.append(
 _SERVERFLAG.fields_by_name['stringval'].containing_oneof = _SERVERFLAG.oneofs_by_name['arg']
 _SERVERFLAGLIST.fields_by_name['err'].message_type = _ERRSTATUS
 _SERVERFLAGLIST.fields_by_name['flags'].message_type = _SERVERFLAG
+_BROADCAST_NOTIFICATION.fields_by_name['err'].message_type = _ERRSTATUS
 DESCRIPTOR.message_types_by_name['empty'] = _EMPTY
 DESCRIPTOR.message_types_by_name['errstatus'] = _ERRSTATUS
 DESCRIPTOR.message_types_by_name['devcapability'] = _DEVCAPABILITY
@@ -1207,6 +1289,7 @@ DESCRIPTOR.message_types_by_name['servercommand_request'] = _SERVERCOMMAND_REQUE
 DESCRIPTOR.message_types_by_name['serverrequest_return'] = _SERVERREQUEST_RETURN
 DESCRIPTOR.message_types_by_name['serverflag'] = _SERVERFLAG
 DESCRIPTOR.message_types_by_name['serverflaglist'] = _SERVERFLAGLIST
+DESCRIPTOR.message_types_by_name['broadcast_notification'] = _BROADCAST_NOTIFICATION
 DESCRIPTOR.enum_types_by_name['capability_types'] = _CAPABILITY_TYPES
 DESCRIPTOR.enum_types_by_name['value_types'] = _VALUE_TYPES
 DESCRIPTOR.enum_types_by_name['byte_data_types'] = _BYTE_DATA_TYPES
@@ -1327,20 +1410,25 @@ serverflaglist = _reflection.GeneratedProtocolMessageType('serverflaglist', (_me
   ))
 _sym_db.RegisterMessage(serverflaglist)
 
+broadcast_notification = _reflection.GeneratedProtocolMessageType('broadcast_notification', (_message.Message,), dict(
+  DESCRIPTOR = _BROADCAST_NOTIFICATION,
+  __module__ = 'foxtrot_pb2'
+  # @@protoc_insertion_point(class_scope:foxtrot.broadcast_notification)
+  ))
+_sym_db.RegisterMessage(broadcast_notification)
 
-DESCRIPTOR.has_options = True
-DESCRIPTOR._options = _descriptor._ParseOptions(descriptor_pb2.FileOptions(), _b('\n\nio.foxtrot'))
-_SERVDESCRIBE_DEVSATTACHEDENTRY.has_options = True
-_SERVDESCRIBE_DEVSATTACHEDENTRY._options = _descriptor._ParseOptions(descriptor_pb2.MessageOptions(), _b('8\001'))
+
+DESCRIPTOR._options = None
+_SERVDESCRIBE_DEVSATTACHEDENTRY._options = None
 
 _EXPTSERVE = _descriptor.ServiceDescriptor(
   name='exptserve',
   full_name='foxtrot.exptserve',
   file=DESCRIPTOR,
   index=0,
-  options=None,
-  serialized_start=2587,
-  serialized_end=3051,
+  serialized_options=None,
+  serialized_start=2804,
+  serialized_end=3419,
   methods=[
   _descriptor.MethodDescriptor(
     name='InvokeCapability',
@@ -1349,7 +1437,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_CAPABILITY_REQUEST,
     output_type=_CAPABILITY_RESPONSE,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='DescribeServer',
@@ -1358,7 +1446,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_EMPTY,
     output_type=_SERVDESCRIBE,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='FetchData',
@@ -1367,7 +1455,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_CHUNK_REQUEST,
     output_type=_DATACHUNK,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='ServerCommand',
@@ -1376,7 +1464,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_SERVERCOMMAND_REQUEST,
     output_type=_SERVERREQUEST_RETURN,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='SetServerFlag',
@@ -1385,7 +1473,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_SERVERFLAG,
     output_type=_SERVERFLAG,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='GetServerFlag',
@@ -1394,7 +1482,7 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_SERVERFLAG,
     output_type=_SERVERFLAG,
-    options=None,
+    serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
     name='ListServerFlags',
@@ -1403,7 +1491,25 @@ _EXPTSERVE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_EMPTY,
     output_type=_SERVERFLAGLIST,
-    options=None,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='DropServerFlag',
+    full_name='foxtrot.exptserve.DropServerFlag',
+    index=7,
+    containing_service=None,
+    input_type=_SERVERFLAG,
+    output_type=_SERVERFLAG,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='BroadcastNotification',
+    full_name='foxtrot.exptserve.BroadcastNotification',
+    index=8,
+    containing_service=None,
+    input_type=_BROADCAST_NOTIFICATION,
+    output_type=_BROADCAST_NOTIFICATION,
+    serialized_options=None,
   ),
 ])
 _sym_db.RegisterServiceDescriptor(_EXPTSERVE)
