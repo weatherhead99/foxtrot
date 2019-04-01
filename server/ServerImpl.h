@@ -16,12 +16,14 @@
 #include "HandlerBase.h"
 
 #include <boost/variant.hpp>
+#include "pushbullet/pushbullet_api.hh"
 
 using grpc::Server;
 using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
 using grpc::ServerBuilder;
 
+using std::string;
 
 namespace foxtrot{
     typedef boost::variant<double,int,bool,std::string> ft_variant;
@@ -32,6 +34,9 @@ class ServerImpl
 public:
     ServerImpl(const std::string& servcomment, DeviceHarness& harness);
     ServerImpl(const std::string& servcomment, DeviceHarness& harness, const std::string& connstr);
+    
+    void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
+    
     
     ~ServerImpl();
     void Run();
@@ -51,7 +56,7 @@ private:
         new HandlerBase<T>(&_service, _cq.get(), logic);
     };
     
-    
+    bool notifications_enabled = false;
     std::shared_ptr<flagmap> _serverflags;
     
     std::string _connstr;
@@ -72,7 +77,7 @@ private:
     DeviceHarness& _harness;
     
     Logging _lg;
-    
+    std::unique_ptr<pushbullet_api> _noti_api = nullptr;
     std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
     
 };

@@ -7,14 +7,13 @@
 #include "InvokeCapabilityImpl.h"
 #include "FetchDataImpl.h"
 #include "ServerFlagsImpl.h"
+#include "BroadcastNotificationImpl.h"
 
 //might be needed on windows?
 #include <exception>
 
 #include <iostream>
 #include <typeinfo>
-#include <future>
-#include <grpc++/security/credentials.h>
 
 
 using std::string;
@@ -32,6 +31,14 @@ ServerImpl::ServerImpl(const string& servcomment, DeviceHarness& harness, const 
   _connstr = connstr;
 
 }
+
+void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string& default_title,
+                                              const string& default_channel)
+{
+    _noti_api = std::make_unique<pushbullet_api>(apikey);
+    notifications_enabled = true;
+}
+
 
 
 
@@ -70,6 +77,18 @@ void ServerImpl::setup_common(const std::string& addrstr)
     add_logic<GetServerFlagsLogic>(_serverflags);
     add_logic<ListServerFlagsLogic>(_serverflags);
     add_logic<DropServerFlagLogic>(_serverflags);
+    
+    if(notifications_enabled)
+    {
+        _lg.Info("setting up pushbullet notification logic");
+        add_logic<BroadcastNotificationLogic>(std::move(_noti_api));
+    }
+    else
+    {
+        _lg.Info("notifications are not enabled");
+    }
+    
+    
 }
 
 

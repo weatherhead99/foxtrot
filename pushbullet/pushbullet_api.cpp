@@ -2,16 +2,19 @@
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 
+
+#define PUSHBULLET_PUSHES_API "https://api.pushbullet.com/v2/pushes"
+
 using namespace rapidjson;
 
-foxtrot::pushbullet_api::pushbullet_api(const string && api_key)
+foxtrot::pushbullet_api::pushbullet_api(const string & api_key)
 : lg_("pushbullet_api"), api_key_(api_key)
 {
     proto_ = std::make_shared<foxtrot::protocols::CurlRequest>();
 }
 
 
-void foxtrot::pushbullet_api::create_push_channel(const string& title, const string& body,
+void foxtrot::pushbullet_api::push_to_channel(const string& title, const string& body,
                                                   const string& channel)
 {
     
@@ -31,6 +34,17 @@ void foxtrot::pushbullet_api::create_push_channel(const string& title, const str
     writer.Key("channel_tag");
     writer.String(channel.c_str());
     
+    writer.EndObject();
     
+    std::vector<string> header{"Access-Token: " + api_key_, "Content-Type: application/json"};
+    
+    auto repl = proto_->blocking_post_request(PUSHBULLET_PUSHES_API,s.GetString(),&header);
+    auto rcode = proto_->get_last_http_response_code();
+    
+    if(rcode <200  || rcode > 300)
+    {
+        //TODO: custom error type here
+        throw std::runtime_error("failed request to pushbullet API");
+    }
     
 }

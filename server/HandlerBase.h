@@ -5,6 +5,8 @@
 #include <type_traits>
 #include "Logging.h"
 #include "HandlerTag.h"
+#include "ServerUtil.h"
+
 using std::cout;
 using std::endl;
 
@@ -65,17 +67,23 @@ namespace foxtrot
                         new HandlerBase<T>(_service, _cq,_logic);
                         _newrequest = false;
                     }
-            
-                    if(_logic->HandleRequest(_req,_reply, _responder, this))
-                    {
-                        _lg.Debug("request successful, marking finished");
-                        _status = status::FINISH;
+                    try{
+                        if(_logic->HandleRequest(_req,_reply, _responder, this))
+                        {
+                            _lg.Debug("request successful, marking finished");
+                            _status = status::FINISH;
+                        }
+                        else
+                        {
+                            _lg.Debug("request not finished yet");
+                            _status = status::PROCESS;
+                        }
                     }
-                    else
+                    catch(...)
                     {
-                        _lg.Debug("request not finished yet");
-                        _status = status::PROCESS;
-                    }
+                        foxtrot_rpc_error_handling(std::current_exception(), _reply, _responder,
+                                                   _lg, this);   
+                    };
             
                 }
             }

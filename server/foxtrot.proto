@@ -88,6 +88,7 @@ message servdescribe
 {
     string servcomment = 1;
     map<uint32, devdescribe> devs_attached = 2;
+    errstatus err = 3;
 }
 
 message capability_argument
@@ -200,6 +201,19 @@ message serverflaglist
 
 }
 
+
+message broadcast_notification
+{
+    errstatus err = 1;
+    uint32 msgid = 2;
+    bool use_default_title = 3;
+    string title = 4;
+    string body = 5;
+    bool use_default_channel = 6;
+    string channel_target = 7;
+}
+
+
 service exptserve
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
@@ -210,4 +224,5 @@ service exptserve
     rpc GetServerFlag (serverflag) returns (serverflag);
     rpc ListServerFlags (empty) returns (serverflaglist);
     rpc DropServerFlag (serverflag) returns (serverflag);
+    rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
 }

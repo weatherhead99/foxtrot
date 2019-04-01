@@ -105,7 +105,8 @@ endif()
 add_subdirectory(autofilld)
 add_subdirectory(pushbullet)
 
-add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
+add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>
+$<TARGET_OBJECTS:pushbullet>)
 message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
 target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 target_link_libraries(foxtrot PRIVATE ${Boost_LOG_LIBRARY} ${libusb} ${dl} ${CMAKE_THREAD_LIBS_INIT})

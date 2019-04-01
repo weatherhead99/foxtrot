@@ -30,6 +30,7 @@ find_library(gslcblas gslcblas)
 
 #curl (for curl request protocol)
 find_package(CURL REQUIRED)
+message(STATUS "found libcurl: ${CURL_LIBRARIES}")
 
 
 

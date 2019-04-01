@@ -35,6 +35,8 @@ namespace foxtrot {
                                               const string& body,
                                               const vector<string>* header = nullptr); 
             
+            unsigned long get_last_http_response_code();
+            
         private:
             void curl_checkerror(int code);
             
