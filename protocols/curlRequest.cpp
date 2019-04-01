@@ -129,6 +129,14 @@ unsigned long foxtrot::protocols::CurlRequest::get_last_http_response_code()
     
 }
 
+std::string foxtrot::protocols::CurlRequest::get_redirect_url()
+{
+    char* url;
+    curl_checkerror(curl_easy_getinfo(_curlinstance, CURLINFO_REDIRECT_URL, &url));
+    return std::string(url);
+}
+
+
 
 
 void foxtrot::protocols::CurlRequest::curl_common_performreq()
