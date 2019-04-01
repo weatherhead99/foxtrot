@@ -26,7 +26,8 @@ typedef severity_channel_logger<sl,std::string> logtp;
 
 BOOST_LOG_GLOBAL_LOGGER(foxtrot_general_logging, logtp);
 
-
+#define FT_LOG_AND_THROW(lg, T, sl, msg) \
+throw *(lg.streamthrow<T>(sl) << msg)
 
 namespace foxtrot
 {
@@ -62,7 +63,7 @@ namespace foxtrot
 	public:
 	  friend class Logging;
 	  template<typename T> streamLogging& operator<<(T const& value);
-	  virtual ~streamLogging();
+	  ~streamLogging();
 	protected:
 	  streamLogging(Logging& lg, sl level);
 	  streamLogging(const streamLogging& other);
@@ -74,12 +75,17 @@ namespace foxtrot
 	};
 	
     template<typename T>
-    class FOXTROT_EXPORT streamThrowLogging : public streamLogging {
+    struct FOXTROT_EXPORT streamThrowLogging : public streamLogging {
         friend class Logging;
-    public:
-        virtual ~streamThrowLogging() final;
+        template<typename R> streamThrowLogging& operator<<(R const& value)
+        {
+            _oss << value;
+            return *this;
+        };
+        T operator*();
     private:
         streamThrowLogging(Logging& lg, sl level);
+        
     };
     
     
@@ -125,11 +131,11 @@ foxtrot::Logging::streamThrowLogging<T>::streamThrowLogging(Logging& lg, sl leve
 };
 
 template<typename T>
-foxtrot::Logging::streamThrowLogging<T>::~streamThrowLogging()
+T foxtrot::Logging::streamThrowLogging<T>::operator*()
 {
-    _lg.logAndThrow<T>(_oss.str(),_level);
-    
-};
+    return T(_oss.str());
+}
+
 
 
 template<typename T>

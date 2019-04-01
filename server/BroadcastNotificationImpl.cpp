@@ -22,6 +22,7 @@ bool foxtrot::BroadcastNotificationLogic::HandleRequest(
     string channel = req.use_default_channel() ? default_channel_ : req.channel_target();
     
     api_->push_to_channel(title,req.body(),channel);
+    
     respond.Finish(repl,grpc::Status::OK,tag);
     return true;
     

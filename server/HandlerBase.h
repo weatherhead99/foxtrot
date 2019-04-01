@@ -82,7 +82,7 @@ namespace foxtrot
                     catch(...)
                     {
                         _lg.Info("Handlerbase error handler invoked...");
-			auto eptr = std::current_exception();
+                        auto eptr = std::current_exception();
                         foxtrot_rpc_error_handling(eptr, _reply, _responder,
                                                    _lg, this);   
                         _status = status::FINISH;
