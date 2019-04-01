@@ -22,7 +22,7 @@ namespace foxtrot {
         Logging lg_;
     };
     
-    string authorize_pushbullet_app(const string& client_id);
+    string get_pushbullet_authkey(const string& client_id);
     
     
 }

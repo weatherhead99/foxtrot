@@ -214,8 +214,20 @@ class Client:
         repl = self._stub.DropServerFlag(req)
         _check_repl_err(repl)
         
-    def broadcast_notification(self, body: str = None, title: str = None, channel: str = None):
-        req = broadcast_notification(body=body, title=title, channel_target=channel)
+    def broadcast_notification(self, body: str, title: str = None, channel: str = None):
+        req = broadcast_notification(body=body)
+        if title is None:
+            req.use_default_title = True
+            req.title = ""
+        else:
+            req.title = title
+        
+        if channel is None:
+            req.use_default_channel = True
+            req.channel_target = ""
+        else:
+            req.channel_target = channel
+        
         repl = self._stub.BroadcastNotification(req)
         _check_repl_err(repl)
 

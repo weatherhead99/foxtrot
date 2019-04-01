@@ -76,6 +76,9 @@ private:
     std::string _servcomment;
     DeviceHarness& _harness;
     
+    std::string default_channel_;
+    std::string default_title_;
+    
     Logging _lg;
     std::unique_ptr<pushbullet_api> _noti_api = nullptr;
     std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;

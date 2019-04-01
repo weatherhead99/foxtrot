@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 //     
     
     
-    auto token = foxtrot::authorize_pushbullet_app("zvccdV4qOqnFMISA2rriEwXatowfBKXe");
-    std::cout << "API key is: " << token << std::endl;
+//     auto token = foxtrot::authorize_pushbullet_app("zvccdV4qOqnFMISA2rriEwXatowfBKXe");
+//     std::cout << "API key is: " << token << std::endl;
     
 }

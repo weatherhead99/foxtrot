@@ -49,6 +49,8 @@ void foxtrot::pushbullet_api::push_to_channel(const string& title, const string&
     auto repl = proto_->blocking_post_request(PUSHBULLET_PUSHES_API,s.GetString(),&header);
     auto rcode = proto_->get_last_http_response_code();
     
+    lg_.strm(sl::trace) << "header: " << header[0] << " " << header[1] ;
+    
     if(rcode <200  || rcode > 300)
     {
         lg_.strm(sl::debug) << "HTTP response: " << repl;
@@ -62,7 +64,7 @@ void foxtrot::pushbullet_api::push_to_channel(const string& title, const string&
 
 
 
-string foxtrot::authorize_pushbullet_app(const string& client_id)
+string foxtrot::get_pushbullet_authkey(const string& client_id)
 {
     
     std::ostringstream oss;
@@ -179,5 +181,9 @@ string foxtrot::authorize_pushbullet_app(const string& client_id)
     auto len = (endpos - startpos - 6);
     return buf.substr(startpos + 6,len);
 };
+
+
+
+
 
 

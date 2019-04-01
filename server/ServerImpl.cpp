@@ -35,8 +35,11 @@ ServerImpl::ServerImpl(const string& servcomment, DeviceHarness& harness, const 
 void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string& default_title,
                                               const string& default_channel)
 {
+    _lg.strm(sl::info) << "API key: " << apikey;
     _noti_api = std::make_unique<pushbullet_api>(apikey);
     notifications_enabled = true;
+    default_channel_ = default_channel;
+    default_title_ = default_title;
 }
 
 
@@ -81,7 +84,8 @@ void ServerImpl::setup_common(const std::string& addrstr)
     if(notifications_enabled)
     {
         _lg.Info("setting up pushbullet notification logic");
-        add_logic<BroadcastNotificationLogic>(std::move(_noti_api));
+        add_logic<BroadcastNotificationLogic>(std::move(_noti_api),default_title_,
+            default_channel_);
     }
     else
     {
