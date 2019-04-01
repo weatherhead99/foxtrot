@@ -85,6 +85,11 @@ int main(int argc, char** argv)
     ("crt",po::value<std::string>(&crtfile),"crt for SSL")
     ("forceauth", po::value<bool>(&forceauth)->default_value(true),"force client auth")
     ("bindstr", po::value<std::string>(&bindstr)->default_value("0.0.0.0"), "socket listen string")
+    ("pushbullet_api_key", po::value<std::string>(),"API key for pushbullet notifications")
+    ("pushbullet_default_title", po::value<std::string>()->default_value(""),
+     "default title for pushbullet notifications")
+    ("pushbullet_default_channel", po::value<std::string>()->default_value(""), 
+     "default channel for pushbullet notifications")
     ("help","display usage information");
     
     po::positional_options_description pdesc;
@@ -176,6 +181,13 @@ int main(int argc, char** argv)
     };
     
     
+    if(vm.count("pushbullet_api_key"))
+    {
+        lg.Info("setting up pushbullet notifications...");
+        serv.setup_notifications(vm["pushbullet_api_key"].as<std::string>(),
+                                 vm["pushbullet_default_title"].as<std::string>(),
+                                 vm["pushbullet_default_channel"].as<std::string>());
+    }
     
     
     if(nthreads > 1)
@@ -187,7 +199,7 @@ int main(int argc, char** argv)
     
       if(except_ptr)
       {
-	std::rethrow_exception(except_ptr);
+        std::rethrow_exception(except_ptr);
       }
     
       lg.Info("server exited without error...");

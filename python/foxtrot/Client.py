@@ -214,6 +214,10 @@ class Client:
         repl = self._stub.DropServerFlag(req)
         _check_repl_err(repl)
         
+    def broadcast_notification(self, body: str = None, title: str = None, channel: str = None):
+        req = broadcast_notification(body=body, title=title, channel_target=channel)
+        repl = self._stub.BroadcastNotification(req)
+        _check_repl_err(repl)
 
 def _fake_call_sync(obj,client,*args,**kwargs):
     req = obj.construct_request(*args,**kwargs)

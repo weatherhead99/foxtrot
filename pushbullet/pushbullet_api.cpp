@@ -43,8 +43,10 @@ void foxtrot::pushbullet_api::push_to_channel(const string& title, const string&
     
     if(rcode <200  || rcode > 300)
     {
+        lg_.strm(sl::error) << "HTTP response code error: " << rcode;
+        lg_.strm(sl::error) << "HTTP response: " << repl;
         //TODO: custom error type here
-        throw std::runtime_error("failed request to pushbullet API");
+        throw std::runtime_error("invalid HTTP response code:" + std::to_string(rcode));
     }
     
 }
