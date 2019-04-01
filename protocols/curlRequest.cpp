@@ -15,7 +15,6 @@ size_t detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
         auto* req = reinterpret_cast<CurlRequest*>(userdata);
         std::string stringdat(ptr,nmemb);
         req->getdatabuilder() << stringdat;
-
       return nmemb;
         
 }
@@ -62,6 +61,7 @@ foxtrot::protocols::CurlRequest::~CurlRequest()
 
 void CurlRequest::Init(const parameterset *const)
 {
+
 }
 
 
@@ -119,6 +119,17 @@ void foxtrot::protocols::CurlRequest::curl_checkerror(int code)
     }
     
 }
+
+
+unsigned long foxtrot::protocols::CurlRequest::get_last_http_response_code()
+{
+    unsigned long code;
+    curl_checkerror(curl_easy_getinfo(_curlinstance,CURLINFO_RESPONSE_CODE,&code));
+    return code;
+    
+}
+
+
 
 void foxtrot::protocols::CurlRequest::curl_common_performreq()
 {

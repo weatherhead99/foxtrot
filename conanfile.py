@@ -30,6 +30,7 @@ class FoxtrotConan(ConanFile):
     "libcurl/7.61.1%s" % bcs, \
     "cmake_findboost_modular%s" % bbcs, \
     "rapidxml/1.13%s" % bcs, \
+    "rapidjson/1.1.0%s" % bcs, \
     "OpenSSL/1.0.2q@conan/stable"
 
         

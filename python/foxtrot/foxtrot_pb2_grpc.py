@@ -54,6 +54,11 @@ class exptserveStub(object):
         request_serializer=foxtrot__pb2.serverflag.SerializeToString,
         response_deserializer=foxtrot__pb2.serverflag.FromString,
         )
+    self.BroadcastNotification = channel.unary_unary(
+        '/foxtrot.exptserve/BroadcastNotification',
+        request_serializer=foxtrot__pb2.broadcast_notification.SerializeToString,
+        response_deserializer=foxtrot__pb2.broadcast_notification.FromString,
+        )
 
 
 class exptserveServicer(object):
@@ -116,6 +121,13 @@ class exptserveServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def BroadcastNotification(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_exptserveServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -158,6 +170,11 @@ def add_exptserveServicer_to_server(servicer, server):
           servicer.DropServerFlag,
           request_deserializer=foxtrot__pb2.serverflag.FromString,
           response_serializer=foxtrot__pb2.serverflag.SerializeToString,
+      ),
+      'BroadcastNotification': grpc.unary_unary_rpc_method_handler(
+          servicer.BroadcastNotification,
+          request_deserializer=foxtrot__pb2.broadcast_notification.FromString,
+          response_serializer=foxtrot__pb2.broadcast_notification.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

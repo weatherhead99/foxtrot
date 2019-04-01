@@ -103,8 +103,10 @@ add_subdirectory(setups)
 endif()
 
 add_subdirectory(autofilld)
+add_subdirectory(pushbullet)
 
-add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>)
+add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>
+$<TARGET_OBJECTS:pushbullet>)
 message(STATUS "binary dir: ${CMAKE_BINARY_DIR}")
 target_include_directories(foxtrot PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 target_link_libraries(foxtrot PRIVATE ${Boost_LOG_LIBRARY} ${libusb} ${dl} ${CMAKE_THREAD_LIBS_INIT})
@@ -162,8 +164,6 @@ endif()
 if(BUILD_UDEV)
   add_subdirectory(udev)
 endif()
-
-add_subdirectory(pushbullet_notifications)
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/foxtrotConfig.cmake.in foxtrotConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)

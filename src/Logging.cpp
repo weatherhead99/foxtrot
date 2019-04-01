@@ -164,6 +164,12 @@ void foxtrot::Logging::Fatal(const std::string& message)
 }
 
 
+void foxtrot::Logging::Log(const std::string& message, sl level)
+{
+    GeneralStreamRecord(message, level);
+}
+
+
 foxtrot::Logging::streamLogging foxtrot::Logging::strm(sl level)
 {
   return streamLogging(*this,level);  
@@ -171,7 +177,9 @@ foxtrot::Logging::streamLogging foxtrot::Logging::strm(sl level)
 
 foxtrot::Logging::streamLogging::~streamLogging()
 {
-  _lg.GeneralStreamRecord(_oss.str(),_level);
+//   _lg.GeneralStreamRecord(_oss.str(),_level);
+    if(!nolog)
+        _lg.Log(_oss.str(),_level);
 
 }
 
