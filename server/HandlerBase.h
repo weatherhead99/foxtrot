@@ -83,6 +83,7 @@ namespace foxtrot
                     {
                         foxtrot_rpc_error_handling(std::current_exception(), _reply, _responder,
                                                    _lg, this);   
+                        _status = status::FINISH;
                     };
             
                 }
