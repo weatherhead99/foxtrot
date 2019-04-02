@@ -1,6 +1,7 @@
 #pragma once
 #include "Logging.h"
 #include <atomic>
+#include <future>
 
 namespace foxtrot {
     class Client;
@@ -12,12 +13,12 @@ namespace foxtrot {
     class autofill_logic {
     public:
         autofill_logic(autofill_logger& logger, double limit_pressure,
-            double empty_temp);
+            double empty_temp, bool dryrun=false);
         
         void register_devid(Client& cl);
         env_data measure_data(Client& cl);
         
-        void fill_tank(Client& cl, int ws_devid, double filltime_hours, int relay);
+        std::future<std::exception_ptr> fill_tank(Client& cl, int ws_devid, double filltime_hours, int relay);
         
         void tick(Client& cl, const env_data& env);
         
@@ -34,7 +35,9 @@ namespace foxtrot {
         int ws_devid = -1;
         int tpg_devid = -1;
         int heater_devid = -1;
-        
+        int archon_devid = -1;
+        bool dryrun_;
+        bool logged_tank_empty = false;
         double empty_temp_;
         double limit_pressure_;
         autofill_logger& logger_;
@@ -42,13 +45,15 @@ namespace foxtrot {
         std::atomic<bool> fill_in_progress;
         std::atomic<bool> fill_just_done;
         Logging lg_;
+        std::future<std::exception_ptr> running_fill_;
+        
     };
     
     
     namespace detail
     {
         
-        void execute_fill(Client& cl, int ws_devid, double filltime_hours, int relay);
+        void execute_fill(Client& cl, int ws_devid, double filltime_hours, int relay, bool dryrun=false);
         
     
     }
