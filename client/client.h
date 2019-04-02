@@ -19,8 +19,41 @@
 namespace foxtrot
 {
     
+    namespace detail2 {
+        template<typename T> 
+        struct has_const_iterator {
+        private:
+            template<typename C> static char test(typename C::const_iterator*);
+            template<typename C> static int test(...);
+        public:
+            enum {value = sizeof(test<T>(0)) == sizeof(char)};
+        };
+        
+        template<typename T, typename = void>
+        struct is_iterator
+        {
+        static constexpr bool value = false;
+        };
+
+        template<typename T>
+        struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterator_traits<T>::value_type, void>::value>::type>
+        {
+        static constexpr bool value = true;
+        };
+        
+    }
+    
+    
     typedef boost::variant<double,int,bool,std::string> ft_variant;
     typedef boost::variant<std::vector<unsigned char> , std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double> > ft_vector_variant;
+    
+    
+    template<typename T,typename R=ft_variant>
+    using enable_has_const_iterator = typename std::enable_if<detail2::has_const_iterator<T>::value, R>::type;
+    
+    template<typename T, typename R=ft_variant>
+    using enable_is_iterator = typename
+    std::enable_if<detail2::is_iterator<T>::value, R>::type;
     
     
     class ft_variant_visitor : public boost::static_visitor<>
@@ -142,9 +175,11 @@ namespace foxtrot
         std::vector<std::string> get_flag_names();
         
         
-        template<typename iteratortp> ft_variant InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
+        template<typename iteratortp> 
+        enable_is_iterator<iteratortp> InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args);
         
-        template<typename containertp> ft_variant InvokeCapability(int devid,const std::string& capname, containertp args);
+        template<typename containertp> 
+        enable_has_const_iterator<containertp> InvokeCapability(int devid,const std::string& capname, containertp args);
         
         template<typename... Args>
         ft_variant InvokeCapability(int devid, const std::string& capname, Args... args);
@@ -191,7 +226,9 @@ namespace foxtrot
     int get_arg_position(const foxtrot::servdescribe& sd, int devid, int capidx, const std::string& arg_name);
     
     
-    template<typename iteratortp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
+    template<typename iteratortp> 
+    enable_is_iterator<iteratortp>
+    Client::InvokeCapability(int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args)
     {
         
         static_assert(std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
@@ -229,10 +266,11 @@ namespace foxtrot
     };
     
     
-    template<typename containertp> ft_variant Client::InvokeCapability(int devid,const std::string& capname, containertp args)
+    template<typename containertp> 
+    typename std::enable_if<detail2::has_const_iterator<containertp>::value, ft_variant>::type
+    Client::InvokeCapability(int devid,const std::string& capname, containertp args)
     {
-        return InvokeCapability(devid,capname,args.begin(),args.end());
-        
+        return InvokeCapability(devid,capname,args.begin(),args.end());    
     };
     
     template <typename iteratortp> ft_vector_variant Client::FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args)

@@ -89,10 +89,10 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 {
     std::vector<std::string> out;
     
-    _lg.Info("getting device...");
+    _lg.strm(sl::trace) << "getting device...";
     auto dev = GetDevice(devid);
     auto tp = rttr::type::get(*dev);
-    _lg.strm(sl::info) << "tp: " << tp.get_name();
+    _lg.strm(sl::trace) << "tp: " << tp.get_name();
     
     auto props = tp.get_properties();
     auto meths = tp.get_methods();

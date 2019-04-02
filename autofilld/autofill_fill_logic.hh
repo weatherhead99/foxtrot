@@ -13,6 +13,10 @@ namespace foxtrot {
     public:
         autofill_logic(autofill_logger& logger, double limit_pressure,
             double empty_temp);
+        
+        void register_devid(Client& cl);
+        env_data measure_data(Client& cl);
+        
         void fill_tank(Client& cl, int ws_devid, double filltime_hours, int relay);
         
         void tick(Client& cl, const env_data& env);
@@ -27,6 +31,10 @@ namespace foxtrot {
         
         
     private:
+        int ws_devid = -1;
+        int tpg_devid = -1;
+        int heater_devid = -1;
+        
         double empty_temp_;
         double limit_pressure_;
         autofill_logger& logger_;
@@ -41,6 +49,7 @@ namespace foxtrot {
     {
         
         void execute_fill(Client& cl, int ws_devid, double filltime_hours, int relay);
+        
     
     }
 }

@@ -19,6 +19,38 @@ autofill_logic::autofill_logic(autofill_logger& logger, double limit_pressure,
     
 }
 
+
+void autofill_logic::register_devid(Client& cl)
+{
+    auto sd = cl.DescribeServer();
+    auto devid = foxtrot::find_devid_on_server(sd,"webswitch_plus");
+    if(devid == -1)
+        throw std::runtime_error("can't find webswitch plus on server!");
+    ws_devid = devid;
+    
+    devid = foxtrot::find_devid_on_server(sd,"TPG362");
+    if(devid == -1)
+        throw std::runtime_error("can't find TPG362 on server!");
+    tpg_devid = devid;
+    
+    devid = foxtrot::find_devid_on_server(sd,"ArchonHeaterX");
+    if(devid == -1)
+        throw std::runtime_error("can't find ArchonHeaterX on server");
+    
+    heater_devid = devid;
+    
+
+};
+
+env_data autofill_logic::measure_data(Client& cl)
+{
+    env_data out;
+    out.cryostat_pressure = boost::get<double>(cl.InvokeCapability(tpg_devid,"getPressure",1));
+    
+    
+};
+
+
 void autofill_logic::fill_tank(Client& cl, int ws_devid, double filltime_hours, int relay)
 {
     lg_.strm(sl::trace) << "logging fill start";
@@ -102,14 +134,7 @@ void autofill_logic::tick(Client& cl, const env_data& env)
     if(fill_needed && pumpdown && !fill_just_done)
     {
         lg_.strm(sl::info) << "logic thinks fill is needed";
-        
-        auto sd = cl.DescribeServer();
-        
-        auto devid = foxtrot::find_devid_on_server(sd,"webswitch_plus");
-        if(devid == -1)
-            throw std::runtime_error("can't find webswitch plus on server!");
-        
-        fill_tank(cl, devid, 0.4, 1);    
+        fill_tank(cl, ws_devid, 0.4, 1);    
     }
     
     fill_just_done = false;
