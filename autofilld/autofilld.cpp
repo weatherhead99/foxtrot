@@ -32,6 +32,7 @@ int main(int argc, char** argv)
     string logdir;
     string connstr;
     string webconf;
+    string basefname;
     
     double limit_temp;
     double limit_pres;
@@ -41,6 +42,7 @@ int main(int argc, char** argv)
     ("interval,i", po::value<int>(&log_interval_s)->default_value(10),
      "seconds between logging points")
     ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")
+    ("basefname",po::value<string>(&basefname)->default_value("log"),"base name for log files"))
     ("rotate_m,r", po::value<int>(&rotate_time_m)->default_value(24 * 60),
      "minutes before rotating a log file")
     ("connstr,c",po::value<string>(&connstr)->default_value("localhost:50051"), "connection string for foxtrot client")
@@ -78,10 +80,21 @@ int main(int argc, char** argv)
     
     foxtrot::autofill_logger logger(logdir, rotate_time_m);
     
-    std::cout << "starting new logfile..." << std::endl;
-    
     foxtrot::autofill_logic logic(logger,limit_pres,limit_temp);
     
     
+    auto filerotate = logger.rotate_files_async_start(basefname);
+    
+    while(true)
+    {
+        lg.strm(sl::debug) << "waiting for tick time" ;
+        std::this_thread::sleep_for(std::chrono::seconds(log_interval_s));
+        lg.strm(sl::debug) << "measuring environmental data";
+        
+        auto env_data = logic.measure_data(cl);
+        lg.strm(sl::debug) << "running autofilld tick" ;
+        logic.tick(cl,env_data);
+        
+    };
     
 };

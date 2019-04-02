@@ -45,8 +45,19 @@ void autofill_logic::register_devid(Client& cl)
 env_data autofill_logic::measure_data(Client& cl)
 {
     env_data out;
-    out.cryostat_pressure = boost::get<double>(cl.InvokeCapability(tpg_devid,"getPressure",1));
     
+    using boost::get;
+    
+    out.cryostat_pressure = get<double>(cl.InvokeCapability(tpg_devid,"getPressure",1));
+    out.pump_pressure = get<double>(cl.InvokeCapability(tpg_devid,"getPressure",2));
+    out.tank_temp = get<double>(cl.InvokeCapability(heater_devid, "getTempA"));
+    out.stage_temp = get<double>(cl.InvokeCapability(heater_devid, "getTempB"));
+    
+    out.heater_output = get<double>(cl.InvokeCapability(heater_devid,"getHeaterAOutput"));
+    
+    out.heater_target = get<double>(cl.InvokeCapability(heater_devid,"getHeaterTarget",0));
+    
+    return out;
     
 };
 
