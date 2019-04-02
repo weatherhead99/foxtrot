@@ -33,6 +33,8 @@ int main(int argc, char** argv)
     string connstr;
     string webconf;
     
+    double limit_temp;
+    double limit_pres;
     
     desc.add_options()
     ("logdir,l", po::value<string>(&logdir)->required(), "location to log events")
@@ -41,7 +43,11 @@ int main(int argc, char** argv)
     ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")
     ("rotate_m,r", po::value<int>(&rotate_time_m)->default_value(24 * 60),
      "minutes before rotating a log file")
-    ("connstr,c",po::value<string>(&connstr)->default_value("localhost:50051"), "connection string for foxtrot client");
+    ("connstr,c",po::value<string>(&connstr)->default_value("localhost:50051"), "connection string for foxtrot client")
+    ("limit_temp,T",po::value<double>(&limit_temp)->default_value(-195.0),
+     "temperature above which to fill tank")
+    ("limit_pressure,P",po::value<double>(&limit_pres)->default_value(1E-4),
+     "pressure above which tank will not be filled")
     ("help","produce help message");
     
     po::variables_map vm;
@@ -74,8 +80,8 @@ int main(int argc, char** argv)
     
     std::cout << "starting new logfile..." << std::endl;
     
-    foxtrot::autofill_logic logic(logger);
+    foxtrot::autofill_logic logic(logger,limit_pres,limit_temp);
     
-    std::cout << "is autofill enabled? " << (int) logic.is_autofill_enabled(cl) << std::endl;
+    
     
 };

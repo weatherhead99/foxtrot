@@ -18,7 +18,8 @@ enum class event_types {
     fill_begin,
     fill_complete,
     tank_empty,
-    dewar_empty
+    dewar_empty,
+    dewar_filled
 };
 
 

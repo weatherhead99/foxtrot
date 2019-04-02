@@ -99,6 +99,8 @@ void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)
         case(event_types::fill_complete): evname = "fill_complete"; break;
         case(event_types::tank_empty): evname = "tank_empty"; break;
         case(event_types::dewar_empty): evname = "dewar_empty"; break;
+        case(event_types::dewar_filled): evname="dewar_filled"; break;
+        default: throw std::logic_error("invalid event");
     }
         
     *(_thisfile) << "#EVENT:" << unix_epoch << "," << pt::to_iso_string(evdat.timestamp) << "," << evname << std::endl;
