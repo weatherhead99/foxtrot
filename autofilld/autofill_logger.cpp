@@ -1,12 +1,17 @@
 #include "autofill_logger.hh"
 
 #include <boost/date_time.hpp>
+#include <chrono>
+#include <thread>
+#include "Logging.h"
+
 
 using namespace foxtrot;
 namespace pt = boost::posix_time;
+namespace gg = boost::gregorian;
 
-autofill_logger::autofill_logger(const string& outfdir, int rotate_time_hours)
-: _lg("autofill_logger"), outfdir_(outfdir)
+autofill_logger::autofill_logger(const string& outfdir, int rotate_time_mins)
+: _lg("autofill_logger"), outfdir_(outfdir), rotate_time_mins_(rotate_time_mins)
 {
     if(!boost::filesystem::exists(outfdir))
     {
@@ -26,6 +31,8 @@ autofill_logger::~autofill_logger()
 
 void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
 {
+    std::lock_guard<std::mutex> lck(file_swap_m);
+    
     auto outfpath = boost::filesystem::path(outfdir_);
     
     auto newfpath = outfpath / (name + ".csv");
@@ -56,6 +63,8 @@ void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
 
 void foxtrot::autofill_logger::LogEnvData(const foxtrot::env_data& dat)
 {
+    std::lock_guard<std::mutex> lck(file_swap_m);
+    
     if(!_thisfile)
     {
         _lg.strm(sl::error) << "can't log without open file!";
@@ -73,6 +82,7 @@ void foxtrot::autofill_logger::LogEnvData(const foxtrot::env_data& dat)
 
 void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)
 {
+    std::lock_guard<std::mutex> lck(file_swap_m);
     if(!_thisfile)
     {
         _lg.strm(sl::error) << "can't log without open file!";
@@ -88,6 +98,7 @@ void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)
         case(event_types::fill_begin): evname = "fill_begin"; break;
         case(event_types::fill_complete): evname = "fill_complete"; break;
         case(event_types::tank_empty): evname = "tank_empty"; break;
+        case(event_types::dewar_empty): evname = "dewar_empty"; break;
     }
         
     *(_thisfile) << "#EVENT:" << unix_epoch << "," << pt::to_iso_string(evdat.timestamp) << "," << evname << std::endl;
@@ -95,4 +106,59 @@ void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)
     
 }
 
+void foxtrot::autofill_logger::LogComment(const string& comment)
+{
+    std::lock_guard<std::mutex> lck(file_swap_m);
+    if(!_thisfile)
+    {
+        _lg.strm(sl::error) << "can't log without open file!";
+        throw std::logic_error("can't log without open file!");
+    }
+    
+    auto now = pt::second_clock::local_time();
+    auto unix_epoch = (now - pt::from_time_t(0)).total_seconds();
+    
+    *(_thisfile) << "#" <<  unix_epoch << "," << pt::to_iso_string(now) <<"," << comment << std::endl;
+    
+    
+}
 
+
+
+string foxtrot::autofill_logger::get_date_time()
+{
+    auto now = pt::second_clock::local_time();
+    auto timeofday = now.time_of_day();
+    std::ostringstream oss;
+    oss << gg::to_iso_extended_string(now.date()) << "T" 
+    << std::setw(2) << std::setfill('0') << timeofday.hours() << "-" 
+    << std::setw(2) << std::setfill('0') << timeofday.minutes();
+    return oss.str();
+}
+
+
+std::future<std::exception_ptr> foxtrot::autofill_logger::rotate_files_async_start(const string& basefname)
+{
+    auto launchfun = [this, &basefname] () {
+        std::exception_ptr except;
+        foxtrot::Logging lg("rotate_files_async_start");
+        try {
+            while(true)
+            {
+                lg.strm(sl::debug) << "starting new file automatically...";
+                auto fnamedt = this->get_date_time();
+                this->start_new_logfile(basefname + std::string{"_"} + fnamedt);
+                lg.strm(sl::debug) << "waiting for: " << rotate_time_mins_ << " minutes";
+                std::this_thread::sleep_for(std::chrono::minutes(rotate_time_mins_));
+                
+            }
+        }
+        catch(...)
+        {
+            except = std::current_exception();
+        }
+        return except;
+    };
+    
+    return std::async(std::launch::async,launchfun);
+}

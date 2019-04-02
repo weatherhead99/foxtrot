@@ -17,7 +17,8 @@ struct env_data {
 enum class event_types {
     fill_begin,
     fill_complete,
-    tank_empty    
+    tank_empty,
+    dewar_empty
 };
 
 

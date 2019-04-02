@@ -7,7 +7,9 @@
 #include <backward.hpp>
 
 #include "autofill_logger.hh"
-
+#include "autofill_fill_logic.hh"
+#include <thread>
+#include <chrono>
 
 namespace po = boost::program_options;
 using std::string;
@@ -26,7 +28,7 @@ int main(int argc, char** argv)
     
     int debug_level;
     int log_interval_s;
-    int rotate_time_h;
+    int rotate_time_m;
     string logdir;
     string connstr;
     string webconf;
@@ -34,12 +36,11 @@ int main(int argc, char** argv)
     
     desc.add_options()
     ("logdir,l", po::value<string>(&logdir)->required(), "location to log events")
-    ("webconfig,w", po::value<string>(&webconf)->default_value(""),"path to config file for web services")
     ("interval,i", po::value<int>(&log_interval_s)->default_value(10),
      "seconds between logging points")
     ("debug,d", po::value<int>(&debug_level)->default_value(4), "debug level")
-    ("rotate_h,r", po::value<int>(&rotate_time_h)->default_value(72),
-     "hours before rotating a log file")
+    ("rotate_m,r", po::value<int>(&rotate_time_m)->default_value(24 * 60),
+     "minutes before rotating a log file")
     ("connstr,c",po::value<string>(&connstr)->default_value("localhost:50051"), "connection string for foxtrot client");
     ("help","produce help message");
     
@@ -68,5 +69,13 @@ int main(int argc, char** argv)
         
     lg.strm(sl::info) << "connecting client..." ;
     foxtrot::Client cl(connstr);
+    
+    foxtrot::autofill_logger logger(logdir, rotate_time_m);
+    
+    std::cout << "starting new logfile..." << std::endl;
+    
+    foxtrot::autofill_logic logic(logger);
+    
+    std::cout << "is autofill enabled? " << (int) logic.is_autofill_enabled(cl) << std::endl;
     
 };
