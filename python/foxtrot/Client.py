@@ -10,6 +10,7 @@ from foxtrot.foxtrot_pb2_grpc import *
 from foxtrot.foxtrot_pb2 import *
 from foxtrot.Errors import *
 
+
 import types
 import struct
 
@@ -171,16 +172,16 @@ class Client:
         ss = self._servdescribe.SerializeToString()
         with open(fname,'wb') as f:
             f.write(ss)
-        
+
     def __getitem__(self,keystr):
         if not hasattr(self,"_devtypes"):
             self._devtypes = [_._devtp for _ in self._devices]
             self._devcomments = [_._comment for _ in self._devices]
             self._devids = [_._devid for _ in self._devices]
-            
+
         if isinstance(keystr,int):
             return self.devices[self._devids.index(keystr)]
-        
+
         else:
             if keystr in self._devcomments:
                 return self._devices[self._devcomments.index(keystr)]
@@ -188,32 +189,23 @@ class Client:
             return self._devices[self._devtypes.index(keystr)]    
 
     def get_all_flags_dict(self) -> dict:
-        response = self._stub.ListServerFlags(empty())
-        _check_repl_err(response)
-        
-        flagdct = {_.flagname : ServerFlag(self,_.flagname) for _ in response.flags}
-        return flagdct
-    
-    def get_all_flags_list(self) -> list:
-        response = self._stub.ListServerFlags(empty())
-        _check_repl_err(response)    
-        return [ServerFlag(self, _.flagname) for _ in response.flags]
+        return {_.name : _ for _ in self.flags}
 
-        
+    def get_all_flags_list(self) -> list:
+        return [_ for _ in self.flags]
+
+
     def create_new_flag(self, name: str, initval):
         sf = ServerFlag(self,name)
         sf.value = initval
         return sf
-    
+
     def drop_server_flag(self, flag) -> None:
-        req = serverflag()
         if isinstance(flag,str):
-            req.flagname = flag
+            ServerFlag(self,flag).drop()
         elif isinstance(flag,ServerFlag):
-            req.flagname = flag._flagname
-        repl = self._stub.DropServerFlag(req)
-        _check_repl_err(repl)
-        
+            flag.drop()
+
     def broadcast_notification(self, body: str, title: str = None, channel: str = None):
         req = broadcast_notification(body=body)
         if title is None:
@@ -230,6 +222,11 @@ class Client:
         
         repl = self._stub.BroadcastNotification(req)
         _check_repl_err(repl)
+    
+    @property
+    def flags(self):
+        return FlagProxy(self)
+
 
 def _fake_call_sync(obj,client,*args,**kwargs):
     req = obj.construct_request(*args,**kwargs)
@@ -286,8 +283,8 @@ class Device:
         
         else:
             return str("Device(" + self._devtp + ")")
-        
-            
+
+
 
 class Capability:
     def __init__(self,captp,capname,argnames,argtypes,rettp,devid,client):
@@ -300,7 +297,7 @@ class Capability:
         self.chunksize = DEFAULT_CHUNKSIZE
         self._devid = devid
         self._cl = client
-        
+
     def __repr__(self):
         if self._captp == VALUE_READONLY :
             infostr = " (readonly value)"
@@ -374,10 +371,19 @@ class ServerFlag:
         return tempstr % (self._flagname, tval, type(tval).__name__)
 
     @property
+    def name(self) -> str :
+        return self._flagname
+
+    def drop(self) -> None:
+        req = serverflag()
+        req.flagname = self._flagname
+        repl = self._client._stub.DropServerFlag(req)
+        _check_repl_err(repl)
+
+    @property
     def value(self):
         req = self.construct_request(self._flagname)
-        stubfun = self._client._stub.GetServerFlag
-        ret = stubfun(req)
+        ret = self._client._stub.GetServerFlag(req)
         _check_repl_err(ret)
         whichattr = ret.WhichOneof("arg")
         if whichattr is None:
@@ -387,11 +393,32 @@ class ServerFlag:
     @value.setter
     def value(self,val):
         req = self.construct_request(self._flagname,val)
-        stubfun = self._client._stub.SetServerFlag
-        repl = stubfun(req)
+        repl = self._client._stub.SetServerFlag(req)
         _check_repl_err(repl)
         whichattr = repl.WhichOneof("arg")
         if whichattr is None:
             return None
         return getattr(repl,whichattr)    
+
+class FlagProxy:
+    def __init__(self,cl: Client):
+        self._cl = cl
+
+    def __getitem__(self,flagname: str):
+        flg = ServerFlag(self._cl, flagname)
+        return flg
+
+    def __setitem__(self, flagname: str, val) -> None:
+         flg = ServerFlag(self._cl, flagname)
+         flg.value = val
+
+    def __iter__(self):
+        response = self._cl._stub.ListServerFlags(empty())
+        _check_repl_err(response)
+        self._flaglist = [ServerFlag(self._cl,_.flagname) for _ in response.flags]
+        self._flagit = iter(self._flaglist)
+        return self
+
+    def __next__(self):
+        return next(self._flagit)
 
