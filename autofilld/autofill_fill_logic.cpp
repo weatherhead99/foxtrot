@@ -18,13 +18,13 @@ limit_pressure_(limit_pressure), dryrun_(dryrun)
 {
     fill_in_progress = false;
     fill_just_done = false;
-    
+
     if(pb_channel)
     {
         pb_enable = true;
         pb_channel_ = *pb_channel;
     }
-    
+
 }
 
 
@@ -202,9 +202,13 @@ void autofill_logic::tick(Client& cl, const env_data& env)
     if(running_fill_.valid() &&
         running_fill_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
-        lg_.strm(sl::error) << "exception ptr in future!";
-        broadcast_notify(cl,"tank","there was an error filling the tank");
-        std::rethrow_exception(running_fill_.get());
+        auto eptr = running_fill_.get();
+        if(eptr)
+        {
+            lg_.strm(sl::error) << "exception ptr in future!";
+            broadcast_notify(cl,"tank","there was an error filling the tank");
+            std::rethrow_exception(running_fill_.get());
+        }
     }
     
     
