@@ -180,7 +180,9 @@ void autofill_logic::tick(Client& cl, const env_data& env)
     
     fill_just_done = false;
     
-    if(running_fill_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+    
+    if(running_fill_.valid() &&
+        running_fill_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
         lg_.strm(sl::error) << "exception ptr in future!";
         std::rethrow_exception(running_fill_.get());
