@@ -1,6 +1,11 @@
 build/*
+*build/*
+*/build/*
 *.egg-info*
 *__pycache__*
 *.gradle*
 *.kdev4*
 */CMakeFiles/*
+*.mypy_cache*
+*/.spyproject/*
+*.egg
