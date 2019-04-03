@@ -131,6 +131,8 @@ def _check_repl_err(repl):
         raise ValueError(repl.err.msg)
     elif repl.err.tp == 5:
         raise ContentionError(repl.err.msg)
+    elif repl.err.tp == 6:
+        raise ServerError(repl.err.msg)
     else:
         raise RuntimeError("unknown error")
         
