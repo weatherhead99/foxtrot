@@ -5,18 +5,25 @@
 #include "autofill_common.hh"
 #include <boost/date_time.hpp>
 #include "autofill_logger.hh"
+#include "ServerError.h"
 
 namespace pt = boost::posix_time;
 
 using namespace foxtrot;
 
 autofill_logic::autofill_logic(autofill_logger& logger, double limit_pressure,
-    double empty_temp, bool dryrun)
+    double empty_temp, bool dryrun, const string* pb_channel)
 : logger_(logger), lg_("autofill_logic"), empty_temp_(empty_temp), 
 limit_pressure_(limit_pressure), dryrun_(dryrun)
 {
     fill_in_progress = false;
     fill_just_done = false;
+    
+    if(pb_channel)
+    {
+        pb_enable = true;
+        pb_channel_ = *pb_channel;
+    }
     
 }
 
@@ -126,6 +133,7 @@ void autofill_logic::tick(Client& cl, const env_data& env)
     
     if(was_dewar_filled(cl))
     {
+        broadcast_notify(cl,"dewar","LN2 Dewar was filled");
         set_dewar_status(cl,true);
         dewar_empty = false;
         clear_dewar_filled(cl);
@@ -140,6 +148,7 @@ void autofill_logic::tick(Client& cl, const env_data& env)
         auto now = pt::second_clock::local_time();
         if(!fill_in_progress && !logged_tank_empty)
         {
+            broadcast_notify(cl,"tank", "cryostat tank is empty");
             logger_.LogEvent(event_data{now,event_types::tank_empty});
             logged_tank_empty = true;
         }
@@ -149,9 +158,15 @@ void autofill_logic::tick(Client& cl, const env_data& env)
         {
             logged_tank_empty = false;
             lg_.strm(sl::info) << "dewar seems to be empty";
-            set_dewar_status(cl, false);
-            auto now = pt::second_clock::local_time();
-            logger_.LogEvent(event_data{now,event_types::dewar_empty});
+            
+            //NOTE: only broadcast if we didn't know dewar was empty
+            if(!dewar_empty)
+            {
+                broadcast_notify(cl,"dewar", "LN2 dewar is probably empty");
+                set_dewar_status(cl, false);
+                auto now = pt::second_clock::local_time();
+                logger_.LogEvent(event_data{now,event_types::dewar_empty});
+            }
             dewar_empty = true;
         }
         else if(!fill_in_progress)
@@ -169,7 +184,10 @@ void autofill_logic::tick(Client& cl, const env_data& env)
     {
         lg_.strm(sl::info) << "logic thinks fill is needed";
         if(is_autofill_enabled(cl))
+        {
+            broadcast_notify(cl,"tank", "a tank autofill is starting");
             running_fill_ = fill_tank(cl, ws_devid, 0.4, 1);    
+        }
         else
             lg_.strm(sl::info) << "autofill is disabled, not doing fill";
     }
@@ -185,6 +203,7 @@ void autofill_logic::tick(Client& cl, const env_data& env)
         running_fill_.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
     {
         lg_.strm(sl::error) << "exception ptr in future!";
+        broadcast_notify(cl,"tank","there was an error filling the tank");
         std::rethrow_exception(running_fill_.get());
     }
     
@@ -261,9 +280,9 @@ void detail::execute_fill(Client& cl, int ws_devid, double filltime_hours,
 {
 
     Logging lg("execute_fill");
-    
+
     lg.strm(sl::debug) << "energising relay..." ;
-    
+
     std::vector<foxtrot::ft_variant> args {relay, true};
     if(!dryrun)
         cl.InvokeCapability(ws_devid,"SetRelay", args.begin(), args.end());
@@ -273,11 +292,30 @@ void detail::execute_fill(Client& cl, int ws_devid, double filltime_hours,
     auto seconds = ( (int) (filltime_hours * 3600));
     lg.strm(sl::trace) << "seconds:" << seconds;
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
-    
+
     lg.strm(sl::debug) << "turning off relay...";
     args[1] = false;
     if(!dryrun)
         cl.InvokeCapability(ws_devid,"SetRelay", args.begin(), args.end());
-    
-    
+
 }
+
+void foxtrot::autofill_logic::broadcast_notify(foxtrot::Client& cl, const string& title,
+    const string& body)
+{
+    if(pb_enable)
+    {
+        try{
+            cl.BroadcastNotification(body,&title,&pb_channel_);
+        }
+        catch(foxtrot::ServerError& err)
+        {
+            lg_.strm(sl::error) << "broadcast notifications appear not to be enabled on the server";
+        };
+
+    }
+
+}
+
+
+

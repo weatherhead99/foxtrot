@@ -10,6 +10,7 @@
 #include "autofill_fill_logic.hh"
 #include <thread>
 #include <chrono>
+#include <memory>
 
 namespace po = boost::program_options;
 using std::string;
@@ -33,10 +34,10 @@ int main ( int argc, char** argv )
     string connstr;
     string webconf;
     string basefname;
+    string pb_channel;
 
     double limit_temp;
     double limit_pres;
-    
     bool dryrun;
 
     desc.add_options()
@@ -53,6 +54,7 @@ int main ( int argc, char** argv )
     ( "limit_pressure,P",po::value<double> ( &limit_pres )->default_value ( 1E-4 ),
       "pressure above which tank will not be filled" )
     ("dryrun,D", po::bool_switch(&dryrun),"dryrun - do not actually do fills")
+    ("pb_channel", po::value<string>(&pb_channel), "pushbullet channel for notifications")
     ( "help","produce help message" );
 
     po::variables_map vm;
@@ -80,22 +82,28 @@ int main ( int argc, char** argv )
 
     foxtrot::autofill_logger logger ( logdir, rotate_time_m );
 
-    foxtrot::autofill_logic logic ( logger,limit_pres,limit_temp, dryrun);
+    
+    std::unique_ptr<foxtrot::autofill_logic> logicptr{};
+    if(vm.count("pb_channel"))
+        logicptr.reset(new foxtrot::autofill_logic(logger,limit_pres,limit_temp,dryrun,
+                                                   &pb_channel));
+    else
+        logicptr.reset(new foxtrot::autofill_logic(logger,limit_pres,limit_temp,dryrun));
 
 
     auto filerotate = logger.rotate_files_async_start ( basefname );
 
-    logic.register_devid(cl);
+    logicptr->register_devid(cl);
 
     while ( true ) {
     lg.strm ( sl::debug ) << "waiting for tick time" ;
         std::this_thread::sleep_for ( std::chrono::seconds ( log_interval_s ) );
         lg.strm ( sl::debug ) << "measuring environmental data";
 
-        auto env_data = logic.measure_data ( cl );
+        auto env_data = logicptr->measure_data ( cl );
         logger.LogEnvData(env_data);
         lg.strm ( sl::debug ) << "running autofilld tick" ;
-        logic.tick ( cl,env_data );
+        logicptr->tick( cl,env_data );
 
     };
 

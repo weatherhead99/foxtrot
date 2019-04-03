@@ -3,6 +3,8 @@
 #include <atomic>
 #include <future>
 
+using std::string;
+
 namespace foxtrot {
     class Client;
     class autofill_logger;
@@ -13,7 +15,7 @@ namespace foxtrot {
     class autofill_logic {
     public:
         autofill_logic(autofill_logger& logger, double limit_pressure,
-            double empty_temp, bool dryrun=false);
+            double empty_temp, bool dryrun=false, const string* pb_channel = nullptr);
         
         void register_devid(Client& cl);
         env_data measure_data(Client& cl);
@@ -29,7 +31,7 @@ namespace foxtrot {
         void set_dewar_status(Client& cl, bool full);
         void checkin(Client& cl);
         void clear_dewar_filled(Client& cl);
-        
+        void broadcast_notify(Client& cl, const string& title, const string& body);
         
     private:
         int ws_devid = -1;
@@ -46,6 +48,8 @@ namespace foxtrot {
         std::atomic<bool> fill_just_done;
         Logging lg_;
         std::future<std::exception_ptr> running_fill_;
+        bool pb_enable = false;
+        string pb_channel_ = "";
         
     };
     
