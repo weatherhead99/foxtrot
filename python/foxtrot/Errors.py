@@ -14,3 +14,6 @@ class ProtocolError(Exception):
 
 class ContentionError(Exception):
     pass
+
+class ServerError(Exception):
+    pass

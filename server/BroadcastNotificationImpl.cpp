@@ -1,4 +1,5 @@
 #include "BroadcastNotificationImpl.h"
+#include "ServerError.h"
 
 foxtrot::BroadcastNotificationLogic::BroadcastNotificationLogic(
     std::unique_ptr<foxtrot::pushbullet_api> api, const string& default_title,
@@ -20,6 +21,11 @@ bool foxtrot::BroadcastNotificationLogic::HandleRequest(
     
     string title = req.use_default_title() ? default_title_ : req.title() ;
     string channel = req.use_default_channel() ? default_channel_ : req.channel_target();
+    
+    if(!api_)
+    {
+        throw foxtrot::ServerError("broadcast notifications not enabled on this server");
+    }
     
     api_->push_to_channel(title,req.body(),channel);
     

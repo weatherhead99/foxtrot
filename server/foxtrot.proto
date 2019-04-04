@@ -44,6 +44,7 @@ enum error_types
     out_of_range = 3;
     unknown_error = 4;
     contention_timeout = 5;
+    ft_ServerError = 6;
 }
 
 enum server_commands

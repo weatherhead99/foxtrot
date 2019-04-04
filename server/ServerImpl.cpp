@@ -90,6 +90,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     else
     {
         _lg.Info("notifications are not enabled");
+        add_logic<BroadcastNotificationLogic>(nullptr);
     }
     
     

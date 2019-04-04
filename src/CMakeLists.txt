@@ -1,7 +1,7 @@
 
 
 set(foxtrot_srcs Device.cpp CommunicationProtocol.cpp Error.cpp ProtocolError.cpp  ProtocolTimeoutError.cpp
-SerialProtocol.cpp ProtocolUtilities.cpp CmdDevice.cpp DeviceError.cpp Logging.cpp ContentionError.cpp StubError.cpp TelemetryError.cpp)
+SerialProtocol.cpp ProtocolUtilities.cpp CmdDevice.cpp DeviceError.cpp Logging.cpp ContentionError.cpp StubError.cpp TelemetryError.cpp ServerError.cpp)
 
 add_library(foxtrot_obj OBJECT ${foxtrot_srcs})
 

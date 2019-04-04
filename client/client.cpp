@@ -470,6 +470,45 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
 
 }
 
+void foxtrot::Client::BroadcastNotification(const std::string& body, const std::string* title, const std::string* channel)
+{
+    broadcast_notification bn;
+    broadcast_notification repl;
+    bn.set_body(body);
+    
+    if(title)
+    {
+        bn.set_title(*title);
+        bn.set_use_default_title(false);
+    }
+    else
+        bn.set_use_default_title(true);
+    
+    if(channel)
+    {
+        bn.set_channel_target(*channel);
+        bn.set_use_default_channel(false);
+    }
+    else
+        bn.set_use_default_channel(true);
+    
+    grpc::ClientContext ctxt;
+    auto status = _stub->BroadcastNotification(&ctxt,bn,&repl);
+    
+    if(status.ok())
+    {
+        check_repl_err(repl, &_lg);
+    }
+    else
+    {
+        _lg.strm(sl::error) << status.error_code() << ": " << status.error_message();
+        throw std::runtime_error("GRPC Error");
+    }
+}
+
+
+
+
 foxtrot::Client::capability_proxy::capability_proxy(foxtrot::Client& cl, int devid, const std::string& capname)
 : _clientbackref(cl),_devid(devid), _capname(capname)
 {
