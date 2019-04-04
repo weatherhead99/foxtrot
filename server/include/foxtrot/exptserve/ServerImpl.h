@@ -1,19 +1,20 @@
 #pragma once
 #include <memory>
-#include "foxtrot.pb.h"
-#include "foxtrot.grpc.pb.h"
 
 #include <grpc++/grpc++.h>
 #include <grpc++/security/credentials.h>
 #include <string>
-#include "DeviceHarness.h"
-#include "Logging.h"
-
 #include <future>
 #include <exception>
 #include <condition_variable>
 #include <mutex>
-#include "HandlerBase.h"
+
+#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/exptserve/HandlerBase.h>
+
+#include <foxtrot/foxtrot.pb.h>
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
 
 #include <boost/variant.hpp>
 #include "pushbullet/pushbullet_api.hh"

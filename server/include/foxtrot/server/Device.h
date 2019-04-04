@@ -1,10 +1,10 @@
 #pragma once
 
-#include "foxtrot_export.h"
 #include <memory>
 #include <string>
 #include <rttr/type>
 
+#include <foxtrot/foxtrot_server_export.h>
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
 
@@ -19,7 +19,7 @@ namespace foxtrot
 
   class CommunicationProtocol;
   
-  class FOXTROT_EXPORT Device
+  class FOXTROT_SERVER_EXPORT Device
   {
     RTTR_ENABLE()
   public:
