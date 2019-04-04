@@ -16,9 +16,9 @@ set(packname "core")
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
                 ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
-                ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/_version.h)
+                ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/${packname}_version.h)
 
-message("foxtrot version: ${VERSION}")
+message("foxtrot core version: ${VERSION}")
 
 #setup conan build if necessary
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
