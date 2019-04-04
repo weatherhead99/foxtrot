@@ -1,0 +1,7 @@
+#include <foxtrot/@packname@_version.h>
+
+
+const std::string @packname@_hash = "@HASH@";
+extern const std::string @packname@_refspec = "@REFSPEC@";
+extern const std::string @packname@_tag = "@TAG@";
+extern const bool @packname@_version_tagged = @TAGGED@;

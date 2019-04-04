@@ -1,0 +1,8 @@
+#Config file for the foxtrot core package
+
+@PACKAGE_INIT@
+set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+if(NOT TARGET foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
+    include(${foxtrot_CMAKE_DIR}/foxtrotTargets.cmake)
+endif()

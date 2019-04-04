@@ -4,10 +4,21 @@ set(CMAKE_CXX_STANDARD 14)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
+
 #import other cmake functionality we need later
 include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(GitVersion)
+
+set(packname "core")
+configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
+                ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
+                ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/_version.h)
+
+message("foxtrot version: ${VERSION}")
 
 #setup conan build if necessary
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -24,7 +35,6 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
 find_package(Boost REQUIRED COMPONENTS log)
 find_package(Protobuf REQUIRED)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(grpc REQUIRED)
 if(${GRPC_CPP_PLUGIN} STREQUAL GRPC_CPP_PLUGIN-NOTFOUND)
     message(FATAL_ERROR "can't compile GRPC code, can't continue!")
@@ -39,7 +49,8 @@ src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/Content
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS proto/foxtrot.proto)
 protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
 
-add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS})
+add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
+            ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 
 generate_export_header(foxtrot_core
 EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_core_export.h)

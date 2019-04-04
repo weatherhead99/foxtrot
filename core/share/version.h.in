@@ -1,0 +1,7 @@
+#pragma once
+#include <string>
+
+extern const std::string @packname@_hash;
+extern const std::string @packname@_tag;
+extern const std::string @packname@_refspec;
+extern const bool @packname@_version_tagged;
