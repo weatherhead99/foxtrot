@@ -15,24 +15,23 @@ def get_version():
     except:
         return None
 
-class FoxtrotCoreConan(ConanFile):
-    name = "foxtrot_core"
-    description = "core libraries for foxtrot"
+class FoxtrotServerConan(ConanFile):
+    name="foxtrot_server"
+    description="foxtrot server components"
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "virtualrunenv"
+    generators = "cmake"
     exports_sources = "*"
     version = get_version()
-    requires = "boost_log%s" % bbcs, \
-        "grpc/1.17.2@inexorgame/stable",\
-        "protobuf/3.6.1%s" % bcs, \
-        "cmake_findboost_modular%s" % bbcs
+    requires = "boost_program_options%s" % bbcs, \
+        "boost_filesystem%s" % bbcs, \
+        "libcurl/7.61.1%s" % bcs
+    
+    def requirements(self):
+        self.requires("foxtrot_core/%s@%s/%s" % 
+                      (self.version,self.user,self.channel))
     
     def build(self):
         cmake = CMake(self)
         cmake.configure()
-        
-        env_build = tools.RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            cmake.build()
-        
+        cmake.build()
         cmake.install()
