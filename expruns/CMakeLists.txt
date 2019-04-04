@@ -6,7 +6,7 @@
 # include_directories(${plplot_path}/plplot)
 
 
-if(${CCfits} STREQUAL CCfits-NOTFOUND)
+if(${CCfits} STREQUAL CCfits-NOTFOUND OR ${gsl} STREQUAL gsl-NOTFOUND)
 	message(WARNING "no CCfits, not building detector_wl_sweep")
 else()
 	add_executable(detector_wl_sweep detector_wl_sweep.cpp OPMD_setup.cpp wl_sweep_io.cpp)
