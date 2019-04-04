@@ -1,20 +1,19 @@
-#include "ServerImpl.h"
 #include <string>
 #include <fstream>
 #include <sstream>
+//might be needed on windows?
+#include <exception>
+#include <iostream>
+#include <typeinfo>
 
+
+//these should be included via the buildsystem
+#include "ServerImpl.h"
 #include "ServerDescribeImpl.h"
 #include "InvokeCapabilityImpl.h"
 #include "FetchDataImpl.h"
 #include "ServerFlagsImpl.h"
 #include "BroadcastNotificationImpl.h"
-
-//might be needed on windows?
-#include <exception>
-
-#include <iostream>
-#include <typeinfo>
-
 
 using std::string;
 using namespace foxtrot;

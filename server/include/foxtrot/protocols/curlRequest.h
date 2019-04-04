@@ -1,8 +1,8 @@
 #pragma once
-#include "CommunicationProtocol.h"
-#include "Logging.h"
 #include <sstream>
 #include <map>
+#include <foxtrot/Logging.h>
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 using namespace foxtrot;
 using std::string;

@@ -1,5 +1,6 @@
-#include "Device.h"
 #include <rttr/registration>
+
+#include <foxtrot/server/Device.h>
 
 
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)

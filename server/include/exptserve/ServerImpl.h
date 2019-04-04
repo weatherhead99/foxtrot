@@ -1,23 +1,23 @@
 #pragma once
 #include <memory>
-
-#include <grpc++/grpc++.h>
-#include <grpc++/security/credentials.h>
 #include <string>
 #include <future>
 #include <exception>
 #include <condition_variable>
 #include <mutex>
 
-#include <foxtrot/server/DeviceHarness.h>
-#include <foxtrot/exptserve/HandlerBase.h>
+#include <grpc++/grpc++.h>
+#include <grpc++/security/credentials.h>
+
+#include <boost/variant.hpp>
 
 #include <foxtrot/foxtrot.pb.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
+#include <foxtrot/server/DeviceHarness.h>
 
-#include <boost/variant.hpp>
-#include "pushbullet/pushbullet_api.hh"
+#include "HandlerBase.h"
+#include "pushbullet_api.hh"
 
 using grpc::Server;
 using grpc::ServerCompletionQueue;

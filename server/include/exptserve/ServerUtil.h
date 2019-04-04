@@ -1,15 +1,17 @@
 #pragma once
-#include "foxtrot.grpc.pb.h"
-#include <rttr/type>
-#include "Logging.h"
 #include <exception>
-// #include "byteview.h"
 
-#include "DeviceError.h"
-#include "ProtocolError.h"
-#include "ContentionError.h"
-#include "ServerError.h"
+#include <rttr/type>
+
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/ContentionError.h>
+#include <foxtrot/ServerError.h>
+
 #include "HandlerBase.h"
+
 
 namespace rttr
 {

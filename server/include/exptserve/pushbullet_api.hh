@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "protocols/curlRequest.h"
-#include "Logging.h"
+
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/protocols/curlRequest.h>
 
 using std::string;
 

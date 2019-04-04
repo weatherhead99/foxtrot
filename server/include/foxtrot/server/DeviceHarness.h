@@ -1,14 +1,16 @@
 #pragma once
-#include "Device.h"
 #include <memory>
 #include <map>
 #include <vector>
 #include <climits>
-#include "foxtrot.grpc.pb.h"
 #include <mutex>
 #include <deque>
-#include "Logging.h"
+
 #include <boost/variant.hpp>
+
+#include <foxtrot/server/Device.h>
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
 
 typedef boost::variant<rttr::property, rttr::method> prop_or_meth;
 

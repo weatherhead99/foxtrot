@@ -1,9 +1,11 @@
 #pragma once
-#include <grpc++/grpc++.h>
-#include "foxtrot.grpc.pb.h"
 #include <iostream>
 #include <type_traits>
-#include "Logging.h"
+#include <grpc++/grpc++.h>
+
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
+
 #include "HandlerTag.h"
 #include "ServerUtil.h"
 
