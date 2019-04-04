@@ -23,6 +23,7 @@ endif()
 
 
 include(GenerateExportHeader)
+include(GNUInstallDirs)
 
 
 message("module dir: ${CMAKE_MODULE_PATH}")
@@ -70,3 +71,28 @@ target_include_directories(exptserve PUBLIC
     
 target_link_libraries(exptserve foxtrot::foxtrot_core ${dl} RTTR::Core)
 target_link_libraries(exptserve foxtrot_server Boost::filesystem Boost::program_options)
+
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+
+install(TARGETS foxtrot_server
+        EXPORT foxtrot_server
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+
+install(TARGETS exptserve
+        EXPORT foxtrot_server
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+install(DIRECTORY include/foxtrot
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        COMPONENT devel)
+        
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_server_export.h
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
+        COMPONENT devel)
+
+install(EXPORT foxtrot_server
+        DESTINATION ${ft_cmakedir}
+        COMPONENT DEVEL
+        NAMESPACE foxtrot::)
