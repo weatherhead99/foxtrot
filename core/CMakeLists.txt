@@ -11,6 +11,7 @@ include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(GitVersion)
+include(FoxtrotCommonSetup)
 
 set(packname "core")
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
@@ -20,17 +21,8 @@ configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
 
 message("foxtrot core version: ${VERSION}")
 
-#setup conan build if necessary
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    message(WARNING "conanbuildinfo detected, building using
-    conan dependencies")
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    set(FOXTROT_CORE_CONAN_BUILD TRUE)
-    conan_basic_setup()
-endif()
 
-#set shared library build by default
-set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
+
 
 find_package(Boost REQUIRED COMPONENTS log)
 find_package(Protobuf REQUIRED)
@@ -63,6 +55,8 @@ target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRPC_LIBRARIES})
 
 
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+
 install(TARGETS foxtrot_core 
     EXPORT foxtrot_core
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
@@ -85,15 +79,20 @@ install(FILES proto/foxtrot.proto
         COMPONENT DEVEL)
         
 install(EXPORT foxtrot_core
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/
+        DESTINATION ${ft_cmakedir}
         COMPONENT DEVEL
         NAMESPACE foxtrot)
 
 #generate cmake package file
 configure_package_config_file(cmake/foxtrotCoreConfig.cmake.in
                               foxtrotCoreConfig.cmake
-                              INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+                              INSTALL_DESTINATION ${ft_cmakedir}
+                              PATH_VARS ft_cmakedir)
 #and install it 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotCoreConfig.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/
+        DESTINATION ${ft_cmakedir}
         COMPONENT DEVEL)
+
+#install cmake macro files
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
+        DESTINATION ${ft_cmakedir})

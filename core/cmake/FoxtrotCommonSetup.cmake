@@ -1,4 +1,5 @@
 #setup conan build if necessary
+message(STATUS "checking for conan build...")
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     message(WARNING "conanbuildinfo detected, building using
     conan dependencies")
