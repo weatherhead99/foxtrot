@@ -1,0 +1,16 @@
+#Config file for the foxtrot client package
+
+@PACKAGE_INIT@
+set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+#set(CMAKE_MODULE_PATH "${CMAKE_MODLE_PATH}/${foxtrot_CMAKE_DIR}")
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(foxtrotCore REQUIRED)
+
+if(NOT TARGET foxtrot_client AND NOT foxtrot_client_BINARY_DIR)
+    include(@PACKAGE_ft_cmakedir@/foxtrot_client.cmake)
+endif()
+
+check_required_components(foxtrot_client)

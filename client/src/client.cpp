@@ -1,12 +1,12 @@
-#include "client.h"
-
-#include "Error.h"
-#include "DeviceError.h"
-#include "ProtocolError.h"
-
 #include <algorithm>
-
 #include <iostream>
+#include <foxtrot/Error.h>
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
+
+#include <foxtrot/client/client.h>
+
+
 
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)

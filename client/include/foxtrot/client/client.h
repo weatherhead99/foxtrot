@@ -3,18 +3,17 @@
 #include <memory>
 #include <iterator>
 #include <iostream>
-
 #include <type_traits>
 #include <initializer_list>
 
 #include <boost/variant.hpp>
 #include <grpc++/grpc++.h>
-#include "foxtrot.grpc.pb.h"
 
-#include "Logging.h"
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
 
-#include "DeviceError.h"
-#include "ProtocolError.h"
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
 
 namespace foxtrot
 {
