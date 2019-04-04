@@ -1,17 +1,18 @@
-#include "ProtocolUtilities.h"
-
 #include <sstream>
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <iostream>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/mpl/for_each.hpp>
 #include <boost/optional.hpp>
 
-#include <iostream>
-#include "Logging.h"
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+
 
 using boost::property_tree::ptree;
 

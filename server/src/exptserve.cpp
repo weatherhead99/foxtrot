@@ -4,7 +4,10 @@
 #include <future>
 #include <exception>
 #include <fstream>
+
 #include <rttr/type>
+#include <boost/program_options.hpp>
+#include <boost/program_options/parsers.hpp>
 
 #include <foxtrot/backward.hpp>
 #include <foxtrot/Logging.h>
@@ -20,9 +23,6 @@
 using namespace foxtrot;
 using std::cout;
 using std::endl;
-
-#include <boost/program_options.hpp>
-#include <boost/program_options/parsers.hpp>
 
 namespace po = boost::program_options;
 

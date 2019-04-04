@@ -2,9 +2,9 @@
 #include <foxtrot/ProtocolError.h>
 
 #include <foxtrot/server/Device.h>
+#include <foxtrot/server/ServerUtil.h>
 
 #include "FetchDataImpl.h"
-#include "ServerUtil.h"
 
 foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 : _harness(harness), _lg("FetchDataLogic")

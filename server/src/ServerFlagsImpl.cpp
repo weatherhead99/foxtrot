@@ -1,5 +1,5 @@
+#include <foxtrot/server/ServerUtil.h>
 #include "ServerFlagsImpl.h"
-#include "ServerUtil.h"
   
   
 class server_flag_visitor : public boost::static_visitor<>

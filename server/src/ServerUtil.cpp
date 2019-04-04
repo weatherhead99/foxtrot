@@ -5,7 +5,7 @@
 
 #include <foxtrot/Logging.h>
 
-#include "ServerUtil.h"
+#include <foxtrot/server/ServerUtil.h>
 
 
 rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)

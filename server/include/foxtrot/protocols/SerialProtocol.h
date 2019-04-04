@@ -1,13 +1,12 @@
 #pragma once
-
 #include <string>
 
-#include "CommunicationProtocol.h"
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 
 namespace foxtrot
 {
- class FOXTROT_EXPORT SerialProtocol : public CommunicationProtocol
+ class FOXTROT_SERVER_EXPORT SerialProtocol : public CommunicationProtocol
  {
  public:
     SerialProtocol(const parameterset*const instance_parameters);

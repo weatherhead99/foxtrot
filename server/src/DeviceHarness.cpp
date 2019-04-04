@@ -7,8 +7,8 @@
 
 #include <foxtrot/ContentionError.h>
 #include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/server/ServerUtil.h>
 
-#include "ServerUtil.h"
 
 
 

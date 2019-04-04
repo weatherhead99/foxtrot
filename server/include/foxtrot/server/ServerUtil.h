@@ -10,8 +10,6 @@
 #include <foxtrot/ContentionError.h>
 #include <foxtrot/ServerError.h>
 
-#include "HandlerBase.h"
-
 
 namespace rttr
 {
@@ -20,6 +18,9 @@ class variant;
 
 namespace foxtrot
 {
+
+class HandlerTag;
+    
 template <typename replT> void set_repl_err_msg ( replT& repl, const std::string& msg, error_types etype )
 {
     auto errstat = repl.mutable_err();

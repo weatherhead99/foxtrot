@@ -1,5 +1,5 @@
+#include <foxtrot/server/ServerUtil.h>
 #include "ServerCommandImpl.h"
-#include "ServerUtil.h"
 
 foxtrot::ServerCommandLogic::ServerCommandLogic(foxtrot::ExperimentalSetup& setup) : _setup(setup), _lg("ServerCommandLogic")
 {

@@ -1,4 +1,4 @@
-#include "CommunicationProtocol.h"
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters) 
 {

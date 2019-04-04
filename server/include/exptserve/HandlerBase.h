@@ -5,9 +5,9 @@
 
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
+#include <foxtrot/server/ServerUtil.h>
 
 #include "HandlerTag.h"
-#include "ServerUtil.h"
 
 using std::cout;
 using std::endl;
@@ -16,7 +16,7 @@ namespace detail
 {
     template<int> struct int_helper {
         
-    };
+        };
     
     template <> struct int_helper<4> {
         typedef unsigned long type;

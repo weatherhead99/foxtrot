@@ -1,7 +1,8 @@
-#include "curlRequest.h"
-#include "ProtocolError.h"
 #include <curl/curl.h>
 #include <curl/easy.h>
+
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/protocols/curlRequest.h>
 
 
 using namespace foxtrot;

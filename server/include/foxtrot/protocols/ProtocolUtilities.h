@@ -1,12 +1,13 @@
 #pragma once
-
-#include "SerialProtocol.h"
-#include "ProtocolError.h"
 #include <string>
 #include <type_traits>
 #include <typeinfo>
 #include <map>
-#include "Logging.h"
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/ProtocolError.h>
+
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 namespace foxtrot {
@@ -77,7 +78,7 @@ void extract_parameter_map_cast(const std::map<keytp,valtp>& map, valtp& param_o
 
 //std::string read_until_endl(SerialProtocol* proto, unsigned readlen, char endlchar='\n');
 
-std::map<std::string,foxtrot::parameterset> FOXTROT_EXPORT read_parameter_json_file(const std::string& fname);
+std::map<std::string,foxtrot::parameterset> FOXTROT_SERVER_EXPORT read_parameter_json_file(const std::string& fname);
 
 
 };

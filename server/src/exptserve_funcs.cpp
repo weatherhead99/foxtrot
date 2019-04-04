@@ -1,10 +1,12 @@
-#include "exptserve.h"
-#include "DeviceHarness.h"
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <foxtrot/server/DeviceHarness.h>
+
+#include "exptserve.h"
 
 using std::cout;
 using std::endl;

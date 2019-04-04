@@ -6,7 +6,7 @@
 #include <foxtrot/ProtocolError.h>
 
 #include "InvokeCapabilityImpl.h"
-#include "ServerUtil.h"
+#include <foxtrot/server/ServerUtil.h>
 
 using std::cout;
 using std::endl;
