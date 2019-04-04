@@ -6,8 +6,8 @@ using std::cout;
 using std::endl;
 
 foxtrot::parameterset sport_params{
-  {"port", "/dev/ttyUSB1"}
-  
+  {"port", "/dev/ttyUSB10"},
+  {"flowcontrol", "hardware"}
 };
 
 

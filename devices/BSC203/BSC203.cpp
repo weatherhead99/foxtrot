@@ -133,7 +133,9 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     if( (headerstr[4] & 0x80) == 0x80)
     {
         //WARNING: IS THE DLEN MSB OR LSB?
-        unsigned short dlen = (headerstr[3] << 8 ) & headerstr[2];  
+      _lg.strm(sl::trace) << "headerstr[3]: " << (int) headerstr[3] << " headerstr[2]: " << (int) headerstr[2];
+      //      unsigned short dlen = (static_cast<int>(headerstr[3]) << 8 ) & static_cast<int>(headerstr[2]);
+      unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
         
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
       
