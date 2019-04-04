@@ -94,7 +94,7 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_server_export.h
 
 install(EXPORT foxtrot_server
         DESTINATION ${ft_cmakedir}
-        COMPONENT DEVEL
+        COMPONENT devel
         NAMESPACE foxtrot::)
 
 configure_package_config_file(cmake/foxtrotServerConfig.cmake.in
@@ -102,3 +102,8 @@ configure_package_config_file(cmake/foxtrotServerConfig.cmake.in
                                 INSTALL_DESTINATION ${ft_cmakedir}
                                 PATH_VARS ft_cmakedir
                                 )
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotServerConfig.cmake
+        DESTINATION ${ft_cmakedir}
+        COMPONENT devel)
+

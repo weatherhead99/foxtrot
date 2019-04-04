@@ -1,4 +1,4 @@
-#Config file for the foxtrot core package
+#Config file for the foxtrot server package
 
 @PACKAGE_INIT@
 set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
