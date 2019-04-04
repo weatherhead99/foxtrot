@@ -11,3 +11,10 @@ endif()
 
 #set shared library build by default
 set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
+
+
+macro(foxtrot_generate_export_header packname tgtname)
+    include(GenerateExportHeader)
+    generate_export_header(${tgtname}
+        EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h)
+endmacro()

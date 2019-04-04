@@ -14,6 +14,7 @@ include(GitVersion)
 include(FoxtrotCommonSetup)
 
 set(packname "core")
+
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
                 ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
@@ -43,13 +44,11 @@ protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
 
 add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
             ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
-
-generate_export_header(foxtrot_core
-EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_core_export.h)
+foxtrot_generate_export_header(${packname} foxtrot_core)
 
 target_include_directories(foxtrot_core PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                            $<INSTALL_INTERFACE:/${CMAKE_INSTALL_INCLUDEDIR}>)
+                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRPC_LIBRARIES})
@@ -81,7 +80,7 @@ install(FILES proto/foxtrot.proto
 install(EXPORT foxtrot_core
         DESTINATION ${ft_cmakedir}
         COMPONENT DEVEL
-        NAMESPACE foxtrot)
+        NAMESPACE foxtrot::)
 
 #generate cmake package file
 configure_package_config_file(cmake/foxtrotCoreConfig.cmake.in

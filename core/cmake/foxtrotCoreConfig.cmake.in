@@ -5,6 +5,11 @@ set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
 
 #set(CMAKE_MODULE_PATH "${CMAKE_MODLE_PATH}/${foxtrot_CMAKE_DIR}")
 
+include(CMakeFindDependencyMacro)
+
+find_dependency(Boost REQUIRED COMPONENTS log)
+find_dependency(Protobuf REQUIRED)
+
 
 if(NOT TARGET foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
     include(@PACKAGE_ft_cmakedir@/foxtrot_core.cmake)
