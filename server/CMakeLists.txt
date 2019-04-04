@@ -24,7 +24,7 @@ endif()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
-
+include(CMakePackageConfigHelpers)
 
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
@@ -96,3 +96,9 @@ install(EXPORT foxtrot_server
         DESTINATION ${ft_cmakedir}
         COMPONENT DEVEL
         NAMESPACE foxtrot::)
+
+configure_package_config_file(cmake/foxtrotServerConfig.cmake.in
+                                foxtrotServerConfig.cmake
+                                INSTALL_DESTINATION ${ft_cmakedir}
+                                PATH_VARS ft_cmakedir
+                                )

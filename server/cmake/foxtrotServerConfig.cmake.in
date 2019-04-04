@@ -24,6 +24,4 @@ if(NOT TARGET foxtrot_server AND NOT foxtrot_server_BINARY_DIR)
     include(@PACKAGE_ft_cmakedir@/foxtrot_server.cmake)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
-
 check_required_components(foxtrot_server)
