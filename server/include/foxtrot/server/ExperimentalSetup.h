@@ -1,15 +1,18 @@
 #pragma once
 #include <string>
-#include "Logging.h"
 #ifdef linux
 #include <dlfcn.h>
 #else
 #define NOMINMAX
 #include <windows.h>
 #endif
+
 #include <boost/variant.hpp>
-#include "CommunicationProtocol.h"
-#include "StubError.h"
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/StubError.h>
+
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 
 

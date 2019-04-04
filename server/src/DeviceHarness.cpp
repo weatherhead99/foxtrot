@@ -1,12 +1,15 @@
-#include "DeviceHarness.h"
-#include "ServerUtil.h"
-#include "ContentionError.h"
-
 #include <iostream>
 #include <utility>
 #include <algorithm>
 #include <sstream>
+
 #include <rttr/type>
+
+#include <foxtrot/ContentionError.h>
+#include <foxtrot/server/DeviceHarness.h>
+
+#include "ServerUtil.h"
+
 
 
 using std::cout;

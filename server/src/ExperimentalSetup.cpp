@@ -1,8 +1,10 @@
-#include "ExperimentalSetup.h"
-#include "Error.h"
-#include "DeviceHarness.h"
-#include <Logging.h>
 #include <boost/filesystem.hpp>
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/Error.h>
+
+#include <foxtrot/server/ExperimentalSetup.h>
+#include <foxtrot/server/DeviceHarness.h>
 
 using namespace foxtrot;
 

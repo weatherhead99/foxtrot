@@ -1,10 +1,13 @@
 #pragma once
-#include "HandlerBase.h"
-#include "foxtrot.grpc.pb.h"
-#include <grpc++/grpc++.h>
-#include "Logging.h"
-
 #include <memory>
+
+#include <grpc++/grpc++.h>
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/foxtrot.grpc.pb.h>
+
+#include "HandlerBase.h"
+
 
 namespace foxtrot
 {

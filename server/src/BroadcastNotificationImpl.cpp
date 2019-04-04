@@ -1,5 +1,6 @@
+#include <foxtrot/ServerError.h>
+
 #include "BroadcastNotificationImpl.h"
-#include "ServerError.h"
 
 foxtrot::BroadcastNotificationLogic::BroadcastNotificationLogic(
     std::unique_ptr<foxtrot::pushbullet_api> api, const string& default_title,

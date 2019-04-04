@@ -1,12 +1,13 @@
-#include "config.h"
+#include <fstream>
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
-#include <Logging.h>
-#include <fstream>
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 
+#include <foxtrot/Logging.h>
+
+#include "config.h"
 
 namespace pt = boost::property_tree;
 namespace po = boost::program_options;

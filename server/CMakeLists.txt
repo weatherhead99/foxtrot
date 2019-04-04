@@ -7,6 +7,10 @@ set(packname "server")
 
 find_package(foxtrotCore REQUIRED)
 
+find_package(rttr 0.9.6 REQUIRED)
+message("rttr version: ${rttr_VERSION}")
+
+
 include(GenerateExportHeader)
 
 
@@ -38,6 +42,11 @@ target_include_directories(exptserve PRIVATE include/exptserve/)
 target_include_directories(exptserve PRIVATE
     ${CMAKE_CURRENT_BINARY_DIR})
 
+if(${rttr_VERSION} STREQUAL "0.9.6")
+    message(WARNING "new RTTR api used!")
+    target_compile_definitions(exptserve PRIVATE -DNEW_RTTR_API)
+endif()
+    
 target_include_directories(exptserve PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)

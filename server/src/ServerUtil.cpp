@@ -1,9 +1,11 @@
-#include "ServerUtil.h"
-#include "Logging.h"
+#include <memory>
+
 #include <rttr/type>
 #include <rttr/variant.h>
 
-#include <memory>
+#include <foxtrot/Logging.h>
+
+#include "ServerUtil.h"
 
 
 rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)

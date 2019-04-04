@@ -1,11 +1,10 @@
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
+
+#include <foxtrot/server/Device.h>
 
 #include "FetchDataImpl.h"
-#include "Device.h"
-
 #include "ServerUtil.h"
-#include "DeviceError.h"
-#include "ProtocolError.h"
-
 
 foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
 : _harness(harness), _lg("FetchDataLogic")

@@ -1,20 +1,21 @@
-#include "ProtocolUtilities.h"
-
-#include "ServerImpl.h"
-#include "DeviceHarness.h"
-#include "dummy/dummyDevice.h"
 #include <memory>
 #include <iostream>
-#include "ExperimentalSetup.h"
-#include <backward.hpp>
-#include "Logging.h"
-#include <rttr/type>
-#include "exptserve.h"
 #include <thread>
 #include <future>
 #include <exception>
-#include "config.h"
 #include <fstream>
+#include <rttr/type>
+
+#include <foxtrot/backward.hpp>
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/server/ExperimentalSetup.h>
+
+#include "exptserve.h"
+#include "config.h"
+#include "ServerImpl.h"
 
 using namespace foxtrot;
 using std::cout;
