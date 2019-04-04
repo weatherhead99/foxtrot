@@ -16,3 +16,5 @@ if(NOT TARGET foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
+
+check_required_components(foxtrot_core)
