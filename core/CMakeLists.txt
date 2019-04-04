@@ -22,9 +22,6 @@ configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
 
 message("foxtrot core version: ${VERSION}")
 
-
-
-
 find_package(Boost REQUIRED COMPONENTS log)
 find_package(Protobuf REQUIRED)
 
@@ -46,15 +43,13 @@ add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
             ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
-target_include_directories(foxtrot_core PUBLIC 
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
+foxtrot_standard_include_dirs(foxtrot_core)
 
 target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRPC_LIBRARIES})
 
 
-set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
 
 install(TARGETS foxtrot_core 
     EXPORT foxtrot_core
@@ -65,33 +60,26 @@ install(DIRECTORY include/foxtrot
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT devel)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_core_export.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
-        COMPONENT devel)
-
 install(FILES ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
         COMPONENT devel)
-        
+
+
 install(FILES proto/foxtrot.proto
         DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/
         COMPONENT DEVEL)
-        
+
 install(EXPORT foxtrot_core
         DESTINATION ${ft_cmakedir}
         COMPONENT DEVEL
         NAMESPACE foxtrot::)
 
-#generate cmake package file
-configure_package_config_file(cmake/foxtrotCoreConfig.cmake.in
-                              foxtrotCoreConfig.cmake
-                              INSTALL_DESTINATION ${ft_cmakedir}
-                              PATH_VARS ft_cmakedir)
-#and install it 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotCoreConfig.cmake
-        DESTINATION ${ft_cmakedir}
-        COMPONENT DEVEL)
+
+foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} ft_cmakedir)
 
 #install cmake macro files
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/GitVersion.cmake
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake.in
         DESTINATION ${ft_cmakedir})

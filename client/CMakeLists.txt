@@ -17,6 +17,8 @@ target_include_directories(foxtrot_client PUBLIC
 
 target_link_libraries(foxtrot_client foxtrot::foxtrot_core)
 
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
+
 install(TARGETS foxtrot_client 
         EXPORT foxtrot_client
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/

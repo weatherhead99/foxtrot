@@ -43,36 +43,24 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 
 add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
-target_include_directories(foxtrot_server PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    ${CURL_INCLUDE_DIR})
-    
-target_include_directories(foxtrot_server PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR})
-
+foxtrot_standard_include_dirs(foxtrot_server)
+target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
 target_link_libraries(foxtrot_server foxtrot::foxtrot_core ${CURL_LIBRARIES})
 
 add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE include/exptserve/)
-target_include_directories(exptserve PRIVATE
-    ${CMAKE_CURRENT_BINARY_DIR})
+foxtrot_standard_include_dirs(exptserve)
 
 if(${rttr_VERSION} STREQUAL "0.9.6")
     message(WARNING "new RTTR api used!")
     target_compile_definitions(exptserve PRIVATE -DNEW_RTTR_API)
     target_compile_definitions(foxtrot_server PUBLIC -DNEW_RTTR_API)
 endif()
-    
-target_include_directories(exptserve PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-    
 target_link_libraries(exptserve foxtrot::foxtrot_core ${dl} RTTR::Core)
 target_link_libraries(exptserve foxtrot_server Boost::filesystem Boost::program_options)
 
-set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 
 install(TARGETS foxtrot_server
         EXPORT foxtrot_server
@@ -84,26 +72,14 @@ install(TARGETS exptserve
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
-install(DIRECTORY include/foxtrot
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        COMPONENT devel)
-        
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_server_export.h
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
-        COMPONENT devel)
+
 
 install(EXPORT foxtrot_server
         DESTINATION ${ft_cmakedir}
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-configure_package_config_file(cmake/foxtrotServerConfig.cmake.in
-                                foxtrotServerConfig.cmake
-                                INSTALL_DESTINATION ${ft_cmakedir}
-                                PATH_VARS ft_cmakedir
-                                )
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotServerConfig.cmake
-        DESTINATION ${ft_cmakedir}
-        COMPONENT devel)
+foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
+                                ${ft_cmakedir}
+                                ft_cmakedir)
 

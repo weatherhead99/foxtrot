@@ -11,10 +11,39 @@ endif()
 
 #set shared library build by default
 set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
+set(CMAKE_BUILD_TYPE RelWithDebIngo CACHE STRING "build type")
 
 
 macro(foxtrot_generate_export_header packname tgtname)
     include(GenerateExportHeader)
     generate_export_header(${tgtname}
         EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
+            COMPONENT devel)
 endmacro()
+
+function(foxtrot_standard_include_dirs tgt)
+    target_include_directories(${tgt} PUBLIC
+                        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+                        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    target_include_directories(${tgt} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    install(DIRECTORY include/foxtrot
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+            COMPONENT devel)
+endfunction()
+
+function(foxtrot_create_package_config infile destdir path_vars)
+    include(CMakePackageConfigHelpers)
+    get_filename_component(outfname_withpath ${infile} NAME_WE)
+    get_filename_component(outfname ${outfname_withpath} NAME)
+    
+    configure_package_config_file(${infile} ${outfname}.cmake
+                        INSTALL_DESTINATION ${destdir}
+                        PATH_VARS ${path_vars})
+    
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}.cmake
+            DESTINATION ${destdir}
+            COMPONENT devel)
+
+endfunction()
