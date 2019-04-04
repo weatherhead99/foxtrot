@@ -1,8 +1,10 @@
 #pragma once
 #include <grpc++/grpc++.h>
-#include "foxtrot.grpc.pb.h"
-#include "DeviceHarness.h"
-#include "Logging.h"
+
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/server/DeviceHarness.h>
 
 namespace foxtrot
 {

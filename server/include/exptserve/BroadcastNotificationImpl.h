@@ -1,9 +1,13 @@
 #pragma once
-#include <grpc++/grpc++.h>
-#include "pushbullet/pushbullet_api.hh"
-#include "HandlerBase.h"
-#include "Logging.h"
 #include <memory>
+
+#include <grpc++/grpc++.h>
+
+#include <foxtrot/Logging.h>
+
+#include "pushbullet_api.hh"
+
+#include "HandlerBase.h"
 
 using std::string;
 

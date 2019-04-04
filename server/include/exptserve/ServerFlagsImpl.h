@@ -1,12 +1,14 @@
 #pragma once
-#include <grpc++/grpc++.h>
-#include "foxtrot.grpc.pb.h"
-#include "Logging.h"
-
-#include <boost/variant.hpp>
 #include <map>
 #include <string>
 #include <memory>
+
+#include <boost/variant.hpp>
+#include <grpc++/grpc++.h>
+
+#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/Logging.h>
+
 
 namespace foxtrot {
     

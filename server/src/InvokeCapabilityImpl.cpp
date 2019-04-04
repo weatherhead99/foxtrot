@@ -1,13 +1,12 @@
-#include "InvokeCapabilityImpl.h"
-
-#include "foxtrot.pb.h"
-#include "DeviceError.h"
-#include "ProtocolError.h"
 #include <chrono>
-
 #include <mutex>
-#include "ServerUtil.h"
 
+#include <foxtrot/foxtrot.pb.h>
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
+
+#include "InvokeCapabilityImpl.h"
+#include "ServerUtil.h"
 
 using std::cout;
 using std::endl;
