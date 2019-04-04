@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Error.h"
+#include <foxtrot/Error.h>
 
 namespace foxtrot
 {
-  class FOXTROT_EXPORT ContentionError : public Error 
+  class FOXTROT_CORE_EXPORT ContentionError : public Error 
   {
   public:
     ContentionError(const std::string& msg);

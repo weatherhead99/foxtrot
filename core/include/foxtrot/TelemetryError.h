@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Error.h"
+#include <foxtrot/Error.h>
 
 namespace foxtrot {
 

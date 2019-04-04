@@ -1,8 +1,8 @@
 #pragma once
-#include "ProtocolError.h"
+#include <foxtrot/ProtocolError.h>
 namespace foxtrot
 {
-  class FOXTROT_EXPORT ProtocolTimeoutError: public ProtocolError
+  class FOXTROT_CORE_EXPORT ProtocolTimeoutError: public ProtocolError
   {
   public:
     ProtocolTimeoutError(const std::string& msg);

@@ -1,5 +1,5 @@
-#include "Error.h"
-#include "Logging.h"
+#include <foxtrot/Error.h>
+#include <foxtrot/Logging.h>
 
 foxtrot::Error::Error(const std::string& msg): runtime_error(msg)
 {

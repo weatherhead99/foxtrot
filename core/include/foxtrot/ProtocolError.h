@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Error.h"
+#include <foxtrot/Error.h>
 
 namespace foxtrot
 {
  class Logging;
     
- class FOXTROT_EXPORT ProtocolError : public Error 
+ class FOXTROT_CORE_EXPORT ProtocolError : public Error 
  {
  public:
     ProtocolError(const std::string& msg);

@@ -1,4 +1,4 @@
-#include "StubError.h"
+#include <foxtrot/StubError.h>
 
 foxtrot::StubError::StubError(const std::string& msg) : Error(msg)
 {

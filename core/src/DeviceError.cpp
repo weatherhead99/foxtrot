@@ -1,4 +1,4 @@
-#include "DeviceError.h"
+#include <foxtrot/DeviceError.h>
 
 
 foxtrot::DeviceError::DeviceError(const std::string& msg): Error(msg)

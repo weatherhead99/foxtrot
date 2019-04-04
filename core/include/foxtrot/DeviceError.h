@@ -1,10 +1,10 @@
 #pragma once
-#include "Error.h"
+#include <foxtrot/Error.h>
 
 namespace foxtrot
 {
 
-  class FOXTROT_EXPORT DeviceError : public Error
+  class FOXTROT_CORE_EXPORT DeviceError : public Error
   {
   public:
    DeviceError(const std::string& msg); 

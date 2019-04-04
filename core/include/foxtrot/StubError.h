@@ -1,9 +1,8 @@
 #pragma once
-#include <string>
-#include <Error.h>
+#include <foxtrot/Error.h>
 
 namespace foxtrot {
-	class FOXTROT_EXPORT StubError: public Error
+	class FOXTROT_CORE_EXPORT StubError: public Error
 	{
 		public:
 		StubError(const std::string& msg);

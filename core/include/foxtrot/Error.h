@@ -1,16 +1,16 @@
 #pragma once
 
 #include <stdexcept>
-
 #include <string>
-#include "foxtrot_export.h"
+
+#include <foxtrot/foxtrot_core_export.h>
 
 namespace foxtrot
 {
   class Logging;
     
     
-  class FOXTROT_EXPORT Error : public std::runtime_error
+  class FOXTROT_CORE_EXPORT Error : public std::runtime_error
   {
   public:
     Error(const std::string& msg);
