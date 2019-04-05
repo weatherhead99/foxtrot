@@ -72,7 +72,6 @@ install(EXPORT foxtrot_core
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-
 foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} ft_cmakedir)
 
 #install cmake macro files
@@ -84,6 +83,4 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
 
         
 #add to package registry
-export(EXPORT foxtrot_core FILE ${CMAKE_CURRENT_BINARY_DIR}/foxtrotCoreexports.cmake
-        NAMESPACE foxtrot::)
-export(PACKAGE foxtrotCore)
+foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)

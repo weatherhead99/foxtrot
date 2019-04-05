@@ -1,0 +1,7 @@
+#config file for foxtrot protocols
+
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+find_dependency(foxtrotServer REQUIRED)

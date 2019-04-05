@@ -83,3 +83,4 @@ foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
                                 ${ft_cmakedir}
                                 ft_cmakedir)
 
+foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)

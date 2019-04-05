@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.6)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_package(foxtrotCore REQUIRED)
 find_package(foxtrotServer REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
@@ -72,5 +71,19 @@ target_link_libraries(foxtrot_protocols foxtrot::foxtrot_core foxtrot::foxtrot_s
 
 #TODO: do this more elegantly
 target_include_directories(foxtrot_protocols PRIVATE ${libusb_include})
+
+install(TARGETS foxtrot_protocols
+        EXPORT foxtrot_protocols
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotProtocols/)
+
+install(EXPORT foxtrot_protocols
+        DESTINATION ${ft_cmakedir}
+        NAMESPACE foxtrot::
+        COMPONENT devel)
+        
+        
 
 
