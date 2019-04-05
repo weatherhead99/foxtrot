@@ -1,11 +1,11 @@
 #pragma once
-#include "SerialProtocol.h"
 #include <string>
-
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/io_service.hpp>
 
-#include "Logging.h"
+#include <foxtrot/Logging.h>
+#include <foxtrot/protocols/SerialProtocol.h>
+
 
 using namespace boost::asio;
 
@@ -16,7 +16,7 @@ namespace foxtrot
   {
     
     
-    class FOXTROT_EXPORT SerialPort : public SerialProtocol
+    class FOXTROT_SERVER_EXPORT SerialPort : public SerialProtocol
     {
     public:
     SerialPort(const parameterset*const instance_parameters);

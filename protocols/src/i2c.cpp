@@ -1,10 +1,10 @@
-
-#include "i2c.h"
-#include "ProtocolUtilities.h"
+#include <fcntl.h>
 #include <linux/i2c-dev.h>
 #include <linux/i2c.h>
-#include <fcntl.h>
 #include <sys/ioctl.h>
+
+#include <foxtrot/protocols/i2c.h>
+#include <foxtrot/protocols/ProtocolUtilities.h>
 
 foxtrot::protocols::i2c::i2c(const parameterset *const instance_parameters)
 : foxtrot::CommunicationProtocol(instance_parameters), _lg("i2c")

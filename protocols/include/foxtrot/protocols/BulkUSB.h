@@ -1,6 +1,6 @@
 #pragma once
-#include "SerialProtocol.h"
-#include "Logging.h"
+#include <foxtrot/Logging.h>
+#include <foxtrot/protocols/SerialProtocol.h>
 
 class libusb_context;
 class libusb_device_handle;
@@ -12,7 +12,7 @@ namespace foxtrot
 {
   namespace protocols
   {
-    class FOXTROT_EXPORT BulkUSB : public SerialProtocol
+    class FOXTROT_SERVER_EXPORT BulkUSB : public SerialProtocol
     {
     public:
     BulkUSB(const parameterset*const instance_parameters);

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "SerialProtocol.h"
 #include <string>
-#include "Logging.h"
+#include <foxtrot/Logging.h>
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 using namespace foxtrot;
@@ -12,7 +12,7 @@ namespace foxtrot {
   namespace protocols
   {
 
-class FOXTROT_EXPORT simpleTCP : public SerialProtocol
+class FOXTROT_SERVER_EXPORT simpleTCP : public SerialProtocol
 {
 public:
   

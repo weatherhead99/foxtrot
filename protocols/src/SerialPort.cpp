@@ -1,27 +1,25 @@
-#include "SerialPort.h"
-#include "ProtocolError.h"
+#include <vector>
+#include <iostream>
+#include <map>
+#include <chrono>
+#include <thread>
+#include <algorithm>
 #ifdef linux
 #include <termios.h>
 #else
 #include <Windows.h>
 #endif
-
-#include "ProtocolUtilities.h"
-#include "StubError.h"
-
 #include <fcntl.h>
 #include <string.h>
-#include <vector>
-
-#include <iostream>
-#include <map>
-
-#include <chrono>
-#include <thread>
-
-#include <algorithm>
 
 #include <boost/asio/write.hpp>
+
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/StubError.h>
+
+#include <foxtrot/protocols/SerialPort.h>
+#include <foxtrot/protocols/ProtocolUtilities.h>
+
 
 using namespace boost::asio;
 using boost::asio::serial_port_base;

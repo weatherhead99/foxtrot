@@ -1,14 +1,16 @@
 #pragma once
-#include "CommunicationProtocol.h"
 #include <string>
 #include <vector>
-#include "Logging.h"
+
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 namespace foxtrot
 {
     namespace protocols
     {
-        class FOXTROT_EXPORT i2c : public CommunicationProtocol
+        class FOXTROT_SERVER_EXPORT i2c : public CommunicationProtocol
         {
         public:
             i2c(const parameterset* const instance_parameters);

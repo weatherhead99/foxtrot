@@ -1,14 +1,14 @@
 #pragma once
-
-#include "SerialProtocol.h"
 #include <string>
 #include <vector>
-#ifdef linux
-#include <scsi/sg.h>
-#endif
 #include <array>
 #include <utility>
 #include <type_traits>
+#ifdef linux
+#include <scsi/sg.h>
+#endif
+
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 namespace foxtrot
@@ -29,7 +29,7 @@ namespace foxtrot
 	#endif
     
     
-    class FOXTROT_EXPORT scsiserial : public SerialProtocol
+    class FOXTROT_SERVER_EXPORT scsiserial : public SerialProtocol
     {
     public:
     scsiserial(const parameterset*const instance_parameters);

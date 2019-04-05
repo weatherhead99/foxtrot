@@ -1,15 +1,16 @@
-#include "BulkUSB.h"
-
-#include "ProtocolUtilities.h"
-
-#include <libusb.h>
-#include "ProtocolError.h"
-#include "ProtocolTimeoutError.h"
 #include <string>
 #include <memory>
-
 #include <vector>
 #include <iostream>
+
+#include <libusb.h>
+
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/ProtocolTimeoutError.h>
+
+#include <foxtrot/protocols/BulkUSB.h>
+#include <foxtrot/protocols/ProtocolUtilities.h>
+
 
 foxtrot::protocols::BulkUSB::BulkUSB(const foxtrot::parameterset* const instance_parameters)
 : SerialProtocol(instance_parameters), _lg("BulkUSB")

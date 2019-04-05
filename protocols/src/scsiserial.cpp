@@ -1,16 +1,18 @@
-#include "scsiserial.h"
-#include "ProtocolUtilities.h"
-
-#include <scsi/sg.h>
-#include <sys/ioctl.h>
+#include <cmath>
+#include <algorithm>
+#include <iostream>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
 #include <byteswap.h>
-#include <cmath>
 
-#include <algorithm>
-#include <iostream>
+#include <scsi/sg.h>
+#include <sys/ioctl.h>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+#include <foxtrot/protocols/scsiserial.h>
+
+
 
 foxtrot::protocols::scsiserial::scsiserial(const foxtrot::parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters)

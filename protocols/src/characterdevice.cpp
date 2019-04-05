@@ -1,10 +1,11 @@
-#include "characterdevice.h"
-#include "ProtocolUtilities.h"
 #include <iostream>
 
 #include <errno.h>
 #include <string.h>
 #include <sstream>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+#include <foxtrot/protocols/characterdevice.h>
 
 using std::cout;
 using std::endl;

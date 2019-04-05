@@ -1,11 +1,10 @@
-#include "simpleTCP.h"
-
-#include <boost/variant.hpp>
 #include <vector>
-
 #include <memory>
-
+#include <iostream>
+#include <algorithm>
+#include <string.h>
 #ifdef linux
+#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
@@ -13,16 +12,14 @@
 #include <unistd.h>
 #endif
 
-#include "StubError.h"
+#include <boost/variant.hpp>
 
-#include <string.h>
-#include "ProtocolError.h"
+#include <foxtrot/StubError.h>
+#include <foxtrot/ProtocolError.h>
 
-#include <errno.h>
-#include "ProtocolUtilities.h"
+#include <foxtrot/protocols/simpleTCP.h>
+#include <foxtrot/protocols/ProtocolUtilities.h>
 
-#include <iostream>
-#include <algorithm>
 
 using namespace foxtrot::protocols;
 
@@ -32,10 +29,6 @@ simpleTCP::simpleTCP(const parameterset*const instance_parameters)
 {
 
 }
-
-
-
-
 
 simpleTCP::~simpleTCP()
 {
@@ -47,7 +40,6 @@ simpleTCP::~simpleTCP()
 #endif
 
 }
-
 
 
 void simpleTCP::Init(const parameterset* const class_parameters)
