@@ -14,6 +14,10 @@ if(GRPC_LIBRARIES)
     message(STATUS "GRPC include: ${GRPC_INCLUDE_DIR}; c++ include ${GRPCPP_INCLUDE_DIR}")
 endif()
 
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(grpc DEFAULT_MSG
+                                  GRPC_LIBRARY GRPCPP_LIBRARY GPR_LIBRARY GRPC_INCLUDE_DIR GRPCPP_INCLUDE_DIR)
+
 
 function(PROTOBUF_GENERATE_GRPC_CPP SRCS HDRS)
   if(NOT ARGN)

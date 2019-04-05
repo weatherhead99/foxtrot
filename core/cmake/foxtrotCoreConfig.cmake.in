@@ -31,6 +31,9 @@ else()
     endif()
     list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
 endif()
-    
+
+#need to put this here because only just configured the module path
+message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
+find_dependency(grpc REQUIRED)
 
 check_required_components(foxtrot_core)
