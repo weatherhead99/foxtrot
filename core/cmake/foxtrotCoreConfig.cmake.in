@@ -10,11 +10,27 @@ include(CMakeFindDependencyMacro)
 find_dependency(Boost REQUIRED COMPONENTS log)
 find_dependency(Protobuf REQUIRED)
 
-
-if(NOT TARGET foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
-    include(@PACKAGE_ft_cmakedir@/foxtrot_core.cmake)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/installtree)
+    message(WARNING "foxtrotCoreConfig configuring from BUILD TREE! You may not want this!")
+    set(BUILD_TREE TRUE)
+else()
+    message(STATUS "foxtrotCoreConfig configuring from install tree (normal behaviour)")
+    set(BUILD_TREE FALSE)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
+
+if(BUILD_TREE)
+    include(${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../cmake/)
+    set_property(TARGET foxtrot::foxtrot_core APPEND PROPERTY
+                 INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR})
+                    
+else()
+    if(NOT TARGET foxtrot::foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
+        include(@PACKAGE_ft_cmakedir@/foxtrot_core.cmake)
+    endif()
+    list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
+endif()
+    
 
 check_required_components(foxtrot_core)

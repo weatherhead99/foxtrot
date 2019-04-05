@@ -39,11 +39,14 @@ src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/Content
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS proto/foxtrot.proto)
 protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
 
+
 add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
             ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
-
+add_custom_command(TARGET foxtrot_core POST_BUILD
+COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${PROTO_HDRS} ${PROTO_GRPC_HDRS} 
+${CMAKE_CURRENT_BINARY_DIR}/foxtrot/)
 foxtrot_standard_include_dirs(foxtrot_core)
 
 target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRPC_LIBRARIES})
@@ -56,22 +59,17 @@ install(TARGETS foxtrot_core
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
     
-install(DIRECTORY include/foxtrot
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-        COMPONENT devel)
-
-install(FILES ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
         COMPONENT devel)
 
-
 install(FILES proto/foxtrot.proto
         DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/
-        COMPONENT DEVEL)
+        COMPONENT devels)
 
 install(EXPORT foxtrot_core
         DESTINATION ${ft_cmakedir}
-        COMPONENT DEVEL
+        COMPONENT devel
         NAMESPACE foxtrot::)
 
 
@@ -83,3 +81,9 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake.in
         DESTINATION ${ft_cmakedir})
+
+        
+#add to package registry
+export(EXPORT foxtrot_core FILE ${CMAKE_CURRENT_BINARY_DIR}/foxtrotCoreexports.cmake
+        NAMESPACE foxtrot::)
+export(PACKAGE foxtrotCore)

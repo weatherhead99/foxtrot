@@ -38,12 +38,18 @@ function(foxtrot_create_package_config infile destdir path_vars)
     get_filename_component(outfname_withpath ${infile} NAME_WE)
     get_filename_component(outfname ${outfname_withpath} NAME)
     
-    configure_package_config_file(${infile} ${outfname}.cmake
+    configure_package_config_file(${infile} installtree/${outfname}.cmake
                         INSTALL_DESTINATION ${destdir}
                         PATH_VARS ${path_vars})
     
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}.cmake
+    configure_package_config_file(${infile} ${outfname}.cmake
+                        INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+                        PATH_VARS ${path_vars}
+                        INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
+    
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/installtree/${outfname}.cmake
             DESTINATION ${destdir}
             COMPONENT devel)
-
+            
+            
 endfunction()
