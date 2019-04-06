@@ -6,8 +6,7 @@
 #include <boost/program_options/parsers.hpp>
 
 #include <foxtrot/Logging.h>
-
-#include "config.h"
+#include <foxtrot/config.h>
 
 namespace pt = boost::property_tree;
 namespace po = boost::program_options;

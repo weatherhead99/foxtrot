@@ -1,4 +1,4 @@
-project(foxtrot_core C CXX)
+    project(foxtrot_core C CXX)
 cmake_minimum_required(VERSION 3.6)
 set(CMAKE_CXX_STANDARD 14)
 #in case of building static libs
@@ -33,7 +33,7 @@ endif()
 
 #build foxtrot core library (errors and logging)
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp)
+src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/config.cpp)
 
 #generate protobuf headers
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS proto/foxtrot.proto)

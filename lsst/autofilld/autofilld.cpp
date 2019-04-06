@@ -1,16 +1,18 @@
 #include <string>
-
-#include <boost/program_options.hpp>
-#include "client.h"
-#include "config.h"
-#include "Logging.h"
-#include <backward.hpp>
-
-#include "autofill_logger.hh"
-#include "autofill_fill_logic.hh"
 #include <thread>
 #include <chrono>
 #include <memory>
+
+#include <boost/program_options.hpp>
+
+#include <foxtrot/backward.hpp>
+#include <foxtrot/Logging.h>
+#include <foxtrot/client/client.h>
+
+#include "config.h"
+
+#include "autofill_logger.hh"
+#include "autofill_fill_logic.hh"
 
 namespace po = boost::program_options;
 using std::string;

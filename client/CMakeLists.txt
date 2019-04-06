@@ -34,11 +34,5 @@ install(EXPORT foxtrot_client
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-configure_package_config_file(cmake/foxtrotClientConfig.cmake.in
-                              foxtrotClientConfig.cmake
-                              INSTALL_DESTINATION ${ft_cmakedir}
-                              PATH_VARS ft_cmakedir)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrotClientConfig.cmake
-        DESTINATION ${ft_cmakedir}
-        COMPONENT devel)
+foxtrot_create_package_config(cmake/foxtrotClientConfig.cmake.in ${ft_cmakedir} ft_cmakedir)
+foxtrot_add_to_package_registry(foxtrot_client foxtrotClient)
