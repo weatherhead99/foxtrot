@@ -1,7 +1,8 @@
 #pragma once
-#include "Logging.h"
 #include <atomic>
 #include <future>
+
+#include <foxtrot/Logging.h>
 
 using std::string;
 

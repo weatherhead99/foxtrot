@@ -1,11 +1,14 @@
-#include "autofill_fill_logic.hh"
-#include "client.h"
 #include <thread>
 #include <chrono>
-#include "autofill_common.hh"
+
 #include <boost/date_time.hpp>
+
+#include <foxtrot/client/client.h>
+#include <foxtrot/ServerError.h>
+
+#include "autofill_fill_logic.hh"
+#include "autofill_common.hh"
 #include "autofill_logger.hh"
-#include "ServerError.h"
 
 namespace pt = boost::posix_time;
 

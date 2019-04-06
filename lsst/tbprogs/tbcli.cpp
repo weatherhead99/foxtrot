@@ -1,8 +1,12 @@
-#include "client.h"
-#include <boost/program_options.hpp>
 #include <iostream>
-#include "Logging.h"
-#include "backward.hpp"
+
+#include <boost/program_options.hpp>
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/backward.hpp>
+
+#include <foxtrot/client/client.h>
+
 #include "tbcli_heater_logic.h"
 #include "tbcli_pressure_logic.h"
 #include "tbcli_mono_logic.h"

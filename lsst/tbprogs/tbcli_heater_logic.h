@@ -1,6 +1,7 @@
 #pragma once
-#include "client.h"
 #include <utility>
+
+#include <foxtrot/client.h>
 
 
 int find_archon_heater(const foxtrot::servdescribe& cl);

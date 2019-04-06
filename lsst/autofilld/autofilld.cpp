@@ -9,7 +9,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/client/client.h>
 
-#include "config.h"
+#include <foxtrot/config.h>
 
 #include "autofill_logger.hh"
 #include "autofill_fill_logic.hh"

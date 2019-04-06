@@ -1,9 +1,10 @@
-#include "autofill_logger.hh"
-
-#include <boost/date_time.hpp>
 #include <chrono>
 #include <thread>
-#include "Logging.h"
+#include <boost/date_time.hpp>
+
+#include <foxtrot/Logging.h>
+
+#include "autofill_logger.hh"
 
 
 using namespace foxtrot;

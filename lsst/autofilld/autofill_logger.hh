@@ -1,10 +1,13 @@
 #pragma once
-#include "autofill_common.hh"
 #include <string>
-#include "Logging.h"
-#include <boost/filesystem.hpp>
 #include <mutex>
 #include <future>
+
+#include <boost/filesystem.hpp>
+
+#include <foxtrot/Logging.h>
+
+#include "autofill_common.hh"
 
 using std::string;
 
