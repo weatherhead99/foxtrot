@@ -84,6 +84,11 @@ install(EXPORT foxtrot_protocols
         NAMESPACE foxtrot::
         COMPONENT devel)
         
-        
+foxtrot_create_package_config(cmake/foxtrotProtocolsConfig.cmake.in
+                                ${ft_cmakedir}
+                                "ft_cmakedir;protos")
+
+foxtrot_add_to_package_registry(foxtrot_protocols foxtrotProtocols)
+
 
 
