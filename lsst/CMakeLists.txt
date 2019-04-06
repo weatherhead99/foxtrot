@@ -14,4 +14,4 @@ set(tbcli_srcs tbprogs/tbcli.cpp tbprogs/tbcli_fill_logic.cpp tbprogs/tbcli_heat
     tbprogs/tbcli_mono_logic.cpp tbprogs/tbcli_pressure_logic.cpp)
     
 add_executable(tbcli ${tbcli_srcs})
-target_link_libraries(tbcli foxtrot::foxtrot_client)
+target_link_libraries(tbcli foxtrot::foxtrot_client Boost::program_options)

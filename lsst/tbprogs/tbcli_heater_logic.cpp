@@ -1,5 +1,6 @@
-#include "tbcli_heater_logic.h"
 #include <algorithm>
+
+#include "tbcli_heater_logic.h"
 
 
 int find_archon_heater(const foxtrot::servdescribe& cl)

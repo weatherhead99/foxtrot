@@ -1,6 +1,6 @@
 #pragma once
 
-#include "client.h"
+#include <foxtrot/client/client.h>
 
 int find_pressure_gauge(const foxtrot::servdescribe& cl);
 
