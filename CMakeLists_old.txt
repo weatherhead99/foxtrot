@@ -88,10 +88,10 @@ add_subdirectory(src)
 
 include_directories(devices protocols)
 add_subdirectory(protocols)
-add_subdirectory(devices)
-add_subdirectory(expruns)
+#add_subdirectory(devices)
+#add_subdirectory(expruns)
 add_subdirectory(util)
-add_subdirectory(watchdog)
+#add_subdirectory(watchdog)
 
 if(BUILD_SERVER)
 add_subdirectory(server)
@@ -99,10 +99,10 @@ add_subdirectory(client)
 endif()
 
 if(BUILD_SETUPS)
-add_subdirectory(setups)
+#add_subdirectory(setups)
 endif()
 
-add_subdirectory(autofilld)
+#add_subdirectory(autofilld)
 add_subdirectory(pushbullet)
 
 add_library(foxtrot SHARED $<TARGET_OBJECTS:foxtrot_obj> $<TARGET_OBJECTS:foxtrot_proto>
@@ -129,9 +129,9 @@ message(STATUS "ft includes: ${ft_includes}")
 install(FILES ${ft_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/ COMPONENT devel)
 
 
-if(BUILD_PROGS)
-add_subdirectory(tbprogs)
-endif()
+#if(BUILD_PROGS)
+#add_subdirectory(tbprogs)
+#endif()
 
 
 if(BUILD_DASHBOARD)
@@ -149,21 +149,21 @@ if(BUILD_TESTS)
   add_subdirectory(test)
 endif(BUILD_TESTS)	
 
-if(BUILD_OPMD)
-  add_subdirectory(OPMD)
-endif()
+# if(BUILD_OPMD)
+#   add_subdirectory(OPMD)
+# endif()
 
-if(BUILD_KEYPAD)
-  add_subdirectory(keypad)
-endif()
+# if(BUILD_KEYPAD)
+#   add_subdirectory(keypad)
+# endif()
 
 if(BUILD_TELEMETRY)
   add_subdirectory(telemetry)
 endif()
 
-if(BUILD_UDEV)
-  add_subdirectory(udev)
-endif()
+# if(BUILD_UDEV)
+#   add_subdirectory(udev)
+# endif()
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/foxtrotConfig.cmake.in foxtrotConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrot/)

@@ -62,7 +62,12 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     endif()
 endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+add_library(foxtrot_proto OBJECT ${proto_srcs})
+target_include_directories(foxtrot_proto INTERFACE $<TARGET_PROPERTY:RTTR::Core,INTERFACE_INCLUDE_DIRECTORIES>)
+target_include_directories(foxtrot_proto PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+target_compile_definitions(foxtrot_proto PRIVATE -Dfoxtrot_EXPORTS)
 
 
 add_library(foxtrot_protocols ${srcs})

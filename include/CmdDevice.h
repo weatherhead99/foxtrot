@@ -5,7 +5,7 @@
 namespace foxtrot
 {
   
-  class FOXTROT_EXPORT CmdDevice : public Device 
+  class FOXTROT_CORE_EXPORT CmdDevice : public Device 
   {
 	RTTR_ENABLE(Device);
   public:
