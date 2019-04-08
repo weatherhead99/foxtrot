@@ -36,8 +36,7 @@ src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp)
 set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp 
     src/InvokeCapabilityImpl.cpp  src/FetchDataImpl.cpp 
     src/ExperimentalSetup.cpp src/ChunkStreamImpl.cpp 
-    src/ServerFlagsImpl.cpp src/ServerCommandImpl.cpp src/BroadcastNotificationImpl.cpp
-    src/config.cpp src/FetchDataImpl.cpp src/exptserve.cpp src/exptserve_funcs.cpp
+    src/ServerFlagsImpl.cpp src/ServerCommandImpl.cpp src/BroadcastNotificationImpl.cpp src/FetchDataImpl.cpp src/exptserve.cpp src/exptserve_funcs.cpp
     src/pushbullet_api.cpp
     )
 
@@ -45,7 +44,7 @@ add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
 foxtrot_standard_include_dirs(foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(foxtrot_server foxtrot::foxtrot_core ${CURL_LIBRARIES})
+target_link_libraries(foxtrot_server foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core)
 
 add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE include/exptserve/)

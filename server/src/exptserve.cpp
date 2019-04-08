@@ -11,13 +11,13 @@
 
 #include <foxtrot/backward.hpp>
 #include <foxtrot/Logging.h>
+#include <foxtrot/config.h>
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/ExperimentalSetup.h>
 
 #include "exptserve.h"
-#include "config.h"
 #include "ServerImpl.h"
 
 using namespace foxtrot;
