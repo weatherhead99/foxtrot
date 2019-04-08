@@ -53,6 +53,8 @@ target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRP
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
+set(ft_core_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
+set(ft_core_binarydir ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS foxtrot_core 
     EXPORT foxtrot_core
@@ -72,7 +74,8 @@ install(EXPORT foxtrot_core
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} ft_cmakedir)
+foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} 
+    "ft_cmakedir;ft_core_sourcedir;ft_core_binarydir")
 
 #install cmake macro files
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
