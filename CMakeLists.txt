@@ -5,6 +5,7 @@ include(ExternalProject)
 
 option(BUILD_SERVER "build foxtrot server component" ON)
 option(BUILD_CLIENT "build foxtrot client component" ON)
+option(BUILD_PROTOCOLS "build extra foxtrot communication protocols" ON)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/dist 
     CACHE PATH "installation prefix" FORCE)
@@ -14,7 +15,6 @@ ExternalProject_Add(foxtrot_core SOURCE_DIR ${CMAKE_SOURCE_DIR}/core
                     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                     -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
-
 set(CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR})
 
 if(BUILD_SERVER)
@@ -23,7 +23,6 @@ if(BUILD_SERVER)
                         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                         -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}
                         DEPENDS foxtrot_core)
-
 endif()
 
 if(BUILD_CLIENT)
@@ -31,4 +30,12 @@ if(BUILD_CLIENT)
     ExternalProject_Add(foxtrot_client SOURCE_DIR ${CMAKE_SOURCE_DIR}/client
                         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                         DEPENDS foxtrot_core)
+endif()
+
+
+if(BUILD_PROTOCOLS)
+    message(STATUS "building foxtrot protocol library")
+    ExternalProject_Add(foxtrot_protocols SOURCE_DIR ${CMAKE_SOURCE_DIR}/protocols
+                        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                        DEPENDS foxtrot_server)
 endif()

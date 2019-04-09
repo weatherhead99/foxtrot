@@ -46,14 +46,14 @@ function(foxtrot_create_package_config infile destdir path_vars)
                         INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
                         PATH_VARS ${path_vars}
                         INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
-    
+
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/installtree/${outfname}.cmake
             DESTINATION ${destdir}
             COMPONENT devel)
 endfunction()
 
 function(foxtrot_add_to_package_registry exportname packagename)
-    export(EXPORT ${exportname} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packagename}exports.cmake
-    NAMESPACE foxtrot::)
-    export(PACKAGE ${packagename})
+        export(EXPORT ${exportname} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packagename}exports.cmake
+        NAMESPACE foxtrot::)
+        export(PACKAGE ${packagename})
 endfunction()

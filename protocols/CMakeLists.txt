@@ -47,35 +47,30 @@ if(Boost)
 endif()
 
 #some protocols only work on linux
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    find_file(sg_include scsi/sg.h)
-    if(EXISTS ${sg_include})
-        message(STATUS "found scsiserial dependencies")
-        foxtrot_build_protocol(scsiserial)
-    endif()
-    
-    find_file(i2c_include i2c-dev.h PATH_SUFFIXES linux)
-    message(STATUS "i2c: ${i2c_include}")
-    if(EXISTS ${i2c_include})
-        message(STATUS "found i2c dependencies")
-        foxtrot_build_protocol(i2c)
-    endif()
-endif()
+#i2c protocol currently broken!
+# if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+#     find_file(sg_include scsi/sg.h)
+#     if(EXISTS ${sg_include})
+#         message(STATUS "found scsiserial dependencies")
+#         foxtrot_build_protocol(scsiserial)
+#     endif()
+#     
+#     find_file(i2c_include i2c-dev.h PATH_SUFFIXES linux)
+#     message(STATUS "i2c: ${i2c_include}")
+#     if(EXISTS ${i2c_include})
+#         message(STATUS "found i2c dependencies")
+#         foxtrot_build_protocol(i2c)
+#     endif()
+# endif()
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-
-add_library(foxtrot_proto OBJECT ${proto_srcs})
-target_include_directories(foxtrot_proto INTERFACE $<TARGET_PROPERTY:RTTR::Core,INTERFACE_INCLUDE_DIRECTORIES>)
-target_include_directories(foxtrot_proto PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
-target_compile_definitions(foxtrot_proto PRIVATE -Dfoxtrot_EXPORTS)
-
 
 add_library(foxtrot_protocols ${srcs})
 foxtrot_standard_include_dirs(foxtrot_protocols)
 target_link_libraries(foxtrot_protocols foxtrot::foxtrot_core foxtrot::foxtrot_server)
 
 #TODO: do this more elegantly
-target_include_directories(foxtrot_protocols PRIVATE ${libusb_include})
+target_include_directories(foxtrot_protocols PRIVATE ${libusb_include} ${i2c_include})
 
 install(TARGETS foxtrot_protocols
         EXPORT foxtrot_protocols
