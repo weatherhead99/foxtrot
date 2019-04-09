@@ -82,6 +82,7 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GitVersion.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake.in
+        ${CMAKE_CURRENT_LIST_DIR}/cmake/Findgrpc.cmake
         DESTINATION ${ft_cmakedir})
 
         
