@@ -315,7 +315,11 @@ void foxtrot::autofill_logic::broadcast_notify(foxtrot::Client& cl, const string
         catch(foxtrot::ServerError& err)
         {
             lg_.strm(sl::error) << "broadcast notifications appear not to be enabled on the server";
-        };
+        }
+        catch(foxtrot::ProtocolError& err)
+	{
+	  lg_.strm(sl::error) << "broadcast protocol failed for some reason, ignoring...";
+	}
 
     }
 
