@@ -11,7 +11,7 @@ endif()
 
 #set shared library build by default
 set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
-set(CMAKE_BUILD_TYPE RelWithDebIngo CACHE STRING "build type")
+set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type")
 
 
 macro(foxtrot_generate_export_header packname tgtname)
