@@ -1,11 +1,11 @@
 #pragma once
-#include "Device.h"
+#include <foxtrot/server/Device.h>
 #include <string>
 
 namespace foxtrot
 {
   
-  class FOXTROT_CORE_EXPORT CmdDevice : public Device 
+  class FOXTROT_SERVER_EXPORT CmdDevice : public Device 
   {
 	RTTR_ENABLE(Device);
   public:

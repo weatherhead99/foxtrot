@@ -1,9 +1,28 @@
-macro(add_device_lib name srcfiles)
-add_library(${name} STATIC ${srcfiles})
-#NOTE: needed on windows to prevent ODR violations
-target_link_libraries(${name} PRIVATE ${RTTR_TARGET})
-list(APPEND device_libs ${name})
-install(TARGETS ${name} DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/devices/)
+project(foxtrot_devices C CXX)
+cmake_minimum_required(VERSION 3.6)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(packname "devices")
+
+find_package(foxtrotCore REQUIRED)
+find_package(foxtrotProtocols REQUIRED)
+find_package(rttr 0.9.6 REQUIRED)
+
+set(device_targets "")
+
+macro(add_device_object_lib name srcs includes)
+    add_library(${name} OBJECT ${srcs})
+    target_include_directories(${name} PRIVATE
+    $<TARGET_PROPERTY:foxtrot::foxtrot_server,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>
+    $<TARGET_PROPERTY:foxtrot::foxtrot_protocols,INTERFACE_INCLUDE_DIRECTORIES>)
+    
+    list(APPEND device_targets ${name})
+    set(device_targets ${device_targets} PARENT_SCOPE)
+    install(FILES ${includes}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices/)
 endmacro()
 
 
@@ -16,8 +35,18 @@ add_subdirectory(newport_2936R)
 add_subdirectory(TPG362)
 add_subdirectory(DM3068)
 add_subdirectory(dummy)
-if(BUILD_I2C)
-  add_subdirectory(BME280)
-endif()
+# if(BUILD_I2C)
+#   add_subdirectory(BME280)
+# endif()
 add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
+
+set(libobjs "")
+message(STATUS "device targetS: ${device_targets}")
+foreach(tgt ${device_targets})
+    list(APPEND libobjs "$<TARGET_OBJECTS:${tgt}>")
+endforeach()
+message(STATUS "libobjs: ${libobjs}")
+add_library(foxtrot_devices ${libobjs})
+
+

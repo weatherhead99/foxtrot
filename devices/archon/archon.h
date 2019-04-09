@@ -1,20 +1,22 @@
-
 #pragma once
 
-#include "CmdDevice.h"
 #include <memory>
 #include <string>
-#include "protocols/simpleTCP.h"
 #include <map>
 #include <vector>
-#include <boost/iterator/iterator_concepts.hpp>
-
-#include <rttr/registration>
-#include <boost/date_time.hpp>
-
 #include <mutex>
 
-#include "Logging.h"
+#include <boost/iterator/iterator_concepts.hpp>
+#include <boost/date_time.hpp>
+
+#include <rttr/registration>
+
+#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/protocols/simpleTCP.h>
+#include <foxtrot/Logging.h>
+
+
+
 
 using std::string;
 typedef std::map<std::string,std::string> ssmap;

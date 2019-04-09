@@ -1,11 +1,13 @@
 #pragma once
-#include "CmdDevice.h"
-#include "SerialProtocol.h"
-#include "Logging.h"
 #include <memory>
 #include <sstream>
 #include <iomanip>
 #include <tuple>
+
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 using std::string;

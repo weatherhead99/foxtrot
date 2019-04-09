@@ -1,18 +1,4 @@
-#include "archon.h"
-#include "archon_modules.h"
-#include "archon_module_heaterx.h"
-#include "archon_module_lvxbias.h"
-#include "archon_module_hvxbias.h"
-#include "archon_module_AD.h"
-#include "archon_module_xvbias.h"
-#include "archon_module_driver.h"
-#include "DeviceError.h"
-
 #include <algorithm>
-
-#include "ProtocolUtilities.h"
-#include "CommunicationProtocol.h"
-
 #include <thread>
 #include <chrono>
 #include <locale>
@@ -22,11 +8,26 @@
 #include <string>
 #include <utility>
 
-
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/date_time/gregorian/gregorian_io.hpp>
 
-#include "ProtocolError.h"
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+#include <foxtrot/protocols/CommunicationProtocol.h>
+
+#include "archon.h"
+#include "archon_modules.h"
+#include "archon_module_heaterx.h"
+#include "archon_module_lvxbias.h"
+#include "archon_module_hvxbias.h"
+#include "archon_module_AD.h"
+#include "archon_module_xvbias.h"
+#include "archon_module_driver.h"
+
+
+
 
 #define READ_SIZE 1024
 

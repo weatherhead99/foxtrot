@@ -1,6 +1,11 @@
 #pragma once
-#include "Device.h"
-#include "Logging.h"
+#include <rttr/registration>
+
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/server/Device.h>
+
+#include <foxtrot/protocols/CommunicationProtocol.h>
 
 #define FX2_VID 0x04B4
 #define FX2_PID 0x8613
@@ -14,8 +19,6 @@
 #define COEFF_C3_ADDR 0xC0
 #define COEFF_C4_ADDR 0xE0
 
-#include <rttr/registration>
-#include "CommunicationProtocol.h"
 
 class libusb_device;
 class libusb_context;

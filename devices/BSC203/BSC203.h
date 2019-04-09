@@ -1,12 +1,14 @@
 #pragma once
 
-#include "SerialPort.h"
-#include "Device.h"
-
 #include <vector>
 #include <array>
 
-#include "Logging.h"
+#include <foxtrot/Logging.h>
+
+#include <foxtrot/protocols/SerialPort.h>
+#include <foxtrot/server/Device.h>
+
+
 
 //TODO: handle error conditions somehow!!!!
 

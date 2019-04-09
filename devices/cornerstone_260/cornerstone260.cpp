@@ -1,20 +1,21 @@
-#include "cornerstone260.h"
-#include "ProtocolError.h"
-#include "ProtocolUtilities.h"
-#include "SerialPort.h"
-
 #include <map>
 #include <memory>
 #include <type_traits>
-
 #include <sstream>
-
 #include <chrono>
 #include <thread>
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
+
 #include <rttr/registration>
+
+#include <foxtrot/ProtocolError.h>
+
+#include <foxtrot/protocols/ProtocolUtilities.h>
+#include <foxtrot/protocols/SerialPort.h>
+
+#include "cornerstone260.h"
 
 const foxtrot::parameterset cornerstone_class_params_serial
 {

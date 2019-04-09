@@ -8,8 +8,8 @@ endif()
 message(WARNING "rapidxml: ${rapidxml_include}")
 
 
-add_device_lib(webswitch_plus webswitch_plus.cpp)
+add_device_object_lib(webswitch_plus webswitch_plus.cpp webswitch_plus.h)
 target_include_directories(webswitch_plus PUBLIC ${rapidxml_include})
 
-add_executable(webswitch_play webswitch_play.cpp)
-target_link_libraries(webswitch_play foxtrot webswitch_plus)
+# add_executable(webswitch_play webswitch_play.cpp)
+# target_link_libraries(webswitch_play foxtrot webswitch_plus)

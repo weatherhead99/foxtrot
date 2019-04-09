@@ -1,12 +1,14 @@
-#include "stellarnet.h"
-#include "ProtocolError.h"
-#include "DeviceError.h"
-#include <libusb.h>
 #include <fstream>
 #include <sstream>
-
 #include <thread>
 #include <chrono>
+
+#include <libusb.h>
+
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/DeviceError.h>
+
+#include "stellarnet.h"
 
 #define DEVICE_ID_ADDR 0x20
 #define COEFF_C1_ADDR 0x80

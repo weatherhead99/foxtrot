@@ -1,7 +1,7 @@
 #pragma once
 
-#include "CmdDevice.h"
-#include "scsiserial.h"
+#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/protocols/scsiserial.h>
 
 #include <rttr/registration>
 

@@ -1,5 +1,5 @@
+#include <foxtrot/DeviceError.h>
 #include "BSC203.h"
-#include <DeviceError.h>
 
 
 #define DEST_HOST_CONTROLLER 0x01

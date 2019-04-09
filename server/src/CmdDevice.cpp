@@ -1,4 +1,4 @@
-#include "CmdDevice.h"
+#include <foxtrot/server/CmdDevice.h>
 
 foxtrot::CmdDevice::CmdDevice(std::shared_ptr< foxtrot::CommunicationProtocol > proto): Device(proto)
 {

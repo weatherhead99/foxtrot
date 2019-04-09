@@ -2,11 +2,12 @@ set(archon_srcs archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_a
 archonraw.cpp
 )
 
-add_library(archon STATIC ${archon_srcs})
-target_link_libraries(archon PRIVATE ${RTTR_TARGET})
-target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
-target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
+add_device_object_lib(archon ${archon_srcs} "")
+
+# target_link_libraries(archon PRIVATE ${RTTR_TARGET})
+# target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
+# target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
 
 
-add_executable(archon_test archon_test.cpp)
-target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )
+# add_executable(archon_test archon_test.cpp)
+# target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )

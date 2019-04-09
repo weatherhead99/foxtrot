@@ -1,6 +1,6 @@
-#include "webswitch_plus.h"
 #include <algorithm>
-#include "DeviceError.h"
+#include <foxtrot/DeviceError.h>
+#include "webswitch_plus.h"
 
 using namespace rapidxml;
 

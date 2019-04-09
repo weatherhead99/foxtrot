@@ -1,12 +1,14 @@
-#include "dummyDevice.h"
-#include <rttr/registration>
-#include <rttr/type>
 #include <type_traits>
 #include <iostream>
-#include "DeviceError.h"
-
 #include <thread>
 #include <chrono>
+
+#include <rttr/type>
+#include <rttr/registration>
+
+#include <foxtrot/DeviceError.h>
+
+#include "dummyDevice.h"
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)

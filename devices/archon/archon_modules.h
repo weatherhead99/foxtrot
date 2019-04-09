@@ -1,14 +1,15 @@
 #pragma once
 #include <array>
 #include <tuple>
-
-#include "Device.h"
-#include "archon.h"
 #include <sstream>
 #include <type_traits>
 #include <memory>
 #include <iomanip>
+
 #include <rttr/type>
+
+#include <foxtrot/server/Device.h>
+#include "archon.h"
 
 namespace foxtrot
 {

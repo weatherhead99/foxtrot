@@ -19,7 +19,7 @@ set(FOXTROT_PROTOCOLS_SUPPORTED "@protos@")
 
 if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotProtocolsexports.cmake)
-    set_property(TARGET foxtrot::foxtrot_protocolsAPPEND PROPERTY
+    set_property(TARGET foxtrot::foxtrot_protocols APPEND PROPERTY
                  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR})
 else()
     if(NOT TARGET foxtrot::foxtrot_protocols AND NOT foxtrot_protocols_BINARY_DIR)

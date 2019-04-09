@@ -1,8 +1,10 @@
 #pragma once
+#include <rttr/registration>
+
+#include <foxtrot/Logging.h>
+
 #include "archon_modules.h"
 #include "archon_module_lvxbias.h"
-#include <rttr/registration>
-#include "Logging.h"
 
 namespace foxtrot
 {

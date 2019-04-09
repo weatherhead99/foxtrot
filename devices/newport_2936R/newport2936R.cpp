@@ -1,16 +1,20 @@
-#include "newport2936R.h"
-#include "BulkUSB.h"
-#include "SerialPort.h"
 #include <iostream>
-#include "DeviceError.h"
-#include "ProtocolError.h"
-#include "ProtocolTimeoutError.h"
 #include <algorithm>
 #include <string>
-#include <rttr/registration>
 #include <thread>
 #include <chrono>
 #include <sstream>
+
+#include <rttr/registration>
+
+#include <foxtrot/ProtocolError.h>
+#include <foxtrot/ProtocolTimeoutError.h>
+#include <foxtrot/DeviceError.h>
+
+#include <foxtrot/protocols/BulkUSB.h>
+#include <foxtrot/protocols/SerialPort.h>
+
+#include "newport2936R.h"
 
 const foxtrot::parameterset newport2936R_usb_params 
 {

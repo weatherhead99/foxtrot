@@ -1,18 +1,20 @@
-#include "TPG362.h"
 
-#include "DeviceError.h"
-#include <SerialPort.h>
 #include <iostream>
-
 #include <numeric>
 #include <iomanip>
-
 #include <cmath>
 #include <chrono>
 #include <thread>
+#include <climits>
 
 #include <rttr/registration>
-#include <climits>
+
+#include <foxtrot/DeviceError.h>
+
+#include <foxtrot/protocols/SerialPort.h>
+
+#include "TPG362.h"
+
 
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
   : CmdDevice(proto), _serproto(proto), _lg("TPG362")

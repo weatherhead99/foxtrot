@@ -1,9 +1,8 @@
 #pragma once
-#include "Device.h"
-
 #include <random>
 #include <vector>
 
+#include <foxtrot/server/Device.h>
 
 namespace foxtrot
 {

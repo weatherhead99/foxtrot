@@ -1,6 +1,6 @@
 #pragma once
-#include "CmdDevice.h"
-#include "SerialProtocol.h"
+#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 namespace foxtrot

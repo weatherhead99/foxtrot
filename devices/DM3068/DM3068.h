@@ -1,9 +1,10 @@
 #pragma once
-#include "CmdDevice.h"
-#include "SerialProtocol.h"
 #include <memory>
 #include <sstream>
 #include <iomanip>
+
+#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/protocols/SerialProtocol.h>
 
 
 

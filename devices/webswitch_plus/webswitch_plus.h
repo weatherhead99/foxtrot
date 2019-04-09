@@ -1,12 +1,14 @@
 #pragma once
 
-#include "Device.h"
-#include "Logging.h"
-
-#include <rapidxml.hpp>
-#include <rttr/registration>
 #include <sstream>
-#include "curlRequest.h"
+
+#include <rttr/registration>
+#include <rapidxml.hpp>
+
+#include <foxtrot/Logging.h>
+#include <foxtrot/server/Device.h>
+
+#include <foxtrot/protocols/curlRequest.h>
 
 using foxtrot::protocols::CurlRequest;
 
