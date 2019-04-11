@@ -1,37 +1,21 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import python_requires
 
-bcs = "@bincrafters/stable"
-bbcs = "/1.69.0%s" % bcs
+ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+bbcs = ftbase.bbcs
+bcs = ftbase.bcs
 
-def get_version():
-    git = tools.Git()
-    try:
-        tag = git.get_tag()
-        if git.get_tag() is not None:
-            return tag
-        else:
-            return "%s_%s" % (git.get_branch(), git.get_revision()[:8])
-    except:
-        return None
-
-class FoxtrotServerConan(ConanFile):
+class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
+                         metaclass=ftbase.FoxtrotCppMeta):
     name="foxtrot_server"
     description="foxtrot server components"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake"
-    exports_sources = "*"
-    version = get_version()
+    exports_sources = "CMakeLists.txt", "src/*.cpp",
+    "include/exptserve/*.h", "include/foxtrot/server/*.h",
+    "cmake/*.in"
     requires = "boost_program_options%s" % bbcs, \
         "boost_filesystem%s" % bbcs, \
         "libcurl/7.61.1%s" % bcs
-    
+
     def requirements(self):
-        self.requires("foxtrot_core/%s@%s/%s" % 
+        self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version,self.user,self.channel))
-    
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        cmake.build()
-        cmake.install()

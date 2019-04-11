@@ -1,38 +1,18 @@
 import os
-from conans import ConanFile, CMake, tools
+from conans import python_requires
 
-bcs = "@bincrafters/stable"
-bbcs = "/1.69.0%s" % bcs
+ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
 
-def get_version():
-    git = tools.Git()
-    try:
-        tag = git.get_tag()
-        if git.get_tag() is not None:
-            return tag
-        else:
-            return "%s_%s" % (git.get_branch(), git.get_revision()[:8])
-    except:
-        return None
-
-class FoxtrotCoreConan(ConanFile):
+class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
+                       metaclass=ftbase.FoxtrotCppMeta):
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "virtualrunenv"
-    exports_sources = "*"
-    version = get_version()
-    requires = "boost_log%s" % bbcs, \
+    exports_sources = "CMakeLists.txt", "src/*.cpp", \
+                      "include/foxtrot/*.h", "include/foxtrot/*.hpp", \
+                      "cmake/*.cmake", "cmake/*.cmake.in", \
+                      "proto/*.proto", "share/*.in"
+    requires = "boost_log%s" % ftbase.bbcs, \
         "grpc/1.17.2@inexorgame/stable",\
-        "protobuf/3.6.1%s" % bcs, \
-        "cmake_findboost_modular%s" % bbcs
-    
-    def build(self):
-        cmake = CMake(self)
-        cmake.configure()
-        
-        env_build = tools.RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            cmake.build()
-        
-        cmake.install()
+        "protobuf/3.6.1%s" % ftbase.bcs, \
+        "cmake_findboost_modular%s" % ftbase.bbcs, \
+        "OpenSSL/1.0.2q@conan/stable"
