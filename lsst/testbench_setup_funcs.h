@@ -1,8 +1,8 @@
 #pragma once 
 
 #include <map>
-#include "server/DeviceHarness.h"
-#include "devices/archon/archon_modules.h"
+#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/devices/archon/archon_modules.h>
 
 
 

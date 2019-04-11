@@ -15,7 +15,7 @@ find_package(foxtrotProtocols REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 
 
-
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 set(device_targets "")
 
 macro(add_device_object_lib)
@@ -33,6 +33,10 @@ macro(add_device_object_lib)
     
     list(APPEND device_targets ${olib_NAME})
     set(device_targets ${device_targets} PARENT_SCOPE)
+    
+    file(COPY ${olib_INCLUDES} 
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/devices)
+    
     install(FILES ${olib_INCLUDES}
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices/)
 endmacro()
@@ -72,4 +76,8 @@ install(EXPORT foxtrot_devices
         NAMESPACE foxtrot::
         COMPONENT devel)
         
+foxtrot_create_package_config(cmake/foxtrotDevicesConfig.cmake.in ${ft_cmakedir} 
+"ft_cmakedir;device_targets")
 
+foxtrot_add_to_package_registry(foxtrot_devices
+foxtrotDevices)

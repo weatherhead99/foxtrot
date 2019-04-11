@@ -1,37 +1,40 @@
-#include "DeviceHarness.h"
-#include "devices/archon/archon.h"
-#include "devices/archon/archon_modules.h"
-#include "devices/archon/archon_module_heaterx.h"
-#include "devices/archon/archon_module_hvxbias.h"
-#include "devices/archon/archon_module_driver.h"
-#include "devices/archon/archon_module_AD.h"
-#include "devices/archon/archon_module_xvbias.h"
-#include "devices/archon/archonraw.h"
-#include "devices/webswitch_plus/webswitch_plus.h"
+#include <memory>
+#include <map>
+#include <boost/variant.hpp>
 
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/Logging.h>
 
-#include "protocols/simpleTCP.h"
-#include "DeviceError.h"
-#include "protocols/SerialPort.h"
-#include <BulkUSB.h>
-#include "protocols/curlRequest.h"
+#include <foxtrot/server/DeviceHarness.h>
 
-#include "devices/TPG362/TPG362.h"
-
-#include "devices/newport_2936R/newport2936R.h"
-
-#include "devices/cornerstone_260/cornerstone260.h"
-
+#include <foxtrot/devices/archon.h>
+#include <foxtrot/devices/archon_modules.h>
+#include <foxtrot/devices/archon_module_heaterx.h>
+#include <foxtrot/devices/archon_module_hvxbias.h>
+#include <foxtrot/devices/archon_module_driver.h>
+#include <foxtrot/devices/archon_module_AD.h>
+#include <foxtrot/devices/archon_module_xvbias.h>
+#include <foxtrot/devices/archonraw.h>
+#include <foxtrot/devices/webswitch_plus/webswitch_plus.h>
+#include <foxtrot/devices/TPG362/TPG362.h>
+#include <foxtrot/devices/newport_2936R/newport2936R.h>
+#include <foxtrot/devices/cornerstone_260/cornerstone260.h>
+#include <foxtrot/devices/stellarnet/stellarnet.h>
 #ifdef linux
 #include "devices/OPS-Q250/Q250.h"
 #endif
 
-#include "devices/stellarnet/stellarnet.h"
 
-#include <memory>
-#include <map>
-#include <boost/variant.hpp>
-#include "Logging.h"
+#include <foxtrot/protocols/simpleTCP.h>
+#include <foxtrot/protocols/SerialPort.h>
+#include <foxtrot/protocols/BulkUSB.h>
+#include <foxtrot/protocols/curlRequest.h>
+
+
+
+
+
+
 
 #include "testbench_setup_funcs.h"
 
