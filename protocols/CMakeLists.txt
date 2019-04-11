@@ -11,6 +11,7 @@ set(packname "protocols")
 
 set(srcs "")
 set(protos "")
+set(ft_proto_includes "")
 
 macro(foxtrot_build_protocol protoname)
     option(BUILD_${protoname} "build ${protoname} protocol" ON)
@@ -25,10 +26,11 @@ endmacro()
 #BulkUSB setup and check
 message(STATUS "finding dependencies for BulkUSB")
 find_library(libusb NAMES usb-1.0 libusb-1.0 usb)
-find_path(libusb_include NAMES libusb.h usb.h PATH_SUFFIXES libusb-1.0)
-if(libusb)
+find_path(libusb_include NAMES libusb.h PATH_SUFFIXES libusb-1.0)
+if(libusb AND libusb_include)
     message(STATUS "BulkUSB dependencies found")
     foxtrot_build_protocol(BulkUSB)
+    list(APPEND ft_proto_includes ${libusb_include})
 endif()
 
 #character device has no dependencies
@@ -70,7 +72,7 @@ foxtrot_standard_include_dirs(foxtrot_protocols)
 target_link_libraries(foxtrot_protocols foxtrot::foxtrot_core foxtrot::foxtrot_server)
 
 #TODO: do this more elegantly
-target_include_directories(foxtrot_protocols PRIVATE ${libusb_include} ${i2c_include})
+target_include_directories(foxtrot_protocols PRIVATE ${ft_proto_includes})
 
 install(TARGETS foxtrot_protocols
         EXPORT foxtrot_protocols

@@ -6,6 +6,7 @@ include(ExternalProject)
 option(BUILD_SERVER "build foxtrot server component" ON)
 option(BUILD_CLIENT "build foxtrot client component" ON)
 option(BUILD_PROTOCOLS "build extra foxtrot communication protocols" ON)
+option(BUILD_DEVICES "build device drivers" ON)
 
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/dist 
     CACHE PATH "installation prefix" FORCE)
@@ -38,4 +39,13 @@ if(BUILD_PROTOCOLS)
     ExternalProject_Add(foxtrot_protocols SOURCE_DIR ${CMAKE_SOURCE_DIR}/protocols
                         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
                         DEPENDS foxtrot_server)
+endif()
+
+if(BUILD_DEVICES)
+    message(STATUS "building foxtrot device drivers")
+    
+    ExternalProject_Add(foxtrot_devices SOURCE_DIR 
+    ${CMAKE_SOURCE_DIR}/devices 
+                        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+                        DEPENDS foxtrot_protocols)
 endif()
