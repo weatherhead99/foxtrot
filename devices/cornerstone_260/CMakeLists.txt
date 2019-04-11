@@ -1,4 +1,5 @@
-add_device_object_lib(cornerstone260 cornerstone260.cpp cornerstone260.h)
+add_device_object_lib(NAME cornerstone260 
+SRCS cornerstone260.cpp INCLUDES cornerstone260.h)
 
 
 # add_executable(cornerstone_play cornerstone_play.cpp)

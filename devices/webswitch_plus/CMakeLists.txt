@@ -8,7 +8,7 @@ endif()
 message(WARNING "rapidxml: ${rapidxml_include}")
 
 
-add_device_object_lib(webswitch_plus webswitch_plus.cpp webswitch_plus.h)
+add_device_object_lib(NAME webswitch_plus SRCS webswitch_plus.cpp INCLUDES webswitch_plus.h)
 target_include_directories(webswitch_plus PUBLIC ${rapidxml_include})
 
 # add_executable(webswitch_play webswitch_play.cpp)

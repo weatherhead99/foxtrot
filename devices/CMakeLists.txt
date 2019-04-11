@@ -7,24 +7,35 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(packname "devices")
 
 find_package(foxtrotCore REQUIRED)
+include(FoxtrotCommonSetup)
+include(GNUInstallDirs)
+include(CMakeParseArguments)
+
 find_package(foxtrotProtocols REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 
+
+
 set(device_targets "")
 
-macro(add_device_object_lib name srcs includes)
-    add_library(${name} OBJECT ${srcs})
-    target_include_directories(${name} PRIVATE
+macro(add_device_object_lib)
+    set(options OPTIONAL)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SRCS INCLUDES)
+    cmake_parse_arguments(olib "${options}" "${oneValueArgs}" 
+            "${multiValueArgs}" ${ARGN})
+            
+    add_library(${olib_NAME} OBJECT ${olib_SRCS})
+    target_include_directories(${olib_NAME} PRIVATE
     $<TARGET_PROPERTY:foxtrot::foxtrot_server,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_protocols,INTERFACE_INCLUDE_DIRECTORIES>)
     
-    list(APPEND device_targets ${name})
+    list(APPEND device_targets ${olib_NAME})
     set(device_targets ${device_targets} PARENT_SCOPE)
-    install(FILES ${includes}
+    install(FILES ${olib_INCLUDES}
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices/)
 endmacro()
-
 
 
 add_subdirectory(archon)
@@ -49,4 +60,16 @@ endforeach()
 message(STATUS "libobjs: ${libobjs}")
 add_library(foxtrot_devices ${libobjs})
 
+install(TARGETS foxtrot_devices 
+        EXPORT foxtrot_devices
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+        
+set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotDevices)
+
+install(EXPORT foxtrot_devices
+        DESTINATION ${ft_cmakedir}
+        NAMESPACE foxtrot::
+        COMPONENT devel)
+        
 

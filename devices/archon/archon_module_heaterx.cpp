@@ -1,7 +1,7 @@
-#include "archon_module_heaterx.h"
 #include <sstream>
-#include "DeviceError.h"
-#include "Logging.h"
+#include <foxtrot/DeviceError.h>
+#include <foxtrot/Logging.h>
+#include "archon_module_heaterx.h"
 
 using foxtrot::DeviceError;
 using namespace foxtrot;

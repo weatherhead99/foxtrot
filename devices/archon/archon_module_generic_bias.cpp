@@ -1,7 +1,7 @@
-#include "archon_module_generic_bias.h"
 #include <sstream>
+#include <foxtrot/Logging.h>
 #include "archon_modules.h"
-#include "Logging.h"
+#include "archon_module_generic_bias.h"
 
 
 using namespace foxtrot;

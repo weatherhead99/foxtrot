@@ -1,7 +1,7 @@
 find_library(libusb NAMES usb-1.0 libusb-1.0 usb)
-find_path(libusb_include NAMES libusb.h usb.h PATH_SUFFIXES libusb-1.0)
-if(libusb)
-    add_device_object_lib(stellarnet stellarnet.cpp stellarnet.h)
+find_path(libusb_include NAMES libusb.h PATH_SUFFIXES libusb-1.0)
+if(libusb AND libusb_include)
+    add_device_object_lib(NAME stellarnet SRCS stellarnet.cpp INCLUDES stellarnet.h)
     target_include_directories(stellarnet PUBLIC ${libusb_include})
 endif()
 
