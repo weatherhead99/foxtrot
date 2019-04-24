@@ -58,7 +58,7 @@ void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
     
     }
     
-    *(_thisfile) << "#unixtime,datetime,pressure_cryo(hPa),pressure_pump(hPa),temp_stage(C),temp_tank(C),htr(V),target(C)" << std::endl;
+    *(_thisfile) << "#unixtime,datetime,pressure_cryo(hPa),pressure_pump(hPa),temp_stage(C),temp_tank(C),htr(V),target(C),cryo_gauge_onoff,pump_gauge_onoff" << std::endl;
     
 }
 
@@ -74,11 +74,16 @@ void foxtrot::autofill_logger::LogEnvData(const foxtrot::env_data& dat)
     
     auto unix_epoch = (dat.timestamp - pt::from_time_t(0)).total_seconds();
     
-    *(_thisfile) << unix_epoch << "," << pt::to_iso_string(dat.timestamp) << "," << 
-        dat.cryostat_pressure << "," << dat.pump_pressure << "," << dat.stage_temp << "," 
-        << dat.tank_temp << "," << dat.heater_output << "," << dat.heater_target << std::endl;
-    
-
+    *(_thisfile) << unix_epoch << "," 
+    << pt::to_iso_string(dat.timestamp) << 
+        "," << dat.cryostat_pressure << 
+        "," << dat.pump_pressure << 
+        "," << dat.stage_temp << 
+        "," << dat.tank_temp << 
+        "," << dat.heater_output << 
+        "," << dat.heater_target << 
+        "," << (int) dat.pump_gauge_enable << 
+        "," << (int) dat.cryo_gauge_enable << std::endl;
 }
 
 void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)

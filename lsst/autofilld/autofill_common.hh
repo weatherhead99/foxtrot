@@ -11,6 +11,8 @@ struct env_data {
     double pump_pressure;
     double heater_output;
     double heater_target;
+    bool cryo_gauge_enable;
+    bool pump_gauge_enable;
 };
     
     
