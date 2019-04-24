@@ -73,6 +73,10 @@ env_data autofill_logic::measure_data(Client& cl)
 
     out.heater_target = get<double>(cl.InvokeCapability(heater_devid,"getHeaterTarget",0));
 
+    
+    out.cryo_gauge_enable = cl.InvokeCapability(tpg_devid,"getGaugeOnOff",1);
+    out.pump_gauge_enable = cl.InvokeCapability(tpg_devid,"getGaugeOnOff",2);
+    
     return out;
 
 };
