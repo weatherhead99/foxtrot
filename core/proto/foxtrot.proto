@@ -45,14 +45,13 @@ enum error_types
     unknown_error = 4;
     contention_timeout = 5;
     ft_ServerError = 6;
+    ft_AuthError = 7;
 }
 
 enum server_commands
 {
     ReloadSetup = 0;
     ChangeDebugLevel = 1;
-
-
 }
 
 message errstatus
@@ -214,6 +213,28 @@ message broadcast_notification
     string channel_target = 7;
 }
 
+message auth_challenge
+{
+    errstatus err = 1;
+    uint32 challengeid = 2;
+    string challenge = 3;
+    string statusmsg = 4;
+}
+
+message auth_response
+{
+    uint32 challengeid = 1;
+    string userid = 2;
+    string sig = 3;
+}
+
+message auth_confirm
+{
+    errstatus err = 1;
+    string sessionkey = 2;
+    string expiry = 3;
+    string statusmsg = 4;
+}
 
 service exptserve
 {
@@ -226,4 +247,6 @@ service exptserve
     rpc ListServerFlags (empty) returns (serverflaglist);
     rpc DropServerFlag (serverflag) returns (serverflag);
     rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
+    rpc RequestAuthChallenge (empty) returns (auth_challenge);
+    rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
 }

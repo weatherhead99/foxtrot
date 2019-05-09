@@ -21,6 +21,11 @@ else()
     set(dl "")
 endif()
 
+option(BUILD_AUTH "build support for authentication" ON)
+if(BUILD_AUTH)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+    find_package(sodium REQUIRED)
+endif()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
@@ -41,11 +46,22 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
     src/pushbullet_api.cpp
     )
 
+
+if(BUILD_AUTH)
+    list(APPEND server_srcs src/AuthHandler.cpp)
+    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp)
+
+endif()
+
 add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
 foxtrot_standard_include_dirs(foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
 target_link_libraries(foxtrot_server foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core)
+
+if(BUILD_AUTH)
+    target_link_libraries(foxtrot_server ${sodium_LIBRARY_RELEASE})
+endif()
 
 add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE include/exptserve/)
@@ -72,8 +88,6 @@ install(TARGETS exptserve
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
-
-
 install(EXPORT foxtrot_server
         DESTINATION ${ft_cmakedir}
         COMPONENT devel
@@ -84,3 +98,5 @@ foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
                                 ft_cmakedir)
 
 foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)
+
+add_subdirectory(devprogs)
