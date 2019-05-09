@@ -33,7 +33,7 @@ configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
 
 message("foxtrot core version: ${VERSION}")
 
-find_package(Boost REQUIRED COMPONENTS log)
+find_package(Boost REQUIRED COMPONENTS log program_options filesystem)
 find_package(Protobuf REQUIRED)
 
 find_package(grpc REQUIRED)
@@ -60,7 +60,7 @@ COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${PROTO_HDRS} ${PROTO_GRPC_HDRS}
 ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/)
 foxtrot_standard_include_dirs(foxtrot_core)
 
-target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log ${GRPC_LIBRARIES})
+target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log Boost::program_options Boost::filesystem ${GRPC_LIBRARIES})
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
