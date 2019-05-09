@@ -14,8 +14,11 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     "cmake/*.in"
     requires = "boost_program_options%s" % bbcs, \
         "boost_filesystem%s" % bbcs, \
-        "libcurl/7.61.1%s" % bcs
-
+        "libcurl/7.61.1%s" % bcs, \
+        "OpenSSL/1.0.2r@conan/stable", \
+        "libsodium/1.0.16%s" % bcs, \
+        "cmake_findboost_modular%s" % bbcs
+        
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version,self.user,self.channel))

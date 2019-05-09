@@ -53,7 +53,10 @@ function(foxtrot_create_package_config infile destdir path_vars)
 endfunction()
 
 function(foxtrot_add_to_package_registry exportname packagename)
-        export(EXPORT ${exportname} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packagename}exports.cmake
-        NAMESPACE foxtrot::)
-        export(PACKAGE ${packagename})
+  if(FT_EXPORT_TO_PACKAGE_REGISTRY)
+    message("exporting to package registry")
+    export(EXPORT ${exportname} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packagename}exports.cmake
+      NAMESPACE foxtrot::)
+    export(PACKAGE ${packagename})
+  endif()
 endfunction()

@@ -5,6 +5,15 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "server")
 
+message(STATUS "checking for conan build...")
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    message(WARNING "conanbuildinfo detected, building using
+    conan dependencies")
+    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+    set(FOXTROT_CORE_CONAN_BUILD TRUE)
+    conan_basic_setup()
+endif()
+
 find_package(foxtrotCore REQUIRED)
 
 find_package(rttr 0.9.6 REQUIRED)
@@ -57,10 +66,10 @@ add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
 foxtrot_standard_include_dirs(foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(foxtrot_server foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core)
+target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core)
 
 if(BUILD_AUTH)
-    target_link_libraries(foxtrot_server ${sodium_LIBRARY_RELEASE})
+    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE})
 endif()
 
 add_executable(exptserve ${exptserve_srcs})
