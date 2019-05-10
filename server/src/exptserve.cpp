@@ -84,7 +84,7 @@ int main(int argc, char** argv)
     ("port",po::value<short unsigned>(&port)->default_value(50051),"port to use")
     ("key",po::value<std::string>(&keyfile),"pem for SSL")
     ("crt",po::value<std::string>(&crtfile),"crt for SSL")
-    ("forceauth", po::value<bool>(&forceauth)->default_value(true),"force client auth")
+    ("forceauth", po::bool_switch(&forceauth),"force client auth")
     ("bindstr", po::value<std::string>(&bindstr)->default_value("0.0.0.0"), "socket listen string")
     ("pushbullet_api_key", po::value<std::string>(),"API key for pushbullet notifications")
     ("pushbullet_default_title", po::value<std::string>()->default_value(""),

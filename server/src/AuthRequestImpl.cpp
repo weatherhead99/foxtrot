@@ -10,5 +10,13 @@ AuthRequestLogic::AuthRequestLogic(std::shared_ptr<AuthHandler> authhand)
 bool AuthRequestLogic::HandleRequest(AuthRequestLogic::reqtp& req, AuthRequestLogic::repltp& repl, AuthRequestLogic::respondertp& respond, HandlerTag* tag)
 {
     //TODO: refuse if channel does not have TLS enabled!
+    grpc::ServerContext servctxt;
+    auto isauth = servctxt.auth_context()->IsPeerAuthenticated();
     
+    lg_.strm(sl::debug) << "is client authenticated? "  << (int) isauth;
+    
+    
+    repl.set_challenge(authhand_->get_challenge_string());
+    respond.Finish(repl, grpc::Status::OK, tag);
+    return true;
 }

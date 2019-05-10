@@ -109,3 +109,7 @@ foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
 foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)
 
 add_subdirectory(devprogs)
+
+#build the dummy device
+add_subdirectory(devices)
+add_subdirectory(setups)

@@ -8,7 +8,7 @@
 
 #include <foxtrot/DeviceError.h>
 
-#include "dummyDevice.h"
+#include <foxtrot/devices/dummyDevice.h>
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)

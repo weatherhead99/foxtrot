@@ -1,14 +1,16 @@
-#include "devices/dummy/dummyDevice.h"
-#include "DeviceHarness.h"
 #include <memory>
-#include "DeviceError.h"
-
-#include <iostream>
-#include "Logging.h"
-#include "dummy_setup.h"
 #include <map>
-#include <boost/variant.hpp>
+#include <iostream>
 #include <sstream>
+
+#include <boost/variant.hpp>
+
+#include <foxtrot/devices/dummyDevice.h>
+#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceError.h>
+
+#include <foxtrot/Logging.h>
+#include "dummy_setup.h"
 
 using std::cout;
 using std::endl;
