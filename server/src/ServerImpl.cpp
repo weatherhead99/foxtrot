@@ -6,6 +6,7 @@
 #include <iostream>
 #include <typeinfo>
 
+#include <foxtrot/server/AuthHandler.h>
 
 //these should be included via the buildsystem
 #include "ServerImpl.h"
@@ -14,6 +15,7 @@
 #include "FetchDataImpl.h"
 #include "ServerFlagsImpl.h"
 #include "BroadcastNotificationImpl.h"
+#include "AuthRequestImpl.h"
 
 using std::string;
 using namespace foxtrot;
@@ -40,6 +42,14 @@ void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string
     default_channel_ = default_channel;
     default_title_ = default_title;
 }
+
+void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_seconds)
+{
+    _lg.strm(sl::info) << "registering AuthHandler";
+    _auth_api = std::make_shared<AuthHandler>(credsfile);
+    auth_enabled = true;
+}
+
 
 
 
@@ -91,6 +101,17 @@ void ServerImpl::setup_common(const std::string& addrstr)
         _lg.Info("notifications are not enabled");
         add_logic<BroadcastNotificationLogic>(nullptr);
     }
+    if(auth_enabled)
+    {
+        _lg.Info("setting up authentication system");
+        add_logic<AuthRequestLogic>(_auth_api);
+    }
+    else
+    {
+        _lg.Info("setting up authentication system");
+        add_logic<AuthRequestLogic>(nullptr);
+    }
+    
     
     
 }

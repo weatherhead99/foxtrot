@@ -15,7 +15,6 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     "include/foxtrot/devices/*.h", "include/foxtrot/protocols/*.h", \
     "include/exptserve/*.hh", "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = "boost_program_options%s" % bbcs, \
-        "boost_filesystem%s" % bbcs, \
         "libcurl/7.61.1%s" % bcs, \
         "libsodium/1.0.16%s" % bcs, \
         "cmake_findboost_modular%s" % bbcs, \

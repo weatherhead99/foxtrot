@@ -10,7 +10,7 @@ namespace foxtrot {
         typedef empty reqtp;
         typedef auth_challenge repltp;
         typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-        constexpr static auto requestfunptrf = &exptserve::AsyncService::RequestRequestAuthChallenge;
+        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestRequestAuthChallenge;
         
         AuthRequestLogic(std::shared_ptr<AuthHandler> authhand);
         

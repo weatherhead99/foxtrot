@@ -21,9 +21,9 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
         "OpenSSL/1.0.2r@conan/stable"
     
     default_options = {"boost_log:shared" : True,
+                       "boost_thread:shared" : True,
                        "boost_program_options:shared" : True,
                        "boost_filesystem:shared" : True,
-                       "boost_thread:shared" : True,
                        "OpenSSL:shared" : True,
                        "protobuf:with_zlib" : True}
     

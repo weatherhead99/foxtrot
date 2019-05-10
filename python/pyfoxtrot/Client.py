@@ -229,6 +229,12 @@ class Client:
     def flags(self):
         return FlagProxy(self)
 
+    def _get_challenge_str(self) -> str:
+        req = empty()
+        repl = self._stub.RequestAuthChallenge(req)
+        _check_repl_err(repl)
+        return repl
+
 
 def _fake_call_sync(obj,client,*args,**kwargs):
     req = obj.construct_request(*args,**kwargs)

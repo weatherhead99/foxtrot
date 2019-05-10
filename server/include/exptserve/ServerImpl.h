@@ -15,6 +15,8 @@
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/server/AuthHandler.h>
+
 
 #include "HandlerBase.h"
 #include "pushbullet_api.hh"
@@ -29,7 +31,7 @@ using std::string;
 namespace foxtrot{
     typedef boost::variant<double,int,bool,std::string> ft_variant;
     using flagmap =  std::map<std::string, ft_variant> ;
-
+    
 class ServerImpl 
 {
 public:
@@ -37,7 +39,7 @@ public:
     ServerImpl(const std::string& servcomment, DeviceHarness& harness, const std::string& connstr);
     
     void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
-    
+    void setup_auth(const std::string& credsfile, int creds_validity_seconds);
     
     ~ServerImpl();
     void Run();
@@ -58,6 +60,7 @@ private:
     };
     
     bool notifications_enabled = false;
+    bool auth_enabled = false;
     std::shared_ptr<flagmap> _serverflags;
     
     std::string _connstr;
@@ -81,6 +84,7 @@ private:
     std::string default_title_;
     
     Logging _lg;
+    std::shared_ptr<AuthHandler> _auth_api = nullptr;
     std::unique_ptr<pushbullet_api> _noti_api = nullptr;
     std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
     
