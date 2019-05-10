@@ -12,6 +12,8 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                       "cmake/*.cmake", "cmake/*.cmake.in", \
                       "proto/*.proto", "share/*.in"
     requires = "boost_log%s" % ftbase.bbcs, \
+        "boost_program_options%s" % ftbase.bbcs, \
+        "boost_filesystem%s" % ftbase.bbcs, \
         "grpc/1.17.2@inexorgame/stable",\
         "protobuf/3.6.1%s" % ftbase.bcs, \
         "cmake_findboost_modular%s" % ftbase.bbcs, \

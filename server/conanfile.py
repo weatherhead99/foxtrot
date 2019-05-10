@@ -7,11 +7,12 @@ bcs = ftbase.bcs
 
 class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
                          metaclass=ftbase.FoxtrotCppMeta):
+    exports_sources = "cmake/*"
     name="foxtrot_server"
     description="foxtrot server components"
-    exports_sources = "CMakeLists.txt", "src/*.cpp",
-    "include/exptserve/*.h", "include/foxtrot/server/*.h",
-    "cmake/*.in"
+    exports_sources = "CMakeLists.txt", "src/*.cpp", \
+    "include/exptserve/*.h", "include/foxtrot/server/*.h", \
+    "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = "boost_program_options%s" % bbcs, \
         "boost_filesystem%s" % bbcs, \
         "libcurl/7.61.1%s" % bcs, \

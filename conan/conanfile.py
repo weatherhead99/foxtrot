@@ -32,4 +32,5 @@ class FoxtrotCppPackage(ConanFile):
         with tools.environment_append(env_build.vars):
             cmake.build()
         cmake.install()
+        cmake.patch_config_paths()
 
