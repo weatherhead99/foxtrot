@@ -14,7 +14,12 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
     requires = "boost_log%s" % ftbase.bbcs, \
         "boost_program_options%s" % ftbase.bbcs, \
         "boost_filesystem%s" % ftbase.bbcs, \
-        "grpc/1.17.2@inexorgame/stable",\
+        "grpc/1.20.0@inexorgame/stable",\
         "protobuf/3.6.1%s" % ftbase.bcs, \
         "cmake_findboost_modular%s" % ftbase.bbcs, \
-        "OpenSSL/1.0.2q@conan/stable"
+        "OpenSSL/1.0.2r@conan/stable"
+    
+    default_options = {"boost_log:shared" : True,
+                       "boost_program_options:shared" : True,
+                       "boost_filesystem:shared" : True,
+                       "OpenSSL:shared" : True}

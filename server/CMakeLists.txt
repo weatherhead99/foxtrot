@@ -16,6 +16,7 @@ endif()
 
 find_package(foxtrotCore REQUIRED)
 
+find_package(OpenSSL REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 
@@ -33,6 +34,7 @@ endif()
 option(BUILD_AUTH "build support for authentication" ON)
 if(BUILD_AUTH)
     list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+    message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
     find_package(sodium REQUIRED)
 endif()
 
@@ -66,7 +68,7 @@ add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
 foxtrot_standard_include_dirs(foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core)
+target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL)
 
 if(BUILD_AUTH)
     target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE})
