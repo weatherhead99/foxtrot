@@ -98,11 +98,17 @@ int main(int argc, char** argv)
     
     po::variables_map vm;
     
-//     lg.strm(sl::debug) << "options setup, about to open config file..";
-    po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
-//     foxtrot::load_config_file(config_file,desc,vm,&lg);
     foxtrot::load_config_file(config_file,desc,vm);
-//     lg.strm(sl::trace) << "notifying..";
+    po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
+
+    
+ if(vm.count("help"))
+    {
+        std::cout << "Usage:" << argv[0] << " setupfile servername parameterfile [options]" << std::endl;
+        std::cout << "description of options: " << std::endl;
+        std::cout << desc << std::endl;
+        std::exit(0);
+    }
     
     try{
         po::notify(vm);
@@ -117,14 +123,6 @@ int main(int argc, char** argv)
     foxtrot::check_debug_level_and_exit(debuglevel,lg);
     
     foxtrot::setDefaultSink();
-    
-    if(vm.count("help"))
-    {
-        std::cout << "Usage:" << argv[0] << " setupfile servername parameterfile [options]" << std::endl;
-        std::cout << "description of options: " << std::endl;
-        std::cout << desc << std::endl;
-        std::exit(0);
-    }
     
     
     
