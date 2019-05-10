@@ -1,17 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
-      name='foxtrot',
+      name='pyfoxtrot',
       version='0.0',
       description='python bindings for foxtrot client and telemetry client',
       author='Dan Weatherill',
       author_email='daniel.weatherill@physics.ox.ac.uk',
-      install_requires = [  
-              'grpcio-tools',
-              'nanomsg >= 1.0',
-              'compiler',
-              'visitor',
-              'mypy'
-              ]
-      
+      setup_requires = [
+              "grpcio-tools"],
+      packages = find_packages(),
+      include_package_data = True
       )

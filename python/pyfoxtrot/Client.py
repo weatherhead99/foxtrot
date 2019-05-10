@@ -6,9 +6,9 @@ Created on Wed Apr 19 11:44:13 2017
 @author: weatherill
 """
 from functools import wraps
-from foxtrot.foxtrot_pb2_grpc import *
-from foxtrot.foxtrot_pb2 import *
-from foxtrot.Errors import *
+from pyfoxtrot.foxtrot_pb2_grpc import *
+from pyfoxtrot.foxtrot_pb2 import *
+from pyfoxtrot.Errors import *
 
 
 import types
