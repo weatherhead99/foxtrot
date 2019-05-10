@@ -12,6 +12,7 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                       "cmake/*.cmake", "cmake/*.cmake.in", \
                       "proto/*.proto", "share/*.in"
     requires = "boost_log%s" % ftbase.bbcs, \
+        "boost_thread%s" % ftbase.bbcs, \
         "boost_program_options%s" % ftbase.bbcs, \
         "boost_filesystem%s" % ftbase.bbcs, \
         "grpc/1.20.0@inexorgame/stable",\
@@ -22,4 +23,10 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
     default_options = {"boost_log:shared" : True,
                        "boost_program_options:shared" : True,
                        "boost_filesystem:shared" : True,
-                       "OpenSSL:shared" : True}
+                       "boost_thread:shared" : True,
+                       "OpenSSL:shared" : True,
+                       "protobuf:with_zlib" : True}
+    
+    def package_info(self):
+        self.cpp_info.libs=["libfoxtrot_core.so"]
+        self.cpp_info.libdirs=["lib/foxtrot"]

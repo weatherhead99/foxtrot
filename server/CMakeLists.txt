@@ -10,7 +10,7 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     message(WARNING "conanbuildinfo detected, building using
     conan dependencies")
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    set(FOXTROT_CORE_CONAN_BUILD TRUE)
+    set(FOXTROT_SERVER_CONAN_BUILD TRUE)
     conan_basic_setup()
 endif()
 
@@ -84,8 +84,18 @@ if(${rttr_VERSION} STREQUAL "0.9.6")
     target_compile_definitions(foxtrot_server PUBLIC -DNEW_RTTR_API)
 endif()
 
-target_link_libraries(exptserve foxtrot::foxtrot_core ${dl} RTTR::Core)
-target_link_libraries(exptserve foxtrot_server Boost::filesystem Boost::program_options)
+target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core)
+target_link_libraries(exptserve PUBLIC foxtrot_server Boost::filesystem Boost::program_options)
+
+if(FOXTROT_SERVER_CONAN_BUILD)
+#fixing issues with inexorgame grpc library export (I think?)
+find_package(Threads)
+target_link_libraries(exptserve PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+#fixing issues with my GRPC script in the case of static grpc libraries
+target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB} ${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
+endif()
+
+
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 

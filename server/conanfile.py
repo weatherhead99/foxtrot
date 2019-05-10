@@ -26,3 +26,10 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version,self.user,self.channel))
+        
+    def package_info(self):
+        self.cpp_info.libs=["libfoxtrot_server.so"]
+        self.cpp_info.libdirs=["lib/foxtrot"]
+
+    def deploy(self):
+        self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
