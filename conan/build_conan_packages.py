@@ -13,8 +13,11 @@ api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel,
            version=buildtools_version)
 
 
+createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=True,
+                                  keep_build=True, update=True)
+
 print("building foxtrot core conan package...")
-api.create("../core", user=user, channel=channel)
+createfun("../core")
 
 print("building foxtrot server conan package...")
-api.create("../server", user=user, channel=channel)
+createfun("../server")

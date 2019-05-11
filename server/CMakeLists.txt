@@ -92,12 +92,18 @@ if(FOXTROT_SERVER_CONAN_BUILD)
 find_package(Threads)
 target_link_libraries(exptserve PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 #fixing issues with my GRPC script in the case of static grpc libraries
-target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB} ${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
+target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB}
+${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
 endif()
 
 add_executable(ftauth src/ftauth.cpp src/auth_utils.cpp)
 target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core)
 target_include_directories(ftauth PRIVATE include)
+
+if(FOXTROT_SERVER_CONAN_BUILD)
+	target_link_libraries(ftauth PRIVATE ${CONAN_BOOST_REGEX_LIBRARIES})
+endif()
+
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 

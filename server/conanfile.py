@@ -18,7 +18,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
         "libcurl/7.61.1%s" % bcs, \
         "libsodium/1.0.16%s" % bcs, \
         "cmake_findboost_modular%s" % bbcs, \
-        "rttr/0.9.6@weatherhead99/testing"
+        "rttr/0.9.6@weatherhead99/testing", \
+        "rapidjson/1.1.0%s" % bcs
     
     default_options = {"rttr:shared" : True}
     

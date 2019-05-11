@@ -20,12 +20,13 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
         "cmake_findboost_modular%s" % ftbase.bbcs, \
         "OpenSSL/1.0.2r@conan/stable"
     
-    default_options = {"boost_log:shared" : True,
-                       "boost_thread:shared" : True,
-                       "boost_program_options:shared" : True,
-                       "boost_filesystem:shared" : True,
-                       "OpenSSL:shared" : True,
-                       "protobuf:with_zlib" : True}
+    default_options = {"boost_log:shared": True,
+                       "boost_thread:shared": True,
+                       "boost_program_options:shared": True,
+                       "boost_filesystem:shared": True,
+                       "boost_regex:shared": True,
+                       "OpenSSL:shared": True,
+                       "protobuf:with_zlib": True}
     
     def package_info(self):
         self.cpp_info.libs=["libfoxtrot_core.so"]
