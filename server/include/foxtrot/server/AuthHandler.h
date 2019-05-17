@@ -12,7 +12,7 @@
 
 namespace foxtrot {
     
-    using credentialsmap = std::map<std::string, std::vector<std::string>>;
+    using credentialsmap = std::map<std::string, std::vector<std::pair<std::string,foxtrot::pkarr>>>;
     
     class AuthHandler{
     public:

@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     std::string client_credstore;
     std::string userid;
     std::string keyname;
+    std::string exportfile;
     int authlevel;
     
     po::options_description desc("foxtrot auth tool");
@@ -30,6 +31,7 @@ int main(int argc, char** argv)
     ("userid,u",po::value<string>(&userid), "user id, needed for some commands")
     ("authlevel,a", po::value<int>(&authlevel), "auth level, needed for some commands")
     ("keyname,k", po::value<string>(&keyname)->default_value("default"), "key name, needed for some commands")
+    ("exportfile,e",po::value<string>(&exportfile), "export file name, needed for some commands")
     ("help","display usage information");
     
     po::positional_options_description pdesc;
@@ -97,9 +99,24 @@ int main(int argc, char** argv)
             std::exit(1);
         }
         
-        auto keys = foxtrot::get_creds_from_file(client_credstore, userid);
+        auto keys = foxtrot::get_creds_from_client_file(client_credstore, userid);
         foxtrot::auth_user_to_file(server_credstore, userid, std::get<0>(keys), authlevel, keyname);
         
+    }
+    else if(command == "exportuser")
+    {
+        if(!vm.count("userid"))
+        {
+            cerr << "must provide a userid for the exportuser command" << endl;
+            std::exit(1);
+        }
+        if(!vm.count("exportfile"))
+        {
+            cerr << "must provide an export file for the exportuser command" << endl;
+            std::exit(1);
+        }
+        auto keys = foxtrot::get_creds_from_client_file(client_credstore,userid);
+        foxtrot::export_pubkey(exportfile,userid,std::get<0>(keys),keyname);
     }
     else
     {

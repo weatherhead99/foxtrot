@@ -17,3 +17,6 @@ class ContentionError(Exception):
 
 class ServerError(Exception):
     pass
+
+class AuthenticationError(Exception):
+    pass

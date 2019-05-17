@@ -93,7 +93,7 @@ int main(int argc, char** argv)
      "default title for pushbullet notifications")
     ("pushbullet_default_channel", po::value<std::string>()->default_value(""), 
      "default channel for pushbullet notifications")
-    ("servercreds,sc", po::value<std::string>(), "authentication credentials (JSON) file")
+    ("servercreds,sc", po::value<std::string>(&servercreds), "authentication credentials (JSON) file")
     ("credvalid,cv", po::value<int>(&cred_validity_hours)->default_value(24), "length of credential validity (hours)")
     ("help","display usage information");
     
@@ -179,6 +179,7 @@ int main(int argc, char** argv)
       if(!forceauth)
           lg.Warning("client authentication not forced!");
       
+      lg.Info("setting up SSL secure channel");
       serv.SetupSSL(crtfile,keyfile,forceauth);
       
     };

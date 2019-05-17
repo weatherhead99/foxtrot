@@ -17,10 +17,14 @@ namespace foxtrot {
     void save_creds_to_file(const std::string& fname, const std::string& userid,
                             const keypair& keys);
     
-    keypair get_creds_from_file(const std::string& fname, const std::string& userid);
+    keypair get_creds_from_client_file(const std::string& fname, const std::string& userid);
     
     void auth_user_to_file(const std::string& fname, const std::string& userid, const pkarr& pk,
-                           int authlevel, const std::string& keyname="pubkey");
+                           int authlevel, const std::string& keyname="default");
+    
+    void export_pubkey(const std::string& outfname, const std::string& userid, const pkarr& pk,
+                       const std::string& keyname="default");
+    
 }
 
 namespace detail

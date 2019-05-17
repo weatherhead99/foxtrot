@@ -9,20 +9,35 @@ AuthRequestLogic::AuthRequestLogic(std::shared_ptr<AuthHandler> authhand)
 
 bool AuthRequestLogic::HandleRequest(AuthRequestLogic::reqtp& req, AuthRequestLogic::repltp& repl, AuthRequestLogic::respondertp& respond, HandlerTag* tag)
 {
+    
+    lg_.strm(sl::trace) << "in handlerequest for authrequest";
+    
     if(!authhand_)
     {
+        foxtrot_server_specific_error("authentication not configured on this server",
+            repl, respond, lg_, tag, error_types::ft_AuthError);
+        
         repl.set_statusmsg("authentication not configured on this server");
-        respond.Finish(repl, grpc::Status::OK, tag);
         return true;
     }
     
     
-    
+    lg_.strm(sl::trace) << "checked authhandler existence";
     //TODO: refuse if channel does not have TLS enabled!
-    grpc::ServerContext servctxt;
+    
+    auto& servctxt = static_cast<HandlerBase<AuthRequestLogic>*>(tag)->getContext();
+    
+    lg_.strm(sl::trace) << "created server context";
     auto isauth = servctxt.auth_context()->IsPeerAuthenticated();
     
     lg_.strm(sl::debug) << "is client authenticated? "  << (int) isauth;
+    if(!isauth)
+    {
+        foxtrot_server_specific_error("not connected using TLS, refusing to issue challenge",
+                                      repl, respond, lg_, tag, error_types::ft_AuthError);
+        repl.set_statusmsg("not connected using TLS, refusing to issue challenge");
+        return true;
+    }
     
     repl.set_challenge(authhand_->get_challenge_string());
     respond.Finish(repl, grpc::Status::OK, tag);

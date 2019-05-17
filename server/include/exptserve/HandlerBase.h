@@ -120,6 +120,11 @@ namespace foxtrot
 	};
         
 	
+    const grpc::ServerContext& getContext() const
+    {
+        return _ctxt;
+    }
+    
     private:
       
 	

@@ -45,6 +45,7 @@ void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string
 
 void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
+    _lg.strm(sl::debug) << "credsfile: " << credsfile;
     _cred_validity_hours = creds_validity_hours;
     _lg.strm(sl::info) << "registering AuthHandler";
     _auth_api = std::make_shared<AuthHandler>(credsfile);
@@ -82,7 +83,6 @@ void ServerImpl::setup_common(const std::string& addrstr)
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
     _lg.Info("server listening on " + addrstr );
-    
     add_logic<ServerDescribeLogic>(_servcomment,_harness);
     add_logic<InvokeCapabilityLogic>(_harness);
     add_logic<FetchDataLogic>(_harness);

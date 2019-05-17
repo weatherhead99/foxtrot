@@ -34,6 +34,7 @@ foxtrot::credentialsmap foxtrot::AuthHandler::load_creds_from_file(const std::st
 {
     if(!fs::exists(filename))
     {
+        _lg.strm(sl::error) << "file: " << filename << "doesn't seem to exist";
         throw std::out_of_range("credentials file couldn't be found!");
     }
 
@@ -47,18 +48,25 @@ foxtrot::credentialsmap foxtrot::AuthHandler::load_creds_from_file(const std::st
         std::string userid = item.first;
         _lg.strm(sl::debug) << "found userid: " << userid;
 
-        std::vector<string> keys;
-        for(auto& key: item.second)
+        auto keytree = item.second.get_child("keys");
+        credentialsmap::mapped_type keys;
+        for(auto& key: keytree)
         {
+            
             _lg.strm(sl::debug) << "loading key named: " << key.first;
-            keys.push_back(key.second.get_value<string>());
+            auto keystr = key.second.get_value<string>();
+            auto keyvec = detail::base642bin(keystr);
+            pkarr keyarr;
+            std::move(keyvec.begin(), keyvec.begin() + keyvec.size(), keyarr.begin());
+            
+            keys.push_back(std::make_pair(key.first, keyarr));
         }
         
         _creds.insert({userid,keys});
     };
     
     _lg.strm(sl::info) << "loaded: " << _creds.size() << " user credentials";
-
+    return _creds;
 }
 
 

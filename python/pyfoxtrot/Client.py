@@ -133,6 +133,8 @@ def _check_repl_err(repl):
         raise ContentionError(repl.err.msg)
     elif repl.err.tp == 6:
         raise ServerError(repl.err.msg)
+    elif repl.err.tp == 7:
+        raise AuthenticationError(repl.err.msg)
     else:
         raise RuntimeError("unknown error")
         
