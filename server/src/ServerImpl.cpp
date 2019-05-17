@@ -43,8 +43,9 @@ void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string
     default_title_ = default_title;
 }
 
-void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_seconds)
+void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
+    _cred_validity_hours = creds_validity_hours;
     _lg.strm(sl::info) << "registering AuthHandler";
     _auth_api = std::make_shared<AuthHandler>(credsfile);
     auth_enabled = true;
@@ -108,7 +109,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     }
     else
     {
-        _lg.Info("setting up authentication system");
+        _lg.Info("authentication system disabled");
         add_logic<AuthRequestLogic>(nullptr);
     }
     

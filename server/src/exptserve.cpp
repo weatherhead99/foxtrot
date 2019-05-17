@@ -63,6 +63,8 @@ int main(int argc, char** argv)
     bool forceauth;
     
     std::string bindstr;
+    std::string servercreds;
+    int cred_validity_hours;
     
     foxtrot::Logging lg("exptserve");
     
@@ -91,6 +93,8 @@ int main(int argc, char** argv)
      "default title for pushbullet notifications")
     ("pushbullet_default_channel", po::value<std::string>()->default_value(""), 
      "default channel for pushbullet notifications")
+    ("servercreds,sc", po::value<std::string>(), "authentication credentials (JSON) file")
+    ("credvalid,cv", po::value<int>(&cred_validity_hours)->default_value(24), "length of credential validity (hours)")
     ("help","display usage information");
     
     po::positional_options_description pdesc;
@@ -188,6 +192,11 @@ int main(int argc, char** argv)
                                  vm["pushbullet_default_channel"].as<std::string>());
     }
     
+    if(vm.count("servercreds"))
+    {
+        lg.Info("loading credentials for authentication");
+        serv.setup_auth(servercreds, cred_validity_hours);
+    }
     
     if(nthreads > 1)
     {

@@ -19,7 +19,8 @@ int main(int argc, char** argv)
     std::string server_credstore;
     std::string client_credstore;
     std::string userid;
-    
+    std::string keyname;
+    int authlevel;
     
     po::options_description desc("foxtrot auth tool");
     desc.add_options()
@@ -27,14 +28,19 @@ int main(int argc, char** argv)
     ("server_credstore,s",po::value<string>(&server_credstore), "path to server credential store")
     ("client_credstore,c",po::value<string>(&client_credstore), "path to client credential store")
     ("userid,u",po::value<string>(&userid), "user id, needed for some commands")
+    ("authlevel,a", po::value<int>(&authlevel), "auth level, needed for some commands")
+    ("keyname,k", po::value<string>(&keyname)->default_value("default"), "key name, needed for some commands")
     ("help","display usage information");
     
     po::positional_options_description pdesc;
     pdesc.add("command",1);
-    pdesc.add("userid",2);
+    pdesc.add("userid",1);
+    pdesc.add("authlevel",1);
     
     po::variables_map vm;
-    po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
+    auto parsed = po::command_line_parser(argc,argv).
+                options(desc).positional(pdesc).allow_unregistered().run();
+    po::store(parsed,vm);
     
     
     if(vm.count("help"))
@@ -74,6 +80,26 @@ int main(int argc, char** argv)
         }
         cout << "generating new keypair for user " << userid << endl;
         auto keypair = foxtrot::generate_new_key();
+        foxtrot::save_creds_to_file(client_credstore,userid,keypair);
+    }
+    else if(command == "authuser")
+    {
+
+        if(!vm.count("userid"))
+        {
+            cerr << "must provide a userid for the createuser command" << endl;
+            std::exit(1);
+        }
+        
+        if(!vm.count("authlevel"))
+        {
+            cerr << "must provide authlevel for the authuser command" << endl;
+            std::exit(1);
+        }
+        
+        auto keys = foxtrot::get_creds_from_file(client_credstore, userid);
+        foxtrot::auth_user_to_file(server_credstore, userid, std::get<0>(keys), authlevel, keyname);
+        
     }
     else
     {

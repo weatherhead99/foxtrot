@@ -59,7 +59,7 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 
 
 if(BUILD_AUTH)
-    list(APPEND server_srcs src/AuthHandler.cpp)
+    list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp)
     list(APPEND exptserve_srcs src/AuthRequestImpl.cpp)
 
 endif()
@@ -96,8 +96,9 @@ target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB}
 ${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
 endif()
 
-add_executable(ftauth src/ftauth.cpp src/auth_utils.cpp)
-target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core)
+add_executable(ftauth src/ftauth.cpp)
+target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core
+foxtrot_server)
 target_include_directories(ftauth PRIVATE include)
 
 if(FOXTROT_SERVER_CONAN_BUILD)

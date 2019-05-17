@@ -61,30 +61,6 @@ foxtrot::credentialsmap foxtrot::AuthHandler::load_creds_from_file(const std::st
 
 }
 
-std::array<unsigned char, CHALLENGE_STRING_BYTES> detail::get_challenge_bytes()
-{
-    std::array<unsigned char, CHALLENGE_STRING_BYTES> out;
-    randombytes_buf(out.begin(), out.size());
-    return out;
-}
 
-std::vector<unsigned char> detail::base642bin(const std::string& base64str)
-{
-    const int bin_maxlen = 4096;
-    std::vector<unsigned char> out;
-    //NOTE: max length!
-    out.resize(bin_maxlen);
-    size_t outlen;
-    
-    auto ret = sodium_base642bin(out.data(),bin_maxlen,
-        base64str.data(), base64str.size(), nullptr, &outlen, nullptr,
-                                 sodium_base64_VARIANT_ORIGINAL_NO_PADDING);
-    
-    if(ret)
-        throw std::runtime_error("couldn't decode base64 string!");
-    
-    out.resize(outlen);
-    return out;
-}
 
 
