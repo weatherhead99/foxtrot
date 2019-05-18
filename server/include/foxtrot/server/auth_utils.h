@@ -6,10 +6,12 @@
 #include <sodium.h>
 
 const int CHALLENGE_STRING_BYTES  = 32;
+const int SESSIONKEY_BYTES = 32;
 
 namespace foxtrot {
     using pkarr = std::array<unsigned char, crypto_sign_PUBLICKEYBYTES>;
     using skarr = std::array<unsigned char, crypto_sign_SECRETKEYBYTES>;
+    using seskeyarr = std::array<unsigned char, SESSIONKEY_BYTES>;
     
     using keypair = std::tuple<pkarr,skarr>;
     

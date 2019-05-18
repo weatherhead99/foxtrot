@@ -61,7 +61,7 @@ class exptserveStub(object):
         )
     self.RequestAuthChallenge = channel.unary_unary(
         '/foxtrot.exptserve/RequestAuthChallenge',
-        request_serializer=foxtrot__pb2.empty.SerializeToString,
+        request_serializer=foxtrot__pb2.auth_request.SerializeToString,
         response_deserializer=foxtrot__pb2.auth_challenge.FromString,
         )
     self.RespondAuthChallenge = channel.unary_unary(
@@ -202,7 +202,7 @@ def add_exptserveServicer_to_server(servicer, server):
       ),
       'RequestAuthChallenge': grpc.unary_unary_rpc_method_handler(
           servicer.RequestAuthChallenge,
-          request_deserializer=foxtrot__pb2.empty.FromString,
+          request_deserializer=foxtrot__pb2.auth_request.FromString,
           response_serializer=foxtrot__pb2.auth_challenge.SerializeToString,
       ),
       'RespondAuthChallenge': grpc.unary_unary_rpc_method_handler(

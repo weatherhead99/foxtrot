@@ -31,15 +31,21 @@ bool AuthRequestLogic::HandleRequest(AuthRequestLogic::reqtp& req, AuthRequestLo
     auto isauth = servctxt.auth_context()->IsPeerAuthenticated();
     
     lg_.strm(sl::debug) << "is client authenticated? "  << (int) isauth;
-    if(!isauth)
-    {
-        foxtrot_server_specific_error("not connected using TLS, refusing to issue challenge",
-                                      repl, respond, lg_, tag, error_types::ft_AuthError);
-        repl.set_statusmsg("not connected using TLS, refusing to issue challenge");
-        return true;
-    }
+    //WARNING: MUST FIX BELOW BEFORE USING!
+//     if(!isauth)
+//     {
+//         foxtrot_server_specific_error("not connected using TLS, refusing to issue challenge",
+//                                       repl, respond, lg_, tag, error_types::ft_AuthError);
+//         repl.set_statusmsg("not connected using TLS, refusing to issue challenge");
+//         return true;
+//     }
+//     
+    auto challenge = authhand_->get_challenge_string(req.userid());
     
-    repl.set_challenge(authhand_->get_challenge_string());
+    
+    repl.set_challenge(challenge.first);
+    repl.set_challengeid(challenge.second);
+    
     respond.Finish(repl, grpc::Status::OK, tag);
     return true;
 }

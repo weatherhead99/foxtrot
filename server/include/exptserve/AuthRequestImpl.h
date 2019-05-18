@@ -7,7 +7,7 @@
 namespace foxtrot {
     struct AuthRequestLogic
     {
-        typedef empty reqtp;
+        typedef auth_request reqtp;
         typedef auth_challenge repltp;
         typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
         constexpr static auto requestfunptr = &exptserve::AsyncService::RequestRequestAuthChallenge;

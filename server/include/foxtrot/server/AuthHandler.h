@@ -3,32 +3,42 @@
 #include <map>
 #include <vector>
 #include <array>
+#include <deque>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/auth_utils.h>
 #include <sodium.h>
+#include <mutex>
 
-
+const unsigned MAX_CHALLENGES = 4096;
 
 namespace foxtrot {
     
-    using credentialsmap = std::map<std::string, std::vector<std::pair<std::string,foxtrot::pkarr>>>;
+    using key_info = std::pair<std::string,foxtrot::pkarr>;
+    using login_info = std::tuple<std::string,int, time_t>;
+    using credentialsmap = std::map<std::string, std::pair<std::vector<key_info>,int>>;
     
     class AuthHandler{
     public:
         AuthHandler(const std::string& filename);
         AuthHandler(credentialsmap&& creds);
         
-        std::string get_challenge_string() const;
-        std::string authenticate_user(const std::string& userid, const std::string& response, int valid_seconds) const;
-        int get_privilege_level(const std::string& userid) const;
-        int validate_session_key(const std::string& key) const;
+        std::pair<std::string,unsigned> get_challenge_string(const std::string& userid);
+        bool verify_response(const std::string& userid, unsigned challenge_id, const std::string& response,
+            const std::string& sig, int& authlevel, std::string& sessionkey);
+        
+
     private:
         credentialsmap load_creds_from_file(const std::string& filename);
         //TODO: this should be mlock'd for security
         credentialsmap _creds;
-        std::map<std::string, time_t> _sessionkeys;
+        std::map<unsigned, std::pair<std::string,std::string>> _challenges;
+        std::map<seskeyarr, login_info> _sessionkeys;
+        std::deque<unsigned> _challenge_order;
         Logging _lg;
+        
+        std::mutex challenge_mut;
+        std::mutex session_mut;
     };
 }
 

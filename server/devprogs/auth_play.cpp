@@ -11,9 +11,9 @@ int main(int argc, char** argv)
     
     foxtrot::AuthHandler authhand("./creds.json");
 
-    auto challenge_string = authhand.get_challenge_string();
+//     auto challenge_string = authhand.get_challenge_string();
     
-    cout << "challenge str: " << challenge_string << endl;
+//     cout << "challenge str: " << challenge_string << endl;
     
     
     std::array<unsigned char,crypto_sign_PUBLICKEYBYTES> pk;

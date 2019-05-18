@@ -213,6 +213,11 @@ message broadcast_notification
     string channel_target = 7;
 }
 
+message auth_request
+{
+    string userid = 1;
+}
+
 message auth_challenge
 {
     errstatus err = 1;
@@ -247,6 +252,6 @@ service exptserve
     rpc ListServerFlags (empty) returns (serverflaglist);
     rpc DropServerFlag (serverflag) returns (serverflag);
     rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
-    rpc RequestAuthChallenge (empty) returns (auth_challenge);
+    rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
     rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
 }

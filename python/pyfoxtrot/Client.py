@@ -143,7 +143,7 @@ def _reinterpret_cast_bytes(bts,tp):
 
 
 class Client:
-    def __init__(self,connstr: str,certfile:str=None) -> None:
+    def __init__(self,connstr: str, certfile:str=None) -> None:
         if certfile is None:
             self._channel = grpc.insecure_channel(connstr)
         else:
@@ -230,12 +230,6 @@ class Client:
     @property
     def flags(self):
         return FlagProxy(self)
-
-    def _get_challenge_str(self) -> str:
-        req = empty()
-        repl = self._stub.RequestAuthChallenge(req)
-        _check_repl_err(repl)
-        return repl
 
 
 def _fake_call_sync(obj,client,*args,**kwargs):
