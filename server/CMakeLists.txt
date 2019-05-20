@@ -60,7 +60,7 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 
 if(BUILD_AUTH)
     list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp)
-    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp)
+    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp)
 
 endif()
 
