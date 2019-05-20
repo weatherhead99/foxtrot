@@ -26,8 +26,9 @@ class AuthenticatedClient(Client):
         return repl
 
     def _prepare_auth_response(self, challengemess: auth_challenge, userid: str):
-        signmess = self._seckey.sign(decode_sodiumkey(challengemess.challenge))
-        sig = base64.standard_b64encode(signmess.signature).strip("=")
+        #signmess = self._seckey.sign(decode_sodiumkey(challengemess.challenge))
+        signmess = self._seckey.sign(challengemess.challenge)
+        sig = signmess.signature
         req = auth_response(sig=sig, userid=userid, challengeid = challengemess.challengeid)
         return req
         

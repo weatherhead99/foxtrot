@@ -39,10 +39,12 @@ bool AuthRequestLogic::HandleRequest(AuthRequestLogic::reqtp& req, AuthRequestLo
 //         return true;
 //     }
 //     
-    auto challenge = authhand_->get_challenge_string(req.userid());
+    
+    auto challenge = authhand_->get_challenge_binary(req.userid());
     
     
-    repl.set_challenge(challenge.first);
+    
+    repl.set_challenge(challenge.first.data(),challenge.first.size());
     repl.set_challengeid(challenge.second);
     
     respond.Finish(repl, grpc::Status::OK, tag);

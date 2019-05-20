@@ -12,7 +12,9 @@ namespace foxtrot {
     using pkarr = std::array<unsigned char, crypto_sign_PUBLICKEYBYTES>;
     using skarr = std::array<unsigned char, crypto_sign_SECRETKEYBYTES>;
     using seskeyarr = std::array<unsigned char, SESSIONKEY_BYTES>;
+    using sigarr = std::array<unsigned char, crypto_sign_BYTES>;
     
+    using challengearr = std::array<unsigned char, CHALLENGE_STRING_BYTES>;
     using keypair = std::tuple<pkarr,skarr>;
     
     keypair generate_new_key();

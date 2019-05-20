@@ -22,6 +22,16 @@ AuthHandler::AuthHandler(const std::string& filename)
 
 std::pair<std::string, unsigned> foxtrot::AuthHandler::get_challenge_string(const std::string& userid)
 {
+    auto challenge_binary = get_challenge_binary(userid);
+    auto challengestr = detail::bin2base64(challenge_binary.first);
+    
+    return std::make_pair(challengestr, challenge_binary.second);
+}
+
+
+std::pair<foxtrot::challengearr, unsigned>
+foxtrot::AuthHandler::get_challenge_binary(const std::string& userid)
+{
     if(_creds.find(userid)  == _creds.end())
     {
         _lg.Info("request for a challenge from invalid userid");
@@ -39,21 +49,22 @@ std::pair<std::string, unsigned> foxtrot::AuthHandler::get_challenge_string(cons
 
     auto bytes = detail::get_challenge_bytes();
 
-    std::string out = detail::bin2base64(bytes);
     unsigned challengeid = randombytes_random();
     
     {
         std::lock_guard<std::mutex> lck(challenge_mut);
-        _challenges.insert({challengeid, {userid, out}});
+        _challenges.insert({challengeid, {userid, bytes}});
         _challenge_order.push_back(challengeid);
         
         
     }
     
-    return std::make_pair(out, challengeid);
-}
+    return std::make_pair(bytes, challengeid);
+    
+    
+};
 
-bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const std::string& response, const std::string& sig, int& authlevel, std::string& sessionkey)
+bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const foxtrot::sigarr& sig, int& authlevel, std::string& sessionkey)
 {
     auto credit = _creds.find(userid);
     if(credit == _creds.end())
@@ -63,8 +74,9 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
     }
     
     //TODO: challenges should be stored in binary form!
-    std::string origchallenge;
     std::string origuserid;
+    challengearr origchallenge;
+    
     auto challengeit = _challenges.find(challenge_id);
     if(challengeit == _challenges.end())
     {
@@ -80,11 +92,6 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
             _lg.Info("mismatch in user id");
             throw std::runtime_error("mismatched user id!");
         }
-        if(origchallenge != response)
-        {
-            _lg.Info("mismatched challenge string");
-            throw std::runtime_error("mismatched challenge string");
-        }
     }
     
     authlevel = credit->second.second;
@@ -92,9 +99,8 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
     std::string keyname;
     for(auto& key : credit->second.first)
     {
-        bool thisverify = crypto_sign_verify_detached(
-            reinterpret_cast<const unsigned char*>(sig.data()),
-            reinterpret_cast<const unsigned char*>(response.data()),response.size(),key.second.data());
+        bool thisverify = crypto_sign_verify_detached(sig.data(),
+            origchallenge.data(),origchallenge.size(),key.second.data());
         if(thisverify)
         {
             std::lock_guard<std::mutex> lck(session_mut);

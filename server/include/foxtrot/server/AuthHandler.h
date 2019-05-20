@@ -24,15 +24,17 @@ namespace foxtrot {
         AuthHandler(credentialsmap&& creds);
         
         std::pair<std::string,unsigned> get_challenge_string(const std::string& userid);
-        bool verify_response(const std::string& userid, unsigned challenge_id, const std::string& response,
-            const std::string& sig, int& authlevel, std::string& sessionkey);
+        std::pair<challengearr, unsigned>
+        get_challenge_binary(const std::string& userid);
+        bool verify_response(const std::string& userid, unsigned challenge_id,
+            const sigarr& sig, int& authlevel, std::string& sessionkey);
         
 
     private:
         credentialsmap load_creds_from_file(const std::string& filename);
         //TODO: this should be mlock'd for security
         credentialsmap _creds;
-        std::map<unsigned, std::pair<std::string,std::string>> _challenges;
+        std::map<unsigned, std::pair<std::string,challengearr>> _challenges;
         std::map<seskeyarr, login_info> _sessionkeys;
         std::deque<unsigned> _challenge_order;
         Logging _lg;

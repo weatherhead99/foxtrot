@@ -199,7 +199,7 @@ int main(int argc, char** argv)
     lg.Info("trying to load credentials for authentication");
     if(!boost::filesystem::exists(servercreds))
     {
-        lg.Info("no credentials info found, not setting up authentication");
+        lg.Warning("no credentials info found, not setting up authentication");
     }
     else
     {
