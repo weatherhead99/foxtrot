@@ -17,7 +17,6 @@ bool AuthRequestLogic::HandleRequest(AuthRequestLogic::reqtp& req, AuthRequestLo
         foxtrot_server_specific_error("authentication not configured on this server",
             repl, respond, lg_, tag, error_types::ft_AuthError);
         
-        repl.set_statusmsg("authentication not configured on this server");
         return true;
     }
     

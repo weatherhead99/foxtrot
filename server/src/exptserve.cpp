@@ -9,6 +9,8 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 
+#include <boost/filesystem.hpp>
+
 #include <foxtrot/backward.hpp>
 #include <foxtrot/Logging.h>
 #include <foxtrot/config.h>
@@ -63,7 +65,7 @@ int main(int argc, char** argv)
     bool forceauth;
     
     std::string bindstr;
-    std::string servercreds;
+    auto servercreds = foxtrot::get_config_file_path("FOXTROT_CREDS", "server_creds.json");
     int cred_validity_hours;
     
     foxtrot::Logging lg("exptserve");
@@ -93,8 +95,8 @@ int main(int argc, char** argv)
      "default title for pushbullet notifications")
     ("pushbullet_default_channel", po::value<std::string>()->default_value(""), 
      "default channel for pushbullet notifications")
-    ("servercreds,sc", po::value<std::string>(&servercreds), "authentication credentials (JSON) file")
-    ("credvalid,cv", po::value<int>(&cred_validity_hours)->default_value(24), "length of credential validity (hours)")
+    ("servercreds,S", po::value<std::string>(&servercreds), "authentication credentials (JSON) file")
+    ("credvalid,v", po::value<int>(&cred_validity_hours)->default_value(24), "length of credential validity (hours)")
     ("help","display usage information");
     
     po::positional_options_description pdesc;
@@ -193,9 +195,15 @@ int main(int argc, char** argv)
                                  vm["pushbullet_default_channel"].as<std::string>());
     }
     
-    if(vm.count("servercreds"))
+    
+    lg.Info("trying to load credentials for authentication");
+    if(!boost::filesystem::exists(servercreds))
     {
-        lg.Info("loading credentials for authentication");
+        lg.Info("no credentials info found, not setting up authentication");
+    }
+    else
+    {
+        lg.Info("setting up authentication system");
         serv.setup_auth(servercreds, cred_validity_hours);
     }
     
