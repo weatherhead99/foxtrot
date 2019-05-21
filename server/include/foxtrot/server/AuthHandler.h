@@ -27,7 +27,7 @@ namespace foxtrot {
         std::pair<challengearr, unsigned>
         get_challenge_binary(const std::string& userid);
         bool verify_response(const std::string& userid, unsigned challenge_id,
-            const sigarr& sig, int& authlevel, seskeyarr& sessionkey);
+            const sigarr& sig, int& authlevel, time_t& expiry, seskeyarr& sessionkey);
         
 
     private:

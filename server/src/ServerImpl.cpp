@@ -16,6 +16,7 @@
 #include "ServerFlagsImpl.h"
 #include "BroadcastNotificationImpl.h"
 #include "AuthRequestImpl.h"
+#include "AuthRespondImpl.h"
 
 using std::string;
 using namespace foxtrot;
@@ -105,11 +106,13 @@ void ServerImpl::setup_common(const std::string& addrstr)
     {
         _lg.Info("setting up authentication system");
         add_logic<AuthRequestLogic>(_auth_api);
+        add_logic<AuthRespondLogic>(_auth_api);
     }
     else
     {
         _lg.Info("authentication system disabled");
         add_logic<AuthRequestLogic>(nullptr);
+        add_logic<AuthRespondLogic>(nullptr);
     }
     
     

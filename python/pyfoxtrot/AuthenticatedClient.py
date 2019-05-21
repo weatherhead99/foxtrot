@@ -3,6 +3,7 @@ from pyfoxtrot.foxtrot_pb2 import *
 import base64
 import json
 import nacl.signing
+import datetime
 
 def decode_sodiumkey(key_in: str) -> bytes:
     return base64.standard_b64decode(key_in + "=====")
@@ -32,7 +33,29 @@ class AuthenticatedClient(Client):
         req = auth_response(sig=sig, userid=userid, challengeid = challengemess.challengeid)
         return req
         
+    def login(self):
+        challenge = self._get_challenge_str(self._userid)
+        resp = self._prepare_auth_response(challenge, self._userid)
+        
+        confirm = self._stub.RespondAuthChallenge(resp)
+        _check_repl_err(confirm)
+        self._seskey = confirm.sessionkey
+        self._expiry = datetime.datetime.fromtimestamp(confirm.expiry)
+        self._authlevel = confirm.authlevel
+    
+    @property
+    def authlevel(self) -> int:
+        return self._authlevel
 
+    @property
+    def expiry(self) -> datetime.datetime:
+        return self._expiry
+
+    @property
+    def remaining_time(self) -> datetime.timedelta:
+        now = datetime.datetime.now()
+        return self.expiry - now
+    
     @classmethod
     def from_credsfile(cls, connstr: str, certfile: str, 
                        userid: str, credsfile: str):

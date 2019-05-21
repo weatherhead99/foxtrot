@@ -64,7 +64,7 @@ foxtrot::AuthHandler::get_challenge_binary(const std::string& userid)
     
 };
 
-bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const foxtrot::sigarr& sig, int& authlevel, seskeyarr& sessionkey)
+bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const foxtrot::sigarr& sig, int& authlevel, time_t& expiry, seskeyarr& sessionkey)
 {
     auto credit = _creds.find(userid);
     if(credit == _creds.end())
@@ -87,6 +87,12 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
     {
         origchallenge = challengeit->second.second;
         origuserid = challengeit->second.first;
+        
+        std::lock_guard<std::mutex> lck(challenge_mut);
+        _challenges.erase(challengeit);
+        _challenge_order.pop_front();
+        
+        
         if(userid != origuserid)
         {
             _lg.Info("mismatch in user id");
@@ -95,27 +101,66 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
     }
     
     authlevel = credit->second.second;
+    _lg.strm(sl::trace) << "user authlevel is: " << authlevel;
     bool verify = false;
     std::string keyname;
     for(auto& key : credit->second.first)
     {
-        bool thisverify = crypto_sign_verify_detached(sig.data(),
-            origchallenge.data(),origchallenge.size(),key.second.data());
-        if(thisverify)
+        _lg.strm(sl::trace) << "trying to verify for keyname: " << key.first;
+        
+        std::ostringstream oss;
+        for(auto& c : sig)
         {
-            std::lock_guard<std::mutex> lck(session_mut);
+          oss << std::to_string((int) c) << ",";  
+            
+        };
+        _lg.strm(sl::debug) << "sig bytes: "  << oss.str(); 
+        
+        oss.str("");
+        
+        for(auto& c : origchallenge)
+        {
+            oss << std::to_string((int) c)  << ",";
+        };
+        _lg.strm(sl::debug) << "challenge bytes: " << oss.str();
+        
+        oss.str("");
+        for(auto& c : key.second)
+        {
+            oss << std::to_string((int) c ) << ",";
+        }
+        _lg.strm(sl::debug) << "public key bytes: " << oss.str();
+        
+        
+        int thisverify = crypto_sign_verify_detached(sig.data(),
+            origchallenge.data(),origchallenge.size(),key.second.data());
+        if(thisverify == 0 )
+        {
             _lg.strm(sl::info) << "verified login for: " << userid << "with key name: " << key.first;
             keyname = key.first;
             
             randombytes_buf(sessionkey.begin(),sessionkey.size());
             
             auto expiry_date = boost::posix_time::second_clock::local_time() + boost::posix_time::hours(valid_hours_);
+            expiry = (expiry_date - boost::posix_time::from_time_t(0)).total_seconds();
             
-            //TODO:FINISH HERE!
+            //find the auth level
+            if(credit == _creds.end())
+            {
+                throw std::logic_error("invalid credential after valid login. This shouldn't happen!");
+            }
+            
+            authlevel = credit->second.second;
+            
+            std::lock_guard<std::mutex> lck(session_mut);
+            login_info login{userid, authlevel, expiry};
+            _sessionkeys.insert({sessionkey, login});
             
             return true;
         }
     }
+    
+    
     _lg.strm(sl::info) << "failed login attempt for: " << userid;
     return false;
 }

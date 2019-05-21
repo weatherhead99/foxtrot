@@ -27,9 +27,23 @@ bool foxtrot::AuthRespondLogic::HandleRequest(foxtrot::AuthRespondLogic::reqtp& 
     seskeyarr sessionkey;
     sigarr sig;
     std::copy(req.sig().begin(), req.sig().begin() + sig.size(), sig.begin());
+    time_t expiry;
     
-    auto success = authhand_->verify_response(req.userid(), req.challengeid(), sig, authlevel, sessionkey);
+    auto success = authhand_->verify_response(req.userid(), req.challengeid(), sig, authlevel, expiry, sessionkey);
     
     
+    if(!success)
+    {
+        foxtrot_server_specific_error("failed to authenticate user", repl, respond, lg_, tag, error_types::ft_AuthError);
+        return true;
+    }
+    
+    repl.mutable_sessionkey()->assign(sessionkey.begin(),sessionkey.end());
+    repl.set_authlevel(authlevel);
+    repl.set_expiry(expiry);
+    
+    respond.Finish(repl, grpc::Status::OK, tag);
+    
+    return true;
  
 }
