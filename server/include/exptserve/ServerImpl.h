@@ -60,7 +60,6 @@ private:
     };
     
     bool notifications_enabled = false;
-    int _cred_validity_hours = -1;
     bool auth_enabled = false;
     std::shared_ptr<flagmap> _serverflags;
     

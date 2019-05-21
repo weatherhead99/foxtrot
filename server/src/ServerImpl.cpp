@@ -46,9 +46,8 @@ void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string
 void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
     _lg.strm(sl::debug) << "credsfile: " << credsfile;
-    _cred_validity_hours = creds_validity_hours;
     _lg.strm(sl::info) << "registering AuthHandler";
-    _auth_api = std::make_shared<AuthHandler>(credsfile);
+    _auth_api = std::make_shared<AuthHandler>(credsfile, creds_validity_hours);
     auth_enabled = true;
 }
 

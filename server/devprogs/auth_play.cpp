@@ -9,7 +9,7 @@ using std::endl;
 int main(int argc, char** argv)
 {
     
-    foxtrot::AuthHandler authhand("./creds.json");
+//     foxtrot::AuthHandler authhand("./creds.json");
 
 //     auto challenge_string = authhand.get_challenge_string();
     

@@ -13,8 +13,8 @@ namespace pt = boost::property_tree;
 namespace ptime = boost::posix_time;
 
 
-AuthHandler::AuthHandler(const std::string& filename)
-: _lg("AuthHandler")
+AuthHandler::AuthHandler(const std::string& filename, int valid_hours)
+: _lg("AuthHandler"), valid_hours_(valid_hours)
 {
     _creds = load_creds_from_file(filename);
 };
@@ -64,7 +64,7 @@ foxtrot::AuthHandler::get_challenge_binary(const std::string& userid)
     
 };
 
-bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const foxtrot::sigarr& sig, int& authlevel, std::string& sessionkey)
+bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned int challenge_id, const foxtrot::sigarr& sig, int& authlevel, seskeyarr& sessionkey)
 {
     auto credit = _creds.find(userid);
     if(credit == _creds.end())
@@ -107,8 +107,10 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
             _lg.strm(sl::info) << "verified login for: " << userid << "with key name: " << key.first;
             keyname = key.first;
             
-            seskeyarr seskey;
-            randombytes_buf(seskey.begin(),seskey.size());
+            randombytes_buf(sessionkey.begin(),sessionkey.size());
+            
+            auto expiry_date = boost::posix_time::second_clock::local_time() + boost::posix_time::hours(valid_hours_);
+            
             //TODO:FINISH HERE!
             
             return true;

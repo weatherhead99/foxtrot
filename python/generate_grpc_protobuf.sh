@@ -1,3 +1,4 @@
 #!/bin/bash
+env python3 -m grpc_tools.protoc -I ../core/proto --python_out=./pyfoxtrot/ --grpc_python_out=./pyfoxtrot/ ../core/proto/foxtrot.proto
 
-python -m grpc_tools.protoc -I ../server/ --python_out=./foxtrot/ --grpc_python_out=./foxtrot/ ../server/foxtrot.proto
+sed -i -e 's/import foxtrot_pb2 as foxtrot__pb2/import pyfoxtrot.foxtrot_pb2 as foxtrot__pb2/g' ./pyfoxtrot/foxtrot_pb2_grpc.py

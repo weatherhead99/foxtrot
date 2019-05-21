@@ -20,14 +20,14 @@ namespace foxtrot {
     
     class AuthHandler{
     public:
-        AuthHandler(const std::string& filename);
-        AuthHandler(credentialsmap&& creds);
+        AuthHandler(const std::string& filename, int valid_hours);
+        AuthHandler(credentialsmap&& creds, int valid_hours);
         
         std::pair<std::string,unsigned> get_challenge_string(const std::string& userid);
         std::pair<challengearr, unsigned>
         get_challenge_binary(const std::string& userid);
         bool verify_response(const std::string& userid, unsigned challenge_id,
-            const sigarr& sig, int& authlevel, std::string& sessionkey);
+            const sigarr& sig, int& authlevel, seskeyarr& sessionkey);
         
 
     private:
@@ -41,6 +41,7 @@ namespace foxtrot {
         
         std::mutex challenge_mut;
         std::mutex session_mut;
+        int valid_hours_;
     };
 }
 
