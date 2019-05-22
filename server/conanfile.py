@@ -7,7 +7,6 @@ bcs = ftbase.bcs
 
 class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
                          metaclass=ftbase.FoxtrotCppMeta):
-    exports_sources = "cmake/*"
     name="foxtrot_server"
     description="foxtrot server components"
     exports_sources = "CMakeLists.txt", "src/*.cpp", \
