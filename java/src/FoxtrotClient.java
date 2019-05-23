@@ -4,11 +4,13 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.foxtrot.exptserveGrpc.exptserveStub;
 import io.foxtrot.exptserveGrpc.exptserveBlockingStub;
+import io.foxtrot.Foxtrot;
 
+import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 public class FoxtrotClient {
     private final ManagedChannel channel;
-    private final exptserveStub asyncStub;
     private final exptserveBlockingStub blockingStub;
     
     public FoxtrotClient(String host, int port) {
@@ -18,7 +20,11 @@ public class FoxtrotClient {
     FoxtrotClient(ManagedChannel channel) {
         this.channel = channel;
         blockingStub = exptserveGrpc.newBlockingStub(channel);
-        asyncStub = exptserveGrpc.newStub(channel);
     }
-    
+
+    public Foxtrot.servdescribe DescribeServer() {
+	var em = Foxtrot.empty.newBuilder().build();
+	var desc = blockingStub.describeServer(em);
+	return desc;
+    }
 }

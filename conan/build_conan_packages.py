@@ -16,8 +16,14 @@ api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel,
 createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=True,
                                   keep_build=True, update=True)
 
+curdir = os.path.abspath(os.curdir)
+
 print("building foxtrot core conan package...")
-createfun("../core")
+os.chdir("../core")
+createfun(".")
 
 print("building foxtrot server conan package...")
-createfun("../server")
+os.chdir("../server")
+createfun(".")
+
+os.chdir(curdir)

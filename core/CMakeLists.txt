@@ -10,7 +10,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 include(GenerateExportHeader)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-include(GitVersion)
 include(FoxtrotCommonSetup)
 
 #setup conan build if necessary
@@ -21,6 +20,13 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     set(FOXTROT_CORE_CONAN_BUILD TRUE)
     conan_basic_setup()
+    set(core_hash "None")
+    set(core_refspec "None")
+    set(core_tag "None")
+    set(core_version_tagged FALSE)
+  else()
+    message(STATUS "not a conan build")
+    include(GitVersion)    
 endif()
 
 
@@ -43,6 +49,7 @@ endif()
 
 
 #build foxtrot core library (errors and logging)
+
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
 src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/config.cpp)
 
@@ -52,7 +59,7 @@ protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
 
 
 add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
-            ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
 add_custom_command(TARGET foxtrot_core POST_BUILD

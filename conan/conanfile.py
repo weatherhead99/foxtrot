@@ -1,5 +1,7 @@
 from conans import tools, ConanFile, CMake
 
+hardcode_version="0.0.1dev"
+
 def get_version():
     git = tools.Git()
     try:
@@ -9,7 +11,7 @@ def get_version():
         else:
             return "%s_%s" % (git.get_branch(), git.get_revision()[:8])
     except:
-        return None
+        return hardcode_version
 
 bcs = "@bincrafters/stable"
 bbcs = "/1.69.0%s" % bcs
@@ -29,6 +31,7 @@ class FoxtrotCppPackage(ConanFile):
         cmake.configure()
 
         env_build = tools.RunEnvironment(self)
+        cmake.definitions["CONAN_PACKAGE_VERSION"] = self.version
         with tools.environment_append(env_build.vars):
             cmake.build()
         cmake.install()
