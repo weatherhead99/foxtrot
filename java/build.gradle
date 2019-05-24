@@ -56,19 +56,10 @@ sourceSets {
         }
         
         java {
-            srcDir "src"
-	    srcDir "build/generated/java/io/foxtrot"
             
         }
         
     }
 }
 
-startScripts.enabled = false
-
-task TestClient(type: CreateStartScripts) {
-     mainClassName = "ClientTest.SimpleTest"
-     applicationName = "ftclient_test"
-     outputDir = new File(project.buildDir, "cltest")
-     classpath = startScripts.classpath
-}
+mainClassName = "devprogs.ClientTest"
