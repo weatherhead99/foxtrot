@@ -93,7 +93,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
                 
             
             //check if it's a stream data method
-	    if(is_ft_call_streaming(prop))
+	    if(is_ft_call_streaming(meth))
 	      {
 		    foxtrot_server_specific_error( 
 		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
