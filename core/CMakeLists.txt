@@ -52,7 +52,7 @@ endif()
 #build foxtrot core library (errors and logging)
 
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/config.cpp)
+src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp)
 
 get_filename_component(protopath proto/foxtrot.proto ABSOLUTE)
 find_program(grpc_plugin grpc_cpp_plugin)

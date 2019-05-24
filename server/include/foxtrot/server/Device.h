@@ -3,13 +3,18 @@
 #include <memory>
 #include <string>
 #include <rttr/type>
-
+#include <boost/variant.hpp>
+#include <boost/optional.hpp>
 #include <foxtrot/foxtrot_server_export.h>
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
 
 namespace foxtrot
 {
+    using ft_returntype = boost::optional<boost::variant<double,int,bool,std::string>>;
+    using ft_argtype = boost::variant<double,int,bool,std::string>;
+    
+    using arg_cit = std::vector<ft_argtype>::const_iterator;
     
  enum class CapabilityMeta
  {
@@ -28,6 +33,8 @@ namespace foxtrot
     virtual const std::string getDeviceTypeName() const;
     const std::string getDeviceComment() const;
     void setDeviceComment(const std::string& comment);
+    virtual ft_returntype InvokeCapability(const std::string& capname, arg_cit beginargs, arg_cit endargs);
+    
     
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;

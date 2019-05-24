@@ -1,7 +1,9 @@
+#include <sstream>
+
 #include <rttr/registration>
 
 #include <foxtrot/server/Device.h>
-
+#include <foxtrot/ReflectionError.h>
 
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
 : _proto(std::move(proto)), _devcomment(comment)
@@ -25,6 +27,236 @@ void foxtrot::Device::setDeviceComment(const std::string& comment)
 {
     _devcomment = comment;
 }
+
+
+class ftarg_visitor : public boost::static_visitor<>
+{
+public:
+    ftarg_visitor(rttr::variant& var) : var_(var) {};
+    void operator()(double& i) const
+    {
+        var_ = i;
+    }
+    void operator()(int& i) const
+    {
+        var_ = i;
+    }
+    void operator()(bool& i) const
+    {
+        var_ = i;
+    }
+    void operator()(const std::string& s) const
+    {
+        var_ = s;
+    }
+    
+private:
+    rttr::variant& var_;
+};
+
+foxtrot::ft_returntype get_returnval(rttr::variant& var)
+{
+    foxtrot::ft_returntype out;
+    
+    if(!var.is_valid())
+        throw std::logic_error("invalid RTTR variant supplied to get_returnval");
+    
+    auto tp = var.get_type();
+    if(!tp.is_valid())
+        throw std::logic_error("invalid RTTR type from variant in get_returnval");
+    
+    bool success = false;
+    
+    if(tp == rttr::type::get<void>())
+    {
+        //don't set optional
+        return out;
+    }
+
+    foxtrot::ft_returntype retval;
+    if(tp == rttr::type::get<bool>())
+    {
+        retval = var.to_bool();
+        success = true;
+    }
+    
+    if(tp == rttr::type::get<double>() || tp == rttr::type::get<float>())
+    {
+        retval = var.to_double(&success);
+    }
+    
+    if(tp == rttr::type::get<std::string>())
+    {
+        retval = std::move(var.to_string(&success));
+    }
+    
+    if(tp.is_enumeration())
+    {
+        retval = var.to_int(&success);
+    }
+
+    if(!tp.is_arithmetic())
+    {
+        retval = std::move(var.to_string(&success));
+    }
+
+    retval = var.to_int(&success);
+    
+    if(!success)
+    {
+        throw std::logic_error("failed to convert return type. This may be an error in your device driver");
+    }
+    
+    out = std::move(retval);
+    return out;
+
+};
+
+
+rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos)
+{
+    rttr::variant out;
+    boost::apply_visitor(ftarg_visitor(out),argin);
+    if(!out.is_valid())
+    {
+        throw std::logic_error("variant is invalid! in get_arg");
+    }
+    
+    if(!out.can_convert(tp))
+    {
+        std::ostringstream oss;
+        oss << "argument at position: " << pos << "of type: " << out.get_type().get_name() << "cannot be converted to needed type: " << tp.get_name();
+        throw std::logic_error(oss.str());
+    }
+        
+    if(out.get_type() != tp)
+    {
+        bool success = out.convert(tp);
+        if(!success)
+            throw foxtrot::ReflectionError("failed to convert argument at position: " + std::to_string(pos));
+    };
+    
+    return out;
+}
+
+std::vector<rttr::argument> get_callargs(rttr::method& meth,
+                                        foxtrot::arg_cit begin, foxtrot::arg_cit end)
+{
+    auto argsize_given = std::distance(begin,end);
+    auto param_infs = meth.get_parameter_infos();
+    
+    if(argsize_given != param_infs.size())
+    {
+        throw std::out_of_range("unexpected number of arguments supplied");
+    }
+    
+    std::vector<rttr::argument> out;
+    out.reserve(std::distance(begin,end));
+    
+#ifdef NEW_RTTR_API
+    auto paraminfsit = param_infs.begin();
+#endif
+    int i=0;
+    for(auto it = begin; it != end; it++)
+    {
+#ifdef NEW_RTTR_API
+        const auto target_argtp = (paraminfsit++)->get_type();
+        i++;
+#else
+        const auto target_argtp = param_infs[i++].get_type();
+#endif
+        
+        //HACK: this could be much better and avoid copying, probably
+        auto argcpy = *it;
+        auto rttrarg = get_arg(argcpy,target_argtp,i+1);
+        out.push_back(rttrarg);
+    };
+    
+    return out;
+};
+
+
+template<typename T> bool is_ft_call_streaming ( const T& propmeth )
+{
+    auto streammeta = propmeth.get_metadata ( "streamdata" );
+    if ( streammeta.is_valid() ) {
+        if ( streammeta.to_bool() ) {
+            return true;
+        };
+
+    };
+    return false;
+};
+
+
+foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capname,
+    foxtrot::arg_cit beginargs, foxtrot::arg_cit endargs)
+{
+    //default (rttr based) implementation. Override in e.g. python devices
+    auto devtp = rttr::type::get(*this);
+    
+    auto prop = devtp.get_property(capname.c_str());
+    auto meth = devtp.get_method(capname.c_str());
+    
+    if(!meth && !prop)
+    {
+        throw ReflectionError("no matching property or method");
+    }
+    else if(!prop)
+    {
+        //method call
+        if(!meth.is_valid())
+        {
+            throw std::logic_error("invalid method!");
+        }
+        if(is_ft_call_streaming(meth))
+        {
+            throw foxtrot::ReflectionError("tried to InvokeCapability on a bulk data method!");
+        }
+        
+        auto callargs = get_callargs(meth, beginargs, endargs);
+        auto retval = meth.invoke_variadic(*this,callargs);
+        return get_returnval(retval);
+        
+    }
+    else
+    {
+        //property
+        if(is_ft_call_streaming(prop))
+        {
+            throw foxtrot::ReflectionError("tried to InvokeCapability on a bulk data method!");
+        }
+        auto nargs = std::distance(beginargs,endargs);
+        
+        if(prop.is_readonly())
+        {
+            auto ret = prop.get_value(*this);
+            return get_returnval(ret);
+        }
+        else if(nargs > 1)
+        {
+            throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
+        }
+        else if(nargs == 1)
+        {
+            bool success;
+            auto argcpy = *beginargs;
+            auto arg = get_arg(argcpy,prop.get_type(),1);
+            success = prop.set_value(*this, arg);
+            if(!success)
+                throw std::runtime_error("failed to set property!");
+            foxtrot::ft_returntype ret;
+            return ret;
+        }
+        else if(nargs == 0)
+        {
+            auto retval = prop.get_value(*this);
+            return get_returnval(retval);
+        }
+    }
+    
+}
+
 
 
 
