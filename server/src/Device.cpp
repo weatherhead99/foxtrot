@@ -6,7 +6,7 @@
 #include <foxtrot/ReflectionError.h>
 
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
-: _proto(std::move(proto)), _devcomment(comment)
+: _proto(std::move(proto)), _devcomment(comment), lg_("Device")
 {
 
 }
@@ -22,7 +22,6 @@ const std::string foxtrot::Device::getDeviceComment() const
 {
     return _devcomment;
 };
-
 void foxtrot::Device::setDeviceComment(const std::string& comment)
 {
     _devcomment = comment;
@@ -54,7 +53,7 @@ private:
     rttr::variant& var_;
 };
 
-foxtrot::ft_returntype get_returnval(rttr::variant& var)
+foxtrot::ft_returntype get_returnval(rttr::variant& var, foxtrot::Logging* lg = nullptr)
 {
     foxtrot::ft_returntype out;
     
@@ -82,7 +81,11 @@ foxtrot::ft_returntype get_returnval(rttr::variant& var)
     
     if(tp == rttr::type::get<double>() || tp == rttr::type::get<float>())
     {
+        if(lg)
+            lg->strm(sl::trace) << "return type is a double";
         retval = var.to_double(&success);
+        if(lg)
+            lg->strm(sl::trace) << "retval value stored: " << boost::get<double>(*retval);
     }
     
     if(tp == rttr::type::get<std::string>())
@@ -100,7 +103,12 @@ foxtrot::ft_returntype get_returnval(rttr::variant& var)
         retval = std::move(var.to_string(&success));
     }
 
-    retval = var.to_int(&success);
+    if(!success)
+    {
+        if(lg)
+            lg->strm(sl::trace) << "return type fallthrough, using int";
+        retval = var.to_int(&success);
+    }
     
     if(!success)
     {
@@ -113,7 +121,7 @@ foxtrot::ft_returntype get_returnval(rttr::variant& var)
 };
 
 
-rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos)
+rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos, foxtrot::Logging* lg =nullptr)
 {
     rttr::variant out;
     boost::apply_visitor(ftarg_visitor(out),argin);
@@ -121,6 +129,8 @@ rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos
     {
         throw std::logic_error("variant is invalid! in get_arg");
     }
+    if(lg)
+        lg->strm(sl::trace) << "target argtype: " << tp.get_name();
     
     if(!out.can_convert(tp))
     {
@@ -140,7 +150,7 @@ rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos
 }
 
 std::vector<rttr::argument> get_callargs(rttr::method& meth,
-                                        foxtrot::arg_cit begin, foxtrot::arg_cit end)
+                                        foxtrot::arg_cit begin, foxtrot::arg_cit end, foxtrot::Logging* lg = nullptr)
 {
     auto argsize_given = std::distance(begin,end);
     auto param_infs = meth.get_parameter_infos();
@@ -168,7 +178,7 @@ std::vector<rttr::argument> get_callargs(rttr::method& meth,
         
         //HACK: this could be much better and avoid copying, probably
         auto argcpy = *it;
-        auto rttrarg = get_arg(argcpy,target_argtp,i+1);
+        auto rttrarg = get_arg(argcpy,target_argtp,i+1,lg);
         out.push_back(rttrarg);
     };
     
@@ -214,9 +224,9 @@ foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capn
             throw foxtrot::ReflectionError("tried to InvokeCapability on a bulk data method!");
         }
         
-        auto callargs = get_callargs(meth, beginargs, endargs);
+        auto callargs = get_callargs(meth, beginargs, endargs, &lg_);
         auto retval = meth.invoke_variadic(*this,callargs);
-        return get_returnval(retval);
+        return get_returnval(retval, &lg_);
         
     }
     else
@@ -231,7 +241,7 @@ foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capn
         if(prop.is_readonly())
         {
             auto ret = prop.get_value(*this);
-            return get_returnval(ret);
+            return get_returnval(ret, &lg_);
         }
         else if(nargs > 1)
         {
@@ -251,7 +261,7 @@ foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capn
         else if(nargs == 0)
         {
             auto retval = prop.get_value(*this);
-            return get_returnval(retval);
+            return get_returnval(retval, &lg_);
         }
     }
     

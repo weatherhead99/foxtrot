@@ -6,6 +6,7 @@
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
 #include <foxtrot/foxtrot_server_export.h>
+#include <foxtrot/Logging.h>
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
 
@@ -39,7 +40,8 @@ namespace foxtrot
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;
     std::string _devcomment;
-    
+  private:
+    foxtrot::Logging lg_;
     
     
   };

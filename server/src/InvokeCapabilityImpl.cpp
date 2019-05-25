@@ -24,6 +24,66 @@ void voidfun()
 };
 
 
+foxtrot::ft_argtype parse_wire_arg(const foxtrot::capability_argument& inarg, bool& success, foxtrot::Logging* lg = nullptr)
+{
+    success = true;
+    foxtrot::ft_argtype outarg;
+    auto which_type = inarg.value_case();
+    
+    switch(which_type)
+    {
+        case(capability_argument::ValueCase::kDblarg):
+            outarg = inarg.dblarg();
+            if(lg)
+                lg->strm(sl::trace) << "argument is a double";
+            break;
+        case(capability_argument::ValueCase::kIntarg):
+            outarg = inarg.intarg();
+            if(lg)
+                lg->strm(sl::trace) << "argument is an int";
+            break;
+        case(capability_argument::ValueCase::kBoolarg):
+            outarg = inarg.boolarg();
+            if(lg)
+                lg->strm(sl::trace) << "argument is a bool";
+            break;
+        case(capability_argument::ValueCase::kStrarg):
+            outarg = inarg.strarg();
+            if(lg)
+                lg->strm(sl::trace) << "argument is a string";
+            break;
+        case(capability_argument::ValueCase::VALUE_NOT_SET):
+            success = false;
+    }
+    return outarg;
+};
+
+class ftreturn_visitor : public boost::static_visitor<>
+{
+public:
+    ftreturn_visitor(foxtrot::capability_response& resp) : resp_(resp) {};
+    void operator()(double& i) const
+    {
+        resp_.set_dblret(i);
+    }
+    void operator()(int& i ) const
+    {
+        resp_.set_intret(i);
+    }
+    void operator()(bool& i) const
+    {
+        resp_.set_boolret(i);
+    }
+    void operator()(const std::string& s) const
+    {
+        resp_.set_stringret(s);
+    }
+    
+private:
+    foxtrot::capability_response& resp_;
+    
+};
+
 
 bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
@@ -48,147 +108,27 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
       return true;
     };
     
-    auto devtp = rttr::type::get(*dev);
+    std::vector<foxtrot::ft_argtype> ftargs;
+    ftargs.reserve(req.args().size());
     
-    auto prop = devtp.get_property(req.capname().c_str());
-    auto meth = devtp.get_method(req.capname().c_str());
-    
-    rttr::variant retval;
-    
-    try{
-        if (!meth && !prop)
+    for(auto& inarg: req.args())
+    {
+        bool success = false;
+        auto outarg = parse_wire_arg(inarg, success, &_lg);
+        if(!success)
         {
-	  foxtrot_server_specific_error(
-	    "no matching property or method", repl,respond,_lg,tag);
-	  return true;
+            foxtrot_server_specific_error("couldn't parse wire argument at position:" + std::to_string(inarg.position()), repl, respond, _lg, tag, error_types::unknown_error);
+            return true;
         }
-        else if (!prop)
-        {
-            //method
-            if(!meth.is_valid())
-            {
-	      foxtrot_server_specific_error(
-		"invalid method", repl, respond, _lg, tag);
-                _lg.Error("invalid method!");
-                return true;
-            }
-            
-            std::vector<rttr::variant> args;
-            try{
-                args = get_callargs(meth,req,repl);	    
-                for(auto& arg: args)
-                {
-		  rttr::variant v = arg;
-		  _lg.Trace("arg: " + v.to_string());
-                }
-	    
-                }  
-                catch(int& i)
-                {
-		  foxtrot_server_specific_error(
-		    repl.err().msg(), repl,respond,_lg,tag);
-                return true;
-                }
-	    std::vector<rttr::argument> callargs(args.begin(), args.end());
-                
-            
-            //check if it's a stream data method
-	    if(is_ft_call_streaming(meth))
-	      {
-		    foxtrot_server_specific_error( 
-		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
-                    return true;
-	      }
-	  
-	    auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-            retval = meth.invoke_variadic(*dev,callargs);
-            set_returntype(retval,repl);
-                        
-        }
-        
-        else
-        {
-            //property            
-	    if(is_ft_call_streaming(prop))
-	      {
-		    foxtrot_server_specific_error( 
-		    "tried to InvokeCapability on a bulk data property!", repl, respond, _lg, tag);
-                    return true;
-	      }
-	  
-	  
-                if(prop.is_readonly())
-                {
-		    _lg.Trace("readonly property");
-		     auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                    retval = prop.get_value(*dev);
-                    set_returntype(retval,repl);
-                }
-                else
-                {
-                    if( req.args_size() >1)
-                    {
-                        //ERRROR: should only have one number to set a property
-                        foxtrot_server_specific_error(
-                        "require only 1 argument to writable property",
-                        repl, respond, _lg,tag);
-                        return true;
-		      
-                    }
-                    else if (req.args_size() == 1)
-                    {
-                        bool success;
-                        auto arg = get_arg(req.args().Get(0),success);
-                        if(!success)
-                        {
-                            foxtrot_server_specific_error("couldn't get argument for setting property",
-                                repl,respond,_lg,tag);
-                            return true;
-			
-                        }
-		      
-                        auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                        _lg.Trace("setting property value...");
-                        
-                        if(arg.get_type() != prop.get_type())
-                        {
-                            _lg.strm(sl::error) << "arg type: " << arg.get_type().get_name();
-                            _lg.strm(sl::error) << "property type: " << prop.get_type().get_name();
-			    
-			    if(!arg.can_convert(prop.get_type()))
-			    {
-			      throw std::runtime_error("mismatch between argument and property types");
-			    }
-			    else
-			    {
-			      if(!arg.convert(prop.get_type()))
-			      {
-				throw std::runtime_error("failed to convert argument type");
-			      }
-			    }
-                        }
-                        
-                        
-                        success = prop.set_value(*dev,arg);
-                        if(!success)
-                        {
-                            throw std::runtime_error("failed to set property");
-                        }
-                        
-                        repl.set_stringret("");
-                        
-                    }
-                    else if(req.args_size() == 0)
-                    {
-                        auto lock = _harness.lock_device_contentious(devid,req.contention_timeout());
-                        retval  = prop.get_value(dev);
-                        set_returntype(retval,repl);
-                    }
-                    
-                }
-                
-        };
-        
+        ftargs.push_back(outarg);
+    };
+    
+    try {
+    //TODO: error handling here
+    auto ftretval = dev->InvokeCapability(req.capname(),ftargs.cbegin(), ftargs.cend());
+
+    if(ftretval.is_initialized())
+        boost::apply_visitor(ftreturn_visitor(repl),*ftretval);
     
     respond.Finish(repl,grpc::Status::OK,tag);
     return true;
