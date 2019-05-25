@@ -23,6 +23,74 @@ void voidfun()
     
 };
 
+rttr::variant wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, foxtrot::Logging* lg = nullptr)
+{
+    success = true;
+    rttr::variant out;
+    
+    auto which_type = arg.value_case();
+    switch(which_type)
+    {
+        case(capability_argument::ValueCase::kDblarg):
+            out = arg.dblarg(); break;
+        case(capability_argument::ValueCase::kIntarg):
+            out = arg.intarg(); break;
+        case(capability_argument::ValueCase::kBoolarg):
+            out = arg.boolarg(); break;
+        case(capability_argument::ValueCase::kStrarg):
+            out = arg.strarg(); break;
+        case(capability_argument::ValueCase::VALUE_NOT_SET):
+            success = false; break;
+    }
+    return out;
+}
+
+void set_retval_from_variant(const rttr::variant& in, foxtrot::capability_response& resp, foxtrot::Logging* lg = nullptr)
+{
+    bool success;
+    if(!in.is_valid())
+        throw std::logic_error("invalid RTTR variant supplied to set_retval");
+    auto tp = in.get_type();
+    
+    if(!tp.is_valid())
+        throw std::logic_error("invalid RTTR type from variant in set_retval");
+    
+    if(lg)
+        lg->strm(sl::trace) << "variant type: " << in.get_type().get_name();
+    
+    success = true;
+    
+    if(tp == rttr::type::get<void>())
+        return;
+    
+    if(tp == rttr::type::get<bool>())
+        resp.set_boolret(in.to_bool());
+    else if(tp == rttr::type::get<double>() || tp == rttr::type::get<float>())
+        resp.set_dblret(in.to_double(&success));
+    else if(tp == rttr::type::get<std::string>())
+        resp.set_stringret(in.to_string(&success));
+    else if(tp == rttr::type::get<int>() || tp == rttr::type::get<unsigned>() || 
+        tp == rttr::type::get<short>() || tp == rttr::type::get<unsigned short>() 
+        || tp == rttr::type::get<long>() || tp == rttr::type::get<unsigned long>())
+        resp.set_intret(in.to_int(&success));
+    else if(tp.is_enumeration())
+        resp.set_intret(in.to_int(&success));
+    else if(!tp.is_arithmetic())
+        resp.set_stringret(in.to_string(&success));
+    
+    if(!success)
+    {
+        if(lg)
+            lg->strm(sl::trace) << "return type fallthrough, using int";
+        resp.set_intret(in.to_int(&success));
+            
+    }
+    
+    if(!success)
+        throw std::logic_error("failed to convert return type. This may be an error in your device driver");
+    
+    
+}
 
 foxtrot::ft_argtype parse_wire_arg(const foxtrot::capability_argument& inarg, bool& success, foxtrot::Logging* lg = nullptr)
 {
@@ -108,29 +176,36 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
       return true;
     };
     
-    std::vector<foxtrot::ft_argtype> ftargs;
-    ftargs.reserve(req.args().size());
+    std::vector<rttr::variant> vargs;
+    vargs.reserve(req.args().size());
+//     std::vector<foxtrot::ft_argtype> ftargs;
+//     ftargs.reserve(req.args().size());
     
     for(auto& inarg: req.args())
     {
         bool success = false;
-        auto outarg = parse_wire_arg(inarg, success, &_lg);
+        auto outarg = wire_arg_to_variant(inarg, success, &_lg);
+//         auto outarg = parse_wire_arg(inarg, success, &_lg);
         if(!success)
         {
             foxtrot_server_specific_error("couldn't parse wire argument at position:" + std::to_string(inarg.position()), repl, respond, _lg, tag, error_types::unknown_error);
             return true;
         }
-        ftargs.push_back(outarg);
+//         ftargs.push_back(outarg);
+        vargs.push_back(outarg);
     };
     
     try {
     //TODO: error handling here
         auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
-        auto ftretval = dev->Invoke(req.capname(),ftargs.cbegin(), ftargs.cend());
+//         auto ftretval = dev->Invoke(req.capname(),ftargs.cbegin(), ftargs.cend());
+        auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
 
-        if(ftretval.is_initialized())
-            boost::apply_visitor(ftreturn_visitor(repl),*ftretval);
+//         if(ftretval.is_initialized())
+//             boost::apply_visitor(ftreturn_visitor(repl),*ftretval);
     
+        set_retval_from_variant(ftretval, repl, &_lg);
+        
         respond.Finish(repl,grpc::Status::OK,tag);
         return true;
     

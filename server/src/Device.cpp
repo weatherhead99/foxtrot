@@ -162,6 +162,39 @@ rttr::variant get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos,
     return out;
 }
 
+void sanitize_arg(rttr::variant& argin, const rttr::type& target_tp, int pos, foxtrot::Logging* lg= nullptr)
+{
+    if(!argin.is_valid())
+        throw std::logic_error("argument variant is not valid! This should not happen");
+    
+    if(!argin.can_convert(target_tp))
+    {
+        std::ostringstream oss;
+        oss << "argument at position: " << pos << "of type: " << argin.get_type().get_name() << "cannot be converted to needed type: " << target_tp.get_name();
+        throw std::logic_error(oss.str());
+    }
+    
+    if(argin.get_type() != target_tp)
+    {
+        if(lg)
+            lg->strm(sl::trace) << "need to convert";
+        bool success = argin.convert(target_tp);
+        if(!success)
+            throw foxtrot::ReflectionError("failed to convert argument at position: " + std::to_string(pos));
+    };
+    
+    if(lg)
+        lg->strm(sl::trace) << "printing prepared arg: " << argin.to_string();
+    
+    if(lg)
+    {
+        lg->strm(sl::trace) << "argument type: " << argin.get_type().get_name();
+        lg->strm(sl::trace) << "target type:" << target_tp.get_name();
+    }
+
+}
+
+
 std::vector<rttr::variant> get_callargs(rttr::method& meth,
                                         foxtrot::arg_cit begin, foxtrot::arg_cit end, foxtrot::Logging* lg = nullptr)
 {
@@ -296,6 +329,85 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
     };
     
     return out;
+    
+}
+
+
+rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_cit argbegin,
+                                      foxtrot::rarg_cit argend)
+{
+       //default (rttr based) implementation. Override in e.g. python devices
+    auto devtp = rttr::type::get(*this);
+    
+    auto prop = devtp.get_property(capname.c_str());
+    auto meth = devtp.get_method(capname.c_str());
+    
+    if(!meth && !prop)
+    {
+        throw ReflectionError("no matching property or method");
+    }
+    else if(!prop)
+    {
+        //method call
+        if(!meth.is_valid())
+        {
+            throw std::logic_error("invalid method!");
+        }
+        
+        std::vector<rttr::variant> argcopy(argbegin, argend);
+        //TODO: check arguments here
+        auto paraminfs = meth.get_parameter_infos();
+        auto paraminfsit = paraminfs.begin();
+        if(argcopy.size() != paraminfs.size())
+        {
+            throw std::runtime_error("wrong number of arguments provided");
+        }
+        
+        int i =1;
+        for(auto& a : argcopy)
+        {
+            auto target_tp = (paraminfsit++)->get_type();
+            sanitize_arg(a, target_tp, i++, &lg_);
+        }
+        
+        std::vector<rttr::argument> argvec(argcopy.begin(), argcopy.end());
+        auto retval = meth.invoke_variadic(*this,argvec);
+        if(!retval)
+            throw std::logic_error("failed to invoke method!");
+        return retval;
+        
+    }
+    else
+    {
+        auto nargs = std::distance(argbegin,argend);
+        if(prop.is_readonly())
+        {
+            auto ret = prop.get_value(*this);
+            return ret;
+        }
+        else if(nargs > 1)
+        {
+            throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
+        }
+        else if(nargs == 1)
+        {
+            bool success;
+            auto argcpy = *argbegin;
+            sanitize_arg(argcpy,prop.get_type(),1);
+            success = prop.set_value(*this, argcpy);
+            if(!success)
+                throw std::runtime_error("failed to set property!");
+            foxtrot::ft_returntype ret;
+            return ret;
+        }
+        else if(nargs == 0)
+        {
+            auto retval = prop.get_value(*this);
+            return retval;
+        }
+    }
+    
+    
     
 }
 

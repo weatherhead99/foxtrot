@@ -15,6 +15,7 @@ namespace foxtrot
     using ft_returntype = boost::optional<boost::variant<double,int,bool,std::string>>;
     using ft_argtype = boost::variant<double,int,bool,std::string>;
     using arg_cit = std::vector<ft_argtype>::const_iterator;
+    using rarg_cit = std::vector<rttr::variant>::const_iterator;
     
  enum class CapabilityMeta
  {
@@ -53,6 +54,7 @@ namespace foxtrot
     void setDeviceComment(const std::string& comment);
     virtual std::vector<std::string> GetCapabilityNames() const;
     virtual ft_returntype Invoke(const std::string& capname, arg_cit beginargs, arg_cit endargs);
+    virtual rttr::variant Invoke(const std::string& capname, rarg_cit beginargs, rarg_cit endargs);
     virtual Capability GetCapability(const std::string& capname) const;
     
   protected:
