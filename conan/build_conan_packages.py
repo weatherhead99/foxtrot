@@ -19,11 +19,11 @@ createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=Tru
 curdir = os.path.abspath(os.curdir)
 
 print("building foxtrot core conan package...")
-os.chdir("../core")
-createfun(".")
+createfun("../core")
 
 print("building foxtrot server conan package...")
-os.chdir("../server")
-createfun(".")
+createfun("../server")
 
-os.chdir(curdir)
+print("building foxtrot c++ client package...")
+createfun("../client")
+
