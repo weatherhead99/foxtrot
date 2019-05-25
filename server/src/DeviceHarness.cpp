@@ -90,39 +90,13 @@ std::timed_mutex & foxtrot::DeviceHarness::GetMutex(int id)
 
 std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 {
+    
     std::vector<std::string> out;
     
     _lg.strm(sl::trace) << "getting device...";
     auto dev = GetDevice(devid);
-    auto tp = rttr::type::get(*dev);
-    _lg.strm(sl::trace) << "tp: " << tp.get_name();
-    
-    auto props = tp.get_properties();
-    auto meths = tp.get_methods();
-    
-    out.reserve(props.size() + meths.size());
-    
-    for(auto& prop : props)
-    {
-#ifdef NEW_RTTR_API
-     out.push_back(std::string{prop.get_name()});
-#else
-     out.push_back(prop.get_name());   
-#endif
-    }
-    
-    
-    for(auto& meth: meths)
-    {
-#ifdef NEW_RTTR_API
-        out.push_back(std::string{meth.get_name()});
-#else
-        out.push_back(meth.get_name());
-#endif
-    };
-    
-    return out;
-    
+    return dev->GetCapabilityNames();
+
 }
 
 foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, const std::string& capname)
@@ -248,25 +222,6 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
 }
 
 
-
-
-
-variant DeviceHarness::call_capability(int devid, property& prop, unsigned int contention_timeout_ms)
-{
-  if(!prop.is_readonly())
-  {
-    throw std::logic_error("not a readonly property");
-  };
-  
-  auto lock = lock_device_contentious(devid,contention_timeout_ms);
-  
-  auto dev = GetDevice(devid);
-  auto retval = prop.get_value(*dev);
-      
-  return retval;
-  
-
-}
 
 std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
 {

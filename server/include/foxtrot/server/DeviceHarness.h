@@ -36,10 +36,6 @@ namespace foxtrot
         
         //TODO:must be a more elegant way to do this trick
         const std::map<int,const Device*> GetDevMap() const;
-        
-	rttr::variant call_capability(int devid, rttr::property& prop, unsigned contention_timeout_ms);
-	rttr::variant call_capability(int devid, rttr::property& prop, rttr::variant arg, unsigned contention_timeout_ms);
-        rttr::variant call_capability(int devid, rttr::method& meth, std::vector<rttr::variant>& args, unsigned contention_timeout_ms);
 	std::unique_lock<std::timed_mutex> lock_device_contentious(int devid, unsigned contention_timeout_ms);
 	
 	

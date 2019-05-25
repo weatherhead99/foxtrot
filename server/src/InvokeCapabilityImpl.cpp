@@ -125,13 +125,14 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
     try {
     //TODO: error handling here
-    auto ftretval = dev->InvokeCapability(req.capname(),ftargs.cbegin(), ftargs.cend());
+        auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
+        auto ftretval = dev->Invoke(req.capname(),ftargs.cbegin(), ftargs.cend());
 
-    if(ftretval.is_initialized())
-        boost::apply_visitor(ftreturn_visitor(repl),*ftretval);
+        if(ftretval.is_initialized())
+            boost::apply_visitor(ftreturn_visitor(repl),*ftretval);
     
-    respond.Finish(repl,grpc::Status::OK,tag);
-    return true;
+        respond.Finish(repl,grpc::Status::OK,tag);
+        return true;
     
     }
     catch(...)

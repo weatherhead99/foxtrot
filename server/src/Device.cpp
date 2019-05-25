@@ -199,7 +199,7 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 };
 
 
-foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capname,
+foxtrot::ft_returntype foxtrot::Device::Invoke(const std::string& capname,
     foxtrot::arg_cit beginargs, foxtrot::arg_cit endargs)
 {
     //default (rttr based) implementation. Override in e.g. python devices
@@ -266,6 +266,38 @@ foxtrot::ft_returntype foxtrot::Device::InvokeCapability(const std::string& capn
     }
     
 }
+
+std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
+{
+    std::vector<std::string> out;
+    auto tp = rttr::type::get(*this);
+    auto props = tp.get_properties();
+    auto meths = tp.get_methods();
+    
+    out.reserve(props.size() + meths.size());
+    
+        for(auto& prop : props)
+    {
+#ifdef NEW_RTTR_API
+     out.push_back(std::string{prop.get_name()});
+#else
+     out.push_back(prop.get_name());   
+#endif
+    }
+    
+    for(auto& meth: meths)
+    {
+#ifdef NEW_RTTR_API
+        out.push_back(std::string{meth.get_name()});
+#else
+        out.push_back(meth.get_name());
+#endif
+    };
+    
+    return out;
+    
+}
+
 
 
 

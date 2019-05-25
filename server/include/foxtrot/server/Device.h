@@ -34,7 +34,8 @@ namespace foxtrot
     virtual const std::string getDeviceTypeName() const;
     const std::string getDeviceComment() const;
     void setDeviceComment(const std::string& comment);
-    virtual ft_returntype InvokeCapability(const std::string& capname, arg_cit beginargs, arg_cit endargs);
+    virtual std::vector<std::string> GetCapabilityNames() const;
+    virtual ft_returntype Invoke(const std::string& capname, arg_cit beginargs, arg_cit endargs);
     
     
   protected:
