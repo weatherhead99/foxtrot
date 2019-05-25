@@ -27,5 +27,6 @@ namespace foxtrot
 	foxtrot::Logging _lg;
     };
     
+    
 
 }

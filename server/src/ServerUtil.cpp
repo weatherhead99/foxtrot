@@ -6,6 +6,79 @@
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/ServerUtil.h>
+#include <foxtrot/foxtrot.pb.h>
+
+using namespace foxtrot;
+
+rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, foxtrot::Logging* lg)
+{
+    success = true;
+    rttr::variant out;
+    
+    auto which_type = arg.value_case();
+    switch(which_type)
+    {
+        case(capability_argument::ValueCase::kDblarg):
+            out = arg.dblarg(); break;
+        case(capability_argument::ValueCase::kIntarg):
+            out = arg.intarg(); break;
+        case(capability_argument::ValueCase::kBoolarg):
+            out = arg.boolarg(); break;
+        case(capability_argument::ValueCase::kStrarg):
+            out = arg.strarg(); break;
+        case(capability_argument::ValueCase::VALUE_NOT_SET):
+            success = false; break;
+    }
+    return out;
+}
+
+void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capability_response& resp, foxtrot::Logging* lg)
+{
+    bool success;
+    if(!in.is_valid())
+        throw std::logic_error("invalid RTTR variant supplied to set_retval");
+    auto tp = in.get_type();
+    
+    if(!tp.is_valid())
+        throw std::logic_error("invalid RTTR type from variant in set_retval");
+    
+    if(lg)
+        lg->strm(sl::trace) << "variant type: " << in.get_type().get_name();
+    
+    success = true;
+    
+    if(tp == rttr::type::get<void>())
+        return;
+    
+    if(tp == rttr::type::get<bool>())
+        resp.set_boolret(in.to_bool());
+    else if(tp == rttr::type::get<double>() || tp == rttr::type::get<float>())
+        resp.set_dblret(in.to_double(&success));
+    else if(tp == rttr::type::get<std::string>())
+        resp.set_stringret(in.to_string(&success));
+    else if(tp == rttr::type::get<int>() || tp == rttr::type::get<unsigned>() || 
+        tp == rttr::type::get<short>() || tp == rttr::type::get<unsigned short>() 
+        || tp == rttr::type::get<long>() || tp == rttr::type::get<unsigned long>())
+        resp.set_intret(in.to_int(&success));
+    else if(tp.is_enumeration())
+        resp.set_intret(in.to_int(&success));
+    else if(!tp.is_arithmetic())
+        resp.set_stringret(in.to_string(&success));
+    
+    if(!success)
+    {
+        if(lg)
+            lg->strm(sl::trace) << "return type fallthrough, using int";
+        resp.set_intret(in.to_int(&success));
+            
+    }
+    
+    if(!success)
+        throw std::logic_error("failed to convert return type. This may be an error in your device driver");
+    
+    
+}
+
 
 
 rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
