@@ -122,7 +122,7 @@ foxtrot::ft_returntype get_returnval(rttr::variant& var, foxtrot::Logging* lg = 
 };
 
 
-rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos, foxtrot::Logging* lg =nullptr)
+rttr::variant get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos, foxtrot::Logging* lg =nullptr)
 {
     rttr::variant out;
     boost::apply_visitor(ftarg_visitor(out),argin);
@@ -142,10 +142,15 @@ rttr::argument get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos
         
     if(out.get_type() != tp)
     {
+        if(lg)
+            lg->strm(sl::trace) << "need to convert";
         bool success = out.convert(tp);
         if(!success)
             throw foxtrot::ReflectionError("failed to convert argument at position: " + std::to_string(pos));
     };
+    
+    if(lg)
+        lg->strm(sl::trace) << "printing prepared arg: " << out.to_string();
     
     return out;
 }
@@ -175,7 +180,7 @@ std::vector<rttr::argument> get_callargs(rttr::method& meth,
         //HACK: this could be much better and avoid copying, probably
         auto argcpy = *it;
         auto rttrarg = get_arg(argcpy,target_argtp,i+1,lg);
-        out.push_back(rttrarg);
+        out.push_back(rttr::argument{rttrarg});
     };
     
     return out;
