@@ -5,6 +5,7 @@
 #include <foxtrot/server/Device.h>
 #include <foxtrot/ReflectionError.h>
 
+
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
 : _proto(std::move(proto)), _devcomment(comment), lg_("Device")
 {
@@ -163,18 +164,13 @@ std::vector<rttr::argument> get_callargs(rttr::method& meth,
     std::vector<rttr::argument> out;
     out.reserve(std::distance(begin,end));
     
-#ifdef NEW_RTTR_API
     auto paraminfsit = param_infs.begin();
-#endif
     int i=0;
     for(auto it = begin; it != end; it++)
     {
-#ifdef NEW_RTTR_API
         const auto target_argtp = (paraminfsit++)->get_type();
         i++;
-#else
-        const auto target_argtp = param_infs[i++].get_type();
-#endif
+
         
         //HACK: this could be much better and avoid copying, probably
         auto argcpy = *it;
@@ -278,27 +274,81 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
     
         for(auto& prop : props)
     {
-#ifdef NEW_RTTR_API
      out.push_back(std::string{prop.get_name()});
-#else
-     out.push_back(prop.get_name());   
-#endif
     }
     
     for(auto& meth: meths)
     {
-#ifdef NEW_RTTR_API
         out.push_back(std::string{meth.get_name()});
-#else
-        out.push_back(meth.get_name());
-#endif
     };
     
     return out;
     
 }
 
-
+foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) const
+{
+    auto reflecttp = rttr::type::get(*this);
+    auto prop = reflecttp.get_property(capname.c_str());
+    auto meth = reflecttp.get_method(capname.c_str());
+    
+    Capability out;
+    out.CapabilityName = capname;
+    
+    if(prop)
+    {
+        auto proptp = prop.get_type();
+        out.Returntype = proptp;
+        
+        
+        if(proptp.is_sequential_container())
+        {
+            out.type = CapabilityType::STREAM;
+        }
+        
+        else if(prop.is_readonly())
+        {
+            out.type = CapabilityType::VALUE_READONLY;
+        }
+        else
+        {
+            out.type = CapabilityType::VALUE_READWRITE;
+            out.Argnames.push_back(std::string{proptp.get_name()});
+            out.Argtypes.push_back(proptp);
+        }
+    }
+    else if(meth)
+    {
+        if(meth.get_return_type().is_sequential_container())
+        {
+            out.type = CapabilityType::STREAM;
+        }
+        else
+        {
+            out.type = CapabilityType::ACTION;
+        }
+        
+        auto args = meth.get_parameter_infos();
+        auto rettp = meth.get_return_type();
+        
+        out.Returntype = rettp;
+        out.Argnames.reserve(args.size());
+        out.Argtypes.reserve(args.size());
+        
+        for(auto& arg : args)
+        {
+            out.Argnames.push_back(std::string(arg.get_name()));
+            out.Argtypes.push_back(arg.get_type());
+        }
+    }
+    else
+    {
+        throw std::out_of_range("requested capability which doesn't seem to exist!");
+    }
+    
+    return out;
+    
+}
 
 
 
