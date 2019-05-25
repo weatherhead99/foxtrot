@@ -72,7 +72,8 @@ message devcapability
     {
       value_types rettp = 5;
       byte_data_types vecrettp = 6;
-      }
+      bool dynamic_rettp = 7;
+    }
 }
 
 message devdescribe
