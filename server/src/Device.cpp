@@ -152,10 +152,17 @@ rttr::variant get_arg(foxtrot::ft_argtype& argin, const rttr::type& tp, int pos,
     if(lg)
         lg->strm(sl::trace) << "printing prepared arg: " << out.to_string();
     
+    if(lg)
+    {
+        lg->strm(sl::trace) << "argument type: " << out.get_type().get_name();
+        lg->strm(sl::trace) << "target type:" << tp.get_name();
+    }
+        
+    
     return out;
 }
 
-std::vector<rttr::argument> get_callargs(rttr::method& meth,
+std::vector<rttr::variant> get_callargs(rttr::method& meth,
                                         foxtrot::arg_cit begin, foxtrot::arg_cit end, foxtrot::Logging* lg = nullptr)
 {
     auto argsize_given = std::distance(begin,end);
@@ -166,7 +173,7 @@ std::vector<rttr::argument> get_callargs(rttr::method& meth,
         throw std::out_of_range("unexpected number of arguments supplied");
     }
     
-    std::vector<rttr::argument> out;
+    std::vector<rttr::variant> out;
     out.reserve(std::distance(begin,end));
     
     auto paraminfsit = param_infs.begin();
@@ -175,12 +182,10 @@ std::vector<rttr::argument> get_callargs(rttr::method& meth,
     {
         const auto target_argtp = (paraminfsit++)->get_type();
         i++;
-
-        
         //HACK: this could be much better and avoid copying, probably
         auto argcpy = *it;
         auto rttrarg = get_arg(argcpy,target_argtp,i+1,lg);
-        out.push_back(rttr::argument{rttrarg});
+        out.push_back(rttrarg);
     };
     
     return out;
@@ -226,7 +231,10 @@ foxtrot::ft_returntype foxtrot::Device::Invoke(const std::string& capname,
         }
         
         auto callargs = get_callargs(meth, beginargs, endargs, &lg_);
-        auto retval = meth.invoke_variadic(*this,callargs);
+        std::vector<rttr::argument> argvec(callargs.begin(), callargs.end());
+        auto retval = meth.invoke_variadic(*this,argvec);
+        if(!retval)
+            throw std::logic_error("failed to invoke method!");
         return get_returnval(retval, &lg_);
         
     }
