@@ -5,6 +5,15 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "client")
 
+message(STATUS "checking for conan build...")
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  message(WARNING "conanbuildinfo detected, building using conan dependencies")
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  set(FOXTROT_CLIENT_CONAN_BUILD TRUE)
+  conan_basic_setup()
+endif()
+
+
 find_package(foxtrotCore REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)

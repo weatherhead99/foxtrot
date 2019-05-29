@@ -27,3 +27,8 @@ createfun("../server")
 print("building foxtrot c++ client package...")
 createfun("../client")
 
+print("building foxtrot protocols package...")
+createfun("../protocols")
+
+print("building foxtrot devices package...")
+createfun("../devices")
