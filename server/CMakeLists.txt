@@ -96,10 +96,12 @@ target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB}
 ${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
 endif()
 
-add_executable(ftauth src/ftauth.cpp)
-target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core
-foxtrot_server)
-target_include_directories(ftauth PRIVATE include)
+if(BUILD_AUTH)
+    add_executable(ftauth src/ftauth.cpp)
+    target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core
+    foxtrot_server)
+    target_include_directories(ftauth PRIVATE include)
+endif()
 
 if(FOXTROT_SERVER_CONAN_BUILD)
 	target_link_libraries(ftauth PRIVATE ${CONAN_BOOST_REGEX_LIBRARIES})
@@ -117,12 +119,20 @@ install(TARGETS exptserve
         EXPORT foxtrot_server
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
+if(BUILD_AUTH)
+    install(TARGETS ftauth
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
 install(EXPORT foxtrot_server
         DESTINATION ${ft_cmakedir}
         COMPONENT devel
         NAMESPACE foxtrot::)
 
+        
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake 
+        DESTINATION ${ft_cmakedir})
+        
 foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
                                 ${ft_cmakedir}
                                 ft_cmakedir)

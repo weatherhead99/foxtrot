@@ -1,13 +1,24 @@
 project(foxtrot_protocols C CXX)
 cmake_minimum_required(VERSION 3.6)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+message(STATUS "checking for conan build...")
+if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  message(WARNING "conanbuildinfo detected, building using conan dependencies")
+  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+  set(FOXTROT_PROTOCOLS_CONAN_BUILD TRUE)
+  conan_basic_setup()
+endif()
+
 
 find_package(foxtrotServer REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 
 set(packname "protocols")
+
+
 
 set(srcs "")
 set(protos "")
@@ -43,7 +54,7 @@ foxtrot_build_protocol(simpleTCP)
 
 message(STATUS "finding dependencies for serial port")
 find_package(Boost REQUIRED)
-if(Boost)
+if(Boost_FOUND)
     message(STATUS "found serial port dependencies")
     foxtrot_build_protocol(SerialPort)
 endif()
@@ -64,6 +75,8 @@ endif()
 #         foxtrot_build_protocol(i2c)
 #     endif()
 # endif()
+
+message("protocols enabled for build: ${protos}")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
