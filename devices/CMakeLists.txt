@@ -63,6 +63,7 @@ if(BUILD_I2C)
 endif()
 add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
+add_subdirectory(digitaldiscovery)
 
 set(libobjs "")
 message(STATUS "device targetS: ${device_targets}")

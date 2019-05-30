@@ -8,13 +8,6 @@ set(foxtrot_core_PREFIX ${PACKAGE_PREFIX_DIR})
 
 include(CMakeFindDependencyMacro)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-
-find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread)
-find_dependency(Protobuf REQUIRED)
-find_dependency(grpc REQUIRED)
-
-
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/installtree)
     message(WARNING "foxtrotCoreConfig configuring from BUILD TREE! You may not want this!")
     set(BUILD_TREE TRUE)
@@ -25,9 +18,18 @@ endif()
 
 
 if(BUILD_TREE)
-    
+    list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_core_sourcedir@/cmake/")
+else()
+    list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+endif()
+
+find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread)
+find_dependency(Protobuf REQUIRED)
+find_dependency(grpc REQUIRED)
+
+
+if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)
-    list(APPEND CMAKE_MODULE_PATH @PACKAGE_ft_core_sourcedir@/cmake/)
     set_property(TARGET foxtrot::foxtrot_core APPEND PROPERTY
                  INTERFACE_INCLUDE_DIRECTORIES @PACKAGE_ft_core_binarydir@)
 else()
