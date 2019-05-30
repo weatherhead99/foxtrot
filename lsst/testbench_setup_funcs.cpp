@@ -1,11 +1,11 @@
 #include "testbench_setup_funcs.h"
 
-#include "devices/archon/archon_module_heaterx.h"
-#include "devices/archon/archon_module_hvxbias.h"
-#include "devices/archon/archon_module_lvxbias.h"
-#include "devices/archon/archon_module_xvbias.h"
-#include "devices/archon/archon_module_driver.h"
-#include "devices/archon/archon_module_AD.h"
+#include <foxtrot/devices/archon_module_heaterx.h>
+#include <foxtrot/devices/archon_module_hvxbias.h>
+#include <foxtrot/devices/archon_module_lvxbias.h>
+#include <foxtrot/devices/archon_module_xvbias.h>
+#include <foxtrot/devices/archon_module_driver.h>
+#include <foxtrot/devices/archon_module_AD.h>
 
 void setup_heaterX(const modulesmap& modules, foxtrot::DeviceHarness& harness, foxtrot::Logging& lg)
 {

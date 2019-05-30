@@ -15,13 +15,13 @@
 #include <foxtrot/devices/archon_module_AD.h>
 #include <foxtrot/devices/archon_module_xvbias.h>
 #include <foxtrot/devices/archonraw.h>
-#include <foxtrot/devices/webswitch_plus/webswitch_plus.h>
-#include <foxtrot/devices/TPG362/TPG362.h>
-#include <foxtrot/devices/newport_2936R/newport2936R.h>
-#include <foxtrot/devices/cornerstone_260/cornerstone260.h>
-#include <foxtrot/devices/stellarnet/stellarnet.h>
+#include <foxtrot/devices/webswitch_plus.h>
+#include <foxtrot/devices/TPG362.h>
+#include <foxtrot/devices/newport2936R.h>
+#include <foxtrot/devices/cornerstone260.h>
+#include <foxtrot/devices/stellarnet.h>
 #ifdef linux
-#include "devices/OPS-Q250/Q250.h"
+#include <foxtrot/devices/Q250.h>
 #endif
 
 
