@@ -20,7 +20,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
         "rttr/0.9.6@weatherhead99/testing", \
         "rapidjson/1.1.0%s" % bcs
     
-    default_options = {"rttr:shared" : True}
+    default_options = {"rttr:shared" : True,
+                       "libcurl:shared" : True}
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %

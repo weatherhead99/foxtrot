@@ -2,6 +2,8 @@
 
 @PACKAGE_INIT@
 
+set(foxtrot_protocols_PREFIX ${PACKAGE_PREFIX_DIR})
+
 include(CMakeFindDependencyMacro)
 
 find_dependency(foxtrotServer REQUIRED)
@@ -23,7 +25,7 @@ if(BUILD_TREE)
                  INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_LIST_DIR})
 else()
     if(NOT TARGET foxtrot::foxtrot_protocols AND NOT foxtrot_protocols_BINARY_DIR)
-        include(@PACKAGE_ft_cmakedir@/foxtrot_protocols.cmake)
+        include(${foxtrot_protocols_PREFIX}/lib/cmake/foxtrotProtocols/foxtrot_protocols.cmake)
     endif()
 endif()
 
