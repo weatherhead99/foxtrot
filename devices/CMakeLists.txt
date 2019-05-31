@@ -26,11 +26,14 @@ find_package(rttr 0.9.6 REQUIRED)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 set(device_targets "")
+set(link_later_libs "")
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 macro(add_device_object_lib)
     set(options OPTIONAL)
     set(oneValueArgs NAME)
-    set(multiValueArgs SRCS INCLUDES)
+    set(multiValueArgs SRCS INCLUDES LINKLIBS)
     cmake_parse_arguments(olib "${options}" "${oneValueArgs}" 
             "${multiValueArgs}" ${ARGN})
             
@@ -42,6 +45,9 @@ macro(add_device_object_lib)
     
     list(APPEND device_targets ${olib_NAME})
     set(device_targets ${device_targets} PARENT_SCOPE)
+    
+    list(APPEND link_later_libs ${olib_LINKLIBS})
+    set(link_later_libs ${link_later_libs} PARENT_SCOPE)
     
     file(COPY ${olib_INCLUDES} 
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/devices)
@@ -64,6 +70,7 @@ endif()
 add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
 add_subdirectory(digitaldiscovery)
+add_subdirectory(idscamera)
 
 set(libobjs "")
 message(STATUS "device targetS: ${device_targets}")
@@ -72,6 +79,12 @@ foreach(tgt ${device_targets})
 endforeach()
 message(STATUS "libobjs: ${libobjs}")
 add_library(foxtrot_devices ${libobjs})
+
+foreach(lib ${link_later_libs})
+    message(STATUS "linking in requested library: ${lib}")
+    target_link_libraries(foxtrot_devices PUBLIC ${lib})
+endforeach()
+
 
 install(TARGETS foxtrot_devices 
         EXPORT foxtrot_devices
