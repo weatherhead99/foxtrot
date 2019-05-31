@@ -132,10 +132,12 @@ install(EXPORT foxtrot_server
         
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake 
         DESTINATION ${ft_cmakedir})
-        
+
+set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
+
 foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
                                 ${ft_cmakedir}
-                                ft_cmakedir)
+                                "ft_cmakedir;ft_server_sourcedir")
 
 foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)
 
