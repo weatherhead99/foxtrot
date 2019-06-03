@@ -42,10 +42,11 @@ message("foxtrot core version: ${VERSION}")
 find_package(Boost REQUIRED COMPONENTS log program_options filesystem)
 find_package(Protobuf REQUIRED)
 
-find_package(grpc REQUIRED)
-if(${GRPC_CPP_PLUGIN} STREQUAL GRPC_CPP_PLUGIN-NOTFOUND)
-    message(FATAL_ERROR "can't compile GRPC code, can't continue!")
-endif()
+find_package(gRPC REQUIRED)
+find_package(protoc REQUIRED)
+# if(${GRPC_CPP_PLUGIN} STREQUAL GRPC_CPP_PLUGIN-NOTFOUND)
+#     message(FATAL_ERROR "can't compile GRPC code, can't continue!")
+# endif()
 
 
 #build foxtrot core library (errors and logging)
@@ -54,21 +55,37 @@ set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
 src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/config.cpp)
 
 #generate protobuf headers
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS proto/foxtrot.proto)
-protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
+#TODO: FIX THIS!
+#protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS proto/foxtrot.proto)
+#protobuf_generate_grpc_cpp(PROTO_GRPC_SRCS PROTO_GRPC_HDRS proto/foxtrot.proto)
+protobuf_generate(OUT_VAR proto_srcs PROTOS proto/foxtrot.proto APPEND_PATH)
+get_filename_component(protopath proto/foxtrot.proto ABSOLUTE)
+find_program(grpc_plugin grpc_cpp_plugin)
 
+set(grpc_srcs "foxtrot.grpc.pb.cc;foxtrot.grpc.pb.h")
 
-add_library(foxtrot_core ${srcs} ${PROTO_SRCS} ${PROTO_GRPC_SRCS}
-  ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+add_custom_command(OUTPUT ${grpc_srcs}
+                    COMMAND protobuf::protoc
+                    ARGS --grpc_out ${CMAKE_CURRENT_BINARY_DIR} --plugin=protoc-gen-grpc=${grpc_plugin} foxtrot.proto -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+                    DEPENDS ${protopath} protobuf::protoc
+                    COMMENT "generating GRPC stub code from ${protopath}"
+                    VERBATIM
+                    )
+set_source_files_properties(${grpc_srcs} PROPERTIES GENERATED TRUE)
+
+message("generated sources: ${grpc_srcs}")
+
+add_library(foxtrot_core ${srcs} ${proto_srcs} ${grpc_srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
-add_custom_command(TARGET foxtrot_core POST_BUILD
-COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${PROTO_HDRS} ${PROTO_GRPC_HDRS} 
-${CMAKE_CURRENT_BINARY_DIR}/foxtrot/)
-foxtrot_standard_include_dirs(foxtrot_core)
+# add_custom_command(TARGET foxtrot_core POST_BUILD
+# COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${PROTO_HDRS} ${PROTO_GRPC_HDRS} 
+# ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/)
 
-target_link_libraries(foxtrot_core PUBLIC protobuf::libprotobuf Boost::log Boost::program_options 
-Boost::filesystem ${GRPC_LIBRARIES})
+
+
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)

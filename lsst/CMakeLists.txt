@@ -31,3 +31,11 @@ set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp)
 add_library(lsst_testbench SHARED ${setup_srcs})
 target_link_libraries(lsst_testbench foxtrot::foxtrot_core foxtrot::foxtrot_server
 foxtrot::foxtrot_devices)
+set_target_properties(lsst_testbench PROPERTIES PREFIX "")
+
+
+include(GNUInstallDirs)
+
+install(TARGETS autofilld RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS tbcli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS lsst_testbench LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})

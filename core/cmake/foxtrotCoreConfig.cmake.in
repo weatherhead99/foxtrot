@@ -25,7 +25,7 @@ endif()
 
 find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread)
 find_dependency(Protobuf REQUIRED)
-find_dependency(grpc REQUIRED)
+find_dependency(gRPC REQUIRED)
 
 
 if(BUILD_TREE)
@@ -39,8 +39,5 @@ else()
     list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
 endif()
 
-#need to put this here because only just configured the module path
-message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
-find_dependency(grpc REQUIRED)
 
 check_required_components(foxtrot_core)

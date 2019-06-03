@@ -15,6 +15,7 @@ endif()
 
 
 find_package(foxtrotCore REQUIRED)
+find_package(gRPC REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -24,7 +25,7 @@ target_include_directories(foxtrot_client PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
                             $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 
-target_link_libraries(foxtrot_client foxtrot::foxtrot_core)
+target_link_libraries(foxtrot_client foxtrot::foxtrot_core gRPC::grpc++)
 target_include_directories(foxtrot_client PRIVATE 
 $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>)
 

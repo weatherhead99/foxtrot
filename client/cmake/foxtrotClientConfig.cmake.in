@@ -10,6 +10,7 @@ set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
 include(CMakeFindDependencyMacro)
 
 find_dependency(foxtrotCore REQUIRED)
+find_dependency(gRPC REQUIRED)
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/installtree)
     message(WARNING "foxtrotClientConfig configuring from BUILD TREE! You may not want this!")
