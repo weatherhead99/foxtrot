@@ -14,7 +14,7 @@ namespace foxtrot
    virtual void write(const std::string& data) = 0;
    virtual std::string read(unsigned len, unsigned* actlen=nullptr) = 0;
     
-   virtual std::string read_until_endl( char endlchar = '\n') ;
+   virtual std::string read_until_endl( char endlchar = '\n') = 0;
    
    
    

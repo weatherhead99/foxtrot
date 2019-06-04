@@ -10,22 +10,30 @@ else()
     set(BUILD_TREE FALSE)
 endif()
 
+set(FOXTROT_DEVICES_BUILTIN "@device_targets@")
+
+
 include(CMakeFindDependencyMacro)
 find_dependency(foxtrotCore REQUIRED)
 find_dependency(foxtrotProtocols REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)
-if(@BUILD_UEYE@)
+if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
   if(BUILD_TREE)
-    list(APPEND CMAKE_MODULE_PATH "@ft_client_sourcedir@/cmake")
+    list(APPEND CMAKE_MODULE_PATH "@ft_devices_sourcedir@/cmake")
   else()
     list(APPEND CMAKE_MODULE_PATH "${foxtrot_devices_PREFIX}/lib/cmake/foxtrotDevices/")
   endif()
   find_dependency(ueye REQUIRED)
 endif()
+if("webswitch_plus" IN_LIST FOXTROT_DEVICES_BUILTIN)
+  if(BUILD_TREE)
+    list(APPEND CMAKE_MODULE_PATH "@ft_devices_sourcedir@/cmake")
+  else()
+    list(APPEND CMAKE_MODULE_PATH "${foxtrot_devices_PREFIX}/lib/cmake/foxtrotDevices/")
+  endif()
+  find_dependency(rapidxml REQUIRED)
+endif()
 
-
-
-set(FOXTROT_DEVICES_BUILTIN "@device_targets@")
 
 
 if(BUILD_TREE)

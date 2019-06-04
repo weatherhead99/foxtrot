@@ -82,7 +82,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(foxtrot_protocols ${srcs})
 foxtrot_standard_include_dirs(foxtrot_protocols)
-target_link_libraries(foxtrot_protocols foxtrot::foxtrot_core foxtrot::foxtrot_server)
+target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_server)
 
 #TODO: do this more elegantly
 target_include_directories(foxtrot_protocols PRIVATE ${ft_proto_includes})

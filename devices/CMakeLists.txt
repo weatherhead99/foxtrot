@@ -50,6 +50,11 @@ macro(add_device_object_lib)
     list(APPEND link_later_libs ${olib_LINKLIBS})
     set(link_later_libs ${link_later_libs} PARENT_SCOPE)
 
+    foreach(lib ${link_later_libs})
+      target_include_directories(${olib_NAME} PUBLIC
+	$<TARGET_PROPERTY:${lib},INTERFACE_INCLUDE_DIRECTORIES>)
+    endforeach()
+    
     set(olib_INCLUDES_abs "")
     foreach(include ${olib_INCLUDES})
       get_filename_component(fla ${include} ABSOLUTE)
@@ -112,9 +117,11 @@ install(EXPORT foxtrot_devices
         DESTINATION ${ft_cmakedir}
         NAMESPACE foxtrot::
         COMPONENT devel)
-        
+
+set(ft_devices_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
+
 foxtrot_create_package_config(cmake/foxtrotDevicesConfig.cmake.in ${ft_cmakedir} 
-"ft_cmakedir;device_targets")
+"ft_cmakedir;device_targets;ft_devices_sourcedir")
 
 foxtrot_add_to_package_registry(foxtrot_devices
 foxtrotDevices)

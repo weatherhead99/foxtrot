@@ -1,4 +1,13 @@
 #include <foxtrot/protocols/CommunicationProtocol.h>
+#include <foxtrot/protocols/SerialProtocol.h>
+
+foxtrot::SerialProtocol::SerialProtocol(const foxtrot::parameterset* const instance_parameters)
+  : CommunicationProtocol(instance_parameters)
+  
+{
+};
+
+
 
 foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters) 
 {

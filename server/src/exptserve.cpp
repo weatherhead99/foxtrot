@@ -103,9 +103,10 @@ int main(int argc, char** argv)
     pdesc.add("setupfile",1).add("servername",1).add("parameterfile",1);
     
     po::variables_map vm;
-    
-    foxtrot::load_config_file(config_file,desc,vm);
+
     po::store(po::command_line_parser(argc,argv).options(desc).positional(pdesc).run(),vm);
+    foxtrot::load_config_file(config_file,desc,vm);
+    
 
     
  if(vm.count("help"))
