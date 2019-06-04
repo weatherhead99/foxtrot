@@ -37,21 +37,30 @@ macro(add_device_object_lib)
     cmake_parse_arguments(olib "${options}" "${oneValueArgs}" 
             "${multiValueArgs}" ${ARGN})
             
-    add_library(${olib_NAME} OBJECT ${olib_SRCS})
+	  add_library(${olib_NAME} OBJECT ${olib_SRCS})
+
     target_include_directories(${olib_NAME} PRIVATE
     $<TARGET_PROPERTY:foxtrot::foxtrot_server,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_protocols,INTERFACE_INCLUDE_DIRECTORIES>)
-    
+  
     list(APPEND device_targets ${olib_NAME})
     set(device_targets ${device_targets} PARENT_SCOPE)
     
     list(APPEND link_later_libs ${olib_LINKLIBS})
     set(link_later_libs ${link_later_libs} PARENT_SCOPE)
+
+    set(olib_INCLUDES_abs "")
+    foreach(include ${olib_INCLUDES})
+      get_filename_component(fla ${include} ABSOLUTE)
+      list(APPEND olib_INCLUDES_abs ${fla})
+    endforeach()
     
-    file(COPY ${olib_INCLUDES} 
-        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/devices)
-    
+    add_custom_target(${olib_NAME}_copy_includes
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${olib_INCLUDES_abs}
+      ${CMAKE_BINARY_DIR}/foxtrot/devices/
+      COMMENT "copying include tree to top level build tree")
+
     install(FILES ${olib_INCLUDES}
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices/)
 endmacro()
@@ -79,10 +88,16 @@ foreach(tgt ${device_targets})
 endforeach()
 message(STATUS "libobjs: ${libobjs}")
 add_library(foxtrot_devices ${libobjs})
+target_link_libraries(foxtrot_devices PUBLIC foxtrot::foxtrot_protocols)
 
 foreach(lib ${link_later_libs})
     message(STATUS "linking in requested library: ${lib}")
     target_link_libraries(foxtrot_devices PUBLIC ${lib})
+endforeach()
+
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/foxtrot/devices)
+foreach(tgt ${device_targets})
+  add_dependencies(foxtrot_devices ${tgt}_copy_includes)
 endforeach()
 
 
