@@ -39,4 +39,7 @@ class FoxtrotCppPackage(ConanFile):
             cmake.build()
         cmake.install()
         cmake.patch_config_paths()
-
+    
+    def package_info(self):
+        self.cpp_info.libdirs = ["lib/foxtrot"]
+        self.cpp_info.libs = tools.collect_libs(self)

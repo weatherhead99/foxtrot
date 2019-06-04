@@ -15,3 +15,4 @@ class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage,
     
     def requirements(self):
         self.requires("foxtrot_server/%s@%s/%s" % (self.version,self.user, self.channel))
+

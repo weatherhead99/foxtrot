@@ -27,7 +27,3 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                        "boost_regex:shared": True,
                        "OpenSSL:shared": True,
                        "protobuf:with_zlib": True}
-    
-    def package_info(self):
-        self.cpp_info.libs=["libfoxtrot_core.so"]
-        self.cpp_info.libdirs=["lib/foxtrot"]

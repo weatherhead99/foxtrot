@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef FOXTROT_CONAN_BUILD
+#ifndef BOOST_LOG_DYN_LINK
 #define BOOST_LOG_DYN_LINK
 #endif
 

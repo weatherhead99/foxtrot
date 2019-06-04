@@ -24,3 +24,4 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" % (self.version, self.user, self.channel))
         self.requires("foxtrot_protocols/%s@%s/%s" % (self.version, self.user, self.channel))
+
