@@ -14,7 +14,7 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "newport_2936R/*.h", "newport_2936R/*.cpp", "OPS-Q250/*.h",
                       "OPS-Q250/*.cpp", "stellarnet/*.h", "stellarnet/*.cpp",
                       "TPG362/*.h", "TPG362/*.cpp", "webswitch_plus/*.h",
-                      "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/*.in")
+                      "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake")
 
     requires =  ("OpenSSL/1.0.2r@conan/stable",
                  "rapidxml/1.13@bincrafters/stable")
