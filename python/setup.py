@@ -9,5 +9,6 @@ setup(
       setup_requires = [
               "grpcio-tools"],
       packages = find_packages(),
-      include_package_data = True
+      include_package_data = True,
+      install_requires = ["mypy", "grpcio-tools"]
       )

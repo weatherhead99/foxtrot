@@ -47,7 +47,7 @@ if(FOXTROT_CORE_CONAN_BUILD)
     find_package(protoc REQUIRED)
 endif()
 
-message(WARNING "using protoc program: ${protobuf::protoc}")
+#message(WARNING "using protoc program: ${protobuf::protoc}")
 
 #build foxtrot core library (errors and logging)
 
