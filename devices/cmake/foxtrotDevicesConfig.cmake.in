@@ -33,6 +33,9 @@ if("webswitch_plus" IN_LIST FOXTROT_DEVICES_BUILTIN)
   endif()
   find_dependency(rapidxml REQUIRED)
 endif()
+if("stellarnet" IN_LIST FOXTROT_DEVICES_BUILTIN)
+  find_dependency(libusb REQUIRED)
+endif()
 
 
 

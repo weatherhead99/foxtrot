@@ -35,14 +35,12 @@ endmacro()
 
 
 #BulkUSB setup and check
-message(STATUS "finding dependencies for BulkUSB")
-find_library(libusb NAMES usb-1.0 libusb-1.0 usb)
-find_path(libusb_include NAMES libusb.h PATH_SUFFIXES libusb-1.0)
-if(libusb AND libusb_include)
+find_package(libusb REQUIRED)
+if(${libusb_FOUND})
     message(STATUS "BulkUSB dependencies found")
     foxtrot_build_protocol(BulkUSB)
-    list(APPEND ft_proto_includes ${libusb_include})
 endif()
+
 
 #character device has no dependencies
 #largely only useful on unix though
@@ -83,6 +81,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(foxtrot_protocols ${srcs})
 foxtrot_standard_include_dirs(foxtrot_protocols)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_server)
+
+if("BulkUSB" IN_LIST protos)
+    message(STATUS "linking in libusb")
+    target_link_libraries(foxtrot_protocols PUBLIC libusb::libusb)
+endif()
+
 
 #TODO: do this more elegantly
 target_include_directories(foxtrot_protocols PRIVATE ${ft_proto_includes})

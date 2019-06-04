@@ -19,6 +19,11 @@ endif()
 
 set(FOXTROT_PROTOCOLS_SUPPORTED "@protos@")
 
+if("BulkUSB" IN_LIST FOXTROT_PROTOCOLS_SUPPORTED)
+    find_dependency(libusb REQUIRED)
+endif()
+
+
 if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotProtocolsexports.cmake)
     set_property(TARGET foxtrot::foxtrot_protocols APPEND PROPERTY
