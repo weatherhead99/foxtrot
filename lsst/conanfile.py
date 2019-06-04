@@ -18,7 +18,8 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
         self.requires("foxtrot_devices/%s@%s/%s" % (self.version,self.user,self.channel))
 
     def deploy(self):
-        self.copy_deps("exptserve")
-        self.copy("tbcli")
-        self.copy("autofilld")
-        self.copy("lsst_testbench.so")
+        self.copy_deps("*exptserve")
+        self.copy_deps("*dummy_setup.so")
+        self.copy("*tbcli")
+        self.copy("*autofilld")
+        self.copy("*lsst_testbench.so")
