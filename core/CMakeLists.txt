@@ -88,7 +88,7 @@ add_custom_command(TARGET foxtrot_core POST_BUILD
 COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${gen_hdrs}
  ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem protobuf::libprotobuf gRPC::grpc++)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
