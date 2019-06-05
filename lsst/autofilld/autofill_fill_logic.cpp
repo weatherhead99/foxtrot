@@ -66,18 +66,22 @@ env_data autofill_logic::measure_data(Client& cl)
     cl.InvokeCapability(archon_devid,"update_state");
     
     out.timestamp = pt::second_clock::local_time();
-
+    lg_.strm(sl::trace) << "getting pressure 1";
     out.cryostat_pressure = get<double>(cl.InvokeCapability(tpg_devid,"getPressure",1));
+    lg_.strm(sl::trace) << "getting pressure 2";
     out.pump_pressure = get<double>(cl.InvokeCapability(tpg_devid,"getPressure",2));
+    lg_.strm(sl::trace) << "getting temp A";
     out.tank_temp = get<double>(cl.InvokeCapability(heater_devid, "getTempA"));
+    lg_.strm(sl::trace) << "getting temp B";
     out.stage_temp = get<double>(cl.InvokeCapability(heater_devid, "getTempB"));
-
+    lg_.strm(sl::trace) << "getting heater output";
     out.heater_output = get<double>(cl.InvokeCapability(heater_devid,"getHeaterAOutput"));
-
+    lg_.strm(sl::trace) << "getting heater target";
     out.heater_target = get<double>(cl.InvokeCapability(heater_devid,"getHeaterTarget",0));
 
-    
+    lg_.strm(sl::trace) << "getting gauge enable 1";
     out.cryo_gauge_enable = get<bool>(cl.InvokeCapability(tpg_devid,"getGaugeOnOff",1));
+    lg_.strm(sl::trace) << "getting gauge enable 2";
     out.pump_gauge_enable = get<bool>(cl.InvokeCapability(tpg_devid,"getGaugeOnOff",2));
     
     return out;
