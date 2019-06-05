@@ -58,14 +58,16 @@ if(Boost_FOUND)
 endif()
 
 #some protocols only work on linux
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  find_file(sg_include scsi/sg.h)
+  if(EXISTS ${sg_include})
+    message(STATUS "found scsiserial dependencies")
+    foxtrot_build_protocol(scsiserial)
+  endif()
+endif()
+#
 #i2c protocol currently broken!
-# if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-#     find_file(sg_include scsi/sg.h)
-#     if(EXISTS ${sg_include})
-#         message(STATUS "found scsiserial dependencies")
-#         foxtrot_build_protocol(scsiserial)
-#     endif()
-#     
 #     find_file(i2c_include i2c-dev.h PATH_SUFFIXES linux)
 #     message(STATUS "i2c: ${i2c_include}")
 #     if(EXISTS ${i2c_include})
