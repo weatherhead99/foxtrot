@@ -8,7 +8,7 @@ add_device_object_lib(NAME archon
 
 # target_link_libraries(archon PRIVATE ${RTTR_TARGET})
 # target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
-# target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
+target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
 
 
 # add_executable(archon_test archon_test.cpp)
