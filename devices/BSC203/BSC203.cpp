@@ -170,6 +170,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
 }
 
 
+
 void foxtrot::devices::BSC203::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
 {
     unsigned char enable_disable = onoff? 0x01 : 0x02;
@@ -194,14 +195,9 @@ bool foxtrot::devices::BSC203::get_channelenable(foxtrot::devices::destination d
 
 
 foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::destination dest)
-{
-    hwinfo out;
-    
-    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,0x00,0x00,dest);
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_HWINFO,dest);
-    
-    //TODO: fill in hwinfo struct sensibly
-    
+{    
+    auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
+                                               bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00);
     return out;
 };
 
@@ -236,19 +232,33 @@ void foxtrot::devices::BSC203::home_channel(foxtrot::devices::destination dest, 
     
 };
 
-
-void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
+template<typename T>
+std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
 {
-    std::array<unsigned char,6> data {static_cast<unsigned char>(chan),0,0,0,0,0};
+    unsigned char* distbytes = reinterpret_cast<unsigned char*>(&distance);
+    std::array<unsigned char, 6> data{static_cast<unsigned char>(chan), 0, distbytes[0], distbytes[1], distbytes[2], distbytes[3]};
+    return data;
+}
+
+
+void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
+{
+    auto data = get_move_request_header_data(distance, chan);
+    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
+                                                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+                                                     dest, data);
     
-//      transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
-    
+    //TODO: check contents of motor_status struct
 }
 
 void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
 {
+    auto data = get_move_request_header_data(distance, chan);
+    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE,
+                                                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+                                                     dest, data);
     
-    
+    //TODO: check contents of motor status struct
 }
 
 

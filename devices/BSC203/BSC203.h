@@ -144,7 +144,7 @@ namespace foxtrot {
       std::vector<unsigned char> data;      
     };
     
-    
+#pragma pack(push,1)
     struct hwinfo
     {
       unsigned int serno;
@@ -157,6 +157,14 @@ namespace foxtrot {
       unsigned short nchans;
     };
     
+    struct motor_status
+    {
+        unsigned short chan_ident;
+        unsigned long position;
+        unsigned long enccount;
+        unsigned short statusbits;
+    };
+#pragma pack(pop)
     
     class BSC203 : public Device
     {
@@ -174,7 +182,7 @@ namespace foxtrot {
     void home_channel(destination dest, motor_channel_idents channel);
     
     
-    void relative_move(destination dest, motor_channel_idents channel, unsigned distance);
+    void relative_move(destination dest, motor_channel_idents channel, int distance);
     void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
     
     
@@ -187,10 +195,18 @@ namespace foxtrot {
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, 
 			    destination src = destination::host);
     
-      
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
           bool* has_data = nullptr);
       
+      template<typename T>
+      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest,
+          unsigned char p1, unsigned char p2);
+    
+      template<typename T, typename arrtp>
+      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest,
+                                arrtp& data);
+      
+                         
       foxtrot::Logging _lg;
       
     private:
@@ -207,15 +223,38 @@ namespace foxtrot {
 template<typename arrtp>
 void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes opcode, arrtp& data, destination  dest, destination src)
 { 
-  unsigned char* len = &data.size(); 
+  auto size = data.size();
+  unsigned char* len = reinterpret_cast<unsigned char*>(size); 
   unsigned char* optpr = reinterpret_cast<unsigned char*>(&opcode);
   
   unsigned char destaddr = static_cast<unsigned char>(dest) | 0x80;
   unsigned char srcaddr = static_cast<unsigned char>(src);
   
-  std::array<unsigned char, 6> header{ optpr[1], optpr[0], len[1],len[0], destaddr, srcaddr};
+  std::array<unsigned char, 6> header{ optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
    
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
 
 }
+
+template<typename T>
+T foxtrot::devices::BSC203::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
+                                                    foxtrot::devices::bsc203_opcodes opcode_recv, 
+                                                    destination dest, unsigned char p1, unsigned char p2)
+{
+    T out;
+    transmit_message(opcode_send, p1, p2, dest);
+    bool has_data;
+    auto ret = receive_message_sync(opcode_recv,dest, &has_data);
+    
+    if(!has_data)
+        throw DeviceError("expected struct data in response but didn't get any!");
+    
+    if(ret.data.size() != sizeof(T))
+        throw std::logic_error("mismatch between received data size and struct size!");
+    
+    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    return out;
+    
+}
+
