@@ -54,41 +54,82 @@ endif()
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
 src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp)
 
-get_filename_component(protopath proto/foxtrot.proto ABSOLUTE)
+
 find_program(grpc_plugin grpc_cpp_plugin)
 
 
-set(proto_srcs "foxtrot.pb.cc;foxtrot.pb.h")
+function(generate_proto_and_grpc)
+    include(CMakeParseArguments)
+    set(multiValueArgs PROTO_FILES)
+    set(singleValueArgs OUT_VARNAME)
+    cmake_parse_arguments(generate_proto_and_grpc "" "${singleValueArgs}"  "${multiValueArgs}" ${ARGN})
+    set(all_srcs "")
+    foreach(protofile ${generate_proto_and_grpc_PROTO_FILES})
+        get_filename_component(basename ${protofile} NAME_WE)
+        get_filename_component(protopath ${protofile} ABSOLUTE)
+        set(proto_srcs "${basename}.pb.cc;${basename}.pb.h")
+        set(grpc_srcs "${basename}.grpc.pb.cc;${basename}.grpc.pb.h")
+        set(gen_hdrs "${basename}.grpc.pb.h;${basename}.pb.h")
 
-add_custom_command(OUTPUT ${proto_srcs}
-                    COMMAND protobuf::protoc
-                    ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR} foxtrot.proto -I${CMAKE_CURRENT_SOURCE_DIR}/proto
-                    COMMENT "generating protobuf code from ${protopath}"
-                    DEPENDS ${protopath} protobuf::protoc
-                    VERBATIM)
-set_source_files_properties(${proto_srcs} PROPERTIES GENERATED TRUE)
+        list(APPEND all_srcs ${proto_srcs})
+        list(APPEND all_srcs ${grpc_srcs})
 
-set(grpc_srcs "foxtrot.grpc.pb.cc;foxtrot.grpc.pb.h")
+        add_custom_command(OUTPUT ${proto_srcs}
+                           COMMAND protobuf::protoc
+                           ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR} ${protofile} -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+                           COMMENT "generating protobuf code from ${protopath}"
+                           DEPENDS ${protopath} protobuf::protoc
+                           VERBATIM)
+        set_source_files_properties(${proto_srcs} PROPERTIES GENERATED TRUE)
 
-add_custom_command(OUTPUT ${grpc_srcs}
-                    COMMAND protobuf::protoc
-                    ARGS --grpc_out ${CMAKE_CURRENT_BINARY_DIR} --plugin=protoc-gen-grpc=${grpc_plugin} foxtrot.proto -I${CMAKE_CURRENT_SOURCE_DIR}/proto
-                    DEPENDS ${protopath} protobuf::protoc
-                    COMMENT "generating GRPC stub code from ${protopath}"
-                    VERBATIM)
-set_source_files_properties(${grpc_srcs} PROPERTIES GENERATED TRUE)
+        add_custom_command(OUTPUT ${grpc_srcs}
+                           COMMAND protobuf::protoc
+                           ARGS --grpc_out ${CMAKE_CURRENT_BINARY_DIR} --plugin=protoc-gen-grpc=${grpc_plugin} ${protofile} -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+                           DEPENDS ${protopath} protobuf::protoc
+                           COMMENT "generating GRPC stub code from ${protopath}"
+                           VERBATIM)
+        set_source_files_properties(${grpc_srcs} PROPERTIES GENERATED TRUE)
+    endforeach()
+    set(${generate_proto_and_grpc_OUT_VARNAME} ${all_srcs} PARENT_SCOPE)
+    
+endfunction()
 
-message("generated sources: ${grpc_srcs}")
+generate_proto_and_grpc(PROTO_FILES foxtrot.proto ft_types.proto OUT_VARNAME pb_srcs)
+message("pb_srcs: ${pb_srcs}")
 
-add_library(foxtrot_core ${srcs} ${proto_srcs} ${grpc_srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+# set(proto_srcs "foxtrot.pb.cc;foxtrot.pb.h")
+# get_filename_component(protopath proto/foxtrot.proto ABSOLUTE)
+# add_custom_command(OUTPUT ${proto_srcs}
+#                     COMMAND protobuf::protoc
+#                     ARGS --cpp_out ${CMAKE_CURRENT_BINARY_DIR} foxtrot.proto -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+#                     COMMENT "generating protobuf code from ${protopath}"
+#                     DEPENDS ${protopath} protobuf::protoc
+#                     VERBATIM)
+# set_source_files_properties(${proto_srcs} PROPERTIES GENERATED TRUE)
+# 
+# set(grpc_srcs "foxtrot.grpc.pb.cc;foxtrot.grpc.pb.h")
+# 
+# add_custom_command(OUTPUT ${grpc_srcs}
+#                     COMMAND protobuf::protoc
+#                     ARGS --grpc_out ${CMAKE_CURRENT_BINARY_DIR} --plugin=protoc-gen-grpc=${grpc_plugin} foxtrot.proto -I${CMAKE_CURRENT_SOURCE_DIR}/proto
+#                     DEPENDS ${protopath} protobuf::protoc
+#                     COMMENT "generating GRPC stub code from ${protopath}"
+#                     VERBATIM)
+# set_source_files_properties(${grpc_srcs} PROPERTIES GENERATED TRUE)
+# 
+# message("generated sources: ${grpc_srcs}")
+
+
+
+add_library(foxtrot_core ${srcs} ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
-set(gen_hdrs "foxtrot.pb.h;foxtrot.grpc.pb.h")
-
-add_custom_command(TARGET foxtrot_core POST_BUILD
-COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${gen_hdrs}
- ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
+# set(gen_hdrs "foxtrot.pb.h;foxtrot.grpc.pb.h")
+# 
+# add_custom_command(TARGET foxtrot_core POST_BUILD
+# COMMAND ${CMAKE_COMMAND} -E copy_if_different  ${gen_hdrs}
+#  ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 
 target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem protobuf::libprotobuf gRPC::grpc++)
 

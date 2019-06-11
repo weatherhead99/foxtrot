@@ -1,0 +1,15 @@
+syntax="proto3";
+
+message ft_variant {
+    oneof value {
+        double dblval = 1;
+        sint32 intval = 2;
+        bool boolval = 3;
+        string stringval = 4;
+        ft_struct structval = 5;
+    }
+}
+
+message ft_struct {
+    map<string, ft_variant> value = 1;
+}

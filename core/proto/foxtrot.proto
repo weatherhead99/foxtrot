@@ -3,6 +3,8 @@ syntax="proto3";
 package foxtrot;
 option java_package = "io.foxtrot";
 
+import "ft_types.proto";
+
 message empty {}
 
 enum capability_types
