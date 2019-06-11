@@ -5,3 +5,4 @@ Foxtrot is a device server (and clients) designed for use in benchtop/small scal
 
 Foxtrot is built on top of a modern and featureful RPC framework, [gRPC](https://grpc.io). The server is written in c++14 and at present there are reasonably featureful clients available in python and c++. Clients in C and java are planned, as well as clients in MATLAB and LabVIEW based on these.
 
+For (in progress) build instructions, see [doc/building.md](doc/building.md).
