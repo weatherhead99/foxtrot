@@ -1,0 +1,4 @@
+bincrafters https://api.bintray.com/conan/bincrafters/public-conan True
+inexorgame https://api.bintray.com/conan/inexorgame/inexor-conan True
+weatherhead99 https://api.bintray.com/conan/inexorgame/inexor-conan True
+conan-center https://conan.bintray.com True
