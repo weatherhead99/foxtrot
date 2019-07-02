@@ -3,7 +3,10 @@
 #include <vector>
 #include <array>
 
+#include <rttr/registration>
+
 #include <foxtrot/Logging.h>
+#include <foxtrot/DeviceError.h>
 
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/server/Device.h>
@@ -168,6 +171,9 @@ namespace foxtrot {
     
     class BSC203 : public Device
     {
+        
+    RTTR_ENABLE()
+        
     public:
     BSC203(std::shared_ptr< protocols::SerialPort > proto);
     
@@ -257,4 +263,24 @@ T foxtrot::devices::BSC203::request_response_struct(foxtrot::devices::bsc203_opc
     return out;
     
 }
+
+template<typename T, typename arrtp>
+T foxtrot::devices::BSC203::request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest,
+                          arrtp& data)
+{
+    T out;
+    transmit_message(opcode_send, data, dest);
+    bool has_data;
+    auto ret = receive_message_sync(opcode_recv, dest, &has_data);
+    
+    if(!has_data)
+        throw DeviceError("expected struct data in response but didn't get any!");
+    
+    if(ret.data.size() != sizeof(T))
+        throw std::logic_error("mismatch between receieved data size and struct size!");
+    
+    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    return out;
+}
+
 

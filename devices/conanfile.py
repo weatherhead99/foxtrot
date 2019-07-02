@@ -17,7 +17,9 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake")
 
     requires =  ("OpenSSL/1.0.2r@conan/stable",
-                 "rapidxml/1.13@bincrafters/stable")
+                 "rapidxml/1.13@bincrafters/stable",
+                 "boost_date_time%s" % ftbase.bbcs)
+    
     default_options = {"OpenSSL:shared" : True,
                        "libcurl:shared" : True}
     

@@ -16,6 +16,7 @@ endif()
 
 
 find_package(foxtrotCore REQUIRED)
+find_package(Boost REQUIRED COMPONENTS date_time)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakeParseArguments)
@@ -93,7 +94,8 @@ foreach(tgt ${device_targets})
 endforeach()
 message(STATUS "libobjs: ${libobjs}")
 add_library(foxtrot_devices ${libobjs})
-target_link_libraries(foxtrot_devices PUBLIC foxtrot::foxtrot_protocols)
+#TODO: fix these insane dependencies
+target_link_libraries(foxtrot_devices PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
 
 foreach(lib ${link_later_libs})
     message(STATUS "linking in requested library: ${lib}")
@@ -105,6 +107,9 @@ foreach(tgt ${device_targets})
   add_dependencies(foxtrot_devices ${tgt}_copy_includes)
 endforeach()
 
+
+add_executable(bsc_play BSC203/bsc_play.cpp)
+target_link_libraries(bsc_play PUBLIC foxtrot_devices)
 
 install(TARGETS foxtrot_devices 
         EXPORT foxtrot_devices

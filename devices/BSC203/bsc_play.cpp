@@ -1,6 +1,6 @@
 #include <iostream>
 #include "BSC203.h"
-#include "SerialPort.h"
+#include <foxtrot/protocols/SerialPort.h>
 
 using std::cout;
 using std::endl;
