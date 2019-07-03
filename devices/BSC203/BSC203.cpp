@@ -16,6 +16,8 @@
 #include <thread>
 #include <chrono>
 
+using std::cout;
+using std::endl;
 
 const foxtrot::parameterset bsc203_class_params
 {
@@ -31,7 +33,6 @@ const foxtrot::parameterset bsc203_class_params
 foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 
 : foxtrot::Device(proto), _serport(proto), _lg("BSC203")
 {
-  
   _serport->Init(&bsc203_class_params);
   
   //send this random magical message that makes stuff work for some reason
@@ -40,7 +41,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   
   for(unsigned char i =0 ; i <3; i++)
   {
-      if(get_bayused_rack(destination::rack, i))
+      /*if(get_bayused_rack(destination::rack, i))
       {
 	_lg.Debug("bay is used: " + std::to_string(i));
           _lg.Debug("disabling flash programming on controller " + std::to_string(i));
@@ -51,7 +52,10 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
       else
       {
 	_lg.Debug("bay is unused: " + std::to_string(i));
-      };
+      };*/ // Comenting this piece of code because it fails in the received message cause it does not have any bays
+      
+      // Moving this line outside because TIM101 does not have any bays
+    _lg.Debug("bay is unused: " + std::to_string(i));
       
   };
   
@@ -74,7 +78,7 @@ void foxtrot::devices::BSC203::identify_module(foxtrot::devices::destination des
 }
 
 
-void foxtrot::devices::BSC203::transmit_message( foxtrot::devices::bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
+void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
   
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
@@ -96,6 +100,8 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     
     auto headerstr = _serport->read(6,&actlen);
     
+    cout << actlen << endl;
+    
     if(actlen != 6)
     {
         _lg.Error("bad reply length: " + std::to_string(actlen));
@@ -112,7 +118,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     
     
     unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0]); 
-    std::cout << (unsigned ) opcode << std::endl;
+    std::cout << (unsigned) opcode << std::endl;
     
     
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
@@ -125,7 +131,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
     {
-        _lg.Error("unexpected source: " + std::to_string(src));
+        _lg.Error("unexpected source: " + std::to_string(src) + " - " +  std::to_string(static_cast<decltype(src)>(expected_source)));
         throw DeviceError("received unexpected source");
     }
     
@@ -140,6 +146,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
       
       auto data = _serport->read(dlen,&actlen);
+
       if(actlen != dlen)
       {
           _lg.Error("didn't read all the data..." + std::to_string(actlen));
@@ -163,7 +170,6 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     
     out.p1 = headerstr[2];
     out.p2 = headerstr[3];
-      
       
     return out;
     
@@ -195,11 +201,30 @@ bool foxtrot::devices::BSC203::get_channelenable(foxtrot::devices::destination d
 
 
 foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::destination dest)
-{    
+{   
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
                                                bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00);
     return out;
 };
+
+void foxtrot::devices::BSC203::printhwinfo(foxtrot::devices::hwinfo infostr)
+{
+    cout << "Printing hwinfo..." << endl;
+    cout << "\tSerial number: " << std::dec << infostr.serno << endl;
+    cout << "\tModel number: " << std::dec << infostr.modelno << endl;
+    cout << "\tType: " << std::dec << infostr.type << endl;
+    cout << "\tFirmware Version: " << std::dec << infostr.fwvers << endl;
+    cout << "\tNotes: ";
+    for (int i = 0; i < 47; i++)
+    {
+        cout << infostr.notes[i];
+    }
+    cout << endl;
+    cout << "\tHW Version: " << std::dec <<infostr.HWvers << endl;
+    cout << "\tMod State: " << std::dec << infostr.modstate << endl;
+    cout << "\tNumber of channels: " << std::dec << infostr.nchans << endl;
+    
+}
 
 bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination dest, unsigned char bay)
 {

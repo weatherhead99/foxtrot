@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 foxtrot::parameterset sport_params{
-  {"port", "/dev/ttyUSB10"},
+  {"port", "/dev/ttyUSB0"},
   {"flowcontrol", "hardware"}
 };
 
@@ -18,8 +18,8 @@ int main(int argc,char** argv)
   auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&sport_params);
   foxtrot::devices::BSC203 motors(sport);
   
-  auto hwinfo = motors.get_hwinfo(foxtrot::devices::destination::rack);
-  cout << "serial#: " << hwinfo.serno << endl;
-  
+  auto hwinfo = motors.get_hwinfo(foxtrot::devices::destination::sourceTIM101);
+  //cout << "serial#: " << hwinfo.serno << endl;
+  motors.printhwinfo(hwinfo);
 
 };

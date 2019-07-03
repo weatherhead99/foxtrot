@@ -22,6 +22,7 @@ namespace foxtrot {
     {
      host = 0x01,
      rack = 0x11,
+     sourceTIM101 = 0x50,
      bay1 = 0x21,
      bay2 = 0x22,
      bay3 = 0x23
@@ -155,6 +156,7 @@ namespace foxtrot {
       unsigned short type;
       unsigned int fwvers;
       std::array<char,48> notes;
+      std::array<char,12> emptyspace;
       unsigned short HWvers;
       unsigned short modstate;
       unsigned short nchans;
@@ -182,6 +184,7 @@ namespace foxtrot {
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
     hwinfo get_hwinfo(destination dest);
+    void printhwinfo(hwinfo infostr);
       
     bool get_bayused_rack(destination dest, unsigned char bay);
     
@@ -190,9 +193,7 @@ namespace foxtrot {
     
     void relative_move(destination dest, motor_channel_idents channel, int distance);
     void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
-    
-    
-    
+
     protected:
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
 			    destination src = destination::host);
