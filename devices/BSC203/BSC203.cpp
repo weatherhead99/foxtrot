@@ -34,6 +34,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
 : foxtrot::Device(proto), _serport(proto), _lg("BSC203")
 {
   _serport->Init(&bsc203_class_params);
+  _serport->setDrain(true);
   
   //send this random magical message that makes stuff work for some reason
   _lg.Debug("disabling flash programming on rack...");
@@ -62,9 +63,9 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
   _lg.Debug("stopping update messages...");
   //disable status update messages as they will mess with out synchronous messaging model
   transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::rack);
-  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
-  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay2);
-  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay3);
+  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
+  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay2);
+  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay3);
   
   _lg.Debug("update messages stopped");
   
@@ -80,7 +81,6 @@ void foxtrot::devices::BSC203::identify_module(foxtrot::devices::destination des
 
 void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
-  
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
   
   std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
@@ -88,7 +88,6 @@ void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes
   _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
   
-
 }
 
 foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(foxtrot::devices::bsc203_opcodes expected_opcode, foxtrot::devices::destination expected_source, bool* has_data)
@@ -96,10 +95,10 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
     unsigned actlen;
     bsc203_reply out;
     
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // IT SEEMS TO WORK FINE WITH 50 ms, PLEASE DO NOT CHANGE IT.
     
     auto headerstr = _serport->read(6,&actlen);
-    
+
     cout << actlen << endl;
     
     if(actlen != 6)
@@ -107,15 +106,6 @@ foxtrot::devices::bsc203_reply foxtrot::devices::BSC203::receive_message_sync(fo
         _lg.Error("bad reply length: " + std::to_string(actlen));
         throw DeviceError("received bad reply length..." );
     };
-    
-//     std::cout << "headerstr len: " << headerstr.size() << std::endl;
-    
-    for(auto& c : headerstr)
-    {
-      std::cout << std::hex << (unsigned) c << "\t";
-    }
-    std::cout << std::endl;
-    
     
     unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0]); 
     std::cout << (unsigned) opcode << std::endl;
@@ -207,24 +197,6 @@ foxtrot::devices::hwinfo foxtrot::devices::BSC203::get_hwinfo(foxtrot::devices::
     return out;
 };
 
-void foxtrot::devices::BSC203::printhwinfo(foxtrot::devices::hwinfo infostr)
-{
-    cout << "Printing hwinfo..." << endl;
-    cout << "\tSerial number: " << std::dec << infostr.serno << endl;
-    cout << "\tModel number: " << std::dec << infostr.modelno << endl;
-    cout << "\tType: " << std::dec << infostr.type << endl;
-    cout << "\tFirmware Version: " << std::dec << infostr.fwvers << endl;
-    cout << "\tNotes: ";
-    for (int i = 0; i < 47; i++)
-    {
-        cout << infostr.notes[i];
-    }
-    cout << endl;
-    cout << "\tHW Version: " << std::dec <<infostr.HWvers << endl;
-    cout << "\tMod State: " << std::dec << infostr.modstate << endl;
-    cout << "\tNumber of channels: " << std::dec << infostr.nchans << endl;
-    
-}
 
 bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination dest, unsigned char bay)
 {
@@ -253,8 +225,7 @@ void foxtrot::devices::BSC203::home_channel(foxtrot::devices::destination dest, 
     {
         throw DeviceError("invalid channel returned...");
     }
-    
-    
+
 };
 
 template<typename T>
@@ -272,7 +243,6 @@ void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest,
     auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
                                                      bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                                                      dest, data);
-    
     //TODO: check contents of motor_status struct
 }
 
@@ -286,7 +256,24 @@ void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest,
     //TODO: check contents of motor status struct
 }
 
-
+void foxtrot::devices::printhwinfo(foxtrot::devices::hwinfo infostr)
+{
+    cout << "Printing hwinfo..." << endl;
+    cout << "\tSerial number: " << std::dec << infostr.serno << endl;
+    cout << "\tModel number: " << std::dec << infostr.modelno << endl;
+    cout << "\tType: " << std::dec << infostr.type << endl;
+    cout << "\tFirmware Version: " << std::dec << infostr.fwvers << endl;
+    cout << "\tNotes: ";
+    for (int i = 0; i < 47; i++)
+    {
+        cout << infostr.notes[i];
+    }
+    cout << endl;
+    cout << "\tHW Version: " << std::dec <<infostr.HWvers << endl;
+    cout << "\tMod State: " << std::dec << infostr.modstate << endl;
+    cout << "\tNumber of channels: " << std::dec << infostr.nchans << endl;
+    
+}
 
 
 

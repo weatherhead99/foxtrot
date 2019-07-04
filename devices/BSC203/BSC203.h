@@ -11,8 +11,6 @@
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/server/Device.h>
 
-
-
 //TODO: handle error conditions somehow!!!!
 
 namespace foxtrot {
@@ -162,13 +160,21 @@ namespace foxtrot {
       unsigned short nchans;
     };
     
-    struct motor_status
+#pragma pack(push,1)
+   /* struct motor_status
     {
         unsigned short chan_ident;
         unsigned long position;
         unsigned long enccount;
         unsigned short statusbits;
-    };
+    };*/
+   struct motor_status
+   {
+       unsigned short chan_indent;
+       unsigned int position;
+       unsigned int enccount;
+       unsigned int statusbits;
+   }; //This one is suppose to fit with the 14 bytes message.
 #pragma pack(pop)
     
     class BSC203 : public Device
@@ -184,19 +190,16 @@ namespace foxtrot {
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
     hwinfo get_hwinfo(destination dest);
-    void printhwinfo(hwinfo infostr);
       
     bool get_bayused_rack(destination dest, unsigned char bay);
     
     void home_channel(destination dest, motor_channel_idents channel);
     
-    
     void relative_move(destination dest, motor_channel_idents channel, int distance);
     void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
 
     protected:
-      void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
-			    destination src = destination::host);
+      void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
       
       template<typename arrtp>
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, 
@@ -222,23 +225,27 @@ namespace foxtrot {
       
     };
     
+    void printhwinfo(hwinfo infostr);
     
   }//namespace devices
 } //namespace foxtrot
 
 
+
+
+
 template<typename arrtp>
 void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes opcode, arrtp& data, destination  dest, destination src)
 { 
+
   auto size = data.size();
-  unsigned char* len = reinterpret_cast<unsigned char*>(size); 
+  unsigned char* len = reinterpret_cast<unsigned char*>(&size); 
   unsigned char* optpr = reinterpret_cast<unsigned char*>(&opcode);
-  
   unsigned char destaddr = static_cast<unsigned char>(dest) | 0x80;
   unsigned char srcaddr = static_cast<unsigned char>(src);
   
-  std::array<unsigned char, 6> header{ optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
-   
+  std::array<unsigned char, 6> header{optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
+
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
 
@@ -283,5 +290,3 @@ T foxtrot::devices::BSC203::request_response_struct(bsc203_opcodes opcode_send, 
     std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
     return out;
 }
-
-
