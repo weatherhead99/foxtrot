@@ -17,15 +17,24 @@
 
 namespace foxtrot {
   namespace devices {
-    
+      
+    enum class jogdir : unsigned char 
+    {
+        forward = 0x01,
+        reverse = 0x02
+    };
+        
     #pragma pack(pop)
     
-    class BSC203 : public APT
+    class TIM101 : public APT
     {
     public:
-        BSC203(std::shared_ptr< protocols::SerialPort > proto);
+        TIM101(std::shared_ptr< protocols::SerialPort > proto);
+        void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
+        void jog_move(destination dest, motor_channel_idents channel, jogdir direction);
     };
     
   }//namespace devices
 } //namespace foxtrot
+
 
