@@ -7,9 +7,17 @@ message ft_variant {
         bool boolval = 3;
         string stringval = 4;
         ft_struct structval = 5;
+        ft_enum enumval = 6;
     }
 }
 
 message ft_struct {
     map<string, ft_variant> value = 1;
+}
+
+
+message ft_enum {
+    string enum_name = 1;
+    map<string, uint32> enum_map = 2;
+    uint32 enum_value = 3;
 }
