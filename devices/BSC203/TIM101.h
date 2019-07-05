@@ -18,6 +18,8 @@
 namespace foxtrot {
   namespace devices {
       
+      
+#pragma pack(push,1)
     enum class jogdir : unsigned char 
     {
         forward = 0x01,

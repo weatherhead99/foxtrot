@@ -167,7 +167,6 @@ namespace foxtrot {
       unsigned short nchans;
     };
     
-#pragma pack(push,1)
    struct motor_status
    {
        unsigned short chan_indent;
@@ -255,43 +254,41 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
 
 }
 
+
+template<typename T>
+T check_convert_response_struct(const foxtrot::devices::bsc203_reply& repl, bool has_data)
+{
+    T out;
+    if(!has_data)
+        throw foxtrot::DeviceError("expected struct data in response but didn't get any!");
+    if(repl.data.size() != sizeof(T))
+        throw std::logic_error("mismatch between received data size and struct size!");
+    std::copy(repl.data.begin(), repl.data.end(), reinterpret_cast<unsigned char*>(&out));
+    return out;
+}
+
+
 template<typename T>
 T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
                                                     foxtrot::devices::bsc203_opcodes opcode_recv, 
                                                     destination dest, unsigned char p1, unsigned char p2)
 {
-    T out;
     transmit_message(opcode_send, p1, p2, dest);
     bool has_data;
     auto ret = receive_message_sync(opcode_recv,dest, &has_data);
-    
-    if(!has_data)
-        throw DeviceError("expected struct data in response but didn't get any!");
-    
-    if(ret.data.size() != sizeof(T))
-        throw std::logic_error("mismatch between received data size and struct size!");
-    
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    T out = check_convert_response_struct<T>(ret, has_data);
     return out;
-    
 }
 
 template<typename T, typename arrtp>
 T foxtrot::devices::APT::request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data)
 {
-    T out;
     transmit_message(opcode_send, data, dest);
     _lg.Trace("after transmit message");
     bool has_data;
     auto ret = receive_message_sync(opcode_recv, dest, &has_data);
     _lg.Trace("after received message");
-    if(!has_data)
-        throw DeviceError("expected struct data in response but didn't get any!");
-    
-    if(ret.data.size() != sizeof(T))
-        throw std::logic_error("mismatch between receieved data size and struct size!");
-    
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    T out = check_convert_response_struct<T>(ret, has_data);
     return out;
 }
 
