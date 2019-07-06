@@ -2,17 +2,26 @@ syntax="proto3";
 
 message ft_variant {
     oneof value {
-        double dblval = 1;
-        sint32 intval = 2;
-        bool boolval = 3;
-        string stringval = 4;
-        ft_struct structval = 5;
-        ft_enum enumval = 6;
+        ft_simplevariant simplevar = 1;
+        ft_struct structval = 2;
+        ft_enum enumval = 3;
     }
 }
 
+message ft_simplevariant {
+    oneof value {
+        double dblval = 1;
+        sint64 intval = 2;
+        uint64 uintval = 3;
+        bool boolval = 4;
+        string stringval = 5;
+        }
+}
+
+
 message ft_struct {
-    map<string, ft_variant> value = 1;
+    string struct_name = 1;
+    map<string, ft_variant> value = 2;
 }
 
 
