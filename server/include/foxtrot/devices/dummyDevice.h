@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <vector>
+#include <string>
 
 #include <foxtrot/server/Device.h>
 
@@ -9,9 +10,17 @@ namespace foxtrot
     namespace devices
     {
       
-      enum class dummyType {
-	dummy_1,
-	dummy_2
+      enum class dummyEnum {
+        dummy_1,
+        dummy_2
+      };
+      
+      struct dummyStruct
+      {
+          std::string strval;
+          unsigned uval;
+          bool bval;
+          double dval;
       };
       
       
@@ -44,9 +53,10 @@ namespace foxtrot
         void setInt(int a);
         int getInt() const;
         
-	dummyType returns_custom_type(int in);
-	int takes_custom_type(dummyType in);
+        dummyEnum returns_custom_enum(int in);
+        int takes_custom_enum(dummyEnum in);
         
+        dummyStruct returns_custom_struct();
         
 	
 	std::vector<unsigned char> getCountStream(int n);

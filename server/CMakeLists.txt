@@ -50,13 +50,13 @@ include(FoxtrotCommonSetup)
 
 set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
 src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp
-src/CmdDevice.cpp)
+src/CmdDevice.cpp src/typeUtil.cpp)
 
 set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp 
     src/InvokeCapabilityImpl.cpp  src/FetchDataImpl.cpp 
     src/ExperimentalSetup.cpp src/ChunkStreamImpl.cpp 
     src/ServerFlagsImpl.cpp src/ServerCommandImpl.cpp src/BroadcastNotificationImpl.cpp src/FetchDataImpl.cpp src/exptserve.cpp src/exptserve_funcs.cpp
-    src/pushbullet_api.cpp src/typeUtil.cpp
+    src/pushbullet_api.cpp 
     )
 
 

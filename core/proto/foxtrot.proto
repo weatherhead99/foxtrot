@@ -104,13 +104,8 @@ message capability_response
     uint32 msgid = 1;
     uint32 devid = 2;
     string capname = 3;
-    oneof return {
-        double dblret = 4;
-        sint32 intret =5;
-        bool boolret = 6;
-        string stringret = 7;
-    }
-    errstatus err = 8;
+    ft_variant returnval = 4;
+    errstatus err = 5;
 }
 
 

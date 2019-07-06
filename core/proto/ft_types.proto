@@ -1,5 +1,8 @@
 syntax="proto3";
 
+
+
+
 message ft_variant {
     oneof value {
         ft_simplevariant simplevar = 1;

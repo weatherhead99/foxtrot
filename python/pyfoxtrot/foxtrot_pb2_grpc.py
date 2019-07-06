@@ -2,6 +2,7 @@
 import grpc
 
 import pyfoxtrot.foxtrot_pb2 as foxtrot__pb2
+import ft_auth_pb2 as ft__auth__pb2
 
 
 class exptserveStub(object):
@@ -61,13 +62,13 @@ class exptserveStub(object):
         )
     self.RequestAuthChallenge = channel.unary_unary(
         '/foxtrot.exptserve/RequestAuthChallenge',
-        request_serializer=foxtrot__pb2.auth_request.SerializeToString,
-        response_deserializer=foxtrot__pb2.auth_challenge.FromString,
+        request_serializer=ft__auth__pb2.auth_request.SerializeToString,
+        response_deserializer=ft__auth__pb2.auth_challenge.FromString,
         )
     self.RespondAuthChallenge = channel.unary_unary(
         '/foxtrot.exptserve/RespondAuthChallenge',
-        request_serializer=foxtrot__pb2.auth_response.SerializeToString,
-        response_deserializer=foxtrot__pb2.auth_confirm.FromString,
+        request_serializer=ft__auth__pb2.auth_response.SerializeToString,
+        response_deserializer=ft__auth__pb2.auth_confirm.FromString,
         )
 
 
@@ -202,13 +203,13 @@ def add_exptserveServicer_to_server(servicer, server):
       ),
       'RequestAuthChallenge': grpc.unary_unary_rpc_method_handler(
           servicer.RequestAuthChallenge,
-          request_deserializer=foxtrot__pb2.auth_request.FromString,
-          response_serializer=foxtrot__pb2.auth_challenge.SerializeToString,
+          request_deserializer=ft__auth__pb2.auth_request.FromString,
+          response_serializer=ft__auth__pb2.auth_challenge.SerializeToString,
       ),
       'RespondAuthChallenge': grpc.unary_unary_rpc_method_handler(
           servicer.RespondAuthChallenge,
-          request_deserializer=foxtrot__pb2.auth_response.FromString,
-          response_serializer=foxtrot__pb2.auth_confirm.SerializeToString,
+          request_deserializer=ft__auth__pb2.auth_response.FromString,
+          response_serializer=ft__auth__pb2.auth_confirm.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

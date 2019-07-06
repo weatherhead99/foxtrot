@@ -8,13 +8,9 @@ bool foxtrot::is_POD_struct(const rttr::type& tp)
     //TODO: is an enum class counted as a class here?
     if(!tp.is_class() && !tp.is_enumeration())
         return false;
-    
+
     unsigned meth_count = tp.get_methods().size();
     if(meth_count > 0)
-        return false;
-
-    unsigned constructor_count = tp.get_constructors().size();
-    if(constructor_count > 0)
         return false;
 
     return true;
@@ -93,6 +89,8 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
     if(tp == rttr::type::get<void>())
         return out;
     
+
+    
     using rttr::variant;
     variant_setter setter(var, out, success);
     if(tp.is_arithmetic())
@@ -118,7 +116,6 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
     }
     else
     {
-
         if(var.get_type() == rttr::type::get<std::string>())
         {
             auto str = var.to_string(&success);
@@ -164,18 +161,28 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var)
     auto outnames = out.mutable_enum_map();
 
     auto varit = enumvar.get_values().begin();
+    
+    bool ok = false;
     for(auto& name : enumvar.get_names())
     {
-        outnames->operator[](name.to_string()) = (varit++)->to_uint32();
+        outnames->operator[](name.to_string()) = (varit++)->to_uint32(&ok);
+        if(!ok)
+            throw std::logic_error("failed to convert an enum value");
     };
 
-    out.set_enum_value(var.to_uint32());
+    out.set_enum_value(var.to_uint32(&ok));
+
+    if(!ok)
+        throw std::logic_error("failed to convert an enum value");
     
     return out;
 };
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
 {
+    if(!var.is_valid())
+        throw std::logic_error("got invalid variant to convert!");
+    
     ft_variant out;
     
     auto tp = var.get_type();
@@ -185,7 +192,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
         ft_enum* enumval = out.mutable_enumval();
         *enumval = get_enum_wire_type(var);
     }
-    else if(tp.is_class())
+    else if(tp.is_class() && tp != rttr::type::get<std::string>())
     {
         if(!is_POD_struct(tp))
         {

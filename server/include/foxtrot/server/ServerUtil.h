@@ -153,7 +153,7 @@ std::unique_ptr<unsigned char[]> byte_view_data ( rttr::variant& arr, unsigned& 
 
 rttr::variant get_arg ( const capability_argument& arg, bool& success );
 
-bool set_returntype ( rttr::variant& retval, foxtrot::capability_response& repl );
+// bool set_returntype ( rttr::variant& retval, foxtrot::capability_response& repl );
 value_types get_appropriate_wire_type ( const rttr::variant& vr );
 value_types get_appropriate_wire_type ( const rttr::type& tp );
 
