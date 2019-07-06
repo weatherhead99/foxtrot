@@ -36,7 +36,7 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
 {
     bool success;
     if(!in.is_valid())
-        throw std::logic_error("invalid RTTR variant supplied to set_retval");
+        throw std::logic_error("invalid RTTR variant s,upplied to set_retval");
     auto tp = in.get_type();
     
     if(!tp.is_valid())

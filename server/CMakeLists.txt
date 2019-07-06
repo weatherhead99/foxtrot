@@ -56,7 +56,7 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
     src/InvokeCapabilityImpl.cpp  src/FetchDataImpl.cpp 
     src/ExperimentalSetup.cpp src/ChunkStreamImpl.cpp 
     src/ServerFlagsImpl.cpp src/ServerCommandImpl.cpp src/BroadcastNotificationImpl.cpp src/FetchDataImpl.cpp src/exptserve.cpp src/exptserve_funcs.cpp
-    src/pushbullet_api.cpp
+    src/pushbullet_api.cpp src/typeUtil.cpp
     )
 
 
