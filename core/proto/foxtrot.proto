@@ -1,9 +1,10 @@
-syntax="proto3";
-
+syntax = "proto3";
 package foxtrot;
 option java_package = "io.foxtrot";
 
+import "ft_error.proto";
 import "ft_types.proto";
+import "ft_auth.proto";
 
 message empty {}
 
@@ -38,17 +39,6 @@ enum byte_data_types
     BDOUBLE_TYPE = 8;
 }
 
-enum error_types
-{
-    ft_Error = 0;
-    ft_DeviceError = 1;
-    ft_ProtocolError = 2;
-    out_of_range = 3;
-    unknown_error = 4;
-    contention_timeout = 5;
-    ft_ServerError = 6;
-    ft_AuthError = 7;
-}
 
 enum server_commands
 {
@@ -56,12 +46,7 @@ enum server_commands
     ChangeDebugLevel = 1;
 }
 
-message errstatus
-{
-    error_types tp =1;
-    string msg = 2;
 
-}
 
 message devcapability
 {
@@ -216,32 +201,6 @@ message broadcast_notification
     string channel_target = 7;
 }
 
-message auth_request
-{
-    string userid = 1;
-}
-
-message auth_challenge
-{
-    errstatus err = 1;
-    uint32 challengeid = 2;
-    bytes challenge = 3;
-}
-
-message auth_response
-{
-    uint32 challengeid = 1;
-    string userid = 2;
-    bytes sig = 3;
-}
-
-message auth_confirm
-{
-    errstatus err = 1;
-    bytes sessionkey = 2;
-    uint64 expiry = 3;
-    int32 authlevel = 4;
-}
 
 service exptserve
 {

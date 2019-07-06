@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import "ft_error.proto";
+
+message auth_request
+{
+    string userid = 1;
+}
+
+message auth_challenge
+{
+    errstatus err = 1;
+    uint32 challengeid = 2;
+    bytes challenge = 3;
+}
+
+message auth_response
+{
+    uint32 challengeid = 1;
+    string userid = 2;
+    bytes sig = 3;
+}
+
+message auth_confirm
+{
+    errstatus err = 1;
+    bytes sessionkey = 2;
+    uint64 expiry = 3;
+    int32 authlevel = 4;
+}

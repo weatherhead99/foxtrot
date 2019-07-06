@@ -98,7 +98,8 @@ function(generate_proto_and_grpc)
     
 endfunction()
 
-set(proto_input_files proto/foxtrot.proto proto/ft_types.proto)
+set(proto_input_files proto/foxtrot.proto proto/ft_types.proto proto/ft_auth.proto
+proto/ft_error.proto)
 generate_proto_and_grpc(PROTO_FILES ${proto_input_files} OUT_ALL_VARNAME pb_srcs OUT_HDR_VARNAME pb_hdrs)
 message("pb_srcs: ${pb_srcs}")
 message("pb_hdrs: ${pb_hdrs}")
