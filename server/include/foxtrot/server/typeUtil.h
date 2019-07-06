@@ -9,5 +9,8 @@ namespace foxtrot{
     ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var);
     
     ft_struct get_struct_wire_type(const rttr::variant& var);
+    ft_enum get_enum_wire_type(const rttr::variant& var);
+    
+    ft_variant get_variant_wire_type(const rttr::variant& var);
     
 }

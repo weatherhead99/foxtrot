@@ -3,7 +3,7 @@
 
 using namespace foxtrot;
 
-bool is_POD_struct(const rttr::type& tp)
+bool foxtrot::is_POD_struct(const rttr::type& tp)
 {
     //TODO: is an enum class counted as a class here?
     if(!tp.is_class() && !tp.is_enumeration())
@@ -77,7 +77,7 @@ struct variant_setter
 };
 
 
-ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var)
+ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
 {
     ft_simplevariant out;
     
@@ -93,10 +93,10 @@ ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var)
     if(tp == rttr::type::get<void>())
         return out;
     
+    using rttr::variant;
+    variant_setter setter(var, out, success);
     if(tp.is_arithmetic())
     {
-        using rttr::variant;
-        variant_setter setter(var, out, success);
         if(setter.set_check<bool>(&variant::to_bool, &ft_simplevariant::set_boolval))
             return out;
         if(setter.set_check<double>(&variant::to_double, &ft_simplevariant::set_dblval)) 
@@ -105,16 +105,37 @@ ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var)
             return out;
         if(setter.set_check<int>(&variant::to_int, &ft_simplevariant::set_intval))
             return out;
-
-
+        if(setter.set_check<short>(&variant::to_int16, &ft_simplevariant::set_intval))
+            return out;
+        if(setter.set_check<char>(&variant::to_int8, &ft_simplevariant::set_intval))
+            return out;
+        if(setter.set_check<unsigned>(&variant::to_uint32, &ft_simplevariant::set_uintval))
+            return out;
+        if(setter.set_check<unsigned short>(&variant::to_uint16, &ft_simplevariant::set_uintval))
+            return out;
+        if(setter.set_check<unsigned char>(&variant::to_uint8, &ft_simplevariant::set_uintval))
+            return out;
     }
-    
-    
-    
+    else
+    {
+
+        if(var.get_type() == rttr::type::get<std::string>())
+        {
+            auto str = var.to_string(&success);
+            if(!success)
+                throw std::logic_error("failed to convert string value!");
+            out.set_stringval(std::move(str));
+            return out;
+        }
+        else
+        {
+            throw std::logic_error("couldn't find matching mapping for variant with type: " + var.get_type().get_name().to_string());
+        }
+    }
 };
 
 
-ft_struct get_struct_wire_type(const rttr::variant& var)
+ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var)
 {
     ft_struct out;
     
@@ -125,7 +146,60 @@ ft_struct get_struct_wire_type(const rttr::variant& var)
     
     for(auto& prop : tp.get_properties())
     {
-        
+        //WARNING: this is a potentially infinite recursive call
+        auto simplevar = get_variant_wire_type(prop.get_value(var));
+        prop_map->operator[](prop.get_name().to_string()) = simplevar;
     }
+    
+    return out;
+};
+
+ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var)
+{
+    ft_enum out;
+    out.set_enum_name(var.get_type().get_name().to_string());
+
+    auto enumvar = var.get_type().get_enumeration();
+
+    auto outnames = out.mutable_enum_map();
+
+    auto varit = enumvar.get_values().begin();
+    for(auto& name : enumvar.get_names())
+    {
+        outnames->operator[](name.to_string()) = (varit++)->to_uint32();
+    };
+
+    out.set_enum_value(var.to_uint32());
+    
+    return out;
+};
+
+ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
+{
+    ft_variant out;
+    
+    auto tp = var.get_type();
+    
+    if(tp.is_enumeration())
+    {
+        ft_enum* enumval = out.mutable_enumval();
+        *enumval = get_enum_wire_type(var);
+    }
+    else if(tp.is_class())
+    {
+        if(!is_POD_struct(tp))
+        {
+            throw std::logic_error("can't return a class which isn't a POD type");
+        }
+        ft_struct* structval = out.mutable_structval();
+        *structval = get_struct_wire_type(var);
+    }
+    else
+    {
+        ft_simplevariant* simplevarval = out.mutable_simplevar();
+        *simplevarval = get_simple_variant_wire_type(var);
+    }
+
+    return out;
 };
 
