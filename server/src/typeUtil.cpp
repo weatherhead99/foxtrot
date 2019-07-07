@@ -212,89 +212,94 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
 };
 
 
-rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp)
+rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp, 
+                                            const rttr::type& target_tp)
 {
-    auto target_tp = rttr::type::get_by_name(wiretp.enum_name());
-    if(!target_tp.is_valid())
+    rttr::variant out = wiretp.enum_value();
+    if(! out.can_convert(target_tp))
     {
-
-        throw std::runtime_error("didn't recognise enum type with name: " + wiretp.enum_name());
+        throw std::runtime_error("can't convert received type: " + out.get_type().get_name().to_string() + 
+        "to target type: " + target_tp.get_name().to_string());
     }
-
-    if(!target_tp.is_enumeration())
+    
+    if(!out.convert(target_tp))
     {
-        throw std::runtime_error("recognised type, but it isn't an enum: " + wiretp.enum_name());
+        throw std::runtime_error("conversion is possible, but failed for some reason");
     }
-
-    rttr::variant arg = wiretp.enum_value();
-    rttr::variant out = target_tp.create({arg});
     
     return out;
 };
 
-rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp)
+rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
+                                            const rttr::type& target_tp)
 {
-    auto target_tp = rttr::type::get_by_name(wiretp.struct_name());
-    if(!target_tp.is_valid())
-    {
-        throw std::runtime_error("didn't recognise struct type with name: " + wiretp.struct_name());
-    }
-    
-    if(!target_tp.is_class())
-    {
-        throw std::runtime_error("recognised type, but it isn't a struct: " + wiretp.struct_name());
-    }
-    
     rttr::variant out = target_tp.create();
     
-    for(auto& val : wiretp.value())
+    for(auto& prop : target_tp.get_properties())
     {
-        auto prop = target_tp.get_property(val.first);
-        rttr::variant arg = wire_type_to_variant(val.second);
-        prop.set_value(out, arg);
+        auto invar = wiretp.value().at(prop.get_name().to_string());
+        rttr::variant in_variant = wire_type_to_variant(invar, prop.get_type());
+        prop.set_value(out,in_variant);
     };
 
     return out;
 }
 
-rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp)
+rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
+                                            const rttr::type& target_tp)
 {
     rttr::variant out;
-    
     switch(wiretp.value_case())
     {
-        case ft_simplevariant::ValueCase::kBoolval:
-            out = wiretp.boolval(); break;
-        case ft_simplevariant::ValueCase::kDblval:
-            out = wiretp.dblval(); break;
-        case ft_simplevariant::ValueCase::kIntval:
-            out = wiretp.intval(); break;
-        case ft_simplevariant::ValueCase::kUintval:
-            out = wiretp.uintval(); break;
-        case ft_simplevariant::ValueCase::kStringval:
-            out = wiretp.stringval(); break;
-        case ft_simplevariant::ValueCase::VALUE_NOT_SET:
-            throw std::runtime_error("value not set in simplevariant");
-    };
+        case(ft_simplevariant::ValueCase::kBoolval):
+            out = wiretp.boolval();
+            break;
+        case(ft_simplevariant::ValueCase::kIntval):
+            out = wiretp.intval();
+            break;
+        case(ft_simplevariant::ValueCase::kUintval):
+            out = wiretp.uintval();
+            break;
+        case(ft_simplevariant::ValueCase::kDblval):
+            out = wiretp.dblval();
+            break;
+        case(ft_simplevariant::ValueCase::kStringval):
+            out = wiretp.stringval();
+            break;
+    }
+    
+    if(!out.can_convert(target_tp))
+        throw std::runtime_error("cannot convert wire type received: " + out.get_type().get_name().to_string() + " to target type: " + target_tp.get_name().to_string());
+
+    bool success = out.convert(target_tp);
+    if(!success)
+        throw std::runtime_error("type conversion is possible, but failed somehow");
     
     return out;
 }
 
-rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp)
+rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
+                                            const rttr::type& target_tp)
 {
-    rttr::variant out;
-    switch(wiretp.value_case())
+    if(target_tp.is_enumeration())
     {
-        case ft_variant::ValueCase::kSimplevar:
-            out = wire_type_to_variant(wiretp.simplevar()); break;
-        case ft_variant::ValueCase::kEnumval:
-            out = wire_type_to_variant(wiretp.enumval()); break;
-        case ft_variant::ValueCase::kStructval:
-            out = wire_type_to_variant(wiretp.structval()); break;
-        case ft_variant::ValueCase::VALUE_NOT_SET:
-            throw std::runtime_error("value not set in variant");
-    };
+        if(wiretp.value_case() != ft_variant::ValueCase::kEnumval)
+            throw std::runtime_error("expected variant, got something else in supplied type");
 
-    return out;
+        return wire_type_to_variant(wiretp.enumval(),target_tp);
+    }
+    else if(target_tp.is_class() && target_tp != rttr::type::get<std::string>())
+    {
+        if(wiretp.value_case() != ft_variant::ValueCase::kStructval)
+            throw std::runtime_error("expected struct, got something else in supplied type");
+        return wire_type_to_variant(wiretp.structval(), target_tp);
+    }
+    else
+    {
+        if(wiretp.value_case() != ft_variant::ValueCase::kSimplevar)
+            throw std::runtime_error("expected simple var, got something else in supplied type");
+        return wire_type_to_variant(wiretp.simplevar(), target_tp);
+    }
+
 }
 

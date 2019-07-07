@@ -7,6 +7,7 @@
 
 #include "InvokeCapabilityImpl.h"
 #include <foxtrot/server/ServerUtil.h>
+#include <foxtrot/server/typeUtil.h>
 
 using std::cout;
 using std::endl;
@@ -57,15 +58,22 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     std::vector<rttr::variant> vargs;
     vargs.reserve(req.args().size());
 
+    auto targetargit = cap.Argtypes.begin();
     for(auto& inarg: req.args())
     {
         bool success = false;
-        auto outarg = wire_arg_to_variant(inarg, success, &_lg);
-        if(!success)
+        auto target_tp = *(targetargit++);
+        rttr::variant outarg;
+
+        try{
+            outarg = wire_type_to_variant(inarg.value(), target_tp);
+        }
+        catch(...)
         {
-            foxtrot_server_specific_error("couldn't parse wire argument at position:" + std::to_string(inarg.position()), repl, respond, _lg, tag, error_types::unknown_error);
+            foxtrot_rpc_error_handling(std::current_exception(), repl, respond, _lg, tag);
             return true;
         }
+
         vargs.push_back(outarg);
     };
     
