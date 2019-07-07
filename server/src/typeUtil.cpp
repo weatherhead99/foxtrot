@@ -116,6 +116,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
     }
     else
     {
+        
         if(var.get_type() == rttr::type::get<std::string>())
         {
             auto str = var.to_string(&success);
@@ -209,4 +210,91 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
 
     return out;
 };
+
+
+rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp)
+{
+    auto target_tp = rttr::type::get_by_name(wiretp.enum_name());
+    if(!target_tp.is_valid())
+    {
+
+        throw std::runtime_error("didn't recognise enum type with name: " + wiretp.enum_name());
+    }
+
+    if(!target_tp.is_enumeration())
+    {
+        throw std::runtime_error("recognised type, but it isn't an enum: " + wiretp.enum_name());
+    }
+
+    rttr::variant arg = wiretp.enum_value();
+    rttr::variant out = target_tp.create({arg});
+    
+    return out;
+};
+
+rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp)
+{
+    auto target_tp = rttr::type::get_by_name(wiretp.struct_name());
+    if(!target_tp.is_valid())
+    {
+        throw std::runtime_error("didn't recognise struct type with name: " + wiretp.struct_name());
+    }
+    
+    if(!target_tp.is_class())
+    {
+        throw std::runtime_error("recognised type, but it isn't a struct: " + wiretp.struct_name());
+    }
+    
+    rttr::variant out = target_tp.create();
+    
+    for(auto& val : wiretp.value())
+    {
+        auto prop = target_tp.get_property(val.first);
+        rttr::variant arg = wire_type_to_variant(val.second);
+        prop.set_value(out, arg);
+    };
+
+    return out;
+}
+
+rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp)
+{
+    rttr::variant out;
+    
+    switch(wiretp.value_case())
+    {
+        case ft_simplevariant::ValueCase::kBoolval:
+            out = wiretp.boolval(); break;
+        case ft_simplevariant::ValueCase::kDblval:
+            out = wiretp.dblval(); break;
+        case ft_simplevariant::ValueCase::kIntval:
+            out = wiretp.intval(); break;
+        case ft_simplevariant::ValueCase::kUintval:
+            out = wiretp.uintval(); break;
+        case ft_simplevariant::ValueCase::kStringval:
+            out = wiretp.stringval(); break;
+        case ft_simplevariant::ValueCase::VALUE_NOT_SET:
+            throw std::runtime_error("value not set in simplevariant");
+    };
+    
+    return out;
+}
+
+rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp)
+{
+    rttr::variant out;
+    switch(wiretp.value_case())
+    {
+        case ft_variant::ValueCase::kSimplevar:
+            out = wire_type_to_variant(wiretp.simplevar()); break;
+        case ft_variant::ValueCase::kEnumval:
+            out = wire_type_to_variant(wiretp.enumval()); break;
+        case ft_variant::ValueCase::kStructval:
+            out = wire_type_to_variant(wiretp.structval()); break;
+        case ft_variant::ValueCase::VALUE_NOT_SET:
+            throw std::runtime_error("value not set in variant");
+    };
+
+    return out;
+}
 

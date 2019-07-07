@@ -16,20 +16,19 @@ rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& a
     success = true;
     rttr::variant out;
     
-    auto which_type = arg.value_case();
-    switch(which_type)
+    try
     {
-        case(capability_argument::ValueCase::kDblarg):
-            out = arg.dblarg(); break;
-        case(capability_argument::ValueCase::kIntarg):
-            out = arg.intarg(); break;
-        case(capability_argument::ValueCase::kBoolarg):
-            out = arg.boolarg(); break;
-        case(capability_argument::ValueCase::kStrarg):
-            out = arg.strarg(); break;
-        case(capability_argument::ValueCase::VALUE_NOT_SET):
-            success = false; break;
+        out = wire_type_to_variant(arg.value());
     }
+    catch(std::runtime_error& err)
+    {
+        if(lg)
+        {
+            lg->strm(sl::error) << "caught runtime error in converting argument";
+            lg->strm(sl::error) << "details: " << err.what();
+        }
+        throw err;
+    };
     return out;
 }
 
@@ -50,43 +49,6 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
     }
 
 }
-
-
-
-rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
-    {
-    success=true;
-    rttr::variant outarg;
-    auto which_type = arg.value_case();
-    
-    foxtrot::Logging lg("get_arg");
-    lg.Debug("arg type switch: " + std::to_string(which_type) );
-    
-    switch(which_type)
-    {
-    case(capability_argument::ValueCase::kDblarg):
-        outarg = arg.dblarg();
-        break;
-        
-    case(capability_argument::ValueCase::kIntarg):
-        outarg = arg.intarg();
-        break;
-        
-    case(capability_argument::ValueCase::kBoolarg):    
-        outarg = arg.boolarg();
-        break;
-    
-    case(capability_argument::ValueCase::kStrarg):
-        outarg = arg.strarg();
-        break;
-
-    case(capability_argument::ValueCase::VALUE_NOT_SET):
-        success = false;
-    }
-  
-    //     cout << "outarg type: " << outarg.get_type().get_name() << endl;
-    return outarg;
-    }
 
 
 foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)

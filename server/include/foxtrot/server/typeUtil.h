@@ -13,4 +13,10 @@ namespace foxtrot{
     
     ft_variant get_variant_wire_type(const rttr::variant& var);
     
+    rttr::variant wire_type_to_variant(const ft_variant& wiretp);
+    
+    rttr::variant wire_type_to_variant(const ft_simplevariant& wiretp);
+    rttr::variant wire_type_to_variant(const ft_struct& wiretp);
+    rttr::variant wire_type_to_variant(const ft_enum& wiretp);
+    
 }
