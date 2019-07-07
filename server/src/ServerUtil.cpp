@@ -18,7 +18,7 @@ rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& a
     
     try
     {
-        out = wire_type_to_variant(arg.value());
+//         out = wire_type_to_variant(arg.value());
     }
     catch(std::runtime_error& err)
     {
@@ -51,80 +51,80 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
 }
 
 
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
-{
-  
-  if(!var.is_valid())
-  {
-    throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
-  }
-  
-  auto tp = var.get_type();
-  
-  if(!tp.is_valid())
-  {
-    throw std::logic_error("invalid type check previous!");
-  }
-  
-  
-//   if( var.can_convert<int>() || var.can_convert<unsigned>() )
+// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
+// {
+//   
+//   if(!var.is_valid())
+//   {
+//     throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
+//   }
+//   
+//   auto tp = var.get_type();
+//   
+//   if(!tp.is_valid())
+//   {
+//     throw std::logic_error("invalid type check previous!");
+//   }
+//   
+//   
+// //   if( var.can_convert<int>() || var.can_convert<unsigned>() )
+// //     {
+// //       if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
+// // 	{
+// // 	  return value_types::INT;
+// // 	}
+// //     }
+// //     
+//   return get_appropriate_wire_type(tp);
+// }
+// 
+// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
+// {
+//     using namespace rttr;
+//     
+//     
+//     if(!tp.is_valid())
 //     {
-//       if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
-// 	{
-// 	  return value_types::INT;
-// 	}
+//         throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
 //     }
 //     
-  return get_appropriate_wire_type(tp);
-}
-
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
-{
-    using namespace rttr;
-    
-    
-    if(!tp.is_valid())
-    {
-        throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
-    }
-    
-    
-    if(tp == type::get<void>())
-    {
-        return value_types::VOID_TYPE;
-    }
-    
-    //check for bool
-    if(tp == type::get<bool>())
-    {
-        return value_types::BOOL_TYPE;
-    }
-    
-    //check for float
-    if( (tp == type::get<double>()) || (tp == type::get<float>())) 
-    {
-        return value_types::FLOAT_TYPE;
-    }
-    
-    if( tp == type::get<std::string>())
-    {
-      return value_types::STRING_TYPE;
-    }
-    
-    if(tp.is_enumeration())
-    {
-      return value_types::INT_TYPE;
-    }
-    
-    
-    if(!tp.is_arithmetic() )
-    {
-        return value_types::STRING_TYPE;
-    }
-    
-    
-    return value_types::INT_TYPE;
-}
+//     
+//     if(tp == type::get<void>())
+//     {
+//         return value_types::VOID_TYPE;
+//     }
+//     
+//     //check for bool
+//     if(tp == type::get<bool>())
+//     {
+//         return value_types::BOOL_TYPE;
+//     }
+//     
+//     //check for float
+//     if( (tp == type::get<double>()) || (tp == type::get<float>())) 
+//     {
+//         return value_types::FLOAT_TYPE;
+//     }
+//     
+//     if( tp == type::get<std::string>())
+//     {
+//       return value_types::STRING_TYPE;
+//     }
+//     
+//     if(tp.is_enumeration())
+//     {
+//       return value_types::INT_TYPE;
+//     }
+//     
+//     
+//     if(!tp.is_arithmetic() )
+//     {
+//         return value_types::STRING_TYPE;
+//     }
+//     
+//     
+//     return value_types::INT_TYPE;
+// }
 
 
 

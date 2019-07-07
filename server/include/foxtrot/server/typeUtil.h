@@ -23,4 +23,11 @@ namespace foxtrot{
     rttr::variant wire_type_to_variant(const ft_enum& wiretp,
                                        const rttr::type& target_tp);
     
+    variant_descriptor describe_type(const rttr::type& tp);
+    
+    simplevalue_types describe_simple_type(const rttr::type& tp);
+    struct_descriptor describe_struct(const rttr::type& tp);
+    enum_descriptor describe_enum(const rttr::type& tp);
+    
+    
 }

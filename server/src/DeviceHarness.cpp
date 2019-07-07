@@ -148,14 +148,15 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     }
     else
     {
-        out.set_rettp(get_appropriate_wire_type(cap.Returntype));
+        //TODO: add back in!
+//         out.set_rettp(get_appropriate_wire_type(cap.Returntype));
     }
     
     for(auto& name: cap.Argnames)
         out.add_argnames(name);
     
-    for(auto& type : cap.Argtypes)
-        out.add_argtypes(get_appropriate_wire_type(type));
+//     for(auto& type : cap.Argtypes)
+//         out.add_argtypes(get_appropriate_wire_type(type));
 
     return out;
 

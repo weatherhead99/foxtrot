@@ -16,16 +16,6 @@ enum capability_types
     STREAM = 3;
 }
 
-enum value_types
-{
-    FLOAT_TYPE = 0;
-    INT_TYPE = 1;
-    BOOL_TYPE = 2;
-    STRING_TYPE = 3;
-    BYTE_DATA_TYPE = 4;
-    VOID_TYPE = 5;
-}
-
 enum byte_data_types
 {
     UCHAR_TYPE = 0;
@@ -53,11 +43,11 @@ message devcapability
     capability_types tp = 1;
     string capname = 2;
     repeated string argnames = 3;
-    repeated value_types argtypes = 4;
+    repeated variant_descriptor argtypes = 4;
     //TODO: allow for return of vector types
     oneof return
     {
-      value_types rettp = 5;
+      variant_descriptor rettp = 5;
       byte_data_types vecrettp = 6;
       bool dynamic_rettp = 7;
     }

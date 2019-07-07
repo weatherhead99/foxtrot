@@ -303,3 +303,53 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 
 }
 
+variant_descriptor foxtrot::describe_type(const rttr::type& tp)
+{
+
+    
+    
+}
+
+struct_descriptor foxtrot::describe_struct(const rttr::type& tp)
+{
+    struct_descriptor out;
+    out.set_struct_name(tp.get_name().to_string());
+
+    auto prop_map = out.mutable_struct_map();
+    for(auto& prop : tp.get_properties())
+    {
+        auto var = describe_type(prop.get_type());
+        prop_map->operator[](prop.get_name().to_string()) = var;
+    }
+
+    return out;
+};
+
+
+enum_descriptor foxtrot::describe_enum(const rttr::type& tp)
+{
+    enum_descriptor out;
+    out.set_enum_name(tp.get_name().to_string());
+    
+    auto outnames = out.mutable_enum_map();
+    
+    auto enumtp = tp.get_enumeration();
+    auto enumvarit = enumtp.get_values().begin();
+    
+    for(auto& name : enumtp.get_names())
+    {
+        outnames->operator[](name.to_string()) = (enumvarit++)->to_uint32();
+    };
+    
+    return out;
+};
+
+simplevalue_types foxtrot::describe_simple_type(const rttr::type& tp)
+{
+    simplevalue_types out;
+    
+    
+    
+    return out;
+};
+

@@ -153,8 +153,8 @@ std::unique_ptr<unsigned char[]> byte_view_data ( rttr::variant& arr, unsigned& 
 
 
 // bool set_returntype ( rttr::variant& retval, foxtrot::capability_response& repl );
-value_types get_appropriate_wire_type ( const rttr::variant& vr );
-value_types get_appropriate_wire_type ( const rttr::type& tp );
+// value_types get_appropriate_wire_type ( const rttr::variant& vr );
+// value_types get_appropriate_wire_type ( const rttr::type& tp );
 
 
 template<typename T> bool is_ft_call_streaming ( const T& propmeth )
