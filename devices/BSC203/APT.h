@@ -140,10 +140,16 @@ namespace foxtrot {
       MGMSG_MOT_GET_DCSTATUSUPDATE = 0x0491,
       
       MGMSG_MOT_REQ_STATUSBITS = 0x0429,
-      MGMSG_MOT_GET_STATUSBITS = 0x042A
+      MGMSG_MOT_GET_STATUSBITS = 0x042A,
       
+      MGMSG_PZMOT_SET_PARAMS = 0x08C0,
+      MGMSG_PZMOT_REQ_PARAMS = 0x08C1,
+      MGMSG_PZMOT_GET_PARAMS = 0x08C2,
       
-      
+      MGMSG_HW_START_UPDATEMSGS = 0x0011,
+      MGMSG_HW_STOP_UPDATEMSGS = 0x0012,
+      MGMSG_PZMOT_GET_STATUSUPDATE = 0x8E1
+
     };
     
     struct bsc203_reply
@@ -168,13 +174,14 @@ namespace foxtrot {
     };
     
 #pragma pack(push,1)
-   struct motor_status
+   struct channel_status
    {
        unsigned short chan_indent;
        unsigned int position;
        unsigned int enccount;
        unsigned int statusbits;
    }; 
+
    
 #pragma pack(pop)
     
@@ -205,7 +212,7 @@ namespace foxtrot {
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, destination src = destination::host);
       
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
-          bool* has_data = nullptr);
+          bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
       
       template<typename T>
       T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2);
@@ -215,7 +222,6 @@ namespace foxtrot {
       
       foxtrot::Logging _lg;
       
-    private:
       std::shared_ptr<protocols::SerialPort> _serport;
     
     };
@@ -240,16 +246,7 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
   unsigned char srcaddr = static_cast<unsigned char>(src);
   
   std::array<unsigned char, 6> header{optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
-  for (auto c: header)
-  {
-      cout << std::hex << static_cast<unsigned>(c) << "\t";
-  }
   
-  for (auto c: data)
-  {
-      cout <<std::hex << static_cast<unsigned>(c) << "\t";
-  }
-  cout << endl;
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
 
@@ -272,6 +269,7 @@ T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcode
         throw std::logic_error("mismatch between received data size and struct size!");
     
     std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    
     return out;
     
 }

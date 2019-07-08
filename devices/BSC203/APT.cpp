@@ -15,6 +15,7 @@
 
 #include <thread>
 #include <chrono>
+#include <string>
 
 using std::cout;
 using std::endl;
@@ -35,6 +36,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
 {
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
+  _serport->flush();
   
   //send this random magical message that makes stuff work for some reason
   _lg.Debug("disabling flash programming on rack...");
@@ -62,7 +64,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   
   _lg.Debug("stopping update messages...");
   //disable status update messages as they will mess with out synchronous messaging model
-  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::rack);
+  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
   //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
   //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay2);
   //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay3);
@@ -85,26 +87,29 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
   
   std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
   
-  for (auto c: header){
-      cout << std::hex << static_cast<unsigned>(c) << "\t";
-  }
-  cout << endl;
-  
   _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
   
 }
 
-foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtrot::devices::bsc203_opcodes expected_opcode, foxtrot::devices::destination expected_source, bool* has_data)
+foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtrot::devices::bsc203_opcodes expected_opcode, foxtrot::devices::destination expected_source, bool* has_data, bool check_opcode, unsigned* received_opcode)
 {
     unsigned actlen;
     bsc203_reply out;
     
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); // IT SEEMS TO WORK FINE WITH 50 ms, PLEASE DO NOT CHANGE IT.
-    _lg.Trace("before serial port read");
+    
+    //cout << " Bytes available: " << std::hex << _serport->bytes_available() << endl;
+    
     auto headerstr = _serport->read(6,&actlen);
-    _lg.Trace("after serial port message");
-    cout << actlen << endl;
+    
+    while(headerstr[0] == 0){
+        if (_serport->bytes_available() == 0){
+            break;
+        }
+        auto extra_byte = _serport->read(1);
+        std::copy(headerstr.begin() + 1, headerstr.end() + 1, headerstr.begin());
+    }
     
     if(actlen != 6)
     {
@@ -112,22 +117,37 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
         throw DeviceError("received bad reply length..." );
     };
     
-    unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0]); 
-    std::cout << (unsigned) opcode << std::endl;
+    unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF); 
+    //std::cout << std::hex << (unsigned) opcode << std::endl;
     
-    
+    if (received_opcode != nullptr)
+    {
+        *received_opcode = opcode;
+    }
+
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
     {
         _lg.Error("unexpected opcode: " + std::to_string(opcode));
-	_lg.Error("expected: " + std::to_string(static_cast<decltype(opcode)>(expected_opcode)));
-        throw DeviceError("received unexpected opcode");
+        _lg.Error("expected: " + std::to_string(static_cast<decltype(opcode)>(expected_opcode)));
+        
+        if (check_opcode)
+        {
+            throw DeviceError("received unexpected opcode");
+        }
     }
-    
+
+    if (headerstr[4] == 0)
+    {
+        _lg.Error("null destination");
+        throw DeviceError("received null destination");
+    }
+
     auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
     {
         _lg.Error("unexpected source: " + std::to_string(src) + " - " +  std::to_string(static_cast<decltype(src)>(expected_source)));
         throw DeviceError("received unexpected source");
+
     }
     
     //check if data packet present 
@@ -137,11 +157,11 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
       _lg.strm(sl::trace) << "headerstr[3]: " << (int) headerstr[3] << " headerstr[2]: " << (int) headerstr[2];
       //      unsigned short dlen = (static_cast<int>(headerstr[3]) << 8 ) & static_cast<int>(headerstr[2]);
       unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
-        
+      
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
       
       auto data = _serport->read(dlen,&actlen);
-
+      
       if(actlen != dlen)
       {
           _lg.Error("didn't read all the data..." + std::to_string(actlen));
@@ -175,8 +195,6 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
 void foxtrot::devices::APT::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
 {
     unsigned char enable_disable = onoff? 0x01 : 0x02;
-    
-    cout << std::hex << static_cast<unsigned>(enable_disable) << endl;
     
     transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),
                      enable_disable, dest);
@@ -246,17 +264,17 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
 void foxtrot::devices::APT::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
 {
     auto data = get_move_request_header_data(distance, chan);
-    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
+    auto out = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
                                                      bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                                                      dest, data);
-    //TODO: check contents of motor_status struct
+    //TODO: check contents of channel_status struct
 }
 
 // TIM101 and BSC203 although they both need different struts to store the data
 void foxtrot::devices::APT::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
 {
     auto data = get_move_request_header_data(distance, chan);
-    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE,
+    auto out = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE,
                                                      bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                                                      dest, data);
     
