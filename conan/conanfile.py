@@ -1,4 +1,5 @@
 from conans import tools, ConanFile, CMake
+import os
 
 hardcode_version="0.0.1dev"
 
@@ -39,7 +40,18 @@ class FoxtrotCppPackage(ConanFile):
             cmake.build()
         cmake.install()
         cmake.patch_config_paths()
-    
+
     def package_info(self):
+        if not self.in_local_cache:
+            if os.path.exists(".builddir.info"):
+                self.output.info("found builddir info file")
+                with open(".builddir.info","r") as f:
+                    buildpath = f.read().strip()
+
+                self.cpp_info.libdirs.append(os.path.join(buildpath,"lib"))
+                self.cpp_info.includedirs.append(buildpath)
+        
+        self.output.warn("build folder: %s" % self.build_folder)
+
         self.cpp_info.libdirs = ["lib/foxtrot"]
         self.cpp_info.libs = tools.collect_libs(self)
