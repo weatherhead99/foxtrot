@@ -32,7 +32,7 @@ if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)
     set_property(TARGET foxtrot::foxtrot_core PROPERTY
       INTERFACE_INCLUDE_DIRECTORIES
-      "@PACKAGE_ft_core_binarydir@;@PACKAGE_ft_core_sourcedir@/include")
+      "${CMAKE_CURRENT_LIST_DIR};@PACKAGE_ft_core_sourcedir@/include")
 else()
     if(NOT TARGET foxtrot::foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
         include(${foxtrot_core_PREFIX}/lib/cmake/foxtrotCore/foxtrot_core.cmake)
