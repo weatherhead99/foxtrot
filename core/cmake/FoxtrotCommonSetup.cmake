@@ -61,3 +61,9 @@ function(foxtrot_add_to_package_registry exportname packagename)
         export(PACKAGE ${packagename})
     endif()
 endfunction()
+
+
+macro(foxtrot_writeout_build_directory filename)
+    message("writing out location of build directory")
+    file(WRITE ${filename} "${CMAKE_BINARY_DIR}\n")
+endmacro()

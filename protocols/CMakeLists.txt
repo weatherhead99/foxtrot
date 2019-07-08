@@ -16,6 +16,10 @@ find_package(foxtrotServer REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 
+if(FOXTROT_PROTOCOLS_CONAN_BUILD)
+  foxtrot_writeout_build_directory(.builddir.info)
+endif()
+
 set(packname "protocols")
 
 

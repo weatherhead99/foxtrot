@@ -47,6 +47,10 @@ include(CMakePackageConfigHelpers)
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
 
+if(FOXTROT_SERVER_CONAN_BUILD)
+  foxtrot_writeout_build_directory(.builddir.info)
+endif()
+
 
 set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
 src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp

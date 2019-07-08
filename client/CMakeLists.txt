@@ -20,6 +20,10 @@ include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
+if(FOXTROT_CLIENT_CONAN_BUILD)
+  foxtrot_writeout_build_directory(.builddir.info)
+endif()
+
 add_library(foxtrot_client src/client.cpp)
 target_include_directories(foxtrot_client PUBLIC 
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
