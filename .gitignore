@@ -9,3 +9,6 @@ build/*
 *.mypy_cache*
 */.spyproject/*
 *.egg
+*.builddir.info*
+*/conanbuild/*
+python/dist/*
