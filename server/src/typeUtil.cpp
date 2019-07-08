@@ -95,6 +95,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
     variant_setter setter(var, out, success);
     if(tp.is_arithmetic())
     {
+        out.set_size(tp.get_sizeof());
         if(setter.set_check<bool>(&variant::to_bool, &ft_simplevariant::set_boolval))
             return out;
         if(setter.set_check<double>(&variant::to_double, &ft_simplevariant::set_dblval)) 
@@ -344,12 +345,62 @@ enum_descriptor foxtrot::describe_enum(const rttr::type& tp)
     return out;
 };
 
-simplevalue_types foxtrot::describe_simple_type(const rttr::type& tp)
+
+template<typename First, typename... Ts> 
+struct is_type_any_of_impl
+{
+    static bool compare(const rttr::type& tp)
+    {
+        if(tp == rttr::type::get<First>())
+            return true;
+        return is_type_any_of_impl<Ts...>::compare(tp);
+    };
+    
+};
+
+template<typename Last> 
+struct is_type_any_of_impl<Last>{
+    static bool compare(const rttr::type& tp)
+    {
+        return tp == rttr::type::get<Last>();
+    };
+    
+};
+
+template<typename... Ts>
+bool is_type_any_of(const rttr::type& tp)
+{
+    return is_type_any_of<Ts...>(tp);
+}
+
+
+std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp)
 {
     simplevalue_types out;
-    
-    
-    
-    return out;
+    unsigned char size = 0;
+    if(!tp.is_arithmetic())
+    {
+        if(tp == rttr::type::get<void>())
+            out = simplevalue_types::VOID_TYPE;
+        else if(tp == rttr::type::get<std::string>())
+            out =  simplevalue_types::STRING_TYPE;
+    }
+    else
+    {
+        if(tp == rttr::type::get<bool>())
+            out = simplevalue_types::BOOL_TYPE;
+        else if(is_type_any_of<float,double>(tp))
+            out =  simplevalue_types::FLOAT_TYPE;
+        else if(is_type_any_of<char, short, int, long>(tp))
+            out = simplevalue_types::INT_TYPE;
+        else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long>(tp))
+            out =  simplevalue_types::UINT_TYPE;
+        else
+        {
+            throw std::logic_error("can't deduce appropriate descriptor for type: " + tp.get_name().to_string());
+        }
+        size = tp.get_sizeof();
+    }
+    return std::make_pair(out,size);
 };
 

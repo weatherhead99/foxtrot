@@ -21,8 +21,9 @@ message variant_descriptor
 {
     variant_types variant_type = 1;
     simplevalue_types simeplvalue_type = 2;
-    struct_descriptor struct_desc = 3;
-    enum_descriptor enum_desc = 4;
+    uint32 simplevalue_sizeof = 3;
+    struct_descriptor struct_desc = 4;
+    enum_descriptor enum_desc = 5;
 }
 
 message struct_descriptor
@@ -53,6 +54,7 @@ message ft_simplevariant {
         bool boolval = 4;
         string stringval = 5;
         }
+    uint32 size = 6;
 }
 
 

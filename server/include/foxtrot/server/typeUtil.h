@@ -1,6 +1,6 @@
 #include <rttr/type>
 #include <foxtrot/ft_types.pb.h>
-
+#include <utility>
 
 namespace foxtrot{
 
@@ -25,7 +25,7 @@ namespace foxtrot{
     
     variant_descriptor describe_type(const rttr::type& tp);
     
-    simplevalue_types describe_simple_type(const rttr::type& tp);
+    std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp);
     struct_descriptor describe_struct(const rttr::type& tp);
     enum_descriptor describe_enum(const rttr::type& tp);
     
