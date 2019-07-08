@@ -20,6 +20,10 @@ include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakeParseArguments)
 
+if(FOXTROT_DEVICES_CONAN_BUILD)
+  foxtrot_writeout_build_directory(.builddir.info)
+endif()
+
 find_package(foxtrotProtocols REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 
