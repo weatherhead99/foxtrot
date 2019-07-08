@@ -32,10 +32,12 @@ class FoxtrotCppMeta(type):
 class FoxtrotCppPackage(ConanFile):
     def build(self):
         cmake = CMake(self)
-        cmake.configure()
-
         env_build = tools.RunEnvironment(self)
+        if self.develop:
+            self.output.warn("in develop mode")
+            cmake.definitions["FT_EXPORT_TO_PACKAGE_REGISTRY"] = True
         cmake.definitions["CONAN_PACKAGE_VERSION"] = self.version
+        cmake.configure()
         with tools.environment_append(env_build.vars):
             cmake.build()
         cmake.install()
@@ -49,7 +51,8 @@ class FoxtrotCppPackage(ConanFile):
                     buildpath = f.read().strip()
 
                 self.output.warn("buildpath: %s" % buildpath)
-                self.cpp_info.libdirs = [os.path.join(buildpath,"lib")]
+                self.cpp_info.libdirs = [os.path.join(buildpath,"lib"), buildpath]
+                self.cpp_info.builddirs = [buildpath]
                 self.cpp_info.includedirs.append(buildpath)
         
             self.output.warn("build folder: %s" % self.build_folder)

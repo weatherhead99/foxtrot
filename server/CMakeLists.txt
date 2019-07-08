@@ -14,7 +14,13 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
 
+message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
+
 find_package(foxtrotCore REQUIRED)
+
+get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
+message(ERROR "iid: ${prop}")
+
 
 find_package(OpenSSL REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
