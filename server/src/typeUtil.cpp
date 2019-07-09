@@ -306,9 +306,28 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 
 variant_descriptor foxtrot::describe_type(const rttr::type& tp)
 {
-
+    variant_descriptor out;
+    if(tp.is_enumeration())
+    {
+        auto* desc = out.mutable_enum_desc();
+        *desc = describe_enum(tp);
+        out.set_variant_type(variant_types::ENUM_TYPE);
+    }
+    else if(tp != rttr::type::get<std::string>() && !is_POD_struct(tp))
+    {
+        auto* desc = out.mutable_struct_desc();
+        *desc = describe_struct(tp);
+        out.set_variant_type(variant_types::STRUCT_TYPE);
+    }
+    else
+    {
+        auto desc = describe_simple_type(tp);
+        out.set_simplevalue_sizeof(desc.second);
+        out.set_simplevalue_type(desc.first);
+        out.set_variant_type(variant_types::SIMPLEVAR_TYPE);
+    }
     
-    
+    return out;
 }
 
 struct_descriptor foxtrot::describe_struct(const rttr::type& tp)

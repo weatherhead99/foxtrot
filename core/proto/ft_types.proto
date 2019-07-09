@@ -20,7 +20,7 @@ enum variant_types
 message variant_descriptor
 {
     variant_types variant_type = 1;
-    simplevalue_types simeplvalue_type = 2;
+    simplevalue_types simplevalue_type = 2;
     uint32 simplevalue_sizeof = 3;
     struct_descriptor struct_desc = 4;
     enum_descriptor enum_desc = 5;

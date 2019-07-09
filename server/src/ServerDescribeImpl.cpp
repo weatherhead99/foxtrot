@@ -28,7 +28,7 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
           
           //enumerate capabilities
           //WARNING: SLOOOOW
-          auto capnames = _harness.GetCapabilityNames(devid);
+          auto capnames = devpair.second->GetCapabilityNames();
           for(auto& capname : capnames)
           {
               _lg.strm(sl::debug) << "adding capability: " << capname ;

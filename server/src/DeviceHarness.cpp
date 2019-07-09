@@ -8,7 +8,7 @@
 #include <foxtrot/ContentionError.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/ServerUtil.h>
-
+#include <foxtrot/server/typeUtil.h>
 
 
 
@@ -148,15 +148,18 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     }
     else
     {
-        //TODO: add back in!
-//         out.set_rettp(get_appropriate_wire_type(cap.Returntype));
+        auto retdesc = out.mutable_rettp();
+        *retdesc = describe_type(cap.Returntype);
     }
     
     for(auto& name: cap.Argnames)
         out.add_argnames(name);
     
-//     for(auto& type : cap.Argtypes)
-//         out.add_argtypes(get_appropriate_wire_type(type));
+    for(auto& type: cap.Argtypes)
+    {
+        auto typedesc = out.add_argtypes();
+        *typedesc = describe_type(type);
+    }
 
     return out;
 
