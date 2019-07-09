@@ -124,11 +124,11 @@ DESCRIPTOR.message_types_by_name['errstatus'] = _ERRSTATUS
 DESCRIPTOR.enum_types_by_name['error_types'] = _ERROR_TYPES
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-errstatus = _reflection.GeneratedProtocolMessageType('errstatus', (_message.Message,), {
-  'DESCRIPTOR' : _ERRSTATUS,
-  '__module__' : 'ft_error_pb2'
+errstatus = _reflection.GeneratedProtocolMessageType('errstatus', (_message.Message,), dict(
+  DESCRIPTOR = _ERRSTATUS,
+  __module__ = 'ft_error_pb2'
   # @@protoc_insertion_point(class_scope:errstatus)
-  })
+  ))
 _sym_db.RegisterMessage(errstatus)
 
 
