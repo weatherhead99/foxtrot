@@ -14,9 +14,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import ft_error_pb2 as ft__error__pb2
-import ft_types_pb2 as ft__types__pb2
-import ft_auth_pb2 as ft__auth__pb2
+from . import ft_error_pb2 as ft__error__pb2
+from . import ft_types_pb2 as ft__types__pb2
+from . import ft_auth_pb2 as ft__auth__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(

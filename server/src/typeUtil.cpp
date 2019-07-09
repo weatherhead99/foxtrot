@@ -1,5 +1,5 @@
 #include <foxtrot/server/typeUtil.h>
-
+#include <foxtrot/Logging.h>
 
 using namespace foxtrot;
 
@@ -304,24 +304,31 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 
 }
 
-variant_descriptor foxtrot::describe_type(const rttr::type& tp)
+variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging* lg)
 {
     variant_descriptor out;
     if(tp.is_enumeration())
     {
+        if(lg)
+            lg->strm(sl::debug) << "type is enumeration";
         auto* desc = out.mutable_enum_desc();
         *desc = describe_enum(tp);
         out.set_variant_type(variant_types::ENUM_TYPE);
     }
-    else if(tp != rttr::type::get<std::string>() && !is_POD_struct(tp))
+    else if(tp.is_class() && tp != rttr::type::get<std::string>() 
+            && is_POD_struct(tp))
     {
+        if(lg)
+            lg->strm(sl::debug) << "type is struct";
         auto* desc = out.mutable_struct_desc();
         *desc = describe_struct(tp);
         out.set_variant_type(variant_types::STRUCT_TYPE);
     }
     else
     {
-        auto desc = describe_simple_type(tp);
+        if(lg)
+            lg->strm(sl::debug) << "type is simple";
+        auto desc = describe_simple_type(tp,lg);
         out.set_simplevalue_sizeof(desc.second);
         out.set_simplevalue_type(desc.first);
         out.set_variant_type(variant_types::SIMPLEVAR_TYPE);
@@ -389,16 +396,16 @@ struct is_type_any_of_impl<Last>{
 template<typename... Ts>
 bool is_type_any_of(const rttr::type& tp)
 {
-    return is_type_any_of<Ts...>(tp);
+    return is_type_any_of_impl<Ts...>::compare(tp);
 }
 
 
-std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp)
+std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg)
 {
     simplevalue_types out;
     unsigned char size = 0;
     if(!tp.is_arithmetic())
-    {
+    {   
         if(tp == rttr::type::get<void>())
             out = simplevalue_types::VOID_TYPE;
         else if(tp == rttr::type::get<std::string>())
@@ -406,12 +413,18 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
     }
     else
     {
+        if(lg)
+            lg->strm(sl::trace) << "type is arithmetic";
         if(tp == rttr::type::get<bool>())
             out = simplevalue_types::BOOL_TYPE;
         else if(is_type_any_of<float,double>(tp))
             out =  simplevalue_types::FLOAT_TYPE;
         else if(is_type_any_of<char, short, int, long>(tp))
+        {
+            if(lg)
+                lg->strm(sl::trace) << "type is INT";
             out = simplevalue_types::INT_TYPE;
+        }
         else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long>(tp))
             out =  simplevalue_types::UNSIGNED_TYPE;
         else

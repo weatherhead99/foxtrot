@@ -103,10 +103,12 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
 {
     auto dev = GetDevice(devid);
     
+    _lg.strm(sl::trace) << "getting capability from device";
     foxtrot::Capability cap = dev->GetCapability(capname);
     foxtrot::devcapability out;
     out.set_capname(cap.CapabilityName);
     
+    _lg.strm(sl::trace) << "setting capability type...";
     switch(cap.type)
     {
         case(CapabilityType::VALUE_READONLY): out.set_tp(capability_types::VALUE_READONLY); break;
@@ -148,8 +150,9 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     }
     else
     {
+        _lg.strm(sl::debug) << "action type, describing  return type:" << cap.Returntype.get_name().to_string();
         auto retdesc = out.mutable_rettp();
-        *retdesc = describe_type(cap.Returntype);
+        *retdesc = describe_type(cap.Returntype, &_lg);
     }
     
     for(auto& name: cap.Argnames)
@@ -157,6 +160,8 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
     
     for(auto& type: cap.Argtypes)
     {
+        _lg.strm(sl::debug) << "describing argument with type: " <<type.get_name().to_string();
+        
         auto typedesc = out.add_argtypes();
         *typedesc = describe_type(type);
     }

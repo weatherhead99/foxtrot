@@ -8,6 +8,7 @@ Created on Wed Apr 19 11:44:13 2017
 from functools import wraps
 from pyfoxtrot.foxtrot_pb2_grpc import *
 from pyfoxtrot.foxtrot_pb2 import *
+from pyfoxtrot.ft_types_pb2 import *
 from pyfoxtrot.Errors import *
 
 

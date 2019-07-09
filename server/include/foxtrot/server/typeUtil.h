@@ -3,7 +3,8 @@
 #include <utility>
 
 namespace foxtrot{
-
+    class Logging;
+    
     bool is_POD_struct(const rttr::type& tp);
     
     ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var);
@@ -23,9 +24,9 @@ namespace foxtrot{
     rttr::variant wire_type_to_variant(const ft_enum& wiretp,
                                        const rttr::type& target_tp);
     
-    variant_descriptor describe_type(const rttr::type& tp);
+    variant_descriptor describe_type(const rttr::type& tp, Logging* lg=nullptr);
     
-    std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp);
+    std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr);
     struct_descriptor describe_struct(const rttr::type& tp);
     enum_descriptor describe_enum(const rttr::type& tp);
     
