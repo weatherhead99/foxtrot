@@ -8,7 +8,8 @@ using namespace foxtrot;
 using namespace foxtrot::devices;
 
 
-
+namespace foxtrot {
+  namespace devices {
 namespace detail {
     void check_ueye_error(int32_t ret, foxtrot::Logging* lg)
     {
@@ -21,6 +22,8 @@ namespace detail {
         }
     
     };
+}
+  }
 }
 
 
