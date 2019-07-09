@@ -30,10 +30,10 @@ int main(int argc,char** argv)
   //printhwinfo(hwinfo);
   
   //JOG MOVE
-  foxtrot::devices::jogparams jogstruct;
+  /*foxtrot::devices::jogparams jogstruct;
   jogstruct.subMsgID = 0x0009;
   jogstruct.chanIndent = 0x01;
-  jogstruct.jogMode = 0x0002; //continuous
+  jogstruct.jogMode = 0x0002; //step
   jogstruct.jogStepSize = 0x000000AA;
   jogstruct.jogStepRate = 0x000001F4;
   jogstruct.jogStepAccn = 0x000186A0;
@@ -44,12 +44,56 @@ int main(int argc,char** argv)
   
   cout << "jog Mode requested: " << std::hex << jogstruct_req.jogMode << endl;
   cout << "jog Mode Size requested: " << std::hex << jogstruct_req.jogStepSize << endl;
-  cout << "jog Step Accn requested: " << std::hex << jogstruct_req.jogStepAccn << endl;
+  cout << "jog Step Accn requested: " << std::hex << jogstruct_req.jogStepAccn << endl;*/
+  
+  //motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
+
+  // SET POSITION COUNTER
+  foxtrot::devices::pos_counter_params posparams;
+  posparams.subMsgID = 0x0005;
+  posparams.chanIndent = 0x01;
+  posparams.position = 0x0;
+  posparams.encCount = 0x0;
+  
+  motors.set_position_counter(foxtrot::devices::destination::sourceTIM101, &posparams);
   
   motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
-
-  //ABSOLUTE MOVE
-  //motors.absolute_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, 100);
   
+  motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_4, foxtrot::devices::jogdir::forward);
+  
+  //foxtrot::devices::pos_counter_params posparams_rec = motors.request_position_counter(foxtrot::devices::destination::sourceTIM101);
+  //cout << "Get position counter says: " << std:: hex << posparams_rec.position << endl;
+  
+  
+  //ABSOLUTE MOVE
+  /*foxtrot::devices::move_absolute_params absparams;
+  absparams.subMsgID = 0x0007;
+  absparams.chanIndent = 0x01;
+  absparams.maxVoltage = 0x006E;
+  absparams.stepRate = 0x00000014;
+  absparams.stepAccn = 0x000000F0;
+  
+  motors.set_move_absolute_parameters(foxtrot::devices::destination::sourceTIM101, &absparams);
+  
+  foxtrot::devices::move_absolute_params absparams_rec = motors.request_move_absolute_parameters(foxtrot::devices::destination::sourceTIM101);
+  
+  cout << "move_absolute channel : " << std::hex << absparams_rec.chanIndent << endl;
+  cout << "move_absolute max voltage : " << std::hex << absparams_rec.maxVoltage << endl;
+  cout << "move_absolute step rate : " << std::hex << absparams_rec.stepRate << endl;
+  cout << "move_absolute step accn : " << std::hex << absparams_rec.stepAccn << endl;
+  
+  //motors.get_status_update(foxtrot::devices::destination::sourceTIM101);
+  
+  foxtrot::devices::pos_counter_params posparams_rec = motors.request_position_counter(foxtrot::devices::destination::sourceTIM101);
+  
+  cout << "Get position counter says: " << std:: hex << posparams_rec.position << endl;
+  
+  
+  
+  */
+  
+  //motors.absolute_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, 0x64);
+  
+  //foxtrot::devices::motor_status motorstr = motors.get_status_update(foxtrot::devices::destination::sourceTIM101);
 
 };

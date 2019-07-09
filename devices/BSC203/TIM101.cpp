@@ -22,12 +22,22 @@ using std::endl;
 
 //Static functions
 static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::jogparams* jogstruct);
-
+static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams);
+static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams);
 
 
 foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort > proto) : foxtrot::devices::APT(proto)
 {
     _lg.strm(sl::trace) <<"TIM101 Calling superclass constructor...";
+    
+    //send this random magical message that makes stuff work for some reason
+    _lg.Debug("disabling flash programming on rack...");
+    transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::sourceTIM101);
+    
+    //disable status update messages as they will mess with out synchronous messaging model
+    _lg.Debug("stopping update messages...");
+    transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
+    _lg.Debug("update messages stopped");
 }
 
 template<typename T>
@@ -39,19 +49,21 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
     return data;
 }
 
-void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
+void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
 {
     
     //Setting channel to th active channel
     set_channelenable(dest, chan, true);
     
-    auto data = get_move_request_header_data(distance, chan);
-    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE,
-                                                     bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED,
-                                                     dest, data);
+    //auto data = get_move_request_header_data(distance, chan);
+    //transmit_message(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE, data, dest);
+    
+    /*auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE,bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED,
+                                                     dest, data);*/
     
     //TODO: check contents of motor status struct
 }
+
 
 void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, foxtrot::devices::jogdir direction)
 {
@@ -108,6 +120,9 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
     }
 
     stop_update_messages(dest);
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    _serport->flush();
 
 }
     
@@ -117,13 +132,44 @@ void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination 
     
     transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
 
+}
+
+void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, foxtrot::devices::move_absolute_params* absparams){
     
+    auto data = get_move_absolute_request_data(absparams);
+    
+    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
     
 }
+
+void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, foxtrot::devices::pos_counter_params* poscountarams){
+    
+    auto data = get_pos_counter_request_data(poscountarams);
+    
+    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
+    
+}
+
 
 foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest){
 
     auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01);
+    
+    return out;
+    
+}
+
+foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest){
+
+    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01);
+    
+    return out;
+    
+}
+
+foxtrot::devices::pos_counter_params foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest){
+    
+    auto out =request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x05,0x01);
     
     return out;
     
@@ -141,14 +187,53 @@ void foxtrot::devices::TIM101::stop_update_messages(foxtrot::devices::destinatio
     
 }
 
-foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtrot::devices::destination dest)
+foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtrot::devices::destination dest, bool print)
 {
+    bool hasdata;
+    unsigned received_opcode = 0;
+    motor_status motorstr;
     
-    auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_HW_START_UPDATEMSGS, bsc203_opcodes::MGMSG_PZMOT_GET_STATUSUPDATE, dest, 0x0A,0x0);
+    start_update_messages(dest);
     
-    stop_update_messages(dest);
+    _serport->flush();
     
-    return out;
+    //Extracting position information from GET STATUS UPDATE
+    while(received_opcode != static_cast<decltype(received_opcode)>(bsc203_opcodes::MGMSG_PZMOT_GET_STATUSUPDATE))
+    {
+        try{
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        auto ret = receive_message_sync(bsc203_opcodes::MGMSG_PZMOT_GET_STATUSUPDATE, dest, &hasdata, true, &received_opcode);
+        
+        //Checking motor_status information
+        if(!hasdata)
+        {
+            throw DeviceError("expected struct data in response but didn't get any!");
+        }
+
+        if(ret.data.size() != sizeof(motorstr))
+        {
+            throw std::logic_error("mismatch between received data size and struct size!");
+        }
+
+        std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&motorstr));
+
+        //Printing motor_status information
+        if (print){
+        print_motor_status(&motorstr);
+        }
+        
+        stop_update_messages(dest);
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        _serport->flush();
+        
+        return motorstr;
+    
+
+        } catch (DeviceError excep){
+            //_lg.strm(sl::trace) << "looking for get status...";
+        }
+        
+    }
     
 }
 
@@ -202,14 +287,45 @@ static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::
 
     return data;
 }
+
+static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams)
+{
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&absparams->subMsgID);
+    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(&absparams->maxVoltage);
+    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(&absparams->stepRate);
+    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(&absparams->stepAccn);
+    
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams->chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
+    
+    return data;
+    
+}
+
+static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams)
+{
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&poscountparams->subMsgID);
+    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(&poscountparams->position);
+    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(&poscountparams->encCount);
+
+    
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams->chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
+    
+    return data;
+}
     
 
+    //Free functions
 void foxtrot::devices::print_motor_status(foxtrot::devices::motor_status* motorstr){
     
-    cout << "Motor Status: Position Chanel 1 (hex): "<< std::hex << motorstr->channel1.position<< endl;
-    cout << "Motor Status: Position Chanel 2 (hex): "<< std::hex << motorstr->channel2.position << endl;
-    cout << "Motor Status: Position Chanel 3 (hex): "<< std::hex << motorstr->channel3.position << endl;
-    cout << "Motor Status: Position Chanel 4 (hex): "<< std::hex << motorstr->channel4.position << endl;
+    cout << "Motor Status: Position Channel 1 (hex): " << std::hex << motorstr->channel1.position << endl;
+    cout << "Motor Status: Position Channel 2 (hex): " << std::hex << motorstr->channel2.position << endl;
+    cout << "Motor Status: Position Channel 3 (hex): " << std::hex << motorstr->channel3.position << endl;
+    cout << "Motor Status: Position Channel 4 (hex): " << std::hex << motorstr->channel4.position << endl;
+
+    /*for (int i = 0; i < 4; i++)
+    {
+    cout << "Motor Status: Position Chanel " << std::to_string(i) << " (hex): "<< std::hex << motorstr->channelstat[i].position<< endl;
+    }*/
 }
 
 void foxtrot::devices::print_channel_status(foxtrot::devices::channel_status* chanstr){
@@ -219,6 +335,6 @@ void foxtrot::devices::print_channel_status(foxtrot::devices::channel_status* ch
 
 }
     
-    
-    
+
+
     

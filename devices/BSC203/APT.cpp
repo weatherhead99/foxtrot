@@ -37,40 +37,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
   _serport->flush();
-  
-  //send this random magical message that makes stuff work for some reason
-  _lg.Debug("disabling flash programming on rack...");
-  transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::rack);
-  
-  for(unsigned char i =0 ; i <3; i++)
-  {
-      /*if(get_bayused_rack(destination::rack, i))
-      {
-	_lg.Debug("bay is used: " + std::to_string(i));
-          _lg.Debug("disabling flash programming on controller " + std::to_string(i));
-          transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,
-                           static_cast<destination>(i + 0x20));
-          
-      }
-      else
-      {
-	_lg.Debug("bay is unused: " + std::to_string(i));
-      };*/ // Comenting this piece of code because it fails in the received message cause it does not have any bays
-      
-      // Moving this line outside because TIM101 does not have any bays
-    _lg.Debug("bay is unused: " + std::to_string(i));
-      
-  };
-  
-  _lg.Debug("stopping update messages...");
-  //disable status update messages as they will mess with out synchronous messaging model
-  transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
-  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay1);
-  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay2);
-  //transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::bay3);
-  
-  _lg.Debug("update messages stopped");
-  
+
 }
 
 
@@ -222,23 +189,6 @@ foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::des
 };
 
 
-bool foxtrot::devices::APT::get_bayused_rack(foxtrot::devices::destination dest, unsigned char bay)
-{
-    transmit_message(bsc203_opcodes::MGMSG_RACK_REQ_BAYUSED,bay,0,dest);
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_RACK_GET_BAYUSED,dest);
-    
-    if(ret.p1 != bay)
-    {
-      _lg.Error("requested bay: " + std::to_string(bay) + " got bay: " + std::to_string(ret.p1));
-      throw DeviceError("invalid bay returned...");
-    }
-    
-    bool used = (ret.p2 == 0x02) ? false : true;
-    
-    return used;
-};
-
-
 void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOME,static_cast<unsigned char>(chan),0,dest);
@@ -260,26 +210,7 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
     return data;
 }
 
-//Only BSC203
-void foxtrot::devices::APT::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
-{
-    auto data = get_move_request_header_data(distance, chan);
-    auto out = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,
-                                                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
-                                                     dest, data);
-    //TODO: check contents of channel_status struct
-}
 
-// TIM101 and BSC203 although they both need different struts to store the data
-void foxtrot::devices::APT::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, unsigned distance)
-{
-    auto data = get_move_request_header_data(distance, chan);
-    auto out = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE,
-                                                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
-                                                     dest, data);
-    
-    //TODO: check contents of motor status struct
-}
 
 void foxtrot::devices::printhwinfo(foxtrot::devices::hwinfo infostr)
 {

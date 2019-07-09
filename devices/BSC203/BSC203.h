@@ -24,6 +24,9 @@ namespace foxtrot {
     {
     public:
         BSC203(std::shared_ptr< protocols::SerialPort > proto);
+        void relative_move(destination dest, motor_channel_idents channel, int distance);
+        void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
+        bool get_bayused_rack(destination dest, unsigned char bay);
     };
     
   }//namespace devices

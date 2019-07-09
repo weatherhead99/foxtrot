@@ -196,13 +196,8 @@ namespace foxtrot {
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
     hwinfo get_hwinfo(destination dest);
-      
-    bool get_bayused_rack(destination dest, unsigned char bay);
     
     void home_channel(destination dest, motor_channel_idents channel);
-    
-    void relative_move(destination dest, motor_channel_idents channel, int distance);
-    void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
 
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
@@ -246,6 +241,16 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
   unsigned char srcaddr = static_cast<unsigned char>(src);
   
   std::array<unsigned char, 6> header{optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
+  
+  /*for (auto c : header){
+      cout << std::hex << static_cast<unsigned>(c) << "\t";
+  }
+  cout << endl;
+  
+for (auto c : data){
+      cout << std::hex << static_cast<unsigned>(c) << "\t";
+  }
+  cout << endl;*/
   
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
