@@ -66,6 +66,19 @@ def ft_struct_from_value(val: dict, descriptor: variant_descriptor) -> ft_struct
     return out
 
 def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
-    pass
+    out = ft_enum(enum_name=descriptor.enum_desc.enum_name,
+                  enum_map=descriptor.enum_desc.enum_map)
+    if isinstance(val, str):
+        if val not in descriptor.enum_map:
+            raise KeyError("couldn't map string %s to enum value" % val)
+        sanval = descriptor.enum_map[val]
+    elif isinstance(val, int):
+        if int not in descriptor.enum_map.values():
+            raise KeyError("couldn't map int %d to valid enum value" % val)
+        sanval = val
+    else:
+        raise RuntimeError("type: %s is not supported for converting to enum yet" 
+                           % type(val).__name__)
 
-
+    out.enum_value = sanval
+    return out
