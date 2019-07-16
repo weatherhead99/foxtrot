@@ -82,3 +82,25 @@ def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
 
     out.enum_value = sanval
     return out
+
+def value_from_ft_variant(variant):
+    whichattr = variant.WhichOneof("value")
+    if whichattr == "simplevar":
+        return value_from_ft_simplevar(variant.simplevar)
+    elif whichattr == "structval":
+        return value_from_ft_struct(variant.structval)
+    elif whichattr == "enumval":
+        return value_from_ft_enum(variant.enumval)
+    else:
+        raise ValueError("couldn't determine variant type")
+
+
+def value_from_ft_simplevar(variant: ft_simplevariant):
+    whichattr = variant.WhichOneof("value")
+    return getattr(variant, whichattr)
+
+def value_from_ft_struct(variant: ft_struct):
+    return dict(variant.value)
+
+def value_from_ft_enum(variant: ft_enum):
+    return variant.enum_value
