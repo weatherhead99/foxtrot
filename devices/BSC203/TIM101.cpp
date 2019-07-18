@@ -21,9 +21,9 @@ using std::cout;
 using std::endl;
 
 //Static functions
-static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::jogparams* jogstruct);
-static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams);
-static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams);
+static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::devices::jogparams& jogstruct);
+static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams);
+static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams);
 
 
 foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort > proto) : foxtrot::devices::APT(proto)
@@ -142,7 +142,7 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
 
 }
     
-void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination dest, foxtrot::devices::jogparams* jogstruct){
+void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination dest, const foxtrot::devices::jogparams& jogstruct){
     
     auto data = get_jog_set_request_data(jogstruct);
     
@@ -150,7 +150,7 @@ void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination 
 
 }
 
-void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, foxtrot::devices::move_absolute_params* absparams){
+void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, const foxtrot::devices::move_absolute_params& absparams){
     
     auto data = get_move_absolute_request_data(absparams);
     
@@ -158,7 +158,7 @@ void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::de
     
 }
 
-void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, foxtrot::devices::pos_counter_params* poscountarams){
+void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, const foxtrot::devices::pos_counter_params& poscountarams){
     
     auto data = get_pos_counter_request_data(poscountarams);
     
@@ -292,40 +292,40 @@ bool foxtrot::devices::TIM101::check_code_serport(foxtrot::devices::bsc203_opcod
 
     
 //Static functions
-static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::jogparams* jogstructp)
+static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::devices::jogparams& jogstructp)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&jogstructp->subMsgID);
-    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogMode);
-    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepSize);
-    unsigned char* subJogStepRatebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepRate);
-    unsigned char* subJogStepAccnbytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepAccn);
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&jogstructp.subMsgID));
+    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&jogstructp.jogMode));
+    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepSize));
+    unsigned char* subJogStepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepRate));
+    unsigned char* subJogStepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepAccn));
     
-   std::array<unsigned char, 18> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp->chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
+   std::array<unsigned char, 18> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp.chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
 
     return data;
 }
 
-static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams)
+static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&absparams->subMsgID);
-    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(&absparams->maxVoltage);
-    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(&absparams->stepRate);
-    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(&absparams->stepAccn);
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.subMsgID));
+    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.maxVoltage));
+    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepRate));
+    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepAccn));
     
-    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams->chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
     
     return data;
     
 }
 
-static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams)
+static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&poscountparams->subMsgID);
-    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(&poscountparams->position);
-    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(&poscountparams->encCount);
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
+    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.position));
+    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.encCount));
 
     
-    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams->chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams.chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
     
     return data;
 }

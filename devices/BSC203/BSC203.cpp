@@ -21,7 +21,7 @@ using std::endl;
 
 static std::array<unsigned char, 14> get_velocityparams_data(const foxtrot::devices::velocity_params& velpar);
 
-static std::array<unsigned char, 22> get_jog_set_request_data(foxtrot::devices::jogparamsBSC* jogstructp);
+static std::array<unsigned char, 22> get_jog_set_request_data(const foxtrot::devices::jogparamsBSC& jogstructp);
 
 static std::array<unsigned char, 14> get_homeparams_data(const foxtrot::devices::homeparams& homeparams);
 
@@ -147,7 +147,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
         set_limit_switch_params(elem, foxtrot::devices::motor_channel_idents::channel_1, limitstr);
 
         _lg.Debug("Initializing jog parameters");
-        set_jog_params(elem, foxtrot::devices::motor_channel_idents::channel_1, &jogstruct);
+        set_jog_params(elem, foxtrot::devices::motor_channel_idents::channel_1, jogstruct);
 
         _lg.Debug("Initializing relative move distance");
         set_relative_move_params(elem, foxtrot::devices::motor_channel_idents::channel_1, 0xA000);
@@ -469,7 +469,7 @@ void foxtrot::devices::BSC203::set_PMD_params(foxtrot::devices::destination dest
 
 }
 
-void foxtrot::devices::BSC203::set_jog_params(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, foxtrot::devices::jogparamsBSC* jogstruct)
+void foxtrot::devices::BSC203::set_jog_params(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, const foxtrot::devices::jogparamsBSC& jogstruct)
 {
 
     auto data = get_jog_set_request_data(jogstruct);
@@ -643,18 +643,18 @@ static std::array<unsigned char, 14> get_velocityparams_data(const foxtrot::devi
 
 }
 
-static std::array<unsigned char, 22> get_jog_set_request_data(foxtrot::devices::jogparamsBSC* jogstructp)
+static std::array<unsigned char, 22> get_jog_set_request_data(const foxtrot::devices::jogparamsBSC& jogstructp)
 {
 
-    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogMode);
-    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepSize);
-    unsigned char* subJogMinVelbytes = reinterpret_cast<unsigned char*>(&jogstructp->jogMinVel);
-    unsigned char* subJogAccnbytes = reinterpret_cast<unsigned char*>(&jogstructp->jogAccn);
-    unsigned char* subJogMaxVelbytes = reinterpret_cast<unsigned char*>(&jogstructp->jogMaxVel);
-    unsigned char* subJogStopModebytes = reinterpret_cast<unsigned char *>(&jogstructp->jogStopMode);
+    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&jogstructp.jogMode));
+    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepSize));
+    unsigned char* subJogMinVelbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogMinVel));
+    unsigned char* subJogAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogAccn));
+    unsigned char* subJogMaxVelbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogMaxVel));
+    unsigned char* subJogStopModebytes = reinterpret_cast<unsigned char *>(const_cast<unsigned short*>(&jogstructp.jogStopMode));
 
 
-    std::array<unsigned char, 22> data {static_cast<unsigned char>(jogstructp->chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogMinVelbytes[0], subJogMinVelbytes[1], subJogMinVelbytes[2], subJogMinVelbytes[3], subJogAccnbytes[0], subJogAccnbytes[1], subJogAccnbytes[2], subJogAccnbytes[3], subJogMaxVelbytes[0], subJogMaxVelbytes[1], subJogMaxVelbytes[2], subJogMaxVelbytes[3], subJogStopModebytes[0], subJogStopModebytes[1]};
+    std::array<unsigned char, 22> data {static_cast<unsigned char>(jogstructp.chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogMinVelbytes[0], subJogMinVelbytes[1], subJogMinVelbytes[2], subJogMinVelbytes[3], subJogAccnbytes[0], subJogAccnbytes[1], subJogAccnbytes[2], subJogAccnbytes[3], subJogMaxVelbytes[0], subJogMaxVelbytes[1], subJogMaxVelbytes[2], subJogMaxVelbytes[3], subJogStopModebytes[0], subJogStopModebytes[1]};
 
     return data;
 }

@@ -121,7 +121,7 @@ namespace foxtrot {
         void get_relative_move_params(destination dest);
         bool check_code_serport(bsc203_opcodes expected_opcode);
         
-        void set_jog_params(destination dest, motor_channel_idents channel, jogparamsBSC* jogstr);
+        void set_jog_params(destination dest, motor_channel_idents channel, const jogparamsBSC& jogstr);
         void get_jog_params(destination dest);
         
         void set_poscounter(destination dest, motor_channel_idents channel, int position);
