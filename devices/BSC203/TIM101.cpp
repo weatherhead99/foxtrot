@@ -71,13 +71,26 @@ void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::destination dest,
     //Setting channel to th active channel
     set_channelenable(dest, chan, true);
     
-    //auto data = get_move_request_header_data(distance, chan);
-    //transmit_message(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE, data, dest);
+    auto data = get_move_request_header_data(distance, chan);
+    transmit_message(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE, data, dest);
     
-    /*auto out = request_response_struct<motor_status>(bsc203_opcodes::MGMSG_PZMOT_MOVE_ABSOLUTE,bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED,
-                                                     dest, data);*/
+    //The stop_update_messages of the constructor blocks the serial port. For that reason we need to turn it on again.
+    start_update_messages(dest);
+
+    //Waiting for MOVE COMPLETE HEADER
+    while(!check_code_serport(bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED))
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        //_lg.strm(sl::trace) << "looking for move complete...";
+    }
     
-    //TODO: check contents of motor status struct
+    stop_update_messages(dest);
+    
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    _serport->flush();
+    
+    get_status_update(dest);
+
 }
 
 

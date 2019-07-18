@@ -107,6 +107,8 @@ foreach(tgt ${device_targets})
   add_dependencies(foxtrot_devices ${tgt}_copy_includes)
 endforeach()
 
+add_executable(tim_play BSC203/tim_play.cpp)
+target_link_libraries(tim_play PUBLIC foxtrot_devices)
 
 add_executable(bsc_play BSC203/bsc_play.cpp)
 target_link_libraries(bsc_play PUBLIC foxtrot_devices)
