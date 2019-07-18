@@ -180,7 +180,7 @@ class Capability:
             if rawargs[idx] is not None:
                 raise IndexError("conflicting positional and keyword arguments")
             desc = self._argtypes[idx]
-            rawargs[idx] = capability_argument(pos=idx,
+            rawargs[idx] = capability_argument(position=idx,
                                                value=ft_variant_from_value(val, desc))
 
         if any(_ is None for _ in rawargs):
@@ -215,9 +215,9 @@ class Capability:
 
     def construct_request(self, *args, **kwargs):
         if self._captp != VALUE_READWRITE:
-            capargs = self._construct_args(self._argnames, *args, **kwargs)
+            capargs = self._construct_args(*args, **kwargs)
         elif len(args) > 0 or len(kwargs) > 0:
-            capargs = self._construct_args(self._argnames, *args, **kwargs)
+            capargs = self._construct_args(*args, **kwargs)
         else:
             capargs = self._construct_args([], *args, **kwargs)
 

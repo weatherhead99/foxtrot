@@ -6,7 +6,7 @@ Created on Wed Apr 19 12:05:26 2017
 @author: weatherill
 """
 
-from pyfoxtrot.Client import Client, DummyClient
+from pyfoxtrot.Client import Client
 import pyfoxtrot.foxtrot_pb2 
 
 
@@ -15,14 +15,14 @@ cl = Client("localhost:50051")
 
 dev = cl._devices[0]
 
-addcap = dev._caps[5]
+addcap = dev._caps[7]
 addret = addcap.call_cap_sync(cl,1,2)
 
-strmcap = dev._caps[7]
+strmcap = dev._caps[10]
 strmret = strmcap.call_cap_sync(cl,100)
 
 
-counts = cl.dummyDevice.getCountStream(cl,5000)
+counts = cl.dummy1.getCountStream(5000)
 
 
 
