@@ -173,7 +173,7 @@ class Capability:
                 pos=pos,
                 value=ft_variant_from_value(val, argdesc))
 
-        if len(args) + len(kwargs) > len(rawargs):
+        if (len(args) + len(kwargs)) > len(rawargs):
             raise ValueError("too many arguments provided")
 
         for idx, val in enumerate(args):
