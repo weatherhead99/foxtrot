@@ -97,7 +97,10 @@ def value_from_ft_variant(variant):
 
 def value_from_ft_simplevar(variant: ft_simplevariant):
     whichattr = variant.WhichOneof("value")
-    return getattr(variant, whichattr)
+    if whichattr is not None:
+        return getattr(variant, whichattr)
+    else:
+        return None
 
 def value_from_ft_struct(variant: ft_struct):
     return dict(variant.value)

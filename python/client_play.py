@@ -26,8 +26,7 @@ counts = cl.dummy1.getCountStream(5000)
 
 
 
-repl = dev.getRandomVector.call_cap_sync(cl,100)
-bts = foxtrot.Client._process_sync_response(repl,streamraw=True)
+#repl = dev.getRandomVector.call_cap_sync(cl,100)
 
-vec = cl.dummyDevice.getRandomVector(cl,5000)
+vec = cl.dummy1.getRandomVector(5000)
 
