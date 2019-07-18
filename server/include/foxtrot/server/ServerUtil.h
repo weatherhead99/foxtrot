@@ -21,7 +21,10 @@ namespace foxtrot
     
     void set_retval_from_variant(const rttr::variant& in, foxtrot::capability_response& resp, foxtrot::Logging* lg = nullptr);
     
-    rttr::variant wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, foxtrot::Logging* lg = nullptr);
+    rttr::variant wire_arg_to_variant(const foxtrot::capability_argument& arg,
+                                      bool& success,
+                                      const rttr::type& target_tp,
+                                      foxtrot::Logging* lg = nullptr);
     
     
 

@@ -11,14 +11,14 @@
 
 using namespace foxtrot;
 
-rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, foxtrot::Logging* lg)
+rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, const rttr::type& target_tp, foxtrot::Logging* lg)
 {
     success = true;
     rttr::variant out;
     
     try
     {
-//         out = wire_type_to_variant(arg.value());
+        out = wire_type_to_variant(arg.value(), target_tp);
     }
     catch(std::runtime_error& err)
     {

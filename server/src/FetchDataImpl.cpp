@@ -41,10 +41,16 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     std::vector<rttr::variant> vargs;
     vargs.reserve(req.args().size());
     
+    auto argtypeit = cap.Argtypes.begin();
+    
     for(auto& inarg : req.args())
-    {
+    {   
         bool success = false;
-        auto outarg = wire_arg_to_variant(inarg, success, &_lg);
+        if(argtypeit == cap.Argtypes.end())
+            throw std::runtime_error("invalid length of arguments caught in fetchdata");
+        
+        auto outarg = wire_arg_to_variant(inarg, success, 
+                                          *(argtypeit++), &_lg);
         if(!success)
         {
             foxtrot_server_specific_error("couldn't parse wire argument at position: " + 
