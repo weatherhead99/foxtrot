@@ -140,6 +140,21 @@ foxtrot::devices::dummyEnum foxtrot::devices::dummyDevice::returns_custom_enum(i
 
 }
 
+std::string 
+foxtrot::devices::dummyDevice::takes_custom_struct(const dummyStruct& in)
+{
+    return in.strval;
+};
+
+
+bool
+foxtrot::devices::dummyDevice::takes_pointer_type(int* in)
+{
+    if(in)
+        return true;
+    return false;
+}
+
 foxtrot::devices::dummyStruct foxtrot::devices::dummyDevice::returns_custom_struct()
 {
     dummyStruct out;
@@ -194,12 +209,15 @@ RTTR_REGISTRATION
  .method("returns_custom_enum", &dummyDevice::returns_custom_enum)
  .method("doNothing", &dummyDevice::doNothing)
  .method("returns_custom_struct", &dummyDevice::returns_custom_struct)
+ .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
+ .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
  ;
  
  using foxtrot::devices::dummyEnum;
  using foxtrot::devices::dummyStruct;
  
  registration::class_<dummyStruct>("foxtrot::devices::dummyStruct")
+ .constructor()(policy::ctor::as_object)
  .property("strval", &dummyStruct::strval)
  .property("uval", &dummyStruct::uval)
  .property("bval", &dummyStruct::bval)

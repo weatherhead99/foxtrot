@@ -103,7 +103,7 @@ def value_from_ft_simplevar(variant: ft_simplevariant):
         return None
 
 def value_from_ft_struct(variant: ft_struct):
-    return dict(variant.value)
+    return {k: value_from_ft_variant(v) for k, v in variant.value.items()}    
 
 def value_from_ft_enum(variant: ft_enum):
     return variant.enum_value

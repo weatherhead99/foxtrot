@@ -55,6 +55,10 @@ namespace foxtrot
         
         dummyEnum returns_custom_enum(int in);
         int takes_custom_enum(dummyEnum in);
+
+        std::string takes_custom_struct(const dummyStruct& in);
+        
+        bool takes_pointer_type(int* in=nullptr);
         
         dummyStruct returns_custom_struct();
         

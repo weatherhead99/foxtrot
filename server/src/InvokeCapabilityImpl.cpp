@@ -58,15 +58,20 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     std::vector<rttr::variant> vargs;
     vargs.reserve(req.args().size());
 
+    _lg.strm(sl::trace) << "args size: " << req.args().size();
     auto targetargit = cap.Argtypes.begin();
     for(auto& inarg: req.args())
     {
         bool success = false;
+        if(targetargit == cap.Argtypes.end())
+            throw std::out_of_range("ran out of arg types to deduce. Possibly you supplied too many arguments");
+        
         auto target_tp = *(targetargit++);
         rttr::variant outarg;
 
         try{
-            outarg = wire_type_to_variant(inarg.value(), target_tp);
+            outarg = wire_type_to_variant(inarg.value(), target_tp, &_lg);
+            _lg.strm(sl::debug) << "is outarg valid? " << outarg.is_valid() ;
         }
         catch(...)
         {

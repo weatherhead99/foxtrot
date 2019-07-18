@@ -162,6 +162,16 @@ rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_
         for(auto& a : argcopy)
         {
             auto target_tp = (paraminfsit++)->get_type();
+            if(a.get_type().is_wrapper())
+            {
+                lg_.strm(sl::warning) << "in capability with name: " << capname;
+                lg_.strm(sl::warning) << "an argument type ended up as a wrapper. This will cause a copy and is inefficient";
+                lg_.strm(sl::warning) << "the argument type is:"  << a.get_type().get_name().to_string();
+                
+                a = a.extract_wrapped_value();
+            }
+            
+            
             sanitize_arg(a, target_tp, i++, &lg_);
         }
         

@@ -3,7 +3,7 @@
 
 using namespace foxtrot;
 
-bool foxtrot::is_POD_struct(const rttr::type& tp)
+bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
 {
     //TODO: is an enum class counted as a class here?
     if(!tp.is_class() && !tp.is_enumeration())
@@ -73,7 +73,7 @@ struct variant_setter
 };
 
 
-ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
+ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
     ft_simplevariant out;
     
@@ -134,8 +134,11 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var)
 };
 
 
-ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var)
+ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var, Logging* lg)
 {
+    if(lg)
+        lg->strm(sl::trace) << "in get_struct_wire_type";
+    
     ft_struct out;
     
     auto tp = var.get_type();
@@ -146,14 +149,14 @@ ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var)
     for(auto& prop : tp.get_properties())
     {
         //WARNING: this is a potentially infinite recursive call
-        auto simplevar = get_variant_wire_type(prop.get_value(var));
+        auto simplevar = get_variant_wire_type(prop.get_value(var), lg);
         prop_map->operator[](prop.get_name().to_string()) = simplevar;
     }
     
     return out;
 };
 
-ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var)
+ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
 {
     ft_enum out;
     out.set_enum_name(var.get_type().get_name().to_string());
@@ -180,7 +183,7 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var)
     return out;
 };
 
-ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
+ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
     if(!var.is_valid())
         throw std::logic_error("got invalid variant to convert!");
@@ -192,7 +195,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
     if(tp.is_enumeration())
     {
         ft_enum* enumval = out.mutable_enumval();
-        *enumval = get_enum_wire_type(var);
+        *enumval = get_enum_wire_type(var, lg);
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>())
     {
@@ -201,12 +204,12 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
             throw std::logic_error("can't return a class which isn't a POD type");
         }
         ft_struct* structval = out.mutable_structval();
-        *structval = get_struct_wire_type(var);
+        *structval = get_struct_wire_type(var, lg);
     }
     else
     {
         ft_simplevariant* simplevarval = out.mutable_simplevar();
-        *simplevarval = get_simple_variant_wire_type(var);
+        *simplevarval = get_simple_variant_wire_type(var, lg);
     }
 
     return out;
@@ -214,7 +217,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var)
 
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp, 
-                                            const rttr::type& target_tp)
+                                            const rttr::type& target_tp, Logging* lg)
 {
     rttr::variant out = wiretp.enum_value();
     if(! out.can_convert(target_tp))
@@ -232,14 +235,28 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp,
 };
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
-                                            const rttr::type& target_tp)
+                                            const rttr::type& target_tp, Logging* lg)
 {
     rttr::variant out = target_tp.create();
+    
+    if(lg)
+    {
+        lg->strm(sl::debug) << "is type valid? " << target_tp.is_valid();
+        lg->strm(sl::debug) << "is created variant valid: " << out.is_valid();
+        lg->strm(sl::debug) << "type of created variant: " << out.get_type().get_name().to_string();
+    }
     
     for(auto& prop : target_tp.get_properties())
     {
         auto invar = wiretp.value().at(prop.get_name().to_string());
-        rttr::variant in_variant = wire_type_to_variant(invar, prop.get_type());
+        rttr::variant in_variant = wire_type_to_variant(invar, prop.get_type(), lg);
+        if(lg)
+        {
+            lg->strm(sl::debug) << "is in_variant valid? " << in_variant.is_valid();
+            
+            lg->strm(sl::debug) << "is prop valid?" << prop.is_valid();
+            
+        }
         prop.set_value(out,in_variant);
     };
 
@@ -247,7 +264,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
 }
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
-                                            const rttr::type& target_tp)
+                                            const rttr::type& target_tp, Logging* lg)
 {
     rttr::variant out;
     switch(wiretp.value_case())
@@ -280,26 +297,34 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
 }
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
-                                            const rttr::type& target_tp)
+                                            const rttr::type& target_tp, Logging* lg)
 {
+    if(lg)
+    {
+        lg->strm(sl::debug) << "target type: " << target_tp.get_name().to_string();
+    }
+    
     if(target_tp.is_enumeration())
     {
         if(wiretp.value_case() != ft_variant::ValueCase::kEnumval)
             throw std::runtime_error("expected variant, got something else in supplied type");
 
-        return wire_type_to_variant(wiretp.enumval(),target_tp);
+        return wire_type_to_variant(wiretp.enumval(),target_tp, lg);
     }
     else if(target_tp.is_class() && target_tp != rttr::type::get<std::string>())
     {
+        if(lg)
+            lg->strm(sl::trace) << "checking struct case";
+        
         if(wiretp.value_case() != ft_variant::ValueCase::kStructval)
             throw std::runtime_error("expected struct, got something else in supplied type");
-        return wire_type_to_variant(wiretp.structval(), target_tp);
+        return wire_type_to_variant(wiretp.structval(), target_tp, lg);
     }
     else
     {
         if(wiretp.value_case() != ft_variant::ValueCase::kSimplevar)
             throw std::runtime_error("expected simple var, got something else in supplied type");
-        return wire_type_to_variant(wiretp.simplevar(), target_tp);
+        return wire_type_to_variant(wiretp.simplevar(), target_tp, lg);
     }
 
 }
@@ -337,7 +362,7 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
     return out;
 }
 
-struct_descriptor foxtrot::describe_struct(const rttr::type& tp)
+struct_descriptor foxtrot::describe_struct(const rttr::type& tp, Logging* lg)
 {
     struct_descriptor out;
     out.set_struct_name(tp.get_name().to_string());
@@ -353,7 +378,7 @@ struct_descriptor foxtrot::describe_struct(const rttr::type& tp)
 };
 
 
-enum_descriptor foxtrot::describe_enum(const rttr::type& tp)
+enum_descriptor foxtrot::describe_enum(const rttr::type& tp, Logging* lg)
 {
     enum_descriptor out;
     out.set_enum_name(tp.get_name().to_string());
