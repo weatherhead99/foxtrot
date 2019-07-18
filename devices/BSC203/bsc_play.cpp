@@ -4,92 +4,77 @@
 
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/Logging.h>
+#include <unistd.h>
 
 using std::cout;
 using std::endl;
 
-foxtrot::parameterset sport_params{
-  {"port", "/dev/ttyUSB0"},
-  {"flowcontrol", "hardware"}
+foxtrot::parameterset sport_params {
+    {"port", "/dev/ttyUSB1"},
+    {"flowcontrol", "hardware"}
 };
 
 
 int main(int argc,char** argv)
 {
+
+    foxtrot::setLogFilterLevel(sl::trace);
+
+    cout << "BSC203 test..." << endl;
+
+
+    auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&sport_params);
+    foxtrot::devices::BSC203 motors(sport);
+
+    //GENERAL THINGS
+    //motors.identify_module(foxtrot::devices::destination::rack, foxtrot::devices::channelID::channel_1);
+
+    //motors.get_hwinfo(foxtrot::devices::destination::rack);
+
+    //motors.set_channelenable(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, true);
+
+    //RELATIVE & ABSOLUTE MOVE
+    usleep(1000);
+    motors.set_channelenable(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, true);
+    motors.set_channelenable(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, true);
     
-  foxtrot::setLogFilterLevel(sl::trace);
+    //motors.get_enccounter(foxtrot::devices::destination::bay3);
+
+    //motors.get_status_update(foxtrot::devices::destination::bay2);
+
+    for (int i = 0; i < 10; i++){
+        motors.relative_move(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, 409600 * 2);
+        motors.relative_move(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 409600 * 2);
+    }
     
-  cout << "BSC203/TIM101 test..." << endl;
-  
-  auto sport = std::make_shared<foxtrot::protocols::SerialPort>(&sport_params);
-  foxtrot::devices::TIM101 motors(sport);
-  
-  //motors.identify_module(foxtrot::devices::destination::sourceTIM101);
-  
-  //auto hwinfo = motors.get_hwinfo(foxtrot::devices::destination::sourceTIM101);
-  //printhwinfo(hwinfo);
-  
-  //JOG MOVE
-  /*foxtrot::devices::jogparams jogstruct;
-  jogstruct.subMsgID = 0x0009;
-  jogstruct.chanIndent = 0x01;
-  jogstruct.jogMode = 0x0002; //step
-  jogstruct.jogStepSize = 0x0000000A;
-  jogstruct.jogStepRate = 0x000001F4;
-  jogstruct.jogStepAccn = 0x000186A0;
-  
-  motors.set_jog_parameters(foxtrot::devices::destination::sourceTIM101,jogstruct);
-  
-  foxtrot::devices::jogparams jogstruct_req = motors.request_jog_parameters(foxtrot::devices::destination::sourceTIM101);
-  
-  cout << "jog Mode requested: " << std::hex << jogstruct_req.jogMode << endl;
-  cout << "jog Step Size requested: " << std::hex << jogstruct_req.jogStepSize << endl;
-  cout << "jog Step Accn requested: " << std::hex << jogstruct_req.jogStepAccn << endl;*/
-  
-  //motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
+    //motors.get_status_update(foxtrot::devices::destination::bay2);
+    //motors.get_status_update(foxtrot::devices::destination::bay3);
 
-  // SET POSITION COUNTER
-  foxtrot::devices::pos_counter_params posparams;
-  posparams.subMsgID = 0x0005;
-  posparams.chanIndent = 0x08;
-  posparams.position = 0x0;
-  posparams.encCount = 0x0;
-  
-  motors.set_position_counter(foxtrot::devices::destination::sourceTIM101, posparams);
-  
-  motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
+    //motors.absolute_move(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, 409600*(3));
 
-  motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_4, foxtrot::devices::jogdir::forward);
-  
-  //foxtrot::devices::pos_counter_params posparams_rec = motors.request_position_counter(foxtrot::devices::destination::sourceTIM101);
-  //cout << "Get position counter says: " << std:: hex << posparams_rec.position << endl;
-  
-  
-  //ABSOLUTE MOVE
-  /*foxtrot::devices::move_absolute_params absparams;
-  absparams.subMsgID = 0x0007;
-  absparams.chanIndent = 0x01;
-  absparams.maxVoltage = 0x006E;
-  absparams.stepRate = 0x00000014;
-  absparams.stepAccn = 0x0000000F;
-  
-  motors.set_move_absolute_parameters(foxtrot::devices::destination::sourceTIM101, absparams);
-  
-  foxtrot::devices::move_absolute_params absparams_rec = motors.request_move_absolute_parameters(foxtrot::devices::destination::sourceTIM101);
-  
-  cout << "move_absolute channel : " << std::hex << absparams_rec.chanIndent << endl;
-  cout << "move_absolute max voltage : " << std::hex << absparams_rec.maxVoltage << endl;
-  cout << "move_absolute step rate : " << std::hex << absparams_rec.stepRate << endl;
-  cout << "move_absolute step accn : " << std::hex << absparams_rec.stepAccn << endl;*/
-  
-  //motors.get_status_update(foxtrot::devices::destination::sourceTIM101);
-  
-  //foxtrot::devices::pos_counter_params posparams_rec = motors.request_position_counter(foxtrot::devices::destination::sourceTIM101);
-  //cout << "Get position counter says: " << std:: hex << posparams_rec.position << endl;
+    //JOG MOVE
+    /*motors.get_status_update(foxtrot::devices::destination::bay3);
 
-  
-  //motors.absolute_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, 0x64);
-  
-  //foxtrot::devices::motor_status motorstr = motors.get_status_update(foxtrot::devices::destination::sourceTIM101);
+    motors.jog_move(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 0x01);*/
+
+    //SET POSITION
+    /*motors.set_poscounter(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 0x0);
+
+    motors.get_status_update(foxtrot::devices::destination::bay3);*/
+
+    //SET ENCCOUNTER
+    /*motors.set_enccounter(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 0x05);
+
+    //motors.jog_move(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 0x01);
+
+    motors.get_enccounter(foxtrot::devices::destination::bay3);*/
+
+    //motors.get_status_update(foxtrot::devices::destination::bay3);
+
+    //HOMING
+    //motors.set_channelenable(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, true);
+
+    //motors.homing_channel(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1);
+
 
 };

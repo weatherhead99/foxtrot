@@ -41,13 +41,6 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
 }
 
 
-void foxtrot::devices::APT::identify_module(foxtrot::devices::destination dest)
-{
-  //no reply expected
-  transmit_message(bsc203_opcodes::MGMSG_MOD_IDENTIFY,0,0,dest);
-}
-
-
 void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
@@ -158,19 +151,9 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
 }
 
 
-
-void foxtrot::devices::APT::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
-{
-    unsigned char enable_disable = onoff? 0x01 : 0x02;
-    
-    transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),
-                     enable_disable, dest);
-}
-
 bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel)
 {
-    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE
-    ,static_cast<unsigned char>(channel),0, dest);
+    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE,static_cast<unsigned char>(channel),0, dest);
     
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
@@ -180,25 +163,26 @@ bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest
 }
 
 
-
-foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest)
+void foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest)
 {   
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
                                                bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00);
-    return out;
+    printhwinfo(out);
 };
 
 
 void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
-    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOME,static_cast<unsigned char>(chan),0,dest);
-    
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,static_cast<unsigned char>(chan),0,dest);
+
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,dest);
     
     if(ret.p1 != static_cast<unsigned char>(chan))
     {
         throw DeviceError("invalid channel returned...");
     }
+    
+    
 
 };
 

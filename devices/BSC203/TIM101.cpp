@@ -21,9 +21,9 @@ using std::cout;
 using std::endl;
 
 //Static functions
-static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::devices::jogparams& jogstruct);
-static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams);
-static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams);
+static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::jogparams* jogstruct);
+static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams);
+static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams);
 
 
 foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort > proto) : foxtrot::devices::APT(proto)
@@ -38,6 +38,22 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Debug("stopping update messages...");
     transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
     _lg.Debug("update messages stopped");
+}
+
+
+void foxtrot::devices::TIM101::identify_module(foxtrot::devices::destination dest)
+{
+  //no reply expected
+  transmit_message(bsc203_opcodes::MGMSG_MOD_IDENTIFY,0,0,dest);
+}
+
+
+void foxtrot::devices::TIM101::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
+{
+    unsigned char enable_disable = onoff? 0x01 : 0x02;
+    
+    transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
+    
 }
 
 template<typename T>
@@ -126,7 +142,7 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
 
 }
     
-void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination dest, const foxtrot::devices::jogparams& jogstruct){
+void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination dest, foxtrot::devices::jogparams* jogstruct){
     
     auto data = get_jog_set_request_data(jogstruct);
     
@@ -134,7 +150,7 @@ void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination 
 
 }
 
-void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, const foxtrot::devices::move_absolute_params& absparams){
+void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, foxtrot::devices::move_absolute_params* absparams){
     
     auto data = get_move_absolute_request_data(absparams);
     
@@ -142,7 +158,7 @@ void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::de
     
 }
 
-void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, const foxtrot::devices::pos_counter_params& poscountarams){
+void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, foxtrot::devices::pos_counter_params* poscountarams){
     
     auto data = get_pos_counter_request_data(poscountarams);
     
@@ -151,27 +167,28 @@ void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destinatio
 }
 
 
-foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest){
+void foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest){
 
     auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01);
     
-    return out;
+    cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
     
 }
 
-foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest){
+void foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest){
 
     auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01);
     
-    return out;
+    cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
+    cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
     
 }
 
-foxtrot::devices::pos_counter_params foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest){
+void foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest){
     
     auto out =request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x05,0x01);
     
-    return out;
+    cout << "Position counter: Position (hex) = " << std::hex << out.position << endl;
     
 }
     
@@ -187,7 +204,7 @@ void foxtrot::devices::TIM101::stop_update_messages(foxtrot::devices::destinatio
     
 }
 
-foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtrot::devices::destination dest, bool print)
+void foxtrot::devices::TIM101::get_status_update(foxtrot::devices::destination dest, bool print)
 {
     bool hasdata;
     unsigned received_opcode = 0;
@@ -226,7 +243,7 @@ foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtr
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         _serport->flush();
         
-        return motorstr;
+        //return motorstr;
     
 
         } catch (DeviceError excep){
@@ -275,39 +292,40 @@ bool foxtrot::devices::TIM101::check_code_serport(foxtrot::devices::bsc203_opcod
 
     
 //Static functions
-static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::devices::jogparams& jogstructp)
+static std::array<unsigned char, 18> get_jog_set_request_data(foxtrot::devices::jogparams* jogstructp)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&jogstructp.subMsgID));
-    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&jogstructp.jogMode));
-    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepSize));
-    unsigned char* subJogStepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepRate));
-    unsigned char* subJogStepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepAccn));
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&jogstructp->subMsgID);
+    unsigned char* subJogModebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogMode);
+    unsigned char* subJogStepSizebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepSize);
+    unsigned char* subJogStepRatebytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepRate);
+    unsigned char* subJogStepAccnbytes = reinterpret_cast<unsigned char*>(&jogstructp->jogStepAccn);
     
-   std::array<unsigned char, 18> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp.chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
+   std::array<unsigned char, 18> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp->chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
 
     return data;
 }
 
-static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams)
+static std::array<unsigned char, 14> get_move_absolute_request_data(foxtrot::devices::move_absolute_params* absparams)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.subMsgID));
-    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.maxVoltage));
-    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepRate));
-    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepAccn));
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&absparams->subMsgID);
+    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(&absparams->maxVoltage);
+    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(&absparams->stepRate);
+    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(&absparams->stepAccn);
     
-    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams->chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
     
     return data;
     
 }
 
-static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
+static std::array<unsigned char, 14> get_pos_counter_request_data(foxtrot::devices::pos_counter_params* poscountparams)
 {
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
-    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.position));
-    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.encCount));
+    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(&poscountparams->subMsgID);
+    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(&poscountparams->position);
+    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(&poscountparams->encCount);
+
     
-    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams.chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
+    std::array<unsigned char, 14> data{subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams->chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
     
     return data;
 }
@@ -327,13 +345,15 @@ void foxtrot::devices::print_motor_status(foxtrot::devices::motor_status* motors
     }*/
 }
 
+
 void foxtrot::devices::print_channel_status(foxtrot::devices::channel_status* chanstr){
     
-    cout << "Chanel Code (hex): "<< std::hex << chanstr->chan_indent << endl;
+    //cout << "Chanel Code (hex): "<< std::hex << chanstr->chan_indent << endl;
     cout << "Absolute Position (hex): "<< std::hex << chanstr->position << endl;
+    //cout << "Chanel EncCount (hex): "<< std::hex << chanstr->chan_indent << endl;
+    //cout << "Status Bits (hex): "<< std::hex << chanstr->statusbits << endl;
 
 }
-    
 
 
     

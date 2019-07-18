@@ -74,15 +74,17 @@ namespace foxtrot {
     {
     public:
         TIM101(std::shared_ptr< protocols::SerialPort > proto);
+        void identify_module(destination dest);
+        void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
         void absolute_move(destination dest, motor_channel_idents channel, int distance);
-        void set_move_absolute_parameters(destination dest, const move_absolute_params& absparams);
-        move_absolute_params request_move_absolute_parameters(destination dest);
+        void set_move_absolute_parameters(destination dest, move_absolute_params* absparams);
+        void request_move_absolute_parameters(destination dest);
         void jog_move(destination dest, motor_channel_idents channel, jogdir direction);
-        void set_jog_parameters(destination dest, const jogparams& jogstructp);
-        jogparams request_jog_parameters(destination dest);
-        motor_status get_status_update(destination dest, bool print = true);
-        void set_position_counter(destination dest,const pos_counter_params& absparams);
-        pos_counter_params request_position_counter(destination dest);
+        void set_jog_parameters(destination dest, jogparams* jogstructp);
+        void request_jog_parameters(destination dest);
+        void get_status_update(destination dest, bool print = true);
+        void set_position_counter(destination dest, pos_counter_params* absparams);
+        void request_position_counter(destination dest);
     protected:
         void start_update_messages(destination dest);
         void stop_update_messages(destination dest);

@@ -148,7 +148,13 @@ namespace foxtrot {
       
       MGMSG_HW_START_UPDATEMSGS = 0x0011,
       MGMSG_HW_STOP_UPDATEMSGS = 0x0012,
-      MGMSG_PZMOT_GET_STATUSUPDATE = 0x8E1
+      MGMSG_PZMOT_GET_STATUSUPDATE = 0x8E1,
+      
+      MGMSG_MOD_SET_DIGOUTPUTS = 0x0213,
+      MGMSG_MOD_REQ_DIGOUTPUTS = 0x0214,
+      MGMSG_MOD_GET_DIGOUTPUTS = 0x0215,
+      
+      MGMSG_MOT_SET_PMDJOYSTICKPARAMS = 0x04E6
 
     };
     
@@ -191,11 +197,9 @@ namespace foxtrot {
     RTTR_ENABLE()
         
     public:
-    void identify_module(destination dest);
-    void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
-    hwinfo get_hwinfo(destination dest);
+    void get_hwinfo(destination dest);
     
     void home_channel(destination dest, motor_channel_idents channel);
 
@@ -241,16 +245,6 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
   unsigned char srcaddr = static_cast<unsigned char>(src);
   
   std::array<unsigned char, 6> header{optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
-  
-  /*for (auto c : header){
-      cout << std::hex << static_cast<unsigned>(c) << "\t";
-  }
-  cout << endl;
-  
-for (auto c : data){
-      cout << std::hex << static_cast<unsigned>(c) << "\t";
-  }
-  cout << endl;*/
   
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
