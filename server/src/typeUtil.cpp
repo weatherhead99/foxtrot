@@ -159,22 +159,10 @@ ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var, Logging* lg)
 ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
 {
     ft_enum out;
-    out.set_enum_name(var.get_type().get_name().to_string());
-
-    auto enumvar = var.get_type().get_enumeration();
-
-    auto outnames = out.mutable_enum_map();
-
-    auto varit = enumvar.get_values().begin();
+    auto enum_desc = out.mutable_desc();
+    *enum_desc = describe_enum(var.get_type(),lg);
     
-    bool ok = false;
-    for(auto& name : enumvar.get_names())
-    {
-        outnames->operator[](name.to_string()) = (varit++)->to_uint32(&ok);
-        if(!ok)
-            throw std::logic_error("failed to convert an enum value");
-    };
-
+    bool ok;
     out.set_enum_value(var.to_uint32(&ok));
 
     if(!ok)

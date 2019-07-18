@@ -30,3 +30,9 @@ counts = cl.dummy1.getCountStream(5000)
 
 vec = cl.dummy1.getRandomVector(5000)
 
+strct = cl.dummy1.returns_custom_struct()
+
+ret = cl.dummy1.takes_custom_struct(strct)
+
+
+enum = cl.dummy1.returns_custom_enum(1)

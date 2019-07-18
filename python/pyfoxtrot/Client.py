@@ -8,14 +8,18 @@ Created on Wed Apr 19 11:44:13 2017
 
 import struct
 import grpc
+from itertools import chain
 from .foxtrot_pb2_grpc import exptserveStub
 from .common import _check_repl_err
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
+from .TypeConversion import string_describe_ft_variant
 from .foxtrot_pb2 import empty, capability_argument, broadcast_notification
 from .foxtrot_pb2 import chunk_request, capability_request, VALUE_READONLY
 from .foxtrot_pb2 import VALUE_READWRITE, ACTION, STREAM, UCHAR_TYPE, USHORT_TYPE
 from .foxtrot_pb2 import UINT_TYPE, BDOUBLE_TYPE
+from .ft_types_pb2 import ENUM_TYPE
+from .EnumCreator import define_enum
 
 
 DEFAULT_CHUNKSIZE = 1000
@@ -34,7 +38,21 @@ class Client:
         self._servdescribe = self._stub.DescribeServer(empty())
         self._comment = self._servdescribe.servcomment
 
+        self._enum_descs = []
+        self._enum_types = []
+
         self._setup_device_tree()
+
+    def _add_enum_type(self, enumdesc) -> None:
+        if enumdesc not in self._enum_descs:
+            self._enum_descs.append(enumdesc)
+            self._enum_types.append(define_enum(enumdesc))
+
+    def _lookup_enum_type(self, enumdesc):
+        if enumdesc in self._enum_descs:
+            idx = self._enum_descs.index(enumdesc)
+            return self._enum_types[idx]
+        return None
 
     def _setup_device_tree(self) -> None:
         self._devices = []
@@ -145,21 +163,54 @@ class Capability:
         self.chunksize = DEFAULT_CHUNKSIZE
         self._devid = devid
         self._cl = client
-
+        self._enum_return_type = None
+        self._enum_arg_types = [None] * len(argtypes)
+        
+        for tp in chain([rettp], argtypes):
+            if tp.variant_type == ENUM_TYPE:
+                client._add_enum_type(tp.enum_desc)
+                
+        if rettp.variant_type == ENUM_TYPE:
+            self._enum_return_type = client._lookup_enum_type(rettp.enum_desc)
+            
+        for idx,var in enumerate(argtypes):
+            if var.variant_type == ENUM_TYPE:
+                self._enum_arg_types[idx] = client._lookup_enum_type(var.enum_desc)
+    
     def __repr__(self):
         if self._captp == VALUE_READONLY:
-            infostr = " (readonly value)"
+            infostr = "readonly value"
         elif self._captp == VALUE_READWRITE:
-            infostr = " (read/write value)"
+            infostr = "read/write value"
         elif self._captp == ACTION:
-            infostr = " (action)"
+            infostr = "action"
         else:
-            infostr = " (data stream)"
+            infostr = "data stream"
 
-        if len(self._argnames) > 0:
-            return self._capname + "(" + " ".join(self._argnames)  + ")"  + infostr
+        argnamestrs = map(lambda s : "unknown" if not s else s , self._argnames)
+        argtypestrs = [string_describe_ft_variant(_) for _ in self._argtypes]
+        rettypestr = string_describe_ft_variant(self._rettp)
+        
+        argnametypestrs = ["%s:%s" % (n,t) for n,t in zip(argnamestrs,argtypestrs)]
+        
+        displaystr = "%s (%s) -> %s, [%s]" % (self._capname, 
+                      ", ".join(argnametypestrs),
+                      rettypestr,
+                      infostr)
+        
 
-        return self._capname + infostr
+        return displaystr
+
+    def get_enum_type(self, argpos):
+        if isinstance(argpos, int):
+            return self._enum_arg_types[argpos]
+        elif isinstance(argpos, str):
+            idx = self._argnames.index(argpos)
+            return self._enum_arg_types[idx]
+        
+    def get_enum(self, argpos, *args, **kwargs):
+        tp = self.get_enum_type(argpos)
+        return tp(*args, **kwargs)
 
     def _construct_args(self, *args, **kwargs):
         rawargs = [None] * len(self._argnames)

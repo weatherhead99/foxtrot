@@ -2,7 +2,7 @@ syntax="proto3";
 
 enum simplevalue_types
 {
-    FLOAT_TYPE = 0;
+    FLOAT_TYPE = 0 ;
     INT_TYPE = 1;
     UNSIGNED_TYPE = 2;
     BOOL_TYPE = 3;
@@ -65,7 +65,6 @@ message ft_struct {
 
 
 message ft_enum {
-    string enum_name = 1;
-    map<string, uint32> enum_map = 2;
-    uint32 enum_value = 3;
+    enum_descriptor desc = 1;
+    uint32 enum_value = 2;
 }
