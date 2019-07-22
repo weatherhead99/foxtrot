@@ -102,10 +102,10 @@ target_link_libraries(exptserve PUBLIC foxtrot_server Boost::filesystem Boost::p
 if(FOXTROT_SERVER_CONAN_BUILD)
 #fixing issues with inexorgame grpc library export (I think?)
 find_package(Threads)
-target_link_libraries(exptserve PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(exptserve PUBLIC ${CMAKE_THREAD_LIBS_INIT} ${CONAN_LIBS_OPENSSL})
 #fixing issues with my GRPC script in the case of static grpc libraries
 target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB}
-${CONAN_LIBS_C-ARES} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD})
+${CONAN_LIBS_C-ARES} ${CONAN_LIBS_OPENSSL} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD} )
 endif()
 
 if(BUILD_AUTH)

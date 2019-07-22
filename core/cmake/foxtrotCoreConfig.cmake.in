@@ -1,4 +1,4 @@
-#Config file for the foxtrot core package
+##Config file for the foxtrot core package
 
 @PACKAGE_INIT@
 set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
@@ -26,7 +26,7 @@ endif()
 find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
-
+find_dependency(rttr 0.9.5 REQUIRED)
 
 if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)

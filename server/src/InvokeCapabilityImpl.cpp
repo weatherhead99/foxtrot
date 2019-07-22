@@ -7,7 +7,7 @@
 
 #include "InvokeCapabilityImpl.h"
 #include <foxtrot/server/ServerUtil.h>
-#include <foxtrot/server/typeUtil.h>
+#include <foxtrot/typeUtil.h>
 
 using std::cout;
 using std::endl;

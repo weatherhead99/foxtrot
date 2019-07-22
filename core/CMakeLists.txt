@@ -42,6 +42,7 @@ message("foxtrot core version: ${VERSION}")
 
 find_package(Boost REQUIRED COMPONENTS log program_options filesystem)
 find_package(Protobuf REQUIRED)
+find_package(rttr 0.9.6 REQUIRED)
 
 find_package(gRPC REQUIRED)
 if(FOXTROT_CORE_CONAN_BUILD)
@@ -94,9 +95,11 @@ function(generate_proto_and_grpc)
         set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${grpc_srcs} PROPERTIES GENERATED TRUE)
         
         add_custom_target(${basename}_copy_includes
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${gen_hdrs} ${CMAKE_CURRENT_BINARY_DIR}/include/foxtrot 
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/foxtrot
+        COMMAND ${CMAKE_COMMAND} -E copy ${gen_hdrs} ${CMAKE_CURRENT_BINARY_DIR}/foxtrot
+	DEPENDS ${grpc_srcs} ${proto_srcs}
         COMMENT "copying generated headers to top level build tree")
-        
+      
         
     endforeach()
     set(${generate_proto_and_grpc_OUT_ALL_VARNAME} ${all_srcs} PARENT_SCOPE)
@@ -117,15 +120,14 @@ foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 
 add_dependencies(foxtrot_core ft_types_copy_includes)
+add_dependencies(foxtrot_core foxtrot_copy_includes)
+add_dependencies(foxtrot_core ft_error_copy_includes)
+add_dependencies(foxtrot_core ft_auth_copy_includes)
 
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-add_custom_command(TARGET foxtrot_core POST_BUILD
-                    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${pb_hdrs} 
-                    ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 
-
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem protobuf::libprotobuf gRPC::grpc++)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
