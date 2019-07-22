@@ -6,7 +6,7 @@
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/ServerUtil.h>
-#include <foxtrot/server/typeUtil.h>
+#include <foxtrot/typeUtil.h>
 #include <foxtrot/foxtrot.pb.h>
 
 using namespace foxtrot;

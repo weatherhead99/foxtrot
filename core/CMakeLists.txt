@@ -53,7 +53,7 @@ endif()
 #build foxtrot core library (errors and logging)
 
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp)
+src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp)
 
 
 find_program(grpc_plugin grpc_cpp_plugin)
@@ -93,6 +93,11 @@ function(generate_proto_and_grpc)
                            VERBATIM)
         set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/${grpc_srcs} PROPERTIES GENERATED TRUE)
         
+        add_custom_target(${basename}_copy_includes
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${gen_hdrs} ${CMAKE_CURRENT_BINARY_DIR}/include/foxtrot 
+        COMMENT "copying generated headers to top level build tree")
+        
+        
     endforeach()
     set(${generate_proto_and_grpc_OUT_ALL_VARNAME} ${all_srcs} PARENT_SCOPE)
     set(${generate_proto_and_grpc_OUT_HDR_VARNAME} ${all_genhdrs} PARENT_SCOPE)
@@ -110,6 +115,10 @@ message("pb_hdrs: ${pb_hdrs}")
 add_library(foxtrot_core ${srcs} ${pb_srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
+
+add_dependencies(foxtrot_core ft_types_copy_includes)
+
+target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_command(TARGET foxtrot_core POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy_if_different ${pb_hdrs} 

@@ -1,4 +1,4 @@
-#include <foxtrot/server/typeUtil.h>
+#include <foxtrot/typeUtil.h>
 #include <foxtrot/Logging.h>
 
 using namespace foxtrot;
