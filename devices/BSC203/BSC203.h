@@ -97,6 +97,7 @@ namespace foxtrot {
     
     class BSC203 : public APT
     {
+        RTTR_ENABLE()
     public:
         BSC203(std::shared_ptr< protocols::SerialPort > proto);
         void identify_module (destination rackdest, channelID idchan);
@@ -119,8 +120,6 @@ namespace foxtrot {
                                       int distance);
         void set_PMD_params(destination dest, motor_channel_idents channel, const PMDjoystickparams& PMDjoystickstr);
         void get_relative_move_params(destination dest);
-        bool check_code_serport(bsc203_opcodes expected_opcode);
-        
         void set_jog_params(destination dest, motor_channel_idents channel, const jogparamsBSC& jogstr);
         void get_jog_params(destination dest);
         
@@ -144,6 +143,7 @@ namespace foxtrot {
     protected:
         void start_update_messages(destination dest);
         void stop_update_messages(destination dest);
+        bool check_code_serport(bsc203_opcodes expected_opcode);
     };
     
     void print_channel_status(channel_status* chanstr);

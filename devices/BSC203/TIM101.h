@@ -63,15 +63,12 @@ namespace foxtrot {
        channel_status channel3;
        channel_status channel4;
     };
-   
-   /*struct motor_status{
-       std::array<channel_status,4> channelstat;
-   };*/
         
     #pragma pack(pop)
     
     class TIM101 : public APT
     {
+        RTTR_ENABLE()
     public:
         TIM101(std::shared_ptr< protocols::SerialPort > proto);
         void identify_module(destination dest);

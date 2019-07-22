@@ -688,3 +688,147 @@ static std::array< unsigned char, 20> get_PMDjoystick_params(const foxtrot::devi
 
 }
 
+
+RTTR_REGISTRATION{
+    using namespace rttr;
+    using foxtrot::devices::BSC203;
+    registration::class_<BSC203>("foxtrot::devices::BSC203")
+
+    .method("identify_module", &BSC203::identify_module)
+    (parameter_names("destination (rack)", "channel (channel 1)"))
+    .method("set_channelenable", &BSC203::set_channelenable)
+    (parameter_names("destination", "channel (channel 1)", "on/off"))
+    .method("set_limit_switch_params", &BSC203::set_limit_switch_params)
+    (parameter_names("destination", "channel (channel 1)", "limit switch parameters"))
+    .method("set_bowindex", &BSC203::set_bowindex)
+    (parameter_names("destination", "channel (channel 1)", "bow index"))
+    .method("require_status_update", &BSC203::require_status_update)
+    (parameter_names("destination"))
+    .method("require_digoutputs", &BSC203::require_digoutputs)
+    (parameter_names("destination"))
+    .method("relative_move", &BSC203::relative_move)
+    (parameter_names("destination", "channel (channel 1)", "distance"))
+    .method("absolute_move", &BSC203::absolute_move)
+    (parameter_names("destination", "channel (channel 1)", "distance"))
+    .method("get_bayused_rack", &BSC203::get_bayused_rack)
+    (parameter_names("destination", "expected bay"))
+    .method("jog_move", &BSC203::jog_move)
+    (parameter_names("destination", "channel (channel 1)", "direction"))
+    .method("get_status_update", &BSC203::get_status_update)
+    (parameter_names("destination"))
+    .method("set_velocity_params", &BSC203::set_velocity_params)
+    (parameter_names("destination", "velocity parameters"))
+    .method("get_velocity_params", &BSC203::get_velocity_params)
+    (parameter_names("destination"))
+    .method("set_relative_move_params", &BSC203::set_relative_move_params)
+    (parameter_names("destination", "channel (channel 1)", "distance"))
+    .method("set_absolute_move_params", &BSC203::set_absolute_move_params)
+    (parameter_names("destination", "channel (channel 1)", "distance"))
+    .method("set_PMD_params", &BSC203::set_PMD_params)
+    (parameter_names("destination", "channel (channel 1)", "PMD joystick parameters"))
+    .method("get_relative_move_params", &BSC203::get_relative_move_params)
+    (parameter_names("destination"))
+    .method("set_jog_params", &BSC203::set_jog_params)
+    (parameter_names("destination", "channel (channel 1)", "Jog parameters"))
+    .method("get_jog_params", &BSC203::get_jog_params)
+    (parameter_names("destination"))
+    .method("set_poscounter", &BSC203::set_poscounter)
+    (parameter_names("destination", "channel (channel 1)", "position"))
+    .method("get_poscounter", &BSC203::get_poscounter)
+    (parameter_names("destination"))
+    .method("set_enccounter", &BSC203::set_enccounter)
+    (parameter_names("destination", "channel (channel 1)", "enccounter"))
+    .method("get_enccounter", &BSC203::get_enccounter)
+    (parameter_names("destination"))
+    .method("set_homeparams", &BSC203::set_homeparams)
+    (parameter_names("destination", "channel (channel 1)", "homing parameters"))
+    .method("get_homeparams", &BSC203::get_homeparams)
+    (parameter_names("destination"))
+    .method("set_power_parameters", &BSC203::set_power_parameters)
+    (parameter_names("destination", "channel (channel 1)", "power parameters"))
+    .method("get_power_parameters", &BSC203::get_power_parameters)
+    (parameter_names("destination"))
+    .method("set_generalmove_params", &BSC203::set_generalmove_params)
+    (parameter_names("destination", "channel (channel 1)", "backslash distance"))
+    .method("get_generalmove_params", &BSC203::get_generalmove_params)
+    (parameter_names("destination"))
+    .method("homing_channel", &BSC203::homing_channel)
+    (parameter_names("destination", "channel (channel 1)"));
+    
+    //Custom structs
+    using foxtrot::devices::velocity_params;
+    registration::class_<velocity_params>("foxtrot::devices::velocity_params")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_indent", &velocity_params::chan_indent)
+    .property("minvel", &velocity_params::minvel)
+    .property("acceleration", &velocity_params::acceleration)
+    .property("maxvel", &velocity_params::maxvel);
+    
+    using foxtrot::devices::move_relative_params;
+    registration::class_<move_relative_params>("foxtrot::devices::move_relative_params")
+    .constructor()(policy::ctor::as_object)
+    .property("chanIndent", &move_relative_params::chanIndent)
+    .property("rel_distance", &move_relative_params::rel_distance);
+    
+    using foxtrot::devices::position_counter;
+    registration::class_<position_counter>("foxtrot::devices::position_counter")
+    .constructor()(policy::ctor::as_object)
+    .property("chanindent", &position_counter::chanindent)
+    .property("position", &position_counter::position);
+    
+    using foxtrot::devices::jogparamsBSC;
+    registration::class_<jogparamsBSC>("foxtrot::devices::jogparamsBSC")
+    .constructor()(policy::ctor::as_object)
+    .property("chanIndent", &jogparamsBSC::chanIndent)
+    .property("jogMode", &jogparamsBSC::jogMode)
+    .property("jogStepSize", &jogparamsBSC::jogStepSize)
+    .property("jogMinVel", &jogparamsBSC::jogMinVel)
+    .property("jogAccn", &jogparamsBSC::jogAccn)
+    .property("jogMaxVel", &jogparamsBSC::jogMaxVel)
+    .property("jogStopMode", &jogparamsBSC::jogStopMode);
+    
+    using foxtrot::devices::homeparams;
+    registration::class_<homeparams>("foxtrot::devices::homeparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chanIndent", &homeparams::chanIndent)
+    .property("homeDir", &homeparams::homeDir)
+    .property("limitSwitch", &homeparams::limitSwitch)
+    .property("homeVelocity", &homeparams::homeVelocity)
+    .property("offsetDistance", &homeparams::offsetDistance);
+    
+    using foxtrot::devices::powerparams;
+    registration::class_<powerparams>("foxtrot::devices::powerparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chanIndent", &powerparams::chanIndent)
+    .property("restFactor", &powerparams::restFactor)
+    .property("moveFactor", &powerparams::moveFactor);
+    
+    using foxtrot::devices::limitswitchparams;
+    registration::class_<limitswitchparams>("foxtrot::devices::limitswitchparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_indent", &limitswitchparams::chan_indent)
+    .property("CWhard", &limitswitchparams::CWhard)
+    .property("CCWhard", &limitswitchparams::CCWhard)
+    .property("CWsoft", &limitswitchparams::CWsoft)
+    .property("CCWsoft", &limitswitchparams::CCWsoft)
+    .property("limitMode", &limitswitchparams::limitMode);
+    
+    using foxtrot::devices::PMDjoystickparams;
+    registration::class_<PMDjoystickparams>("foxtrot::devices::PMDjoystickparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_indent", &PMDjoystickparams::chan_indent)
+    .property("lowMaxVel", &PMDjoystickparams::lowMaxVel)
+    .property("highMaxVel", &PMDjoystickparams::highMaxVel)
+    .property("highLowAccn", &PMDjoystickparams::highLowAccn)
+    .property("highHighAccn", &PMDjoystickparams::highHighAccn)
+    .property("dirSense", &PMDjoystickparams::dirSense);
+    
+    //Custom enums
+    using foxtrot::devices::channelID;
+    registration::enumeration<channelID>("foxtrot::devices::channelID")
+    (value("channel_1", channelID::channel_1),
+     value("channel_2", channelID::channel_2),
+     value("channel_3", channelID::channel_3));
+
+}
+

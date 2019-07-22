@@ -368,5 +368,75 @@ void foxtrot::devices::print_channel_status(foxtrot::devices::channel_status* ch
 
 }
 
+RTTR_REGISTRATION{
+    using namespace rttr;
+    using foxtrot::devices::TIM101;
+    registration::class_<TIM101>("foxtrot::devices::TIM101")
+
+    .method("identify_module", &TIM101::identify_module)
+    (parameter_names("destination"))
+    .method("set_channelenable", &TIM101::set_channelenable)
+    (parameter_names("destination", "channel", "on/off"))
+    .method("absolute_move", &TIM101::absolute_move)
+    (parameter_names("destination", "channel", "distance"))
+    .method("set_move_absolute_parameters", &TIM101::set_move_absolute_parameters)
+    (parameter_names("destination", "move absolute parameters"))
+    .method("request_move_absolute_parameters", &TIM101::request_move_absolute_parameters)
+    (parameter_names("destination"))
+    .method("jog_move", &TIM101::jog_move)
+    (parameter_names("destination", "channel", "direction"))
+    .method("set_jog_parameters", &TIM101::set_jog_parameters)
+    (parameter_names("destination", "jog parameters"))
+    .method("request_jog_parameters", &TIM101::request_jog_parameters)
+    (parameter_names("destination"))
+    .method("get_status_update", &TIM101::get_status_update)
+    (parameter_names("destination", "boolean print info"))
+    .method("set_position_counter", &TIM101::set_position_counter)
+    (parameter_names("destination", "position parameters"))
+    .method("request_position_counter", &TIM101::request_position_counter)
+    (parameter_names("destination"));
+
+    //Custom structs
+    using foxtrot::devices::jogparams;
+    registration::class_<jogparams>("foxtrot::devices::jogparams")
+    .constructor()(policy::ctor::as_object)
+    .property("subMsgID", &jogparams::subMsgID)
+    .property("chanIndent", &jogparams::chanIndent)
+    .property("jogMode", &jogparams::jogMode)
+    .property("jogStepSize", &jogparams::jogStepSize)
+    .property("jogStepRate", &jogparams::jogStepRate)
+    .property("jogStepAccn", &jogparams::jogStepAccn);
+    
+    using foxtrot::devices::move_absolute_params;
+    registration::class_<move_absolute_params>("foxtrot::devices::move_absolute_params")
+    .constructor()(policy::ctor::as_object)
+    .property("subMsgID", &move_absolute_params::subMsgID)
+    .property("chanIndent", &move_absolute_params::chanIndent)
+    .property("maxVoltage", &move_absolute_params::maxVoltage)
+    .property("stepRate", &move_absolute_params::stepRate)
+    .property("stepAccn", &move_absolute_params::stepAccn);
+    
+    using foxtrot::devices::pos_counter_params;
+    registration::class_<pos_counter_params>("foxtrot::devices::pos_counter_params")
+    .constructor()(policy::ctor::as_object)
+    .property("subMsgID", &pos_counter_params::subMsgID)
+    .property("chanIndent", &pos_counter_params::chanIndent)
+    .property("position", &pos_counter_params::position)
+    .property("encCount", &pos_counter_params::encCount);
+    
+    using foxtrot::devices::motor_status;
+    registration::class_<motor_status>("foxtrot::devices::motor_status")
+    .constructor()(policy::ctor::as_object)
+    .property("channel1", &motor_status::channel1)
+    .property("channel2", &motor_status::channel2)
+    .property("channel3", &motor_status::channel3)
+    .property("channel4", &motor_status::channel4);
+    
+    using foxtrot::devices::jogdir;
+    registration::enumeration<jogdir>("foxtrot::devices::jogdir")
+    (value("forward", jogdir::forward),
+     value("reverse", jogdir::reverse));
+    
+}
 
     

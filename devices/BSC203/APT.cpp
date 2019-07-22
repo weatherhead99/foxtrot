@@ -215,7 +215,65 @@ void foxtrot::devices::printhwinfo(foxtrot::devices::hwinfo infostr)
     
 }
 
-
+RTTR_REGISTRATION{
+    using namespace rttr;
+    using foxtrot::devices::APT;
+    registration::class_<APT>("foxtrot::devices::APT")
+    
+    .method("get_channelenable", &APT::get_channelenable)
+    (parameter_names("destination", "channel"))
+    .method("get_hwinfo", &APT::get_hwinfo)
+    (parameter_names("destination"))
+    .method("home_channel", &APT::home_channel)
+    (parameter_names("destination", "channel"));
+    
+    
+    //Custom structs
+    using foxtrot::devices::bsc203_reply;
+    registration::class_<bsc203_reply>("foxtrot::devices::bsc203_reply")
+    .constructor()(policy::ctor::as_object)
+    .property("p1", &bsc203_reply::p1)
+    .property("p2", &bsc203_reply::p2)
+    .property("data", &bsc203_reply::data);
+    
+    using foxtrot::devices::hwinfo;
+    registration::class_<hwinfo>("foxtrot::devices::hwinfo")
+    .constructor()(policy::ctor::as_object)
+    .property("serno", &hwinfo::serno)
+    .property("modelno", &hwinfo::modelno)
+    .property("type", &hwinfo::type)
+    .property("fwvers", &hwinfo::fwvers)
+    .property("notes", &hwinfo::notes)
+    .property("emptyspace", &hwinfo::emptyspace)
+    .property("HWvers", &hwinfo::HWvers)
+    .property("modstate", &hwinfo::modstate)
+    .property("nchans", &hwinfo::nchans);
+    
+    using foxtrot::devices::channel_status;
+    registration::class_<channel_status>("foxtrot::devices::channel_status")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_indent", &channel_status::chan_indent)
+    .property("position", &channel_status::position)
+    .property("enccount", &channel_status::enccount)
+    .property("statusbits", &channel_status::statusbits);
+    
+    //Custom enums
+    using foxtrot::devices::destination;
+    registration::enumeration<destination>("foxtrot::devices::destination")
+    (value("host", destination::host),
+     value("rack", destination::rack),
+     value("sourceTIM101", destination::sourceTIM101),
+     value("bay1", destination::bay1),
+     value("bay2", destination::bay2),
+     value("bay3", destination::bay3));
+    
+    using foxtrot::devices::motor_channel_idents;
+    registration::enumeration<motor_channel_idents>("foxtrot::devices::motor_channel_idents")
+    (value("channel_1", motor_channel_idents::channel_1),
+     value("channel_2", motor_channel_idents::channel_2),
+     value("channel_3", motor_channel_idents::channel_3),
+     value("channel_4", motor_channel_idents::channel_4));
+}
 
 
 
