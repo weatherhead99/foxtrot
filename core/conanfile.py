@@ -26,4 +26,5 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                        "boost_filesystem:shared": True,
                        "boost_regex:shared": True,
                        "OpenSSL:shared": True,
-                       "protobuf:with_zlib": True}
+                       "protobuf:with_zlib": True,
+                       "protobuf:shared" : True}
