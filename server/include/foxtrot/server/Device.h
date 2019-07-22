@@ -51,6 +51,9 @@ namespace foxtrot
     void setDeviceComment(const std::string& comment);
     virtual std::vector<std::string> GetCapabilityNames() const;
     virtual rttr::variant Invoke(const std::string& capname, rarg_cit beginargs, rarg_cit endargs);
+    virtual rttr::variant Invoke(const Capability& cap,
+                                 rarg_cit beginargs, rarg_cit endargs);
+    
     virtual Capability GetCapability(const std::string& capname) const;
     
   protected:

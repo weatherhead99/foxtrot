@@ -127,6 +127,12 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
     
 }
 
+rttr::variant foxtrot::Device::Invoke(const Capability& cap, foxtrot::rarg_cit argbegin,
+                                      foxtrot::rarg_cit argend)
+{
+    return Invoke(cap.CapabilityName, argbegin, argend);
+}
+
 
 rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_cit argbegin,
                                       foxtrot::rarg_cit argend)
