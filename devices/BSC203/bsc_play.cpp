@@ -34,7 +34,6 @@ int main(int argc,char** argv)
     //motors.set_channelenable(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, true);
 
     //RELATIVE & ABSOLUTE MOVE
-    usleep(1000);
     motors.set_channelenable(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, true);
     motors.set_channelenable(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, true);
     

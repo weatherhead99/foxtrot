@@ -79,7 +79,7 @@ namespace foxtrot {
         void jog_move(destination dest, motor_channel_idents channel, jogdir direction);
         void set_jog_parameters(destination dest, const jogparams& jogstructp);
         void request_jog_parameters(destination dest);
-        void get_status_update(destination dest, bool print = true);
+        motor_status get_status_update(destination dest, bool print = true);
         void set_position_counter(destination dest, const pos_counter_params& absparams);
         void request_position_counter(destination dest);
     protected:
