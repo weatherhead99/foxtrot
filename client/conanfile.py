@@ -22,7 +22,6 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
                        "boost_program_options:shared": True,
                        "boost_filesystem:shared": True,
                        "boost_regex:shared": True,
-                       "OpenSSL:shared": True,
                        "protobuf:with_zlib": True}   
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %

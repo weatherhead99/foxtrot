@@ -6,7 +6,8 @@
 
 #include <foxtrot/client/client.h>
 
-
+//WARNING: HACK: THIS MUST ALL BE FIXED PROPERLY TO BE NOT FRAGILE! 
+//HACK: currently only using simplevariant types etc etc
 
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)
@@ -15,26 +16,31 @@ foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& ar
 
 void foxtrot::ft_variant_visitor::operator()(double& i) const
 {
-//   std::cout << "arg value at visitor is: <double> " << i << std::endl;
-    _arg.set_dblarg(i);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_dblval(i);
+    simplevar->set_size(sizeof(double));
 }
 
 void foxtrot::ft_variant_visitor::operator()(int& d) const
 {
-//     std::cout << "arg value at visitor is: <int> " << d << std::endl;
-    _arg.set_intarg(d);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_intval(d);
+    simplevar->set_size(sizeof(int));
 }
 
 
 void foxtrot::ft_variant_visitor::operator()(bool& i) const
 {
-    _arg.set_boolarg(i);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_boolval(i);
+    simplevar->set_size(sizeof(bool));
 }
 
 void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
 {
-//   std::cout << "arg value at visitor is: <string> " << s << std::endl;
-    _arg.set_strarg(s);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_stringval(s);
+    
 }
 
 
@@ -109,23 +115,24 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
     
     check_repl_err(repl,&lg);
     
-    
-    auto rettp = repl.return_case();
-    switch(rettp)
+    auto retval = repl.returnval();
+    if(!retval.has_simplevar())
     {
-        case(capability_response::ReturnCase::kDblret):
-//             std::cout << "double" << std::endl;
-            out = repl.dblret();
-            break;
-        case(capability_response::ReturnCase::kIntret):
-            out = repl.intret();
-            break;
-        case(capability_response::ReturnCase::kBoolret):
-            out = repl.boolret();
-            break;
-        case(capability_response::ReturnCase::kStringret):
-            out = repl.stringret();
-            break;
+        throw std::runtime_error("can't deal with non simplevar responses in c++ client yet!");
+    }
+    switch(retval.simplevar().value_case())
+    {
+        case(ft_simplevariant::ValueCase::kDblval):
+            out = retval.simplevar().dblval(); break;
+        case(ft_simplevariant::ValueCase::kIntval):
+            out = static_cast<int>(retval.simplevar().intval()); break;
+        case(ft_simplevariant::ValueCase::kUintval):
+            out = static_cast<int>(retval.simplevar().uintval()); break;
+        case(ft_simplevariant::ValueCase::kBoolval):
+            out = retval.simplevar().boolval(); break;
+        case(ft_simplevariant::ValueCase::kStringval):
+            out = retval.simplevar().stringval(); break;
+            
     }
     
     return out;
