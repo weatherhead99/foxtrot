@@ -34,6 +34,14 @@ foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
 
 
+set(motor_setup_srcs motor_test_setup.cpp)
+add_library(motor_test SHARED ${motor_setup_srcs})
+target_link_libraries(motor_test foxtrot::foxtrot_core
+foxtrot::foxtrot_server foxtrot::foxtrot_devices)
+set_target_properties(motor_setup_srcs PROPERTIES PREFIX
+"")
+
+
 include(GNUInstallDirs)
 
 install(TARGETS autofilld RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

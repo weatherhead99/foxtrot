@@ -142,7 +142,7 @@ install(EXPORT foxtrot_server
         NAMESPACE foxtrot::)
 
         
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake 
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake ${CMAKE_CURRENT_LIST_DIR}/cmake/Findrapidjson.cmake
         DESTINATION ${ft_cmakedir})
 
 set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
