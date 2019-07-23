@@ -19,7 +19,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
         "cmake_findboost_modular%s" % bbcs, \
         "rapidjson/1.1.0%s" % bcs, \
     
-    default_options = {"libcurl:shared" : True}
+    default_options = {"libcurl:shared" : True,
+                       "OpenSSL:shared" : True}
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %
