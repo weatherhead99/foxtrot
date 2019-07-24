@@ -355,7 +355,7 @@ void foxtrot::devices::print_channel_status(foxtrot::devices::channel_status* ch
 
     //cout << "Chanel Code (hex): "<< std::hex << chanstr->chan_indent << endl;
     cout << "Absolute Position (hex): "<< std::hex << chanstr->position << endl;
-    //cout << "Chanel EncCount (hex): "<< std::hex << chanstr->chan_indent << endl;
+    cout << "Chanel EncCount (hex): "<< std::hex << chanstr->chan_indent << endl;
     //cout << "Status Bits (hex): "<< std::hex << chanstr->statusbits << endl;
 
 }
