@@ -9,7 +9,7 @@ set(foxtrot_core_PREFIX ${PACKAGE_PREFIX_DIR})
 include(CMakeFindDependencyMacro)
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/installtree)
-    message(WARNING "foxtrotCoreConfig configuring from BUILD TREE! You may not want this!")
+        message(WARNING "foxtrotCoreConfig configuring from BUILD TREE! You may not want this!")
     set(BUILD_TREE TRUE)
 else()
     message(STATUS "foxtrotCoreConfig configuring from install tree (normal behaviour)")

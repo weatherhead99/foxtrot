@@ -34,22 +34,7 @@ int main(int argc,char** argv)
     //motors.set_channelenable(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, true);
 
     //RELATIVE & ABSOLUTE MOVE
-    motors.set_channelenable(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, true);
-    motors.set_channelenable(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, true);
-    
-    //motors.get_enccounter(foxtrot::devices::destination::bay3);
-
-    //motors.get_status_update(foxtrot::devices::destination::bay2);
-
-    for (int i = 0; i < 10; i++){
-        motors.relative_move(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, 409600 * 2);
-        motors.relative_move(foxtrot::devices::destination::bay3, foxtrot::devices::motor_channel_idents::channel_1, 409600 * 2);
-    }
-    
-    //motors.get_status_update(foxtrot::devices::destination::bay2);
-    //motors.get_status_update(foxtrot::devices::destination::bay3);
-
-    //motors.absolute_move(foxtrot::devices::destination::bay2, foxtrot::devices::motor_channel_idents::channel_1, 409600*(3));
+    motors.absolute_move(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, 409600*(2));
 
     //JOG MOVE
     /*motors.get_status_update(foxtrot::devices::destination::bay3);

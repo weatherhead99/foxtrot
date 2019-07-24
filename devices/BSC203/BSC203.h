@@ -110,7 +110,7 @@ namespace foxtrot {
         void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
         bool get_bayused_rack(destination dest, unsigned char bay);
         void jog_move(destination dest, motor_channel_idents channel, unsigned char direction);
-        void get_status_update (destination dest);
+        channel_status get_status_update (destination dest, bool print = true);
         
         void set_velocity_params (destination dest, velocity_params* velpar);
         void get_velocity_params(destination dest);

@@ -82,10 +82,10 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
     velpar.minvel = 0;
     //velpar.acceleration = 0x09600100; // Default acceleration
     //velpar.maxvel = 0x1A36E2EB; // Default velocity
-    //velpar.acceleration = 4506;
-    //velpar.maxvel = 21987328;
-    velpar.acceleration = 4506*4;
-    velpar.maxvel = 21987328*4;
+    velpar.acceleration = 4506;
+    velpar.maxvel = 21987328;
+    //velpar.acceleration = 4506*4;
+    //velpar.maxvel = 21987328*4;
 
     foxtrot::devices::powerparams powerstr;
     powerstr.chanIndent = 0x01;
@@ -245,7 +245,7 @@ void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest,
 
     _serport->flush();
     
-    get_status_update(dest);
+    channel_status chanstat = get_status_update(dest);
 
 }
 
@@ -290,6 +290,13 @@ void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest,
 
     //Set the channel
     set_channelenable(dest, foxtrot::devices::motor_channel_idents::channel_1,true);
+    
+    //Checking that it is not already in the same position
+    channel_status motorinit = get_status_update(dest, false);
+    if (motorinit.position == distance) {
+        _lg.Info("The actuator is already in the requested position");
+        return;
+    }
 
     auto data = get_move_request_header_data(distance, chan);
 
@@ -310,7 +317,7 @@ void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest,
 
     _serport->flush(); 
     
-    get_status_update(dest);
+    channel_status chanstat = get_status_update(dest);
 }
 
 void foxtrot::devices::BSC203::jog_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, unsigned char direction)
@@ -335,18 +342,18 @@ void foxtrot::devices::BSC203::jog_move(foxtrot::devices::destination dest, foxt
 
     _serport->flush(); 
     
-    get_status_update(dest);
+    channel_status chanstat = get_status_update(dest);
 }
 
-void foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination dest) {
+foxtrot::devices::channel_status foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination dest, bool print) {
 
     bool hasdata;
     unsigned received_opcode = 0;
     channel_status chanstr;
 
-    _serport->flush();
     start_update_messages(dest);
-
+    _serport->flush();
+    
     while(received_opcode != static_cast<decltype(received_opcode)>(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE))
     {
         try
@@ -355,8 +362,16 @@ void foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination 
             auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE, dest, &hasdata, true, &received_opcode);
 
             std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&chanstr));
-
-            print_channel_status(&chanstr);
+            
+            if (print){
+                print_channel_status(&chanstr);
+            }
+            
+            stop_update_messages(dest);
+            std::this_thread::sleep_for(std::chrono::milliseconds(150));
+            _serport->flush();
+            
+            return chanstr;
 
         } catch (DeviceError excep)
         {
@@ -364,10 +379,6 @@ void foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination 
         }
     }
 
-
-    stop_update_messages(dest);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    _serport->flush();
 
 }
 
@@ -715,7 +726,7 @@ RTTR_REGISTRATION{
     .method("jog_move", &BSC203::jog_move)
     (parameter_names("destination", "channel (channel 1)", "direction"))
     .method("get_status_update", &BSC203::get_status_update)
-    (parameter_names("destination"))
+    (parameter_names("destination", "print (optional)"))
     .method("set_velocity_params", &BSC203::set_velocity_params)
     (parameter_names("destination", "velocity parameters"))
     .method("get_velocity_params", &BSC203::get_velocity_params)
