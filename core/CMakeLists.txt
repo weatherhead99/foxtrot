@@ -40,7 +40,7 @@ configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
 
 message("foxtrot core version: ${VERSION}")
 
-find_package(Boost REQUIRED COMPONENTS log program_options filesystem)
+find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time)
 find_package(Protobuf REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 
@@ -127,7 +127,7 @@ add_dependencies(foxtrot_core ft_auth_copy_includes)
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)

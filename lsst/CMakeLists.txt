@@ -18,7 +18,7 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 set(autofilld_srcs autofilld/autofilld.cpp autofilld/autofill_fill_logic.cpp
     autofilld/autofill_logger.cpp)
 add_executable(autofilld ${autofilld_srcs})
-target_link_libraries(autofilld foxtrot::foxtrot_client Boost::program_options)
+target_link_libraries(autofilld foxtrot::foxtrot_client foxtrot::foxtrot_core Boost::program_options)
 
 set(tbcli_srcs tbprogs/tbcli.cpp tbprogs/tbcli_fill_logic.cpp tbprogs/tbcli_heater_logic.cpp
     tbprogs/tbcli_mono_logic.cpp tbprogs/tbcli_pressure_logic.cpp)
@@ -29,16 +29,15 @@ target_link_libraries(tbcli foxtrot::foxtrot_client Boost::program_options)
 
 set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp)
 add_library(lsst_testbench SHARED ${setup_srcs})
-target_link_libraries(lsst_testbench foxtrot::foxtrot_core foxtrot::foxtrot_server
+target_link_libraries(lsst_testbench foxtrot::foxtrot_core 
 foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
 
 
 set(motor_setup_srcs motor_test_setup.cpp)
 add_library(motor_test SHARED ${motor_setup_srcs})
-target_link_libraries(motor_test foxtrot::foxtrot_core
-foxtrot::foxtrot_server foxtrot::foxtrot_devices)
-set_target_properties(motor_setup_srcs PROPERTIES PREFIX
+target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
+set_target_properties(motor_test PROPERTIES PREFIX
 "")
 
 
