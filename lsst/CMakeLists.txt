@@ -18,7 +18,7 @@ find_package(Boost REQUIRED COMPONENTS program_options)
 set(autofilld_srcs autofilld/autofilld.cpp autofilld/autofill_fill_logic.cpp
     autofilld/autofill_logger.cpp)
 add_executable(autofilld ${autofilld_srcs})
-target_link_libraries(autofilld foxtrot::foxtrot_client foxtrot::foxtrot_core Boost::program_options)
+target_link_libraries(autofilld foxtrot::foxtrot_client Boost::program_options)
 
 set(tbcli_srcs tbprogs/tbcli.cpp tbprogs/tbcli_fill_logic.cpp tbprogs/tbcli_heater_logic.cpp
     tbprogs/tbcli_mono_logic.cpp tbprogs/tbcli_pressure_logic.cpp)
