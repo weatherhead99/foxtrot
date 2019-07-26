@@ -40,6 +40,10 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Debug("update messages stopped");
 }
 
+const std::string foxtrot::devices::TIM101::getDeviceTypeName() const
+{
+  return "TIM101";
+}
 
 void foxtrot::devices::TIM101::identify_module(foxtrot::devices::destination dest)
 {

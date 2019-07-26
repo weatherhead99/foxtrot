@@ -164,6 +164,12 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
 
 }
 
+
+const std::string foxtrot::devices::BSC203::getDeviceTypeName() const
+{
+  return "BSC203";
+};
+
 void foxtrot::devices::BSC203::identify_module (foxtrot::devices::destination rackdest, foxtrot::devices::channelID idchan)
 {
     //no reply expected

@@ -71,6 +71,7 @@ namespace foxtrot {
         RTTR_ENABLE()
     public:
         TIM101(std::shared_ptr< protocols::SerialPort > proto);
+	const std::string getDeviceTypeName() const override;
         void identify_module(destination dest);
         void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
         void absolute_move(destination dest, motor_channel_idents channel, int distance);

@@ -100,6 +100,8 @@ namespace foxtrot {
         RTTR_ENABLE()
     public:
         BSC203(std::shared_ptr< protocols::SerialPort > proto);
+	const std::string getDeviceTypeName() const override;
+	
         void identify_module (destination rackdest, channelID idchan);
         void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
         void set_limit_switch_params(destination dest, motor_channel_idents channel, const limitswitchparams& limitstr);
