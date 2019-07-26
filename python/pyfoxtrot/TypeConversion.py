@@ -1,12 +1,12 @@
-from pyfoxtrot.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
-from pyfoxtrot.ft_types_pb2 import simplevalue_types, variant_types
-from pyfoxtrot.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor
+from .ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
+from pyfoxtrot.ft_types_pb2 import simplevalue_types
+from pyfoxtrot.ft_types_pb2 import variant_descriptor
 from .ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE
-from .ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
-from enum import Enum
+from .ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE
+from .ft_types_pb2 import STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 
-def ft_variant_from_value(val, descriptor: variant_descriptor) ->ft_variant:
+def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
     vartype = descriptor.variant_type
     out = ft_variant()
     if vartype == SIMPLEVAR_TYPE:
@@ -21,11 +21,12 @@ def ft_variant_from_value(val, descriptor: variant_descriptor) ->ft_variant:
 
 
 def _ensure_type(val, tp: type, cond=None, errmsg=None):
-    if not isinstance(val,tp):
-        raise TypeError("method requires %s value" % tp.__name__ )
+    if not isinstance(val, tp):
+        raise TypeError("method requires %s value" % tp.__name__)
     if cond is not None:
         if not cond(val):
             raise ValueError("Value failed condition: %s" % errmsg)
+
 
 def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
     out = ft_simplevariant()
@@ -38,7 +39,7 @@ def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
         _ensure_type(val, int)
         out.intval = val
     elif svt == simplevalue_types.Value("UNSIGNED_TYPE"):
-        _ensure_type(val,int, lambda s: s > 0, "must be unsigned")
+        _ensure_type(val, int, lambda s: s > 0, "must be unsigned")
         out.uintval = val
     elif svt == simplevalue_types.Value("BOOL_TYPE"):
         _ensure_type(val, bool)
@@ -53,10 +54,12 @@ def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
     
     return out
 
-def ft_struct_from_value(val: dict, descriptor: variant_descriptor) -> ft_struct:
+
+def ft_struct_from_value(val: dict,
+                         descriptor: variant_descriptor) -> ft_struct:
     out = ft_struct()
     _ensure_type(val, dict,
-                 lambda s : all(isinstance(_,str) for _ in s.keys()),
+                 lambda s: all(isinstance(_, str) for _ in s.keys()),
                  "all keys must of string type")
     
     out.struct_name = descriptor.struct_desc.struct_name
@@ -67,19 +70,20 @@ def ft_struct_from_value(val: dict, descriptor: variant_descriptor) -> ft_struct
     
     return out
 
+
 def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
     out = ft_enum(enum_name=descriptor.enum_desc.enum_name,
                   enum_map=descriptor.enum_desc.enum_map)
     if isinstance(val, str):
-        if val not in descriptor.enum_map:
+        if val not in descriptor.enum_desc.enum_map:
             raise KeyError("couldn't map string %s to enum value" % val)
-        sanval = descriptor.enum_map[val]
+        sanval = descriptor.enum_desc.enum_map[val]
     elif isinstance(val, int):
-        if int not in descriptor.enum_map.values():
+        if int(val) not in descriptor.enum_desc.enum_map.values():
             raise KeyError("couldn't map int %d to valid enum value" % val)
         sanval = val
     else:
-        raise RuntimeError("type: %s is not supported for converting to enum yet" 
+        raise RuntimeError("type: %s is not supported for converting to enum yet"
                            % type(val).__name__)
 
     out.enum_value = sanval
@@ -105,38 +109,42 @@ def value_from_ft_simplevar(variant: ft_simplevariant):
     else:
         return None
 
+
 def value_from_ft_struct(variant: ft_struct):
-    return {k: value_from_ft_variant(v) for k, v in variant.value.items()}    
+    return {k: value_from_ft_variant(v) for k, v in variant.value.items()}
+
 
 def value_from_ft_enum(variant: ft_enum):
     return variant.enum_value
 
 
-_simplevar_stringdescs_py_style = {(FLOAT_TYPE,4) : "float[4]",
-                                    (FLOAT_TYPE,8) : "float[8]",
-                                    (INT_TYPE,4) : "int[4]",
-                                    (INT_TYPE,8) : "int[8]",
-                                    (INT_TYPE,2) : "int[2]",
-                                    (INT_TYPE,1) : "int[1]",
-                                    (UNSIGNED_TYPE,1) : "uint[1]",
-                                    (UNSIGNED_TYPE,2) : "uint[2]",
-                                    (UNSIGNED_TYPE,4) : "uint[4]",
-                                    (UNSIGNED_TYPE,8) : "uint[8]",
-                                    BOOL_TYPE :  "bool",
-                                    VOID_TYPE : "void",
-                                    STRING_TYPE : "str"}
+_simplevar_stringdescs_py_style = {(FLOAT_TYPE, 4): "float[4]",
+                                   (FLOAT_TYPE, 8): "float[8]",
+                                   (INT_TYPE, 4): "int[4]",
+                                   (INT_TYPE, 8): "int[8]",
+                                   (INT_TYPE, 2): "int[2]",
+                                   (INT_TYPE, 1): "int[1]",
+                                   (UNSIGNED_TYPE, 1): "uint[1]",
+                                   (UNSIGNED_TYPE, 2): "uint[2]",
+                                   (UNSIGNED_TYPE, 4): "uint[4]",
+                                   (UNSIGNED_TYPE, 8): "uint[8]",
+                                   BOOL_TYPE:  "bool",
+                                   VOID_TYPE: "void",
+                                   STRING_TYPE: "str"}
 
 
 def string_describe_ft_variant(descriptor: variant_descriptor):
     if descriptor.variant_type == SIMPLEVAR_TYPE:
-        if descriptor.simplevalue_type in (BOOL_TYPE,VOID_TYPE,STRING_TYPE):
-            typestr = _simplevar_stringdescs_py_style[descriptor.simplevalue_type]
+        tp = descriptor.simplevalue_type
+        size = descriptor.simplevalue_sizeof
+        if tp in (BOOL_TYPE, VOID_TYPE, STRING_TYPE):
+            typestr = _simplevar_stringdescs_py_style[tp]
         else:
-            typestr = _simplevar_stringdescs_py_style[(descriptor.simplevalue_type,descriptor.simplevalue_sizeof)]
+            typestr = _simplevar_stringdescs_py_style[(tp, size)]
     elif descriptor.variant_type == ENUM_TYPE:
-        enum_name = descriptor.enum_desc.enum_name.replace("::","_")
+        enum_name = descriptor.enum_desc.enum_name.replace("::", "_")
         return "enum[%s]" % enum_name
     elif descriptor.variant_type == STRUCT_TYPE:
-        struct_name = descriptor.struct_desc.struct_name.replace("::","_")
+        struct_name = descriptor.struct_desc.struct_name.replace("::", "_")
         return "struct[%s]" % struct_name
     return typestr
