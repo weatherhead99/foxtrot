@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0e\x66t_types.proto\"\xd2\x01\n\x12variant_descriptor\x12$\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x0e.variant_types\x12,\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x12.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12\'\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x12.struct_descriptor\x12#\n\tenum_desc\x18\x05 \x01(\x0b\x32\x10.enum_descriptor\"\xa6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12\x35\n\nstruct_map\x18\x02 \x03(\x0b\x32!.struct_descriptor.StructMapEntry\x1a\x45\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.variant_descriptor:\x02\x38\x01\"\x85\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12/\n\x08\x65num_map\x18\x02 \x03(\x0b\x32\x1d.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"{\n\nft_variant\x12&\n\tsimplevar\x18\x01 \x01(\x0b\x32\x11.ft_simplevariantH\x00\x12\x1f\n\tstructval\x18\x02 \x01(\x0b\x32\n.ft_structH\x00\x12\x1b\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x08.ft_enumH\x00\x42\x07\n\x05value\"\x88\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\rB\x07\n\x05value\"\x81\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x03(\x0b\x32\x15.ft_struct.ValueEntry\x1a\x39\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.ft_variant:\x02\x38\x01\"\x89\x01\n\x07\x66t_enum\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12\'\n\x08\x65num_map\x18\x02 \x03(\x0b\x32\x15.ft_enum.EnumMapEntry\x12\x12\n\nenum_value\x18\x03 \x01(\r\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*C\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\n\x0e\x66t_types.proto\"\xd2\x01\n\x12variant_descriptor\x12$\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x0e.variant_types\x12,\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x12.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12\'\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x12.struct_descriptor\x12#\n\tenum_desc\x18\x05 \x01(\x0b\x32\x10.enum_descriptor\"\xa6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12\x35\n\nstruct_map\x18\x02 \x03(\x0b\x32!.struct_descriptor.StructMapEntry\x1a\x45\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.variant_descriptor:\x02\x38\x01\"\x85\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12/\n\x08\x65num_map\x18\x02 \x03(\x0b\x32\x1d.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"{\n\nft_variant\x12&\n\tsimplevar\x18\x01 \x01(\x0b\x32\x11.ft_simplevariantH\x00\x12\x1f\n\tstructval\x18\x02 \x01(\x0b\x32\n.ft_structH\x00\x12\x1b\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x08.ft_enumH\x00\x42\x07\n\x05value\"\x88\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\rB\x07\n\x05value\"\x81\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x03(\x0b\x32\x15.ft_struct.ValueEntry\x1a\x39\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.ft_variant:\x02\x38\x01\"=\n\x07\x66t_enum\x12\x1e\n\x04\x64\x65sc\x18\x01 \x01(\x0b\x32\x10.enum_descriptor\x12\x12\n\nenum_value\x18\x02 \x01(\r*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*C\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x62\x06proto3')
 )
 
 _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
@@ -57,8 +57,8 @@ _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1072,
-  serialized_end=1187,
+  serialized_start=995,
+  serialized_end=1110,
 )
 _sym_db.RegisterEnumDescriptor(_SIMPLEVALUE_TYPES)
 
@@ -84,8 +84,8 @@ _VARIANT_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1189,
-  serialized_end=1256,
+  serialized_start=1112,
+  serialized_end=1179,
 )
 _sym_db.RegisterEnumDescriptor(_VARIANT_TYPES)
 
@@ -503,22 +503,22 @@ _FT_STRUCT = _descriptor.Descriptor(
 )
 
 
-_FT_ENUM_ENUMMAPENTRY = _descriptor.Descriptor(
-  name='EnumMapEntry',
-  full_name='ft_enum.EnumMapEntry',
+_FT_ENUM = _descriptor.Descriptor(
+  name='ft_enum',
+  full_name='ft_enum',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='ft_enum.EnumMapEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='desc', full_name='ft_enum.desc', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='ft_enum.EnumMapEntry.value', index=1,
+      name='enum_value', full_name='ft_enum.enum_value', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -530,58 +530,14 @@ _FT_ENUM_ENUMMAPENTRY = _descriptor.Descriptor(
   nested_types=[],
   enum_types=[
   ],
-  serialized_options=_b('8\001'),
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=488,
-  serialized_end=534,
-)
-
-_FT_ENUM = _descriptor.Descriptor(
-  name='ft_enum',
-  full_name='ft_enum',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='enum_name', full_name='ft_enum.enum_name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='enum_map', full_name='ft_enum.enum_map', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='enum_value', full_name='ft_enum.enum_value', index=2,
-      number=3, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[_FT_ENUM_ENUMMAPENTRY, ],
-  enum_types=[
-  ],
   serialized_options=None,
   is_extendable=False,
   syntax='proto3',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=933,
-  serialized_end=1070,
+  serialized_start=932,
+  serialized_end=993,
 )
 
 _VARIANT_DESCRIPTOR.fields_by_name['variant_type'].enum_type = _VARIANT_TYPES
@@ -623,8 +579,7 @@ _FT_SIMPLEVARIANT.fields_by_name['stringval'].containing_oneof = _FT_SIMPLEVARIA
 _FT_STRUCT_VALUEENTRY.fields_by_name['value'].message_type = _FT_VARIANT
 _FT_STRUCT_VALUEENTRY.containing_type = _FT_STRUCT
 _FT_STRUCT.fields_by_name['value'].message_type = _FT_STRUCT_VALUEENTRY
-_FT_ENUM_ENUMMAPENTRY.containing_type = _FT_ENUM
-_FT_ENUM.fields_by_name['enum_map'].message_type = _FT_ENUM_ENUMMAPENTRY
+_FT_ENUM.fields_by_name['desc'].message_type = _ENUM_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['variant_descriptor'] = _VARIANT_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['struct_descriptor'] = _STRUCT_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['enum_descriptor'] = _ENUM_DESCRIPTOR
@@ -703,23 +658,14 @@ _sym_db.RegisterMessage(ft_struct)
 _sym_db.RegisterMessage(ft_struct.ValueEntry)
 
 ft_enum = _reflection.GeneratedProtocolMessageType('ft_enum', (_message.Message,), dict(
-
-  EnumMapEntry = _reflection.GeneratedProtocolMessageType('EnumMapEntry', (_message.Message,), dict(
-    DESCRIPTOR = _FT_ENUM_ENUMMAPENTRY,
-    __module__ = 'ft_types_pb2'
-    # @@protoc_insertion_point(class_scope:ft_enum.EnumMapEntry)
-    ))
-  ,
   DESCRIPTOR = _FT_ENUM,
   __module__ = 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:ft_enum)
   ))
 _sym_db.RegisterMessage(ft_enum)
-_sym_db.RegisterMessage(ft_enum.EnumMapEntry)
 
 
 _STRUCT_DESCRIPTOR_STRUCTMAPENTRY._options = None
 _ENUM_DESCRIPTOR_ENUMMAPENTRY._options = None
 _FT_STRUCT_VALUEENTRY._options = None
-_FT_ENUM_ENUMMAPENTRY._options = None
 # @@protoc_insertion_point(module_scope)
