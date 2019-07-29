@@ -72,8 +72,7 @@ def ft_struct_from_value(val: dict,
 
 
 def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
-    out = ft_enum(enum_name=descriptor.enum_desc.enum_name,
-                  enum_map=descriptor.enum_desc.enum_map)
+    out = ft_enum(desc=descriptor.enum_desc)
     if isinstance(val, str):
         if val not in descriptor.enum_desc.enum_map:
             raise KeyError("couldn't map string %s to enum value" % val)
