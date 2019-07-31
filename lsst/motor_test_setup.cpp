@@ -8,12 +8,12 @@
 using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
 foxtrot::parameterset sport_params_tim {
-    {"port", "/dev/ttyUSB10"},
+    {"port", "/dev/ttyUSB11"},
     {"flowcontrol", "hardware"}
 };
 
 foxtrot::parameterset sport_params_bsc {
-    {"port", "/dev/ttyUSB1"},
+    {"port", "/dev/ttyUSB12"},
     {"flowcontrol", "hardware"}
 };
 

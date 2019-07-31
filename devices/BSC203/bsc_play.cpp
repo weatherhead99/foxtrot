@@ -10,7 +10,7 @@ using std::cout;
 using std::endl;
 
 foxtrot::parameterset sport_params {
-    {"port", "/dev/ttyUSB1"},
+    {"port", "/dev/ttyUSB12"},
     {"flowcontrol", "hardware"}
 };
 
@@ -29,12 +29,13 @@ int main(int argc,char** argv)
     //GENERAL THINGS
     //motors.identify_module(foxtrot::devices::destination::rack, foxtrot::devices::channelID::channel_1);
 
-    //motors.get_hwinfo(foxtrot::devices::destination::rack);
-
-    motors.set_channelenable(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, true);
-
+    //motors.set_channelenable(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, true);
+    
+    motors.get_hwinfo(foxtrot::devices::destination::rack);
     //RELATIVE & ABSOLUTE MOVE
-    motors.absolute_move(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, 409600*(4));
+    //motors.absolute_move(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, 409600*(4));
+    
+    //motors.relative_move(foxtrot::devices::destination::bay1, foxtrot::devices::motor_channel_idents::channel_1, 409600*(2));
 
     //JOG MOVE
     /*motors.get_status_update(foxtrot::devices::destination::bay3);

@@ -36,8 +36,8 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Trace("BSC203 Calling superclass constructor...");
 
     //Constructor based on Throlabs software initialization of the motors
-    //get_hwinfo(foxtrot::devices::destination::rack);
-
+    get_hwinfo(foxtrot::devices::destination::rack);
+    
     for(unsigned char i =0 ; i <3; i++)
     {
         if(get_bayused_rack(destination::rack, i))
@@ -72,7 +72,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Debug("update messages stopped");
 
     //Parameter initialization
-
+    
     //Elements
     foxtrot::devices::destination bays[3] = {foxtrot::devices::destination::bay1, foxtrot::devices::destination::bay2, foxtrot::devices::destination::bay3};
 
@@ -161,6 +161,11 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
         require_status_update(elem);
 
     }
+    
+    //Flushing serial port
+    _lg.Debug("Flushing serial port");
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    _serport->flush();
 
 }
 

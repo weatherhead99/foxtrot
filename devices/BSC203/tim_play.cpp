@@ -39,7 +39,7 @@ int main(int argc,char** argv)
   
   motors.set_jog_parameters(foxtrot::devices::destination::sourceTIM101, jogstruct);*/
   
-  motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
+  //motors.jog_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::jogdir::forward);
 
   
   //ABSOLUTE MOVE
