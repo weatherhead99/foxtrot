@@ -36,7 +36,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Trace("BSC203 Calling superclass constructor...");
 
     //Constructor based on Throlabs software initialization of the motors
-    get_hwinfo(foxtrot::devices::destination::rack);
+    //get_hwinfo(foxtrot::devices::destination::rack);
 
     for(unsigned char i =0 ; i <3; i++)
     {
@@ -446,14 +446,15 @@ void foxtrot::devices::BSC203::require_status_update(foxtrot::devices::destinati
 
 }
 
-void foxtrot::devices::BSC203::get_velocity_params(foxtrot::devices::destination dest)
+foxtrot::devices::velocity_params foxtrot::devices::BSC203::get_velocity_params(foxtrot::devices::destination dest)
 {
 
     auto out =request_response_struct<velocity_params>(bsc203_opcodes::MGMSG_MOT_REQ_VELPARAMS, bsc203_opcodes::MGMSG_MOT_GET_VELPARAMS, dest, 0x01,0x0);
 
-    cout << "Velocity params, min vel (hex): " << static_cast<unsigned>(out.minvel) << endl;
-    cout << "Velocity params, max vel (hex): " << static_cast<unsigned>(out.maxvel) << endl;
-
+    //cout << "Velocity params, min vel (hex): " << static_cast<unsigned>(out.minvel) << endl;
+    //cout << "Velocity params, max vel (hex): " << static_cast<unsigned>(out.maxvel) << endl;
+    
+    return out;
 
 }
 
@@ -495,24 +496,26 @@ void foxtrot::devices::BSC203::set_jog_params(foxtrot::devices::destination dest
 
 }
 
-void foxtrot::devices::BSC203::get_jog_params(foxtrot::devices::destination dest)
+foxtrot::devices::jogparamsBSC foxtrot::devices::BSC203::get_jog_params(foxtrot::devices::destination dest)
 {
     auto out =request_response_struct<jogparamsBSC>(bsc203_opcodes::MGMSG_MOT_REQ_JOGPARAMS, bsc203_opcodes::MGMSG_MOT_GET_JOGPARAMS, dest, 0x01,0x0);
 
-    cout << "MoveJogparams, step size (hex): " << std::hex << static_cast<unsigned>(out.jogStepSize) << endl;
-    cout << "MoveJogparams, min vel (hex): " << std::hex << static_cast<unsigned>(out.jogMinVel) << endl;
-
+    //cout << "MoveJogparams, step size (hex): " << std::hex << static_cast<unsigned>(out.jogStepSize) << endl;
+    //cout << "MoveJogparams, min vel (hex): " << std::hex << static_cast<unsigned>(out.jogMinVel) << endl;
+    
+    return out;
 
 }
 
-void foxtrot::devices::BSC203::get_relative_move_params(foxtrot::devices::destination dest)
+foxtrot::devices::move_relative_params foxtrot::devices::BSC203::get_relative_move_params(foxtrot::devices::destination dest)
 {
 
     auto out =request_response_struct<move_relative_params>(bsc203_opcodes::MGMSG_MOT_REQ_MOVERELPARAMS, bsc203_opcodes::MGMSG_MOT_GET_MOVERELPARAMS, dest, 0x01,0x0);
 
-    cout << "MoveRelative params, chan indent (hex): " << std::hex << static_cast<unsigned>(out.chanIndent) << endl;
-    cout << "MoveRelative params, rel distance (hex): " << std::hex << static_cast<unsigned>(out.rel_distance) << endl;
-
+    //cout << "MoveRelative params, chan indent (hex): " << std::hex << static_cast<unsigned>(out.chanIndent) << endl;
+    //cout << "MoveRelative params, rel distance (hex): " << std::hex << static_cast<unsigned>(out.rel_distance) << endl;
+    
+    return out;
 }
 
 
@@ -528,7 +531,7 @@ void foxtrot::devices::BSC203::set_poscounter(foxtrot::devices::destination dest
 
 }
 
-void foxtrot::devices::BSC203::get_poscounter(foxtrot::devices::destination dest)
+unsigned int foxtrot::devices::BSC203::get_poscounter(foxtrot::devices::destination dest)
 {
 
     start_update_messages(dest);
@@ -539,7 +542,9 @@ void foxtrot::devices::BSC203::get_poscounter(foxtrot::devices::destination dest
 
     auto out =request_response_struct<position_counter>(bsc203_opcodes::MGMSG_MOT_REQ_POSCOUNTER, bsc203_opcodes::MGMSG_MOT_GET_POSCOUNTER, dest, 0x01,0x0);
 
-    cout << "position (hex): " << std::hex << out.position << endl;
+    //cout << "position (hex): " << std::hex << out.position << endl;
+    
+    return out.position;
 }
 
 void foxtrot::devices::BSC203::set_enccounter(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, int enccount)
@@ -552,12 +557,14 @@ void foxtrot::devices::BSC203::set_enccounter(foxtrot::devices::destination dest
 
 }
 
-void foxtrot::devices::BSC203::get_enccounter(foxtrot::devices::destination dest)
+unsigned int foxtrot::devices::BSC203::get_enccounter(foxtrot::devices::destination dest)
 {
 
     auto out =request_response_struct<position_counter>(bsc203_opcodes::MGMSG_MOT_REQ_ENCCOUNTER, bsc203_opcodes::MGMSG_MOT_GET_ENCCOUNTER, dest, 0x01,0x0);
 
-    cout << "position (hex): " << std::hex << out.position << endl;
+    //cout << "position (hex): " << std::hex << out.position << endl;
+    
+    return out.position;
 
 }
 
@@ -570,11 +577,13 @@ void foxtrot::devices::BSC203::set_homeparams(foxtrot::devices::destination dest
 
 }
 
-void foxtrot::devices::BSC203::get_homeparams(foxtrot::devices::destination dest)
+foxtrot::devices::homeparams foxtrot::devices::BSC203::get_homeparams(foxtrot::devices::destination dest)
 {
     auto out =request_response_struct<homeparams>(bsc203_opcodes::MGMSG_MOT_REQ_HOMEPARAMS, bsc203_opcodes::MGMSG_MOT_GET_HOMEPARAMS, dest, 0x01,0x0);
 
-    cout << "home velocity (hex): " << std::hex << out.homeVelocity << endl;
+    //cout << "home velocity (hex): " << std::hex << out.homeVelocity << endl;
+    
+    return out;
 
 }
 
@@ -586,16 +595,16 @@ void foxtrot::devices::BSC203::set_power_parameters(foxtrot::devices::destinatio
 
 }
 
-void foxtrot::devices::BSC203::get_power_parameters(foxtrot::devices::destination dest)
+foxtrot::devices::powerparams foxtrot::devices::BSC203::get_power_parameters(foxtrot::devices::destination dest)
 {
-    //Set the channel
-    set_channelenable(dest, foxtrot::devices::motor_channel_idents::channel_1,true);
 
     auto out =request_response_struct<powerparams>(bsc203_opcodes::MGMSG_MOT_REQ_POWERPARAMS, bsc203_opcodes::MGMSG_MOT_GET_POWERPARAMS, dest, 0x01,0x0);
 
-    cout << "chan indent (hex): " << std::hex << out.chanIndent << endl;
-    cout << "rest Factor (hex): " << std::hex << out.restFactor << endl;
-    cout << "move factor (hex): " << std::hex << out.moveFactor << endl;
+    //cout << "chan indent (hex): " << std::hex << out.chanIndent << endl;
+    //cout << "rest Factor (hex): " << std::hex << out.restFactor << endl;
+    //cout << "move factor (hex): " << std::hex << out.moveFactor << endl;
+    
+    return out;
 
 }
 
@@ -608,13 +617,15 @@ void foxtrot::devices::BSC203::set_generalmove_params(foxtrot::devices::destinat
 
 }
 
-void foxtrot::devices::BSC203::get_generalmove_params(foxtrot::devices::destination dest)
+unsigned int foxtrot::devices::BSC203::get_generalmove_params(foxtrot::devices::destination dest)
 {
 
     auto out =request_response_struct<position_counter>(bsc203_opcodes::MGMSG_MOT_REQ_GENMOVEPARAMS, bsc203_opcodes::MGMSG_MOT_GET_GENMOVEPARAMS, dest, 0x01,0x0);
 
-    cout << "backlash distance (hex): " << std::hex << out.position << endl;
-
+    //cout << "backlash distance (hex): " << std::hex << out.position << endl;
+    
+    return out.position;
+    
 }
 
 

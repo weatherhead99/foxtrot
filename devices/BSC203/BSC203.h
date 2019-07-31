@@ -115,30 +115,30 @@ namespace foxtrot {
         channel_status get_status_update (destination dest, bool print = true);
         
         void set_velocity_params (destination dest, velocity_params* velpar);
-        void get_velocity_params(destination dest);
+        velocity_params get_velocity_params(destination dest);
         
         void set_relative_move_params(destination dest, motor_channel_idents channel, int distance);
         void set_absolute_move_params(destination dest, motor_channel_idents channel, 
                                       int distance);
         void set_PMD_params(destination dest, motor_channel_idents channel, const PMDjoystickparams& PMDjoystickstr);
-        void get_relative_move_params(destination dest);
+        move_relative_params get_relative_move_params(destination dest);
         void set_jog_params(destination dest, motor_channel_idents channel, const jogparamsBSC& jogstr);
-        void get_jog_params(destination dest);
+        jogparamsBSC get_jog_params(destination dest);
         
         void set_poscounter(destination dest, motor_channel_idents channel, int position);
-        void get_poscounter(destination dest);
+        unsigned int get_poscounter(destination dest);
         
         void set_enccounter(destination dest, motor_channel_idents channel, int enccount);
-        void get_enccounter(destination dest);
+        unsigned int get_enccounter(destination dest);
         
         void set_homeparams(destination dest, motor_channel_idents channel,const homeparams& homestr);
-        void get_homeparams(destination dest);
+        homeparams get_homeparams(destination dest);
         
         void set_power_parameters(destination dest, motor_channel_idents channel, const powerparams& powerstr); //Not working on BSC203 controller, the power is computed as a function of the velocity
-        void get_power_parameters(destination dest);
+        powerparams get_power_parameters(destination dest);
         
         void set_generalmove_params(destination dest, motor_channel_idents channel, int backlashdis);
-        void get_generalmove_params(destination dest);
+        unsigned int get_generalmove_params(destination dest);
         
         void homing_channel(destination dest, motor_channel_idents chan);
         

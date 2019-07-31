@@ -8,7 +8,7 @@
 using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
 foxtrot::parameterset sport_params_tim {
-    {"port", "/dev/ttyUSB0"},
+    {"port", "/dev/ttyUSB10"},
     {"flowcontrol", "hardware"}
 };
 
@@ -25,10 +25,10 @@ extern "C" {
     {
         foxtrot::Logging lg ( "setup" );
 
-        if ( params == nullptr ) {
-            lg.Fatal ( "no parametersets received, cannot continue.." );
-            throw std::runtime_error ( "setup cannot continue" );
-        }
+//        if ( params == nullptr ) {
+//            lg.Fatal ( "no parametersets received, cannot continue.." );
+//            throw std::runtime_error ( "setup cannot continue" );
+//        }
 
         lg.Info ( "setting up TIM101" );
         auto sport_tim = std::make_shared<foxtrot::protocols::SerialPort> ( &sport_params_tim );

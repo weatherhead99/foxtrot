@@ -13,7 +13,7 @@ endif()
 find_package(foxtrotClient REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 find_package(foxtrotDevices REQUIRED)
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options date_time)
 
 set(autofilld_srcs autofilld/autofilld.cpp autofilld/autofill_fill_logic.cpp
     autofilld/autofill_logger.cpp)

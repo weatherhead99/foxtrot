@@ -38,6 +38,28 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     _lg.Debug("stopping update messages...");
     transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
     _lg.Debug("update messages stopped");
+    
+    //Initialize movement parameters
+    jogparams jogstruct;
+    jogstruct.subMsgID = 0x0009;
+    jogstruct.chanIndent = 0x01;
+    jogstruct.jogMode = 0x0002; //step
+    jogstruct.jogStepSize = 0x000000AA;
+    jogstruct.jogStepRate = 0x000001F4;
+    jogstruct.jogStepAccn = 0x000186A0;
+  
+    _lg.Debug("Initializing jog parameters");
+    set_jog_parameters(destination::sourceTIM101, jogstruct);
+    
+    move_absolute_params absparams;
+    absparams.subMsgID = 0x0007;
+    absparams.chanIndent = 0x01;
+    absparams.maxVoltage = 0x006E;
+    absparams.stepRate = 0x00000014;
+    absparams.stepAccn = 0x000000F0;
+    
+    _lg.Debug("Initializing move absolute parameters");
+    set_move_absolute_parameters(destination::sourceTIM101, absparams);
 }
 
 const std::string foxtrot::devices::TIM101::getDeviceTypeName() const
@@ -175,29 +197,35 @@ void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destinatio
 }
 
 
-void foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest) {
+foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest) {
 
     auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01);
 
-    cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
+    //cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
+    
+    return out;
 
 }
 
-void foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
+foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
 
     auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01);
 
-    cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
-    cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
+    //cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
+    //cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
+    
+    return out;
 
 }
 
-void foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest) {
+foxtrot::devices::pos_counter_params foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest) {
 
     auto out =request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x05,0x01);
 
-    cout << "Position counter: Channel (hex) = " << std::hex << out.chanIndent << endl;
-    cout << "Position counter: Position (hex) = " << std::hex << out.position << endl;
+    //cout << "Position counter: Channel (hex) = " << std::hex << out.chanIndent << endl;
+    //cout << "Position counter: Position (hex) = " << std::hex << out.position << endl;
+    
+    return out;
 
 }
 
