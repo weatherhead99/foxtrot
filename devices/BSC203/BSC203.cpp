@@ -235,11 +235,13 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
 
 void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
 {
+    //Enabling channel
+    set_channelenable(dest,foxtrot::devices::motor_channel_idents::channel_1, true);
 
     auto data = get_move_request_header_data(distance, chan);
 
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,data,dest);
-
+    
     //The stop_update_messages of the constructor blocks the serial port. For that reason we need to turn it on again.
     start_update_messages(dest);
 
