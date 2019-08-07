@@ -196,6 +196,40 @@ void idscamera::getSingleImageAlone(std::shared_ptr<Image> image)
     check_ueye_error(is_FreezeVideo(_camhandle,IS_WAIT));
 }
 
+foxtrot::devices::metadata idscamera::getImageMetadata(int camWidth, int camHeight, int camBitsperPixel)
+{
+    
+    foxtrot::devices::metadata image_meta;
+    
+    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
+    getSingleImageAlone(imptr);
+    
+    image_meta.width = imptr->getWidth();
+    image_meta.height = imptr->getHeight();
+    image_meta.bitsPerPixel = imptr->bitsperpixel;
+    image_meta.exposure = exposure;
+    image_meta.pixelClock = pixelClock;
+    image_meta.frameRate = frameRate;
+    
+    return image_meta;
+    
+}
+
+std::vector<int> idscamera::getImageRawData(int camWidth, int camHeight, int camBitsperPixel)
+{
+    
+    std::vector<int> outvec;
+    
+    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
+    getSingleImageAlone(imptr);
+    
+    outvec.resize(imptr->datasize);
+    std::copy(imptr->rawData.begin(), imptr->rawData.end(), outvec.begin());
+    
+    return outvec;
+}
+
+
 std::tuple<int, int> idscamera::getImageSize()
 {
     IS_SIZE_2D param;
@@ -224,6 +258,7 @@ int idscamera::getBitsperPixel()
     throw std::logic_error("unimplemented color mode in getBitsPixel");
     
 }
+
 
 void idscamera::printoutImage(std::shared_ptr<foxtrot::devices::Image> image)
 {
@@ -268,18 +303,25 @@ RTTR_REGISTRATION{
     .method("getExposure", &idscamera::getExposure)
     .method("setExposure", &idscamera::setExposure)
     (parameter_names("exposure"))
+    .method("getImageMetadata", &idscamera::getImageMetadata)
+    (parameter_names("width", "height", "bits per pixel"))
+    .method("getImageRawData", &idscamera::getImageRawData)
+    (parameter_names("width", "height", "bits per pixel"))
     .method("getFrameRate", &idscamera::getFrameRate)
     .method("setFrameRate", &idscamera::setFrameRate)
     (parameter_names("frame rate per second"))
-    .method("getSingleImageAlone", &idscamera::getSingleImageAlone)
-    (parameter_names("image pointer"))
-    .method("getSingleImage", &idscamera::getSingleImage)
-    .method("AddImageToSequence", &idscamera::AddImageToSequence)
-    (parameter_names("image pointer"))
-    .method("printoutImage", &idscamera::printoutImage)
-    (parameter_names("image pointer"))
-    .method("getImageSize", &idscamera::getImageSize)
     .method("setColorMode", &idscamera::setColorMode)
     .method("getBitsperPixel", &idscamera::getBitsperPixel);
+    
+    //Custom structs
+    using foxtrot::devices::metadata;
+    registration::class_<metadata>("foxtrot::devices::metadata")
+    .constructor()(policy::ctor::as_object)
+    .property("width", &metadata::width)
+    .property("height", &metadata::height)
+    .property("bitsPerPixel", &metadata::bitsPerPixel)
+    .property("exposure", &metadata::exposure)
+    .property("pixelClock", &metadata::pixelClock)
+    .property("frameRate", &metadata::frameRate);
     
 }

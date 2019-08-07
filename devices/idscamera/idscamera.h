@@ -14,6 +14,16 @@ namespace foxtrot{
             void check_ueye_error(int32_t ret, foxtrot::Logging* lg=nullptr);
         }
         
+        #pragma pack (push,1)
+        struct metadata {
+            int width;
+            int height;
+            int bitsPerPixel;
+            double exposure;
+            double pixelClock;
+            double frameRate;
+        };
+        
         class idscamera : public Device
         {
             RTTR_ENABLE(Device);
@@ -32,6 +42,8 @@ namespace foxtrot{
             void setFrameRate(double exp);
             double getFrameRate();
             Image getSingleImage();
+            metadata getImageMetadata(int camWidth, int camHeight, int camBitsperPixel);
+            std::vector<int> getImageRawData(int camWidth, int camHeight, int camBitsperPixel);
             void getSingleImageAlone(std::shared_ptr<Image> image);
             void AddImageToSequence(std::shared_ptr<Image> image); 
             void printoutImage(std::shared_ptr<Image> image);
