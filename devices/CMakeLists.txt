@@ -117,6 +117,9 @@ target_link_libraries(tim_play PUBLIC foxtrot_devices)
 add_executable(bsc_play BSC203/bsc_play.cpp)
 target_link_libraries(bsc_play PUBLIC foxtrot_devices)
 
+add_executable(idscamera_play idscamera/idscamera_play.cpp)
+target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
+
 install(TARGETS foxtrot_devices 
         EXPORT foxtrot_devices
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
@@ -139,3 +142,4 @@ foxtrot_create_package_config(cmake/foxtrotDevicesConfig.cmake.in ${ft_cmakedir}
 
 foxtrot_add_to_package_registry(foxtrot_devices
 foxtrotDevices)
+
