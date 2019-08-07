@@ -15,8 +15,7 @@ int main(int argc,char** argv)
     cout << "idscamera test..." << endl;
     
     const uint32_t cameraID = 4; // This ID appears in the ids camera manager when the camera is connected.
-    const uint32_t* const cameraIDp = &cameraID;
-    foxtrot::devices::idscamera idscam(cameraIDp);
+    foxtrot::devices::idscamera idscam(&cameraID);
     
     idscam.setExposure(0.01);
     cout << "Exposure time = " << idscam.getExposure() << endl;

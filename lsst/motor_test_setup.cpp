@@ -3,10 +3,12 @@
 #include <map>
 #include <foxtrot/devices/BSC203.h>
 #include <foxtrot/devices/TIM101.h>
+#include <foxtrot/devices/idscamera.h>
 
 
 using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
+//Motor intialization (Serial ports)
 foxtrot::parameterset sport_params_tim {
     {"port", "/dev/ttyUSB0"},
     {"flowcontrol", "hardware"}
@@ -17,7 +19,8 @@ foxtrot::parameterset sport_params_bsc {
     {"flowcontrol", "hardware"}
 };
 
-
+//Camera initialization (ID)
+const uint32_t cameraID = 4;
 
 extern "C" {
 
@@ -40,6 +43,10 @@ extern "C" {
         auto sport_bsc = std::make_shared<foxtrot::protocols::SerialPort> ( &sport_params_bsc );
         auto presgauge_bsc = std::unique_ptr<foxtrot::devices::BSC203> ( new foxtrot::devices::BSC203 ( sport_bsc ) );
         harness.AddDevice ( std::move ( presgauge_bsc ) );
+        
+        lg.Info("setting up Camera");
+        auto presgauge_cam = std::unique_ptr<foxtrot::devices::idscamera> ( new foxtrot::devices::idscamera ( &cameraID ) );
+        harness.AddDevice ( std::move ( presgauge_cam ) );
 
         return 0;
 
