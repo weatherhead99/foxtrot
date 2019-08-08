@@ -476,11 +476,8 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
 tuple_descriptor foxtrot::describe_tuple(const rttr::type& tp, Logging* lg)
 {
     tuple_descriptor out;
-    rttr::variant dummyvar = tp.create();
-    if(!dummyvar.is_valid())
-        throw std::logic_error("can't construct dummy tuple, perhaps type isn't registered properly");
-    
-    auto sz = foxtrot::tuple_size(dummyvar);
+
+    auto sz = foxtrot::tuple_size(tp);
     
     return out;
 };

@@ -61,7 +61,7 @@ rttr::variant tuple_get(const T& in, int n)
     return detail::tuple_getter_helper<T,N-1>::get(in,n);
 }
 template<typename T>
-rttr::type tuple_type(int n)
+rttr::type tuple_element_type(int n)
 {
     constexpr int N = std::tuple_size<T>::value;
     return detail::tuple_type_helper<T,N-1>::type(n);
@@ -83,12 +83,12 @@ void register_tuple()
     .constructor()
     .method("get",&tuple_get<T>)
     .property_readonly("size",&tuple_size<T>)
-    .method("type",&tuple_type<T>);
+    .method("type",&tuple_element_type<T>);
 };
 
 
-rttr::type tuple_type(const rttr::variant& var, int n);
-std::size_t tuple_size(const rttr::variant& var);
+rttr::type tuple_element_type(const rttr::type& tp, int n);
+std::size_t tuple_size(const rttr::type& tp);
 rttr::variant tuple_get(const rttr::variant& var, int n);
 
 }

@@ -1,0 +1,2 @@
+add_executable(tuple_play tuple_play.cpp)
+target_link_libraries(tuple_play foxtrot_core)
