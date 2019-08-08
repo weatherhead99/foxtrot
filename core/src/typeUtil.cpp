@@ -23,20 +23,14 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
 
 bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
 {
-    if(!tp.is_template_instantiation())
+    if(!tp.get_metadata("tuplemeta").is_valid())
     {
         if(lg)
-            lg->strm(sl::trace) << "type is not template instantiation";
+            lg->strm(sl::debug) << "no tuplemeta";
         return false;
     }
-    auto tpname = tp.get_name().to_string();
-    auto pos = tpname.find("std::tuple");
-    if(lg)
-        lg->strm(sl::debug) << "checking for std::tuple location" ;
-    if(pos == std::string::npos)
-        return false;
     return true;
-    
+
 }
 
 
@@ -243,7 +237,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
         ft_struct* structval = out.mutable_structval();
         *structval = get_struct_wire_type(var, lg);
     }
-    else if(is_tuple(tp))
+    else if(is_tuple(tp,lg))
     {
         if(lg)
             lg->strm(sl::trace) << "tuple logic";
@@ -252,7 +246,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>())
     {
-        static std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
+        std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
         throw std::logic_error(err_msg);
     }
     else

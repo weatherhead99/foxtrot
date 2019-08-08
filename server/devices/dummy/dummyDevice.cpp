@@ -178,6 +178,12 @@ std::tuple<double,int,double> foxtrot::devices::dummyDevice::returns_unregistere
     return std::make_tuple(3.14,2,5.18);
 }
 
+
+std::pair<int, double> foxtrot::devices::dummyDevice::returns_pair()
+{
+    return std::make_pair(1,1.0);
+}
+
 void foxtrot::devices::dummyDevice::doNothing()
 {
 };
@@ -222,9 +228,9 @@ RTTR_REGISTRATION
  .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
  .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
  .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
- //.method("returns_unregistered_tuple", &dummyDevice::returns_unregistered_tuple)
- ;
- 
+ .method("returns_pair", &dummyDevice::returns_pair);
+
+ foxtrot::register_tuple<std::pair<int,double>>();
  foxtrot::register_tuple<std::tuple<int,std::string>>();
  
  using foxtrot::devices::dummyEnum;
