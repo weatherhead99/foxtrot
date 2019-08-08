@@ -13,7 +13,7 @@ foxtrot::parameterset sport_params_tim {
 };
 
 foxtrot::parameterset sport_params_bsc {
-    {"port", "/dev/ttyUSB12"},
+    {"port", "/dev/ttyUSB1"},
     {"flowcontrol", "hardware"}
 };
 

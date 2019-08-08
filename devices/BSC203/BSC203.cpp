@@ -237,7 +237,7 @@ void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest,
 {
     //Enabling channel
     set_channelenable(dest,foxtrot::devices::motor_channel_idents::channel_1, true);
-
+    
     auto data = get_move_request_header_data(distance, chan);
 
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE,data,dest);

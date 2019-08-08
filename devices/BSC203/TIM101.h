@@ -81,7 +81,7 @@ namespace foxtrot {
         void set_jog_parameters(destination dest, const jogparams& jogstructp);
         jogparams request_jog_parameters(destination dest);
         motor_status get_status_update(destination dest, bool print = true);
-        void set_position_counter(destination dest, const pos_counter_params& absparams);
+        void set_position_counter(destination dest, const pos_counter_params& poscountarams);
         pos_counter_params request_position_counter(destination dest);
     protected:
         void start_update_messages(destination dest);

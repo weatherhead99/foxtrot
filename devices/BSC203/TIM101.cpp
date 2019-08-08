@@ -39,27 +39,37 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
     _lg.Debug("update messages stopped");
     
+    
+    foxtrot::devices::motor_channel_idents channels[4] = {foxtrot::devices::motor_channel_idents::channel_1, foxtrot::devices::motor_channel_idents::channel_2,         foxtrot::devices::motor_channel_idents::channel_3, foxtrot::devices::motor_channel_idents::channel_4};
+    
     //Initialize movement parameters
     jogparams jogstruct;
     jogstruct.subMsgID = 0x0009;
     jogstruct.chanIndent = 0x01;
-    jogstruct.jogMode = 0x0002; //step
-    jogstruct.jogStepSize = 0x000000AA;
+    jogstruct.jogMode = 0x0002; //step mode
+    jogstruct.jogStepSize = 250;//Can be positive or negative
     jogstruct.jogStepRate = 0x000001F4;
     jogstruct.jogStepAccn = 0x000186A0;
-  
-    _lg.Debug("Initializing jog parameters");
-    set_jog_parameters(destination::sourceTIM101, jogstruct);
-    
+
     move_absolute_params absparams;
     absparams.subMsgID = 0x0007;
     absparams.chanIndent = 0x01;
     absparams.maxVoltage = 0x006E;
-    absparams.stepRate = 0x00000014;
+    absparams.stepRate = 0x000000AA;
     absparams.stepAccn = 0x000000F0;
     
+    _lg.Debug("Initializing jog parameters");
     _lg.Debug("Initializing move absolute parameters");
-    set_move_absolute_parameters(destination::sourceTIM101, absparams);
+    
+    for (auto c:channels)
+    {
+        cout << static_cast<short unsigned int>(c) << endl;
+        jogstruct.chanIndent = static_cast<short unsigned int>(c);
+        set_jog_parameters(destination::sourceTIM101, jogstruct);
+        absparams.chanIndent = static_cast<short unsigned int>(c);
+        set_move_absolute_parameters(destination::sourceTIM101, absparams);
+    }
+    
 }
 
 const std::string foxtrot::devices::TIM101::getDeviceTypeName() const
