@@ -96,6 +96,8 @@ def value_from_ft_variant(variant):
         return value_from_ft_struct(variant.structval)
     elif whichattr == "enumval":
         return value_from_ft_enum(variant.enumval)
+    elif whichattr == "tupleval":
+        return value_from_ft_tuple(variant.tupleval)
     else:
         raise ValueError("couldn't determine variant type")
 
@@ -115,6 +117,9 @@ def value_from_ft_struct(variant: ft_struct):
 def value_from_ft_enum(variant: ft_enum):
     return variant.enum_value
 
+def value_from_ft_tuple(variant: ft_tuple):
+    v = variant.value
+    return tuple( value_from_ft_variant(_) for _ in v)
 
 _simplevar_stringdescs_py_style = {(FLOAT_TYPE, 4): "float[4]",
                                    (FLOAT_TYPE, 8): "float[8]",

@@ -47,6 +47,6 @@ rttr::variant foxtrot::tuple_get(const rttr::variant& var, int n)
     {
         throw std::logic_error("tuple doesn't have a get method. Perhaps it isn't registered");
     }
-    return getmeth.invoke(var,n);
+    return getmeth.invoke(rttr::instance(),var,n);
 }
 

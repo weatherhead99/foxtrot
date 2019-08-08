@@ -36,7 +36,9 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
 {
     ft_variant* retval = resp.mutable_returnval();
     try{
-        *retval = get_variant_wire_type(in);
+        if(lg)
+            lg->strm(sl::trace) << "in is valid? " << in.is_valid() ;
+        *retval = get_variant_wire_type(in, lg);
     }
     catch(std::logic_error& err)
     {

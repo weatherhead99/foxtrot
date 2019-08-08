@@ -24,7 +24,11 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
 bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
 {
     if(!tp.is_template_instantiation())
+    {
+        if(lg)
+            lg->strm(sl::trace) << "type is not template instantiation";
         return false;
+    }
     auto tpname = tp.get_name().to_string();
     auto pos = tpname.find("std::tuple");
     if(lg)
@@ -193,10 +197,13 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
 ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
 {
     ft_tuple out;
-    
+    if(lg)
+        lg->strm(sl::trace) << "getting tuple wire type";
     
     //WARNING: does not work yet!!!
     auto sz = tuple_size(var.get_type());
+    if(lg)
+        lg->strm(sl::trace) << "tuple size: " << sz;
     for(int i=0; i < sz; i++)
     {
         rttr::variant element_value = foxtrot::tuple_get(var, i);
@@ -209,6 +216,12 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
+    if(lg)
+    {
+        lg->strm(sl::trace) << "var is valid? " << var.is_valid();
+        lg->strm(sl::trace) << "var type: " << var.get_type().get_name();
+    }
+    
     if(!var.is_valid())
         throw std::logic_error("get_variant_wire_type: got invalid variant to convert!");
     
@@ -218,26 +231,34 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
     
     if(tp.is_enumeration())
     {
+        if(lg)
+            lg->strm(sl::trace) << "enumeration logic";
         ft_enum* enumval = out.mutable_enumval();
         *enumval = get_enum_wire_type(var, lg);
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
+        if(lg)
+            lg->strm(sl::trace) << "struct logic";
         ft_struct* structval = out.mutable_structval();
         *structval = get_struct_wire_type(var, lg);
     }
     else if(is_tuple(tp))
     {
+        if(lg)
+            lg->strm(sl::trace) << "tuple logic";
         ft_tuple* tupleval = out.mutable_tupleval();
         *tupleval = get_tuple_wire_type(var, lg);
     }
-    else if(tp.is_class())
+    else if(tp.is_class() && tp != rttr::type::get<std::string>())
     {
         static std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
         throw std::logic_error(err_msg);
     }
     else
     {
+        if(lg)
+            lg->strm(sl::trace) << "simplevalue logic";
         ft_simplevariant* simplevarval = out.mutable_simplevar();
         *simplevarval = get_simple_variant_wire_type(var, lg);
     }
