@@ -14,6 +14,10 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
     if(meth_count > 0)
         return false;
 
+    unsigned constructor_count = tp.get_constructors().size();
+    if(constructor_count == 0)
+        return false;
+    
     return true;
 }
 
@@ -23,6 +27,8 @@ bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
         return false;
     auto tpname = tp.get_name().to_string();
     auto pos = tpname.find("std::tuple");
+    if(lg)
+        lg->strm(sl::debug) << "checking for std::tuple location" ;
     if(pos == std::string::npos)
         return false;
     return true;
@@ -186,11 +192,17 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
 
 ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
 {
-    if(!var.is_valid())
-        throw std::logic_error("got invalid variant to convert!");
+    ft_tuple out;
+    
     
     //WARNING: does not work yet!!!
-    ft_tuple out;
+    auto sz = tuple_size(var.get_type());
+    for(int i=0; i < sz; i++)
+    {
+        rttr::variant element_value = foxtrot::tuple_get(var, i);
+        ft_variant* varpt = out.add_value();
+        *varpt = get_variant_wire_type(element_value,lg);
+    }
     
     return out;
 }
@@ -198,7 +210,7 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
     if(!var.is_valid())
-        throw std::logic_error("got invalid variant to convert!");
+        throw std::logic_error("get_variant_wire_type: got invalid variant to convert!");
     
     ft_variant out;
     
@@ -209,14 +221,20 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
         ft_enum* enumval = out.mutable_enumval();
         *enumval = get_enum_wire_type(var, lg);
     }
-    else if(tp.is_class() && tp != rttr::type::get<std::string>())
+    else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
-        if(!is_POD_struct(tp))
-        {
-            throw std::logic_error("can't return a class which isn't a POD type");
-        }
         ft_struct* structval = out.mutable_structval();
         *structval = get_struct_wire_type(var, lg);
+    }
+    else if(is_tuple(tp))
+    {
+        ft_tuple* tupleval = out.mutable_tupleval();
+        *tupleval = get_tuple_wire_type(var, lg);
+    }
+    else if(tp.is_class())
+    {
+        static std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
+        throw std::logic_error(err_msg);
     }
     else
     {
@@ -361,6 +379,14 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
         *desc = describe_struct(tp);
         out.set_variant_type(variant_types::STRUCT_TYPE);
     }
+    else if(is_tuple(tp,lg))
+    {
+        if(lg)
+            lg->strm(sl::trace) << "type is tuple";
+        auto* desc = out.mutable_tuple_desc();
+        *desc = describe_tuple(tp);
+        out.set_variant_type(variant_types::TUPLE_TYPE);
+    }
     else
     {
         if(lg)
@@ -478,6 +504,15 @@ tuple_descriptor foxtrot::describe_tuple(const rttr::type& tp, Logging* lg)
     tuple_descriptor out;
 
     auto sz = foxtrot::tuple_size(tp);
+    
+    for(int i=0; i < sz; i++)
+    {
+        rttr::type element_type = foxtrot::tuple_element_type(tp,i);
+        if(lg)
+            lg->strm(sl::trace) << "element_type name: " << element_type.get_name();
+        variant_descriptor* desc = out.add_tuple_map();
+        *desc = foxtrot::describe_type(element_type, lg);
+    }
     
     return out;
 };

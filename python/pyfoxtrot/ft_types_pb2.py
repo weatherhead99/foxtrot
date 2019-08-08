@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0e\x66t_types.proto\"\xd2\x01\n\x12variant_descriptor\x12$\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x0e.variant_types\x12,\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x12.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12\'\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x12.struct_descriptor\x12#\n\tenum_desc\x18\x05 \x01(\x0b\x32\x10.enum_descriptor\"\xa6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12\x35\n\nstruct_map\x18\x02 \x03(\x0b\x32!.struct_descriptor.StructMapEntry\x1a\x45\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.variant_descriptor:\x02\x38\x01\"\x85\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12/\n\x08\x65num_map\x18\x02 \x03(\x0b\x32\x1d.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"{\n\nft_variant\x12&\n\tsimplevar\x18\x01 \x01(\x0b\x32\x11.ft_simplevariantH\x00\x12\x1f\n\tstructval\x18\x02 \x01(\x0b\x32\n.ft_structH\x00\x12\x1b\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x08.ft_enumH\x00\x42\x07\n\x05value\"\x88\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\rB\x07\n\x05value\"\x81\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x03(\x0b\x32\x15.ft_struct.ValueEntry\x1a\x39\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.ft_variant:\x02\x38\x01\"=\n\x07\x66t_enum\x12\x1e\n\x04\x64\x65sc\x18\x01 \x01(\x0b\x32\x10.enum_descriptor\x12\x12\n\nenum_value\x18\x02 \x01(\r*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*C\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x62\x06proto3')
+  serialized_pb=_b('\n\x0e\x66t_types.proto\"\xf9\x01\n\x12variant_descriptor\x12$\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x0e.variant_types\x12,\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x12.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12\'\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x12.struct_descriptor\x12#\n\tenum_desc\x18\x05 \x01(\x0b\x32\x10.enum_descriptor\x12%\n\ntuple_desc\x18\x06 \x01(\x0b\x32\x11.tuple_descriptor\"\xa6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12\x35\n\nstruct_map\x18\x02 \x03(\x0b\x32!.struct_descriptor.StructMapEntry\x1a\x45\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.variant_descriptor:\x02\x38\x01\"\x85\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12/\n\x08\x65num_map\x18\x02 \x03(\x0b\x32\x1d.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\":\n\x10tuple_descriptor\x12&\n\ttuple_map\x18\x01 \x03(\x0b\x32\x13.variant_descriptor\"\x9a\x01\n\nft_variant\x12&\n\tsimplevar\x18\x01 \x01(\x0b\x32\x11.ft_simplevariantH\x00\x12\x1f\n\tstructval\x18\x02 \x01(\x0b\x32\n.ft_structH\x00\x12\x1b\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x08.ft_enumH\x00\x12\x1d\n\x08tupleval\x18\x04 \x01(\x0b\x32\t.ft_tupleH\x00\x42\x07\n\x05value\"\x88\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\rB\x07\n\x05value\"\x81\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12$\n\x05value\x18\x02 \x03(\x0b\x32\x15.ft_struct.ValueEntry\x1a\x39\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x1a\n\x05value\x18\x02 \x01(\x0b\x32\x0b.ft_variant:\x02\x38\x01\"=\n\x07\x66t_enum\x12\x1e\n\x04\x64\x65sc\x18\x01 \x01(\x0b\x32\x10.enum_descriptor\x12\x12\n\nenum_value\x18\x02 \x01(\r\"&\n\x08\x66t_tuple\x12\x1a\n\x05value\x18\x02 \x03(\x0b\x32\x0b.ft_variant*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*S\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x12\x0e\n\nTUPLE_TYPE\x10\x03\x62\x06proto3')
 )
 
 _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
@@ -57,8 +57,8 @@ _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=995,
-  serialized_end=1110,
+  serialized_start=1166,
+  serialized_end=1281,
 )
 _sym_db.RegisterEnumDescriptor(_SIMPLEVALUE_TYPES)
 
@@ -81,11 +81,15 @@ _VARIANT_TYPES = _descriptor.EnumDescriptor(
       name='ENUM_TYPE', index=2, number=2,
       serialized_options=None,
       type=None),
+    _descriptor.EnumValueDescriptor(
+      name='TUPLE_TYPE', index=3, number=3,
+      serialized_options=None,
+      type=None),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1112,
-  serialized_end=1179,
+  serialized_start=1283,
+  serialized_end=1366,
 )
 _sym_db.RegisterEnumDescriptor(_VARIANT_TYPES)
 
@@ -99,6 +103,7 @@ VOID_TYPE = 5
 SIMPLEVAR_TYPE = 0
 STRUCT_TYPE = 1
 ENUM_TYPE = 2
+TUPLE_TYPE = 3
 
 
 
@@ -144,6 +149,13 @@ _VARIANT_DESCRIPTOR = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tuple_desc', full_name='variant_descriptor.tuple_desc', index=5,
+      number=6, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -157,7 +169,7 @@ _VARIANT_DESCRIPTOR = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=19,
-  serialized_end=229,
+  serialized_end=268,
 )
 
 
@@ -194,8 +206,8 @@ _STRUCT_DESCRIPTOR_STRUCTMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=329,
-  serialized_end=398,
+  serialized_start=368,
+  serialized_end=437,
 )
 
 _STRUCT_DESCRIPTOR = _descriptor.Descriptor(
@@ -231,8 +243,8 @@ _STRUCT_DESCRIPTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=232,
-  serialized_end=398,
+  serialized_start=271,
+  serialized_end=437,
 )
 
 
@@ -269,8 +281,8 @@ _ENUM_DESCRIPTOR_ENUMMAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=488,
-  serialized_end=534,
+  serialized_start=527,
+  serialized_end=573,
 )
 
 _ENUM_DESCRIPTOR = _descriptor.Descriptor(
@@ -306,8 +318,39 @@ _ENUM_DESCRIPTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=401,
-  serialized_end=534,
+  serialized_start=440,
+  serialized_end=573,
+)
+
+
+_TUPLE_DESCRIPTOR = _descriptor.Descriptor(
+  name='tuple_descriptor',
+  full_name='tuple_descriptor',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tuple_map', full_name='tuple_descriptor.tuple_map', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=575,
+  serialized_end=633,
 )
 
 
@@ -339,6 +382,13 @@ _FT_VARIANT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='tupleval', full_name='ft_variant.tupleval', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -354,8 +404,8 @@ _FT_VARIANT = _descriptor.Descriptor(
       name='value', full_name='ft_variant.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=536,
-  serialized_end=659,
+  serialized_start=636,
+  serialized_end=790,
 )
 
 
@@ -423,8 +473,8 @@ _FT_SIMPLEVARIANT = _descriptor.Descriptor(
       name='value', full_name='ft_simplevariant.value',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=662,
-  serialized_end=798,
+  serialized_start=793,
+  serialized_end=929,
 )
 
 
@@ -461,8 +511,8 @@ _FT_STRUCT_VALUEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=873,
-  serialized_end=930,
+  serialized_start=1004,
+  serialized_end=1061,
 )
 
 _FT_STRUCT = _descriptor.Descriptor(
@@ -498,8 +548,8 @@ _FT_STRUCT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=801,
-  serialized_end=930,
+  serialized_start=932,
+  serialized_end=1061,
 )
 
 
@@ -536,22 +586,56 @@ _FT_ENUM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=932,
-  serialized_end=993,
+  serialized_start=1063,
+  serialized_end=1124,
+)
+
+
+_FT_TUPLE = _descriptor.Descriptor(
+  name='ft_tuple',
+  full_name='ft_tuple',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='value', full_name='ft_tuple.value', index=0,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1126,
+  serialized_end=1164,
 )
 
 _VARIANT_DESCRIPTOR.fields_by_name['variant_type'].enum_type = _VARIANT_TYPES
 _VARIANT_DESCRIPTOR.fields_by_name['simplevalue_type'].enum_type = _SIMPLEVALUE_TYPES
 _VARIANT_DESCRIPTOR.fields_by_name['struct_desc'].message_type = _STRUCT_DESCRIPTOR
 _VARIANT_DESCRIPTOR.fields_by_name['enum_desc'].message_type = _ENUM_DESCRIPTOR
+_VARIANT_DESCRIPTOR.fields_by_name['tuple_desc'].message_type = _TUPLE_DESCRIPTOR
 _STRUCT_DESCRIPTOR_STRUCTMAPENTRY.fields_by_name['value'].message_type = _VARIANT_DESCRIPTOR
 _STRUCT_DESCRIPTOR_STRUCTMAPENTRY.containing_type = _STRUCT_DESCRIPTOR
 _STRUCT_DESCRIPTOR.fields_by_name['struct_map'].message_type = _STRUCT_DESCRIPTOR_STRUCTMAPENTRY
 _ENUM_DESCRIPTOR_ENUMMAPENTRY.containing_type = _ENUM_DESCRIPTOR
 _ENUM_DESCRIPTOR.fields_by_name['enum_map'].message_type = _ENUM_DESCRIPTOR_ENUMMAPENTRY
+_TUPLE_DESCRIPTOR.fields_by_name['tuple_map'].message_type = _VARIANT_DESCRIPTOR
 _FT_VARIANT.fields_by_name['simplevar'].message_type = _FT_SIMPLEVARIANT
 _FT_VARIANT.fields_by_name['structval'].message_type = _FT_STRUCT
 _FT_VARIANT.fields_by_name['enumval'].message_type = _FT_ENUM
+_FT_VARIANT.fields_by_name['tupleval'].message_type = _FT_TUPLE
 _FT_VARIANT.oneofs_by_name['value'].fields.append(
   _FT_VARIANT.fields_by_name['simplevar'])
 _FT_VARIANT.fields_by_name['simplevar'].containing_oneof = _FT_VARIANT.oneofs_by_name['value']
@@ -561,6 +645,9 @@ _FT_VARIANT.fields_by_name['structval'].containing_oneof = _FT_VARIANT.oneofs_by
 _FT_VARIANT.oneofs_by_name['value'].fields.append(
   _FT_VARIANT.fields_by_name['enumval'])
 _FT_VARIANT.fields_by_name['enumval'].containing_oneof = _FT_VARIANT.oneofs_by_name['value']
+_FT_VARIANT.oneofs_by_name['value'].fields.append(
+  _FT_VARIANT.fields_by_name['tupleval'])
+_FT_VARIANT.fields_by_name['tupleval'].containing_oneof = _FT_VARIANT.oneofs_by_name['value']
 _FT_SIMPLEVARIANT.oneofs_by_name['value'].fields.append(
   _FT_SIMPLEVARIANT.fields_by_name['dblval'])
 _FT_SIMPLEVARIANT.fields_by_name['dblval'].containing_oneof = _FT_SIMPLEVARIANT.oneofs_by_name['value']
@@ -580,89 +667,106 @@ _FT_STRUCT_VALUEENTRY.fields_by_name['value'].message_type = _FT_VARIANT
 _FT_STRUCT_VALUEENTRY.containing_type = _FT_STRUCT
 _FT_STRUCT.fields_by_name['value'].message_type = _FT_STRUCT_VALUEENTRY
 _FT_ENUM.fields_by_name['desc'].message_type = _ENUM_DESCRIPTOR
+_FT_TUPLE.fields_by_name['value'].message_type = _FT_VARIANT
 DESCRIPTOR.message_types_by_name['variant_descriptor'] = _VARIANT_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['struct_descriptor'] = _STRUCT_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['enum_descriptor'] = _ENUM_DESCRIPTOR
+DESCRIPTOR.message_types_by_name['tuple_descriptor'] = _TUPLE_DESCRIPTOR
 DESCRIPTOR.message_types_by_name['ft_variant'] = _FT_VARIANT
 DESCRIPTOR.message_types_by_name['ft_simplevariant'] = _FT_SIMPLEVARIANT
 DESCRIPTOR.message_types_by_name['ft_struct'] = _FT_STRUCT
 DESCRIPTOR.message_types_by_name['ft_enum'] = _FT_ENUM
+DESCRIPTOR.message_types_by_name['ft_tuple'] = _FT_TUPLE
 DESCRIPTOR.enum_types_by_name['simplevalue_types'] = _SIMPLEVALUE_TYPES
 DESCRIPTOR.enum_types_by_name['variant_types'] = _VARIANT_TYPES
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-variant_descriptor = _reflection.GeneratedProtocolMessageType('variant_descriptor', (_message.Message,), dict(
-  DESCRIPTOR = _VARIANT_DESCRIPTOR,
-  __module__ = 'ft_types_pb2'
+variant_descriptor = _reflection.GeneratedProtocolMessageType('variant_descriptor', (_message.Message,), {
+  'DESCRIPTOR' : _VARIANT_DESCRIPTOR,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:variant_descriptor)
-  ))
+  })
 _sym_db.RegisterMessage(variant_descriptor)
 
-struct_descriptor = _reflection.GeneratedProtocolMessageType('struct_descriptor', (_message.Message,), dict(
+struct_descriptor = _reflection.GeneratedProtocolMessageType('struct_descriptor', (_message.Message,), {
 
-  StructMapEntry = _reflection.GeneratedProtocolMessageType('StructMapEntry', (_message.Message,), dict(
-    DESCRIPTOR = _STRUCT_DESCRIPTOR_STRUCTMAPENTRY,
-    __module__ = 'ft_types_pb2'
+  'StructMapEntry' : _reflection.GeneratedProtocolMessageType('StructMapEntry', (_message.Message,), {
+    'DESCRIPTOR' : _STRUCT_DESCRIPTOR_STRUCTMAPENTRY,
+    '__module__' : 'ft_types_pb2'
     # @@protoc_insertion_point(class_scope:struct_descriptor.StructMapEntry)
-    ))
+    })
   ,
-  DESCRIPTOR = _STRUCT_DESCRIPTOR,
-  __module__ = 'ft_types_pb2'
+  'DESCRIPTOR' : _STRUCT_DESCRIPTOR,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:struct_descriptor)
-  ))
+  })
 _sym_db.RegisterMessage(struct_descriptor)
 _sym_db.RegisterMessage(struct_descriptor.StructMapEntry)
 
-enum_descriptor = _reflection.GeneratedProtocolMessageType('enum_descriptor', (_message.Message,), dict(
+enum_descriptor = _reflection.GeneratedProtocolMessageType('enum_descriptor', (_message.Message,), {
 
-  EnumMapEntry = _reflection.GeneratedProtocolMessageType('EnumMapEntry', (_message.Message,), dict(
-    DESCRIPTOR = _ENUM_DESCRIPTOR_ENUMMAPENTRY,
-    __module__ = 'ft_types_pb2'
+  'EnumMapEntry' : _reflection.GeneratedProtocolMessageType('EnumMapEntry', (_message.Message,), {
+    'DESCRIPTOR' : _ENUM_DESCRIPTOR_ENUMMAPENTRY,
+    '__module__' : 'ft_types_pb2'
     # @@protoc_insertion_point(class_scope:enum_descriptor.EnumMapEntry)
-    ))
+    })
   ,
-  DESCRIPTOR = _ENUM_DESCRIPTOR,
-  __module__ = 'ft_types_pb2'
+  'DESCRIPTOR' : _ENUM_DESCRIPTOR,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:enum_descriptor)
-  ))
+  })
 _sym_db.RegisterMessage(enum_descriptor)
 _sym_db.RegisterMessage(enum_descriptor.EnumMapEntry)
 
-ft_variant = _reflection.GeneratedProtocolMessageType('ft_variant', (_message.Message,), dict(
-  DESCRIPTOR = _FT_VARIANT,
-  __module__ = 'ft_types_pb2'
+tuple_descriptor = _reflection.GeneratedProtocolMessageType('tuple_descriptor', (_message.Message,), {
+  'DESCRIPTOR' : _TUPLE_DESCRIPTOR,
+  '__module__' : 'ft_types_pb2'
+  # @@protoc_insertion_point(class_scope:tuple_descriptor)
+  })
+_sym_db.RegisterMessage(tuple_descriptor)
+
+ft_variant = _reflection.GeneratedProtocolMessageType('ft_variant', (_message.Message,), {
+  'DESCRIPTOR' : _FT_VARIANT,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:ft_variant)
-  ))
+  })
 _sym_db.RegisterMessage(ft_variant)
 
-ft_simplevariant = _reflection.GeneratedProtocolMessageType('ft_simplevariant', (_message.Message,), dict(
-  DESCRIPTOR = _FT_SIMPLEVARIANT,
-  __module__ = 'ft_types_pb2'
+ft_simplevariant = _reflection.GeneratedProtocolMessageType('ft_simplevariant', (_message.Message,), {
+  'DESCRIPTOR' : _FT_SIMPLEVARIANT,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:ft_simplevariant)
-  ))
+  })
 _sym_db.RegisterMessage(ft_simplevariant)
 
-ft_struct = _reflection.GeneratedProtocolMessageType('ft_struct', (_message.Message,), dict(
+ft_struct = _reflection.GeneratedProtocolMessageType('ft_struct', (_message.Message,), {
 
-  ValueEntry = _reflection.GeneratedProtocolMessageType('ValueEntry', (_message.Message,), dict(
-    DESCRIPTOR = _FT_STRUCT_VALUEENTRY,
-    __module__ = 'ft_types_pb2'
+  'ValueEntry' : _reflection.GeneratedProtocolMessageType('ValueEntry', (_message.Message,), {
+    'DESCRIPTOR' : _FT_STRUCT_VALUEENTRY,
+    '__module__' : 'ft_types_pb2'
     # @@protoc_insertion_point(class_scope:ft_struct.ValueEntry)
-    ))
+    })
   ,
-  DESCRIPTOR = _FT_STRUCT,
-  __module__ = 'ft_types_pb2'
+  'DESCRIPTOR' : _FT_STRUCT,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:ft_struct)
-  ))
+  })
 _sym_db.RegisterMessage(ft_struct)
 _sym_db.RegisterMessage(ft_struct.ValueEntry)
 
-ft_enum = _reflection.GeneratedProtocolMessageType('ft_enum', (_message.Message,), dict(
-  DESCRIPTOR = _FT_ENUM,
-  __module__ = 'ft_types_pb2'
+ft_enum = _reflection.GeneratedProtocolMessageType('ft_enum', (_message.Message,), {
+  'DESCRIPTOR' : _FT_ENUM,
+  '__module__' : 'ft_types_pb2'
   # @@protoc_insertion_point(class_scope:ft_enum)
-  ))
+  })
 _sym_db.RegisterMessage(ft_enum)
+
+ft_tuple = _reflection.GeneratedProtocolMessageType('ft_tuple', (_message.Message,), {
+  'DESCRIPTOR' : _FT_TUPLE,
+  '__module__' : 'ft_types_pb2'
+  # @@protoc_insertion_point(class_scope:ft_tuple)
+  })
+_sym_db.RegisterMessage(ft_tuple)
 
 
 _STRUCT_DESCRIPTOR_STRUCTMAPENTRY._options = None

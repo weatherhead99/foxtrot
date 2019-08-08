@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <string>
+#include <tuple>
 
 #include <foxtrot/server/Device.h>
 
@@ -62,7 +63,9 @@ namespace foxtrot
         
         dummyStruct returns_custom_struct();
         
-	
+        std::tuple<int,std::string> returns_int_str_tuple();
+        std::tuple<double,int,double> returns_unregistered_tuple();
+        
 	std::vector<unsigned char> getCountStream(int n);
     std::vector<double> getRandomVector(int n);
 

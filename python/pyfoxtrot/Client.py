@@ -36,6 +36,7 @@ class Client:
         self._stub = exptserveStub(self._channel)
 
         self._servdescribe = self._stub.DescribeServer(empty())
+        _check_repl_err(self._servdescribe)
         self._comment = self._servdescribe.servcomment
 
         self._enum_descs = []

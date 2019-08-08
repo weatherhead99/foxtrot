@@ -7,18 +7,19 @@ std::size_t foxtrot::tuple_size(const rttr::type& tp)
     auto sizeprop = tp.get_property("size");
     if(!sizeprop.is_valid())
         throw std::logic_error("size property isn't valid. Perhaps tuple type isn't registered");
+    if(!sizeprop.is_static())
+        throw std::logic_error("size property isn't static. Perhaps tuple type isn't registered");
     
-    auto sizevar = tp.get_property_value("size");
-    if(!sizevar.is_valid())
+    rttr::variant sizeret = sizeprop.get_value(rttr::instance());
+    
+    if(sizeret.is_type<std::size_t>())
     {
-        throw std::logic_error("tuple doesn't have a size. Perhaps it isn't registered");
+        const std::size_t& sz = sizeret.get_value<std::size_t>();
+        return sz;
     }
     
+    throw std::logic_error("size property returned the wrong type. Perhaps tuple type isn't registered");
     
-    const std::size_t& sz = sizevar.get_value<std::size_t>();
-    
-    
-    return sz;
 }
 
 rttr::type foxtrot::tuple_element_type(const rttr::type& tp, int n)

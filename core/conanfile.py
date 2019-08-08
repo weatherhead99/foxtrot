@@ -7,10 +7,11 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                        metaclass=ftbase.FoxtrotCppMeta):
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
-    exports_sources = "CMakeLists.txt", "src/*.cpp", \
+    exports_sources = "CMakeLists.txt", "src/*.cpp", "src/*.cc", \
                       "include/foxtrot/*.h", "include/foxtrot/*.hpp", \
+                      "include/foxtrot/*.hh", \
                       "cmake/*.cmake", "cmake/*.cmake.in", \
-                      "proto/*.proto", "share/*.in"
+                      "proto/*.proto", "share/*.in", "devprogs/*"
     requires = "boost_log%s" % ftbase.bbcs, \
         "boost_thread%s" % ftbase.bbcs, \
         "boost_program_options%s" % ftbase.bbcs, \
