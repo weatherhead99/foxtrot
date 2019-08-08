@@ -17,7 +17,7 @@ from .TypeConversion import string_describe_ft_variant
 from .foxtrot_pb2 import empty, capability_argument, broadcast_notification
 from .foxtrot_pb2 import chunk_request, capability_request, VALUE_READONLY
 from .foxtrot_pb2 import VALUE_READWRITE, ACTION, STREAM, UCHAR_TYPE, USHORT_TYPE
-from .foxtrot_pb2 import UINT_TYPE, BDOUBLE_TYPE
+from .foxtrot_pb2 import UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
 from .ft_types_pb2 import ENUM_TYPE
 from .EnumCreator import define_enum
 
