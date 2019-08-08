@@ -34,6 +34,6 @@ namespace foxtrot{
     std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr);
     struct_descriptor describe_struct(const rttr::type& tp, Logging* lg=nullptr);
     enum_descriptor describe_enum(const rttr::type& tp, Logging* lg=nullptr);
-    
+    tuple_descriptor describe_tuple(const rttr::type& tp, Logging* lg=nullptr);
     
 }

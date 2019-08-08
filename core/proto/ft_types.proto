@@ -76,7 +76,6 @@ message ft_enum {
 }
 
 message ft_tuple {
-    tuple_descriptor desc = 1;
     repeated ft_variant value = 2;
 }
 
