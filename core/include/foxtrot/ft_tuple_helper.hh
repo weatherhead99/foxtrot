@@ -5,9 +5,9 @@ namespace foxtrot
 {
     namespace detail
     {
-        
+ 
     template<typename T, int N>
-    struct tuple_getter_helper
+    struct tuple_helper
     {
         static rttr::variant get(const T& in, int n)
         {
@@ -15,22 +15,9 @@ namespace foxtrot
             {
                 return std::get<N>(in);
             }
-            return tuple_getter_helper<T, N-1>::get(in,n);
+            return tuple_helper<T, N-1>::get(in,n);
         };
-    };
-
-    template<typename T>
-    struct tuple_getter_helper<T,-1>
-    {
-        static rttr::variant get(const T&, int n)
-        {
-            throw std::logic_error("invalid tuple index");
-        }
-    };
-    
-    template<typename T, int N>
-    struct tuple_type_helper
-    {
+        
         static rttr::type type(int n)
         {
             if(n == N)
@@ -38,19 +25,23 @@ namespace foxtrot
                 using elemT = typename std::tuple_element<N,T>::type;
                 return rttr::type::get<elemT>();
             }
-            return tuple_type_helper<T, N-1>::type(n);
-        };
+            return tuple_helper<T, N-1>::type(n);
+        }
     };
-    
+
     template<typename T>
-    struct tuple_type_helper<T,-1>
+    struct tuple_helper<T,-1>
     {
-        static rttr::type type(int n)
+        static rttr::variant get(const T&, int n) {f();};
+        static rttr::type type(int n) {f();};
+        static void f()
         {
             throw std::logic_error("invalid tuple index");
         }
+        
     };
     
+
     
     }
     
@@ -58,13 +49,13 @@ template<typename T>
 rttr::variant tuple_get(const T& in, int n)
 {
     constexpr int N = std::tuple_size<T>::value;
-    return detail::tuple_getter_helper<T,N-1>::get(in,n);
+    return detail::tuple_helper<T,N-1>::get(in,n);
 }
 template<typename T>
 rttr::type tuple_element_type(int n)
 {
     constexpr int N = std::tuple_size<T>::value;
-    return detail::tuple_type_helper<T,N-1>::type(n);
+    return detail::tuple_helper<T,N-1>::type(n);
 }
 
 template<typename T>
