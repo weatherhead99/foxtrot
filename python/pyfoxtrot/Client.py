@@ -254,6 +254,8 @@ class Capability:
                 structstr = '<%dH' % (len(rawbytes) // 2)
             elif dtp == UINT_TYPE:
                 structstr = '<%dI' % (len(rawbytes) // 4)
+            elif dtp == IINT_TYPE:
+                structstr = '<%di' % (len(rawbytes) // 4)
             elif dtp == BDOUBLE_TYPE:
                 structstr = '<%dd' % (len(rawbytes) // 8)
             else:
