@@ -16,6 +16,18 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
     return true;
 }
 
+bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
+{
+    if(!tp.is_template_instantiation())
+        return false;
+    auto tpname = tp.get_name().to_string();
+    auto pos = tpname.find("std::tuple");
+    if(pos == std::string::npos)
+        return false;
+    return true;
+    
+}
+
 
 template<typename T, typename Tcall>
 auto get_from_variant(const rttr::variant& var, Tcall callable, bool& success) ->
@@ -170,6 +182,17 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
     
     return out;
 };
+
+ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
+{
+    if(!var.is_valid())
+        throw std::logic_error("got invalid variant to convert!");
+    
+    //WARNING: does not work yet!!!
+    ft_tuple out;
+    
+    return out;
+}
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
 {

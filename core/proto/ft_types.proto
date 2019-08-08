@@ -38,11 +38,17 @@ message enum_descriptor
     map<string, uint32> enum_map = 2;
 }
 
+message tuple_descriptor
+{
+    repeated variant_descriptor tuple_map = 1;
+}
+
 message ft_variant {
     oneof value {
         ft_simplevariant simplevar = 1;
         ft_struct structval = 2;
         ft_enum enumval = 3;
+        ft_tuple tupleval = 4;
     }
 }
 
@@ -68,3 +74,9 @@ message ft_enum {
     enum_descriptor desc = 1;
     uint32 enum_value = 2;
 }
+
+message ft_tuple {
+    tuple_descriptor desc = 1;
+    repeated ft_variant value = 2;
+}
+
