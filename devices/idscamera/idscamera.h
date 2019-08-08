@@ -23,6 +23,7 @@ namespace foxtrot{
             double exposure;
             double pixelClock;
             double frameRate;
+            unsigned long long time_stamp_mus;
         };
         
         class idscamera : public Device
@@ -47,24 +48,15 @@ namespace foxtrot{
             int getHeight();
             int getBitsperPixel();
             Image getSingleImage();
+            void captureImage();
             metadata getImageMetadata();
-            std::vector<int> getImageRawData();
-            void getSingleImageAlone();
+            std::vector<unsigned char> getImageRawData();
             void AddImageToSequence(std::shared_ptr<Image> image); 
             void printoutImage();
             void waitEvent(unsigned timeout_ms, const int event); //it only works on Linux
             std::tuple<int,int> getImageSize();
             void setColorMode(const int mode);
-            
-            //properties
-            Image camImage;
-            double exposure;
-            double pixelClock;
-            double frameRate;
-            int camWidth;
-            int camHeight;
-            int camBitsperPixel;
-            
+  
         private:
             //templates
             template<typename T, typename Callable>
@@ -86,10 +78,19 @@ namespace foxtrot{
             };
             
             //properties
+            bool iscaptured;
             uint32_t _camhandle;
             foxtrot::Logging _lg;
             char * getLastUsedCapturePointer();
             std::map<const char*,std::shared_ptr<Image>> _ring_buffered_images;
+            Image camImage;
+            double exposure;
+            double pixelClock;
+            double frameRate;
+            int camWidth;
+            int camHeight;
+            int camBitsperPixel;
+            
         };
         
     }

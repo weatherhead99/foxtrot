@@ -64,6 +64,7 @@ idscamera::idscamera(const uint32_t*  camid)
     pixelClock = getPixelClock();
     frameRate = getFrameRate(); //it always returns 0
     camImage = Image(camWidth, camHeight, camBitsperPixel);
+    iscaptured = false;
 };
 
 
@@ -202,7 +203,7 @@ void idscamera::AddImageToSequence(std::shared_ptr<Image> image)
     
 }
 
-void idscamera::getSingleImageAlone()
+void idscamera::captureImage()
 {
     auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
     
@@ -215,15 +216,19 @@ void idscamera::getSingleImageAlone()
     check_ueye_error(is_FreezeVideo(_camhandle,IS_WAIT));
     
     camImage = Image(*imptr);
+    
+    iscaptured = true;
 }
 
 foxtrot::devices::metadata idscamera::getImageMetadata()
 {
+    if (iscaptured == false)
+    {
+        _lg.Error("No image has been captured");
+        throw DeviceError("No image has been captured");
+    };
     
     foxtrot::devices::metadata image_meta;
-    
-    //auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
-    //getSingleImageAlone(imptr);
     
     image_meta.width = camImage.getWidth();
     image_meta.height = camImage.getHeight();
@@ -236,13 +241,15 @@ foxtrot::devices::metadata idscamera::getImageMetadata()
     
 }
 
-std::vector<int> idscamera::getImageRawData()
+std::vector<unsigned char> idscamera::getImageRawData()
 {
+    if (iscaptured == false)
+    {
+        _lg.Error("No image has been captured");
+        throw DeviceError("No image has been captured");
+    };
     
-    std::vector<int> outvec;
-    
-    //auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
-    //getSingleImageAlone(imptr);
+    std::vector<unsigned char> outvec;
     
     outvec.resize(camImage.datasize);
     std::copy(camImage.rawData.begin(), camImage.rawData.end(), outvec.begin());
@@ -309,14 +316,6 @@ RTTR_REGISTRATION{
     rttr::registration::class_<idscamera>("foxtrot::devices::idscamera")
     .constructor<const uint32_t* const>()
     
-    //properties
-    .property("pixelClock", &idscamera::pixelClock)
-    .property("frameRate", &idscamera::frameRate)
-    .property("exposure", &idscamera::exposure)
-    .property("camWidth", &idscamera::camWidth)
-    .property("camHeight", &idscamera::camHeight)
-    .property("camBitsperPixel", &idscamera::camBitsperPixel)
-    
     //methods
     .method("getPixelClock", &idscamera::getPixelClock)
     .method("setPixelClock", &idscamera::setPixelClock)
@@ -326,7 +325,7 @@ RTTR_REGISTRATION{
     (parameter_names("exposure"))
     .method("getWidth", &idscamera::getWidth)
     .method("getHeight", &idscamera::getHeight)
-    .method("getSingleImageAlone", &idscamera::getSingleImageAlone)
+    .method("captureImage", &idscamera::captureImage)
     .method("getImageMetadata", &idscamera::getImageMetadata)
     .method("getImageRawData", &idscamera::getImageRawData)
     .method("getFrameRate", &idscamera::getFrameRate)

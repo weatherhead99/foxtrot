@@ -44,17 +44,17 @@ int main(int argc,char** argv)
     idscam.printoutImage();*/
     
     //USING JUST THE SINGLE IMAGE
-    /*idscam.getSingleImageAlone();
+    /*idscam.captureImage();
     idscam.printoutImage();*/
     
     
     //USING THE METADATA AND RAWDATA FUNCTIONS FOR FOXTROT
-    /*idscam.getSingleImageAlone();
+    idscam.captureImage();
     foxtrot::devices::metadata meta = idscam.getImageMetadata();
     cout << meta.width << endl;
     
-    std::vector<int> raw = idscam.getImageRawData();
-    cout << raw[100] << endl;*/
+    std::vector<unsigned char> raw = idscam.getImageRawData();
+    cout << static_cast<unsigned>(raw[100]) << endl;
     
     cout << "Test finished." << endl;
 }
