@@ -25,11 +25,12 @@ Image::Image(const foxtrot::devices::Image& copyim): _lg("Image")
     width = copyim.width;
     height = copyim.height;
     bitsperpixel = copyim.bitsperpixel;
+    currentbufferid = copyim.currentbufferid;
     datasize = copyim.datasize;
     rawData.resize(datasize);
     std::copy(copyim.rawData.begin(), copyim.rawData.end(), rawData.begin());
 
-    //lockMemory();
+    lockMemory();
 
 }
 

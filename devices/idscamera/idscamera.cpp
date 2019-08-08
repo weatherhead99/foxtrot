@@ -63,7 +63,14 @@ idscamera::idscamera(const uint32_t*  camid)
     exposure = getExposure();
     pixelClock = getPixelClock();
     frameRate = getFrameRate(); //it always returns 0
+    camImage = Image(camWidth, camHeight, camBitsperPixel);
 };
+
+
+const std::string idscamera::getDeviceTypeName() const
+{
+  return "idscamera";
+}
 
 idscamera::~idscamera()
 {
@@ -120,6 +127,16 @@ void idscamera::setExposure(double exp)
 double idscamera::getExposure() 
 {
     return read_ueye_parameter_command<double>(is_Exposure, IS_EXPOSURE_CMD_GET_EXPOSURE);
+}
+
+int idscamera::getWidth()
+{
+    return camWidth;
+}
+
+int idscamera::getHeight()
+{
+    return camHeight;
 }
 
 char * idscamera::getLastUsedCapturePointer()
@@ -185,28 +202,32 @@ void idscamera::AddImageToSequence(std::shared_ptr<Image> image)
     
 }
 
-void idscamera::getSingleImageAlone(std::shared_ptr<Image> image)
+void idscamera::getSingleImageAlone()
 {
-    auto imdat = reinterpret_cast<char*>(image->rawData.data());
+    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
+    
+    auto imdat = reinterpret_cast<char*>(imptr->rawData.data());
     int pid;
     
-    check_ueye_error(is_SetAllocatedImageMem(_camhandle, image->width, image->height, image->bitsperpixel, imdat, &pid));
-    image->currentbufferid = pid;
-    check_ueye_error(is_SetImageMem(_camhandle, imdat, image->currentbufferid));
+    check_ueye_error(is_SetAllocatedImageMem(_camhandle, imptr->width, imptr->height, imptr->bitsperpixel, imdat, &pid));
+    imptr->currentbufferid = pid;
+    check_ueye_error(is_SetImageMem(_camhandle, imdat, imptr->currentbufferid));
     check_ueye_error(is_FreezeVideo(_camhandle,IS_WAIT));
+    
+    camImage = Image(*imptr);
 }
 
-foxtrot::devices::metadata idscamera::getImageMetadata(int camWidth, int camHeight, int camBitsperPixel)
+foxtrot::devices::metadata idscamera::getImageMetadata()
 {
     
     foxtrot::devices::metadata image_meta;
     
-    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
-    getSingleImageAlone(imptr);
+    //auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
+    //getSingleImageAlone(imptr);
     
-    image_meta.width = imptr->getWidth();
-    image_meta.height = imptr->getHeight();
-    image_meta.bitsPerPixel = imptr->bitsperpixel;
+    image_meta.width = camImage.getWidth();
+    image_meta.height = camImage.getHeight();
+    image_meta.bitsPerPixel = camImage.bitsperpixel;
     image_meta.exposure = exposure;
     image_meta.pixelClock = pixelClock;
     image_meta.frameRate = frameRate;
@@ -215,16 +236,16 @@ foxtrot::devices::metadata idscamera::getImageMetadata(int camWidth, int camHeig
     
 }
 
-std::vector<int> idscamera::getImageRawData(int camWidth, int camHeight, int camBitsperPixel)
+std::vector<int> idscamera::getImageRawData()
 {
     
     std::vector<int> outvec;
     
-    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
-    getSingleImageAlone(imptr);
+    //auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
+    //getSingleImageAlone(imptr);
     
-    outvec.resize(imptr->datasize);
-    std::copy(imptr->rawData.begin(), imptr->rawData.end(), outvec.begin());
+    outvec.resize(camImage.datasize);
+    std::copy(camImage.rawData.begin(), camImage.rawData.end(), outvec.begin());
     
     return outvec;
 }
@@ -260,22 +281,22 @@ int idscamera::getBitsperPixel()
 }
 
 
-void idscamera::printoutImage(std::shared_ptr<foxtrot::devices::Image> image)
+void idscamera::printoutImage()
 {
     static int nfiles;
     nfiles++;
     std::ofstream outfile;
     outfile.open("imageprint_" + std::to_string(nfiles) + ".txt");
     int cnt = 0;
-    for (int i = 0; i < image->datasize; i++)
+    for (int i = 0; i < camImage.datasize; i++)
     {
         cnt++;
-        if (cnt % image->width == 0)
+        if (cnt % camImage.width == 0)
         {
-            outfile << static_cast<unsigned>(image->rawData[i]) << "\n";
+            outfile << static_cast<unsigned>(camImage.rawData[i]) << "\n";
         } else 
         {
-            outfile << static_cast<unsigned>(image->rawData[i]) << ", ";
+            outfile << static_cast<unsigned>(camImage.rawData[i]) << ", ";
         }
     }
     outfile.close();
@@ -303,10 +324,11 @@ RTTR_REGISTRATION{
     .method("getExposure", &idscamera::getExposure)
     .method("setExposure", &idscamera::setExposure)
     (parameter_names("exposure"))
+    .method("getWidth", &idscamera::getWidth)
+    .method("getHeight", &idscamera::getHeight)
+    .method("getSingleImageAlone", &idscamera::getSingleImageAlone)
     .method("getImageMetadata", &idscamera::getImageMetadata)
-    (parameter_names("width", "height", "bits per pixel"))
     .method("getImageRawData", &idscamera::getImageRawData)
-    (parameter_names("width", "height", "bits per pixel"))
     .method("getFrameRate", &idscamera::getFrameRate)
     .method("setFrameRate", &idscamera::setFrameRate)
     (parameter_names("frame rate per second"))

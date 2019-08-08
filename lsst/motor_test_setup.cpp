@@ -10,7 +10,7 @@ using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
 
 //Motor intialization (Serial ports)
 foxtrot::parameterset sport_params_tim {
-    {"port", "/dev/ttyUSB11"},
+    {"port", "/dev/ttyUSB10"},
     {"flowcontrol", "hardware"}
 };
 

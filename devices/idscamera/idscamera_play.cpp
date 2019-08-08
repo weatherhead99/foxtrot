@@ -40,25 +40,21 @@ int main(int argc,char** argv)
         
     };
     foxtrot::devices::Image im_single = idscam.getSingleImage();
-    idscam.printoutImage(std::make_shared<foxtrot::devices::Image>(im_single));*/
+    idscam.camImage = foxtrot::devices::Image(im_single);
+    idscam.printoutImage();*/
     
     //USING JUST THE SINGLE IMAGE
-    /*auto imptr = std::make_shared<foxtrot::devices::Image>(idscam.camWidth, idscam.camHeight, idscam.camBitsperPixel);
-    idscam.getSingleImageAlone(imptr);
-    idscam.printoutImage(imptr);
+    /*idscam.getSingleImageAlone();
+    idscam.printoutImage();*/
     
-    cout << "the first one is over." << endl;
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    auto imptr2 = std::make_shared<foxtrot::devices::Image>(idscam.camWidth, idscam.camHeight, idscam.camBitsperPixel);
-    idscam.getSingleImageAlone(imptr2);
-    idscam.printoutImage(imptr2);*/
     
     //USING THE METADATA AND RAWDATA FUNCTIONS FOR FOXTROT
-    foxtrot::devices::metadata meta = idscam.getImageMetadata(idscam.camWidth, idscam.camHeight, idscam.camBitsperPixel);
+    /*idscam.getSingleImageAlone();
+    foxtrot::devices::metadata meta = idscam.getImageMetadata();
     cout << meta.width << endl;
     
-    std::vector<int> raw = idscam.getImageRawData(idscam.camWidth, idscam.camHeight, idscam.camBitsperPixel);
-    cout << raw[100] << endl;
+    std::vector<int> raw = idscam.getImageRawData();
+    cout << raw[100] << endl;*/
     
     cout << "Test finished." << endl;
 }

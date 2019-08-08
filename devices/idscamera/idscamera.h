@@ -13,7 +13,8 @@ namespace foxtrot{
         {
             void check_ueye_error(int32_t ret, foxtrot::Logging* lg=nullptr);
         }
-        
+
+	
         #pragma pack (push,1)
         struct metadata {
             int width;
@@ -35,24 +36,28 @@ namespace foxtrot{
             ~idscamera();
             
             //methods
+            const std::string getDeviceTypeName() const override;
             uint32_t getPixelClock();
             void setPixelClock(double pclock);
             double getExposure();
             void setExposure(double exp);
             void setFrameRate(double exp);
             double getFrameRate();
+            int getWidth();
+            int getHeight();
+            int getBitsperPixel();
             Image getSingleImage();
-            metadata getImageMetadata(int camWidth, int camHeight, int camBitsperPixel);
-            std::vector<int> getImageRawData(int camWidth, int camHeight, int camBitsperPixel);
-            void getSingleImageAlone(std::shared_ptr<Image> image);
+            metadata getImageMetadata();
+            std::vector<int> getImageRawData();
+            void getSingleImageAlone();
             void AddImageToSequence(std::shared_ptr<Image> image); 
-            void printoutImage(std::shared_ptr<Image> image);
+            void printoutImage();
             void waitEvent(unsigned timeout_ms, const int event); //it only works on Linux
             std::tuple<int,int> getImageSize();
             void setColorMode(const int mode);
-            int getBitsperPixel();
             
             //properties
+            Image camImage;
             double exposure;
             double pixelClock;
             double frameRate;
@@ -61,6 +66,7 @@ namespace foxtrot{
             int camBitsperPixel;
             
         private:
+            //templates
             template<typename T, typename Callable>
             T read_ueye_parameter_command(Callable fun, uint32_t command)
             {
@@ -79,6 +85,7 @@ namespace foxtrot{
                         reinterpret_cast<void*>(const_cast<T*>(&val)), sizeof(val)), &_lg);
             };
             
+            //properties
             uint32_t _camhandle;
             foxtrot::Logging _lg;
             char * getLastUsedCapturePointer();
