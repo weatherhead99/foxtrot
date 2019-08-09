@@ -3,7 +3,7 @@
 #include <ueye.h>
 #include <iostream>
 #include <foxtrot/DeviceError.h>
-
+#include <ctime>
 #include <thread>
 #include <chrono>
 
@@ -65,6 +65,7 @@ idscamera::idscamera(const uint32_t*  camid)
     frameRate = getFrameRate(); //it always returns 0
     camImage = Image(camWidth, camHeight, camBitsperPixel);
     iscaptured = false;
+    firstTimeStamp = 0;
 };
 
 
@@ -203,19 +204,28 @@ void idscamera::AddImageToSequence(std::shared_ptr<Image> image)
     
 }
 
+
 void idscamera::captureImage()
 {
-    auto imptr = std::make_shared<foxtrot::devices::Image>(camWidth, camHeight, camBitsperPixel);
-    
+    auto imptr = &camImage;
     auto imdat = reinterpret_cast<char*>(imptr->rawData.data());
     int pid;
-    
+    if (iscaptured)
+    {
+        check_ueye_error(is_FreeImageMem(_camhandle, imdat, imptr->currentbufferid));
+    }
     check_ueye_error(is_SetAllocatedImageMem(_camhandle, imptr->width, imptr->height, imptr->bitsperpixel, imdat, &pid));
     imptr->currentbufferid = pid;
     check_ueye_error(is_SetImageMem(_camhandle, imdat, imptr->currentbufferid));
     check_ueye_error(is_FreezeVideo(_camhandle,IS_WAIT));
-    
-    camImage = Image(*imptr);
+
+    //Take the first timestamp of the program
+    if (iscaptured == false)
+    {
+        UEYEIMAGEINFO infostruct;
+        check_ueye_error( is_GetImageInfo(_camhandle,camImage.currentbufferid,&infostruct,sizeof(infostruct)));
+        firstTimeStamp = infostruct.u64TimestampDevice / 10;
+    }
     
     iscaptured = true;
 }
@@ -236,6 +246,8 @@ foxtrot::devices::metadata idscamera::getImageMetadata()
     image_meta.exposure = exposure;
     image_meta.pixelClock = pixelClock;
     image_meta.frameRate = frameRate;
+    image_meta.timestamp = getTimestamp() - firstTimeStamp;
+    image_meta.dateCaptured = getDateCaptured();
     
     return image_meta;
     
@@ -287,6 +299,46 @@ int idscamera::getBitsperPixel()
     
 }
 
+unsigned long long idscamera::getTimestamp()
+{
+    if (iscaptured == false)
+    {
+        _lg.Error("You must capture an image before accessing its timestamp");
+        throw DeviceError("You must capture an image before accessing its timestamp");
+    };
+    
+    UEYEIMAGEINFO infostruct;
+    check_ueye_error( is_GetImageInfo(_camhandle,camImage.currentbufferid,&infostruct,sizeof(infostruct)));
+    unsigned long long timestamp = infostruct.u64TimestampDevice / 10;
+
+    return timestamp;
+}
+
+date idscamera::getDateCaptured()
+{
+    if (iscaptured == false)
+    {
+        _lg.Error("You must capture an image before accessing the date");
+        throw DeviceError("You must capture an image before accessing teh date");
+    };
+    
+    foxtrot::devices::date dateCap;
+    
+    UEYEIMAGEINFO infostruct;
+    check_ueye_error( is_GetImageInfo(_camhandle,camImage.currentbufferid,&infostruct,sizeof(infostruct)));
+    auto systime = infostruct.TimestampSystem;
+    
+    dateCap.year = systime.wYear;
+    dateCap.month = systime.wMonth;
+    dateCap.day = systime.wDay;
+    dateCap.hour = systime.wHour;
+    dateCap.minute = systime.wMinute;
+    dateCap.second = systime.wSecond;
+    dateCap.millisecond = systime.wMilliseconds;
+
+    return dateCap;
+}
+
 
 void idscamera::printoutImage()
 {
@@ -335,6 +387,18 @@ RTTR_REGISTRATION{
     .method("getBitsperPixel", &idscamera::getBitsperPixel);
     
     //Custom structs
+    using foxtrot::devices::date;
+    registration::class_<date>("foxtrot::devices::date")
+    .constructor()(policy::ctor::as_object)
+    .property("year", &date::year)
+    .property("month", &date::month)
+    .property("day", &date::day)
+    .property("hour", &date::hour)
+    .property("minute", &date::minute)
+    .property("second", &date::second)
+    .property("millisecond", &date::millisecond);
+
+    
     using foxtrot::devices::metadata;
     registration::class_<metadata>("foxtrot::devices::metadata")
     .constructor()(policy::ctor::as_object)
@@ -343,6 +407,8 @@ RTTR_REGISTRATION{
     .property("bitsPerPixel", &metadata::bitsPerPixel)
     .property("exposure", &metadata::exposure)
     .property("pixelClock", &metadata::pixelClock)
-    .property("frameRate", &metadata::frameRate);
+    .property("frameRate", &metadata::frameRate)
+    .property("timestamp", &metadata::timestamp)
+    .property("dateCaptured", &metadata::dateCaptured);
     
 }

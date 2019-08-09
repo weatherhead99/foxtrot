@@ -13,7 +13,17 @@ namespace foxtrot{
         {
             void check_ueye_error(int32_t ret, foxtrot::Logging* lg=nullptr);
         }
-
+        
+        #pragma pack (push,1)
+        struct date {
+            int year;
+            int month;
+            int day;
+            int hour;
+            int minute;
+            int second;
+            int millisecond;
+        };
 	
         #pragma pack (push,1)
         struct metadata {
@@ -23,7 +33,8 @@ namespace foxtrot{
             double exposure;
             double pixelClock;
             double frameRate;
-            unsigned long long time_stamp_mus;
+            unsigned long long timestamp; //microseconds
+            date dateCaptured;
         };
         
         class idscamera : public Device
@@ -56,6 +67,11 @@ namespace foxtrot{
             void waitEvent(unsigned timeout_ms, const int event); //it only works on Linux
             std::tuple<int,int> getImageSize();
             void setColorMode(const int mode);
+            unsigned long long getTimestamp();
+            date getDateCaptured();
+            
+            //properties
+            Image camImage;
   
         private:
             //templates
@@ -83,13 +99,13 @@ namespace foxtrot{
             foxtrot::Logging _lg;
             char * getLastUsedCapturePointer();
             std::map<const char*,std::shared_ptr<Image>> _ring_buffered_images;
-            Image camImage;
             double exposure;
             double pixelClock;
             double frameRate;
             int camWidth;
             int camHeight;
             int camBitsperPixel;
+            int firstTimeStamp;
             
         };
         
