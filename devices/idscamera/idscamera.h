@@ -33,7 +33,7 @@ namespace foxtrot{
             double exposure;
             double pixelClock;
             double frameRate;
-            unsigned long long timestamp; //microseconds
+            unsigned int timestamp; //microseconds
             date dateCaptured;
         };
         
@@ -67,7 +67,7 @@ namespace foxtrot{
             void waitEvent(unsigned timeout_ms, const int event); //it only works on Linux
             std::tuple<int,int> getImageSize();
             void setColorMode(const int mode);
-            unsigned long long getTimestamp();
+            unsigned int getTimestamp();
             date getDateCaptured();
             
             //properties
@@ -105,7 +105,7 @@ namespace foxtrot{
             int camWidth;
             int camHeight;
             int camBitsperPixel;
-            int firstTimeStamp;
+            unsigned int firstTimeStamp;
             
         };
         

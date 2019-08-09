@@ -45,7 +45,7 @@ int main(int argc,char** argv)
     
     
     //USING THE METADATA AND RAWDATA FUNCTIONS FOR FOXTROT
-    for (int i = 0; i < 1000; i++)
+    for (int i = 0; i < 10; i++)
     {
         idscam.captureImage();
         foxtrot::devices::metadata meta = idscam.getImageMetadata();

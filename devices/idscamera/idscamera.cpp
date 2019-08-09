@@ -299,7 +299,7 @@ int idscamera::getBitsperPixel()
     
 }
 
-unsigned long long idscamera::getTimestamp()
+unsigned int idscamera::getTimestamp()
 {
     if (iscaptured == false)
     {
@@ -309,7 +309,7 @@ unsigned long long idscamera::getTimestamp()
     
     UEYEIMAGEINFO infostruct;
     check_ueye_error( is_GetImageInfo(_camhandle,camImage.currentbufferid,&infostruct,sizeof(infostruct)));
-    unsigned long long timestamp = infostruct.u64TimestampDevice / 10;
+    unsigned int timestamp = infostruct.u64TimestampDevice / 10;
 
     return timestamp;
 }
