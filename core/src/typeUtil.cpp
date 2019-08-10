@@ -497,13 +497,13 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out = simplevalue_types::BOOL_TYPE;
         else if(is_type_any_of<float,double>(tp))
             out =  simplevalue_types::FLOAT_TYPE;
-        else if(is_type_any_of<char, short, int, long>(tp))
+        else if(is_type_any_of<char, short, int, long, long long>(tp))
         {
             if(lg)
                 lg->strm(sl::trace) << "type is INT";
             out = simplevalue_types::INT_TYPE;
         }
-        else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long>(tp))
+        else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>(tp))
             out =  simplevalue_types::UNSIGNED_TYPE;
         else
         {
