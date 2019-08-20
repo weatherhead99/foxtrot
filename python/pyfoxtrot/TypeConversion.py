@@ -39,7 +39,7 @@ def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
         _ensure_type(val, int)
         out.intval = val
     elif svt == simplevalue_types.Value("UNSIGNED_TYPE"):
-        _ensure_type(val, int, lambda s: s > 0, "must be unsigned")
+        _ensure_type(val, int, lambda s: s >= 0, "must be unsigned")
         out.uintval = val
     elif svt == simplevalue_types.Value("BOOL_TYPE"):
         _ensure_type(val, bool)
