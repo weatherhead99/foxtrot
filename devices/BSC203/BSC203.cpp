@@ -1,7 +1,6 @@
 #include <foxtrot/DeviceError.h>
 #include "BSC203.h"
 
-
 #define DEST_HOST_CONTROLLER 0x01
 #define DEST_RACK_CONTROLLER 0x11
 #define DEST_BAY_1 0x21
@@ -52,9 +51,9 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
         else
         {
             _lg.Debug("bay is unused: " + std::to_string(i));
-        };
+        }
 
-    };
+    }
 
     require_digoutputs(foxtrot::devices::destination::rack);
 

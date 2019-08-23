@@ -164,16 +164,16 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
     //TIM101 only cares about the active channel, if you address a jog move instruction to a non-active channel, nothing will happen
     transmit_message(bsc203_opcodes::MGMSG_PZMOT_MOVE_JOG, static_cast<unsigned char>(chan), static_cast<unsigned char>(direction), dest);
 
-    //The stop_update_messages of the constructor blocks the serial port. For that reason we need to turn it on again.
-    start_update_messages(dest);
-
-    //Waiting for MOVE COMPLETE HEADER
-    while(!check_code_serport(bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED))
-    {
-        //_lg.strm(sl::trace) << "looking for move complete...";
-    }
-
-    stop_update_messages(dest);
+//     //The stop_update_messages of the constructor blocks the serial port. For that reason we need to turn it on again.
+//     start_update_messages(dest);
+// 
+//     //Waiting for MOVE COMPLETE HEADER
+//     while(!check_code_serport(bsc203_opcodes::MGMSG_PZMOT_MOVE_COMPLETED))
+//     {
+//         //_lg.strm(sl::trace) << "looking for move complete...";
+//     }
+// 
+//     stop_update_messages(dest);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     _serport->flush();
