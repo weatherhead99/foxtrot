@@ -3,7 +3,7 @@
         
 def _check_repl_err(repl):
     if not repl.HasField('err'):
-        return
+        return repl
 
     if repl.err.tp == 0:
         raise RuntimeError(repl.err.msg)

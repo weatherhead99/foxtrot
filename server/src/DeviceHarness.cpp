@@ -128,6 +128,8 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
         
         if(value_type == type::get<unsigned char>())
             out.set_vecrettp(byte_data_types::UCHAR_TYPE);
+	else if(value_type == type::get<char>())
+	    out.set_vecrettp(byte_data_types::CHAR_TYPE);
         else if(value_type == type::get<unsigned short>())
             out.set_vecrettp(byte_data_types::USHORT_TYPE);
         else if(value_type == type::get<unsigned>())

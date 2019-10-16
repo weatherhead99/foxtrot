@@ -35,7 +35,7 @@ class Client:
             self._channel = grpc.secure_channel(connstr, creds)
         self._stub = exptserveStub(self._channel)
 
-        self._servdescribe = self._stub.DescribeServer(empty())
+        self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
         self._comment = self._servdescribe.servcomment
 
         self._enum_descs = []
