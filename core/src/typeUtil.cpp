@@ -131,6 +131,9 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
             throw std::logic_error("couldn't find matching mapping for variant with type: " + var.get_type().get_name().to_string());
         }
     }
+    
+    throw std::logic_error("invalid control path reached! This is an internal foxtrot bug");
+    
 };
 
 
