@@ -208,32 +208,32 @@ DESCRIPTOR.message_types_by_name['auth_response'] = _AUTH_RESPONSE
 DESCRIPTOR.message_types_by_name['auth_confirm'] = _AUTH_CONFIRM
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-auth_request = _reflection.GeneratedProtocolMessageType('auth_request', (_message.Message,), dict(
-  DESCRIPTOR = _AUTH_REQUEST,
-  __module__ = 'ft_auth_pb2'
+auth_request = _reflection.GeneratedProtocolMessageType('auth_request', (_message.Message,), {
+  'DESCRIPTOR' : _AUTH_REQUEST,
+  '__module__' : 'ft_auth_pb2'
   # @@protoc_insertion_point(class_scope:auth_request)
-  ))
+  })
 _sym_db.RegisterMessage(auth_request)
 
-auth_challenge = _reflection.GeneratedProtocolMessageType('auth_challenge', (_message.Message,), dict(
-  DESCRIPTOR = _AUTH_CHALLENGE,
-  __module__ = 'ft_auth_pb2'
+auth_challenge = _reflection.GeneratedProtocolMessageType('auth_challenge', (_message.Message,), {
+  'DESCRIPTOR' : _AUTH_CHALLENGE,
+  '__module__' : 'ft_auth_pb2'
   # @@protoc_insertion_point(class_scope:auth_challenge)
-  ))
+  })
 _sym_db.RegisterMessage(auth_challenge)
 
-auth_response = _reflection.GeneratedProtocolMessageType('auth_response', (_message.Message,), dict(
-  DESCRIPTOR = _AUTH_RESPONSE,
-  __module__ = 'ft_auth_pb2'
+auth_response = _reflection.GeneratedProtocolMessageType('auth_response', (_message.Message,), {
+  'DESCRIPTOR' : _AUTH_RESPONSE,
+  '__module__' : 'ft_auth_pb2'
   # @@protoc_insertion_point(class_scope:auth_response)
-  ))
+  })
 _sym_db.RegisterMessage(auth_response)
 
-auth_confirm = _reflection.GeneratedProtocolMessageType('auth_confirm', (_message.Message,), dict(
-  DESCRIPTOR = _AUTH_CONFIRM,
-  __module__ = 'ft_auth_pb2'
+auth_confirm = _reflection.GeneratedProtocolMessageType('auth_confirm', (_message.Message,), {
+  'DESCRIPTOR' : _AUTH_CONFIRM,
+  '__module__' : 'ft_auth_pb2'
   # @@protoc_insertion_point(class_scope:auth_confirm)
-  ))
+  })
 _sym_db.RegisterMessage(auth_confirm)
 
 

@@ -87,6 +87,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     //TODO: error handling here
         auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
         auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
+        _lg.strm(sl::trace) << "ftretval is valid? " << ftretval.is_valid();
 
         set_retval_from_variant(ftretval, repl, &_lg);
 

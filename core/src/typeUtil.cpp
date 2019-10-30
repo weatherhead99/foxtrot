@@ -1,5 +1,6 @@
 #include <foxtrot/typeUtil.h>
 #include <foxtrot/Logging.h>
+#include <foxtrot/ft_tuple_helper.hh>
 
 using namespace foxtrot;
 
@@ -13,7 +14,23 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
     if(meth_count > 0)
         return false;
 
+    unsigned constructor_count = tp.get_constructors().size();
+    if(constructor_count == 0)
+        return false;
+    
     return true;
+}
+
+bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
+{
+    if(!tp.get_metadata("tuplemeta").is_valid())
+    {
+        if(lg)
+            lg->strm(sl::debug) << "no tuplemeta";
+        return false;
+    }
+    return true;
+
 }
 
 
@@ -174,10 +191,36 @@ ft_enum foxtrot::get_enum_wire_type(const rttr::variant& var, Logging* lg)
     return out;
 };
 
+ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
+{
+    ft_tuple out;
+    if(lg)
+        lg->strm(sl::trace) << "getting tuple wire type";
+    
+    //WARNING: does not work yet!!!
+    auto sz = tuple_size(var.get_type());
+    if(lg)
+        lg->strm(sl::trace) << "tuple size: " << sz;
+    for(int i=0; i < sz; i++)
+    {
+        rttr::variant element_value = foxtrot::tuple_get(var, i);
+        ft_variant* varpt = out.add_value();
+        *varpt = get_variant_wire_type(element_value,lg);
+    }
+    
+    return out;
+}
+
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
+    if(lg)
+    {
+        lg->strm(sl::trace) << "var is valid? " << var.is_valid();
+        lg->strm(sl::trace) << "var type: " << var.get_type().get_name();
+    }
+    
     if(!var.is_valid())
-        throw std::logic_error("got invalid variant to convert!");
+        throw std::logic_error("get_variant_wire_type: got invalid variant to convert!");
     
     ft_variant out;
     
@@ -185,20 +228,34 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
     
     if(tp.is_enumeration())
     {
+        if(lg)
+            lg->strm(sl::trace) << "enumeration logic";
         ft_enum* enumval = out.mutable_enumval();
         *enumval = get_enum_wire_type(var, lg);
     }
-    else if(tp.is_class() && tp != rttr::type::get<std::string>())
+    else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
-        if(!is_POD_struct(tp))
-        {
-            throw std::logic_error("can't return a class which isn't a POD type");
-        }
+        if(lg)
+            lg->strm(sl::trace) << "struct logic";
         ft_struct* structval = out.mutable_structval();
         *structval = get_struct_wire_type(var, lg);
     }
+    else if(is_tuple(tp,lg))
+    {
+        if(lg)
+            lg->strm(sl::trace) << "tuple logic";
+        ft_tuple* tupleval = out.mutable_tupleval();
+        *tupleval = get_tuple_wire_type(var, lg);
+    }
+    else if(tp.is_class() && tp != rttr::type::get<std::string>())
+    {
+        std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
+        throw std::logic_error(err_msg);
+    }
     else
     {
+        if(lg)
+            lg->strm(sl::trace) << "simplevalue logic";
         ft_simplevariant* simplevarval = out.mutable_simplevar();
         *simplevarval = get_simple_variant_wire_type(var, lg);
     }
@@ -340,6 +397,14 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
         *desc = describe_struct(tp);
         out.set_variant_type(variant_types::STRUCT_TYPE);
     }
+    else if(is_tuple(tp,lg))
+    {
+        if(lg)
+            lg->strm(sl::trace) << "type is tuple";
+        auto* desc = out.mutable_tuple_desc();
+        *desc = describe_tuple(tp);
+        out.set_variant_type(variant_types::TUPLE_TYPE);
+    }
     else
     {
         if(lg)
@@ -435,13 +500,13 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out = simplevalue_types::BOOL_TYPE;
         else if(is_type_any_of<float,double>(tp))
             out =  simplevalue_types::FLOAT_TYPE;
-        else if(is_type_any_of<char, short, int, long>(tp))
+        else if(is_type_any_of<char, short, int, long, long long>(tp))
         {
             if(lg)
                 lg->strm(sl::trace) << "type is INT";
             out = simplevalue_types::INT_TYPE;
         }
-        else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long>(tp))
+        else if(is_type_any_of<unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>(tp))
             out =  simplevalue_types::UNSIGNED_TYPE;
         else
         {
@@ -452,3 +517,20 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
     return std::make_pair(out,size);
 };
 
+tuple_descriptor foxtrot::describe_tuple(const rttr::type& tp, Logging* lg)
+{
+    tuple_descriptor out;
+
+    auto sz = foxtrot::tuple_size(tp);
+    
+    for(int i=0; i < sz; i++)
+    {
+        rttr::type element_type = foxtrot::tuple_element_type(tp,i);
+        if(lg)
+            lg->strm(sl::trace) << "element_type name: " << element_type.get_name();
+        variant_descriptor* desc = out.add_tuple_map();
+        *desc = foxtrot::describe_type(element_type, lg);
+    }
+    
+    return out;
+};

@@ -1110,117 +1110,117 @@ DESCRIPTOR.enum_types_by_name['byte_data_types'] = _BYTE_DATA_TYPES
 DESCRIPTOR.enum_types_by_name['server_commands'] = _SERVER_COMMANDS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-empty = _reflection.GeneratedProtocolMessageType('empty', (_message.Message,), dict(
-  DESCRIPTOR = _EMPTY,
-  __module__ = 'foxtrot_pb2'
+empty = _reflection.GeneratedProtocolMessageType('empty', (_message.Message,), {
+  'DESCRIPTOR' : _EMPTY,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.empty)
-  ))
+  })
 _sym_db.RegisterMessage(empty)
 
-devcapability = _reflection.GeneratedProtocolMessageType('devcapability', (_message.Message,), dict(
-  DESCRIPTOR = _DEVCAPABILITY,
-  __module__ = 'foxtrot_pb2'
+devcapability = _reflection.GeneratedProtocolMessageType('devcapability', (_message.Message,), {
+  'DESCRIPTOR' : _DEVCAPABILITY,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.devcapability)
-  ))
+  })
 _sym_db.RegisterMessage(devcapability)
 
-devdescribe = _reflection.GeneratedProtocolMessageType('devdescribe', (_message.Message,), dict(
-  DESCRIPTOR = _DEVDESCRIBE,
-  __module__ = 'foxtrot_pb2'
+devdescribe = _reflection.GeneratedProtocolMessageType('devdescribe', (_message.Message,), {
+  'DESCRIPTOR' : _DEVDESCRIBE,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.devdescribe)
-  ))
+  })
 _sym_db.RegisterMessage(devdescribe)
 
-servdescribe = _reflection.GeneratedProtocolMessageType('servdescribe', (_message.Message,), dict(
+servdescribe = _reflection.GeneratedProtocolMessageType('servdescribe', (_message.Message,), {
 
-  DevsAttachedEntry = _reflection.GeneratedProtocolMessageType('DevsAttachedEntry', (_message.Message,), dict(
-    DESCRIPTOR = _SERVDESCRIBE_DEVSATTACHEDENTRY,
-    __module__ = 'foxtrot_pb2'
+  'DevsAttachedEntry' : _reflection.GeneratedProtocolMessageType('DevsAttachedEntry', (_message.Message,), {
+    'DESCRIPTOR' : _SERVDESCRIBE_DEVSATTACHEDENTRY,
+    '__module__' : 'foxtrot_pb2'
     # @@protoc_insertion_point(class_scope:foxtrot.servdescribe.DevsAttachedEntry)
-    ))
+    })
   ,
-  DESCRIPTOR = _SERVDESCRIBE,
-  __module__ = 'foxtrot_pb2'
+  'DESCRIPTOR' : _SERVDESCRIBE,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.servdescribe)
-  ))
+  })
 _sym_db.RegisterMessage(servdescribe)
 _sym_db.RegisterMessage(servdescribe.DevsAttachedEntry)
 
-capability_argument = _reflection.GeneratedProtocolMessageType('capability_argument', (_message.Message,), dict(
-  DESCRIPTOR = _CAPABILITY_ARGUMENT,
-  __module__ = 'foxtrot_pb2'
+capability_argument = _reflection.GeneratedProtocolMessageType('capability_argument', (_message.Message,), {
+  'DESCRIPTOR' : _CAPABILITY_ARGUMENT,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.capability_argument)
-  ))
+  })
 _sym_db.RegisterMessage(capability_argument)
 
-capability_request = _reflection.GeneratedProtocolMessageType('capability_request', (_message.Message,), dict(
-  DESCRIPTOR = _CAPABILITY_REQUEST,
-  __module__ = 'foxtrot_pb2'
+capability_request = _reflection.GeneratedProtocolMessageType('capability_request', (_message.Message,), {
+  'DESCRIPTOR' : _CAPABILITY_REQUEST,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.capability_request)
-  ))
+  })
 _sym_db.RegisterMessage(capability_request)
 
-capability_response = _reflection.GeneratedProtocolMessageType('capability_response', (_message.Message,), dict(
-  DESCRIPTOR = _CAPABILITY_RESPONSE,
-  __module__ = 'foxtrot_pb2'
+capability_response = _reflection.GeneratedProtocolMessageType('capability_response', (_message.Message,), {
+  'DESCRIPTOR' : _CAPABILITY_RESPONSE,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.capability_response)
-  ))
+  })
 _sym_db.RegisterMessage(capability_response)
 
-telemetry = _reflection.GeneratedProtocolMessageType('telemetry', (_message.Message,), dict(
-  DESCRIPTOR = _TELEMETRY,
-  __module__ = 'foxtrot_pb2'
+telemetry = _reflection.GeneratedProtocolMessageType('telemetry', (_message.Message,), {
+  'DESCRIPTOR' : _TELEMETRY,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.telemetry)
-  ))
+  })
 _sym_db.RegisterMessage(telemetry)
 
-chunk_request = _reflection.GeneratedProtocolMessageType('chunk_request', (_message.Message,), dict(
-  DESCRIPTOR = _CHUNK_REQUEST,
-  __module__ = 'foxtrot_pb2'
+chunk_request = _reflection.GeneratedProtocolMessageType('chunk_request', (_message.Message,), {
+  'DESCRIPTOR' : _CHUNK_REQUEST,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.chunk_request)
-  ))
+  })
 _sym_db.RegisterMessage(chunk_request)
 
-datachunk = _reflection.GeneratedProtocolMessageType('datachunk', (_message.Message,), dict(
-  DESCRIPTOR = _DATACHUNK,
-  __module__ = 'foxtrot_pb2'
+datachunk = _reflection.GeneratedProtocolMessageType('datachunk', (_message.Message,), {
+  'DESCRIPTOR' : _DATACHUNK,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.datachunk)
-  ))
+  })
 _sym_db.RegisterMessage(datachunk)
 
-servercommand_request = _reflection.GeneratedProtocolMessageType('servercommand_request', (_message.Message,), dict(
-  DESCRIPTOR = _SERVERCOMMAND_REQUEST,
-  __module__ = 'foxtrot_pb2'
+servercommand_request = _reflection.GeneratedProtocolMessageType('servercommand_request', (_message.Message,), {
+  'DESCRIPTOR' : _SERVERCOMMAND_REQUEST,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.servercommand_request)
-  ))
+  })
 _sym_db.RegisterMessage(servercommand_request)
 
-serverrequest_return = _reflection.GeneratedProtocolMessageType('serverrequest_return', (_message.Message,), dict(
-  DESCRIPTOR = _SERVERREQUEST_RETURN,
-  __module__ = 'foxtrot_pb2'
+serverrequest_return = _reflection.GeneratedProtocolMessageType('serverrequest_return', (_message.Message,), {
+  'DESCRIPTOR' : _SERVERREQUEST_RETURN,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.serverrequest_return)
-  ))
+  })
 _sym_db.RegisterMessage(serverrequest_return)
 
-serverflag = _reflection.GeneratedProtocolMessageType('serverflag', (_message.Message,), dict(
-  DESCRIPTOR = _SERVERFLAG,
-  __module__ = 'foxtrot_pb2'
+serverflag = _reflection.GeneratedProtocolMessageType('serverflag', (_message.Message,), {
+  'DESCRIPTOR' : _SERVERFLAG,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.serverflag)
-  ))
+  })
 _sym_db.RegisterMessage(serverflag)
 
-serverflaglist = _reflection.GeneratedProtocolMessageType('serverflaglist', (_message.Message,), dict(
-  DESCRIPTOR = _SERVERFLAGLIST,
-  __module__ = 'foxtrot_pb2'
+serverflaglist = _reflection.GeneratedProtocolMessageType('serverflaglist', (_message.Message,), {
+  'DESCRIPTOR' : _SERVERFLAGLIST,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.serverflaglist)
-  ))
+  })
 _sym_db.RegisterMessage(serverflaglist)
 
-broadcast_notification = _reflection.GeneratedProtocolMessageType('broadcast_notification', (_message.Message,), dict(
-  DESCRIPTOR = _BROADCAST_NOTIFICATION,
-  __module__ = 'foxtrot_pb2'
+broadcast_notification = _reflection.GeneratedProtocolMessageType('broadcast_notification', (_message.Message,), {
+  'DESCRIPTOR' : _BROADCAST_NOTIFICATION,
+  '__module__' : 'foxtrot_pb2'
   # @@protoc_insertion_point(class_scope:foxtrot.broadcast_notification)
-  ))
+  })
 _sym_db.RegisterMessage(broadcast_notification)
 
 

@@ -1,9 +1,9 @@
-from .ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
-from pyfoxtrot.ft_types_pb2 import simplevalue_types
-from pyfoxtrot.ft_types_pb2 import variant_descriptor
-from .ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE
-from .ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE
-from .ft_types_pb2 import STRING_TYPE, VOID_TYPE, FLOAT_TYPE
+from pyfoxtrot.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
+from pyfoxtrot.ft_types_pb2 import simplevalue_types, variant_types
+from pyfoxtrot.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor
+from pyfoxtrot.ft_types_pb2 import tuple_descriptor, ft_tuple
+from .ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE
+from .ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 
 def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
@@ -70,7 +70,6 @@ def ft_struct_from_value(val: dict,
     
     return out
 
-
 def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
     out = ft_enum(desc=descriptor.enum_desc)
     if isinstance(val, str):
@@ -97,6 +96,8 @@ def value_from_ft_variant(variant):
         return value_from_ft_struct(variant.structval)
     elif whichattr == "enumval":
         return value_from_ft_enum(variant.enumval)
+    elif whichattr == "tupleval":
+        return value_from_ft_tuple(variant.tupleval)
     else:
         raise ValueError("couldn't determine variant type")
 
@@ -116,6 +117,9 @@ def value_from_ft_struct(variant: ft_struct):
 def value_from_ft_enum(variant: ft_enum):
     return variant.enum_value
 
+def value_from_ft_tuple(variant: ft_tuple):
+    v = variant.value
+    return tuple( value_from_ft_variant(_) for _ in v)
 
 _simplevar_stringdescs_py_style = {(FLOAT_TYPE, 4): "float[4]",
                                    (FLOAT_TYPE, 8): "float[8]",
@@ -146,4 +150,7 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
     elif descriptor.variant_type == STRUCT_TYPE:
         struct_name = descriptor.struct_desc.struct_name.replace("::", "_")
         return "struct[%s]" % struct_name
+    elif descriptor.variant_type == TUPLE_TYPE:
+        types = ",".join(string_describe_ft_variant(_) for _ in descriptor.tuple_desc.tuple_map)
+        return "tuple[%s]" % types
     return typestr

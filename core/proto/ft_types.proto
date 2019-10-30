@@ -15,6 +15,7 @@ enum variant_types
     SIMPLEVAR_TYPE = 0;
     STRUCT_TYPE = 1;
     ENUM_TYPE = 2;
+    TUPLE_TYPE = 3;
 }
 
 message variant_descriptor
@@ -24,6 +25,7 @@ message variant_descriptor
     uint32 simplevalue_sizeof = 3;
     struct_descriptor struct_desc = 4;
     enum_descriptor enum_desc = 5;
+    tuple_descriptor tuple_desc = 6;
 }
 
 message struct_descriptor
@@ -38,11 +40,17 @@ message enum_descriptor
     map<string, uint32> enum_map = 2;
 }
 
+message tuple_descriptor
+{
+    repeated variant_descriptor tuple_map = 1;
+}
+
 message ft_variant {
     oneof value {
         ft_simplevariant simplevar = 1;
         ft_struct structval = 2;
         ft_enum enumval = 3;
+        ft_tuple tupleval = 4;
     }
 }
 
@@ -68,3 +76,8 @@ message ft_enum {
     enum_descriptor desc = 1;
     uint32 enum_value = 2;
 }
+
+message ft_tuple {
+    repeated ft_variant value = 2;
+}
+

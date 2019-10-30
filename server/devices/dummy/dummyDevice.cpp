@@ -9,6 +9,7 @@
 #include <foxtrot/DeviceError.h>
 
 #include <foxtrot/devices/dummyDevice.h>
+#include <foxtrot/ft_tuple_helper.hh>
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
@@ -166,7 +167,22 @@ foxtrot::devices::dummyStruct foxtrot::devices::dummyDevice::returns_custom_stru
 }
 
 
+std::tuple<int,std::string> foxtrot::devices::dummyDevice::returns_int_str_tuple()
+{
+    return std::make_tuple(0x1337,"hello");
+}
 
+
+std::tuple<double,int,double> foxtrot::devices::dummyDevice::returns_unregistered_tuple()
+{
+    return std::make_tuple(3.14,2,5.18);
+}
+
+
+std::pair<int, double> foxtrot::devices::dummyDevice::returns_pair()
+{
+    return std::make_pair(1,1.0);
+}
 
 void foxtrot::devices::dummyDevice::doNothing()
 {
@@ -211,7 +227,11 @@ RTTR_REGISTRATION
  .method("returns_custom_struct", &dummyDevice::returns_custom_struct)
  .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
  .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
- ;
+ .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
+ .method("returns_pair", &dummyDevice::returns_pair);
+
+ foxtrot::register_tuple<std::pair<int,double>>();
+ foxtrot::register_tuple<std::tuple<int,std::string>>();
  
  using foxtrot::devices::dummyEnum;
  using foxtrot::devices::dummyStruct;
