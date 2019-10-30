@@ -13,7 +13,7 @@ api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel,
            version=buildtools_version)
 
 
-createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=True,
+createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=False,
                                   update=True, build_modes=["missing"])
 
 curdir = os.path.abspath(os.curdir)

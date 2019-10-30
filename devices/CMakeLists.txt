@@ -117,8 +117,10 @@ target_link_libraries(tim_play PUBLIC foxtrot_devices)
 add_executable(bsc_play BSC203/bsc_play.cpp)
 target_link_libraries(bsc_play PUBLIC foxtrot_devices)
 
-add_executable(idscamera_play idscamera/idscamera_play.cpp)
-target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
+if(${ueye_FOUND})
+  add_executable(idscamera_play idscamera/idscamera_play.cpp)
+  target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
+endif()
 
 install(TARGETS foxtrot_devices 
         EXPORT foxtrot_devices
