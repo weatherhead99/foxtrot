@@ -137,8 +137,9 @@ service exptserve
     rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
     rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
     rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
-    rpc CreateStreamBatch(stream_batch_request) returns (stream_batch_response);
-    rpc ListStreamBatch(empty) returns (streambatchlist);
+    rpc CreateStreamThread(stream_thread_request) returns (stream_thread_response);
+    rpc ListStreamThread(empty) returns (streamthreadlist);
+    rpc DestroyStreamThread(stream_thread_request) returns (stream_thread_response);
     rpc CreateStream(stream_registration_request) returns (stream_registration_response);
     rpc ListStreams(empty) returns (streamlist);
     rpc ReceiveStream(stream stream_control) returns (stream capability_response);
