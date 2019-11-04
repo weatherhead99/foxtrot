@@ -35,8 +35,8 @@ namespace foxtrot{
 class ServerImpl 
 {
 public:
-    ServerImpl(const std::string& servcomment, DeviceHarness& harness);
-    ServerImpl(const std::string& servcomment, DeviceHarness& harness, const std::string& connstr);
+    ServerImpl(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness);
+    ServerImpl(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness, const std::string& connstr);
     
     void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
     void setup_auth(const std::string& credsfile, int creds_validity_seconds);
@@ -78,7 +78,7 @@ private:
     foxtrot::exptserve::AsyncService _service;
     
     std::string _servcomment;
-    DeviceHarness& _harness;
+    std::shared_ptr<DeviceHarness> _harness;
     
     std::string default_channel_;
     std::string default_title_;

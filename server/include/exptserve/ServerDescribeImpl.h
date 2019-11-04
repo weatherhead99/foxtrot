@@ -15,7 +15,7 @@ namespace foxtrot
     
  struct ServerDescribeLogic
  {
-    ServerDescribeLogic(const std::string& comment, DeviceHarness& harness);
+    ServerDescribeLogic(const std::string& comment, std::shared_ptr<DeviceHarness> harness);
      
   typedef empty reqtp;
   typedef servdescribe repltp;
@@ -28,7 +28,7 @@ namespace foxtrot
   
  private:
   std::string _servcomment;
-  DeviceHarness& _harness;
+  std::shared_ptr<DeviceHarness> _harness;
   Logging _lg;
   
  };

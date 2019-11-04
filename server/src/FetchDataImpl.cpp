@@ -6,7 +6,7 @@
 
 #include "FetchDataImpl.h"
 
-foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
+foxtrot::FetchDataLogic::FetchDataLogic(std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _harness(harness), _lg("FetchDataLogic")
 {
 }
@@ -21,7 +21,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     try
     {
-     dev = _harness.GetDevice(req.devid());   
+     dev = _harness->GetDevice(req.devid());   
     }
     catch(std::out_of_range& err)
     {
@@ -60,7 +60,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
         vargs.push_back(outarg);
     }
     
-    auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
+    auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
     auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
     
     if(!ftretval.is_sequential_container())

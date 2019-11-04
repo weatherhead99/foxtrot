@@ -14,7 +14,7 @@ using std::endl;
 
 using namespace foxtrot;
 
-foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(DeviceHarness& harness)
+foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness)
 : _harness(harness), _lg("InvokeCapabilityLogic")
 {
 }
@@ -39,7 +39,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     _lg.Debug("capability requested is: " + req.capname() );
     
     try{
-        dev = _harness.GetDevice(devid);    
+        dev = _harness->GetDevice(devid);    
     }
     catch(std::out_of_range& err)
     {
@@ -85,7 +85,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
     try {
     //TODO: error handling here
-        auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
+        auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
         auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
         _lg.strm(sl::trace) << "ftretval is valid? " << ftretval.is_valid();
 

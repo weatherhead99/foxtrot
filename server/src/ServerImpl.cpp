@@ -21,13 +21,13 @@
 using std::string;
 using namespace foxtrot;
 
-foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, foxtrot::DeviceHarness& harness)
+foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051"),
 _serverflags{new flagmap}
 {
 }
 
-ServerImpl::ServerImpl(const string& servcomment, DeviceHarness& harness, const string& connstr)
+ServerImpl::ServerImpl(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
 : ServerImpl(servcomment,harness)
 {
   _connstr = connstr;
