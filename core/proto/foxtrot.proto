@@ -5,30 +5,10 @@ option java_package = "io.foxtrot";
 import "ft_error.proto";
 import "ft_types.proto";
 import "ft_auth.proto";
+import "ft_streams.proto";
+import "ft_capability.proto";
 
 message empty {}
-
-enum capability_types
-{
-    VALUE_READONLY = 0;
-    VALUE_READWRITE = 1;
-    ACTION = 2;
-    STREAM = 3;
-}
-
-enum byte_data_types
-{
-    UCHAR_TYPE = 0;
-    CHAR_TYPE = 1;
-    USHORT_TYPE = 2;
-    UINT_TYPE = 3;
-    ULONG_TYPE = 4;
-    SHORT_TYPE = 5;
-    IINT_TYPE = 6;
-    LONG_TYPE = 7;
-    BFLOAT_TYPE =8;
-    BDOUBLE_TYPE = 9;
-}
 
 
 enum server_commands
@@ -37,26 +17,6 @@ enum server_commands
     ChangeDebugLevel = 1;
 }
 
-enum stream_control_commands
-{
-    stop = 0;
-}
-
-
-message devcapability
-{
-    capability_types tp = 1;
-    string capname = 2;
-    repeated string argnames = 3;
-    repeated variant_descriptor argtypes = 4;
-    //TODO: allow for return of vector types
-    oneof return
-    {
-      variant_descriptor rettp = 5;
-      byte_data_types vecrettp = 6;
-      bool dynamic_rettp = 7;
-    }
-}
 
 message devdescribe
 {
@@ -72,30 +32,6 @@ message servdescribe
     string servcomment = 1;
     map<uint32, devdescribe> devs_attached = 2;
     errstatus err = 3;
-}
-
-message capability_argument
-{
-    uint32 position = 1;
-    ft_variant value = 2;
-}
-
-message capability_request
-{
-    uint32 msgid = 1;
-    uint32 devid = 2;
-    string capname  = 3;
-    repeated capability_argument args = 4; 
-    uint32 contention_timeout = 5;
-}
-
-message capability_response
-{
-    uint32 msgid = 1;
-    uint32 devid = 2;
-    string capname = 3;
-    ft_variant returnval = 4;
-    errstatus err = 5;
 }
 
 
@@ -186,27 +122,6 @@ message broadcast_notification
     string channel_target = 7;
 }
 
-message stream_registration_request
-{
-    uint32 msgid = 1;
-    capability_request req = 2;
-    uint32 nticks = 3;
-    string streamcomment = 4;
-}
-
-message stream_registration_response
-{
-    errstatus err =1;
-    uint32 msgid = 2;
-    uint32 streamhandle = 3;
-}
-
-message stream_control
-{
-    uint32 msgid = 1;
-    uint32 streamhandle = 2;
-    stream_control_commands cmd = 3;
-}
 
 
 service exptserve
@@ -222,7 +137,10 @@ service exptserve
     rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
     rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
     rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
-    rpc RegisterStream(stream_registration_request) returns (stream_registration_response);
+    rpc CreateStreamBatch(stream_batch_request) returns (stream_batch_response);
+    rpc ListStreamBatch(empty) returns (streambatchlist);
+    rpc CreateStream(stream_registration_request) returns (stream_registration_response);
+    rpc ListStreams(empty) returns (streamlist);
     rpc ReceiveStream(stream stream_control) returns (stream capability_response);
     rpc DestroyStream(stream_registration_request) returns (stream_registration_response);
 }
