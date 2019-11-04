@@ -27,7 +27,7 @@ message stream_thread_response
 message stream_registration_request
 {
     uint32 msgid = 1;
-    uint32 batchid = 2;
+    uint32 threadid = 2;
     capability_request req = 3;
     uint32 nticks = 4;
     string streamcomment = 5;
