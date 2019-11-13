@@ -20,7 +20,7 @@ namespace foxtrot
      
  };
  
- enum class CapabilityType
+ enum class CapabilityType : unsigned char
  {
      VALUE_READONLY,
      VALUE_READWRITE,
@@ -35,8 +35,16 @@ namespace foxtrot
       std::vector<std::string> Argnames;
       std::vector<rttr::type> Argtypes;
       rttr::type Returntype = rttr::type::get<void>();
+
+      bool operator==(const Capability& other);
+
   };
  
+  struct CapabilityHash
+  {
+      std::size_t operator() (const Capability& cap) const noexcept;
+  };
+  
  
   class CommunicationProtocol;
   

@@ -1,9 +1,69 @@
 #include <sstream>
+#include <algorithm>
 
 #include <rttr/registration>
 
 #include <foxtrot/server/Device.h>
 #include <foxtrot/ReflectionError.h>
+
+
+//NOTE: copied (probably missing edge cases!) from boost::hash_combine
+template<typename T>
+void hash_combine(std::size_t& prevhash, const T& val)
+{
+    auto hash = std::hash<T>{}(val);
+    prevhash ^= hash  + 0x9e3779b9 + (prevhash << 6) + (prevhash >> 2);
+};
+
+
+bool foxtrot::Capability::operator==(const foxtrot::Capability& other)
+{
+    if(type != other.type)
+        return false;
+    if(Returntype != other.Returntype)
+        return false;
+    auto othertpit = other.Argtypes.cbegin();
+    for(auto& tp: Argtypes)
+    {
+        if(tp != *(othertpit++))
+            return false;
+    }
+    
+    if(CapabilityName != other.CapabilityName)
+        return false;
+    
+    auto otherargnmit = other.Argnames.cbegin();
+    for(auto& argnm: Argnames)
+    {
+        if(argnm != *(otherargnmit++))
+            return false;
+    }
+    
+    return true;
+};
+
+std::size_t foxtrot::CapabilityHash::operator()(const foxtrot::Capability& cap) const noexcept
+{
+    auto hash = std::hash<unsigned char>{}(static_cast<unsigned char>(cap.type));
+    hash_combine(hash, cap.CapabilityName);
+    
+    std::for_each(cap.Argnames.cbegin(), cap.Argnames.cend(), 
+                  [&hash] (const std::string& s) 
+                  {
+                      hash_combine(hash, s);
+                  });
+    
+    std::for_each(cap.Argtypes.cbegin(), cap.Argtypes.cend(),
+                  [&hash] (const rttr::type& t)
+                  {
+                      //WARNING:changes each run, don't cache CapabilityHashes
+                      hash_combine(hash, t.get_id());
+                  });
+    
+    hash_combine(hash, cap.Returntype.get_id());
+    
+    return hash;
+};
 
 
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
