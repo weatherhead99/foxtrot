@@ -11,8 +11,9 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     description="foxtrot server components"
     exports_sources = "CMakeLists.txt", "src/*.cpp", \
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
-    "include/foxtrot/devices/*.h", "include/foxtrot/protocols/*.h", \
-    "include/exptserve/*.hh", "cmake/*", "setups/*", "devprogs/*", "devices/*"
+    "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
+    "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
+    "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = "boost_program_options%s" % bbcs, \
         "libcurl/7.52.1%s" % bcs, \
         "libsodium/1.0.16%s" % bcs, \
