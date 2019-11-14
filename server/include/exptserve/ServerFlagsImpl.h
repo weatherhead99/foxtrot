@@ -3,7 +3,7 @@
 #include <string>
 #include <memory>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <grpc++/grpc++.h>
 
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -14,7 +14,7 @@ namespace foxtrot {
     
     class HandlerTag;
   
-  typedef boost::variant<double,int,bool,std::string> ft_variant;
+  using ft_variant = std::variant<double,int,bool,std::string>;
   
   using flagmap =  std::map<std::string, ft_variant> ;
   

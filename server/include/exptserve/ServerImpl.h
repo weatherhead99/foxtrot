@@ -9,7 +9,7 @@
 #include <grpc++/grpc++.h>
 #include <grpc++/security/credentials.h>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <foxtrot/foxtrot.pb.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -29,7 +29,7 @@ using grpc::ServerBuilder;
 using std::string;
 
 namespace foxtrot{
-    typedef boost::variant<double,int,bool,std::string> ft_variant;
+    using ft_variant = std::variant<double,int,bool,std::string>;
     using flagmap =  std::map<std::string, ft_variant> ;
     
 class ServerImpl 
