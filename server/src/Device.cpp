@@ -1,6 +1,7 @@
 #include <sstream>
 #include <algorithm>
 
+
 #include <rttr/registration>
 
 #include <foxtrot/server/Device.h>
@@ -88,31 +89,6 @@ void foxtrot::Device::setDeviceComment(const std::string& comment)
     _devcomment = comment;
 }
 
-
-class ftarg_visitor : public boost::static_visitor<>
-{
-public:
-    ftarg_visitor(rttr::variant& var) : var_(var) {};
-    void operator()(double& i) const
-    {
-        var_ = i;
-    }
-    void operator()(int& i) const
-    {
-        var_ = i;
-    }
-    void operator()(bool& i) const
-    {
-        var_ = i;
-    }
-    void operator()(const std::string& s) const
-    {
-        var_ = s;
-    }
-    
-private:
-    rttr::variant& var_;
-};
 
 
 void sanitize_arg(rttr::variant& argin, const rttr::type& target_tp, int pos, foxtrot::Logging* lg= nullptr)
