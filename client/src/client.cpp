@@ -379,7 +379,7 @@ void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_vari
     req.set_msgid(_msgid++);
     req.set_flagname(flagname);
     
-    boost::apply_visitor(ft_variant_flag_visitor(req), val);
+    std::visit(ft_variant_flag_visitor(req), val);
     
     grpc::ClientContext ctxt;
     auto status = _stub->SetServerFlag(&ctxt, req, &repl);
@@ -465,7 +465,7 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
   ft_variant_printer pt;
   for(auto& arg: args)
   {
-   boost::apply_visitor(pt,arg);  
+   std::visit(pt,arg);  
    _lg.Trace("arg: "  + pt.string());
     
   }

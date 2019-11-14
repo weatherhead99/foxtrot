@@ -1,6 +1,6 @@
 project(foxtrotlsst C CXX)
 cmake_minimum_required(VERSION 3.6)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 message(STATUS "checking for conan build...")
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)

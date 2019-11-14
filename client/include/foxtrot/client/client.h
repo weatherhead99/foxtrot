@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <initializer_list>
 
-#include <boost/variant.hpp>
+#include <variant>
 #include <grpc++/grpc++.h>
 
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -41,9 +41,9 @@ struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterat
 
 }
 
+using ft_variant = std::variant<double, int, bool, std::string>;
+using ft_vector_variant = std::variant<std::vector<unsigned char>, std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double>> ;
 
-typedef boost::variant<double,int,bool,std::string> ft_variant;
-typedef boost::variant<std::vector<unsigned char>, std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double> > ft_vector_variant;
 
 
 template<typename T,typename R=ft_variant>
@@ -54,7 +54,7 @@ using enable_is_iterator = typename
                            std::enable_if<detail2::is_iterator<T>::value, R>::type;
 
 
-class ft_variant_visitor : public boost::static_visitor<>
+class ft_variant_visitor
 {
 public:
     ft_variant_visitor ( capability_argument& arg );
@@ -70,7 +70,7 @@ private:
 
 };
 
-class ft_variant_flag_visitor : public boost::static_visitor<>
+class ft_variant_flag_visitor 
 {
 public:
     ft_variant_flag_visitor ( serverflag& flag );
@@ -123,7 +123,7 @@ ft_variant ft_variant_from_response ( const serverflag& repl );
 ft_vector_variant ft_variant_from_data ( const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data );
 
 
-class ft_variant_printer : public boost::static_visitor<>
+class ft_variant_printer
 {
 public:
     ft_variant_printer();
@@ -198,7 +198,7 @@ private:
         int i=0;
         for ( auto it = args_begin; it != args_end; it++ ) {
             auto arg = outargs->Add();
-            boost::apply_visitor ( ft_variant_visitor ( *arg ),*it );
+            std::visit( ft_variant_visitor ( *arg ),*it );
             arg->set_position ( i++ );
 
         };
