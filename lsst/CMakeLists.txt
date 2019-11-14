@@ -34,11 +34,13 @@ foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
 
 
-set(motor_setup_srcs motor_test_setup.cpp)
-add_library(motor_test SHARED ${motor_setup_srcs})
-target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
-set_target_properties(motor_test PROPERTIES PREFIX
-"")
+#only build if on idscamera enabled system
+if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
+    set(motor_setup_srcs motor_test_setup.cpp)
+    add_library(motor_test SHARED ${motor_setup_srcs})
+    target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
+    set_target_properties(motor_test PROPERTIES PREFIX "")
+endif()
 
 
 include(GNUInstallDirs)
@@ -46,4 +48,7 @@ include(GNUInstallDirs)
 install(TARGETS autofilld RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS tbcli RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 install(TARGETS lsst_testbench LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(TARGETS motor_test LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
+    install(TARGETS motor_test LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()

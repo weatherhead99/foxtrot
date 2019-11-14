@@ -15,8 +15,9 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
     requires = "boost_program_options%s" % ftbase.bbcs, \
                "boost_log%s" % ftbase.bbcs, \
                "boost_filesystem%s" % ftbase.bbcs, \
-               "protobuf/3.6.1%s" % ftbase.bcs, \
-               "cmake_findboost_modular%s" % ftbase.bbcs
+               "protobuf/3.9.1%s" % ftbase.bcs, \
+               "cmake_findboost_modular%s" % ftbase.bbcs, \
+               "zlib/1.2.11@conan/stable"
     default_options = {"boost_log:shared": True,
                        "boost_thread:shared": True,
                        "boost_program_options:shared": True,
