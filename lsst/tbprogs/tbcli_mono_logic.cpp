@@ -26,7 +26,7 @@ int find_monochromator(const foxtrot::servdescribe& cl)
 
 int get_filter(foxtrot::Client& cl, int devid)
 {
-  return boost::get<int>(cl.InvokeCapability(devid,"getFilter"));
+  return std::get<int>(cl.InvokeCapability(devid,"getFilter"));
   
 }
 
@@ -34,14 +34,14 @@ int get_filter(foxtrot::Client& cl, int devid)
 bool get_shutter(foxtrot::Client& cl, int devid)
 {
   auto resp = cl.InvokeCapability(devid,"getShutterStatus");
-  return boost::get<bool>(resp);
+  return std::get<bool>(resp);
 
 }
 
 double get_wavelength(foxtrot::Client& cl, int devid)
 {
   auto resp = cl.InvokeCapability(devid,"getWave");
-  return boost::get<double>(resp);
+  return std::get<double>(resp);
 
 }
 
@@ -67,7 +67,7 @@ void set_shutter_dumb(foxtrot::Client& cl, int devid, bool onoff)
 
 int get_grating(foxtrot::Client& cl, int devid)
 {
-  return boost::get<int>(cl.InvokeCapability(devid,"getGrating"));
+  return std::get<int>(cl.InvokeCapability(devid,"getGrating"));
 
 }
 
