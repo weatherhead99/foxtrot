@@ -1,4 +1,4 @@
-add_device_object_lib(NAME TPG362 SRCS TPG362.cpp INCLUDES TPG362.h)
+add_device_object_lib(NAME TPG362 SRCS TPG362.cpp Pfeiffer.cpp INCLUDES TPG362.h Pfeiffer.h)
 
 
 # add_executable(checksumtest test_checksum.cpp)
