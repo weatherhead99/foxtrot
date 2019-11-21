@@ -90,6 +90,7 @@ add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
 add_subdirectory(digitaldiscovery)
 add_subdirectory(idscamera)
+add_subdirectory(DLP-IOR4)
 
 set(libobjs "")
 message(STATUS "device targetS: ${device_targets}")
