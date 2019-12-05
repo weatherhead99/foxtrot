@@ -1,5 +1,5 @@
 #pragma once
-#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/server/Device.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/Logging.h>
 
@@ -18,6 +18,8 @@ namespace devices
         off,
         do_not_change
     };
+    
+    
 
     namespace detail
     {
@@ -27,7 +29,7 @@ namespace devices
     }
 
     
-    class DLP_IOR4  : public CmdDevice
+    class DLP_IOR4  : public Device
     {
         RTTR_ENABLE()
     public:
@@ -38,6 +40,8 @@ namespace devices
         void setRelay(int n, bool onoff);
         bool getRelay(int n) const;
         const std::string getDeviceTypeName() const override;
+        
+        void checkAlive();
         
     private:
         shared_ptr<SerialPort> _serport;
