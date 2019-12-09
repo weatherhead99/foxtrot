@@ -3,6 +3,8 @@
 #include <chrono>
 #include <foxtrot/DeviceError.h>
 
+#include <rttr/registration>
+
 //see https://docs.rs-online.com/9004/0900766b814bfd24.pdf for details
 
 const foxtrot::parameterset IOR4_serial_params
@@ -76,6 +78,18 @@ void foxtrot::devices::DLP_IOR4::setRelay(int n, bool onoff)
     
     _serport->write(std::string{setchar});
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    
+}
+
+
+RTTR_REGISTRATION
+{
+    using namespace rttr;
+    using foxtrot::devices::DLP_IOR4;
+    registration::class_<DLP_IOR4>("foxtrot::devices::DLP_IOR4")
+    .method("checkAlive", &DLP_IOR4::checkAlive)
+    .method("getRelay", &DLP_IOR4::getRelay) (parameter_names("n"))
+    .method("setRelay", &DLP_IOR4::setRelay) (parameter_names("n", "onoff"));
     
 }
 
