@@ -139,7 +139,7 @@ bool foxtrot::AuthHandler::verify_response(const std::string& userid, unsigned i
             _lg.strm(sl::info) << "verified login for: " << userid << "with key name: " << key.first;
             keyname = key.first;
             
-            randombytes_buf(sessionkey.begin(),sessionkey.size());
+            randombytes_buf(sessionkey.data(),sessionkey.size());
             
             auto expiry_date = boost::posix_time::second_clock::local_time() + boost::posix_time::hours(valid_hours_);
             expiry = (expiry_date - boost::posix_time::from_time_t(0)).total_seconds();

@@ -26,7 +26,13 @@ endif()
 find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread date_time)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
-find_dependency(rttr 0.9.5 REQUIRED)
+find_dependency(rttr 0.9.6 REQUIRED)
+
+#WARNING: hack to make it work on windows
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0A00)
+endif()
+
 
 if(BUILD_TREE)
     include(${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)

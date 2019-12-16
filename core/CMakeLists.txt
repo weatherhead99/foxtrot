@@ -12,6 +12,14 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(FoxtrotCommonSetup)
 
+#fix GRPC windows building issues
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0A00)
+
+endif()
+
+
+
 #setup conan build if necessary
 message(STATUS "checking for conan build...")
 if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -40,7 +48,12 @@ configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
 
 message("foxtrot core version: ${VERSION}")
 
+if(WIN32)
+#need boost::thread on windows
+find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time thread)
+else()
 find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time)
+endif()
 find_package(Protobuf REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 
@@ -126,8 +139,11 @@ add_dependencies(foxtrot_core ft_auth_copy_includes)
 
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-
+if(WIN32)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
+else()
 target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
+endif()
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
