@@ -1,4 +1,5 @@
 syntax="proto3";
+package foxtrot;
 
 enum simplevalue_types
 {

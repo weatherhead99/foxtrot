@@ -111,7 +111,7 @@ function(generate_proto_and_grpc)
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/foxtrot
         COMMAND ${CMAKE_COMMAND} -E copy ${gen_hdrs} ${CMAKE_CURRENT_BINARY_DIR}/foxtrot
 	DEPENDS ${grpc_srcs} ${proto_srcs}
-        COMMENT "copying generated headers to top level build tree")
+        COMMENT "copying generated headers ${gen_hdrs} to top level build tree")
       
         
     endforeach()
@@ -136,6 +136,8 @@ add_dependencies(foxtrot_core ft_types_copy_includes)
 add_dependencies(foxtrot_core foxtrot_copy_includes)
 add_dependencies(foxtrot_core ft_error_copy_includes)
 add_dependencies(foxtrot_core ft_auth_copy_includes)
+add_dependencies(foxtrot_core ft_streams_copy_includes)
+add_dependencies(foxtrot_core ft_capability_copy_includes)
 
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

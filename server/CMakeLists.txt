@@ -42,8 +42,13 @@ endif()
 
 option(BUILD_AUTH "build support for authentication" ON)
 if(BUILD_AUTH)
-    message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-    find_package(sodium REQUIRED)
+    #message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+    if(WIN32)
+        #find libsodium via conan
+    else()
+        #find via normal cmake mechanism
+        find_package(sodium REQUIRED)
+    endif()
 endif()
 
 include(GenerateExportHeader)
@@ -83,7 +88,7 @@ target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
 target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL rapidjson::rapidjson)
 
 if(BUILD_AUTH)
-    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE})
+    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE} ${CONAN_LIBS_LIBSODIUM})
 endif()
 
 add_executable(exptserve ${exptserve_srcs})
