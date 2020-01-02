@@ -2,7 +2,6 @@
 #include <iostream>
 #include <numeric>
 #include <iomanip>
-#include <cmath>
 #include <chrono>
 #include <thread>
 #include <climits>
@@ -37,36 +36,35 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
 
 double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
 {
-  auto interpret = read_cmd_helper(channel, TPG_parameter_no::Pressure);
-  return interpret_u_expo_raw(std::get<2>(interpret));
+  auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::Pressure);
+  return pfeiffer_interpret_u_expo_raw(interpret);
 }
 
 string foxtrot::devices::TPG362::getDeviceName(short unsigned int channel)
 {
-  auto interpret = read_cmd_helper(channel, TPG_parameter_no::DeviceName);
-  return std::get<2>(interpret);
+  return read_cmd_helper(channel + _address, TPG_parameter_no::DeviceName);
 }
 
 bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
 {
-  auto interpret = read_cmd_helper(channel, TPG_parameter_no::sensEnable);   
-  return static_cast<bool>(std::stoi(std::get<2>(interpret)));
+  auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::sensEnable);   
+  return static_cast<bool>(std::stoi(interpret));
 }
 
 void foxtrot::devices::TPG362::setGaugeOnOff(unsigned short channel, bool onoff)
 {
-    write_cmd_helper(channel, TPG_parameter_no::sensEnable, onoff);
+    write_cmd_helper(channel + _address, TPG_parameter_no::sensEnable, onoff);
 }
 
 bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
 {
-    auto interpret = read_cmd_helper(channel, TPG_parameter_no::degas);
-    return static_cast<bool>(std::stoi(std::get<2>(interpret)));
+    auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::degas);
+    return static_cast<bool>(std::stoi(interpret));
 }
 
 void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
 {
-    write_cmd_helper(channel, TPG_parameter_no::degas, onoff);
+    write_cmd_helper(channel + _address, TPG_parameter_no::degas, onoff);
 }
 
 
@@ -77,13 +75,6 @@ const string foxtrot::devices::TPG362::getDeviceTypeName() const
 }
 
 
-
-double foxtrot::devices::TPG362::interpret_u_expo_raw(const string& val)
-{
-  double mantissa = std::stoi(val.substr(0,4))/ 1000.;
-  short exponent = std::stoi(val.substr(4,2)) - 20;
-  return mantissa * std::pow(10,exponent);
-}
 
 short unsigned convert_int_to_short_unsigned(int value, bool& ok)
 {
@@ -97,7 +88,7 @@ short unsigned convert_int_to_short_unsigned(int value, bool& ok)
         ok = false;
         return 0;
     }
-    std::cout << "in value: " << value << std::endl;
+//     std::cout << "in value: " << value << std::endl;
     
     return static_cast<short unsigned>(value);   
 }
@@ -105,7 +96,7 @@ short unsigned convert_int_to_short_unsigned(int value, bool& ok)
 RTTR_REGISTRATION{
     using namespace rttr;
     using foxtrot::devices::TPG362;
-    registration::class_<TPG362>("foxtrot::devices::dummyDevice")
+    registration::class_<TPG362>("foxtrot::devices::TPG362")
     .method("getPressure", &TPG362::getPressure)
     (
         parameter_names("channel")
@@ -127,8 +118,7 @@ RTTR_REGISTRATION{
         parameter_names("channel")
         )
     .method("setDegass",&TPG362::setDegass)
-    (
-        parameter_names("channel","onoff")
+    (        parameter_names("channel","onoff")
         );
     
     rttr::type::register_converter_func(convert_int_to_short_unsigned);

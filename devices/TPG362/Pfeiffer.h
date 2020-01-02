@@ -20,6 +20,8 @@ namespace foxtrot
 {
 namespace devices
 {
+    
+    
     enum class pfeiffer_action : short unsigned
     {
         read = 0,
@@ -33,14 +35,14 @@ namespace devices
         virtual string cmd(const string& request) override;
     protected:
         PfeifferDevice(shared_ptr<SerialProtocol> proto, const string& logname);
-        string semantic_cmd(short unsigned address, short unsigned parameter,
+        string semantic_command(short unsigned address, short unsigned parameter,
                             pfeiffer_action readwrite, optional<string_view> data = std::nullopt);
         
         template<typename T>
         string semantic_command(short unsigned address, T parameter,
                                 pfeiffer_action readwrite, optional<string_view> data = std::nullopt)
         {
-            return semantic_cmd(address, static_cast<short unsigned>(parameter), readwrite, data);
+            return semantic_command(address, static_cast<short unsigned>(parameter), readwrite, data);
         }
         
         shared_ptr<SerialProtocol> _serproto;
@@ -64,6 +66,38 @@ namespace devices
             oss << std::setw(width) << std::setfill('0') << number;
             return oss.str();
         };
+        
+        template<typename T>
+        string read_cmd_helper(int addr, T param)
+        {
+            auto ret = semantic_command(addr, param, pfeiffer_action::read);
+            auto interpret = interpret_response_telegram(ret);
+            
+            validate_response_telegram_parameters(addr, param, interpret);
+
+            return std::get<2>(interpret);
+        };
+        
+//         template<typename T, typename Ret>
+//         ret read_cmd_helper(int addr, T param)
+//         {
+//             string resp = read_cmd_helper<T>(addr, param);
+//             
+//             
+//         }
+        
+        template<typename T1, typename T2>
+        void write_cmd_helper(int addr, T1 param, T2 value)
+        {
+            auto st = str_from_number(static_cast<unsigned short>(value));
+            auto ret = semantic_command(addr, param, pfeiffer_action::describe);
+            
+            auto interpret = interpret_response_telegram(ret);
+            validate_response_telegram_parameters(addr, param, interpret);
+            
+        };
+        
+        
     private:
         string calculate_checksum(string::const_iterator start, string::const_iterator end);
         string calculate_checksum(const string_view message);
@@ -72,6 +106,9 @@ namespace devices
         std::ostringstream _semanticoss;
         
     };
+    
+    
+    double pfeiffer_interpret_u_expo_raw(const string& val);
     
 }
 }

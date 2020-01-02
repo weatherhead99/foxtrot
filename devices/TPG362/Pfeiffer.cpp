@@ -2,6 +2,7 @@
 
 #include <numeric>
 #include <thread>
+#include <cmath>
 
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/protocols/SerialPort.h>
@@ -42,7 +43,7 @@ string PfeifferDevice::calculate_checksum(const string_view message)
     return str_from_number(checksum % 256, 3);
 };
 
-string PfeifferDevice::semantic_cmd(unsigned short address, unsigned short parameter,
+string PfeifferDevice::semantic_command(unsigned short address, unsigned short parameter,
                                     pfeiffer_action readwrite, optional<string_view> data)
 {
     _semanticoss.str("");
@@ -114,4 +115,13 @@ std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const s
     return std::make_tuple(addr,paramno,data);
     
 }
+
+
+double foxtrot::devices::pfeiffer_interpret_u_expo_raw(const string& val)
+{
+    double mantissa = std::stoi(val.substr(0,4))/ 1000.;
+    short exponent = std::stoi(val.substr(4,2)) - 20;
+    return mantissa * std::pow(10,exponent);
+}
+
 

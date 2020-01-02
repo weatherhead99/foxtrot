@@ -60,33 +60,6 @@ namespace foxtrot {
    private:
      //address range 1-24, default is 1
      short unsigned _address = 010; 
-     
-     string calculate_checksum(string::const_iterator start, string::const_iterator end);
-     string calculate_checksum(const string& message);
-     
-     double interpret_u_expo_raw(const std::string& val);
-     
-     std::tuple<int,int,string> read_cmd_helper(int channel, TPG_parameter_no param)
-     {
-         auto ret = semantic_command<TPG_parameter_no>(_address + channel, param,
-                                                       pfeiffer_action::read);
-         auto interpret = interpret_response_telegram(ret);
-         validate_response_telegram_parameters<TPG_parameter_no>(_address + channel, param, interpret);
-         return interpret;
-     }
-     
-     template<typename T>
-     void write_cmd_helper(int channel, TPG_parameter_no param, T value)
-     {
-         auto st = str_from_number(static_cast<unsigned short>(value));
-         auto ret = semantic_command<TPG_parameter_no>(_address + channel, param,
-                                                       pfeiffer_action::describe);
-         auto interpret = interpret_response_telegram(ret);
-         validate_response_telegram_parameters<TPG_parameter_no>(_address + channel,
-                                                                 param, interpret);
-         
-     }
-     
 
    };
    
