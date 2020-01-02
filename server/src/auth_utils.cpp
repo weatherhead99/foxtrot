@@ -29,7 +29,8 @@ std::vector<unsigned char> detail::base642bin(const std::string& base64str)
 std::array<unsigned char, CHALLENGE_STRING_BYTES> detail::get_challenge_bytes()
 {
     std::array<unsigned char, CHALLENGE_STRING_BYTES> out;
-    randombytes_buf(out.begin(), out.size());
+    
+    randombytes_buf(out.data(), out.size());
     return out;
 }
 
@@ -42,7 +43,7 @@ std::tuple<pkarr, skarr> foxtrot::generate_new_key()
   skarr skout;
   
   //TODO: should we be checking return value of this?
-  crypto_sign_keypair(pkout.begin(), skout.begin());
+  crypto_sign_keypair(pkout.data(), skout.data());
   
   return std::make_tuple(pkout,skout);
 };

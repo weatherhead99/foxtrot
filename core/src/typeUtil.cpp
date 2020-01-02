@@ -10,11 +10,11 @@ bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
     if(!tp.is_class() && !tp.is_enumeration())
         return false;
 
-    unsigned meth_count = tp.get_methods().size();
+    auto meth_count = tp.get_methods().size();
     if(meth_count > 0)
         return false;
 
-    unsigned constructor_count = tp.get_constructors().size();
+    auto constructor_count = tp.get_constructors().size();
     if(constructor_count == 0)
         return false;
     
@@ -484,7 +484,7 @@ bool is_type_any_of(const rttr::type& tp)
 std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg)
 {
     simplevalue_types out;
-    unsigned char size = 0;
+    decltype(tp.get_sizeof()) size = 0;
     if(!tp.is_arithmetic())
     {   
         if(tp == rttr::type::get<void>())

@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+package foxtrot;
 import "ft_types.proto";
 import "ft_error.proto";
 
