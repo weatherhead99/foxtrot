@@ -138,4 +138,73 @@ void foxtrot::devices::TC110::setGasMode(foxtrot::devices::TC110_GasModes mode)
     write_cmd_helper(_address, TC110_parameter_no::GasMode, mode);
 }
 
+foxtrot::devices::TC110_VentModes foxtrot::devices::TC110::getVentMode()
+{
+    auto ret = std::stoul(read_cmd_helper(_address, TC110_parameter_no::VentMode));
+    TC110_VentModes out{static_cast<short unsigned>(ret)};
+    return out;
+}
+
+void foxtrot::devices::TC110::setVentMode(foxtrot::devices::TC110_VentModes mode)
+{
+    write_cmd_helper(_address, TC110_parameter_no::VentMode, mode);
+}
+
+foxtrot::devices::TC110_parameter_no get_Accparam(char Acclet, unsigned char Accnum)
+{
+    foxtrot::devices::TC110_parameter_no param;
+    switch(Acclet)
+    {
+        case('A'): 
+        case('a'):
+            switch(Accnum)
+            {
+                case(1): param = TC110_parameter_no::CfgAccA1; break;
+                case(2): param = TC110_parameter_no::CfgAccA2; break;
+                default: throw std::out_of_range("invalid accessory number parameter");
+            }
+        break;
+        
+        case('B') :
+        case('b') :
+            switch(Accnum)
+            {
+                case(1): param = TC110_parameter_no::CfgAccB1; break;
+                case(2): param = TC110_parameter_no::CfgAccB2; break;
+                default: throw std::out_of_range("invalid accessory number parameter");
+            }
+        break; 
+        
+        default:
+            throw std::out_of_range("invalid Accessory letter parameter");
+                
+    }
+    
+    return param;
+}
+
+foxtrot::devices::TC110_Accconfigs foxtrot::devices::TC110::getAccConfig(char Acclet, unsigned char Accnum)
+{
+    TC110_parameter_no param = get_Accparam(Acclet, Accnum);
+    auto ret = std::stoul(read_cmd_helper(_address, param));
+    TC110_Accconfigs out{static_cast<short unsigned>(ret)};
+    return out;
+}
+
+void foxtrot::devices::TC110::setAccConfig(char Acclet, unsigned char Accnum, foxtrot::devices::TC110_Accconfigs config)
+{
+    TC110_parameter_no param = get_Accparam(Acclet, Accnum);
+    write_cmd_helper(_address, param, config);
+}
+
+bool foxtrot::devices::TC110::getSealingGas()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::SealingGas));
+}
+
+void foxtrot::devices::TC110::setSealingGas(bool onoff)
+{
+    write_cmd_helper(_address, TC110_parameter_no::SealingGas, onoff);
+}
+
 
