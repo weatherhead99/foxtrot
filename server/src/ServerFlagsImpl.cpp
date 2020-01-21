@@ -49,7 +49,7 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
   try{
     repl.set_msgid(req.msgid());
     
-    ft_variant var;
+    ft_std_variant var;
     switch(req.arg_case())
     {
       case(reqtp::ArgCase::kDblval):

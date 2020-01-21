@@ -298,7 +298,7 @@ void detail::execute_fill(Client& cl, int ws_devid, double filltime_hours,
 
     lg.strm(sl::debug) << "energising relay..." ;
 
-    std::vector<foxtrot::ft_variant> args {relay, true};
+    std::vector<foxtrot::ft_std_variant> args {relay, true};
     if(!dryrun)
         cl.InvokeCapability(ws_devid,"SetRelay", args.begin(), args.end());
     else

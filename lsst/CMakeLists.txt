@@ -42,7 +42,8 @@ if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
     set_target_properties(motor_test PROPERTIES PREFIX "")
 endif()
 
-add_subdirectory(fsmd)
+#NOTE: disable fsmd for now as it's not working
+#add_subdirectory(fsmd)
 
 
 include(GNUInstallDirs)

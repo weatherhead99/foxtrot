@@ -108,9 +108,9 @@ std::string foxtrot::ft_variant_printer::string()
 }
 
 
-foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
+foxtrot::ft_std_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
-    foxtrot::ft_variant out;
+    foxtrot::ft_std_variant out;
     foxtrot::Logging lg("ft_variant_from_response");
     
     check_repl_err(repl,&lg);
@@ -140,9 +140,9 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
 
 }
 
-foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::serverflag& repl)
+foxtrot::ft_std_variant foxtrot::ft_variant_from_response(const foxtrot::serverflag& repl)
 {
-    foxtrot::ft_variant out;
+    foxtrot::ft_std_variant out;
     foxtrot::Logging lg("ft_variant_from_response");
     check_repl_err(repl,&lg);
     
@@ -348,7 +348,7 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
 }
 
 
-foxtrot::ft_variant foxtrot::Client::get_server_flag(const std::string& flagname)
+foxtrot::ft_std_variant foxtrot::Client::get_server_flag(const std::string& flagname)
 {
     serverflag req;
     serverflag repl;
@@ -372,7 +372,7 @@ foxtrot::ft_variant foxtrot::Client::get_server_flag(const std::string& flagname
     
 };
 
-void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_variant& val)
+void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_std_variant& val)
 {
     serverflag req;
     serverflag repl;
@@ -450,15 +450,15 @@ std::vector<std::string> foxtrot::Client::get_flag_names()
 };
 
 
-foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
+foxtrot::ft_std_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
 {
-    std::vector<ft_variant> empty;
+    std::vector<ft_std_variant> empty;
     return InvokeCapability(devid,capname,empty.begin(),empty.end());
     
 }
 
 
-foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_variant > args)
+foxtrot::ft_std_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_std_variant > args)
 {
   //TODO: optimize?
   
@@ -470,7 +470,7 @@ foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::stri
     
   }
   
-  std::vector<ft_variant> argvec(args.begin(), args.end());
+  std::vector<ft_std_variant> argvec(args.begin(), args.end());
   
   return InvokeCapability(devid,capname, argvec);
   
@@ -522,7 +522,7 @@ foxtrot::Client::capability_proxy::capability_proxy(foxtrot::Client& cl, int dev
 
 }
 
-foxtrot::ft_variant foxtrot::Client::capability_proxy::operator()(std::initializer_list< foxtrot::ft_variant > args)
+foxtrot::ft_std_variant foxtrot::Client::capability_proxy::operator()(std::initializer_list< foxtrot::ft_std_variant > args)
 {
  return _clientbackref.InvokeCapability(_devid,_capname,args);
 }

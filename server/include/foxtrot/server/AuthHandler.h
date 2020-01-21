@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <array>
 #include <deque>
@@ -17,11 +18,13 @@ namespace foxtrot {
     using key_info = std::pair<std::string,foxtrot::pkarr>;
     using login_info = std::tuple<std::string,int, time_t>;
     using credentialsmap = std::map<std::string, std::pair<std::vector<key_info>,int>>;
-    
+    using matchfiltertuple = std::tuple<std::string, int, bool>;
+
     class AuthHandler{
     public:
         AuthHandler(const std::string& filename, int valid_hours);
         AuthHandler(credentialsmap&& creds, int valid_hours);
+        
         
         std::pair<std::string,unsigned> get_challenge_string(const std::string& userid);
         std::pair<challengearr, unsigned>

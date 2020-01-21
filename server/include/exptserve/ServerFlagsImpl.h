@@ -14,9 +14,9 @@ namespace foxtrot {
     
     class HandlerTag;
   
-  using ft_variant = std::variant<double,int,bool,std::string>;
+  using ft_std_variant = std::variant<double,int,bool,std::string>;
+  using flagmap =  std::map<std::string, ft_std_variant> ;
   
-  using flagmap =  std::map<std::string, ft_variant> ;
   
   struct SetServerFlagsLogic
   {

@@ -47,20 +47,20 @@ double get_wavelength(foxtrot::Client& cl, int devid)
 
 void set_wavelength_dumb(foxtrot::Client& cl, int devid, double wl)
 {
-  std::vector<foxtrot::ft_variant> args{wl};
+  std::vector<foxtrot::ft_std_variant> args{wl};
   cl.InvokeCapability(devid,"setWave",args.begin(), args.end());
 }
 
 void set_filter_dumb(foxtrot::Client& cl, int devid, int filter)
 {
-  std::vector<foxtrot::ft_variant> args{filter};
+  std::vector<foxtrot::ft_std_variant> args{filter};
   cl.InvokeCapability(devid,"setFilter",args.begin(), args.end());
 }
 
 
 void set_shutter_dumb(foxtrot::Client& cl, int devid, bool onoff)
 {
-  std::vector<foxtrot::ft_variant> args{onoff};
+  std::vector<foxtrot::ft_std_variant> args{onoff};
   cl.InvokeCapability(devid,"setShutterStatus",args.begin(), args.end());
   
 }
@@ -73,7 +73,7 @@ int get_grating(foxtrot::Client& cl, int devid)
 
 void set_grating_dumb(foxtrot::Client& cl, int devid, int grating)
 {
-  std::vector<foxtrot::ft_variant> args{grating};
+  std::vector<foxtrot::ft_std_variant> args{grating};
   cl.InvokeCapability(devid,"setGrating", args.begin(), args.end());
 
 }

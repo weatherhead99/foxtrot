@@ -1,9 +1,9 @@
 Building Foxtrot
 ================
 
-Foxtrot itself is a fairly small and simple system, but it only achieves this through the extensive use of third party dependencies which implement a lot of the difficult parts. Thus, it is rather complex to build and get working. These dependencies can be provided either via system packages, or via the [conan](https://conan.io) package manager, which is currently the recommended method. It is in theory possible (though untested and not recommended) to use system packages for some dependencies and conan dependencies for others. Conan requires a compiler fully supporting the c++14 standard.
+Foxtrot itself is a fairly small and simple system, but it only achieves this through the extensive use of third party dependencies which implement a lot of the difficult parts. Thus, it is rather complex to build and get working. These dependencies can be provided either via system packages, or via the [conan](https://conan.io) package manager, which is currently the recommended method. It is in theory possible (though untested and not recommended) to use system packages for some dependencies and conan dependencies for others. Foxtrot requires a compiler fully supporting the c++17 standard.
 
-Foxtrot is currently supported on GNU/Linux only, and only tested in the OpenSUSE Leap 15.0, ubuntu 16.04 and ubuntu 18.04 distributions. Porting to Windows is partially complete.
+Foxtrot is currently supported on GNU/Linux only, and only tested in the OpenSUSE Leap 15.1, ubuntu 16.04 and ubuntu 18.04 distributions. Porting to Windows is partially complete.
 
 >**Important Note:** on ubuntu 18.04, the system grpc package has a bug which causes a segfault when running `exptserve`. In addition, the system grpc package does not provide the proper CMake config files. Thus, at the moment, on ubuntu 18.04, foxtrot is **only supported when building via conan (see below)**
 
@@ -48,7 +48,7 @@ Building with conan dependencies
 
 
 		$ conan --version
-		> Conan version 1.16.0
+		> Conan version 1.21.1
 
 
 	Conan should automatically pick up an installed system compiler settings the first time you run it. If you have installed the ninja build system, you need to change conan's settings to use it. Do this by editing the file `~/.conan/conan.conf`, and search for `cmake_generator`. Change this line to read

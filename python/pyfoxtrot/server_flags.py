@@ -6,17 +6,17 @@ Created on Tue Jul 16 15:04:58 2019
 @author: weatherill
 """
 
-from __future__ import annotations
+#from __future__ import annotations
 from pyfoxtrot.common import _check_repl_err
 from pyfoxtrot.foxtrot_pb2 import serverflag, empty
 
 class ServerFlag:
-    def __init__(self, client: Client, flagname: str):
+    def __init__(self, client, flagname: str):
         self._flagname = flagname
         self._client = client
 
     @staticmethod
-    def construct_request(flagname: str, val=0) -> serverflag:
+    def construct_request(flagname: str, val=0): #-> serverflag:
         req = serverflag()
         req.msgid = 0
         req.flagname = flagname
@@ -69,7 +69,7 @@ class ServerFlag:
         return getattr(repl, whichattr)
 
 class FlagProxy:
-    def __init__(self, cl: Client):
+    def __init__(self, cl):
         self._cl = cl
 
     def __getitem__(self, flagname: str):

@@ -29,8 +29,8 @@ using grpc::ServerBuilder;
 using std::string;
 
 namespace foxtrot{
-    using ft_variant = std::variant<double,int,bool,std::string>;
-    using flagmap =  std::map<std::string, ft_variant> ;
+    using ft_std_variant = std::variant<double,int,bool,std::string>;
+    using flagmap =  std::map<std::string, ft_std_variant> ;
     
 class ServerImpl 
 {

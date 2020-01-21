@@ -27,6 +27,8 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
           desc.set_devcomment(devpair.second->getDeviceComment());
           
           //enumerate capabilities
+          
+          
           //WARNING: SLOOOOW
           auto capnames = devpair.second->GetCapabilityNames();
           for(auto& capname : capnames)

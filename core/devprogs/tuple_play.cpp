@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     cout << "size: " << sz << endl;
     
     foxtrot::Logging lg("tuple_play");
-    tuple_descriptor desc = foxtrot::describe_tuple(tp,&lg);
+    auto desc = foxtrot::describe_tuple(tp,&lg);
     
     cout << "description: " << desc.DebugString() << endl;
     

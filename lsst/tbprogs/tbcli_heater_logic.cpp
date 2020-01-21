@@ -29,7 +29,7 @@ int find_archon_heater(const foxtrot::servdescribe& cl)
 
 void enable_disable_heater_output(foxtrot::Client& cl, int devid, bool onoff)
 {
-    std::vector<foxtrot::ft_variant> args{0, onoff  };
+    std::vector<foxtrot::ft_std_variant> args{0, onoff  };
     cl.InvokeCapability(devid,"setHeaterEnable",args.begin(), args.end());
     cl.InvokeCapability(devid,"apply");
     
@@ -38,7 +38,7 @@ void enable_disable_heater_output(foxtrot::Client& cl, int devid, bool onoff)
 
 bool is_heater_enabled(foxtrot::Client& cl, int devid)
 {
-    std::vector<foxtrot::ft_variant> args{0};
+    std::vector<foxtrot::ft_std_variant> args{0};
     auto resp = cl.InvokeCapability(devid,"getHeaterEnable",args.begin(), args.end());
     return std::get<bool>(resp);
 }
@@ -46,7 +46,7 @@ bool is_heater_enabled(foxtrot::Client& cl, int devid)
 
 double get_heater_target(foxtrot::Client& cl, int devid)
 {
-    std::vector<foxtrot::ft_variant> args{0};
+    std::vector<foxtrot::ft_std_variant> args{0};
     auto resp = cl.InvokeCapability(devid,"getHeaterTarget",args.begin(), args.end());
     return std::get<double>(resp);
     
@@ -54,7 +54,7 @@ double get_heater_target(foxtrot::Client& cl, int devid)
 
 void set_heater_target(foxtrot::Client& cl, int devid, double target)
 {
-    std::vector<foxtrot::ft_variant> args{0, target};
+    std::vector<foxtrot::ft_std_variant> args{0, target};
     cl.InvokeCapability(devid,"setHeaterTarget", args.begin(), args.end());
     
 }
@@ -115,7 +115,7 @@ std::pair< double, double > get_temperatures(foxtrot::Client& cl, int devid)
 
 void apply_settings(foxtrot::Client& cl, int devid)
 {
-  std::vector<foxtrot::ft_variant> args{};
+  std::vector<foxtrot::ft_std_variant> args{};
   cl.InvokeCapability(devid,"apply", args.begin(), args.end());
   
 }

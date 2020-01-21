@@ -41,15 +41,15 @@ struct is_iterator<T, typename std::enable_if<!std::is_same<typename std::iterat
 
 }
 
-using ft_variant = std::variant<double, int, bool, std::string>;
+using ft_std_variant = std::variant<double, int, bool, std::string>;
 using ft_vector_variant = std::variant<std::vector<unsigned char>, std::vector<unsigned short>, std::vector<unsigned>, std::vector<unsigned long>, std::vector<short>, std::vector<int>, std::vector<long>, std::vector<float>, std::vector<double>> ;
 
 
 
-template<typename T,typename R=ft_variant>
+template<typename T,typename R=ft_std_variant>
 using enable_has_const_iterator = typename std::enable_if<detail2::has_const_iterator<T>::value, R>::type;
 
-template<typename T, typename R=ft_variant>
+template<typename T, typename R=ft_std_variant>
 using enable_is_iterator = typename
                            std::enable_if<detail2::is_iterator<T>::value, R>::type;
 
@@ -118,8 +118,8 @@ void check_repl_err ( const T& repl, foxtrot::Logging* lg = nullptr )
 
 };
 
-ft_variant ft_variant_from_response ( const capability_response& repl );
-ft_variant ft_variant_from_response ( const serverflag& repl );
+ft_std_variant ft_variant_from_response ( const capability_response& repl );
+ft_std_variant ft_variant_from_response ( const serverflag& repl );
 ft_vector_variant ft_variant_from_data ( const foxtrot::byte_data_types& tp, const std::vector<unsigned char>& data );
 
 
@@ -148,7 +148,7 @@ public:
     class capability_proxy
     {
         friend class Client;
-        ft_variant operator() ( std::initializer_list<ft_variant> args );
+        ft_std_variant operator() ( std::initializer_list<ft_std_variant> args );
     protected:
         capability_proxy ( Client& cl, int devid, const std::string& capname );
 
@@ -163,8 +163,8 @@ public:
     ~Client();
     servdescribe DescribeServer();
 
-    ft_variant get_server_flag ( const std::string& flagname );
-    void set_server_flag ( const std::string& flagname, const ft_variant& val );
+    ft_std_variant get_server_flag ( const std::string& flagname );
+    void set_server_flag ( const std::string& flagname, const ft_std_variant& val );
     void drop_server_flag ( const std::string& flagname );
 
     std::vector<std::string> get_flag_names();
@@ -177,12 +177,12 @@ public:
     enable_has_const_iterator<containertp> InvokeCapability ( int devid,const std::string& capname, containertp args );
 
     template<typename... Args>
-    ft_variant InvokeCapability ( int devid, const std::string& capname, Args... args );
-    ft_variant InvokeCapability ( int devid, const std::string& capname );
-    ft_variant InvokeCapability ( int devid, const std::string& capname, std::initializer_list<ft_variant> args );
+    ft_std_variant InvokeCapability ( int devid, const std::string& capname, Args... args );
+    ft_std_variant InvokeCapability ( int devid, const std::string& capname );
+    ft_std_variant InvokeCapability ( int devid, const std::string& capname, std::initializer_list<ft_std_variant> args );
 
     capability_proxy call ( int devid, const std::string& capname );
-// 	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, std::initializer_list<ft_variant> args);
+// 	std::vector<unsigned char> FetchData(int devid, const std::string& capname, unsigned dataid, unsigned chunksize, std::initializer_list<ft_std_variant> args);
     template <typename iteratortp> ft_vector_variant FetchData ( int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args );
 
     template<typename... Args>
@@ -223,8 +223,8 @@ enable_is_iterator<iteratortp>
 Client::InvokeCapability ( int devid,const std::string& capname, iteratortp begin_args, iteratortp end_args )
 {
 
-    static_assert ( std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
-                    "iterator type must dereference to ft_variant" );
+    static_assert ( std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_std_variant>::value,
+                    "iterator type must dereference to ft_std_variant" );
 
     capability_request req;
     capability_response repl;
@@ -248,15 +248,15 @@ Client::InvokeCapability ( int devid,const std::string& capname, iteratortp begi
 
 }
 
-template<typename... Args> ft_variant Client::InvokeCapability ( int devid, const std::string& capname, Args... args )
+template<typename... Args> ft_std_variant Client::InvokeCapability ( int devid, const std::string& capname, Args... args )
 {
-    std::vector<ft_variant> callargs{args...};
+    std::vector<ft_std_variant> callargs{args...};
     return InvokeCapability ( devid, capname, callargs.begin(), callargs.end() );
 };
 
 
 template<typename containertp>
-typename std::enable_if<detail2::has_const_iterator<containertp>::value, ft_variant>::type
+typename std::enable_if<detail2::has_const_iterator<containertp>::value, ft_std_variant>::type
 Client::InvokeCapability ( int devid,const std::string& capname, containertp args )
 {
     return InvokeCapability ( devid,capname,args.begin(),args.end() );
@@ -264,8 +264,8 @@ Client::InvokeCapability ( int devid,const std::string& capname, containertp arg
 
 template <typename iteratortp> ft_vector_variant Client::FetchData ( int devid, const std::string& capname, unsigned dataid, unsigned chunksize, iteratortp begin_args, iteratortp end_args )
 {
-    static_assert ( std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_variant>::value,
-                    "iterator type must dereference to ft_variant" );
+    static_assert ( std::is_same<typename std::iterator_traits<iteratortp>::value_type, ft_std_variant>::value,
+                    "iterator type must dereference to ft_std_variant" );
 
     chunk_request req;
     req.set_devid ( devid );
@@ -297,7 +297,7 @@ template<typename... Args>
 ft_vector_variant Client::FetchData ( int devid, const std::string& capname,
                                       unsigned dataid, unsigned chunksize, Args... args )
 {
-    std::vector<ft_variant> callargs{args...};
+    std::vector<ft_std_variant> callargs{args...};
     return FetchData ( devid, capname, dataid, chunksize, callargs.begin(), callargs.end() );
 }
 

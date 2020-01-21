@@ -10,6 +10,7 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
                        "testbench_setup_funcs.*", "tbprogs/*.h",
                        "tbprogs/*.cpp", "autofilld/*.cpp",
                        "autofilld/*.hh", "testbench_archon_heater.*",
+                       "fsmd/*.cpp", "fsmd/include/*.hh"
                        "motor_test_setup.cpp")
     requires = "OpenSSL/1.0.2r@conan/stable"
 
