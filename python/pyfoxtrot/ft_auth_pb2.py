@@ -18,10 +18,10 @@ from . import ft_error_pb2 as ft__error__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='ft_auth.proto',
-  package='',
+  package='foxtrot',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\rft_auth.proto\x1a\x0e\x66t_error.proto\"\x1e\n\x0c\x61uth_request\x12\x0e\n\x06userid\x18\x01 \x01(\t\"Q\n\x0e\x61uth_challenge\x12\x17\n\x03\x65rr\x18\x01 \x01(\x0b\x32\n.errstatus\x12\x13\n\x0b\x63hallengeid\x18\x02 \x01(\r\x12\x11\n\tchallenge\x18\x03 \x01(\x0c\"A\n\rauth_response\x12\x13\n\x0b\x63hallengeid\x18\x01 \x01(\r\x12\x0e\n\x06userid\x18\x02 \x01(\t\x12\x0b\n\x03sig\x18\x03 \x01(\x0c\"^\n\x0c\x61uth_confirm\x12\x17\n\x03\x65rr\x18\x01 \x01(\x0b\x32\n.errstatus\x12\x12\n\nsessionkey\x18\x02 \x01(\x0c\x12\x0e\n\x06\x65xpiry\x18\x03 \x01(\x04\x12\x11\n\tauthlevel\x18\x04 \x01(\x05\x62\x06proto3')
+  serialized_pb=_b('\n\rft_auth.proto\x12\x07\x66oxtrot\x1a\x0e\x66t_error.proto\"\x1e\n\x0c\x61uth_request\x12\x0e\n\x06userid\x18\x01 \x01(\t\"Y\n\x0e\x61uth_challenge\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\x13\n\x0b\x63hallengeid\x18\x02 \x01(\r\x12\x11\n\tchallenge\x18\x03 \x01(\x0c\"A\n\rauth_response\x12\x13\n\x0b\x63hallengeid\x18\x01 \x01(\r\x12\x0e\n\x06userid\x18\x02 \x01(\t\x12\x0b\n\x03sig\x18\x03 \x01(\x0c\"f\n\x0c\x61uth_confirm\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\x12\n\nsessionkey\x18\x02 \x01(\x0c\x12\x0e\n\x06\x65xpiry\x18\x03 \x01(\x04\x12\x11\n\tauthlevel\x18\x04 \x01(\x05\x62\x06proto3')
   ,
   dependencies=[ft__error__pb2.DESCRIPTOR,])
 
@@ -30,13 +30,13 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _AUTH_REQUEST = _descriptor.Descriptor(
   name='auth_request',
-  full_name='auth_request',
+  full_name='foxtrot.auth_request',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='userid', full_name='auth_request.userid', index=0,
+      name='userid', full_name='foxtrot.auth_request.userid', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -54,34 +54,34 @@ _AUTH_REQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=33,
-  serialized_end=63,
+  serialized_start=42,
+  serialized_end=72,
 )
 
 
 _AUTH_CHALLENGE = _descriptor.Descriptor(
   name='auth_challenge',
-  full_name='auth_challenge',
+  full_name='foxtrot.auth_challenge',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='err', full_name='auth_challenge.err', index=0,
+      name='err', full_name='foxtrot.auth_challenge.err', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='challengeid', full_name='auth_challenge.challengeid', index=1,
+      name='challengeid', full_name='foxtrot.auth_challenge.challengeid', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='challenge', full_name='auth_challenge.challenge', index=2,
+      name='challenge', full_name='foxtrot.auth_challenge.challenge', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -99,34 +99,34 @@ _AUTH_CHALLENGE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=65,
-  serialized_end=146,
+  serialized_start=74,
+  serialized_end=163,
 )
 
 
 _AUTH_RESPONSE = _descriptor.Descriptor(
   name='auth_response',
-  full_name='auth_response',
+  full_name='foxtrot.auth_response',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='challengeid', full_name='auth_response.challengeid', index=0,
+      name='challengeid', full_name='foxtrot.auth_response.challengeid', index=0,
       number=1, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='userid', full_name='auth_response.userid', index=1,
+      name='userid', full_name='foxtrot.auth_response.userid', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sig', full_name='auth_response.sig', index=2,
+      name='sig', full_name='foxtrot.auth_response.sig', index=2,
       number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
@@ -144,41 +144,41 @@ _AUTH_RESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=148,
-  serialized_end=213,
+  serialized_start=165,
+  serialized_end=230,
 )
 
 
 _AUTH_CONFIRM = _descriptor.Descriptor(
   name='auth_confirm',
-  full_name='auth_confirm',
+  full_name='foxtrot.auth_confirm',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='err', full_name='auth_confirm.err', index=0,
+      name='err', full_name='foxtrot.auth_confirm.err', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='sessionkey', full_name='auth_confirm.sessionkey', index=1,
+      name='sessionkey', full_name='foxtrot.auth_confirm.sessionkey', index=1,
       number=2, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='expiry', full_name='auth_confirm.expiry', index=2,
+      name='expiry', full_name='foxtrot.auth_confirm.expiry', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='authlevel', full_name='auth_confirm.authlevel', index=3,
+      name='authlevel', full_name='foxtrot.auth_confirm.authlevel', index=3,
       number=4, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -196,8 +196,8 @@ _AUTH_CONFIRM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=215,
-  serialized_end=309,
+  serialized_start=232,
+  serialized_end=334,
 )
 
 _AUTH_CHALLENGE.fields_by_name['err'].message_type = ft__error__pb2._ERRSTATUS
@@ -211,28 +211,28 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 auth_request = _reflection.GeneratedProtocolMessageType('auth_request', (_message.Message,), {
   'DESCRIPTOR' : _AUTH_REQUEST,
   '__module__' : 'ft_auth_pb2'
-  # @@protoc_insertion_point(class_scope:auth_request)
+  # @@protoc_insertion_point(class_scope:foxtrot.auth_request)
   })
 _sym_db.RegisterMessage(auth_request)
 
 auth_challenge = _reflection.GeneratedProtocolMessageType('auth_challenge', (_message.Message,), {
   'DESCRIPTOR' : _AUTH_CHALLENGE,
   '__module__' : 'ft_auth_pb2'
-  # @@protoc_insertion_point(class_scope:auth_challenge)
+  # @@protoc_insertion_point(class_scope:foxtrot.auth_challenge)
   })
 _sym_db.RegisterMessage(auth_challenge)
 
 auth_response = _reflection.GeneratedProtocolMessageType('auth_response', (_message.Message,), {
   'DESCRIPTOR' : _AUTH_RESPONSE,
   '__module__' : 'ft_auth_pb2'
-  # @@protoc_insertion_point(class_scope:auth_response)
+  # @@protoc_insertion_point(class_scope:foxtrot.auth_response)
   })
 _sym_db.RegisterMessage(auth_response)
 
 auth_confirm = _reflection.GeneratedProtocolMessageType('auth_confirm', (_message.Message,), {
   'DESCRIPTOR' : _AUTH_CONFIRM,
   '__module__' : 'ft_auth_pb2'
-  # @@protoc_insertion_point(class_scope:auth_confirm)
+  # @@protoc_insertion_point(class_scope:foxtrot.auth_confirm)
   })
 _sym_db.RegisterMessage(auth_confirm)
 

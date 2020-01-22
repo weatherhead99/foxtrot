@@ -14,10 +14,10 @@ from .common import _check_repl_err
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
 from .TypeConversion import string_describe_ft_variant
-from .foxtrot_pb2 import empty, capability_argument, broadcast_notification
-from .foxtrot_pb2 import chunk_request, capability_request, VALUE_READONLY
-from .foxtrot_pb2 import VALUE_READWRITE, ACTION, STREAM, UCHAR_TYPE, USHORT_TYPE
-from .foxtrot_pb2 import UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
+from .foxtrot_pb2 import empty, broadcast_notification
+from .ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
+from .ft_capability_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
+from .foxtrot_pb2 import chunk_request
 from .ft_types_pb2 import ENUM_TYPE
 from .EnumCreator import define_enum
 

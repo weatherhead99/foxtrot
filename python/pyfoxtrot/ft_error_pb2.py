@@ -18,15 +18,15 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='ft_error.proto',
-  package='',
+  package='foxtrot',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0e\x66t_error.proto\"2\n\terrstatus\x12\x18\n\x02tp\x18\x01 \x01(\x0e\x32\x0c.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t*\xa8\x01\n\x0b\x65rror_types\x12\x0c\n\x08\x66t_Error\x10\x00\x12\x12\n\x0e\x66t_DeviceError\x10\x01\x12\x14\n\x10\x66t_ProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x12\x16\n\x12\x63ontention_timeout\x10\x05\x12\x12\n\x0e\x66t_ServerError\x10\x06\x12\x10\n\x0c\x66t_AuthError\x10\x07\x62\x06proto3')
+  serialized_pb=_b('\n\x0e\x66t_error.proto\x12\x07\x66oxtrot\":\n\terrstatus\x12 \n\x02tp\x18\x01 \x01(\x0e\x32\x14.foxtrot.error_types\x12\x0b\n\x03msg\x18\x02 \x01(\t*\xa8\x01\n\x0b\x65rror_types\x12\x0c\n\x08\x66t_Error\x10\x00\x12\x12\n\x0e\x66t_DeviceError\x10\x01\x12\x14\n\x10\x66t_ProtocolError\x10\x02\x12\x10\n\x0cout_of_range\x10\x03\x12\x11\n\runknown_error\x10\x04\x12\x16\n\x12\x63ontention_timeout\x10\x05\x12\x12\n\x0e\x66t_ServerError\x10\x06\x12\x10\n\x0c\x66t_AuthError\x10\x07\x62\x06proto3')
 )
 
 _ERROR_TYPES = _descriptor.EnumDescriptor(
   name='error_types',
-  full_name='error_types',
+  full_name='foxtrot.error_types',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -65,8 +65,8 @@ _ERROR_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=71,
-  serialized_end=239,
+  serialized_start=88,
+  serialized_end=256,
 )
 _sym_db.RegisterEnumDescriptor(_ERROR_TYPES)
 
@@ -84,20 +84,20 @@ ft_AuthError = 7
 
 _ERRSTATUS = _descriptor.Descriptor(
   name='errstatus',
-  full_name='errstatus',
+  full_name='foxtrot.errstatus',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='tp', full_name='errstatus.tp', index=0,
+      name='tp', full_name='foxtrot.errstatus.tp', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='msg', full_name='errstatus.msg', index=1,
+      name='msg', full_name='foxtrot.errstatus.msg', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -115,8 +115,8 @@ _ERRSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=18,
-  serialized_end=68,
+  serialized_start=27,
+  serialized_end=85,
 )
 
 _ERRSTATUS.fields_by_name['tp'].enum_type = _ERROR_TYPES
@@ -127,7 +127,7 @@ _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 errstatus = _reflection.GeneratedProtocolMessageType('errstatus', (_message.Message,), {
   'DESCRIPTOR' : _ERRSTATUS,
   '__module__' : 'ft_error_pb2'
-  # @@protoc_insertion_point(class_scope:errstatus)
+  # @@protoc_insertion_point(class_scope:foxtrot.errstatus)
   })
 _sym_db.RegisterMessage(errstatus)
 
