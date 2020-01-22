@@ -30,8 +30,10 @@ class FoxtrotCppMeta(type):
 
 
 class FoxtrotCppPackage(ConanFile):
-    default_user="weatherhead99"
-    default_channel="testing"
+    default_user = "weatherhead99"
+    default_channel = "testing"
+    homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
+    author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     
     def _setup_cmake(self):
         cmake = CMake(self)
@@ -53,7 +55,7 @@ class FoxtrotCppPackage(ConanFile):
         cmake = self._setup_cmake()
         cmake.install()
 
-    def package_info(self):
+    def _setup_libdirs_default(self, cppinfo):
         if not self.in_local_cache:
             if os.path.exists(".builddir.info"):
                 self.output.info("found builddir info file")
@@ -61,11 +63,14 @@ class FoxtrotCppPackage(ConanFile):
                     buildpath = f.read().strip()
 
                 self.output.warn("buildpath: %s" % buildpath)
-                self.cpp_info.libdirs = [os.path.join(buildpath,"lib"), buildpath]
-                self.cpp_info.builddirs = [buildpath]
-                self.cpp_info.includedirs.append(buildpath)
+                cppinfo.libdirs = [os.path.join(buildpath,"lib"), buildpath]
+                cppinfo.builddirs = [buildpath]
+                cppinfo.includedirs.append(buildpath)
         
             self.output.warn("build folder: %s" % self.build_folder)
         else:
-            self.cpp_info.libdirs = ["lib/foxtrot"]
+            cppinfo.libdirs = ["lib/foxtrot"]
+
+    def package_info(self):
+        self._setup_libdirs_default(self.cpp_info)
         self.cpp_info.libs = tools.collect_libs(self)

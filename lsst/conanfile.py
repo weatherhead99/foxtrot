@@ -1,4 +1,4 @@
-from conans import python_requires
+from conans import python_requires, tools
 
 ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
 
@@ -25,3 +25,8 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
         self.copy("*tbcli")
         self.copy("*autofilld")
         self.copy("*lsst_testbench.so")
+
+    def package_info(self):
+        self._setup_libdirs_default(self.cpp_info)
+        self.cpp_info.libdirs = ["lib"]
+        self.cpp_info.libs = tools.collect_libs(self)
