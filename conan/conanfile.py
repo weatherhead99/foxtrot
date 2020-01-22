@@ -22,19 +22,35 @@ bbcs = "/1.69.0%s" % bcs
 
 class FoxtrotCppMeta(type):
     def __new__(cls,name,bases,dct):
-        n = super().__new__(cls,name,bases,dct)
+        if name != "FoxtrotCppPackage":
+            newbases = list(bases)
+            newbases.append(ConanFile)
+        else:
+            newbases = bases
+        n = super().__new__(cls,name,tuple(newbases),dct)
         n.generators = "cmake", "virtualrunenv"
         n.settings = "os", "compiler", "build_type", "arch"
-        n.version = get_version()
         return n
 
+class FoxtrotBuildUtils(ConanFile):
+    name = "FoxtrotBuildUtils"
 
-class FoxtrotCppPackage(ConanFile):
+
+
+class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_user = "weatherhead99"
     default_channel = "testing"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
-    
+
+    def set_version(self):
+        git = tools.Git(folder=self.recipe_folder)
+        tagged_version = git.get_tag()
+        if tagged_version is None or tagged_version[0] != "v":
+            self.version = "git%s" % git.get_revision()[:8]
+        else:
+            self.version = tagged_version[1:]
+
     def _setup_cmake(self):
         cmake = CMake(self)
         if self.develop:
@@ -66,7 +82,7 @@ class FoxtrotCppPackage(ConanFile):
                 cppinfo.libdirs = [os.path.join(buildpath,"lib"), buildpath]
                 cppinfo.builddirs = [buildpath]
                 cppinfo.includedirs.append(buildpath)
-        
+
             self.output.warn("build folder: %s" % self.build_folder)
         else:
             cppinfo.libdirs = ["lib/foxtrot"]
