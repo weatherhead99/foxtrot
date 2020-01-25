@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-        
+from pyfoxtrot.Errors import DeviceError, ProtocolError, ContentionError, ServerError, AuthenticationError
+
 def _check_repl_err(repl):
     if not repl.HasField('err'):
         return repl
