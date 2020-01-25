@@ -10,14 +10,14 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
                        "testbench_setup_funcs.*", "tbprogs/*.h",
                        "tbprogs/*.cpp", "autofilld/*.cpp",
                        "autofilld/*.hh", "testbench_archon_heater.*",
-                       "fsmd/*.cpp", "fsmd/include/*.hh"
+                       "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
-    requires = "OpenSSL/1.0.2r@conan/stable"
+    requires = "OpenSSL/1.0.2s@conan/stable", "zlib/1.2.11"
 
     def requirements(self):
-        self.requires("foxtrot_client/latest@%s/%s" % (self.user,self.channel))
-        self.requires("foxtrot_protocols/latest@%s/%s" % (self.user,self.channel))
-        self.requires("foxtrot_devices/latest@%s/%s" % (self.user,self.channel))
+        self.requires("foxtrot_client/%s@%s/%s" % (self.version,self.user,self.channel))
+        self.requires("foxtrot_protocols/%s@%s/%s" % (self.version,self.user,self.channel))
+        self.requires("foxtrot_devices/%s@%s/%s" % (self.version,self.user,self.channel))
 
     def deploy(self):
         self.copy_deps("*exptserve")
