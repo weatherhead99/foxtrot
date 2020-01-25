@@ -19,6 +19,7 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
         "libsodium/1.0.18%s" % bcs, \
         "cmake_findboost_modular%s" % bbcs, \
         "rapidjson/1.1.0%s" % bcs, \
+        "zlib/1.2.11"
     
     default_options = {"libcurl:shared" : True,
                        "OpenSSL:shared" : True,

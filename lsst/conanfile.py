@@ -15,9 +15,9 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
     requires = "OpenSSL/1.0.2r@conan/stable"
 
     def requirements(self):
-        self.requires("foxtrot_client/%s@%s/%s" % (self.version,self.user,self.channel))
-        self.requires("foxtrot_protocols/%s@%s/%s" % (self.version,self.user,self.channel))
-        self.requires("foxtrot_devices/%s@%s/%s" % (self.version,self.user,self.channel))
+        self.requires("foxtrot_client/latest@%s/%s" % (self.user,self.channel))
+        self.requires("foxtrot_protocols/latest@%s/%s" % (self.user,self.channel))
+        self.requires("foxtrot_devices/latest@%s/%s" % (self.user,self.channel))
 
     def deploy(self):
         self.copy_deps("*exptserve")

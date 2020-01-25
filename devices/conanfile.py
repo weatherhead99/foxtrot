@@ -19,7 +19,8 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "idscamera/*.cpp", "idscamera/*.h")
 
     requires =  ("rapidxml/1.13@bincrafters/stable",
-                 "boost_date_time%s" % ftbase.bbcs)
+                 "boost_date_time%s" % ftbase.bbcs,
+                 "zlib/1.2.11")
     
     default_options = {"OpenSSL:shared" : True,
                        "libcurl:shared" : True}

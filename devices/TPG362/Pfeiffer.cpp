@@ -39,6 +39,8 @@ string PfeifferDevice::calculate_checksum(const string_view message)
                                      {
                                          return static_cast<int>(c1) + static_cast<int>(c2);
                                      });
+    _lg.strm(sl::trace) << "length of message: " << message.size() ;
+    _lg.strm(sl::trace) << "numeric calculated checksum: " << checksum;
     
     return str_from_number(checksum % 256, 3);
 };
@@ -95,7 +97,7 @@ void PfeifferDevice::validate_response_telegram_parameters(unsigned short addres
 
 std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const string& response)
 {
-    auto csum_calc = calculate_checksum(response);
+  auto csum_calc = calculate_checksum(response.substr(0,response.size()-4));
     auto csumstr = response.substr(response.size() -4, 3);
     
     if(response.compare(response.size()-4,3,csum_calc) != 0)
@@ -103,6 +105,7 @@ std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const s
         _lg.strm(sl::error) << "mismatched checksum error";
         _lg.strm(sl::error) << "calculated checksum is: " << csum_calc;
         _lg.strm(sl::error) << "received checksum: " << csumstr;
+	_lg.strm(sl::error) << "full response: " << response;
         throw DeviceError("got invalid checksum");
     }
     
