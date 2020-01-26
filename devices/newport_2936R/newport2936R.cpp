@@ -787,12 +787,29 @@ RTTR_REGISTRATION
   using namespace rttr;
   using foxtrot::devices::newport2936R;
   
-  type::register_converter_func(convert_powerunit_to_string);
-  type::register_converter_func(convert_string_to_powerunit);
-  type::register_converter_func(convert_int_to_mode);
-  type::register_converter_func(convert_mode_to_int);
+//   type::register_converter_func(convert_powerunit_to_string);
+//   type::register_converter_func(convert_string_to_powerunit);
+//   type::register_converter_func(convert_int_to_mode);
+//   type::register_converter_func(convert_mode_to_int);
   
-  registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits");
+  registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits")
+  ( value("Amps", powerunits::Amps),
+    value("Volts", powerunits::Volts),
+    value("Watts", powerunits::Watts),
+    value("Watts_cm2", powerunits::Watts_cm2),
+    value("Joules", powerunits::Joules),
+    value("Joules_cm2", powerunits::Joules_cm2));
+  
+  registration::enumeration<foxtrot::devices::powermodes>("foxtrot::devices::powermodes")
+  (value("DC_cont", powermodes::DC_cont),
+   value("DC_sing", powermodes::DC_sing),
+   value("Integrate", powermodes::Integrate),
+   value("PP_cont", powermodes::PP_cont),
+   value("PP_sing", powermodes::PP_sing),
+   value("pulse_cont", powermodes::pulse_cont),
+   value("pulse_single", powermodes::pulse_single),
+   value("RMS", powermodes::RMS));
+  
   registration::class_<newport2936R>("foxtrot::devices::newport2936R")
   .property("Lambda",&newport2936R::getLambda, &newport2936R::setLambda)
   .property_readonly("Power",&newport2936R::getPower)
