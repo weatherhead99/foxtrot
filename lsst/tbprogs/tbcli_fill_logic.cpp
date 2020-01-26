@@ -25,7 +25,7 @@ int find_webswitch(const foxtrot::servdescribe& sd)
 void do_fill(foxtrot::Client& cl, int devid, double filltime_hours, int relay)
 {
     std::cout << "energising relay..." << std::endl;
-    std::vector<foxtrot::ft_variant> args{relay, true};
+    std::vector<foxtrot::ft_std_variant> args{relay, true};
     
     cl.InvokeCapability(devid,"SetRelay",args.begin(),args.end());
     std::cout << "sleeping for fill time: " << filltime_hours << " hours" << std::endl;

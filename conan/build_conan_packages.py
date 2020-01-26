@@ -13,7 +13,7 @@ api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel,
            version=buildtools_version)
 
 
-createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=True,
+createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=False,
                                   update=True, build_modes=["missing"])
 
 curdir = os.path.abspath(os.curdir)
@@ -24,8 +24,10 @@ createfun("../core")
 print("building foxtrot server conan package...")
 createfun("../server")
 
-print("building foxtrot c++ client package...")
-createfun("../client")
+
+#disable building client for now, it doesn't work
+#print("building foxtrot c++ client package...")
+#createfun("../client")
 
 print("building foxtrot protocols package...")
 createfun("../protocols")

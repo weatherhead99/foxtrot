@@ -11,17 +11,19 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     description="foxtrot server components"
     exports_sources = "CMakeLists.txt", "src/*.cpp", \
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
-    "include/foxtrot/devices/*.h", "include/foxtrot/protocols/*.h", \
-    "include/exptserve/*.hh", "cmake/*", "setups/*", "devprogs/*", "devices/*"
+    "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
+    "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
+    "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = "boost_program_options%s" % bbcs, \
-        "libcurl/7.61.1%s" % bcs, \
-        "libsodium/1.0.16%s" % bcs, \
+        "libcurl/7.52.1%s" % bcs, \
+        "libsodium/1.0.18%s" % bcs, \
         "cmake_findboost_modular%s" % bbcs, \
-        "rttr/0.9.6@weatherhead99/testing", \
-        "rapidjson/1.1.0%s" % bcs
+        "rapidjson/1.1.0%s" % bcs, \
+        "zlib/1.2.11"
     
-    default_options = {"rttr:shared" : True,
-                       "libcurl:shared" : True}
+    default_options = {"libcurl:shared" : True,
+                       "OpenSSL:shared" : True,
+                       "libsodium:shared" : True}
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %

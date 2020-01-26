@@ -243,6 +243,7 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
 
 std::string foxtrot::protocols::SerialPort::read_until_endl(char endlchar)
 {
+
   auto avail = bytes_available();
   auto ret = this->read(avail);
   
@@ -252,6 +253,9 @@ std::string foxtrot::protocols::SerialPort::read_until_endl(char endlchar)
   while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(_wait_ms));
+      avail = bytes_available();
+      if(avail == 0)
+          throw foxtrot::ProtocolError("ran out of bytes to read in serial port! Perhaps wait_ms is not configured properly or this command does not return a response");
       ret += read(bytes_available());
 
     };
@@ -272,4 +276,5 @@ void foxtrot::protocols::SerialPort::setWait(unsigned int wait_ms)
   _wait_ms = wait_ms;
 
 }
+
 

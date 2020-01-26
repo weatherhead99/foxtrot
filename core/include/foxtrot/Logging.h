@@ -78,7 +78,7 @@ namespace foxtrot
 	};
 	
     template<typename T>
-    struct FOXTROT_CORE_EXPORT streamThrowLogging : public streamLogging {
+    struct streamThrowLogging : public streamLogging {
         friend class Logging;
         template<typename R> streamThrowLogging& operator<<(R const& value)
         {

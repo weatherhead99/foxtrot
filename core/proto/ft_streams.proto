@@ -1,0 +1,64 @@
+syntax = "proto3";
+package foxtrot;
+
+import "ft_error.proto";
+import "ft_capability.proto";
+
+enum stream_control_commands
+{
+    stop = 0;
+}
+
+
+
+message stream_thread_request
+{
+    uint32 msgid = 1;
+    uint32 tick_time_ms =2;
+    string threadcomment =3;
+}
+
+message stream_thread_response
+{
+    errstatus err =1;
+    uint32 threadid = 2;
+}
+
+
+message stream_registration_request
+{
+    uint32 msgid = 1;
+    uint32 threadid = 2;
+    capability_request req = 3;
+    uint32 nticks = 4;
+    string streamcomment = 5;
+}
+
+message stream_registration_response
+{
+    errstatus err =1;
+    uint32 msgid = 2;
+    uint32 streamhandle = 3;
+}
+
+message stream_control
+{
+    uint32 msgid = 1;
+    uint32 streamhandle = 2;
+    stream_control_commands cmd = 3;
+}
+
+message streamlist
+{
+    errstatus err =1;
+    repeated stream_thread_response threads = 2;
+}
+
+message streamthreadlist
+{
+    errstatus err = 1;
+    repeated stream_registration_response streams = 2;
+
+}
+
+

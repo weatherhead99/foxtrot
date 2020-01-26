@@ -2,7 +2,7 @@
 #include "ServerFlagsImpl.h"
   
   
-class server_flag_visitor : public boost::static_visitor<>
+class server_flag_visitor
 {
 public:
   server_flag_visitor(foxtrot::serverflag& flg) : flg_(flg)
@@ -49,7 +49,7 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
   try{
     repl.set_msgid(req.msgid());
     
-    ft_variant var;
+    ft_std_variant var;
     switch(req.arg_case())
     {
       case(reqtp::ArgCase::kDblval):
@@ -111,10 +111,11 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
     {
       throw std::out_of_range("invalid server flag");
     }
-    
+
     repl.set_flagname(req.flagname());    
-    boost::apply_visitor( server_flag_visitor(repl), it->second) ;
-    
+    std::visit( server_flag_visitor(repl), it->second);
+
+
   }
   catch(...)
   {
@@ -148,7 +149,7 @@ bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic:
         {
             auto* newflag = repl.add_flags();
             newflag->set_flagname(flag.first);
-            boost::apply_visitor( server_flag_visitor(*newflag), flag.second);
+            std::visit(server_flag_visitor(*newflag), flag.second);
         }
             
     }

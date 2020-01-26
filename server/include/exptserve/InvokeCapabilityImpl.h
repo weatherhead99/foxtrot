@@ -18,14 +18,15 @@ namespace foxtrot
      const static bool newcall = true;
      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestInvokeCapability;
      
-     InvokeCapabilityLogic(DeviceHarness& harness);
+     InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness);
      
      bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
      
     private:
-        DeviceHarness& _harness;
+    std::shared_ptr<DeviceHarness> _harness;
 	foxtrot::Logging _lg;
     };
+    
     
 
 }

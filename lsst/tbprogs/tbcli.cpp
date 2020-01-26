@@ -239,7 +239,7 @@ int main(int argc, char** argv)
 	exit(1);
       }
       
-      auto power = boost::get<double>(client.InvokeCapability(devid,"Power",{}));
+      auto power = std::get<double>(client.InvokeCapability(devid,"Power",{}));
       std::cout << "power: " << power <<  std::endl;
     }
 

@@ -6,7 +6,8 @@
 
 #include <foxtrot/client/client.h>
 
-
+//WARNING: HACK: THIS MUST ALL BE FIXED PROPERLY TO BE NOT FRAGILE! 
+//HACK: currently only using simplevariant types etc etc
 
 foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& arg) 
 : _arg(arg)
@@ -15,26 +16,31 @@ foxtrot::ft_variant_visitor::ft_variant_visitor(foxtrot::capability_argument& ar
 
 void foxtrot::ft_variant_visitor::operator()(double& i) const
 {
-//   std::cout << "arg value at visitor is: <double> " << i << std::endl;
-    _arg.set_dblarg(i);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_dblval(i);
+    simplevar->set_size(sizeof(double));
 }
 
 void foxtrot::ft_variant_visitor::operator()(int& d) const
 {
-//     std::cout << "arg value at visitor is: <int> " << d << std::endl;
-    _arg.set_intarg(d);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_intval(d);
+    simplevar->set_size(sizeof(int));
 }
 
 
 void foxtrot::ft_variant_visitor::operator()(bool& i) const
 {
-    _arg.set_boolarg(i);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_boolval(i);
+    simplevar->set_size(sizeof(bool));
 }
 
 void foxtrot::ft_variant_visitor::operator()(const std::string& s) const
 {
-//   std::cout << "arg value at visitor is: <string> " << s << std::endl;
-    _arg.set_strarg(s);
+    auto simplevar = _arg.mutable_value()->mutable_simplevar();
+    simplevar->set_stringval(s);
+    
 }
 
 
@@ -102,30 +108,31 @@ std::string foxtrot::ft_variant_printer::string()
 }
 
 
-foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
+foxtrot::ft_std_variant foxtrot::ft_variant_from_response(const foxtrot::capability_response& repl)
 {
-    foxtrot::ft_variant out;
+    foxtrot::ft_std_variant out;
     foxtrot::Logging lg("ft_variant_from_response");
     
     check_repl_err(repl,&lg);
     
-    
-    auto rettp = repl.return_case();
-    switch(rettp)
+    auto retval = repl.returnval();
+    if(!retval.has_simplevar())
     {
-        case(capability_response::ReturnCase::kDblret):
-//             std::cout << "double" << std::endl;
-            out = repl.dblret();
-            break;
-        case(capability_response::ReturnCase::kIntret):
-            out = repl.intret();
-            break;
-        case(capability_response::ReturnCase::kBoolret):
-            out = repl.boolret();
-            break;
-        case(capability_response::ReturnCase::kStringret):
-            out = repl.stringret();
-            break;
+        throw std::runtime_error("can't deal with non simplevar responses in c++ client yet!");
+    }
+    switch(retval.simplevar().value_case())
+    {
+        case(ft_simplevariant::ValueCase::kDblval):
+            out = retval.simplevar().dblval(); break;
+        case(ft_simplevariant::ValueCase::kIntval):
+            out = static_cast<int>(retval.simplevar().intval()); break;
+        case(ft_simplevariant::ValueCase::kUintval):
+            out = static_cast<int>(retval.simplevar().uintval()); break;
+        case(ft_simplevariant::ValueCase::kBoolval):
+            out = retval.simplevar().boolval(); break;
+        case(ft_simplevariant::ValueCase::kStringval):
+            out = retval.simplevar().stringval(); break;
+            
     }
     
     return out;
@@ -133,9 +140,9 @@ foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::capability_
 
 }
 
-foxtrot::ft_variant foxtrot::ft_variant_from_response(const foxtrot::serverflag& repl)
+foxtrot::ft_std_variant foxtrot::ft_variant_from_response(const foxtrot::serverflag& repl)
 {
-    foxtrot::ft_variant out;
+    foxtrot::ft_std_variant out;
     foxtrot::Logging lg("ft_variant_from_response");
     check_repl_err(repl,&lg);
     
@@ -341,7 +348,7 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
 }
 
 
-foxtrot::ft_variant foxtrot::Client::get_server_flag(const std::string& flagname)
+foxtrot::ft_std_variant foxtrot::Client::get_server_flag(const std::string& flagname)
 {
     serverflag req;
     serverflag repl;
@@ -365,14 +372,14 @@ foxtrot::ft_variant foxtrot::Client::get_server_flag(const std::string& flagname
     
 };
 
-void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_variant& val)
+void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_std_variant& val)
 {
     serverflag req;
     serverflag repl;
     req.set_msgid(_msgid++);
     req.set_flagname(flagname);
     
-    boost::apply_visitor(ft_variant_flag_visitor(req), val);
+    std::visit(ft_variant_flag_visitor(req), val);
     
     grpc::ClientContext ctxt;
     auto status = _stub->SetServerFlag(&ctxt, req, &repl);
@@ -443,27 +450,27 @@ std::vector<std::string> foxtrot::Client::get_flag_names()
 };
 
 
-foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
+foxtrot::ft_std_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname)
 {
-    std::vector<ft_variant> empty;
+    std::vector<ft_std_variant> empty;
     return InvokeCapability(devid,capname,empty.begin(),empty.end());
     
 }
 
 
-foxtrot::ft_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_variant > args)
+foxtrot::ft_std_variant foxtrot::Client::InvokeCapability(int devid, const std::string& capname, std::initializer_list< foxtrot::ft_std_variant > args)
 {
   //TODO: optimize?
   
   ft_variant_printer pt;
   for(auto& arg: args)
   {
-   boost::apply_visitor(pt,arg);  
+   std::visit(pt,arg);  
    _lg.Trace("arg: "  + pt.string());
     
   }
   
-  std::vector<ft_variant> argvec(args.begin(), args.end());
+  std::vector<ft_std_variant> argvec(args.begin(), args.end());
   
   return InvokeCapability(devid,capname, argvec);
   
@@ -515,7 +522,7 @@ foxtrot::Client::capability_proxy::capability_proxy(foxtrot::Client& cl, int dev
 
 }
 
-foxtrot::ft_variant foxtrot::Client::capability_proxy::operator()(std::initializer_list< foxtrot::ft_variant > args)
+foxtrot::ft_std_variant foxtrot::Client::capability_proxy::operator()(std::initializer_list< foxtrot::ft_std_variant > args)
 {
  return _clientbackref.InvokeCapability(_devid,_capname,args);
 }

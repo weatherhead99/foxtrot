@@ -150,15 +150,16 @@ int main(int argc, char** argv)
     lg.strm(sl::debug) << "passed all the option tests..";
     
     
-    DeviceHarness harness;
-    foxtrot::ExperimentalSetup setup(setupfile,harness,params.get());
+    auto harness = std::make_shared<DeviceHarness>();
+
+    foxtrot::ExperimentalSetup setup(setupfile,*harness,params.get());
     
     if(vm.count("dump"))
     {
       lg.Info("dumping setup...");
       
       auto dumpfile = vm["dump"].as<std::string>();
-      dump_setup(harness, dumpfile);
+      dump_setup(*harness, dumpfile);
       
       return 0;
     }

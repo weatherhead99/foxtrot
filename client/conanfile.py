@@ -15,14 +15,14 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
     requires = "boost_program_options%s" % ftbase.bbcs, \
                "boost_log%s" % ftbase.bbcs, \
                "boost_filesystem%s" % ftbase.bbcs, \
-               "protobuf/3.6.1%s" % ftbase.bcs, \
-               "cmake_findboost_modular%s" % ftbase.bbcs
+               "protobuf/3.9.1%s" % ftbase.bcs, \
+               "cmake_findboost_modular%s" % ftbase.bbcs, \
+               "zlib/1.2.11"
     default_options = {"boost_log:shared": True,
                        "boost_thread:shared": True,
                        "boost_program_options:shared": True,
                        "boost_filesystem:shared": True,
                        "boost_regex:shared": True,
-                       "OpenSSL:shared": True,
                        "protobuf:with_zlib": True}   
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %

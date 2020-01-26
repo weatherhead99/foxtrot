@@ -1,7 +1,7 @@
 project(foxtrot_devices C CXX)
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
@@ -16,6 +16,7 @@ endif()
 
 
 find_package(foxtrotCore REQUIRED)
+find_package(Boost REQUIRED COMPONENTS date_time)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakeParseArguments)
@@ -89,6 +90,7 @@ add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
 add_subdirectory(digitaldiscovery)
 add_subdirectory(idscamera)
+add_subdirectory(DLP-IOR4)
 
 set(libobjs "")
 message(STATUS "device targetS: ${device_targets}")
@@ -97,7 +99,8 @@ foreach(tgt ${device_targets})
 endforeach()
 message(STATUS "libobjs: ${libobjs}")
 add_library(foxtrot_devices ${libobjs})
-target_link_libraries(foxtrot_devices PUBLIC foxtrot::foxtrot_protocols)
+#TODO: fix these insane dependencies
+target_link_libraries(foxtrot_devices PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
 
 foreach(lib ${link_later_libs})
     message(STATUS "linking in requested library: ${lib}")
@@ -109,6 +112,16 @@ foreach(tgt ${device_targets})
   add_dependencies(foxtrot_devices ${tgt}_copy_includes)
 endforeach()
 
+add_executable(tim_play BSC203/tim_play.cpp)
+target_link_libraries(tim_play PUBLIC foxtrot_devices)
+
+add_executable(bsc_play BSC203/bsc_play.cpp)
+target_link_libraries(bsc_play PUBLIC foxtrot_devices)
+
+if(${ueye_FOUND})
+  add_executable(idscamera_play idscamera/idscamera_play.cpp)
+  target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
+endif()
 
 install(TARGETS foxtrot_devices 
         EXPORT foxtrot_devices
@@ -132,3 +145,4 @@ foxtrot_create_package_config(cmake/foxtrotDevicesConfig.cmake.in ${ft_cmakedir}
 
 foxtrot_add_to_package_registry(foxtrot_devices
 foxtrotDevices)
+

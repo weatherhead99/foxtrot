@@ -3,258 +3,153 @@
 #include <vector>
 #include <array>
 
+#include <rttr/registration>
+
 #include <foxtrot/Logging.h>
+#include <foxtrot/DeviceError.h>
 
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/server/Device.h>
 
+#include "APT.h"
 
 
 //TODO: handle error conditions somehow!!!!
 
 namespace foxtrot {
   namespace devices {
+      
+    #pragma pack(push,1)
+   struct velocity_params
+   {
+       unsigned short chan_indent;
+       unsigned int minvel;
+       unsigned int acceleration;
+       unsigned int maxvel;
+   }; 
+   
+    #pragma pack(push,1)
+   struct move_relative_params{
+       unsigned short chanIndent;
+       unsigned int rel_distance;
+   };
+   
+    #pragma pack(push,1)
+   struct position_counter{
+       unsigned short chanindent;
+       unsigned int position;
+   };
+   
+    #pragma pack (push,1)
+   struct jogparamsBSC{
+        unsigned short chanIndent;
+        unsigned short jogMode;
+        unsigned int jogStepSize;
+        unsigned int jogMinVel;
+        unsigned int jogAccn;
+        unsigned int jogMaxVel;
+        unsigned short jogStopMode;
+   };
+   
+    #pragma pack (push,1)
+   struct homeparams{
+       unsigned short chanIndent;
+       unsigned short homeDir; //1->UP; 2->DOWN.
+       unsigned short limitSwitch;
+       unsigned int homeVelocity;
+       unsigned int offsetDistance;
+   };
+   
+    #pragma pack (push,1)
+   struct powerparams{
+       unsigned short chanIndent;
+       unsigned short restFactor;
+       unsigned short moveFactor;
+   };
+   
+   enum class channelID: unsigned char {
+       channel_1 = 0x01,
+       channel_2 = 0x02,
+       channel_3 = 0x03,
+   };
+   
+   #pragma pack (push,1)
+   struct limitswitchparams{
+       unsigned short chan_indent;
+       unsigned short CWhard;
+       unsigned short CCWhard;
+       unsigned int CWsoft;
+       unsigned int CCWsoft;
+       unsigned short limitMode;
+   };
+   
+   #pragma pack (push,1)
+   struct PMDjoystickparams{
+       unsigned short chan_indent;
+       unsigned int lowMaxVel;
+       unsigned int highMaxVel;
+       unsigned int highLowAccn;
+       unsigned int highHighAccn;
+       unsigned short dirSense;
+   };
     
-    enum class destination : unsigned char
+    #pragma pack(pop)
+    
+    class BSC203 : public APT
     {
-     host = 0x01,
-     rack = 0x11,
-     bay1 = 0x21,
-     bay2 = 0x22,
-     bay3 = 0x23
-    };
-    
-    enum class motor_channel_idents : unsigned char{
-        channel_1 = 0x01,
-        channel_2 = 0x02,
-        channel_3 = 0x04,
-        channel_4 = 0x08
-    };
-        
-    
-    
-    enum class bsc203_opcodes : unsigned short {
-      MGMSG_MOD_IDENTIFY = 0x0223,
-      MGMSG_MOD_SET_CHANENABLESTATE = 0x0210,
-      MGMSG_MOD_REQ_CHANENABLESTATE = 0x0211,
-      MGMSG_MOD_GET_CHANENABLESTATE = 0x0212,
-      
-      MGMSG_MOD_START_UPDATEMSGS = 0x0011,
-      MGMSG_MOD_STOP_UPDATEMSGS = 0x0012,
-      
-      MGMSG_MOD_REQ_HWINFO = 0x0005,
-      MGMSG_MOD_GET_HWINFO = 0x0006,
-      
-      MGMSG_HW_NO_FLASH_PROGRAMMING = 0x0018,
-      
-      MGMSG_RACK_REQ_BAYUSED = 0x0060,
-      MGMSG_RACK_GET_BAYUSED = 0x0061,
-      
-      MGMSG_RACK_REQ_STATUSBITS = 0x0226,
-      MGMSG_RACK_GET_STATUSBITS = 0x0227,
-      
-      MGMSG_RACK_SET_DIGOUTPUTS = 0x0228,
-      MGMSG_RACK_REQ_DIGOUTPUTS = 0x0229,
-      MGMSG_RACK_GET_DIGOUTPUTS = 0x0230,
-      
-      MGMSG_MOT_SET_POSCOUNTER = 0x0410,
-      MGMSG_MOT_REQ_POSCOUNTER = 0x0411,
-      MGMSG_MOT_GET_POSCOUNTER = 0x0412,
-      
-      MGMSG_MOT_SET_ENCCOUNTER = 0x0409,
-      MGMSG_MOT_REQ_ENCCOUNTER = 0x040A,
-      MGMSG_MOT_GET_ENCCOUNTER = 0x040B,
-      
-      MGMSG_MOT_SET_VELPARAMS = 0x0413,
-      MGMSG_MOT_REQ_VELPARAMS = 0x0414,
-      MGMSG_MOT_GET_VELPARAMS = 0x0415,
-      
-      MGMSG_MOT_SET_JOGPARAMS = 0x0416,
-      MGMSG_MOT_REQ_JOGPARAMS = 0x0417,
-      MGMSG_MOT_GET_JOGPARAMS = 0x0418,
-      
-      MGMSG_MOT_REQ_ADCINPUTS = 0x042B,
-      MGMSG_MOT_GET_ADCINPUTS = 0x042C,
-      
-      MGMSG_MOT_SET_POWERPARAMS = 0x0426,
-      MGMSG_MOT_REQ_POWERPARAMS = 0x0427,
-      MGMSG_MOT_GET_POWERPARAMS = 0x0428,
-      
-      MGMSG_MOT_SET_GENMOVEPARAMS = 0x043A,
-      MGMSG_MOT_REQ_GENMOVEPARAMS = 0x043B,
-      MGMSG_MOT_GET_GENMOVEPARAMS = 0x043C,
-      
-      MGMSG_MOT_SET_MOVERELPARAMS = 0x0445,
-      MGMSG_MOT_REQ_MOVERELPARAMS = 0x0446,
-      MGMSG_MOT_GET_MOVERELPARAMS = 0x0447,
-      
-      MGMSG_MOT_SET_MOVEABSPARAMS = 0x0450,
-      MGMSG_MOT_REQ_MOVEABSPARAMS = 0x0451,
-      MGMSG_MOT_GET_MOVEABSPARAMS = 0x0452,
-      
-      MGMSG_MOT_SET_HOMEPARAMS = 0x0440,
-      MGMSG_MOT_REQ_HOMEPARAMS = 0x0441,
-      MGMSG_MOT_GET_HOMEPARAMS = 0x0442,
-      
-      MGMSG_MOT_SET_LIMSWITCHPARAMS = 0x0423,
-      MGMSG_MOT_REQ_LIMSWITCHPARAMS = 0x0424,
-      MGMSG_MOT_GET_LIMSWITCHPARAMS = 0x0425,
-      
-      MGMSG_MOT_MOVE_HOME = 0x0443,
-      MGMSG_MOT_MOVE_HOMED = 0x0444,
-      
-      MGMSG_MOT_MOVE_RELATIVE = 0x0448,
-      
-      MGMSG_MOT_MOVE_COMPLETED = 0x0464,
-      
-      MGMSG_MOT_MOVE_ABSOLUTE = 0x0453,
-      
-      MGMSG_MOT_MOVE_JOG = 0x046A,
-      
-      MGMSG_MOT_MOVE_VELOCITY = 0x0457,
-      
-      MGMSG_MOT_MOVE_STOP = 0x0465,
-      MGMSG_MOT_MOVE_STOPPED = 0x0466,
-      
-      MGMSG_MOT_SET_BOWINDEX = 0x04F4,
-      MGMSG_MOT_REQ_BOWINDEX = 0x04F5,
-      MGMSG_MOT_GET_BOWINDEX = 0x04F6,
-      
-      MGMSG_MOT_SET_DCPIDPARAMS = 0x04A0,
-      MGMSG_MOT_REQ_DCPIDPARAMS = 0x04A1,
-      MGMSG_MOT_GET_DCPIDPARAMS = 0x04A2,
-      
-      MGMSG_MOT_GET_STATUSUPDATE = 0x0481,
-      MGMSG_MOT_REQ_STATUSUPDATE = 0x0480,
-      
-      MGMSG_MOT_REQ_DCSTATUSUPDATE = 0x0490,
-      MGMSG_MOT_GET_DCSTATUSUPDATE = 0x0491,
-      
-      MGMSG_MOT_REQ_STATUSBITS = 0x0429,
-      MGMSG_MOT_GET_STATUSBITS = 0x042A
-      
-      
-      
-    };
-    
-    struct bsc203_reply
-    {
-      unsigned char p1;
-      unsigned char p2;
-      std::vector<unsigned char> data;      
-    };
-    
-#pragma pack(push,1)
-    struct hwinfo
-    {
-      unsigned int serno;
-      unsigned long modelno;
-      unsigned short type;
-      unsigned int fwvers;
-      std::array<char,48> notes;
-      unsigned short HWvers;
-      unsigned short modstate;
-      unsigned short nchans;
-    };
-    
-    struct motor_status
-    {
-        unsigned short chan_ident;
-        unsigned long position;
-        unsigned long enccount;
-        unsigned short statusbits;
-    };
-#pragma pack(pop)
-    
-    class BSC203 : public Device
-    {
+        RTTR_ENABLE()
     public:
-    BSC203(std::shared_ptr< protocols::SerialPort > proto);
-    
-    void identify_module(destination dest);
-    void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
-    bool get_channelenable(destination dest, motor_channel_idents channel);
-    
-    hwinfo get_hwinfo(destination dest);
-      
-    bool get_bayused_rack(destination dest, unsigned char bay);
-    
-    void home_channel(destination dest, motor_channel_idents channel);
-    
-    
-    void relative_move(destination dest, motor_channel_idents channel, int distance);
-    void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
-    
-    
-    
+        BSC203(std::shared_ptr< protocols::SerialPort > proto);
+	const std::string getDeviceTypeName() const override;
+	
+        void identify_module (destination rackdest, channelID idchan);
+        void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
+        void set_limit_switch_params(destination dest, motor_channel_idents channel, const limitswitchparams& limitstr);
+        void set_bowindex(destination dest, motor_channel_idents channel, int bowindex);
+        void require_status_update(destination dest);
+        void require_digoutputs(destination dest);
+        void relative_move(destination dest, motor_channel_idents channel, int distance);
+        void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
+        bool get_bayused_rack(destination dest, unsigned char bay);
+        void jog_move(destination dest, motor_channel_idents channel, unsigned char direction);
+        channel_status get_status_update (destination dest, bool print = true);
+        
+        void set_velocity_params (destination dest, velocity_params* velpar);
+        velocity_params get_velocity_params(destination dest);
+        
+        void set_relative_move_params(destination dest, motor_channel_idents channel, int distance);
+        void set_absolute_move_params(destination dest, motor_channel_idents channel, 
+                                      int distance);
+        void set_PMD_params(destination dest, motor_channel_idents channel, const PMDjoystickparams& PMDjoystickstr);
+        move_relative_params get_relative_move_params(destination dest);
+        void set_jog_params(destination dest, motor_channel_idents channel, const jogparamsBSC& jogstr);
+        jogparamsBSC get_jog_params(destination dest);
+        
+        void set_poscounter(destination dest, motor_channel_idents channel, int position);
+        unsigned int get_poscounter(destination dest);
+        
+        void set_enccounter(destination dest, motor_channel_idents channel, int enccount);
+        unsigned int get_enccounter(destination dest);
+        
+        void set_homeparams(destination dest, motor_channel_idents channel,const homeparams& homestr);
+        homeparams get_homeparams(destination dest);
+        
+        void set_power_parameters(destination dest, motor_channel_idents channel, const powerparams& powerstr); //Not working on BSC203 controller, the power is computed as a function of the velocity
+        powerparams get_power_parameters(destination dest);
+        
+        void set_generalmove_params(destination dest, motor_channel_idents channel, int backlashdis);
+        unsigned int get_generalmove_params(destination dest);
+        
+        void homing_channel(destination dest, motor_channel_idents chan);
+        
     protected:
-      void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest,
-			    destination src = destination::host);
-      
-      template<typename arrtp>
-      void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, 
-			    destination src = destination::host);
-    
-      bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
-          bool* has_data = nullptr);
-      
-      template<typename T>
-      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest,
-          unsigned char p1, unsigned char p2);
-    
-      template<typename T, typename arrtp>
-      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest,
-                                arrtp& data);
-      
-                         
-      foxtrot::Logging _lg;
-      
-    private:
-      std::shared_ptr<protocols::SerialPort> _serport;
-      
-      
+        void start_update_messages(destination dest);
+        void stop_update_messages(destination dest);
+        bool check_code_serport(bsc203_opcodes expected_opcode);
     };
     
+    void print_channel_status(channel_status* chanstr);
     
   }//namespace devices
 } //namespace foxtrot
-
-
-template<typename arrtp>
-void foxtrot::devices::BSC203::transmit_message(foxtrot::devices::bsc203_opcodes opcode, arrtp& data, destination  dest, destination src)
-{ 
-  auto size = data.size();
-  unsigned char* len = reinterpret_cast<unsigned char*>(size); 
-  unsigned char* optpr = reinterpret_cast<unsigned char*>(&opcode);
-  
-  unsigned char destaddr = static_cast<unsigned char>(dest) | 0x80;
-  unsigned char srcaddr = static_cast<unsigned char>(src);
-  
-  std::array<unsigned char, 6> header{ optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
-   
-  _serport->write(std::string(header.begin(), header.end()));
-  _serport->write(std::string(data.begin(), data.end()));
-
-}
-
-template<typename T>
-T foxtrot::devices::BSC203::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
-                                                    foxtrot::devices::bsc203_opcodes opcode_recv, 
-                                                    destination dest, unsigned char p1, unsigned char p2)
-{
-    T out;
-    transmit_message(opcode_send, p1, p2, dest);
-    bool has_data;
-    auto ret = receive_message_sync(opcode_recv,dest, &has_data);
-    
-    if(!has_data)
-        throw DeviceError("expected struct data in response but didn't get any!");
-    
-    if(ret.data.size() != sizeof(T))
-        throw std::logic_error("mismatch between received data size and struct size!");
-    
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
-    return out;
-    
-}
 

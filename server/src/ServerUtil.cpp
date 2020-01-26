@@ -6,187 +6,127 @@
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/ServerUtil.h>
+#include <foxtrot/typeUtil.h>
+#include <foxtrot/foxtrot.pb.h>
 
+using namespace foxtrot;
 
-rttr::variant foxtrot::get_arg(const capability_argument& arg, bool& success)
-    {
-    success=true;
-    rttr::variant outarg;
-    auto which_type = arg.value_case();
-    
-    foxtrot::Logging lg("get_arg");
-    lg.Debug("arg type switch: " + std::to_string(which_type) );
-    
-    switch(which_type)
-    {
-    case(capability_argument::ValueCase::kDblarg):
-        outarg = arg.dblarg();
-        break;
-        
-    case(capability_argument::ValueCase::kIntarg):
-        outarg = arg.intarg();
-        break;
-        
-    case(capability_argument::ValueCase::kBoolarg):    
-        outarg = arg.boolarg();
-        break;
-    
-    case(capability_argument::ValueCase::kStrarg):
-        outarg = arg.strarg();
-        break;
-
-    case(capability_argument::ValueCase::VALUE_NOT_SET):
-        success = false;
-    }
-  
-    //     cout << "outarg type: " << outarg.get_type().get_name() << endl;
-    return outarg;
-    }
-    
-
-    
-bool foxtrot::set_returntype(rttr::variant& retval, capability_response& repl)
+rttr::variant foxtrot::wire_arg_to_variant(const foxtrot::capability_argument& arg, bool& success, const rttr::type& target_tp, foxtrot::Logging* lg)
 {
-      foxtrot::Logging _lg("set_returntype");
-  
-      _lg.Trace("setting return type" );
-      
-      if(!retval.is_valid())
-      {
-	_lg.Error("invalid variant supplied!");
-	throw std::logic_error("invalid variant supplied");
-      };
-      
-      _lg.strm(sl::trace) << "raw type name is: " << retval.get_type().get_name();
-      auto rettp = get_appropriate_wire_type(retval);
-        _lg.Trace("rettp is: " + std::to_string(rettp) );
-            bool convertsuccess = true;
-         if(rettp == value_types::FLOAT_TYPE)
-         {
-            _lg.Trace("it's a double!");
-            repl.set_dblret(retval.to_double(&convertsuccess));
-         }
-         else if (rettp == value_types::BOOL_TYPE)
-         {
-	   _lg.Trace("bool");
-             convertsuccess = retval.can_convert(rttr::type::get<bool>());
-             repl.set_boolret(retval.to_bool());
-         }
-         else if(rettp == value_types::INT_TYPE)
-         {
-             _lg.Trace("int");
-             repl.set_intret(retval.to_int(&convertsuccess));
-         }
-         else if(rettp == value_types::STRING_TYPE)
-         {
-             _lg.Trace("string");
-	     
-	     auto canconv = retval.can_convert(rttr::type::get<std::string>());
-	     _lg.Trace("can convert to string: " + std::to_string(canconv));
-	     
-	     auto ok = retval.convert(rttr::type::get<std::string>());
-	     
-	     _lg.Trace("converted string: " + retval.to_string());
-	     
-	     bool ok2;
-	     std::string out = retval.convert<std::string>(&ok2);
-	     _lg.Trace("retval.convert: " + out);
-	     
-             repl.set_stringret(retval.to_string(&convertsuccess));
-         }
-         //if it's VOID, no need to set rettp
-         else if(rettp == value_types::VOID_TYPE)
-        { 
-            _lg.Trace("void");
-            repl.set_stringret("");
-	   
-        }   
-         
-         if(!convertsuccess)
-         {
-             errstatus* errstat = repl.mutable_err();
-             errstat->set_msg("couldn't successfully convert return type");
-             errstat->set_tp(error_types::ft_Error);
-         };
-         
-         _lg.Debug("convertsuccess: " + std::to_string(convertsuccess) );
-         return convertsuccess;
+    success = true;
+    rttr::variant out;
+    
+    try
+    {
+        out = wire_type_to_variant(arg.value(), target_tp);
+    }
+    catch(std::runtime_error& err)
+    {
+        if(lg)
+        {
+            lg->strm(sl::error) << "caught runtime error in converting argument";
+            lg->strm(sl::error) << "details: " << err.what();
+        }
+        throw err;
+    };
+    return out;
 }
 
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
+void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capability_response& resp, foxtrot::Logging* lg)
 {
-  
-  if(!var.is_valid())
-  {
-    throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
-  }
-  
-  auto tp = var.get_type();
-  
-  if(!tp.is_valid())
-  {
-    throw std::logic_error("invalid type check previous!");
-  }
-  
-  
-//   if( var.can_convert<int>() || var.can_convert<unsigned>() )
+    ft_variant* retval = resp.mutable_returnval();
+    try{
+        if(lg)
+            lg->strm(sl::trace) << "in is valid? " << in.is_valid() ;
+        *retval = get_variant_wire_type(in, lg);
+    }
+    catch(std::logic_error& err)
+    {
+        if(lg)
+        {
+            lg->strm(sl::error) << "caught logic error converting variant wire type";
+            lg->strm(sl::error) << "details: " << err.what();
+        }
+        throw err;
+    }
+
+}
+
+
+// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
+// {
+//   
+//   if(!var.is_valid())
+//   {
+//     throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
+//   }
+//   
+//   auto tp = var.get_type();
+//   
+//   if(!tp.is_valid())
+//   {
+//     throw std::logic_error("invalid type check previous!");
+//   }
+//   
+//   
+// //   if( var.can_convert<int>() || var.can_convert<unsigned>() )
+// //     {
+// //       if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
+// // 	{
+// // 	  return value_types::INT;
+// // 	}
+// //     }
+// //     
+//   return get_appropriate_wire_type(tp);
+// }
+// 
+// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
+// {
+//     using namespace rttr;
+//     
+//     
+//     if(!tp.is_valid())
 //     {
-//       if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
-// 	{
-// 	  return value_types::INT;
-// 	}
+//         throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
 //     }
 //     
-  return get_appropriate_wire_type(tp);
-}
-
-foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
-{
-    using namespace rttr;
-    
-    
-    if(!tp.is_valid())
-    {
-        throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
-    }
-    
-    
-    if(tp == type::get<void>())
-    {
-        return value_types::VOID_TYPE;
-    }
-    
-    //check for bool
-    if(tp == type::get<bool>())
-    {
-        return value_types::BOOL_TYPE;
-    }
-    
-    //check for float
-    if( (tp == type::get<double>()) || (tp == type::get<float>())) 
-    {
-        return value_types::FLOAT_TYPE;
-    }
-    
-    if( tp == type::get<std::string>())
-    {
-      return value_types::STRING_TYPE;
-    }
-    
-    if(tp.is_enumeration())
-    {
-      return value_types::INT_TYPE;
-    }
-    
-    
-    if(!tp.is_arithmetic() )
-    {
-        return value_types::STRING_TYPE;
-    }
-    
-    
-    return value_types::INT_TYPE;
-}
+//     
+//     if(tp == type::get<void>())
+//     {
+//         return value_types::VOID_TYPE;
+//     }
+//     
+//     //check for bool
+//     if(tp == type::get<bool>())
+//     {
+//         return value_types::BOOL_TYPE;
+//     }
+//     
+//     //check for float
+//     if( (tp == type::get<double>()) || (tp == type::get<float>())) 
+//     {
+//         return value_types::FLOAT_TYPE;
+//     }
+//     
+//     if( tp == type::get<std::string>())
+//     {
+//       return value_types::STRING_TYPE;
+//     }
+//     
+//     if(tp.is_enumeration())
+//     {
+//       return value_types::INT_TYPE;
+//     }
+//     
+//     
+//     if(!tp.is_arithmetic() )
+//     {
+//         return value_types::STRING_TYPE;
+//     }
+//     
+//     
+//     return value_types::INT_TYPE;
+// }
 
 
 

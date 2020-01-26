@@ -22,7 +22,7 @@ namespace foxtrot
         constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
         const static bool newcall = true;
 	
-        FetchDataLogic(DeviceHarness& harness);
+        FetchDataLogic(std::shared_ptr<DeviceHarness> harness);
         
 	
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
@@ -32,7 +32,7 @@ namespace foxtrot
 	
     private:
         bool initial_request(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
-        DeviceHarness& _harness;
+        std::shared_ptr<DeviceHarness> _harness;
 	foxtrot::Logging _lg;
     
     unsigned _thischunk = 0;

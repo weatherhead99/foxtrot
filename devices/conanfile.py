@@ -14,10 +14,14 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "newport_2936R/*.h", "newport_2936R/*.cpp", "OPS-Q250/*.h",
                       "OPS-Q250/*.cpp", "stellarnet/*.h", "stellarnet/*.cpp",
                       "TPG362/*.h", "TPG362/*.cpp", "webswitch_plus/*.h",
-                      "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake")
+                      "DLP-IOR4/*.cpp", "DLP-IOR4/*.hh",
+                      "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake",
+                      "idscamera/*.cpp", "idscamera/*.h")
 
-    requires =  ("OpenSSL/1.0.2r@conan/stable",
-                 "rapidxml/1.13@bincrafters/stable")
+    requires =  ("rapidxml/1.13@bincrafters/stable",
+                 "boost_date_time%s" % ftbase.bbcs,
+                 "zlib/1.2.11")
+    
     default_options = {"OpenSSL:shared" : True,
                        "libcurl:shared" : True}
     

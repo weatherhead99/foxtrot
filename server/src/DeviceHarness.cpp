@@ -8,7 +8,7 @@
 #include <foxtrot/ContentionError.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/ServerUtil.h>
-
+#include <foxtrot/typeUtil.h>
 
 
 
@@ -90,183 +90,89 @@ std::timed_mutex & foxtrot::DeviceHarness::GetMutex(int id)
 
 std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 {
+    
     std::vector<std::string> out;
     
     _lg.strm(sl::trace) << "getting device...";
     auto dev = GetDevice(devid);
-    auto tp = rttr::type::get(*dev);
-    _lg.strm(sl::trace) << "tp: " << tp.get_name();
-    
-    auto props = tp.get_properties();
-    auto meths = tp.get_methods();
-    
-    out.reserve(props.size() + meths.size());
-    
-    for(auto& prop : props)
-    {
-#ifdef NEW_RTTR_API
-     out.push_back(std::string{prop.get_name()});
-#else
-     out.push_back(prop.get_name());   
-#endif
-    }
-    
-    
-    for(auto& meth: meths)
-    {
-#ifdef NEW_RTTR_API
-        out.push_back(std::string{meth.get_name()});
-#else
-        out.push_back(meth.get_name());
-#endif
-    };
-    
-    return out;
-    
+    return dev->GetCapabilityNames();
+
 }
 
 foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, const std::string& capname)
 {
     auto dev = GetDevice(devid);
-    auto reflecttp = type::get(*dev);
     
-    //either it's a property or a method
+    _lg.strm(sl::trace) << "getting capability from device";
+    foxtrot::Capability cap = dev->GetCapability(capname);
+    foxtrot::devcapability out;
+    out.set_capname(cap.CapabilityName);
     
-    auto prop = reflecttp.get_property(capname.c_str());
-    auto meth = reflecttp.get_method(capname.c_str());
-    
-    devcapability cap;
-    cap.set_capname(capname);
-    
-    _lg.strm(sl::trace) << "getting capability for: " << capname;
-    
-    
-    if(prop)
+    _lg.strm(sl::trace) << "setting capability type...";
+    switch(cap.type)
     {
-        _lg.strm(sl::trace) << "it's a property...";
-      
-#ifndef NEW_RTTR_API
-      if(prop.get_type().is_array())
-#else
-      if(prop.get_type().is_sequential_container())
-#endif
-      {
-          _lg.strm(sl::trace) << "it's a stream...";
-        cap.set_tp(capability_types::STREAM);
-	
-      }
-      
-      if(prop.is_readonly())
-      {
-            
-          cap.set_tp(capability_types::VALUE_READONLY);
-          std::ostringstream oss;
-          oss << cap.tp();
-          _lg.Debug(oss.str() );
-      }
-      else
-      {
-          cap.set_tp(capability_types::VALUE_READWRITE);
-          
-          auto proptp = prop.get_type();
-          
-#ifdef NEW_RTTR_API
-          //TODO: probably much more elegant way to do this!
-          cap.add_argnames(std::string(proptp.get_name()));
-#else
-          cap.add_argnames(proptp.get_name());
-#endif
-          cap.add_argtypes(get_appropriate_wire_type(proptp));
-          
-      }
-      
-      _lg.strm(sl::trace) << "rettp: " << prop.get_type().get_name();
-      foxtrot::value_types rettp = get_appropriate_wire_type(prop.get_type());
-      _lg.strm(sl::trace) <<  "rettp wire type : " <<  rettp ;
-      
-      cap.set_rettp(rettp);
-      
-      
+        case(CapabilityType::VALUE_READONLY): out.set_tp(capability_types::VALUE_READONLY); break;
+        case(CapabilityType::VALUE_READWRITE): out.set_tp(capability_types::VALUE_READWRITE); break;
+        case(CapabilityType::ACTION): out.set_tp(capability_types::ACTION); break;
+        case(CapabilityType::STREAM): out.set_tp(capability_types::STREAM); break;
     }
-    else if (meth)
+    
+    if(cap.type == CapabilityType::STREAM)
     {
-        _lg.strm(sl::trace) << "it's a method...";
+        if(! cap.Returntype.is_template_instantiation())
+        {
+            throw std::logic_error("stream return type is not a template instantiation. Don't know how to deal with this");
+        }
+        auto tempargs = cap.Returntype.get_template_arguments();
+        auto value_type = *tempargs.begin();
         
-#ifndef NEW_RTTR_API
-        _lg.strm(sl::trace) << "old rttr api in use...";
-	  if(meth.get_return_type().is_array())
-#else
-          
-     _lg.strm(sl::trace) << "return type: " << meth.get_return_type().get_name(); 
-          
-      if(meth.get_return_type().is_sequential_container())
-#endif
-	  {
-        _lg.strm(sl::trace) << "it's a stream...";
-	   cap.set_tp(capability_types::STREAM);
-	   
-	  }
-	  else{
-        _lg.strm(sl::trace) << "it's an action...";
-            cap.set_tp(capability_types::ACTION);
-	  }
-            
-            //in this case, set argument names and types
-            auto args =  meth.get_parameter_infos();
-            
-            auto rettp = meth.get_return_type();
-            cap.set_rettp(get_appropriate_wire_type(rettp));
-            
-            
-            for(auto& arg : args)
-            {
-#ifdef NEW_RTTR_API
-                cap.add_argnames(std::string(arg.get_name()));
-#else
-                cap.add_argnames(arg.get_name());
-#endif
-                
-                auto argtp = arg.get_type();
-                
-                //get a wire type
-                auto wire_type = get_appropriate_wire_type(argtp);
-                
-                cap.add_argtypes(wire_type);
-                
-            }
-            
+        if(value_type == type::get<unsigned char>())
+            out.set_vecrettp(byte_data_types::UCHAR_TYPE);
+	else if(value_type == type::get<char>())
+	    out.set_vecrettp(byte_data_types::CHAR_TYPE);
+        else if(value_type == type::get<unsigned short>())
+            out.set_vecrettp(byte_data_types::USHORT_TYPE);
+        else if(value_type == type::get<unsigned>())
+            out.set_vecrettp(byte_data_types::UINT_TYPE);
+        else if(value_type == type::get<unsigned long>())
+            out.set_vecrettp(byte_data_types::ULONG_TYPE);
+        else if(value_type == type::get<short>())
+            out.set_vecrettp(byte_data_types::SHORT_TYPE);
+        else if(value_type == type::get<int>())
+            out.set_vecrettp(byte_data_types::IINT_TYPE);
+        else if(value_type == type::get<long>())
+            out.set_vecrettp(byte_data_types::LONG_TYPE);
+        else if(value_type == type::get<float>())
+            out.set_vecrettp(byte_data_types::BFLOAT_TYPE);
+        else if(value_type == type::get<double>())
+            out.set_vecrettp(byte_data_types::BDOUBLE_TYPE);
+        else
+            throw std::out_of_range("invalid value type for stream: " + std::string(value_type.get_name()));
+        
     }
     else
     {
-        throw std::out_of_range("requested capability doesn't seem to exist!");
-        
+        _lg.strm(sl::debug) << "action type, describing  return type:" << cap.Returntype.get_name().to_string();
+        auto retdesc = out.mutable_rettp();
+        *retdesc = describe_type(cap.Returntype, &_lg);
     }
     
+    for(auto& name: cap.Argnames)
+        out.add_argnames(name);
     
-    return cap;
-    
+    for(auto& type: cap.Argtypes)
+    {
+        _lg.strm(sl::debug) << "describing argument with type: " <<type.get_name().to_string();
+        
+        auto typedesc = out.add_argtypes();
+        *typedesc = describe_type(type);
+    }
+
+    return out;
+
 }
 
 
-
-
-
-variant DeviceHarness::call_capability(int devid, property& prop, unsigned int contention_timeout_ms)
-{
-  if(!prop.is_readonly())
-  {
-    throw std::logic_error("not a readonly property");
-  };
-  
-  auto lock = lock_device_contentious(devid,contention_timeout_ms);
-  
-  auto dev = GetDevice(devid);
-  auto retval = prop.get_value(*dev);
-      
-  return retval;
-  
-
-}
 
 std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
 {

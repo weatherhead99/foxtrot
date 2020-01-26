@@ -61,7 +61,7 @@ env_data autofill_logic::measure_data(Client& cl)
 {
     env_data out;
 
-    using boost::get;
+    using std::get;
     
     cl.InvokeCapability(archon_devid,"update_state");
     
@@ -229,7 +229,7 @@ bool autofill_logic::was_dewar_filled(Client& cl)
 {
     try {
         auto ret = cl.get_server_flag("autofill/dewar_filled");
-        return boost::get<bool>(ret);
+        return std::get<bool>(ret);
     }
     catch(std::out_of_range& err)
     {
@@ -251,7 +251,7 @@ bool autofill_logic::is_autofill_enabled(Client& cl)
 {
     try{
         auto ret = cl.get_server_flag("autofill/autofill_enable");
-        return boost::get<bool>(ret);
+        return std::get<bool>(ret);
     }
     catch(std::out_of_range& err)
     {
@@ -298,7 +298,7 @@ void detail::execute_fill(Client& cl, int ws_devid, double filltime_hours,
 
     lg.strm(sl::debug) << "energising relay..." ;
 
-    std::vector<foxtrot::ft_variant> args {relay, true};
+    std::vector<foxtrot::ft_std_variant> args {relay, true};
     if(!dryrun)
         cl.InvokeCapability(ws_devid,"SetRelay", args.begin(), args.end());
     else

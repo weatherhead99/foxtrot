@@ -9,6 +9,7 @@
 #include <foxtrot/DeviceError.h>
 
 #include <foxtrot/devices/dummyDevice.h>
+#include <foxtrot/ft_tuple_helper.hh>
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
@@ -127,17 +128,60 @@ double foxtrot::devices::dummyDevice::getWomble()
     return _womble;
 }
 
-int foxtrot::devices::dummyDevice::takes_custom_type(foxtrot::devices::dummyType in)
+int foxtrot::devices::dummyDevice::takes_custom_enum(foxtrot::devices::dummyEnum in)
 {
   return 1;
 
 }
 
 
-foxtrot::devices::dummyType foxtrot::devices::dummyDevice::returns_custom_type(int in)
+foxtrot::devices::dummyEnum foxtrot::devices::dummyDevice::returns_custom_enum(int in)
 {
-  return dummyType::dummy_1;
+  return dummyEnum::dummy_1;
 
+}
+
+std::string 
+foxtrot::devices::dummyDevice::takes_custom_struct(const dummyStruct& in)
+{
+    return in.strval;
+};
+
+
+bool
+foxtrot::devices::dummyDevice::takes_pointer_type(int* in)
+{
+    if(in)
+        return true;
+    return false;
+}
+
+foxtrot::devices::dummyStruct foxtrot::devices::dummyDevice::returns_custom_struct()
+{
+    dummyStruct out;
+    out.strval = "hello";
+    out.uval = 0xDEAD;
+    out.bval = false;
+    out.dval = 3.14159;
+    return out;
+}
+
+
+std::tuple<int,std::string> foxtrot::devices::dummyDevice::returns_int_str_tuple()
+{
+    return std::make_tuple(0x1337,"hello");
+}
+
+
+std::tuple<double,int,double> foxtrot::devices::dummyDevice::returns_unregistered_tuple()
+{
+    return std::make_tuple(3.14,2,5.18);
+}
+
+
+std::pair<int, double> foxtrot::devices::dummyDevice::returns_pair()
+{
+    return std::make_pair(1,1.0);
 }
 
 void foxtrot::devices::dummyDevice::doNothing()
@@ -177,9 +221,34 @@ RTTR_REGISTRATION
  .method("setWomble",&dummyDevice::setWomble)
  (parameter_names("val"))
  .method("getWomble", &dummyDevice::getWomble)
- .method("takes_custom_type", &dummyDevice::takes_custom_type)
- .method("returns_custom_type", &dummyDevice::returns_custom_type)
+ .method("takes_custom_enum", &dummyDevice::takes_custom_enum)
+ .method("returns_custom_enum", &dummyDevice::returns_custom_enum)
  .method("doNothing", &dummyDevice::doNothing)
+ .method("returns_custom_struct", &dummyDevice::returns_custom_struct)
+ .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
+ .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
+ .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
+ .method("returns_pair", &dummyDevice::returns_pair);
+
+ foxtrot::register_tuple<std::pair<int,double>>();
+ foxtrot::register_tuple<std::tuple<int,std::string>>();
  
- ;
+ using foxtrot::devices::dummyEnum;
+ using foxtrot::devices::dummyStruct;
+ 
+ registration::class_<dummyStruct>("foxtrot::devices::dummyStruct")
+ .constructor()(policy::ctor::as_object)
+ .property("strval", &dummyStruct::strval)
+ .property("uval", &dummyStruct::uval)
+ .property("bval", &dummyStruct::bval)
+ .property("dval", &dummyStruct::dval);
+ 
+ 
+ registration::enumeration<dummyEnum>("foxtrot::devices::dummyEnum")
+ (
+     value("dummy_1", dummyEnum::dummy_1),
+     value("dummy_2", dummyEnum::dummy_2)
+     );
+ 
+ 
 }

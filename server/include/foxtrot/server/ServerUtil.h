@@ -4,6 +4,7 @@
 #include <rttr/type>
 
 #include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_capability.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
@@ -18,6 +19,15 @@ class variant;
 
 namespace foxtrot
 {
+    
+    void set_retval_from_variant(const rttr::variant& in, foxtrot::capability_response& resp, foxtrot::Logging* lg = nullptr);
+    
+    rttr::variant wire_arg_to_variant(const foxtrot::capability_argument& arg,
+                                      bool& success,
+                                      const rttr::type& target_tp,
+                                      foxtrot::Logging* lg = nullptr);
+    
+    
 
 class HandlerTag;
     
@@ -145,108 +155,10 @@ template <typename repltp, typename respondtp> void foxtrot_server_specific_erro
 
 std::unique_ptr<unsigned char[]> byte_view_data ( rttr::variant& arr, unsigned& byte_size, foxtrot::byte_data_types& dtype );
 
-rttr::variant get_arg ( const capability_argument& arg, bool& success );
 
-bool set_returntype ( rttr::variant& retval, foxtrot::capability_response& repl );
-value_types get_appropriate_wire_type ( const rttr::variant& vr );
-value_types get_appropriate_wire_type ( const rttr::type& tp );
-
-template <typename reqtp, typename repltp> std::vector<rttr::variant> get_callargs ( rttr::method& meth,
-        reqtp& req,
-        repltp& repl )
-{
-    foxtrot::Logging lg ( "get_callargs" );
-
-
-    auto args = req.args();
-    std::vector<rttr::variant> argvec;
-    argvec.resize ( args.size() );
-
-    //check parameter infos
-    auto param_infs = meth.get_parameter_infos();
-
-    if ( args.size() != param_infs.size() ) {
-        lg.Error ( "unexpected number of arguments supplied" );
-        errstatus* errstat = repl.mutable_err();
-        errstat->set_msg ( "incorrect number of arguments supplied" );
-        errstat->set_tp ( error_types::out_of_range );
-
-        throw 1;
-
-    }
-
-#ifdef NEW_RTTR_API
-    auto paraminfsit = param_infs.begin();
-#endif
-
-    for ( auto& arg: args ) {
-        bool success;
-        rttr::variant outarg = get_arg ( arg,success );
-
-        if ( !outarg.is_valid() ) {
-            lg.Error ( "variant is invalid" );
-            throw std::logic_error ( "variant is invalid! in get_callargs" );
-
-        };
-
-
-        if ( !success ) {
-            lg.Error ( "error in getting arguments..." );
-            auto msg = "argument at position " + std::to_string ( arg.position() ) + "is not set";
-            set_repl_err_msg ( repl,msg,error_types::ft_Error );
-            throw 1;
-        }
-#ifdef NEW_RTTR_API
-        const auto target_argtp = ( paraminfsit++ )->get_type();
-#else
-        const auto target_argtp = param_infs[arg.position()].get_type();
-#endif
-        lg.strm ( sl::debug ) << "can convert? : " << ( int ) outarg.can_convert ( target_argtp );
-
-        if ( !outarg.can_convert ( target_argtp ) ) {
-            lg.Error ( "error converting argument " );
-            auto msg = "argument at position " + std::to_string ( arg.position() ) + " of type: " + outarg.get_type().get_name()
-                       + "cannot be converted to type " + target_argtp.get_name();
-            lg.Debug ( msg );
-            set_repl_err_msg ( repl,msg, error_types::out_of_range );
-            throw 1;
-
-        }
-
-        if ( outarg.get_type() != target_argtp ) {
-            lg.strm ( sl::debug ) << " need to convert an arg from: " << outarg.get_type().get_name() << " to " << target_argtp.get_name();
-
-            lg.strm ( sl::debug ) << "arg value (int): " << outarg.to_int() ;
-        };
-
-        //NOTE: outarg.convert returns bool, f*ck you RTTR that is NOT obvious!
-
-        success = outarg.convert ( target_argtp );
-
-        if ( !success ) {
-            lg.strm ( sl::error ) << "failed to convert arg..." ;
-            throw std::logic_error ( "failed to convert arg" );
-        };
-
-        lg.strm ( sl::debug ) << "arg type is now: " << outarg.get_type().get_name();
-
-        argvec[arg.position()] = outarg;
-    };
-
-    for ( auto& arg : argvec ) {
-        bool success;
-        auto str = arg.to_string ( &success );
-        if ( !success ) {
-            lg.Error ( "couldn't get string whil trying to print arg" );
-            break;
-        }
-
-        lg.Trace ( "arg: " + str );
-
-    }
-
-    return argvec;
-}
+// bool set_returntype ( rttr::variant& retval, foxtrot::capability_response& repl );
+// value_types get_appropriate_wire_type ( const rttr::variant& vr );
+// value_types get_appropriate_wire_type ( const rttr::type& tp );
 
 
 template<typename T> bool is_ft_call_streaming ( const T& propmeth )

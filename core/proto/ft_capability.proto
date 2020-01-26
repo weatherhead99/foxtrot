@@ -1,0 +1,69 @@
+syntax = "proto3";
+package foxtrot;
+import "ft_types.proto";
+import "ft_error.proto";
+
+enum capability_types
+{
+    VALUE_READONLY = 0;
+    VALUE_READWRITE = 1;
+    ACTION = 2;
+    STREAM = 3;
+}
+
+
+enum byte_data_types
+{
+    UCHAR_TYPE = 0;
+    CHAR_TYPE = 1;
+    USHORT_TYPE = 2;
+    UINT_TYPE = 3;
+    ULONG_TYPE = 4;
+    SHORT_TYPE = 5;
+    IINT_TYPE = 6;
+    LONG_TYPE = 7;
+    BFLOAT_TYPE =8;
+    BDOUBLE_TYPE = 9;
+}
+
+message devcapability
+{
+    capability_types tp = 1;
+    string capname = 2;
+    repeated string argnames = 3;
+    repeated variant_descriptor argtypes = 4;
+    //TODO: allow for return of vector types
+    oneof return
+    {
+      variant_descriptor rettp = 5;
+      byte_data_types vecrettp = 6;
+      bool dynamic_rettp = 7;
+    }
+}
+
+
+
+message capability_argument
+{
+    uint32 position = 1;
+    ft_variant value = 2;
+}
+
+message capability_request
+{
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname  = 3;
+    repeated capability_argument args = 4; 
+    uint32 contention_timeout = 5;
+}
+
+message capability_response
+{
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname = 3;
+    ft_variant returnval = 4;
+    errstatus err = 5;
+}
+

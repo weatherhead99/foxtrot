@@ -1,0 +1,85 @@
+syntax="proto3";
+package foxtrot;
+
+enum simplevalue_types
+{
+    FLOAT_TYPE = 0 ;
+    INT_TYPE = 1;
+    UNSIGNED_TYPE = 2;
+    BOOL_TYPE = 3;
+    STRING_TYPE = 4;
+    VOID_TYPE = 5;
+}
+
+enum variant_types
+{
+    SIMPLEVAR_TYPE = 0;
+    STRUCT_TYPE = 1;
+    ENUM_TYPE = 2;
+    TUPLE_TYPE = 3;
+}
+
+message variant_descriptor
+{
+    variant_types variant_type = 1;
+    simplevalue_types simplevalue_type = 2;
+    uint32 simplevalue_sizeof = 3;
+    struct_descriptor struct_desc = 4;
+    enum_descriptor enum_desc = 5;
+    tuple_descriptor tuple_desc = 6;
+}
+
+message struct_descriptor
+{
+    string struct_name = 1;
+    map<string, variant_descriptor> struct_map = 2;
+}
+
+message enum_descriptor
+{
+    string enum_name = 1;
+    map<string, uint32> enum_map = 2;
+}
+
+message tuple_descriptor
+{
+    repeated variant_descriptor tuple_map = 1;
+}
+
+message ft_variant {
+    oneof value {
+        ft_simplevariant simplevar = 1;
+        ft_struct structval = 2;
+        ft_enum enumval = 3;
+        ft_tuple tupleval = 4;
+    }
+}
+
+message ft_simplevariant {
+    oneof value {
+        double dblval = 1;
+        sint64 intval = 2;
+        uint64 uintval = 3;
+        bool boolval = 4;
+        string stringval = 5;
+        }
+    uint32 size = 6;
+    bool is_void = 7;
+}
+
+
+message ft_struct {
+    string struct_name = 1;
+    map<string, ft_variant> value = 2;
+}
+
+
+message ft_enum {
+    enum_descriptor desc = 1;
+    uint32 enum_value = 2;
+}
+
+message ft_tuple {
+    repeated ft_variant value = 2;
+}
+

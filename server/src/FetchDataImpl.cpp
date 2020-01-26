@@ -6,7 +6,7 @@
 
 #include "FetchDataImpl.h"
 
-foxtrot::FetchDataLogic::FetchDataLogic(foxtrot::DeviceHarness& harness)
+foxtrot::FetchDataLogic::FetchDataLogic(std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _harness(harness), _lg("FetchDataLogic")
 {
 }
@@ -21,7 +21,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     try
     {
-     dev = _harness.GetDevice(req.devid());   
+     dev = _harness->GetDevice(req.devid());   
     }
     catch(std::out_of_range& err)
     {
@@ -29,62 +29,49 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
         return true;
     }
     
-    auto devtp = rttr::type::get(*dev);
-    auto meth = devtp.get_method(req.capname().c_str());
-    
-    if(!meth)
+    auto cap = dev->GetCapability(req.capname());
+    if(cap.type != CapabilityType::STREAM)
     {
-      auto msg = "no matching method found for capability: " + req.capname();
-      foxtrot_server_specific_error(msg,repl,respond,_lg,tag,error_types::out_of_range);
-      return true;
+        foxtrot_server_specific_error("tried to FetchData on a non streaming method: " + req.capname(),
+                                      repl, respond, _lg, tag, error_types::ft_ServerError);
+        return true;
     }
     
-    auto streamdatameta = meth.get_metadata("streamdata");
-    if(!streamdatameta.is_valid() || !streamdatameta.to_bool()) 
+    
+    std::vector<rttr::variant> vargs;
+    vargs.reserve(req.args().size());
+    
+    auto argtypeit = cap.Argtypes.begin();
+    
+    for(auto& inarg : req.args())
+    {   
+        bool success = false;
+        if(argtypeit == cap.Argtypes.end())
+            throw std::runtime_error("invalid length of arguments caught in fetchdata");
+        
+        auto outarg = wire_arg_to_variant(inarg, success, 
+                                          *(argtypeit++), &_lg);
+        if(!success)
+        {
+            foxtrot_server_specific_error("couldn't parse wire argument at position: " + 
+            std::to_string(inarg.position()), repl, respond, _lg, tag, error_types::unknown_error);
+            return true;
+        }
+        vargs.push_back(outarg);
+    }
+    
+    auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
+    auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
+    
+    if(!ftretval.is_sequential_container())
     {
-      auto msg = "tried to call a method that doesn't support streaming";
-      foxtrot_server_specific_error(msg,repl,respond,_lg,tag);
-      return true;
+        foxtrot_server_specific_error("return type is not an array type", repl, respond,_lg,tag);
+        return true;
     }
     
-    rttr::variant retval;
-    
-    std::vector<rttr::variant> args;
-    
-    try{
-      args = get_callargs(meth,req,repl);
-    }
-    catch(int& i)
-    {
-      foxtrot_server_specific_error("couldn't get callargs", repl, respond, _lg,tag);
-      return true;
-    }
-    
-    
-    try{
-      std::vector<rttr::argument> callargs(args.begin(), args.end());
-      
-      auto lock = _harness.lock_device_contentious(req.devid(),req.contention_timeout());
-      retval = meth.invoke_variadic(*dev,callargs);
-    }
-    catch(...)
-    {
-      foxtrot_rpc_error_handling(std::current_exception(),repl,respond,_lg,tag);
-      return true;
-    };
-    
-#ifdef NEW_RTTR_API
-    if(!retval.is_sequential_container())
-#else
-    if(!retval.is_array())
-#endif
-    {
-      foxtrot_server_specific_error("return type is not an array type", repl, respond,_lg,tag);
-      return true;
-    }
     
     foxtrot::byte_data_types dt;
-    _data = foxtrot::byte_view_data(retval,_byte_size,dt);
+    _data = foxtrot::byte_view_data(ftretval,_byte_size,dt);
     
     if(_data == nullptr )
     {
@@ -104,6 +91,9 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     _currval = _data.get();
     
     return false;
+    
+    
+
 };
 
 

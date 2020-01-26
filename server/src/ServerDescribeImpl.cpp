@@ -1,7 +1,7 @@
 #include "ServerDescribeImpl.h"
 #include <iostream>
 
-foxtrot::ServerDescribeLogic::ServerDescribeLogic(const std::string& comment, foxtrot::DeviceHarness& harness)
+foxtrot::ServerDescribeLogic::ServerDescribeLogic(const std::string& comment, std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _servcomment(comment), _harness(harness), _lg("ServerDescribeLogic")
 {
 }
@@ -13,7 +13,7 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
       
       repl.set_servcomment(_servcomment);
       
-      auto devmap = _harness.GetDevMap();
+      auto devmap = _harness->GetDevMap();
       
       auto outdevmap = repl.mutable_devs_attached();
       
@@ -27,13 +27,15 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
           desc.set_devcomment(devpair.second->getDeviceComment());
           
           //enumerate capabilities
+          
+          
           //WARNING: SLOOOOW
-          auto capnames = _harness.GetCapabilityNames(devid);
+          auto capnames = devpair.second->GetCapabilityNames();
           for(auto& capname : capnames)
           {
               _lg.strm(sl::debug) << "adding capability: " << capname ;
               auto outcaps = desc.add_caps();
-              outcaps->CopyFrom(_harness.GetDeviceCapability(devid, capname));
+              outcaps->CopyFrom(_harness->GetDeviceCapability(devid, capname));
               
               _lg.strm(sl::trace) << "debug string: " << outcaps->DebugString();
               

@@ -9,7 +9,7 @@
 #include <grpc++/grpc++.h>
 #include <grpc++/security/credentials.h>
 
-#include <boost/variant.hpp>
+#include <variant>
 
 #include <foxtrot/foxtrot.pb.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -29,14 +29,14 @@ using grpc::ServerBuilder;
 using std::string;
 
 namespace foxtrot{
-    typedef boost::variant<double,int,bool,std::string> ft_variant;
-    using flagmap =  std::map<std::string, ft_variant> ;
+    using ft_std_variant = std::variant<double,int,bool,std::string>;
+    using flagmap =  std::map<std::string, ft_std_variant> ;
     
 class ServerImpl 
 {
 public:
-    ServerImpl(const std::string& servcomment, DeviceHarness& harness);
-    ServerImpl(const std::string& servcomment, DeviceHarness& harness, const std::string& connstr);
+    ServerImpl(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness);
+    ServerImpl(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness, const std::string& connstr);
     
     void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
     void setup_auth(const std::string& credsfile, int creds_validity_seconds);
@@ -78,7 +78,7 @@ private:
     foxtrot::exptserve::AsyncService _service;
     
     std::string _servcomment;
-    DeviceHarness& _harness;
+    std::shared_ptr<DeviceHarness> _harness;
     
     std::string default_channel_;
     std::string default_title_;
