@@ -12,12 +12,13 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT bool is_tuple(const rttr::type& tp, Logging* lg = nullptr);
     
     FOXTROT_CORE_EXPORT ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var, Logging* lg=nullptr);
-    
+
     FOXTROT_CORE_EXPORT ft_struct get_struct_wire_type(const rttr::variant& var, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT ft_enum get_enum_wire_type(const rttr::variant& var, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT ft_tuple get_tuple_wire_type(const rttr::variant& var, Logging* lg = nullptr);
     
-    FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var, Logging* lg=nullptr);
+    FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var,
+                                                         Logging* lg=nullptr);
     
     
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_variant& wiretp, 

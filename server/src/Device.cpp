@@ -245,9 +245,13 @@ rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_
             if(!success)
                 throw std::runtime_error("failed to set property!");
             
-            auto voidtp = rttr::type::get<void>();
-            auto voidval = voidtp.create();
-            return voidval;
+//             auto voidtp = rttr::type::get<void>();
+//             auto voidval = voidtp.create();
+//HACK: creating void type doesn't seem to work somehow!
+            auto voidmeth = rttr::type::get_global_method("void_helper_function");
+            auto voidret = voidmeth.invoke({});
+            
+            return voidret;
         }
         else if(nargs == 0)
         {
@@ -325,6 +329,10 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
 }
 
 
+void void_helper_function()
+{
+};
+
 
 RTTR_REGISTRATION
 {
@@ -334,6 +342,8 @@ RTTR_REGISTRATION
  .property_readonly("getDeviceTypeName", &Device::getDeviceTypeName)
  .property_readonly("getDeviceComment", &Device::getDeviceComment)
  ;
+ 
+ registration::method("void_helper_function", &void_helper_function);
        
 }
 

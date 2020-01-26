@@ -137,12 +137,18 @@ class Device:
         self._cl = client
 
         self._caps = []
+        self._props = {}
         for cap in caps:
             self._caps.append(Capability(cap.tp, cap.capname, cap.argnames,
                                          cap.argtypes, cap.rettp, devid, client))
 
         for cap in self._caps:
             setattr(self, cap._capname, cap)
+            if(cap._captp == VALUE_READONLY or cap._captp == VALUE_READWRITE):
+                propname = "value_%s" % cap._capname
+                fget = lambda s: getattr(s,propname)()
+                fset = lambda s, val: getattr(s,propname)(val)
+                self._props[propname] = property(fget, fset)
 
     def __repr__(self):
         if self._comment:
@@ -272,7 +278,7 @@ class Capability:
         elif len(args) > 0 or len(kwargs) > 0:
             capargs = self._construct_args(*args, **kwargs)
         else:
-            capargs = self._construct_args([], *args, **kwargs)
+            capargs = []
 
         reqtp = chunk_request if self._captp == STREAM else capability_request
 

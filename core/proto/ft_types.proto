@@ -64,6 +64,7 @@ message ft_simplevariant {
         string stringval = 5;
         }
     uint32 size = 6;
+    bool is_void = 7;
 }
 
 

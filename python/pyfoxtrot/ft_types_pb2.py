@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='foxtrot',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0e\x66t_types.proto\x12\x07\x66oxtrot\"\xa1\x02\n\x12variant_descriptor\x12,\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x16.foxtrot.variant_types\x12\x34\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x1a.foxtrot.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12/\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x1a.foxtrot.struct_descriptor\x12+\n\tenum_desc\x18\x05 \x01(\x0b\x32\x18.foxtrot.enum_descriptor\x12-\n\ntuple_desc\x18\x06 \x01(\x0b\x32\x19.foxtrot.tuple_descriptor\"\xb6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12=\n\nstruct_map\x18\x02 \x03(\x0b\x32).foxtrot.struct_descriptor.StructMapEntry\x1aM\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0b\x32\x1b.foxtrot.variant_descriptor:\x02\x38\x01\"\x8d\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12\x37\n\x08\x65num_map\x18\x02 \x03(\x0b\x32%.foxtrot.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"B\n\x10tuple_descriptor\x12.\n\ttuple_map\x18\x01 \x03(\x0b\x32\x1b.foxtrot.variant_descriptor\"\xba\x01\n\nft_variant\x12.\n\tsimplevar\x18\x01 \x01(\x0b\x32\x19.foxtrot.ft_simplevariantH\x00\x12\'\n\tstructval\x18\x02 \x01(\x0b\x32\x12.foxtrot.ft_structH\x00\x12#\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x10.foxtrot.ft_enumH\x00\x12%\n\x08tupleval\x18\x04 \x01(\x0b\x32\x11.foxtrot.ft_tupleH\x00\x42\x07\n\x05value\"\x88\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\rB\x07\n\x05value\"\x91\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x03(\x0b\x32\x1d.foxtrot.ft_struct.ValueEntry\x1a\x41\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.foxtrot.ft_variant:\x02\x38\x01\"E\n\x07\x66t_enum\x12&\n\x04\x64\x65sc\x18\x01 \x01(\x0b\x32\x18.foxtrot.enum_descriptor\x12\x12\n\nenum_value\x18\x02 \x01(\r\".\n\x08\x66t_tuple\x12\"\n\x05value\x18\x02 \x03(\x0b\x32\x13.foxtrot.ft_variant*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*S\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x12\x0e\n\nTUPLE_TYPE\x10\x03\x62\x06proto3')
+  serialized_pb=_b('\n\x0e\x66t_types.proto\x12\x07\x66oxtrot\"\xa1\x02\n\x12variant_descriptor\x12,\n\x0cvariant_type\x18\x01 \x01(\x0e\x32\x16.foxtrot.variant_types\x12\x34\n\x10simplevalue_type\x18\x02 \x01(\x0e\x32\x1a.foxtrot.simplevalue_types\x12\x1a\n\x12simplevalue_sizeof\x18\x03 \x01(\r\x12/\n\x0bstruct_desc\x18\x04 \x01(\x0b\x32\x1a.foxtrot.struct_descriptor\x12+\n\tenum_desc\x18\x05 \x01(\x0b\x32\x18.foxtrot.enum_descriptor\x12-\n\ntuple_desc\x18\x06 \x01(\x0b\x32\x19.foxtrot.tuple_descriptor\"\xb6\x01\n\x11struct_descriptor\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12=\n\nstruct_map\x18\x02 \x03(\x0b\x32).foxtrot.struct_descriptor.StructMapEntry\x1aM\n\x0eStructMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12*\n\x05value\x18\x02 \x01(\x0b\x32\x1b.foxtrot.variant_descriptor:\x02\x38\x01\"\x8d\x01\n\x0f\x65num_descriptor\x12\x11\n\tenum_name\x18\x01 \x01(\t\x12\x37\n\x08\x65num_map\x18\x02 \x03(\x0b\x32%.foxtrot.enum_descriptor.EnumMapEntry\x1a.\n\x0c\x45numMapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\r:\x02\x38\x01\"B\n\x10tuple_descriptor\x12.\n\ttuple_map\x18\x01 \x03(\x0b\x32\x1b.foxtrot.variant_descriptor\"\xba\x01\n\nft_variant\x12.\n\tsimplevar\x18\x01 \x01(\x0b\x32\x19.foxtrot.ft_simplevariantH\x00\x12\'\n\tstructval\x18\x02 \x01(\x0b\x32\x12.foxtrot.ft_structH\x00\x12#\n\x07\x65numval\x18\x03 \x01(\x0b\x32\x10.foxtrot.ft_enumH\x00\x12%\n\x08tupleval\x18\x04 \x01(\x0b\x32\x11.foxtrot.ft_tupleH\x00\x42\x07\n\x05value\"\x99\x01\n\x10\x66t_simplevariant\x12\x10\n\x06\x64\x62lval\x18\x01 \x01(\x01H\x00\x12\x10\n\x06intval\x18\x02 \x01(\x12H\x00\x12\x11\n\x07uintval\x18\x03 \x01(\x04H\x00\x12\x11\n\x07\x62oolval\x18\x04 \x01(\x08H\x00\x12\x13\n\tstringval\x18\x05 \x01(\tH\x00\x12\x0c\n\x04size\x18\x06 \x01(\r\x12\x0f\n\x07is_void\x18\x07 \x01(\x08\x42\x07\n\x05value\"\x91\x01\n\tft_struct\x12\x13\n\x0bstruct_name\x18\x01 \x01(\t\x12,\n\x05value\x18\x02 \x03(\x0b\x32\x1d.foxtrot.ft_struct.ValueEntry\x1a\x41\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\"\n\x05value\x18\x02 \x01(\x0b\x32\x13.foxtrot.ft_variant:\x02\x38\x01\"E\n\x07\x66t_enum\x12&\n\x04\x64\x65sc\x18\x01 \x01(\x0b\x32\x18.foxtrot.enum_descriptor\x12\x12\n\nenum_value\x18\x02 \x01(\r\".\n\x08\x66t_tuple\x12\"\n\x05value\x18\x02 \x03(\x0b\x32\x13.foxtrot.ft_variant*s\n\x11simplevalue_types\x12\x0e\n\nFLOAT_TYPE\x10\x00\x12\x0c\n\x08INT_TYPE\x10\x01\x12\x11\n\rUNSIGNED_TYPE\x10\x02\x12\r\n\tBOOL_TYPE\x10\x03\x12\x0f\n\x0bSTRING_TYPE\x10\x04\x12\r\n\tVOID_TYPE\x10\x05*S\n\rvariant_types\x12\x12\n\x0eSIMPLEVAR_TYPE\x10\x00\x12\x0f\n\x0bSTRUCT_TYPE\x10\x01\x12\r\n\tENUM_TYPE\x10\x02\x12\x0e\n\nTUPLE_TYPE\x10\x03\x62\x06proto3')
 )
 
 _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
@@ -57,8 +57,8 @@ _SIMPLEVALUE_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1311,
-  serialized_end=1426,
+  serialized_start=1328,
+  serialized_end=1443,
 )
 _sym_db.RegisterEnumDescriptor(_SIMPLEVALUE_TYPES)
 
@@ -88,8 +88,8 @@ _VARIANT_TYPES = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1428,
-  serialized_end=1511,
+  serialized_start=1445,
+  serialized_end=1528,
 )
 _sym_db.RegisterEnumDescriptor(_VARIANT_TYPES)
 
@@ -458,6 +458,13 @@ _FT_SIMPLEVARIANT = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='is_void', full_name='foxtrot.ft_simplevariant.is_void', index=6,
+      number=7, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -474,7 +481,7 @@ _FT_SIMPLEVARIANT = _descriptor.Descriptor(
       index=0, containing_type=None, fields=[]),
   ],
   serialized_start=906,
-  serialized_end=1042,
+  serialized_end=1059,
 )
 
 
@@ -511,8 +518,8 @@ _FT_STRUCT_VALUEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1125,
-  serialized_end=1190,
+  serialized_start=1142,
+  serialized_end=1207,
 )
 
 _FT_STRUCT = _descriptor.Descriptor(
@@ -548,8 +555,8 @@ _FT_STRUCT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1045,
-  serialized_end=1190,
+  serialized_start=1062,
+  serialized_end=1207,
 )
 
 
@@ -586,8 +593,8 @@ _FT_ENUM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1192,
-  serialized_end=1261,
+  serialized_start=1209,
+  serialized_end=1278,
 )
 
 
@@ -617,8 +624,8 @@ _FT_TUPLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1263,
-  serialized_end=1309,
+  serialized_start=1280,
+  serialized_end=1326,
 )
 
 _VARIANT_DESCRIPTOR.fields_by_name['variant_type'].enum_type = _VARIANT_TYPES

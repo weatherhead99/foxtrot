@@ -95,19 +95,23 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
     ft_simplevariant out;
     
     bool success;
-    
-    if(!var.is_valid())
-        throw std::logic_error("invalid RTTR variant supplied to get_simple_variant_wire_type");
-    
     auto tp = var.get_type();
     if(!tp.is_valid())
         throw std::logic_error("invalid RTTR type from variant in get_simple_variant_wire_type");
     
     if(tp == rttr::type::get<void>())
+    {
+        out.set_is_void(true);
         return out;
+    }
+    
+    if(!var.is_valid())
+    {
+        throw std::logic_error("simple_variant got invalid input!");
+    }
+    out.set_is_void(false);
     
 
-    
     using rttr::variant;
     variant_setter setter(var, out, success);
     if(tp.is_arithmetic())
@@ -211,7 +215,8 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
     return out;
 }
 
-ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
+ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
+                                          Logging* lg)
 {
     if(lg)
     {
@@ -219,13 +224,22 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var, Logging* lg)
         lg->strm(sl::trace) << "var type: " << var.get_type().get_name();
     }
     
-    if(!var.is_valid())
-        throw std::logic_error("get_variant_wire_type: got invalid variant to convert!");
-    
     ft_variant out;
-    
     auto tp = var.get_type();
+    if(!tp.is_valid())
+        throw std::logic_error("got invalid RTTR type, this is a foxtrot bug");
     
+    if(tp == rttr::type::get<void>())
+    {
+        ft_simplevariant* simplevar = out.mutable_simplevar();
+        simplevar->set_is_void(true);
+        return out;
+    }
+    if(!var.is_valid())
+    {
+            throw std::logic_error("get_variant_wire_type: got invalid variant to convert!");
+    }
+
     if(tp.is_enumeration())
     {
         if(lg)
