@@ -22,6 +22,14 @@ string PfeifferDevice::cmd(const string& request)
     //TODO: is this thread safe??
     _cmdoss.str("");
     _cmdoss << request << calculate_checksum(request) << '\r';
+
+    //HACK: this will be a problem if you use another protocol
+    auto serproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
+    if(serproto)
+      serproto->flush();
+    else
+      throw std::logic_error("failed to cast protocol to serial port. This is an error in the TPG362 driver code");
+    
     _serproto->write(_cmdoss.str());
     
       //HACK: need a better way to wait for the reply
