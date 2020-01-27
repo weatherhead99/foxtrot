@@ -791,6 +791,8 @@ RTTR_REGISTRATION
 //   type::register_converter_func(convert_string_to_powerunit);
 //   type::register_converter_func(convert_int_to_mode);
 //   type::register_converter_func(convert_mode_to_int);
+  using foxtrot::devices::powermodes;
+  using foxtrot::devices::powerunits;
   
   registration::enumeration<foxtrot::devices::powerunits>("foxtrot::devices::powerunits")
   ( value("Amps", powerunits::Amps),
