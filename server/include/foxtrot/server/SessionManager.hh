@@ -6,10 +6,12 @@
 #include <vector>
 #include <optional>
 #include <iterator>
-#include <mutex>
+#include <shared_mutex>
 #include <foxtrot/Logging.h>
 #include <boost/functional/hash.hpp>
 #include <chrono>
+#include <memory>
+#include <tuple>
 
 using std::string;
 using std::vector;
@@ -19,7 +21,7 @@ using time_type = std::chrono::time_point<std::chrono::system_clock>;
 using duration_type = typename time_type::duration;
 
 
-const unsigned short SESSION_ID_BYTES = 8;
+const unsigned short SESSION_ID_BYTES = 32;
 
 namespace foxtrot
 {
@@ -45,42 +47,47 @@ namespace foxtrot
     };
     
     
-    class SessionManager
+    class SessionManager : public std::enable_shared_from_this<SessionManager>
     {
     public:
         SessionManager(const duration_type& session_length);
         
         void update_session_states();
-        bool session_auth_check(const Sessionid& secret, unsigned devid) const;
-        bool session_auth_check(const Sessionid& secret, const string& flagname) const;
+        bool session_auth_check(const Sessionid& secret, unsigned devid);
+        bool session_auth_check(const Sessionid& secret, const string& flagname);
         
-        const ft_session_info* const who_owns_device(unsigned devid) const;
-        const ft_session_info* const who_owns_flag(const string& flagname) const;
+        optional<ft_session_info> who_owns_device(unsigned devid);
+        optional<ft_session_info> who_owns_flag(const string& flagname);
         
-        Sessionid start_session(const string& username, 
-                                          const string& comment,
-                                          const vector<unsigned>* const devices_requested, 
-                                          const vector<string>* const flags_requested);
+        std::tuple<Sessionid,unsigned short> start_session(const string& username, 
+                                                            const string& comment,
+                                                            const vector<unsigned>* const devices_requested, 
+                                                            const vector<string>* const flags_requested,
+                                                            const time_type* const requested_expiry
+                                                          );
         
         bool renew_session(const Sessionid& session_id);
         bool close_session(const Sessionid& session_id);
         
-        const ft_session_info& get_session_info(const Sessionid& session_id) const;
-        const ft_session_info& get_session_info(unsigned short id) const;
+        ft_session_info get_session_info(const Sessionid& session_id);
+        ft_session_info get_session_info(unsigned short id);
         
-        const std::map<unsigned short, ft_session_info>::const_iterator cbegin() const;
-        const std::map<unsigned short, ft_session_info>::const_iterator cend() const;
+        const duration_type& get_session_length() const;
         
     private:
         template<typename T, typename F> void check_requested_items(T* req, F checkfun)
         {
+            _lg.strm(sl::trace) << "in check_requested_items";
             if(req)
             {
+                _lg.strm(sl::trace) << "request is not null";
                 for(auto& item : *req)
                 {
-                    const ft_session_info* const sesinfo = checkfun(item);
-                    if(sesinfo != nullptr)
+                    _lg.strm(sl::trace) << "in item : " << item;
+                    auto sesinfo = checkfun(item);
+                    if(sesinfo)
                     {
+                        _lg.strm(sl::trace) << "about to throw integer in checking";
                         throw sesinfo->internal_session_id;
                     }
                 }
@@ -128,7 +135,7 @@ namespace foxtrot
         std::map<unsigned short, unsigned> _devicecachemap;
         std::unordered_map<string, unsigned short> _flagcachemap;
         
-        std::mutex _sessionmut;
+        std::shared_mutex _sessionmut;
         
         unsigned short next_session_id = 0;
         

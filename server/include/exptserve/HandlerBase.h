@@ -74,7 +74,7 @@ namespace foxtrot
                     if(_newrequest)
                     {
                         _lg.Trace("spawning new handler");
-                        new HandlerBase<T>(_service, _cq,_logic);
+                        new HandlerBase<T, Service>(_service, _cq,_logic);
                         _newrequest = false;
                     }
                     try{

@@ -28,3 +28,4 @@ namespace foxtrot
         std::shared_ptr<SessionManager> _sesman;
     };
 }
+

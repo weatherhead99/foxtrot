@@ -1,12 +1,10 @@
 from pyfoxtrot.Client import Client, _check_repl_err
 from pyfoxtrot.foxtrot_pb2 import *
-import base64
+from pyfoxtrot.common import decode_sodiumkey
 import json
 import nacl.signing
 import datetime
 
-def decode_sodiumkey(key_in: str) -> bytes:
-    return base64.standard_b64decode(key_in + "=====")
 
 
 class AuthenticatedClient(Client):

@@ -17,6 +17,10 @@
 #include "BroadcastNotificationImpl.h"
 #include "AuthRequestImpl.h"
 #include "AuthRespondImpl.h"
+#include "StartSessionImpl.hh"
+
+#include <chrono>
+
 
 using std::string;
 using namespace foxtrot;
@@ -25,6 +29,9 @@ foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<
 : _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051"),
 _serverflags{new FlagMap}
 {
+    //TODO: option for length of session
+    auto session_length = std::chrono::seconds(10);
+    _sesman = std::make_shared<SessionManager>(session_length);
 }
 
 ServerImpl::ServerImpl(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
@@ -76,7 +83,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
     builder.AddListeningPort(addrstr,_creds)
-    .RegisterService(&_service);
+    .RegisterService(&_service).RegisterService(&_sessionservice);
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
@@ -88,6 +95,10 @@ void ServerImpl::setup_common(const std::string& addrstr)
     add_logic<GetServerFlagsLogic>(_serverflags);
     add_logic<ListServerFlagsLogic>(_serverflags);
     add_logic<DropServerFlagLogic>(_serverflags);
+    
+    //TODO: adapt add_logic for multiple services
+    std::shared_ptr<StartSessionLogic> logic(new StartSessionLogic(_sesman));
+    new HandlerBase<StartSessionLogic,decltype(_sessionservice)>(&_sessionservice, _cq.get(), logic);
     
     if(notifications_enabled)
     {

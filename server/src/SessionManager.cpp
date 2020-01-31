@@ -23,36 +23,68 @@ foxtrot::SessionManager::SessionManager(const duration_type& session_length)
 
 
 
-const foxtrot::ft_session_info & foxtrot::SessionManager::get_session_info(const foxtrot::Sessionid& session_id) const
+foxtrot::ft_session_info  foxtrot::SessionManager::get_session_info(const foxtrot::Sessionid& session_id)
 {
+    std::shared_lock lck(_sessionmut);
+    auto id = _sessionidmap.find(session_id);
+    if(id == _sessionidmap.end())
+    {
+        throw std::out_of_range("invalid secret!");
+    }
+    return _sessionmap.at(id->second);
     
 }
 
-const foxtrot::ft_session_info & foxtrot::SessionManager::get_session_info(unsigned short id) const
+foxtrot::ft_session_info foxtrot::SessionManager::get_session_info(unsigned short id)
 {
+    std::shared_lock lck(_sessionmut);
     return _sessionmap.at(id);
 }
 
 
 
-const foxtrot::ft_session_info *const foxtrot::SessionManager::who_owns_device(unsigned devid) const
+optional<foxtrot::ft_session_info> foxtrot::SessionManager::who_owns_device(unsigned devid)
 {
-    return find_in_cache(_devicecachemap, devid);
+    optional<ft_session_info> out;
+    _lg.strm(sl::trace) << "about to shared lock session mutex";
+    std::shared_lock lck(_sessionmut);
+    _lg.strm(sl::trace) << "about to find in cache";
+    auto ptr = find_in_cache(_devicecachemap, devid);
+    
+    if(ptr)
+    {
+        out = *ptr;
+        return out;
+    }
+    
+    return out;
 }
 
-const foxtrot::ft_session_info *const foxtrot::SessionManager::who_owns_flag(const std::string& flagname) const
+optional<foxtrot::ft_session_info> foxtrot::SessionManager::who_owns_flag(const std::string& flagname)
 {
-    return find_in_cache(_flagcachemap, flagname);
+    optional<ft_session_info> out;
+    std::shared_lock lck(_sessionmut);
+    auto ptr = find_in_cache(_flagcachemap, flagname);
+    
+    if(ptr)
+    {
+        out = *ptr;
+        return out;
+    }
+    
+    return out;
 }
 
 
-foxtrot::Sessionid  foxtrot::SessionManager::start_session(
+std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_session(
     const std::string& username, 
     const std::string& comment, 
     const vector<unsigned> *const devices_requested, 
-    const vector<std::string> *const flags_requested)
+    const vector<std::string> *const flags_requested,
+    const time_type* const requested_expiry)
 {
-    std::lock_guard<std::mutex> lck(_sessionmut);
+    
+    auto now = std::chrono::system_clock::now();
     _lg.strm(sl::info) << "new user session requested by: "<< username 
                         << "with comment: " << comment;
     
@@ -64,15 +96,29 @@ foxtrot::Sessionid  foxtrot::SessionManager::start_session(
         _lg.strm(sl::debug) << "checking for requested flags...";
         check_requested_items(flags_requested, [this] (auto flagname) { return who_owns_flag(flagname);});
     }
-    catch(int i)
+    catch(short unsigned i)
     {
         _lg.strm(sl::error) << "a requested item is owned by session with id: " << i;
         throw i;
     };
     
+    if(requested_expiry)
+    {
+        //check that session length is allowed
+        if(*requested_expiry > (now + _session_length))
+        {
+            _lg.strm(sl::error) << "requested a session longer than max allowed";
+            throw std::out_of_range("requested session longer than max allowed");
+        }
+        
+    };
+    
+    
     //setup the next session internal id to be issued
     using Mt = typename decltype(_sessionmap)::value_type;
     
+    //do not move this lock guard up otherwise it conflicts with shared lock in check_requested_items
+    std::lock_guard lck(_sessionmut);
     if(not _sessionmap.empty())
     {
         auto it = std::max_element(_sessionmap.cbegin(), _sessionmap.cend(), 
@@ -87,7 +133,7 @@ foxtrot::Sessionid  foxtrot::SessionManager::start_session(
     newsession.comment = comment;
     newsession.user_identifier = username;
     newsession.internal_session_id = next_session_id;
-    auto now = std::chrono::system_clock::now();
+    
     newsession.expiry = now + _session_length;
     
     if(devices_requested)
@@ -114,12 +160,13 @@ foxtrot::Sessionid  foxtrot::SessionManager::start_session(
     
     _lg.strm(sl::info) << "session creation succeeded, expiry time is: " << put_time_helper(newsession.expiry);
     //NOTE: is this cheaper than returning the whole Sessionid object?
-    return secret;
+    return std::make_tuple(secret, next_session_id);
 }
 
 
 bool foxtrot::SessionManager::close_session(const foxtrot::Sessionid& session_id)
 {
+    std::lock_guard lck(_sessionmut);
     auto loc = _sessionidmap.find(session_id);
     if(loc == _sessionidmap.end())
     {
@@ -127,7 +174,6 @@ bool foxtrot::SessionManager::close_session(const foxtrot::Sessionid& session_id
         return false;
     };
     
-    std::lock_guard<std::mutex> lck(_sessionmut);
     remove_session(loc->second);
     return true;
     
@@ -135,6 +181,7 @@ bool foxtrot::SessionManager::close_session(const foxtrot::Sessionid& session_id
 
 bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id)
 {
+    std::lock_guard lck(_sessionmut);
     auto loc = _sessionidmap.find(session_id);
     if(loc == _sessionidmap.end())
     {
@@ -142,7 +189,6 @@ bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id
         return false;
     }
     
-    std::lock_guard<std::mutex> lck(_sessionmut);
     auto& sesinfo = _sessionmap.at(loc->second);
     
     auto now = std::chrono::system_clock::now();
@@ -154,14 +200,16 @@ bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id
 }
 
 bool foxtrot::SessionManager::session_auth_check(const foxtrot::Sessionid& secret,
-                                                 const std::string& flagname) const
+                                                 const std::string& flagname)
 {
+    std::shared_lock lck(_sessionmut);
     return auth_check(secret, [] (const auto& sesinfo) {return sesinfo.flags;}, flagname);
 }
 
 bool foxtrot::SessionManager::session_auth_check(const foxtrot::Sessionid& secret, 
-                                                 unsigned devid) const
+                                                 unsigned devid)
 {
+    std::shared_lock lck(_sessionmut);
     return auth_check(secret, [](const auto& sesinfo) {return sesinfo.devices;}, devid);
 }
 
@@ -191,7 +239,7 @@ void foxtrot::SessionManager::update_at_next_expiry()
 void foxtrot::SessionManager::update_session_states()
 {
     _lg.strm(sl::trace) << "updating session state variables";
-    std::lock_guard<std::mutex> lck(_sessionmut);
+    std::lock_guard lck(_sessionmut);
     auto now = std::chrono::system_clock::now();
     
     std::vector<unsigned> expired_ids;
@@ -214,15 +262,6 @@ void foxtrot::SessionManager::update_session_states()
     
 }
 
-const std::map<unsigned short, ft_session_info>::const_iterator foxtrot::SessionManager::cbegin() const
-{
-    return _sessionmap.cbegin();
-}
-
-const std::map<unsigned short, ft_session_info>::const_iterator foxtrot::SessionManager::cend() const
-{
-    return _sessionmap.cend();
-}
 
 void foxtrot::SessionManager::remove_session(unsigned short sesid)
 {
@@ -251,3 +290,11 @@ foxtrot::Sessionid foxtrot::SessionManager::generate_session_id()
     randombytes_buf(out.data(), out.size());
     return out;
 }
+
+
+const duration_type & foxtrot::SessionManager::get_session_length() const
+{
+    return _session_length;
+}
+
+

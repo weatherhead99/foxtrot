@@ -13,10 +13,12 @@
 
 #include <foxtrot/foxtrot.pb.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_sessions.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/FlagMap.hh>
+#include <foxtrot/server/SessionManager.hh>
 
 #include "HandlerBase.h"
 #include "pushbullet_api.hh"
@@ -76,6 +78,8 @@ private:
     std::unique_ptr<Server> _server;
     
     foxtrot::exptserve::AsyncService _service;
+    foxtrot::sessions::AsyncService _sessionservice;
+    std::shared_ptr<SessionManager> _sesman;
     
     std::string _servcomment;
     std::shared_ptr<DeviceHarness> _harness;
