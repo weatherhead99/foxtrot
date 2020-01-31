@@ -8,14 +8,15 @@
 
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
-
+#include <foxtrot/server/FlagMap.hh>
 
 namespace foxtrot {
     
     class HandlerTag;
+
   
-  using ft_std_variant = std::variant<double,int,bool,std::string>;
-  using flagmap =  std::map<std::string, ft_std_variant> ;
+  
+  
   
   
   struct SetServerFlagsLogic
@@ -26,12 +27,12 @@ namespace foxtrot {
     const static bool newcall = true;
     constexpr static auto requestfunptr = &exptserve::AsyncService::RequestSetServerFlag;
     
-    SetServerFlagsLogic(std::shared_ptr<flagmap> vars);
+    SetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
     
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
     
   private:
-    std::shared_ptr<flagmap> vars_;
+    std::shared_ptr<FlagMap> vars_;
     foxtrot::Logging lg_;
     
   };
@@ -45,11 +46,11 @@ namespace foxtrot {
     const static bool newcall = true;
     constexpr static auto requestfunptr = &exptserve::AsyncService::RequestGetServerFlag;
     
-    GetServerFlagsLogic(std::shared_ptr<flagmap> vars);
+    GetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
     
   private:
-    std::shared_ptr<flagmap> vars_;
+    std::shared_ptr<FlagMap> vars_;
     foxtrot::Logging lg_;
     
   };
@@ -65,11 +66,11 @@ namespace foxtrot {
       const static bool newcall = true;
       constexpr static auto requestfunptr = &exptserve::AsyncService::RequestListServerFlags;
       
-      ListServerFlagsLogic(std::shared_ptr<flagmap> vars);
+      ListServerFlagsLogic(std::shared_ptr<FlagMap> vars);
       bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
       
   private:
-      std::shared_ptr<flagmap> vars_;
+      std::shared_ptr<FlagMap> vars_;
       foxtrot::Logging lg_;
       
   };
@@ -83,11 +84,11 @@ namespace foxtrot {
       const static bool newcall = true;
       
       constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDropServerFlag;
-      DropServerFlagLogic(std::shared_ptr<flagmap> vars);
+      DropServerFlagLogic(std::shared_ptr<FlagMap> vars);
       bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
       
   private:
-      std::shared_ptr<flagmap> vars_;
+      std::shared_ptr<FlagMap> vars_;
       foxtrot::Logging lg_;
       
           

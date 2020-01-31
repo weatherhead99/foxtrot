@@ -24,12 +24,12 @@ const unsigned short SESSION_ID_BYTES = 8;
 namespace foxtrot
 {
     
-    struct session_info
+    struct ft_session_info
     {
         unsigned short internal_session_id;
         string user_identifier;
         string comment;
-        vector<unsigned short> devices;
+        vector<unsigned> devices;
         vector<string> flags;
         time_type expiry;
     };
@@ -51,24 +51,25 @@ namespace foxtrot
         SessionManager(const duration_type& session_length);
         
         void update_session_states();
-        bool session_auth_check(const Sessionid& secret, unsigned short devid) const;
+        bool session_auth_check(const Sessionid& secret, unsigned devid) const;
         bool session_auth_check(const Sessionid& secret, const string& flagname) const;
         
-        const session_info* const who_owns_device(unsigned short devid) const;
-        const session_info* const who_owns_flag(const string& flagname) const;
+        const ft_session_info* const who_owns_device(unsigned devid) const;
+        const ft_session_info* const who_owns_flag(const string& flagname) const;
         
         Sessionid start_session(const string& username, 
                                           const string& comment,
-                                          const vector<unsigned short>* const devices_requested, 
+                                          const vector<unsigned>* const devices_requested, 
                                           const vector<string>* const flags_requested);
         
         bool renew_session(const Sessionid& session_id);
         bool close_session(const Sessionid& session_id);
         
-        const session_info& get_session_info(const Sessionid& session_id) const;
+        const ft_session_info& get_session_info(const Sessionid& session_id) const;
+        const ft_session_info& get_session_info(unsigned short id) const;
         
-        const std::map<unsigned short, session_info>::const_iterator cbegin() const;
-        const std::map<unsigned short, session_info>::const_iterator cend() const;
+        const std::map<unsigned short, ft_session_info>::const_iterator cbegin() const;
+        const std::map<unsigned short, ft_session_info>::const_iterator cend() const;
         
     private:
         template<typename T, typename F> void check_requested_items(T* req, F checkfun)
@@ -77,7 +78,7 @@ namespace foxtrot
             {
                 for(auto& item : *req)
                 {
-                    const session_info* const sesinfo = checkfun(item);
+                    const ft_session_info* const sesinfo = checkfun(item);
                     if(sesinfo != nullptr)
                     {
                         throw sesinfo->internal_session_id;
@@ -87,7 +88,7 @@ namespace foxtrot
         };
         
         template<typename M>
-        const session_info* const find_in_cache(const M& map, const typename M::key_type& val) const
+        const ft_session_info* const find_in_cache(const M& map, const typename M::key_type& val) const
         {
             auto it = map.find(val);
             if(it != map.end())
@@ -122,9 +123,9 @@ namespace foxtrot
         void update_at_next_expiry();
         
         
-        std::map<unsigned short, session_info> _sessionmap;
+        std::map<unsigned short, ft_session_info> _sessionmap;
         std::unordered_map<Sessionid, unsigned short, Sessionid_hash> _sessionidmap;
-        std::map<unsigned short, unsigned short> _devicecachemap;
+        std::map<unsigned short, unsigned> _devicecachemap;
         std::unordered_map<string, unsigned short> _flagcachemap;
         
         std::mutex _sessionmut;

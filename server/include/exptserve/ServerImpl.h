@@ -16,7 +16,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/AuthHandler.h>
-
+#include <foxtrot/server/FlagMap.hh>
 
 #include "HandlerBase.h"
 #include "pushbullet_api.hh"
@@ -61,7 +61,7 @@ private:
     
     bool notifications_enabled = false;
     bool auth_enabled = false;
-    std::shared_ptr<flagmap> _serverflags;
+    std::shared_ptr<FlagMap> _serverflags;
     
     std::string _connstr;
   

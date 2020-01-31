@@ -23,7 +23,7 @@ using namespace foxtrot;
 
 foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051"),
-_serverflags{new flagmap}
+_serverflags{new FlagMap}
 {
 }
 
@@ -75,10 +75,8 @@ void ServerImpl::setup_common(const std::string& addrstr)
   
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
-    builder.AddListeningPort(addrstr,_creds);
-    
-    //TODO: Register Service
-    builder.RegisterService(&_service);
+    builder.AddListeningPort(addrstr,_creds)
+    .RegisterService(&_service);
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();

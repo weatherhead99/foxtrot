@@ -12,12 +12,12 @@ namespace foxtrot
     
     struct InvokeCapabilityLogic
     {
+     constexpr static auto requestfunptr = &exptserve::AsyncService::RequestInvokeCapability;
+
      typedef capability_request reqtp;
      typedef capability_response repltp;
      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp; 
      const static bool newcall = true;
-     constexpr static auto requestfunptr = &exptserve::AsyncService::RequestInvokeCapability;
-     
      InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness);
      
      bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);

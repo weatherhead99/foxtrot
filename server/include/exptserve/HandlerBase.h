@@ -34,12 +34,12 @@ namespace detail
 namespace foxtrot
 {
     
-    template<typename T> class HandlerBase : public HandlerTag
+    template<typename T, typename Service=exptserve::AsyncService> class HandlerBase : public HandlerTag
     {
       
     public:
         
-        HandlerBase(exptserve::AsyncService* service, grpc::ServerCompletionQueue* cq, std::shared_ptr<T> logic)
+        HandlerBase(Service* service, grpc::ServerCompletionQueue* cq, std::shared_ptr<T> logic)
         : _service(service), _cq(cq), _responder(&_ctxt),  _logic(logic), _status(status::CREATE),
         _lg("HandlerBase")
         {
@@ -53,31 +53,39 @@ namespace foxtrot
                 std::lock_guard<std::mutex> lk(_procmut);
                 if(_status == status::CREATE)
                 {       
-                    _lg.Debug("request status is CREATE, processing");
+                    _lg.Trace("request status is CREATE, processing");
                     _status = status::PROCESS;   
                     //TODO: dispatch on this
-                
                     (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
                     
                 }
                 else if(_status == status::PROCESS)
                 {
                     _lg.strm(sl::trace) << "request id is: " << reinterpret_cast<detail::pointer_print_type>(this);
+                    
+                    _lg.strm(sl::debug) << "request peer string: " << _ctxt.peer();
+                    process_metadata(_ctxt);
+                    
+                    for(auto& [k,v] : _ctxt.client_metadata())
+                    {
+                        _lg.strm(sl::trace) << "call metadata, key: " << k << "value: " << v ;
+                    }
+                    
                     if(_newrequest)
                     {
-                        _lg.Debug("spawning new handler");
+                        _lg.Trace("spawning new handler");
                         new HandlerBase<T>(_service, _cq,_logic);
                         _newrequest = false;
                     }
                     try{
                         if(_logic->HandleRequest(_req,_reply, _responder, this))
                         {
-                            _lg.Debug("request successful, marking finished");
+                            _lg.Trace("request successful, marking finished");
                             _status = status::FINISH;
                         }
                         else
                         {
-                            _lg.Debug("request not finished yet");
+                            _lg.Trace("request not finished yet");
                             _status = status::PROCESS;
                         }
                     }
@@ -118,21 +126,25 @@ namespace foxtrot
 	  }
 	  
 	};
+    
+    void process_metadata(const grpc::ServerContext& ctxt)
+    {
         
+    };
 	
+    
     const grpc::ServerContext& getContext() const
     {
         return _ctxt;
     }
-    
+
     private:
-      
 	
         std::shared_ptr<T> _logic;
         bool _newrequest = true;
         grpc::ServerCompletionQueue* _cq;
         grpc::ServerContext _ctxt;
-        exptserve::AsyncService* _service;
+        Service* _service;
 	
         typename T::reqtp _req;
         typename T::repltp _reply;

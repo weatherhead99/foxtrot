@@ -138,6 +138,7 @@ add_dependencies(foxtrot_core ft_error_copy_includes)
 add_dependencies(foxtrot_core ft_auth_copy_includes)
 add_dependencies(foxtrot_core ft_streams_copy_includes)
 add_dependencies(foxtrot_core ft_capability_copy_includes)
+add_dependencies(foxtrot_core ft_sessions_copy_includes)
 
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

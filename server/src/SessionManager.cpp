@@ -23,18 +23,24 @@ foxtrot::SessionManager::SessionManager(const duration_type& session_length)
 
 
 
-const foxtrot::session_info & foxtrot::SessionManager::get_session_info(const foxtrot::Sessionid& session_id) const
+const foxtrot::ft_session_info & foxtrot::SessionManager::get_session_info(const foxtrot::Sessionid& session_id) const
 {
     
 }
 
+const foxtrot::ft_session_info & foxtrot::SessionManager::get_session_info(unsigned short id) const
+{
+    return _sessionmap.at(id);
+}
 
-const foxtrot::session_info *const foxtrot::SessionManager::who_owns_device(unsigned short devid) const
+
+
+const foxtrot::ft_session_info *const foxtrot::SessionManager::who_owns_device(unsigned devid) const
 {
     return find_in_cache(_devicecachemap, devid);
 }
 
-const foxtrot::session_info *const foxtrot::SessionManager::who_owns_flag(const std::string& flagname) const
+const foxtrot::ft_session_info *const foxtrot::SessionManager::who_owns_flag(const std::string& flagname) const
 {
     return find_in_cache(_flagcachemap, flagname);
 }
@@ -43,7 +49,7 @@ const foxtrot::session_info *const foxtrot::SessionManager::who_owns_flag(const 
 foxtrot::Sessionid  foxtrot::SessionManager::start_session(
     const std::string& username, 
     const std::string& comment, 
-    const vector<unsigned short> *const devices_requested, 
+    const vector<unsigned> *const devices_requested, 
     const vector<std::string> *const flags_requested)
 {
     std::lock_guard<std::mutex> lck(_sessionmut);
@@ -77,7 +83,7 @@ foxtrot::Sessionid  foxtrot::SessionManager::start_session(
         next_session_id = it->first + 1;
     }
     
-    session_info newsession;
+    ft_session_info newsession;
     newsession.comment = comment;
     newsession.user_identifier = username;
     newsession.internal_session_id = next_session_id;
@@ -154,7 +160,7 @@ bool foxtrot::SessionManager::session_auth_check(const foxtrot::Sessionid& secre
 }
 
 bool foxtrot::SessionManager::session_auth_check(const foxtrot::Sessionid& secret, 
-                                                 unsigned short devid) const
+                                                 unsigned devid) const
 {
     return auth_check(secret, [](const auto& sesinfo) {return sesinfo.devices;}, devid);
 }
@@ -208,12 +214,12 @@ void foxtrot::SessionManager::update_session_states()
     
 }
 
-const std::map<unsigned short, session_info>::const_iterator foxtrot::SessionManager::cbegin() const
+const std::map<unsigned short, ft_session_info>::const_iterator foxtrot::SessionManager::cbegin() const
 {
     return _sessionmap.cbegin();
 }
 
-const std::map<unsigned short, session_info>::const_iterator foxtrot::SessionManager::cend() const
+const std::map<unsigned short, ft_session_info>::const_iterator foxtrot::SessionManager::cend() const
 {
     return _sessionmap.cend();
 }
