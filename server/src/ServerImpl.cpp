@@ -18,6 +18,7 @@
 #include "AuthRequestImpl.h"
 #include "AuthRespondImpl.h"
 #include "StartSessionImpl.hh"
+#include "CloseSessionImpl.hh"
 
 #include <chrono>
 
@@ -30,7 +31,7 @@ foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<
 _serverflags{new FlagMap}
 {
     //TODO: option for length of session
-    auto session_length = std::chrono::seconds(10);
+    auto session_length = std::chrono::minutes(10);
     _sesman = std::make_shared<SessionManager>(session_length);
 }
 
@@ -97,8 +98,8 @@ void ServerImpl::setup_common(const std::string& addrstr)
     add_logic<DropServerFlagLogic>(_serverflags);
     
     //TODO: adapt add_logic for multiple services
-    std::shared_ptr<StartSessionLogic> logic(new StartSessionLogic(_sesman));
-    new HandlerBase<StartSessionLogic,decltype(_sessionservice)>(&_sessionservice, _cq.get(), logic);
+    add_logic_with_service<StartSessionLogic>(&_sessionservice, _sesman);
+    add_logic_with_service<CloseSessionLogic>(&_sessionservice, _sesman);
     
     if(notifications_enabled)
     {

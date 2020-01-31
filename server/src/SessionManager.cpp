@@ -21,6 +21,10 @@ foxtrot::SessionManager::SessionManager(const duration_type& session_length)
 {
 }
 
+foxtrot::SessionManager::~SessionManager()
+{
+    stop_updates();
+}
 
 
 foxtrot::ft_session_info  foxtrot::SessionManager::get_session_info(const foxtrot::Sessionid& session_id)
@@ -118,6 +122,8 @@ std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_se
     using Mt = typename decltype(_sessionmap)::value_type;
     
     //do not move this lock guard up otherwise it conflicts with shared lock in check_requested_items
+    bool start_needed = true;
+    
     std::lock_guard lck(_sessionmut);
     if(not _sessionmap.empty())
     {
@@ -127,6 +133,7 @@ std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_se
                                         return first.first < second.first;
                                     });
         next_session_id = it->first + 1;
+        start_needed = false;
     }
     
     ft_session_info newsession;
@@ -159,7 +166,11 @@ std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_se
     
     
     _lg.strm(sl::info) << "session creation succeeded, expiry time is: " << put_time_helper(newsession.expiry);
-    //NOTE: is this cheaper than returning the whole Sessionid object?
+    
+    
+    if(start_needed)
+    start_updates();
+
     return std::make_tuple(secret, next_session_id);
 }
 
@@ -213,27 +224,108 @@ bool foxtrot::SessionManager::session_auth_check(const foxtrot::Sessionid& secre
     return auth_check(secret, [](const auto& sesinfo) {return sesinfo.devices;}, devid);
 }
 
-void foxtrot::SessionManager::update_at_next_expiry()
+bool foxtrot::SessionManager::update_at_next_expiry(std::unique_lock<std::mutex>* lckptr)
 {
+    _lg.strm(sl::trace) << "update_at_next_expiry";
     //find earliest expiry time;
-    std::vector<time_type> expiry_times;
-    expiry_times.resize(_sessionmap.size());
-    std::transform(_sessionmap.begin(), _sessionmap.end(),
-                   expiry_times.begin(), 
-                   [] (const auto& it)
-                   { return it.second.expiry;});
+    auto next_expiry = std::chrono::system_clock::now();
+    {
+        _lg.strm(sl::trace) << "locking session mutex";
+        std::shared_lock lck(_sessionmut);
+        _lg.strm(sl::trace) << "acquired lock";
+        if(_sessionmap.size() == 0)
+        {
+            _lg.strm(sl::trace) << "no sessions, returning";
+            return false;
+        }
+        
+        auto next_expiry_it = std::min_element(_sessionmap.begin(), _sessionmap.end(),
+                                       [] (const auto& t1, const auto& t2)
+                                       {
+                                           return t1.second.expiry < t2.second.expiry;
+                                       });
+        next_expiry = next_expiry_it->second.expiry;
+    }
+
+    _lg.strm(sl::debug) << "next expiry: " << put_time_helper(next_expiry);
+    auto now = std::chrono::system_clock::now();
     
-    auto next_expiry = std::min_element(expiry_times.begin(), expiry_times.end());
     
-    auto next_wakeup = *next_expiry + std::chrono::seconds(1);
+    if(now > next_expiry)
+    {
+        _lg.strm(sl::debug) << "now is already after expiry";
+        _lg.strm(sl::debug) << "now is: " << put_time_helper(now);
+        _lg.strm(sl::debug) << "next expiry is: " << put_time_helper(next_expiry);
+        update_session_states();
+    }
+    else
+    {
+        auto next_wakeup = next_expiry + std::chrono::seconds(1);
+        _lg.strm(sl::debug) << "next expiry time is: " << put_time_helper(next_expiry);
+        _lg.strm(sl::debug) << "waiting til next expiry +1 second to update sessions";
+        auto stat = _stop_updates_cv.wait_until(*lckptr, next_wakeup);
+        _lg.strm(sl::debug) << "updating sesion states...";
+        update_session_states();
+    }
     
-    _lg.strm(sl::debug) << "next expiry time is: " << put_time_helper(*next_expiry);
-    _lg.strm(sl::debug) << "waiting til next expiry +1 second to update sessions";
-    std::this_thread::sleep_until(next_wakeup);
-    _lg.strm(sl::debug) << "updating sesion states...";
-    update_session_states();
+    return true;
+}
+
+
+void foxtrot::SessionManager::start_updates()
+{
+    _lg.strm(sl::info) << "starting session update thread";
+    
+    _stop_updates = false;
+    
+    if(_update_thread.joinable())
+    {
+        _lg.strm(sl::debug) << "update thread is joinable, joining it...";
+        _update_thread.join();
+        _lg.strm(sl::debug) << "proceeding";
+    }
+    
+     _update_thread = std::move(std::thread(
+        [this] () {
+            bool localstopupdates = false;
+            while(not localstopupdates)
+            {
+                try{
+                    std::unique_lock lck(_updatemut);
+                    localstopupdates = _stop_updates;
+                    if(!update_at_next_expiry(&lck))
+                    {
+                        _lg.strm(sl::debug) << "no sessions to process, deleting thread";
+                        _stop_updates = true;
+                        break;
+                    }
+                }
+                catch(...)
+                {
+                    _stop_updates = true;
+                    _lg.strm(sl::fatal) << "an exception happened in start_updates";
+                }
+            }
+        }));
+
     
 }
+
+void foxtrot::SessionManager::stop_updates()
+{
+    _lg.strm(sl::info) << "stopping session update thread";
+    {
+        std::lock_guard lck(_updatemut);
+        _stop_updates = true;
+        _stop_updates_cv.notify_all();
+    }
+    _lg.strm(sl::debug) << "waiting for update thread to finish;";
+    if(_update_thread.joinable())
+        _update_thread.join();
+    
+}
+
+
 
 
 void foxtrot::SessionManager::update_session_states()
@@ -266,6 +358,8 @@ void foxtrot::SessionManager::update_session_states()
 void foxtrot::SessionManager::remove_session(unsigned short sesid)
 {
     auto& sesinfo = _sessionmap.at(sesid);
+    
+    _lg.strm(sl::info) << "session for user: " << sesinfo.user_identifier << "has expired";
     
     for(auto& devid : sesinfo.devices)
     {

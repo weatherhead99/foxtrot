@@ -12,6 +12,8 @@
 #include <chrono>
 #include <memory>
 #include <tuple>
+#include <condition_variable>
+#include <thread>
 
 using std::string;
 using std::vector;
@@ -51,6 +53,7 @@ namespace foxtrot
     {
     public:
         SessionManager(const duration_type& session_length);
+        ~SessionManager();
         
         void update_session_states();
         bool session_auth_check(const Sessionid& secret, unsigned devid);
@@ -77,13 +80,13 @@ namespace foxtrot
     private:
         template<typename T, typename F> void check_requested_items(T* req, F checkfun)
         {
-            _lg.strm(sl::trace) << "in check_requested_items";
+            
             if(req)
             {
-                _lg.strm(sl::trace) << "request is not null";
+            
                 for(auto& item : *req)
                 {
-                    _lg.strm(sl::trace) << "in item : " << item;
+            
                     auto sesinfo = checkfun(item);
                     if(sesinfo)
                     {
@@ -127,8 +130,10 @@ namespace foxtrot
         void remove_session(unsigned short sesid);
         Sessionid generate_session_id();
         
-        void update_at_next_expiry();
+        bool update_at_next_expiry(std::unique_lock<std::mutex>* lck);
         
+        void start_updates();
+        void stop_updates();
         
         std::map<unsigned short, ft_session_info> _sessionmap;
         std::unordered_map<Sessionid, unsigned short, Sessionid_hash> _sessionidmap;
@@ -137,10 +142,18 @@ namespace foxtrot
         
         std::shared_mutex _sessionmut;
         
+        std::mutex _updatemut;
+        std::condition_variable _stop_updates_cv;
+        bool _stop_updates = false;
+        
+        
+        
         unsigned short next_session_id = 0;
         
         foxtrot::Logging _lg;
         duration_type _session_length;
+        
+        std::thread _update_thread;
     };
     
 };

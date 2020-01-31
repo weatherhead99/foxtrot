@@ -26,3 +26,6 @@ def _check_repl_err(repl):
 
 def decode_sodiumkey(key_in: str) -> bytes:
     return base64.standard_b64decode(key_in + "=====")
+
+def encode_sodiumkey(key_in: str) -> bytes:
+    return base64.standard_b64encode(key_in).rstrip(b"=")

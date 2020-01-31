@@ -61,6 +61,12 @@ private:
         new HandlerBase<T>(&_service, _cq.get(), logic);
     };
     
+    template<typename T, typename Service, typename... initargs> void add_logic_with_service(Service* serv, initargs&&... args)
+    {
+        std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...));
+        new HandlerBase<T,Service>(serv, _cq.get(), logic);
+    }
+    
     bool notifications_enabled = false;
     bool auth_enabled = false;
     std::shared_ptr<FlagMap> _serverflags;

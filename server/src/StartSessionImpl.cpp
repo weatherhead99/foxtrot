@@ -4,7 +4,7 @@
 
 foxtrot::StartSessionLogic::StartSessionLogic(
     std::shared_ptr<foxtrot::SessionManager> sesman)
-: _sesman(sesman), _lg("StartSessionLogic")
+: BaseSessionLogicImpl("StartSessionLogic", sesman)
 {};
 
 void populate_reply(foxtrot::session_info& repl, const foxtrot::ft_session_info& in)
@@ -20,8 +20,11 @@ bool foxtrot::StartSessionLogic::HandleRequest(foxtrot::StartSessionLogic::reqtp
     _lg.strm(sl::debug) << "processing start session request";
     
     if(req.user_identifier().size() == 0)
+    {
         foxtrot_server_specific_error("must supply a user identifier to start session", repl,
                                       respond, _lg, tag, error_types::ft_ServerError);
+        return true;
+    }
     
         std::vector<unsigned> vecdev(req.devices().begin(), req.devices().end());
         std::vector<std::string> vecflag(req.flags().begin(), req.flags().end());
@@ -35,8 +38,10 @@ bool foxtrot::StartSessionLogic::HandleRequest(foxtrot::StartSessionLogic::reqtp
         {
         auto [sessionid, internalid] = _sesman->start_session(req.user_identifier(), req.comment(), &vecdev, 
                                &vecflag, requested_expiry);
-        auto secret = detail::bin2base64(sessionid);
-        repl.set_sessionid(std::move(secret));
+        
+        std::string secstring(sessionid.begin(), sessionid.end());
+        
+        repl.set_sessionid(secstring);
         repl.set_user_identifier(req.user_identifier());
         repl.set_comment(req.comment());
         
