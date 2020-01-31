@@ -20,6 +20,9 @@
 #include "StartSessionImpl.hh"
 #include "CloseSessionImpl.hh"
 
+#include <boost/mpl/list.hpp>
+#include <boost/mpl/for_each.hpp>
+
 #include <chrono>
 
 
@@ -89,6 +92,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
     _lg.Info("server listening on " + addrstr );
+    
     add_logic<ServerDescribeLogic>(_servcomment,_harness);
     add_logic<InvokeCapabilityLogic>(_harness);
     add_logic<FetchDataLogic>(_harness);

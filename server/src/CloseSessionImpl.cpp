@@ -3,13 +3,14 @@
 #include <foxtrot/server/auth_utils.h>
 
 foxtrot::CloseSessionLogic::CloseSessionLogic(std::shared_ptr<SessionManager> sesman)
-: BaseSessionLogicImpl("EndSessionImpl", sesman)
+: _lg("CloseSessionLogic"), _sesman(sesman)
 {
     
     
 };
 
-bool foxtrot::CloseSessionLogic::HandleRequest(foxtrot::BaseSessionLogicImpl::reqtp& req, foxtrot::BaseSessionLogicImpl::repltp& repl, foxtrot::BaseSessionLogicImpl::respondertp& respond, foxtrot::HandlerTag* tag)
+bool foxtrot::CloseSessionLogic::HandleRequest(foxtrot::CloseSessionLogic::reqtp& req, foxtrot::CloseSessionLogic::repltp& repl, foxtrot::CloseSessionLogic::respondertp& respond, 
+                                               foxtrot::HandlerTag* tag)
 {
     _lg.strm(sl::debug) << "processing close session request";
     
@@ -20,10 +21,9 @@ bool foxtrot::CloseSessionLogic::HandleRequest(foxtrot::BaseSessionLogicImpl::re
         return true;
     }
     
-    auto convert_sesid = detail::base642bin(req.sessionid());
     foxtrot::Sessionid binary_sesid;
     
-    if(convert_sesid.size() != binary_sesid.size())
+    if(req.sessionid().size() != binary_sesid.size())
     {
         foxtrot_server_specific_error("invalid session id format",
                                       repl, respond, _lg, tag, error_types::ft_ServerError);

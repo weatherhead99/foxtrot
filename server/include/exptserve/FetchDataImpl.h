@@ -7,28 +7,18 @@
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/DeviceHarness.h>
-
+#include "Logic_defs.hh"
 
 namespace foxtrot
 {
     class HandlerTag;
     
-    struct FetchDataLogic
+    struct FetchDataLogic : public Serverlogic_defs<&exptserve::AsyncService::RequestFetchData>
     {
-        typedef chunk_request reqtp;
-        typedef datachunk repltp; 
-	typedef grpc::ServerAsyncWriter<datachunk> respondertp;
-	  
-        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
-        const static bool newcall = true;
-	
         FetchDataLogic(std::shared_ptr<DeviceHarness> harness);
-        
-	
+
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
-        
-        
-        
+
 	
     private:
         bool initial_request(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);

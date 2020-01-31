@@ -9,28 +9,18 @@
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/FlagMap.hh>
+#include "Logic_defs.hh"
 
 namespace foxtrot {
     
     class HandlerTag;
 
   
-  
-  
-  
-  
-  struct SetServerFlagsLogic
+  struct SetServerFlagsLogic : 
+  public Serverlogic_defs<&exptserve::AsyncService::RequestSetServerFlag>
   {
-    typedef serverflag reqtp;
-    typedef serverflag repltp;
-    typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-    const static bool newcall = true;
-    constexpr static auto requestfunptr = &exptserve::AsyncService::RequestSetServerFlag;
-    
     SetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
-    
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
-    
   private:
     std::shared_ptr<FlagMap> vars_;
     foxtrot::Logging lg_;
@@ -38,14 +28,9 @@ namespace foxtrot {
   };
   
   
-  struct GetServerFlagsLogic
+  struct GetServerFlagsLogic : 
+  public Serverlogic_defs<&exptserve::AsyncService::RequestGetServerFlag>
   {
-    typedef serverflag reqtp;
-    typedef serverflag repltp;
-    typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-    const static bool newcall = true;
-    constexpr static auto requestfunptr = &exptserve::AsyncService::RequestGetServerFlag;
-    
     GetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
     
@@ -57,36 +42,24 @@ namespace foxtrot {
   
   
 
-  struct ListServerFlagsLogic
+  struct ListServerFlagsLogic : 
+  public Serverlogic_defs<&exptserve::AsyncService::RequestListServerFlags>
   {
-      typedef empty reqtp;
-      typedef serverflaglist repltp;
-      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-      
-      const static bool newcall = true;
-      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestListServerFlags;
-      
+
       ListServerFlagsLogic(std::shared_ptr<FlagMap> vars);
       bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
-      
+
   private:
       std::shared_ptr<FlagMap> vars_;
       foxtrot::Logging lg_;
       
   };
   
-  struct DropServerFlagLogic
+  struct DropServerFlagLogic:
+  public Serverlogic_defs<&exptserve::AsyncService::RequestDropServerFlag>
   {
-      typedef serverflag reqtp;
-      typedef serverflag repltp;
-      
-      typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-      const static bool newcall = true;
-      
-      constexpr static auto requestfunptr = &exptserve::AsyncService::RequestDropServerFlag;
       DropServerFlagLogic(std::shared_ptr<FlagMap> vars);
       bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
-      
   private:
       std::shared_ptr<FlagMap> vars_;
       foxtrot::Logging lg_;

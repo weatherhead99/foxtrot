@@ -4,7 +4,7 @@
 
 foxtrot::StartSessionLogic::StartSessionLogic(
     std::shared_ptr<foxtrot::SessionManager> sesman)
-: BaseSessionLogicImpl("StartSessionLogic", sesman)
+: _lg("StartSessionLogic")
 {};
 
 void populate_reply(foxtrot::session_info& repl, const foxtrot::ft_session_info& in)
