@@ -1,12 +1,13 @@
 #pragma once
 
-#include "BaseSessionLogicImpl.hh"
+#include <foxtrot/ft_sessions.grpc.pb.h>
+#include <foxtrot/server/SessionManager.hh>
 #include "Logic_defs.hh"
 
 namespace foxtrot 
 {
     
-    struct StartSessionLogic : 
+    struct StartSessionLogic: 
     public Serverlogic_defs<&sessions::AsyncService::RequestStartSession>
     {
 

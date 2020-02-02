@@ -72,7 +72,7 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
     src/ExperimentalSetup.cpp src/ChunkStreamImpl.cpp 
     src/ServerFlagsImpl.cpp src/ServerCommandImpl.cpp src/BroadcastNotificationImpl.cpp src/FetchDataImpl.cpp src/exptserve.cpp
     src/StartSessionImpl.cpp
-    src/CloseSessionImpl.cpp
+    src/CloseSessionImpl.cpp src/ListSessionsImpl.cpp
     src/exptserve_funcs.cpp
     src/pushbullet_api.cpp 
     )

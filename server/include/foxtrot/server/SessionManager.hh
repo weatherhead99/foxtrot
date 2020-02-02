@@ -77,6 +77,14 @@ namespace foxtrot
         
         const duration_type& get_session_length() const;
         
+        template<typename F>
+        void for_each_readonly(F apply)
+        {
+            std::shared_lock lck(_sessionmut);
+            std::for_each(_sessionmap.cbegin(), _sessionmap.cend(), apply);
+        };
+        
+        
     private:
         template<typename T, typename F> void check_requested_items(T* req, F checkfun)
         {

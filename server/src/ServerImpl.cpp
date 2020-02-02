@@ -19,6 +19,7 @@
 #include "AuthRespondImpl.h"
 #include "StartSessionImpl.hh"
 #include "CloseSessionImpl.hh"
+#include "ListSessionsImpl.hh"
 
 #include <boost/mpl/list.hpp>
 #include <boost/mpl/for_each.hpp>
@@ -104,6 +105,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
     //TODO: adapt add_logic for multiple services
     add_logic_with_service<StartSessionLogic>(&_sessionservice, _sesman);
     add_logic_with_service<CloseSessionLogic>(&_sessionservice, _sesman);
+    add_logic_with_service<ListSessionsLogic>(&_sessionservice, _sesman);
     
     if(notifications_enabled)
     {
