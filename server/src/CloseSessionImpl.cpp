@@ -25,10 +25,13 @@ bool foxtrot::CloseSessionLogic::HandleRequest(foxtrot::CloseSessionLogic::reqtp
     
     if(req.sessionid().size() != binary_sesid.size())
     {
+
         foxtrot_server_specific_error("invalid session id format",
                                       repl, respond, _lg, tag, error_types::ft_ServerError);
         return true;
     }
+    
+    std::copy(req.sessionid().begin(), req.sessionid().end(), binary_sesid.begin());
     
     auto sesinfo = _sesman->get_session_info(binary_sesid);
     repl.set_user_identifier(sesinfo.user_identifier);

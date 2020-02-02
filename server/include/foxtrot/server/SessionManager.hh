@@ -127,6 +127,8 @@ namespace foxtrot
             return true;
         }
         
+        void notify_session_update();
+        
         void remove_session(unsigned short sesid);
         Sessionid generate_session_id();
         
@@ -146,7 +148,8 @@ namespace foxtrot
         std::condition_variable _stop_updates_cv;
         bool _stop_updates = false;
         
-        
+        std::mutex _sessionop_mut;
+        std::condition_variable _sessionop_cv;
         
         unsigned short next_session_id = 0;
         

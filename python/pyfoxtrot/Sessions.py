@@ -6,6 +6,7 @@ from pyfoxtrot.Client import Client
 from pyfoxtrot.common import _check_repl_err, decode_sodiumkey, encode_sodiumkey
 from pyfoxtrot.Errors import ServerError
 from datetime import datetime
+from time import sleep
 
 class SessionConflictError(ServerError):
     @classmethod
@@ -21,7 +22,7 @@ class Session:
         obj = cls()
         obj._userid = repl.user_identifier
         obj._comment = repl.comment
-        obj._secret = decode_sodiumkey(repl.sessionid)
+        obj._secret = repl.sessionid
         obj._expiry = datetime.fromtimestamp(repl.expiry.seconds)
         obj.raw_repl = repl
         return obj
@@ -77,7 +78,7 @@ class SessionManager:
         return Session._from_create_session_repl(repl)
 
     def _close_session(self, session: Session):
-        req = session_info(sessionid = encode_sodiumkey(session._secret))
+        req = session_info(sessionid = ses._secret)
         
         repl = self._stub.CloseSession(req)
         _check_repl_err(repl)
@@ -89,3 +90,6 @@ if __name__ == "__main__":
     sm = SessionManager(cl)
     ses = sm._start_session("danw", "comment1", [cl.dummy1])
     print(ses)
+    sleep(1)
+    print("trying to close session..")
+    sm._close_session(ses)

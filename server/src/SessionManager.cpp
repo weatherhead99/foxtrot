@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <thread>
+#include <sstream>
 
 using namespace foxtrot;
 
@@ -15,10 +16,21 @@ auto put_time_helper(const time_type& time, const string& format="%c")
     return std::put_time(localtime, format.c_str());
 }
 
+std::string secret_to_string(const foxtrot::Sessionid& secret)
+{
+    std::ostringstream oss;
+    for(auto& bt : secret)
+    {
+        oss << int(bt) << ", ";
+    }
+    return oss.str();
+}
+
 
 foxtrot::SessionManager::SessionManager(const duration_type& session_length)
 : _lg("SessionManager"), _session_length(session_length)
 {
+    start_updates();
 }
 
 foxtrot::SessionManager::~SessionManager()
@@ -33,6 +45,14 @@ foxtrot::ft_session_info  foxtrot::SessionManager::get_session_info(const foxtro
     auto id = _sessionidmap.find(session_id);
     if(id == _sessionidmap.end())
     {
+        _lg.strm(sl::trace) << "secret received: " << secret_to_string(session_id) ;
+        
+        for(auto& [id, ses] : _sessionidmap)
+        {
+            _lg.strm(sl::trace) << "session id: " << ses << "secret: " << secret_to_string(id);
+        }
+        
+        
         throw std::out_of_range("invalid secret!");
     }
     return _sessionmap.at(id->second);
@@ -77,6 +97,15 @@ optional<foxtrot::ft_session_info> foxtrot::SessionManager::who_owns_flag(const 
     }
     
     return out;
+}
+
+
+void foxtrot::SessionManager::notify_session_update()
+{
+    _lg.strm(sl::trace) << "attempting to lock update mutex";
+    std::unique_lock lck(_sessionop_mut);
+    _lg.strm(sl::trace) << "notifying session update thread...";
+    _sessionop_cv.notify_one();
 }
 
 
@@ -167,9 +196,7 @@ std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_se
     
     _lg.strm(sl::info) << "session creation succeeded, expiry time is: " << put_time_helper(newsession.expiry);
     
-    
-    if(start_needed)
-    start_updates();
+    notify_session_update();
 
     return std::make_tuple(secret, next_session_id);
 }
@@ -186,6 +213,7 @@ bool foxtrot::SessionManager::close_session(const foxtrot::Sessionid& session_id
     };
     
     remove_session(loc->second);
+    notify_session_update();
     return true;
     
 }
@@ -207,6 +235,7 @@ bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id
     _lg.strm(sl::debug) << "renewing session with id: " << loc->second;
     
     sesinfo.expiry = now + _session_length;
+    notify_session_update();
     return true;
 }
 
@@ -235,7 +264,7 @@ bool foxtrot::SessionManager::update_at_next_expiry(std::unique_lock<std::mutex>
         _lg.strm(sl::trace) << "acquired lock";
         if(_sessionmap.size() == 0)
         {
-            _lg.strm(sl::trace) << "no sessions, returning";
+            _lg.strm(sl::trace) << "no sessions";
             return false;
         }
         
@@ -278,12 +307,12 @@ void foxtrot::SessionManager::start_updates()
     
     _stop_updates = false;
     
-    if(_update_thread.joinable())
-    {
-        _lg.strm(sl::debug) << "update thread is joinable, joining it...";
-        _update_thread.join();
-        _lg.strm(sl::debug) << "proceeding";
-    }
+//     if(_update_thread.joinable())
+//     {
+//         _lg.strm(sl::debug) << "update thread is joinable, joining it...";
+//         _update_thread.join();
+//         _lg.strm(sl::debug) << "proceeding";
+//     }
     
      _update_thread = std::move(std::thread(
         [this] () {
@@ -295,9 +324,9 @@ void foxtrot::SessionManager::start_updates()
                     localstopupdates = _stop_updates;
                     if(!update_at_next_expiry(&lck))
                     {
-                        _lg.strm(sl::debug) << "no sessions to process, deleting thread";
-                        _stop_updates = true;
-                        break;
+                        _lg.strm(sl::trace) << "waiting until update notification";
+                        std::unique_lock lck(_sessionop_mut);
+                        _sessionop_cv.wait(lck);
                     }
                 }
                 catch(...)

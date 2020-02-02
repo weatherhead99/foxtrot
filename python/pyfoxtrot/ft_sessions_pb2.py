@@ -22,7 +22,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='foxtrot',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x11\x66t_sessions.proto\x12\x07\x66oxtrot\x1a\x0e\x66t_error.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb8\x01\n\x0csession_info\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\x11\n\tsessionid\x18\x02 \x01(\t\x12\x17\n\x0fuser_identifier\x18\x03 \x01(\t\x12\x0f\n\x07\x63omment\x18\x04 \x01(\t\x12\x0f\n\x07\x64\x65vices\x18\x05 \x03(\r\x12\r\n\x05\x66lags\x18\x06 \x03(\t\x12*\n\x06\x65xpiry\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"X\n\x0csession_list\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\'\n\x08sessions\x18\x02 \x03(\x0b\x32\x15.foxtrot.session_info2\x86\x02\n\x08sessions\x12<\n\x0cStartSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12<\n\x0c\x43loseSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12@\n\x10KeepAliveSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12<\n\x0cListSessions\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_listb\x06proto3')
+  serialized_pb=_b('\n\x11\x66t_sessions.proto\x12\x07\x66oxtrot\x1a\x0e\x66t_error.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb8\x01\n\x0csession_info\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\x11\n\tsessionid\x18\x02 \x01(\x0c\x12\x17\n\x0fuser_identifier\x18\x03 \x01(\t\x12\x0f\n\x07\x63omment\x18\x04 \x01(\t\x12\x0f\n\x07\x64\x65vices\x18\x05 \x03(\r\x12\r\n\x05\x66lags\x18\x06 \x03(\t\x12*\n\x06\x65xpiry\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"X\n\x0csession_list\x12\x1f\n\x03\x65rr\x18\x01 \x01(\x0b\x32\x12.foxtrot.errstatus\x12\'\n\x08sessions\x18\x02 \x03(\x0b\x32\x15.foxtrot.session_info2\x86\x02\n\x08sessions\x12<\n\x0cStartSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12<\n\x0c\x43loseSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12@\n\x10KeepAliveSession\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_info\x12<\n\x0cListSessions\x12\x15.foxtrot.session_info\x1a\x15.foxtrot.session_listb\x06proto3')
   ,
   dependencies=[ft__error__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,])
 
@@ -45,8 +45,8 @@ _SESSION_INFO = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='sessionid', full_name='foxtrot.session_info.sessionid', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
