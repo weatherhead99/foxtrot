@@ -1,6 +1,7 @@
 #include "StartSessionImpl.hh"
 #include <foxtrot/server/ServerUtil.h>
 #include <foxtrot/server/auth_utils.h>
+#include "session_utils.hh"
 
 foxtrot::StartSessionLogic::StartSessionLogic(
     std::shared_ptr<foxtrot::SessionManager> sesman)
@@ -28,16 +29,11 @@ bool foxtrot::StartSessionLogic::HandleRequest(foxtrot::StartSessionLogic::reqtp
     
         std::vector<unsigned> vecdev(req.devices().begin(), req.devices().end());
         std::vector<std::string> vecflag(req.flags().begin(), req.flags().end());
-        
-        
-        time_type* requested_expiry = nullptr;
-        if(req.has_expiry())
-            *requested_expiry = std::chrono::system_clock::from_time_t(req.expiry().seconds());
-    
+        auto requested_expiry = get_expiry(req);
         try
         {
         auto [sessionid, internalid] = _sesman->start_session(req.user_identifier(), req.comment(), &vecdev, 
-                               &vecflag, requested_expiry);
+                               &vecflag, requested_expiry.get());
         
         std::string secstring(sessionid.begin(), sessionid.end());
         
@@ -51,6 +47,7 @@ bool foxtrot::StartSessionLogic::HandleRequest(foxtrot::StartSessionLogic::reqtp
         auto expiry = _sesman->get_session_info(internalid).expiry;
         
         //WARNING: probably doesn't work on Windows!!
+        
         auto tt = std::chrono::system_clock::to_time_t(expiry);
         repl.mutable_expiry()->set_seconds(tt);
         
@@ -61,9 +58,7 @@ bool foxtrot::StartSessionLogic::HandleRequest(foxtrot::StartSessionLogic::reqtp
             auto owner = _sesman->get_session_info(i);
             repl.set_user_identifier(owner.user_identifier);
             repl.set_comment(owner.comment);
-            
-            auto tt_owner = std::chrono::system_clock::to_time_t(owner.expiry);
-            repl.mutable_expiry()->set_seconds(tt_owner);
+            set_expiry_from_time(repl, owner.expiry);
             
             foxtrot_server_specific_error("Can't start session as it conflicts with another session",
                 repl, respond, _lg, tag, error_types::ft_ServerError);

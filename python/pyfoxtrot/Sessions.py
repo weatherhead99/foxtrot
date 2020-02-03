@@ -5,7 +5,7 @@ from pyfoxtrot.ft_sessions_pb2 import session_info, session_list, session_empty
 from pyfoxtrot.Client import Client
 from pyfoxtrot.common import _check_repl_err, decode_sodiumkey, encode_sodiumkey
 from pyfoxtrot.Errors import ServerError
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 
 class SessionConflictError(ServerError):
@@ -119,6 +119,15 @@ class SessionManager:
         _check_repl_err(repl)
         
         return [Session._from_repl(_,self._cl, self) for _ in repl.sessions]
+
+    def _renew_session(self, ses: Session, requested_expiry: datetime = None):
+        req = session_info(sessionid = ses._secret)
+        if requested_expiry is not None:
+            req.expiry.seconds = int(requested_expiry.timestamp())
+        
+        repl = self._stub.KeepAliveSession(req)
+        _check_repl_err(repl)
+        ses._expiry = datetime.fromtimestamp(repl.expiry.seconds)
 
 if __name__ == "__main__":
     cl = Client("localhost:50051")

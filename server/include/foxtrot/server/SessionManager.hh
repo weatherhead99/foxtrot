@@ -69,7 +69,7 @@ namespace foxtrot
                                                             const time_type* const requested_expiry
                                                           );
         
-        bool renew_session(const Sessionid& session_id);
+        bool renew_session(const Sessionid& session_id, const time_type* const requested_expiry);
         bool close_session(const Sessionid& session_id);
         
         ft_session_info get_session_info(const Sessionid& session_id);
@@ -134,6 +134,8 @@ namespace foxtrot
             
             return true;
         }
+        
+        void check_requested_expiry(const time_type& tm);
         
         void notify_session_update();
         

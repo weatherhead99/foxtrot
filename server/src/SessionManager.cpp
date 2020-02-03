@@ -137,13 +137,7 @@ std::tuple<foxtrot::Sessionid, unsigned short> foxtrot::SessionManager::start_se
     
     if(requested_expiry)
     {
-        //check that session length is allowed
-        if(*requested_expiry > (now + _session_length))
-        {
-            _lg.strm(sl::error) << "requested a session longer than max allowed";
-            throw std::out_of_range("requested session longer than max allowed");
-        }
-        
+        check_requested_expiry(*requested_expiry);
     };
     
     
@@ -218,7 +212,8 @@ bool foxtrot::SessionManager::close_session(const foxtrot::Sessionid& session_id
     
 }
 
-bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id)
+bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id,
+    const time_type* const requested_expiry)
 {
     std::lock_guard lck(_sessionmut);
     auto loc = _sessionidmap.find(session_id);
@@ -234,7 +229,19 @@ bool foxtrot::SessionManager::renew_session(const foxtrot::Sessionid& session_id
     
     _lg.strm(sl::debug) << "renewing session with id: " << loc->second;
     
-    sesinfo.expiry = now + _session_length;
+    if(requested_expiry)
+    {
+        _lg.strm(sl::debug) << "processing requested expiry time";
+        check_requested_expiry(*requested_expiry);
+        sesinfo.expiry = *requested_expiry;
+    }
+    else
+    {
+        sesinfo.expiry = now + _session_length;
+    }
+    
+    _lg.strm(sl::debug) << "new session expiry time is: " << put_time_helper(sesinfo.expiry);
+    
     notify_session_update();
     return true;
 }
@@ -420,4 +427,18 @@ const duration_type & foxtrot::SessionManager::get_session_length() const
     return _session_length;
 }
 
-
+void foxtrot::SessionManager::check_requested_expiry(const time_type& tm)
+{
+    auto now = std::chrono::system_clock::now();
+    if(tm > (now + _session_length))
+    {
+        _lg.strm(sl::error) << "requested a session longer than max allowed";
+        throw std::out_of_range("requested a session longer than max allowed";
+        
+    }
+    else if(tm < now)
+    {
+        _lg.strm(sl::error) << "requested a session expiry in the past";
+        throw std::out_of_range("requested a session expiry in the past");
+    }
+};

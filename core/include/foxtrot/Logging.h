@@ -66,7 +66,7 @@ namespace foxtrot
 	public:
 	  friend class Logging;
 	  template<typename T> streamLogging& operator<<(T const& value);
-	  ~streamLogging();
+	  virtual ~streamLogging();
 	protected:
 	  streamLogging(Logging& lg, sl level);
 	  streamLogging(const streamLogging& other);
@@ -86,6 +86,8 @@ namespace foxtrot
             return *this;
         };
         T operator*();
+        virtual ~streamThrowLogging() override;
+        
     private:
         streamThrowLogging(Logging& lg, sl level);
         
@@ -139,6 +141,16 @@ T foxtrot::Logging::streamThrowLogging<T>::operator*()
     return T(_oss.str());
 }
 
+template<typename T>
+foxtrot::Logging::streamThrowLogging<T>::~streamThrowLogging()
+{
+    if(!std::uncaught_exceptions())
+        _lg.logAndThrow<T>(_oss.str(), _level);
+    else
+    {
+        nolog = false;
+    }
+}
 
 
 template<typename T>
@@ -155,3 +167,4 @@ foxtrot::Logging::streamThrowLogging<T> foxtrot::Logging::strmthrow(sl level)
     return streamThrowLogging<T>(*this,level);
     
 };
+
