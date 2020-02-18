@@ -3,14 +3,12 @@
 #include "HandlerBase.h"
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/Logging.h>
+#include "Logic_defs.hh"
 
 namespace foxtrot {
-    struct AuthRespondLogic
+    struct AuthRespondLogic : 
+    public Serverlogic_defs<&exptserve::AsyncService::RequestRespondAuthChallenge>
     {
-        typedef auth_response reqtp;
-        typedef auth_confirm repltp;
-        typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestRespondAuthChallenge;
         
         AuthRespondLogic(std::shared_ptr<AuthHandler> authhand);
         

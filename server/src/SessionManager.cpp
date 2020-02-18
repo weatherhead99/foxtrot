@@ -433,11 +433,13 @@ void foxtrot::SessionManager::check_requested_expiry(const time_type& tm)
     if(tm > (now + _session_length))
     {
         _lg.strm(sl::error) << "requested a session longer than max allowed";
-        throw std::out_of_range("requested a session longer than max allowed";
+        throw std::out_of_range("requested a session longer than max allowed");
         
     }
     else if(tm < now)
     {
+        _lg.strm(sl::error) << "now: " << put_time_helper(now);
+        _lg.strm(sl::error) << "requested expiry time: " << put_time_helper(tm);
         _lg.strm(sl::error) << "requested a session expiry in the past";
         throw std::out_of_range("requested a session expiry in the past");
     }

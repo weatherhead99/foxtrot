@@ -64,7 +64,6 @@ namespace foxtrot
                     _lg.strm(sl::trace) << "request id is: " << reinterpret_cast<detail::pointer_print_type>(this);
                     
                     _lg.strm(sl::debug) << "request peer string: " << _ctxt.peer();
-                    process_metadata(_ctxt);
                     
                     for(auto& [k,v] : _ctxt.client_metadata())
                     {
@@ -78,6 +77,10 @@ namespace foxtrot
                         _newrequest = false;
                     }
                     try{
+                        if(_logic->check_metadata(_ctxt))
+                        {
+                            _lg.Trace("request passed metadata check, continuing");
+                        }
                         if(_logic->HandleRequest(_req,_reply, _responder, this))
                         {
                             _lg.Trace("request successful, marking finished");
@@ -127,11 +130,6 @@ namespace foxtrot
 	  
 	};
     
-    void process_metadata(const grpc::ServerContext& ctxt)
-    {
-        
-    };
-	
     
     const grpc::ServerContext& getContext() const
     {

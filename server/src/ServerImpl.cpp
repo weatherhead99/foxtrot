@@ -22,6 +22,8 @@
 #include "ListSessionsImpl.hh"
 #include "KeepAliveSessionImpl.hh"
 
+#include <foxtrot/server/interceptors/sessioninterceptor.hh>
+
 #include <boost/mpl/list.hpp>
 #include <boost/mpl/for_each.hpp>
 
@@ -90,6 +92,11 @@ void ServerImpl::setup_common(const std::string& addrstr)
     //TODO: SECURE CREDENTIALS!
     builder.AddListeningPort(addrstr,_creds)
     .RegisterService(&_service).RegisterService(&_sessionservice);
+    
+    std::vector<std::unique_ptr<ServerInterceptorFactoryInterface>> interceptors;
+    interceptors.push_back(std::make_unique<SessionInterceptorFactory>(_sesman));
+    
+    builder.experimental().SetInterceptorCreators(std::move(interceptors));
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();

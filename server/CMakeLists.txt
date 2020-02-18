@@ -75,6 +75,7 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
     src/CloseSessionImpl.cpp src/ListSessionsImpl.cpp
     src/exptserve_funcs.cpp
     src/pushbullet_api.cpp 
+    src/interceptors/SessionInterceptor.cpp
     )
 
 

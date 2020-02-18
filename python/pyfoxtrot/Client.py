@@ -40,7 +40,7 @@ class Client:
 
         self._enum_descs = []
         self._enum_types = []
-
+        self._active_session = None
         self._setup_device_tree()
 
     def _add_enum_type(self, enumdesc) -> None:

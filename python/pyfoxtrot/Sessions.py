@@ -104,15 +104,19 @@ class SessionManager:
         except ServerError as err:
             sce = SessionConflictError._from_raw_error(err)
             raise sce
-            
-        return Session._from_repl(repl,self._cl, self)
+        
+        ses = Session._from_repl(repl, self._cl, self)
+        self._cl._active_session = ses
+        return ses
 
     def _close_session(self, session: Session):
         req = session_info(sessionid = ses._secret)
         
         repl = self._stub.CloseSession(req)
         _check_repl_err(repl)
-        
+        if self._cl._active_session is ses:
+            self._cl._active_session = None
+
     def _list_sessions(self):
         req = session_empty()
         repl = self._stub.ListSessions(req)

@@ -39,7 +39,7 @@ namespace foxtrot
     template<typename Req>
     std::unique_ptr<time_type> get_expiry(const Req& req)
     {
-        auto out = std::make_unique<time_type>();
+        auto out = std::unique_ptr<time_type>();
         if(req.has_expiry())
         {
             out = std::make_unique<time_type>(std::chrono::system_clock::from_time_t(req.expiry().seconds()));

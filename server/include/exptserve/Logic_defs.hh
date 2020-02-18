@@ -2,6 +2,8 @@
 #include <boost/function_types/parameter_types.hpp>
 #include <boost/mpl/at.hpp>
 #include <type_traits>
+#include <stdexcept>
+#include <grpcpp/server_context.h>
 
 namespace foxtrot
 {
@@ -44,6 +46,18 @@ namespace foxtrot
         using repltp = typename detail::extract_value_type<respondertp>::value_type;
         
         constexpr static auto requestfunptr = Fun;
+        
+        bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
+        {
+            //default implementation that doesn't do anything
+            throw std::logic_error("this handlerequest base method should never be called!");
+        }
+        
+        bool check_metadata(grpc::ServerContext& _ctxt)
+        {
+            return true;
+        }
+        
         
     };
     
