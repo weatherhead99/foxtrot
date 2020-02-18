@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <stdexcept>
 #include <grpcpp/server_context.h>
+#include <foxtrot/server/ServerUtil.h>
+#include <foxtrot/Logging.h>
 
 namespace foxtrot
 {
@@ -49,8 +51,12 @@ namespace foxtrot
         
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
         {
-            //default implementation that doesn't do anything
-            throw std::logic_error("this handlerequest base method should never be called!");
+            //default implementation throw a not implemented error 
+            foxtrot::Logging lg("Serverlogic_defs");
+            foxtrot_server_specific_error("method not implemented yet.", repl,
+                                          respond,lg,error_types::ft_ServerError);
+            return true;
+            
         }
         
         bool check_metadata(grpc::ServerContext& _ctxt)
