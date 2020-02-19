@@ -34,16 +34,21 @@ namespace foxtrot
             using value_type = T;
         };
         
+        template<typename> struct member_function_traits;
         
-        template<typename T, typename U>
-        T base_of(U T::*);
+        template<typename Return, typename Object, typename... Args>
+        struct member_function_traits<Return (Object::*)(Args...)>
+        {
+            using instance_type = Object;
+        };
         
         
     }
     
     class HandlerTag;
     
-    template<auto Fun, typename F=decltype(Fun)>
+    
+    template<auto Fun, typename Service, typename F=decltype(Fun)>
     struct Serverlogic_defs
     {
         //second argument to F, pointer removed
@@ -51,6 +56,8 @@ namespace foxtrot
         //third argument to F, pointer removed
         using respondertp = typename detail::get_function_parameter_type<F,3>::type;
         using repltp = typename detail::extract_value_type<respondertp>::value_type;
+        
+        using servicetp = Service;
         
         constexpr static auto requestfunptr = Fun;
         
@@ -68,7 +75,6 @@ namespace foxtrot
         {
             return true;
         }
-        
         
     };
     

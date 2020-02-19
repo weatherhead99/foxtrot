@@ -7,7 +7,8 @@
 
 namespace foxtrot {
     struct AuthRespondLogic : 
-    public Serverlogic_defs<&auth::AsyncService::RequestRespondAuthChallenge>
+    public Serverlogic_defs<&auth::AsyncService::RequestRespondAuthChallenge,
+        auth::AsyncService>
     {
         
         AuthRespondLogic(std::shared_ptr<AuthHandler> authhand);

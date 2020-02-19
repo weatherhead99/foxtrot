@@ -8,7 +8,8 @@ namespace foxtrot
 {
     
     struct CloseSessionLogic :
-    public Serverlogic_defs<&sessions::AsyncService::RequestCloseSession>
+    public Serverlogic_defs<&sessions::AsyncService::RequestCloseSession,
+        sessions::AsyncService>
     {
 
         CloseSessionLogic(std::shared_ptr<SessionManager> sesman);

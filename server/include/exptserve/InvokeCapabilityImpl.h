@@ -1,5 +1,4 @@
 #pragma once
-#include <grpc++/grpc++.h>
 
 #include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
@@ -14,7 +13,8 @@ namespace foxtrot
     class HandlerTag;
     
     struct InvokeCapabilityLogic : public
-    Serverlogic_defs<&capability::AsyncService::RequestInvokeCapability>
+    Serverlogic_defs<&capability::AsyncService::RequestInvokeCapability,
+    capability::AsyncService>
     {
      InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness);
      

@@ -34,7 +34,7 @@ namespace detail
 namespace foxtrot
 {
     
-    template<typename T, typename Service=exptserve::AsyncService> class HandlerBase : public HandlerTag
+    template<typename T, typename Service=typename T::servicetp> class HandlerBase : public HandlerTag
     {
       
     public:
@@ -56,7 +56,15 @@ namespace foxtrot
                     _lg.Trace("request status is CREATE, processing");
                     _status = status::PROCESS;   
                     //TODO: dispatch on this
+                    if(!_service)
+                        _lg.Error("service is nullptr");
+                    if(!_cq)
+                        _lg.Error("cq is nullptr");
+                    if(!this)
+                        _lg.Error("this is nullptr");
+                    _lg.Trace("about to call requestfunptr");
                     (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
+                    _lg.Trace("requestfunptr returned");
                     
                 }
                 else if(_status == status::PROCESS)

@@ -4,7 +4,6 @@
 #include <memory>
 
 #include <variant>
-#include <grpc++/grpc++.h>
 
 #include <foxtrot/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
@@ -17,7 +16,8 @@ namespace foxtrot {
 
   
   struct SetServerFlagsLogic : 
-  public Serverlogic_defs<&flags::AsyncService::RequestSetServerFlag>
+  public Serverlogic_defs<&flags::AsyncService::RequestSetServerFlag,
+      flags::AsyncService>
   {
     SetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
@@ -29,7 +29,8 @@ namespace foxtrot {
   
   
   struct GetServerFlagsLogic : 
-  public Serverlogic_defs<&flags::AsyncService::RequestGetServerFlag>
+  public Serverlogic_defs<&flags::AsyncService::RequestGetServerFlag,
+      flags::AsyncService>
   {
     GetServerFlagsLogic(std::shared_ptr<FlagMap> vars);
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
@@ -43,7 +44,8 @@ namespace foxtrot {
   
 
   struct ListServerFlagsLogic : 
-  public Serverlogic_defs<&flags::AsyncService::RequestListServerFlags>
+  public Serverlogic_defs<&flags::AsyncService::RequestListServerFlags,
+      flags::AsyncService>
   {
 
       ListServerFlagsLogic(std::shared_ptr<FlagMap> vars);
@@ -56,7 +58,8 @@ namespace foxtrot {
   };
   
   struct DropServerFlagLogic:
-  public Serverlogic_defs<&flags::AsyncService::RequestDropServerFlag>
+  public Serverlogic_defs<&flags::AsyncService::RequestDropServerFlag,
+      flags::AsyncService>
   {
       DropServerFlagLogic(std::shared_ptr<FlagMap> vars);
       bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);

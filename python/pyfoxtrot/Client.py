@@ -295,8 +295,14 @@ class Capability:
 
     def call_cap_sync(self, client, *args, **kwargs):
         stubfun = client._stub.FetchData if self._captp == STREAM else client._stub.InvokeCapability
-        ret = stubfun(self.construct_request(*args, **kwargs))
-
+        req = self.construct_request(*args, **kwargs)
+        if client._active_session is None:
+            ret = stubfun(req)
+        else:
+            print("session active using metadata")
+            metadata = [("session_secret-bin", client._active_session._secret)]
+            ret,status = stubfun.with_call(request=req, metadata=metadata)
+        
         return ret
 
     def __call__(self, *args, **kwargs):

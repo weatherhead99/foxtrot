@@ -10,7 +10,8 @@
 namespace foxtrot
 {
  struct ChunkStreamLogic : public
- Serverlogic_defs<&capability::AsyncService::RequestFetchData>
+ Serverlogic_defs<&capability::AsyncService::RequestFetchData,
+ capability::AsyncService>
  {
 
    ChunkStreamLogic();

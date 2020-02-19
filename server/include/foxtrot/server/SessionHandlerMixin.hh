@@ -30,11 +30,23 @@ namespace foxtrot
         
         
         template<typename R>
-        bool check_session_needed(const R& req, SessionManager& sesman, Logging& lg)
+        bool check_session_needed(const R& req, SessionManager& sesman, 
+                                  DeviceHarness& harness, Logging& lg)
         {
             if constexpr(has_devid<R>::value)
             {
                 lg.strm(sl::debug) << "has devid!";
+                
+                auto cap = harness.GetDevice(req.devid())->GetCapability(req.capname());
+                
+                //capability is readonly, doesn't affect other user to read it
+                if(cap.type == CapabilityType::VALUE_READONLY)
+                    return false;
+                
+                //capability is readwrite, but we are reading it
+                if(cap.type == CapabilityType::VALUE_READWRITE && req.args().size() == 0)
+                    return false;
+                
                 auto optsession = sesman.who_owns_device(req.devid());
                 if(optsession.has_value())
                     return true;
@@ -54,7 +66,6 @@ namespace foxtrot
                 return false;
             }
             
-            
         }
         
         
@@ -66,8 +77,9 @@ namespace foxtrot
     {
     public:
         template<typename ...Ts>
-        SessionHandlerMixin(shared_ptr<SessionManager> sesman, Ts... args)
-        : _sesman(sesman), _lg("SessionHandlerMixin"), T(std::forward<Ts...>(args...))
+        SessionHandlerMixin(shared_ptr<SessionManager> sesman, shared_ptr<DeviceHarness> devharness, Ts... args)
+        : _sesman(sesman), _devharness(devharness), _lg("SessionHandlerMixin"),
+        T(std::forward<Ts...>(args...))
         {
         };
         
@@ -82,11 +94,16 @@ namespace foxtrot
             _lg.strm(sl::info) << "SessionHandlerMixin processing metadata";
             
             //check if we require a session auth
-            if(detail::check_session_needed(req,*_sesman, _lg))
+            if(detail::check_session_needed(req,*_sesman, *_devharness, _lg))
             {
                 _lg.strm(sl::debug) << "need session auth";
                 auto id = get_request_session_id(req, ctxt);
-                
+                if(!_sesman->session_auth_check(id, req.devid()))
+                {
+                    _lg.strm(sl::error) << "invalid secret to run command";
+                    throw foxtrot::ServerError("invalid session secret");
+                }
+                return true;
             }
             else
             {
@@ -94,7 +111,6 @@ namespace foxtrot
                 return true;
             }
             
-            //check if we have one
             
             return true;  
         };
@@ -105,11 +121,17 @@ namespace foxtrot
         foxtrot::Sessionid get_request_session_id(typename T::reqtp& req, grpc::ServerContext& ctxt)
         {
             auto metadat = ctxt.client_metadata();
-            auto secpos = metadat.find("session_secret");
+            
+            for(auto& [k,v] : metadat)
+            {
+                _lg.strm(sl::info) << "MD: " << k << ": " << v;
+            }
+            
+            auto secpos = metadat.find("session_secret-bin");
             if(secpos == metadat.end())
             {
                 _lg.strm(sl::error) << "no session secret provided, but it is needed";
-                throw foxtrot::ServerError("no session secret provided, but it is needed");
+                throw foxtrot::ServerError("request locked by user session, but no secret provided");
             }
             
             foxtrot::Sessionid out;
@@ -121,12 +143,14 @@ namespace foxtrot
                 throw std::out_of_range("invalid session secret array size");
             }
             
+            std::copy(secpos->second.begin(), secpos->second.end(), out.begin());
+            
             return out;
         };
         
         foxtrot::Logging _lg;
         shared_ptr<SessionManager> _sesman;
-        
+        shared_ptr<DeviceHarness> _devharness;
         
     };
     

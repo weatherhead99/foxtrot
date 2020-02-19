@@ -86,57 +86,52 @@ void ServerImpl::setup_common(const std::string& addrstr)
       
     };
   
-  
-    ServerBuilder builder;
-    //TODO: SECURE CREDENTIALS!
-    builder.AddListeningPort(addrstr,_creds)
-    .RegisterService(&_service).RegisterService(&_sessionservice).RegisterService(&_flagservice)
-    .RegisterService(&_capabilityservice).RegisterService(&_authservice);
-    
+    builder.AddListeningPort(addrstr,_creds);
     _cq = builder.AddCompletionQueue();
-    _server = builder.BuildAndStart();
-    _lg.Info("server listening on " + addrstr );
     
-    add_logic_with_service<ServerDescribeLogic>(&_capabilityservice, _servcomment,_harness);
-    add_logic_with_service<InvokeCapabilityWithSession>(&_capabilityservice, _sesman,_harness);
-    add_logic_with_service<FetchDataLogic>(&_capabilityservice, _harness);
+    std::vector<std::unique_ptr<logic_add_helper_base>> logics;
     
-    add_logic_with_service<SetServerFlagsLogic>(&_flagservice,_serverflags);
-    add_logic_with_service<GetServerFlagsLogic>(&_flagservice,_serverflags);
-    add_logic_with_service<ListServerFlagsLogic>(&_flagservice,_serverflags);
-    add_logic_with_service<DropServerFlagLogic>(&_flagservice, _serverflags);
-    
-    //TODO: adapt add_logic for multiple services
-    add_logic_with_service<StartSessionLogic>(&_sessionservice, _sesman);
-    add_logic_with_service<CloseSessionLogic>(&_sessionservice, _sesman);
-    add_logic_with_service<ListSessionsLogic>(&_sessionservice, _sesman);
-    add_logic_with_service<KeepAliveSessionLogic>(&_sessionservice, _sesman);
-    
+    logics.push_back( create_logic_add_helper<ServerDescribeLogic>(_servcomment,_harness));
+    logics.push_back( create_logic_add_helper<InvokeCapabilityWithSession>(_sesman, _harness, _harness));
+    logics.push_back( create_logic_add_helper<FetchDataLogic>(_harness));
+    logics.push_back( create_logic_add_helper<SetServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<GetServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<ListServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<DropServerFlagLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<StartSessionLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<CloseSessionLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<ListSessionsLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<KeepAliveSessionLogic>(_sesman));
     if(notifications_enabled)
     {
         _lg.Info("setting up pushbullet notification logic");
-        add_logic<BroadcastNotificationLogic>(std::move(_noti_api),default_title_,
-            default_channel_);
+        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(std::move(_noti_api),
+                                                                             default_title_, default_channel_));
     }
     else
     {
         _lg.Info("notifications are not enabled");
-        add_logic<BroadcastNotificationLogic>(nullptr);
+//         logics.push_back<BroadcastNotificationLogic>(nullptr);
     }
+
     if(auth_enabled)
     {
         _lg.Info("setting up authentication system");
-        add_logic_with_service<AuthRequestLogic>(&_authservice,_auth_api);
-        add_logic_with_service<AuthRespondLogic>(&_authservice,_auth_api);
+        logics.push_back(create_logic_add_helper<AuthRequestLogic>(_auth_api));
+        logics.push_back(create_logic_add_helper<AuthRespondLogic>(_auth_api));
     }
     else
     {
         _lg.Info("authentication system disabled");
-        add_logic_with_service<AuthRequestLogic>(&_authservice, nullptr);
-        add_logic_with_service<AuthRespondLogic>(&_authservice, nullptr);
+        logics.push_back(create_logic_add_helper<AuthRequestLogic>(nullptr));
+        logics.push_back(create_logic_add_helper<AuthRespondLogic>(nullptr));
     }
+
+    _server = builder.BuildAndStart();
     
+
     
+    _lg.Info("server listening on " + addrstr );
     
 }
 
@@ -257,6 +252,9 @@ void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool for
   
 }
 
-
+ServerCompletionQueue* ServerImpl::getCQ()
+{
+    return _cq.get();
+}
 
 

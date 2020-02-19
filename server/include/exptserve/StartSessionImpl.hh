@@ -8,7 +8,8 @@ namespace foxtrot
 {
     
     struct StartSessionLogic: 
-    public Serverlogic_defs<&sessions::AsyncService::RequestStartSession>
+    public Serverlogic_defs<&sessions::AsyncService::RequestStartSession,
+        sessions::AsyncService>
     {
 
         StartSessionLogic(std::shared_ptr<SessionManager> sesman);

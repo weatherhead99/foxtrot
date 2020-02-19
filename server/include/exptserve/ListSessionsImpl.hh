@@ -8,7 +8,8 @@
 namespace foxtrot
 {
     class ListSessionsLogic 
-    : public Serverlogic_defs<&sessions::AsyncService::RequestListSessions>
+    : public Serverlogic_defs<&sessions::AsyncService::RequestListSessions,
+    sessions::AsyncService>
     {
     public:
         ListSessionsLogic(std::shared_ptr<SessionManager> sesman);

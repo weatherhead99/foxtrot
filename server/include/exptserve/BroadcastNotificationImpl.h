@@ -16,7 +16,8 @@ namespace foxtrot
     
     
     struct BroadcastNotificationLogic
-    : public Serverlogic_defs<&exptserve::AsyncService::RequestBroadcastNotification>
+    : public Serverlogic_defs<&exptserve::AsyncService::RequestBroadcastNotification,
+    exptserve::AsyncService>
     {
         BroadcastNotificationLogic(std::unique_ptr<pushbullet_api> api, 
             const string& default_title="",

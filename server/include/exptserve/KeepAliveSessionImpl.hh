@@ -7,7 +7,8 @@ namespace foxtrot
 {
     
     class KeepAliveSessionLogic : 
-    public Serverlogic_defs<&sessions::AsyncService::RequestKeepAliveSession>
+    public Serverlogic_defs<&sessions::AsyncService::RequestKeepAliveSession,
+        sessions::AsyncService>
     {
     public:
         KeepAliveSessionLogic(std::shared_ptr<SessionManager> sesman);

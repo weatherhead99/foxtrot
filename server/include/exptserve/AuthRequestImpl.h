@@ -6,7 +6,8 @@
 #include "Logic_defs.hh"
 
 namespace foxtrot {
-    struct AuthRequestLogic : public Serverlogic_defs<&auth::AsyncService::RequestRequestAuthChallenge>
+    struct AuthRequestLogic : public Serverlogic_defs<&auth::AsyncService::RequestRequestAuthChallenge,
+    auth::AsyncService>
     {
         AuthRequestLogic(std::shared_ptr<AuthHandler> authhand);
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond,

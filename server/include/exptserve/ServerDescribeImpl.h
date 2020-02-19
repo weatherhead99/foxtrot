@@ -14,7 +14,8 @@ namespace foxtrot
 {
     class HandlerTag;
     
- struct ServerDescribeLogic : public Serverlogic_defs<&capability::AsyncService::RequestDescribeServer>
+ struct ServerDescribeLogic : public Serverlogic_defs<&capability::AsyncService::RequestDescribeServer,
+ capability::AsyncService>
  {
     ServerDescribeLogic(const std::string& comment, std::shared_ptr<DeviceHarness> harness);
     bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);

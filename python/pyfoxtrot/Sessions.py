@@ -19,7 +19,8 @@ class SessionConflictError(ServerError):
 
 class Session:
     @classmethod
-    def _from_repl(cls, repl: session_info, cl: Client = None, sm= None):
+    def _from_repl(cls, repl: session_info, cl: Client = None, sm= None,
+                   interactive: bool=True):
         obj = cls()
         obj._userid = repl.user_identifier
         obj._comment = repl.comment
@@ -30,6 +31,7 @@ class Session:
         obj._flags = repl.flags
         obj._cl = cl
         obj._sm = sm
+        obj._interactive = interactive
         return obj
     
     def close(self):
@@ -80,6 +82,11 @@ class Session:
         strtime = self.expiry.strftime("%c")
         return "Session(user=%s, comment='%s', expiry='%s') - %s, %s"  % \
                   (self.userid, self.comment, strtime, isexpiredstr, ownedstr)
+
+    def __del__(self):
+        if self._interactive:
+            print("closing interactive session")
+            self.close()
 
 class SessionManager:
     def __init__(self, cl: Client):

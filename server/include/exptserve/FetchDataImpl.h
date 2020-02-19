@@ -1,8 +1,6 @@
 #pragma once
 #include <map>
 
-#include <grpc++/grpc++.h>
-
 #include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
@@ -13,7 +11,8 @@ namespace foxtrot
 {
     class HandlerTag;
     
-    struct FetchDataLogic : public Serverlogic_defs<&capability::AsyncService::RequestFetchData>
+    struct FetchDataLogic : public Serverlogic_defs<&capability::AsyncService::RequestFetchData,
+    capability::AsyncService>
     {
         FetchDataLogic(std::shared_ptr<DeviceHarness> harness);
 
