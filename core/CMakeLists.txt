@@ -121,7 +121,8 @@ function(generate_proto_and_grpc)
 endfunction()
 
 set(proto_input_files proto/foxtrot.proto proto/ft_types.proto proto/ft_auth.proto
-proto/ft_error.proto proto/ft_streams.proto proto/ft_capability.proto proto/ft_sessions.proto)
+proto/ft_error.proto proto/ft_streams.proto proto/ft_capability.proto proto/ft_sessions.proto
+proto/ft_flags.proto)
 generate_proto_and_grpc(PROTO_FILES ${proto_input_files} OUT_ALL_VARNAME pb_srcs OUT_HDR_VARNAME pb_hdrs)
 message("pb_srcs: ${pb_srcs}")
 message("pb_hdrs: ${pb_hdrs}")
@@ -139,6 +140,7 @@ add_dependencies(foxtrot_core ft_auth_copy_includes)
 add_dependencies(foxtrot_core ft_streams_copy_includes)
 add_dependencies(foxtrot_core ft_capability_copy_includes)
 add_dependencies(foxtrot_core ft_sessions_copy_includes)
+add_dependencies(foxtrot_core ft_flags_copy_includes)
 
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 

@@ -1,10 +1,8 @@
 #pragma once
 #include <memory>
 
-#include <grpc++/grpc++.h>
-
+#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
-#include <foxtrot/foxtrot.grpc.pb.h>
 
 #include "HandlerBase.h"
 #include "Logic_defs.hh"
@@ -12,7 +10,7 @@
 namespace foxtrot
 {
  struct ChunkStreamLogic : public
- Serverlogic_defs<&exptserve::AsyncService::RequestFetchData>
+ Serverlogic_defs<&capability::AsyncService::RequestFetchData>
  {
 
    ChunkStreamLogic();

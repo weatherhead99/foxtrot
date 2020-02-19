@@ -3,7 +3,7 @@
 
 #include <grpc++/grpc++.h>
 
-#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/DeviceHarness.h>
@@ -13,7 +13,7 @@ namespace foxtrot
 {
     class HandlerTag;
     
-    struct FetchDataLogic : public Serverlogic_defs<&exptserve::AsyncService::RequestFetchData>
+    struct FetchDataLogic : public Serverlogic_defs<&capability::AsyncService::RequestFetchData>
     {
         FetchDataLogic(std::shared_ptr<DeviceHarness> harness);
 

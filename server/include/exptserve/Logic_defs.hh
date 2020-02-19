@@ -34,6 +34,11 @@ namespace foxtrot
             using value_type = T;
         };
         
+        
+        template<typename T, typename U>
+        T base_of(U T::*);
+        
+        
     }
     
     class HandlerTag;
@@ -59,7 +64,7 @@ namespace foxtrot
             
         }
         
-        bool check_metadata(grpc::ServerContext& _ctxt)
+        bool check_metadata(grpc::ServerContext& _ctxt, reqtp& req)
         {
             return true;
         }

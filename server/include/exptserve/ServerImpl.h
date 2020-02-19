@@ -14,6 +14,9 @@
 #include <foxtrot/foxtrot.pb.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
 #include <foxtrot/ft_sessions.grpc.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
+#include <foxtrot/ft_auth.grpc.pb.h>
+#include <foxtrot/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/DeviceHarness.h>
 #include <foxtrot/server/AuthHandler.h>
@@ -85,6 +88,9 @@ private:
     
     foxtrot::exptserve::AsyncService _service;
     foxtrot::sessions::AsyncService _sessionservice;
+    foxtrot::capability::AsyncService _capabilityservice;
+    foxtrot::flags::AsyncService _flagservice;
+    foxtrot::auth::AsyncService _authservice;
     std::shared_ptr<SessionManager> _sesman;
     
     std::string _servcomment;

@@ -3,6 +3,7 @@ package foxtrot;
 
 import "ft_error.proto";
 import "ft_capability.proto";
+import "ft_types.proto";
 
 enum stream_control_commands
 {
@@ -61,4 +62,13 @@ message streamthreadlist
 
 }
 
-
+service streams
+{
+    rpc CreateStreamThread(stream_thread_request) returns (stream_thread_response);
+    rpc ListStreamThread(empty) returns (streamthreadlist);
+    rpc DestroyStreamThread(stream_thread_request) returns (stream_thread_response);
+    rpc CreateStream(stream_registration_request) returns (stream_registration_response);
+    rpc ListStreams(empty) returns (streamlist);
+    rpc ReceiveStream(stream stream_control) returns (stream capability_response);
+    rpc DestroyStream(stream_registration_request) returns (stream_registration_response);
+}

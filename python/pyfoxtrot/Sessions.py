@@ -1,7 +1,8 @@
 import grpc
 
 from pyfoxtrot.ft_sessions_pb2_grpc import sessionsStub
-from pyfoxtrot.ft_sessions_pb2 import session_info, session_list, session_empty
+from pyfoxtrot.ft_sessions_pb2 import session_info, session_list
+from pyfoxtrot.ft_types_pb2 import empty
 from pyfoxtrot.Client import Client
 from pyfoxtrot.common import _check_repl_err, decode_sodiumkey, encode_sodiumkey
 from pyfoxtrot.Errors import ServerError
@@ -110,15 +111,15 @@ class SessionManager:
         return ses
 
     def _close_session(self, session: Session):
-        req = session_info(sessionid = ses._secret)
+        req = session_info(sessionid = session._secret)
         
         repl = self._stub.CloseSession(req)
         _check_repl_err(repl)
-        if self._cl._active_session is ses:
+        if self._cl._active_session is session:
             self._cl._active_session = None
 
     def _list_sessions(self):
-        req = session_empty()
+        req = empty()
         repl = self._stub.ListSessions(req)
         _check_repl_err(repl)
         

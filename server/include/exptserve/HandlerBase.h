@@ -77,19 +77,24 @@ namespace foxtrot
                         _newrequest = false;
                     }
                     try{
-                        if(_logic->check_metadata(_ctxt))
+                        if(_logic->check_metadata(_ctxt, _req))
                         {
                             _lg.Trace("request passed metadata check, continuing");
-                        }
-                        if(_logic->HandleRequest(_req,_reply, _responder, this))
-                        {
-                            _lg.Trace("request successful, marking finished");
-                            _status = status::FINISH;
+                            if(_logic->HandleRequest(_req,_reply, _responder, this))
+                            {
+                                _lg.Trace("request successful, marking finished");
+                                _status = status::FINISH;
+                            }
+                            else
+                            {
+                                _lg.Trace("request not finished yet");
+                                _status = status::PROCESS;
+                            }
                         }
                         else
                         {
-                            _lg.Trace("request not finished yet");
-                            _status = status::PROCESS;
+                            _lg.Trace("request failed metadata check, finishing");
+                            _status = status::FINISH;
                         }
                     }
                     catch(...)
@@ -129,6 +134,8 @@ namespace foxtrot
 	  }
 	  
 	};
+    
+    
     
     
     const grpc::ServerContext& getContext() const

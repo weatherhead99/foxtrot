@@ -3,8 +3,8 @@ package foxtrot;
 
 import "ft_error.proto";
 import "google/protobuf/timestamp.proto";
+import "ft_types.proto";
 
-message session_empty {}
 
 message session_info
 {
@@ -28,6 +28,6 @@ service sessions
     rpc StartSession(session_info) returns (session_info);
     rpc CloseSession(session_info) returns (session_info);
     rpc KeepAliveSession(session_info) returns (session_info);
-    rpc ListSessions(session_empty) returns (session_list);
+    rpc ListSessions(empty) returns (session_list);
 
 };

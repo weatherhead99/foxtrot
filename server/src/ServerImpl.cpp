@@ -22,7 +22,6 @@
 #include "ListSessionsImpl.hh"
 #include "KeepAliveSessionImpl.hh"
 
-#include <foxtrot/server/interceptors/sessioninterceptor.hh>
 
 #include <boost/mpl/list.hpp>
 #include <boost/mpl/for_each.hpp>
@@ -91,24 +90,21 @@ void ServerImpl::setup_common(const std::string& addrstr)
     ServerBuilder builder;
     //TODO: SECURE CREDENTIALS!
     builder.AddListeningPort(addrstr,_creds)
-    .RegisterService(&_service).RegisterService(&_sessionservice);
-    
-    std::vector<std::unique_ptr<ServerInterceptorFactoryInterface>> interceptors;
-    interceptors.push_back(std::make_unique<SessionInterceptorFactory>(_sesman));
-    
-    builder.experimental().SetInterceptorCreators(std::move(interceptors));
+    .RegisterService(&_service).RegisterService(&_sessionservice).RegisterService(&_flagservice)
+    .RegisterService(&_capabilityservice).RegisterService(&_authservice);
     
     _cq = builder.AddCompletionQueue();
     _server = builder.BuildAndStart();
     _lg.Info("server listening on " + addrstr );
     
-    add_logic<ServerDescribeLogic>(_servcomment,_harness);
-    add_logic<InvokeCapabilityLogic>(_harness);
-    add_logic<FetchDataLogic>(_harness);
-    add_logic<SetServerFlagsLogic>(_serverflags);
-    add_logic<GetServerFlagsLogic>(_serverflags);
-    add_logic<ListServerFlagsLogic>(_serverflags);
-    add_logic<DropServerFlagLogic>(_serverflags);
+    add_logic_with_service<ServerDescribeLogic>(&_capabilityservice, _servcomment,_harness);
+    add_logic_with_service<InvokeCapabilityWithSession>(&_capabilityservice, _sesman,_harness);
+    add_logic_with_service<FetchDataLogic>(&_capabilityservice, _harness);
+    
+    add_logic_with_service<SetServerFlagsLogic>(&_flagservice,_serverflags);
+    add_logic_with_service<GetServerFlagsLogic>(&_flagservice,_serverflags);
+    add_logic_with_service<ListServerFlagsLogic>(&_flagservice,_serverflags);
+    add_logic_with_service<DropServerFlagLogic>(&_flagservice, _serverflags);
     
     //TODO: adapt add_logic for multiple services
     add_logic_with_service<StartSessionLogic>(&_sessionservice, _sesman);
@@ -130,14 +126,14 @@ void ServerImpl::setup_common(const std::string& addrstr)
     if(auth_enabled)
     {
         _lg.Info("setting up authentication system");
-        add_logic<AuthRequestLogic>(_auth_api);
-        add_logic<AuthRespondLogic>(_auth_api);
+        add_logic_with_service<AuthRequestLogic>(&_authservice,_auth_api);
+        add_logic_with_service<AuthRespondLogic>(&_authservice,_auth_api);
     }
     else
     {
         _lg.Info("authentication system disabled");
-        add_logic<AuthRequestLogic>(nullptr);
-        add_logic<AuthRespondLogic>(nullptr);
+        add_logic_with_service<AuthRequestLogic>(&_authservice, nullptr);
+        add_logic_with_service<AuthRespondLogic>(&_authservice, nullptr);
     }
     
     

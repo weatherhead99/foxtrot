@@ -2,6 +2,7 @@
 import grpc
 
 from . import ft_sessions_pb2 as ft__sessions__pb2
+from . import ft_types_pb2 as ft__types__pb2
 
 
 class sessionsStub(object):
@@ -31,7 +32,7 @@ class sessionsStub(object):
         )
     self.ListSessions = channel.unary_unary(
         '/foxtrot.sessions/ListSessions',
-        request_serializer=ft__sessions__pb2.session_empty.SerializeToString,
+        request_serializer=ft__types__pb2.empty.SerializeToString,
         response_deserializer=ft__sessions__pb2.session_list.FromString,
         )
 
@@ -88,7 +89,7 @@ def add_sessionsServicer_to_server(servicer, server):
       ),
       'ListSessions': grpc.unary_unary_rpc_method_handler(
           servicer.ListSessions,
-          request_deserializer=ft__sessions__pb2.session_empty.FromString,
+          request_deserializer=ft__types__pb2.empty.FromString,
           response_serializer=ft__sessions__pb2.session_list.SerializeToString,
       ),
   }

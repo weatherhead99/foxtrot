@@ -29,3 +29,9 @@ message auth_confirm
     uint64 expiry = 3;
     int32 authlevel = 4;
 }
+
+service auth
+{
+    rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
+    rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
+}

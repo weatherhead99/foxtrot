@@ -2,9 +2,7 @@
 import grpc
 
 from . import foxtrot_pb2 as foxtrot__pb2
-from . import ft_auth_pb2 as ft__auth__pb2
-from . import ft_capability_pb2 as ft__capability__pb2
-from . import ft_streams_pb2 as ft__streams__pb2
+from . import ft_types_pb2 as ft__types__pb2
 
 
 class exptserveStub(object):
@@ -17,157 +15,21 @@ class exptserveStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.InvokeCapability = channel.unary_unary(
-        '/foxtrot.exptserve/InvokeCapability',
-        request_serializer=ft__capability__pb2.capability_request.SerializeToString,
-        response_deserializer=ft__capability__pb2.capability_response.FromString,
-        )
-    self.DescribeServer = channel.unary_unary(
-        '/foxtrot.exptserve/DescribeServer',
-        request_serializer=foxtrot__pb2.empty.SerializeToString,
-        response_deserializer=foxtrot__pb2.servdescribe.FromString,
-        )
-    self.FetchData = channel.unary_stream(
-        '/foxtrot.exptserve/FetchData',
-        request_serializer=foxtrot__pb2.chunk_request.SerializeToString,
-        response_deserializer=foxtrot__pb2.datachunk.FromString,
-        )
-    self.ServerCommand = channel.unary_unary(
-        '/foxtrot.exptserve/ServerCommand',
-        request_serializer=foxtrot__pb2.servercommand_request.SerializeToString,
-        response_deserializer=foxtrot__pb2.serverrequest_return.FromString,
-        )
-    self.SetServerFlag = channel.unary_unary(
-        '/foxtrot.exptserve/SetServerFlag',
-        request_serializer=foxtrot__pb2.serverflag.SerializeToString,
-        response_deserializer=foxtrot__pb2.serverflag.FromString,
-        )
-    self.GetServerFlag = channel.unary_unary(
-        '/foxtrot.exptserve/GetServerFlag',
-        request_serializer=foxtrot__pb2.serverflag.SerializeToString,
-        response_deserializer=foxtrot__pb2.serverflag.FromString,
-        )
-    self.ListServerFlags = channel.unary_unary(
-        '/foxtrot.exptserve/ListServerFlags',
-        request_serializer=foxtrot__pb2.empty.SerializeToString,
-        response_deserializer=foxtrot__pb2.serverflaglist.FromString,
-        )
-    self.DropServerFlag = channel.unary_unary(
-        '/foxtrot.exptserve/DropServerFlag',
-        request_serializer=foxtrot__pb2.serverflag.SerializeToString,
-        response_deserializer=foxtrot__pb2.serverflag.FromString,
-        )
     self.BroadcastNotification = channel.unary_unary(
         '/foxtrot.exptserve/BroadcastNotification',
         request_serializer=foxtrot__pb2.broadcast_notification.SerializeToString,
         response_deserializer=foxtrot__pb2.broadcast_notification.FromString,
         )
-    self.RequestAuthChallenge = channel.unary_unary(
-        '/foxtrot.exptserve/RequestAuthChallenge',
-        request_serializer=ft__auth__pb2.auth_request.SerializeToString,
-        response_deserializer=ft__auth__pb2.auth_challenge.FromString,
-        )
-    self.RespondAuthChallenge = channel.unary_unary(
-        '/foxtrot.exptserve/RespondAuthChallenge',
-        request_serializer=ft__auth__pb2.auth_response.SerializeToString,
-        response_deserializer=ft__auth__pb2.auth_confirm.FromString,
-        )
-    self.CreateStreamThread = channel.unary_unary(
-        '/foxtrot.exptserve/CreateStreamThread',
-        request_serializer=ft__streams__pb2.stream_thread_request.SerializeToString,
-        response_deserializer=ft__streams__pb2.stream_thread_response.FromString,
-        )
-    self.ListStreamThread = channel.unary_unary(
-        '/foxtrot.exptserve/ListStreamThread',
-        request_serializer=foxtrot__pb2.empty.SerializeToString,
-        response_deserializer=ft__streams__pb2.streamthreadlist.FromString,
-        )
-    self.DestroyStreamThread = channel.unary_unary(
-        '/foxtrot.exptserve/DestroyStreamThread',
-        request_serializer=ft__streams__pb2.stream_thread_request.SerializeToString,
-        response_deserializer=ft__streams__pb2.stream_thread_response.FromString,
-        )
-    self.CreateStream = channel.unary_unary(
-        '/foxtrot.exptserve/CreateStream',
-        request_serializer=ft__streams__pb2.stream_registration_request.SerializeToString,
-        response_deserializer=ft__streams__pb2.stream_registration_response.FromString,
-        )
-    self.ListStreams = channel.unary_unary(
-        '/foxtrot.exptserve/ListStreams',
-        request_serializer=foxtrot__pb2.empty.SerializeToString,
-        response_deserializer=ft__streams__pb2.streamlist.FromString,
-        )
-    self.ReceiveStream = channel.stream_stream(
-        '/foxtrot.exptserve/ReceiveStream',
-        request_serializer=ft__streams__pb2.stream_control.SerializeToString,
-        response_deserializer=ft__capability__pb2.capability_response.FromString,
-        )
-    self.DestroyStream = channel.unary_unary(
-        '/foxtrot.exptserve/DestroyStream',
-        request_serializer=ft__streams__pb2.stream_registration_request.SerializeToString,
-        response_deserializer=ft__streams__pb2.stream_registration_response.FromString,
+    self.GetServerInfo = channel.unary_unary(
+        '/foxtrot.exptserve/GetServerInfo',
+        request_serializer=ft__types__pb2.empty.SerializeToString,
+        response_deserializer=foxtrot__pb2.server_info.FromString,
         )
 
 
 class exptserveServicer(object):
   # missing associated documentation comment in .proto file
   pass
-
-  def InvokeCapability(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def DescribeServer(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def FetchData(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ServerCommand(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def SetServerFlag(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def GetServerFlag(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ListServerFlags(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def DropServerFlag(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
 
   def BroadcastNotification(self, request, context):
     # missing associated documentation comment in .proto file
@@ -176,63 +38,7 @@ class exptserveServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def RequestAuthChallenge(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def RespondAuthChallenge(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def CreateStreamThread(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ListStreamThread(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def DestroyStreamThread(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def CreateStream(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ListStreams(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def ReceiveStream(self, request_iterator, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def DestroyStream(self, request, context):
+  def GetServerInfo(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -242,95 +48,15 @@ class exptserveServicer(object):
 
 def add_exptserveServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'InvokeCapability': grpc.unary_unary_rpc_method_handler(
-          servicer.InvokeCapability,
-          request_deserializer=ft__capability__pb2.capability_request.FromString,
-          response_serializer=ft__capability__pb2.capability_response.SerializeToString,
-      ),
-      'DescribeServer': grpc.unary_unary_rpc_method_handler(
-          servicer.DescribeServer,
-          request_deserializer=foxtrot__pb2.empty.FromString,
-          response_serializer=foxtrot__pb2.servdescribe.SerializeToString,
-      ),
-      'FetchData': grpc.unary_stream_rpc_method_handler(
-          servicer.FetchData,
-          request_deserializer=foxtrot__pb2.chunk_request.FromString,
-          response_serializer=foxtrot__pb2.datachunk.SerializeToString,
-      ),
-      'ServerCommand': grpc.unary_unary_rpc_method_handler(
-          servicer.ServerCommand,
-          request_deserializer=foxtrot__pb2.servercommand_request.FromString,
-          response_serializer=foxtrot__pb2.serverrequest_return.SerializeToString,
-      ),
-      'SetServerFlag': grpc.unary_unary_rpc_method_handler(
-          servicer.SetServerFlag,
-          request_deserializer=foxtrot__pb2.serverflag.FromString,
-          response_serializer=foxtrot__pb2.serverflag.SerializeToString,
-      ),
-      'GetServerFlag': grpc.unary_unary_rpc_method_handler(
-          servicer.GetServerFlag,
-          request_deserializer=foxtrot__pb2.serverflag.FromString,
-          response_serializer=foxtrot__pb2.serverflag.SerializeToString,
-      ),
-      'ListServerFlags': grpc.unary_unary_rpc_method_handler(
-          servicer.ListServerFlags,
-          request_deserializer=foxtrot__pb2.empty.FromString,
-          response_serializer=foxtrot__pb2.serverflaglist.SerializeToString,
-      ),
-      'DropServerFlag': grpc.unary_unary_rpc_method_handler(
-          servicer.DropServerFlag,
-          request_deserializer=foxtrot__pb2.serverflag.FromString,
-          response_serializer=foxtrot__pb2.serverflag.SerializeToString,
-      ),
       'BroadcastNotification': grpc.unary_unary_rpc_method_handler(
           servicer.BroadcastNotification,
           request_deserializer=foxtrot__pb2.broadcast_notification.FromString,
           response_serializer=foxtrot__pb2.broadcast_notification.SerializeToString,
       ),
-      'RequestAuthChallenge': grpc.unary_unary_rpc_method_handler(
-          servicer.RequestAuthChallenge,
-          request_deserializer=ft__auth__pb2.auth_request.FromString,
-          response_serializer=ft__auth__pb2.auth_challenge.SerializeToString,
-      ),
-      'RespondAuthChallenge': grpc.unary_unary_rpc_method_handler(
-          servicer.RespondAuthChallenge,
-          request_deserializer=ft__auth__pb2.auth_response.FromString,
-          response_serializer=ft__auth__pb2.auth_confirm.SerializeToString,
-      ),
-      'CreateStreamThread': grpc.unary_unary_rpc_method_handler(
-          servicer.CreateStreamThread,
-          request_deserializer=ft__streams__pb2.stream_thread_request.FromString,
-          response_serializer=ft__streams__pb2.stream_thread_response.SerializeToString,
-      ),
-      'ListStreamThread': grpc.unary_unary_rpc_method_handler(
-          servicer.ListStreamThread,
-          request_deserializer=foxtrot__pb2.empty.FromString,
-          response_serializer=ft__streams__pb2.streamthreadlist.SerializeToString,
-      ),
-      'DestroyStreamThread': grpc.unary_unary_rpc_method_handler(
-          servicer.DestroyStreamThread,
-          request_deserializer=ft__streams__pb2.stream_thread_request.FromString,
-          response_serializer=ft__streams__pb2.stream_thread_response.SerializeToString,
-      ),
-      'CreateStream': grpc.unary_unary_rpc_method_handler(
-          servicer.CreateStream,
-          request_deserializer=ft__streams__pb2.stream_registration_request.FromString,
-          response_serializer=ft__streams__pb2.stream_registration_response.SerializeToString,
-      ),
-      'ListStreams': grpc.unary_unary_rpc_method_handler(
-          servicer.ListStreams,
-          request_deserializer=foxtrot__pb2.empty.FromString,
-          response_serializer=ft__streams__pb2.streamlist.SerializeToString,
-      ),
-      'ReceiveStream': grpc.stream_stream_rpc_method_handler(
-          servicer.ReceiveStream,
-          request_deserializer=ft__streams__pb2.stream_control.FromString,
-          response_serializer=ft__capability__pb2.capability_response.SerializeToString,
-      ),
-      'DestroyStream': grpc.unary_unary_rpc_method_handler(
-          servicer.DestroyStream,
-          request_deserializer=ft__streams__pb2.stream_registration_request.FromString,
-          response_serializer=ft__streams__pb2.stream_registration_response.SerializeToString,
+      'GetServerInfo': grpc.unary_unary_rpc_method_handler(
+          servicer.GetServerInfo,
+          request_deserializer=ft__types__pb2.empty.FromString,
+          response_serializer=foxtrot__pb2.server_info.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
