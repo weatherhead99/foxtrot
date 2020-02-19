@@ -39,14 +39,17 @@ namespace foxtrot
                 
                 auto cap = harness.GetDevice(req.devid())->GetCapability(req.capname());
                 
-                //capability is readonly, doesn't affect other user to read it
-                if(cap.type == CapabilityType::VALUE_READONLY)
-                    return false;
+                //disable this for now, think about how to make this work in future
                 
-                //capability is readwrite, but we are reading it
-                if(cap.type == CapabilityType::VALUE_READWRITE && req.args().size() == 0)
-                    return false;
                 
+//                 //capability is readonly, doesn't affect other user to read it
+//                 if(cap.type == CapabilityType::VALUE_READONLY)
+//                     return false;
+//                 
+//                 //capability is readwrite, but we are reading it
+//                 if(cap.type == CapabilityType::VALUE_READWRITE && req.args().size() == 0)
+//                     return false;
+//                 
                 auto optsession = sesman.who_owns_device(req.devid());
                 if(optsession.has_value())
                     return true;
