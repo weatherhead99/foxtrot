@@ -26,15 +26,20 @@ string PfeifferDevice::cmd(const string& request)
     //HACK: this will be a problem if you use another protocol
     auto serproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
     if(serproto)
-      serproto->flush();
+      {
+	serproto->flush();
+	serproto->setDrain(true);
+	serproto->setWait(100);
+      }
+      
     else
       throw std::logic_error("failed to cast protocol to serial port. This is an error in the TPG362 driver code");
-    
+
+    _lg.strm(sl::debug) << "writing to serial port...";
     _serproto->write(_cmdoss.str());
     
-      //HACK: need a better way to wait for the reply
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
+    _lg.strm(sl::debug) << "reading from serial port...";
     auto repl = _serproto->read_until_endl('\r');
     return repl;
     
@@ -75,6 +80,8 @@ string PfeifferDevice::semantic_command(unsigned short address, unsigned short p
             }
             _semanticoss << str_from_number(data->size(),2) << *data;
     }
+
+    _lg.strm(sl::trace) << "message: " << _semanticoss.str();
     
     return cmd(_semanticoss.str());
 }

@@ -58,8 +58,8 @@ namespace foxtrot {
    
     
    private:
-     //address range 1-24, default is 1
-     short unsigned _address = 010; 
+     //address range 1-24, default is 1, shift left by one digit ( last digit is for gauge subaddr)
+     short unsigned _address = 10; 
 
    };
    
