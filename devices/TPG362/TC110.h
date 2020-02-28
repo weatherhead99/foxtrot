@@ -135,7 +135,7 @@ namespace foxtrot {
             void setRUTimeCtrl(bool onoff);
             
             bool getPumpStationOnOff();
-            void setPumpstationOnOff(bool onoff);
+            void setPumpStationOnOff(bool onoff);
             
             bool getVentEnable();
             void setVentEnable(bool onoff);
@@ -174,7 +174,7 @@ namespace foxtrot {
             void setCtrlInterface(TC110_ControlInterfaces control);
             
             bool getInterfaceSelectionLocked();
-            void setIntergaceSelectionLocked(bool onoff);
+            void setInterfaceSelectionLocked(bool onoff);
             
             TC110_DIconfigs getDIConfig(unsigned char DInum);
             void setDIConfig(unsigned char DInum, TC110_DIconfigs config);
