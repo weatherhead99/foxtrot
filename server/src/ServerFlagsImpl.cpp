@@ -1,6 +1,6 @@
 #include <foxtrot/server/ServerUtil.h>
 #include "ServerFlagsImpl.h"
-  
+#include <foxtrot/server/FlagMap.hh>
   
 class server_flag_visitor
 {
@@ -10,15 +10,15 @@ public:
      
   };
   
-  void operator()(double& i) const
+  void operator()(const double& i) const
   {
     flg_.set_dblval(i);
   };
-  void operator()(int& i) const
+  void operator()(const int& i) const
   {
     flg_.set_intval(i);
   };
-  void operator()(bool& i) const
+  void operator()(const bool& i) const
   {
     flg_.set_boolval(i);
   };
@@ -35,7 +35,7 @@ private:
 
 
 
-foxtrot::SetServerFlagsLogic::SetServerFlagsLogic(std::shared_ptr<flagmap> vars)
+foxtrot::SetServerFlagsLogic::SetServerFlagsLogic(std::shared_ptr<FlagMap> vars)
 : lg_("SetServerFlagsLogic"), vars_(vars)
 {
 }
@@ -75,7 +75,7 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
     };
 
     lg_.Trace("setting value in flagmap");
-      vars_->operator[](req.flagname()) = var;
+      vars_->set(req.flagname(), var);
   }
   catch(...)
   {
@@ -91,7 +91,7 @@ bool foxtrot::SetServerFlagsLogic::HandleRequest(foxtrot::SetServerFlagsLogic::r
 }
 
 
-foxtrot::GetServerFlagsLogic::GetServerFlagsLogic(std::shared_ptr<flagmap> vars)
+foxtrot::GetServerFlagsLogic::GetServerFlagsLogic(std::shared_ptr<FlagMap> vars)
 : lg_("GetServerFlagsLogic"), vars_(vars)
 {
 
@@ -106,14 +106,9 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
   
   try{
  
-    auto it = vars_->find(req.flagname());
-    if(it == vars_->end())
-    {
-      throw std::out_of_range("invalid server flag");
-    }
-
+    auto val = vars_->get(req.flagname());
     repl.set_flagname(req.flagname());    
-    std::visit( server_flag_visitor(repl), it->second);
+    std::visit( server_flag_visitor(repl), val);
 
 
   }
@@ -130,7 +125,7 @@ bool foxtrot::GetServerFlagsLogic::HandleRequest(foxtrot::GetServerFlagsLogic::r
 
 
 
-foxtrot::ListServerFlagsLogic::ListServerFlagsLogic(std::shared_ptr<flagmap> vars)
+foxtrot::ListServerFlagsLogic::ListServerFlagsLogic(std::shared_ptr<FlagMap> vars)
 : lg_("ListServerFlagsLogic"), vars_(vars)
 {
     
@@ -144,14 +139,12 @@ bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic:
     //TODO: set message id somehow?
     
     try {
-    
-        for(auto& flag : *vars_)
-        {
-            auto* newflag = repl.add_flags();
-            newflag->set_flagname(flag.first);
-            std::visit(server_flag_visitor(*newflag), flag.second);
-        }
-            
+            vars_->for_each_readonly([&repl] (const auto& item)
+            {
+                auto* newflag = repl.add_flags();
+                newflag->set_flagname(item.first);
+                std::visit(server_flag_visitor(*newflag), item.second);
+            });
     }
     catch(...)
     {
@@ -166,7 +159,7 @@ bool foxtrot::ListServerFlagsLogic::HandleRequest(foxtrot::ListServerFlagsLogic:
 }
 
 
-foxtrot::DropServerFlagLogic::DropServerFlagLogic(std::shared_ptr<flagmap> vars)
+foxtrot::DropServerFlagLogic::DropServerFlagLogic(std::shared_ptr<FlagMap> vars)
 : lg_("DropServerFlagLogic"), vars_(vars)
 {}
 
@@ -177,13 +170,7 @@ bool foxtrot::DropServerFlagLogic::HandleRequest(foxtrot::DropServerFlagLogic::r
     try {
             repl.set_msgid(req.msgid());
            lg_.strm(sl::debug) << "flag name: \"" << req.flagname() << "\""; 
-           auto it = vars_->find(req.flagname());
-           if(it == vars_->end())
-           {
-               throw std::out_of_range("no such flag");
-           }
-           
-           vars_->erase(it);
+           vars_->drop(req.flagname());
            lg_.Debug("flag removed");
            repl.set_flagname(req.flagname());
            

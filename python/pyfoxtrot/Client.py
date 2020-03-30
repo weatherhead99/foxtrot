@@ -10,14 +10,16 @@ import struct
 import grpc
 from itertools import chain
 from .foxtrot_pb2_grpc import exptserveStub
+from .ft_capability_pb2_grpc import capabilityStub
 from .common import _check_repl_err
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
 from .TypeConversion import string_describe_ft_variant
-from .foxtrot_pb2 import empty, broadcast_notification
+from .ft_types_pb2 import empty
+from .foxtrot_pb2 import  broadcast_notification
 from .ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
 from .ft_capability_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
-from .foxtrot_pb2 import chunk_request
+from .ft_capability_pb2 import chunk_request
 from .ft_types_pb2 import ENUM_TYPE
 from .EnumCreator import define_enum
 
@@ -33,14 +35,14 @@ class Client:
                 cert = f.read()
             creds = grpc.ssl_channel_credentials(root_certificates=cert)
             self._channel = grpc.secure_channel(connstr, creds)
-        self._stub = exptserveStub(self._channel)
+        self._stub = capabilityStub(self._channel)
 
         self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
         self._comment = self._servdescribe.servcomment
 
         self._enum_descs = []
         self._enum_types = []
-
+        self._active_session = None
         self._setup_device_tree()
 
     def _add_enum_type(self, enumdesc) -> None:
@@ -293,8 +295,14 @@ class Capability:
 
     def call_cap_sync(self, client, *args, **kwargs):
         stubfun = client._stub.FetchData if self._captp == STREAM else client._stub.InvokeCapability
-        ret = stubfun(self.construct_request(*args, **kwargs))
-
+        req = self.construct_request(*args, **kwargs)
+        if client._active_session is None:
+            ret = stubfun(req)
+        else:
+            print("session active using metadata")
+            metadata = [("session_secret-bin", client._active_session._secret)]
+            ret,status = stubfun.with_call(request=req, metadata=metadata)
+        
         return ret
 
     def __call__(self, *args, **kwargs):

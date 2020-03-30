@@ -1,16 +1,15 @@
 #pragma once
-#include <grpc++/grpc++.h>
 #include "HandlerBase.h"
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/Logging.h>
+#include "Logic_defs.hh"
+#include <foxtrot/ft_auth.grpc.pb.h>
 
 namespace foxtrot {
-    struct AuthRespondLogic
+    struct AuthRespondLogic : 
+    public Serverlogic_defs<&auth::AsyncService::RequestRespondAuthChallenge,
+        auth::AsyncService>
     {
-        typedef auth_response reqtp;
-        typedef auth_confirm repltp;
-        typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestRespondAuthChallenge;
         
         AuthRespondLogic(std::shared_ptr<AuthHandler> authhand);
         

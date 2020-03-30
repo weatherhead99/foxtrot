@@ -8,7 +8,7 @@
 #include <variant>
 
 #include <foxtrot/server/Device.h>
-#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 using prop_or_meth = std::variant<rttr::property, rttr::method>;

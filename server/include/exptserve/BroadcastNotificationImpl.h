@@ -7,6 +7,7 @@
 
 #include "pushbullet_api.hh"
 #include "HandlerBase.h"
+#include "Logic_defs.hh"
 
 using std::string;
 
@@ -15,12 +16,9 @@ namespace foxtrot
     
     
     struct BroadcastNotificationLogic
+    : public Serverlogic_defs<&exptserve::AsyncService::RequestBroadcastNotification,
+    exptserve::AsyncService>
     {
-        typedef broadcast_notification reqtp;
-        typedef broadcast_notification repltp;
-        typedef grpc::ServerAsyncResponseWriter<repltp> respondertp;
-        constexpr static auto requestfunptr = &exptserve::AsyncService::RequestBroadcastNotification;
-        
         BroadcastNotificationLogic(std::unique_ptr<pushbullet_api> api, 
             const string& default_title="",
             const string& default_channel=""

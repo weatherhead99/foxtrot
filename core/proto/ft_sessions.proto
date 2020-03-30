@@ -1,0 +1,33 @@
+syntax = "proto3";
+package foxtrot;
+
+import "ft_error.proto";
+import "google/protobuf/timestamp.proto";
+import "ft_types.proto";
+
+
+message session_info
+{
+    errstatus err = 1;
+    bytes sessionid = 2;
+    string user_identifier = 3;
+    string comment = 4;
+    repeated uint32 devices = 5;
+    repeated string flags = 6;
+    google.protobuf.Timestamp expiry = 7;
+};
+
+message session_list
+{
+    errstatus err = 1;
+    repeated session_info sessions = 2;
+};
+
+service sessions
+{
+    rpc StartSession(session_info) returns (session_info);
+    rpc CloseSession(session_info) returns (session_info);
+    rpc KeepAliveSession(session_info) returns (session_info);
+    rpc ListSessions(empty) returns (session_list);
+
+};

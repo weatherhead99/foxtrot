@@ -67,3 +67,50 @@ message capability_response
     errstatus err = 5;
 }
 
+message chunk_request
+{ 
+    uint32 msgid = 1;
+    uint32 devid = 2;
+    string capname = 3;
+    repeated capability_argument args = 4;
+    uint32 chunksize = 6;
+    uint32 contention_timeout = 7;
+
+}
+
+message datachunk
+{
+    bytes data = 1;
+    uint32 msgid = 2;
+    uint32 devid = 3;
+    string capname = 4;
+    errstatus err = 6;
+    byte_data_types dtp = 7;
+
+}
+
+
+message devdescribe
+{
+    uint32 devid = 1;    
+    string devtype = 2;
+    string devcomment = 3;
+    repeated devcapability caps = 4;
+    
+}
+
+message servdescribe
+{
+    string servcomment = 1;
+    map<uint32, devdescribe> devs_attached = 2;
+    errstatus err = 3;
+}
+
+service capability
+{
+    rpc InvokeCapability (capability_request) returns (capability_response);
+    rpc DescribeServer(empty) returns (servdescribe);
+    rpc FetchData(chunk_request) returns (stream datachunk);
+
+}
+

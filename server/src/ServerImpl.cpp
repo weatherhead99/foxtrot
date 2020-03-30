@@ -17,14 +17,28 @@
 #include "BroadcastNotificationImpl.h"
 #include "AuthRequestImpl.h"
 #include "AuthRespondImpl.h"
+#include "StartSessionImpl.hh"
+#include "CloseSessionImpl.hh"
+#include "ListSessionsImpl.hh"
+#include "KeepAliveSessionImpl.hh"
+
+
+#include <boost/mpl/list.hpp>
+#include <boost/mpl/for_each.hpp>
+
+#include <chrono>
+
 
 using std::string;
 using namespace foxtrot;
 
 foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
 : _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051"),
-_serverflags{new flagmap}
+_serverflags{new FlagMap}
 {
+    //TODO: option for length of session
+    auto session_length = std::chrono::minutes(10);
+    _sesman = std::make_shared<SessionManager>(session_length);
 }
 
 ServerImpl::ServerImpl(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
@@ -72,50 +86,52 @@ void ServerImpl::setup_common(const std::string& addrstr)
       
     };
   
-  
-    ServerBuilder builder;
-    //TODO: SECURE CREDENTIALS!
     builder.AddListeningPort(addrstr,_creds);
-    
-    //TODO: Register Service
-    builder.RegisterService(&_service);
-    
     _cq = builder.AddCompletionQueue();
-    _server = builder.BuildAndStart();
-    _lg.Info("server listening on " + addrstr );
-    add_logic<ServerDescribeLogic>(_servcomment,_harness);
-    add_logic<InvokeCapabilityLogic>(_harness);
-    add_logic<FetchDataLogic>(_harness);
-    add_logic<SetServerFlagsLogic>(_serverflags);
-    add_logic<GetServerFlagsLogic>(_serverflags);
-    add_logic<ListServerFlagsLogic>(_serverflags);
-    add_logic<DropServerFlagLogic>(_serverflags);
     
+    std::vector<std::unique_ptr<logic_add_helper_base>> logics;
+    
+    logics.push_back( create_logic_add_helper<ServerDescribeLogic>(_servcomment,_harness));
+    logics.push_back( create_logic_add_helper<InvokeCapabilityWithSession>(_sesman, _harness, _harness));
+    logics.push_back( create_logic_add_helper<FetchDataLogic>(_harness));
+    logics.push_back( create_logic_add_helper<SetServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<GetServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<ListServerFlagsLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<DropServerFlagLogic>(_serverflags));
+    logics.push_back( create_logic_add_helper<StartSessionLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<CloseSessionLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<ListSessionsLogic>(_sesman));
+    logics.push_back( create_logic_add_helper<KeepAliveSessionLogic>(_sesman));
     if(notifications_enabled)
     {
         _lg.Info("setting up pushbullet notification logic");
-        add_logic<BroadcastNotificationLogic>(std::move(_noti_api),default_title_,
-            default_channel_);
+        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(std::move(_noti_api),
+                                                                             default_title_, default_channel_));
     }
     else
     {
         _lg.Info("notifications are not enabled");
-        add_logic<BroadcastNotificationLogic>(nullptr);
+//         logics.push_back<BroadcastNotificationLogic>(nullptr);
     }
+
     if(auth_enabled)
     {
         _lg.Info("setting up authentication system");
-        add_logic<AuthRequestLogic>(_auth_api);
-        add_logic<AuthRespondLogic>(_auth_api);
+        logics.push_back(create_logic_add_helper<AuthRequestLogic>(_auth_api));
+        logics.push_back(create_logic_add_helper<AuthRespondLogic>(_auth_api));
     }
     else
     {
         _lg.Info("authentication system disabled");
-        add_logic<AuthRequestLogic>(nullptr);
-        add_logic<AuthRespondLogic>(nullptr);
+        logics.push_back(create_logic_add_helper<AuthRequestLogic>(nullptr));
+        logics.push_back(create_logic_add_helper<AuthRespondLogic>(nullptr));
     }
+
+    _server = builder.BuildAndStart();
     
+
     
+    _lg.Info("server listening on " + addrstr );
     
 }
 
@@ -236,6 +252,9 @@ void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool for
   
 }
 
-
+ServerCompletionQueue* ServerImpl::getCQ()
+{
+    return _cq.get();
+}
 
 

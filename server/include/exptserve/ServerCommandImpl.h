@@ -7,6 +7,7 @@
 #include <foxtrot/server/ExperimentalSetup.h>
 
 #include "HandlerBase.h"
+#include "Logic_defs.hh"
 
 namespace foxtrot
 {

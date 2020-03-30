@@ -37,7 +37,7 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
               auto outcaps = desc.add_caps();
               outcaps->CopyFrom(_harness->GetDeviceCapability(devid, capname));
               
-              _lg.strm(sl::trace) << "debug string: " << outcaps->DebugString();
+             // _lg.strm(sl::trace) << "debug string: " << outcaps->DebugString();
               
               
           }

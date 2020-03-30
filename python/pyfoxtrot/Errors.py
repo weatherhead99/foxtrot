@@ -6,17 +6,22 @@ Created on Wed May  3 22:34:46 2017
 @author: danw
 """
 
-class DeviceError(Exception):
+class FoxtrotBaseError(Exception):
+    def __init__(self, msg, raw_reply=None):
+        super().__init__(msg)
+        self.raw_reply = raw_reply
+
+class DeviceError(FoxtrotBaseError):
     pass
 
-class ProtocolError(Exception):
+class ProtocolError(FoxtrotBaseError):
     pass
 
-class ContentionError(Exception):
+class ContentionError(FoxtrotBaseError):
     pass
 
-class ServerError(Exception):
+class ServerError(FoxtrotBaseError):
     pass
 
-class AuthenticationError(Exception):
+class AuthenticationError(FoxtrotBaseError):
     pass

@@ -1,0 +1,38 @@
+syntax = "proto3";
+package foxtrot;
+
+option java_package = "io.foxtrot";
+
+import "ft_error.proto";
+import "ft_types.proto";
+
+message serverflag
+{
+    errstatus err = 1;
+    uint32 msgid = 2;
+    string flagname = 3;
+    
+    oneof arg {
+      double dblval = 4;
+      sint32 intval = 5;
+      bool boolval = 6;
+      string stringval = 7;
+    }
+}
+
+message serverflaglist
+{
+    errstatus err =1;
+    uint32 msgid =2;
+    
+    repeated serverflag flags =3;
+
+}
+
+service flags
+{
+    rpc SetServerFlag (serverflag) returns (serverflag);
+    rpc GetServerFlag (serverflag) returns (serverflag);
+    rpc ListServerFlags (empty) returns (serverflaglist);
+    rpc DropServerFlag (serverflag) returns (serverflag);
+}

@@ -1,23 +1,21 @@
 #pragma once
-#include <grpc++/grpc++.h>
 
-#include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/server/DeviceHarness.h>
+#include "Logic_defs.hh"
+#include <foxtrot/server/SessionHandlerMixin.hh>
 
 namespace foxtrot
 {
+    
     class HandlerTag;
     
-    struct InvokeCapabilityLogic
+    struct InvokeCapabilityLogic : public
+    Serverlogic_defs<&capability::AsyncService::RequestInvokeCapability,
+    capability::AsyncService>
     {
-     typedef capability_request reqtp;
-     typedef capability_response repltp;
-     typedef grpc::ServerAsyncResponseWriter<repltp> respondertp; 
-     const static bool newcall = true;
-     constexpr static auto requestfunptr = &exptserve::AsyncService::RequestInvokeCapability;
-     
      InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness);
      
      bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag);
@@ -27,6 +25,7 @@ namespace foxtrot
 	foxtrot::Logging _lg;
     };
     
-    
+
+    using InvokeCapabilityWithSession = SessionHandlerMixin<InvokeCapabilityLogic>;
 
 }

@@ -60,11 +60,14 @@ void foxtrot::formatter(const logging::record_view& rec, logging::formatting_ost
         case(sl::warning):
             strm.stream() << termcolor::yellow;
             break;
-//         case(sl::info):
-//             strm.stream() << termcolor::green;
-//             break;
+        case(sl::info):
+            strm.stream() << termcolor::green;
+            break;
         case(sl::debug):
             strm.stream() << termcolor::cyan;
+            break;
+        case(sl::trace):
+            strm.stream() << termcolor::white;
             break;
     }
     

@@ -1,26 +1,19 @@
 #pragma once
 #include <memory>
 
-#include <grpc++/grpc++.h>
-
+#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
-#include <foxtrot/foxtrot.grpc.pb.h>
 
 #include "HandlerBase.h"
-
+#include "Logic_defs.hh"
 
 namespace foxtrot
 {
- struct ChunkStreamLogic
+ struct ChunkStreamLogic : public
+ Serverlogic_defs<&capability::AsyncService::RequestFetchData,
+ capability::AsyncService>
  {
-   typedef chunk_request reqtp;
-   typedef datachunk repltp;
-   typedef grpc::ServerAsyncWriter<datachunk> respondertp;
-   
-   //NOTE: will not be used, request will always start in PROCESS mode
-   constexpr static auto requestfunptr = &exptserve::AsyncService::RequestFetchData;
-   const static bool newcall = false;
-   
+
    ChunkStreamLogic();
    
    bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond, void* tag);
@@ -40,7 +33,6 @@ namespace foxtrot
    unsigned char* _currval;
    
  };
-  
- typedef HandlerBase<ChunkStreamLogic> ChunkStreamImpl;
+
   
 }
