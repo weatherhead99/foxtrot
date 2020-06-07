@@ -34,6 +34,7 @@ class FoxtrotCppMeta(type):
 
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
+    version = get_version()
 
 
 

@@ -2,6 +2,16 @@ syntax = "proto3";
 package foxtrot;
 
 import "ft_error.proto";
+import "google/protobuf/timestamp.proto";
+
+message auth_data
+{
+   string userid = 1;
+   bytes token = 2;
+   int32 authlevel = 3;
+   int32 authflags = 4;
+   google.protobuf.Timestamp expiry = 5;
+}
 
 message auth_request
 {
@@ -30,8 +40,20 @@ message auth_confirm
     int32 authlevel = 4;
 }
 
+
+message sasl_auth_data
+{
+    errstatus err = 1;
+    bytes sasl_data = 2;
+    auth_data authdat = 3;
+}
+
+
 service auth
 {
     rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
     rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
+    rpc SaslAuthProcess (stream sasl_auth_data) returns (stream sasl_auth_data);
+
+    rpc VerifyToken(sasl_auth_data) returns (sasl_auth_data);
 }
