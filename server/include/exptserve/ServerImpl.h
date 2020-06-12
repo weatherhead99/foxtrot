@@ -24,6 +24,7 @@
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/FlagMap.hh>
 #include <foxtrot/server/SessionManager.hh>
+#include <foxtrot/server/auth_layer/AuthBase.hh>
 
 #include "HandlerBase.h"
 #include "pushbullet_api.hh"
@@ -93,7 +94,7 @@ private:
       logic_add_helper(ServerImpl& impl, initargs&&... args)
       : _impl(impl), _lg("logic_add_helper")
       {
-          _lg.Warning("creating new logic object");
+          _lg.Trace("creating new logic object");
           _logic = std::make_shared<T>( std::forward<initargs>(args)...);
           _impl.add_logic_shared_ptr(_logic);
           _impl.register_get_service<Service>();
@@ -101,7 +102,7 @@ private:
       
       virtual ~logic_add_helper()
       {
-          _lg.Warning("creating new HandlerBase");
+          _lg.Trace("creating new HandlerBase");
           new HandlerBase<T>(_impl.register_get_service<Service>(), _impl.getCQ(), _logic);
       }
       
@@ -163,6 +164,7 @@ private:
     foxtrot::capability::AsyncService _capabilityservice;
     foxtrot::flags::AsyncService _flagservice;
     foxtrot::auth::AsyncService _authservice;
+    
     std::shared_ptr<SessionManager> _sesman;
     
     grpc::ServerBuilder builder;
@@ -178,6 +180,7 @@ private:
     std::shared_ptr<AuthHandler> _auth_api = nullptr;
     std::unique_ptr<pushbullet_api> _noti_api = nullptr;
     std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
+    std::shared_ptr<UserAuthInterface> _auth_iface = nullptr;
     
 };
 

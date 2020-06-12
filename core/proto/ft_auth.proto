@@ -2,6 +2,7 @@ syntax = "proto3";
 package foxtrot;
 
 import "ft_error.proto";
+import "ft_types.proto";
 import "google/protobuf/timestamp.proto";
 
 message auth_data
@@ -48,12 +49,18 @@ message sasl_auth_data
     auth_data authdat = 3;
 }
 
+message auth_type_list
+{
+    errstatus err = 1;
+    repeated string mechanism_name = 2;
+}
 
 service auth
 {
     rpc RequestAuthChallenge (auth_request) returns (auth_challenge);
     rpc RespondAuthChallenge (auth_response) returns (auth_confirm);
-    rpc SaslAuthProcess (stream sasl_auth_data) returns (stream sasl_auth_data);
 
+    rpc GetSupportedAuthMechanisms (empty) returns (auth_type_list);
+    rpc SaslAuthProcess (stream sasl_auth_data) returns (stream sasl_auth_data);
     rpc VerifyToken(sasl_auth_data) returns (sasl_auth_data);
 }

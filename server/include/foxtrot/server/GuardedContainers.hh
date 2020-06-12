@@ -26,13 +26,14 @@ namespace foxtrot
             std::for_each(_var.begin(), _var.end(), apply);
         }
         
-        
-        
-        void set(const Idx& key, const value_type& val)
+        template<typename F>
+        auto apply_operation_readwrite(F apply)
         {
             std::lock_guard lck(_mut);
-            _var[key] = val;
-        };
+            return apply(_var);
+        }
+        
+        
 
     protected:
         T _var;
@@ -47,6 +48,7 @@ namespace foxtrot
     public:
         using key_type = typename M::key_type;
         using value_type = typename M::value_type;
+        using mapped_type = typename M::mapped_type;
         
         void drop(const key_type& key)
         {
@@ -67,6 +69,19 @@ namespace foxtrot
         };
         
         
+        void set(const key_type& key, const mapped_type& val)
+        {
+            std::lock_guard lck(this->_mut);
+            this->_var[key] = val;
+        };
+        
+        bool in(const key_type& key)
+        {
+            std::shared_lock lck(this->_mut);
+            auto it = this->_var.find(key);
+            return it != this->_var.end();
+        }
+        
     };
     
     template<class V>
@@ -80,6 +95,7 @@ namespace foxtrot
             std::shared_lock lck(this->_mut);
             return this->_var[idx];
         };
+        
         
     };
     

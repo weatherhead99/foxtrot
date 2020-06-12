@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <foxtrot/server/GuardedContainers.hh>
+#include <foxtrot/Logging.h>
 #include <unordered_map>
 #include <map>
 
@@ -66,18 +67,16 @@ namespace foxtrot
         
         bool verify_call(const auth_token& token, int required_level, int required_flags=0);
         std::vector<string> get_supported_mechanisms();
-        
-        
+        void add_provider(std::shared_ptr<UserAuthProvider> provider);
         
     protected:
-        void add_provider(std::shared_ptr<UserAuthProvider> provider);
       
     private:
         authmethodmap _methods;
         authprovidervec _authproviders;
         unique_ptr<UserProviderInterface> _infoprovider;
         tokenmap _tokens;
-        
+        Logging _lg;
     };
     
 }

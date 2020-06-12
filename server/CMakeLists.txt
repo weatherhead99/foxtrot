@@ -80,8 +80,9 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 
 if(BUILD_AUTH)
     list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp src/SessionManager.cpp
-                src/auth_layer/SASLAuthProvider.cpp)
-    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp)
+                src/auth_layer/SASLAuthProvider.cpp src/auth_layer/UserAuthInterface.cpp)
+    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp src/GetAuthMechanismsImpl.cpp)
+    
 
 endif()
 
