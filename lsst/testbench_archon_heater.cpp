@@ -240,7 +240,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
                            auto relay_params = params->at("relay_params");
                            auto proto = std::make_shared<foxtrot::protocols::SerialPort>(&relay_params);
                            auto relay = std::unique_ptr<foxtrot::devices::DLP_IOR4>(
-                               new foxtrot::devices::DLP_IOR4(proto, "vacuum valve relays"));
+                               new foxtrot::devices::DLP_IOR4(proto, "vacuum_valve_relays"));
 
                            harness.AddDevice(std::move(relay));
                        });

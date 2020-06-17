@@ -90,7 +90,7 @@ namespace devices
         void write_cmd_helper(int addr, T1 param, T2 value)
         {
             auto st = str_from_number(static_cast<unsigned short>(value));
-            auto ret = semantic_command(addr, param, pfeiffer_action::describe);
+            auto ret = semantic_command(addr, param, pfeiffer_action::describe, st);
             
             auto interpret = interpret_response_telegram(ret);
             validate_response_telegram_parameters(addr, param, interpret);
