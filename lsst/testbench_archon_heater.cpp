@@ -24,6 +24,8 @@
 #include <foxtrot/devices/Q250.h>
 #endif
 
+#include <foxtrot/devices/DLP_IOR4.hh>
+
 
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/protocols/SerialPort.h>
@@ -228,7 +230,20 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
             harness.AddDevice(std::move(webswitch));
         }
     );
+    
+    
+    
+    //relay system for gate valves
+    setup_with_disable("relays", setup_params, lg,
+                       [&harness, &lg, &params] () {
+                           lg.Info("setting up vacuum valve relays");
+                           auto relay_params = params->at("relay_params");
+                           auto proto = std::make_shared<foxtrot::protocols::SerialPort>(&relay_params);
+                           auto relay = std::unique_ptr<foxtrot::devices::DLP_IOR4>(
+                               new foxtrot::devices::DLP_IOR4(proto, "vacuum valve relays"));
 
+                           harness.AddDevice(std::move(relay));
+                       });
     
     return 0;  
 };
