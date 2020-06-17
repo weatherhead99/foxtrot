@@ -315,7 +315,9 @@ foxtrot::Client::Client(const std::string& connstr)
     _channel = grpc::CreateChannel(connstr,grpc::InsecureChannelCredentials());
     
     _lg.Debug("connect status: " + std::to_string(_channel->GetState(true)));
-    _stub = exptserve::NewStub(_channel);
+    _capability_stub = capability::NewStub(_channel);
+    _flags_stub = flags::NewStub(_channel);
+    _exptserve_stub = exptserve::NewStub(_channel);
     
 }
 
@@ -333,7 +335,7 @@ foxtrot::servdescribe foxtrot::Client::DescribeServer()
     _lg.Debug("invoking describe RPC...");
     
     grpc::ClientContext ctxt;
-    auto status = _stub->DescribeServer(&ctxt, req,&repl);
+    auto status = _capability_stub->DescribeServer(&ctxt, req,&repl);
     
     if(status.ok())
     {
@@ -357,7 +359,7 @@ foxtrot::ft_std_variant foxtrot::Client::get_server_flag(const std::string& flag
     req.set_flagname(flagname);
     
     grpc::ClientContext ctxt;
-    auto status = _stub->GetServerFlag(&ctxt, req, &repl);
+    auto status = _flags_stub->GetServerFlag(&ctxt, req, &repl);
     
     if(status.ok())
     {
@@ -382,7 +384,7 @@ void foxtrot::Client::set_server_flag(const std::string& flagname, const ft_std_
     std::visit(ft_variant_flag_visitor(req), val);
     
     grpc::ClientContext ctxt;
-    auto status = _stub->SetServerFlag(&ctxt, req, &repl);
+    auto status = _flags_stub->SetServerFlag(&ctxt, req, &repl);
     
     if(status.ok())
     {
@@ -404,7 +406,7 @@ void foxtrot::Client::drop_server_flag(const std::string& flagname)
     req.set_flagname(flagname);
     
     grpc::ClientContext ctxt;
-    auto status = _stub->DropServerFlag(&ctxt, req, &repl);
+    auto status = _flags_stub->DropServerFlag(&ctxt, req, &repl);
     
     if(status.ok())
     {
@@ -426,7 +428,7 @@ std::vector<std::string> foxtrot::Client::get_flag_names()
     empty req;
     
     grpc::ClientContext ctxt;
-    auto status = _stub->ListServerFlags(&ctxt, req, &repl);
+    auto status = _flags_stub->ListServerFlags(&ctxt, req, &repl);
     
     if(status.ok())
     {
@@ -500,7 +502,7 @@ void foxtrot::Client::BroadcastNotification(const std::string& body, const std::
         bn.set_use_default_channel(true);
     
     grpc::ClientContext ctxt;
-    auto status = _stub->BroadcastNotification(&ctxt,bn,&repl);
+    auto status = _exptserve_stub->BroadcastNotification(&ctxt,bn,&repl);
     
     if(status.ok())
     {

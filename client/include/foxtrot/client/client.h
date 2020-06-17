@@ -10,6 +10,10 @@
 #include <grpc++/grpc++.h>
 
 #include <foxtrot/foxtrot.grpc.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
+#include <foxtrot/ft_capability.pb.h>
+#include <foxtrot/ft_flags.pb.h>
+#include <foxtrot/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/DeviceError.h>
@@ -205,7 +209,10 @@ private:
 
     }
 
-    std::unique_ptr<exptserve::Stub> _stub;
+    std::unique_ptr<foxtrot::capability::Stub> _capability_stub;
+    std::unique_ptr<foxtrot::flags::Stub> _flags_stub;
+    std::unique_ptr<foxtrot::exptserve::Stub> _exptserve_stub;
+    //std::unique_ptr<exptserve::Stub> _stub;
     std::shared_ptr<grpc::Channel> _channel;
     int _msgid = 0;
     Logging _lg;
@@ -236,7 +243,7 @@ Client::InvokeCapability ( int devid,const std::string& capname, iteratortp begi
     fill_args ( req, begin_args,end_args );
 
     grpc::ClientContext ctxt;
-    auto status = _stub->InvokeCapability ( &ctxt,req,&repl );
+    auto status = _capability_stub->InvokeCapability ( &ctxt,req,&repl );
 
     if ( status.ok() ) {
         return ft_variant_from_response ( repl );
@@ -277,7 +284,7 @@ template <typename iteratortp> ft_vector_variant Client::FetchData ( int devid, 
     fill_args ( req, begin_args, end_args );
 
     grpc::ClientContext ctxt;
-    auto reader = _stub->FetchData ( &ctxt,req );
+    auto reader = _capability_stub->FetchData ( &ctxt,req );
 
     std::vector<unsigned char> bytes;
 
