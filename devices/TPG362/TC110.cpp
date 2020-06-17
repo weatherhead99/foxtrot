@@ -221,76 +221,76 @@ RTTR_REGISTRATION
      value("No_Error", TC110_DOconfigs::No_Error)
      );
   
-  registration::class_<TC110>("foxtrot::devices::TC110")
-    .property("Heating", &TC110::getHeating,
-	      &TC110::setHeating)
-    .property("Standby", &TC110::getStandby,
-	      &TC110::setStandby)
-    .property("RUTimeCtrl", &TC110::getRUTimeCtrl,
-	      &TC110::setRUTimeCtrl)
-    .property("PumpStationOnOff", &TC110::getPumpStationOnOff,
-	      &TC110::setPumpStationOnOff)
-    .property("VentEnable", &TC110::getVentEnable,
-	      &TC110::setVentEnable)
+//   registration::class_<TC110>("foxtrot::devices::TC110")
+//     .property("Heating", &TC110::getHeating,
+// 	      &TC110::setHeating)
+//     .property("Standby", &TC110::getStandby,
+// 	      &TC110::setStandby)
+//     .property("RUTimeCtrl", &TC110::getRUTimeCtrl,
+// 	      &TC110::setRUTimeCtrl)
+//     .property("PumpStationOnOff", &TC110::getPumpStationOnOff,
+// 	      &TC110::setPumpStationOnOff)
+//     .property("VentEnable", &TC110::getVentEnable,
+// 	      &TC110::setVentEnable)
 
    
     
-    .property("SpeedSwitchPointConfig", &TC110::getSpeedSwitchPointConfig,
-	      &TC110::setSpeedSwitchPointConfig)
+//     .property("SpeedSwitchPointConfig", &TC110::getSpeedSwitchPointConfig,
+// 	      &TC110::setSpeedSwitchPointConfig)
 
     //TODO::DOConfigs
 
-    .property("MotorPump", &TC110::getMotorPump,
-	      &TC110::setMotorPump)
+//     .property("MotorPump", &TC110::getMotorPump,
+// 	      &TC110::setMotorPump)
 
     //TODO: TC110_backingpumpoperatingmodes
 
-    .property("BackingPumpMode", &TC110::getBackingPumpMode,
-	      &TC110::setBackingPumpMode)
-
-    .property("RotSpeedSettingMode", &TC110::getRotSpeedSettingMode,
-	      &TC110::setRotSpeedSettingMode)
-
-    .property("GasMode", &TC110::getGasMode,
-	      &TC110::setGasMode)
-
-    .property("VentMode", &TC110::getVentMode,
-	      &TC110::setVentMode)
+//     .property("BackingPumpMode", &TC110::getBackingPumpMode,
+// 	      &TC110::setBackingPumpMode)
+// 
+//     .property("RotSpeedSettingMode", &TC110::getRotSpeedSettingMode,
+// 	      &TC110::setRotSpeedSettingMode)
+// 
+//     .property("GasMode", &TC110::getGasMode,
+// 	      &TC110::setGasMode)
+// 
+//     .property("VentMode", &TC110::getVentMode,
+// 	      &TC110::setVentMode)
 
     //TODO: AccConfig
 
-    .property("SealingGas", &TC110::getSealingGas,
-	      &TC110::setSealingGas)
+//     .property("SealingGas", &TC110::getSealingGas,
+// 	      &TC110::setSealingGas)
 
-    .property("AOConfig", &TC110::getAOConfig,
-	      &TC110::setAOConfig)
+    //.property("AOConfig", &TC110::getAOConfig,
+	//      &TC110::setAOConfig)
 
-    .property("CtrlInterface", &TC110::getCtrlInterface,
-	      &TC110::setCtrlInterface)
+    //.property("CtrlInterface", &TC110::getCtrlInterface,
+	//      &TC110::setCtrlInterface)
 
 
-    .property("InterfaceSelectionLocked",
-	      &TC110::getInterfaceSelectionLocked,
-	      &TC110::setInterfaceSelectionLocked)
+    //.property("InterfaceSelectionLocked",
+// 	      &TC110::getInterfaceSelectionLocked,
+// 	      &TC110::setInterfaceSelectionLocked)
 
     
     //TODO: DIConfig
 
-    .property_readonly("RemotePriority", &TC110::getRemotePriority)
+    //.property_readonly("RemotePriority", &TC110::getRemotePriority)
 
-    .property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
-    .property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
+//     .property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
+//     .property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
+// 
+//     .property_readonly("SpeedAttained", &TC110::getSpeedAttained)
+//     .property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
+// 
+//     .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
+//     .property_readonly("ActiveRotSpeed", &TC110::getActiveRotSpeed)
 
-    .property_readonly("SpeedAttained", &TC110::getSpeedAttained)
-    .property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
-
-    .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
-    .property_readonly("ActiveRotSpeed", &TC110::getActiveRotSpeed)
-
-    .property_readonly("DriveCurrent", &TC110::getDriveCurrent)
-    .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
-    .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
-    .property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
+    //.property_readonly("DriveCurrent", &TC110::getDriveCurrent)
+//     .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
+//     .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
+    //.property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
     ;
 
 }
