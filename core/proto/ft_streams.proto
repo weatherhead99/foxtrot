@@ -42,6 +42,7 @@ message stream_registration_response
     errstatus err =1;
     uint32 msgid = 2;
     uint32 streamhandle = 3;
+    int32 current_thread = 4;
 }
 
 message stream_control
