@@ -11,7 +11,7 @@ if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 endif()
 
 find_package(foxtrotClient REQUIRED)
-find_package(foxtrotProtocols REQUIRED)
+#find_package(foxtrotProtocols REQUIRED)
 find_package(foxtrotDevices REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options date_time)
 

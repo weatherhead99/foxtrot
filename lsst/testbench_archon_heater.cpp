@@ -24,18 +24,14 @@
 #include <foxtrot/devices/Q250.h>
 #endif
 
+#include <foxtrot/devices/BSC203.h>
 #include <foxtrot/devices/DLP_IOR4.hh>
-
+#include <foxtrot/devices/TC110.h>
 
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/protocols/BulkUSB.h>
 #include <foxtrot/protocols/curlRequest.h>
-
-
-
-
-
 
 
 #include "testbench_setup_funcs.h"
@@ -243,6 +239,29 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
                                new foxtrot::devices::DLP_IOR4(proto, "vacuum_valve_relays"));
 
                            harness.AddDevice(std::move(relay));
+                       });
+    
+    //================vacuum system=======================//
+    setup_with_disable("TC110", setup_params, lg,
+                       [&harness, &lg, &params]() {
+                           lg.Info("setting up TC110 vacuum pump controller");
+                           auto tc110_params = params->at("tc110_params");
+                           auto proto = std::make_shared<foxtrot::protocols::SerialPort>(&tc110_params);
+                           auto vacpump = std::unique_ptr<foxtrot::devices::TC110>(
+                               new foxtrot::devices::TC110(proto));
+                           vacpump->setVentEnable(false);
+                           harness.AddDevice(std::move(vacpump));
+                       });
+    
+    //===============spot motor system======================//
+    setup_with_disable("BSC203", setup_params, lg,
+                       [&harness, &lg, &params]() {
+                          lg.Info("setting up BSC203 motor controller");
+                          auto bsc_params = params->at("bsc203_params");
+                          auto proto= std::make_shared<foxtrot::protocols::SerialPort>(&bsc_params);
+                          auto stages = std::unique_ptr<foxtrot::devices::BSC203>(
+                              new foxtrot::devices::BSC203(proto));
+                          harness.AddDevice(std::move(stages));
                        });
     
     return 0;  
