@@ -28,12 +28,13 @@ class FoxtrotCppMeta(type):
         else:
             newbases = bases
         n = super().__new__(cls,name,tuple(newbases),dct)
-        n.generators = "cmake", "virtualrunenv"
+        n.generators = "cmake", "cmake_paths", "virtualrunenv", "cmake_find_package"
         n.settings = "os", "compiler", "build_type", "arch"
         return n
 
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
+    version = "0.1"
 
 
 
@@ -42,14 +43,24 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_channel = "testing"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
+    scm = {
+        "type" : "git",
+        "revision" : "auto"}
 
-    def set_version(self):
-        git = tools.Git(folder=self.recipe_folder)
-        tagged_version = git.get_tag()
-        if tagged_version is None or tagged_version[0] != "v":
-            self.version = "git%s" % git.get_revision()[:8]
-        else:
-            self.version = tagged_version[1:]
+    def __init__(self, *args, **kwargs):
+        if not hasattr(self, "src_folder"):
+            raise RuntimeError("no src_folder attribute provided")
+        self.scm["subfolder"] = self.src_folder
+        super().__init__(*args, **kwargs)
+
+    
+    # def set_version(self):
+    #     git = tools.Git(folder=self.recipe_folder)
+    #     tagged_version = git.get_tag()
+    #     if tagged_version is None or tagged_version[0] != "v":
+    #         self.version = "git%s" % git.get_revision()[:8]
+    #     else:
+    #         self.version = tagged_version[1:]
 
     def _setup_cmake(self):
         cmake = CMake(self)

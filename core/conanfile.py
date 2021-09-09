@@ -11,24 +11,18 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                       "include/foxtrot/*.h", "include/foxtrot/*.hpp", \
                       "include/foxtrot/*.hh", \
                       "cmake/*.cmake", "cmake/*.cmake.in", \
-                      "proto/*.proto", "share/*.in", "devprogs/*"
-    requires = "boost_log%s" % ftbase.bbcs, \
-        "boost_thread%s" % ftbase.bbcs, \
-        "boost_program_options%s" % ftbase.bbcs, \
-        "boost_filesystem%s" % ftbase.bbcs, \
-        "grpc/1.25.0@inexorgame/stable",\
-        "protobuf/3.9.1%s" % ftbase.bcs, \
-        "cmake_findboost_modular%s" % ftbase.bbcs, \
-        "OpenSSL/1.0.2s@conan/stable", \
-        "rttr/0.9.6@weatherhead99/testing", \
-        "zlib/1.2.11"
+                      "proto/*.proto", "share/*.in", "devprogs/*" ,\
+                      "proto/CMakeLists.txt"
 
-    default_options = {"boost_log:shared": True,
-                       "boost_thread:shared": True,
-                       "boost_program_options:shared": True,
-                       "boost_filesystem:shared": True,
-                       "boost_regex:shared": True,
+    requires = ("boost/1.76.0",
+                "grpc/1.38.0",
+                "rttr/0.9.6")
+
+    default_options = {"boost:shared" : True,
                        "OpenSSL:shared": True,
                        "protobuf:with_zlib": True,
                        "protobuf:shared" : True,
                        "rttr:shared" : True}
+
+    src_folder = "core"
+    
