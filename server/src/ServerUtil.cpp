@@ -133,24 +133,6 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
 template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
 { 
     foxtrot::Logging lg("variant_to_bytes");
-#ifndef NEW_RTTR_API
-    rttr::type tp = rttr::type::get<std::vector<T>>();
-    lg.strm(sl::debug) << "reference type: " << tp.get_name();
-    lg.strm(sl::debug) << "received type: " << vt.get_type().get_name();
-    
-    if(!vt.can_convert(tp))
-    {
-        return nullptr;
-    }
-    
-    auto arr = vt.convert<std::vector<T>>();
-    byte_size = sizeof(T) / sizeof(unsigned char) * arr.size();
-    auto data  = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
-    auto targetptr = reinterpret_cast<unsigned char*>(arr.data());
-    std::copy(targetptr , targetptr + byte_size, data.get());    
-    return data;
-
-#else
   lg.strm(sl::trace) << "received type: " << vt.get_type().get_name();
   
   auto view = vt.create_sequential_view();
@@ -172,8 +154,7 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
   std::copy(targetptr, targetptr + byte_size, data.get());
   
   return data;
-  
-#endif
+ 
     
 }
 
