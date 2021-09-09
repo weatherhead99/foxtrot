@@ -22,7 +22,8 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
                        "OpenSSL:shared": True,
                        "protobuf:with_zlib": True,
                        "protobuf:shared" : True,
-                       "rttr:shared" : True}
+                       "rttr:shared" : True,
+                       "rttr:with_rtti" : True}
 
     src_folder = "core"
     

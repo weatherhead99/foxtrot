@@ -1,8 +1,7 @@
 project(foxtrot_server C CXX)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set(packname "server")
 
 message(STATUS "checking for conan build...")
@@ -17,10 +16,8 @@ endif()
 message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
 
 find_package(foxtrotCore REQUIRED)
-
 get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
 message(ERROR "iid: ${prop}")
-
 
 find_package(OpenSSL REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
@@ -42,13 +39,7 @@ endif()
 
 option(BUILD_AUTH "build support for authentication" ON)
 if(BUILD_AUTH)
-    #message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-    if(WIN32)
-        #find libsodium via conan
-    else()
-        #find via normal cmake mechanism
-        find_package(sodium REQUIRED)
-    endif()
+  find_package(sodium REQUIRED)
 endif()
 
 include(GenerateExportHeader)
@@ -61,7 +52,6 @@ include(FoxtrotCommonSetup)
 if(FOXTROT_SERVER_CONAN_BUILD)
   foxtrot_writeout_build_directory(.builddir.info)
 endif()
-
 
 set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
 src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp
@@ -81,7 +71,6 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 if(BUILD_AUTH)
     list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp src/SessionManager.cpp)
     list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp)
-
 endif()
 
 add_library(foxtrot_server ${server_srcs})
@@ -98,23 +87,9 @@ add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE include/exptserve/)
 foxtrot_standard_include_dirs(exptserve)
 
-if(${rttr_VERSION} STREQUAL "0.9.6")
-    message(WARNING "new RTTR api used!")
-    target_compile_definitions(exptserve PRIVATE -DNEW_RTTR_API)
-    target_compile_definitions(foxtrot_server PUBLIC -DNEW_RTTR_API)
-endif()
-
 target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core)
 target_link_libraries(exptserve PUBLIC foxtrot_server Boost::filesystem Boost::program_options)
 
-if(FOXTROT_SERVER_CONAN_BUILD)
-#fixing issues with inexorgame grpc library export (I think?)
-find_package(Threads)
-target_link_libraries(exptserve PUBLIC ${CMAKE_THREAD_LIBS_INIT} ${CONAN_LIBS_OPENSSL})
-#fixing issues with my GRPC script in the case of static grpc libraries
-target_link_libraries(foxtrot_server PUBLIC ${CONAN_LIBS_ZLIB}
-${CONAN_LIBS_C-ARES} ${CONAN_LIBS_OPENSSL} ${CONAN_LIBS_GRPC} ${CONAN_LIBS_BOOST_THREAD} )
-endif()
 
 if(BUILD_AUTH)
     add_executable(ftauth src/ftauth.cpp)
@@ -123,9 +98,6 @@ if(BUILD_AUTH)
     target_include_directories(ftauth PRIVATE include)
 endif()
 
-if(FOXTROT_SERVER_CONAN_BUILD)
-	target_link_libraries(ftauth PRIVATE ${CONAN_BOOST_REGEX_LIBRARIES})
-endif()
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
