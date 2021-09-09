@@ -33,8 +33,8 @@ namespace foxtrot
     template<typename T>
     struct tuple_helper<T,-1>
     {
-        static rttr::variant get(const T&, int n) {f();};
-        static rttr::type type(int n) {f();};
+      static rttr::variant get(const T&, int n) {f(); return rttr::variant();};
+      static rttr::type type(int n) {f(); return rttr::type::get<void>();};
         static void f()
         {
             throw std::logic_error("invalid tuple index");
