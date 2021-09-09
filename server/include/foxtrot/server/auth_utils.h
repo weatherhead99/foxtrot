@@ -4,6 +4,8 @@
 #include <tuple>
 #include <vector>
 #include <sodium.h>
+#include <string>
+#include <stdexcept>
 
 const int CHALLENGE_STRING_BYTES  = 32;
 const int SESSIONKEY_BYTES = 64;

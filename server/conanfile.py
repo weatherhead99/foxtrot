@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 bbcs = ftbase.bbcs
 bcs = ftbase.bcs
 

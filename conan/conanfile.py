@@ -1,21 +1,6 @@
 from conans import tools, ConanFile, CMake
 import os
 
-hardcode_version="0.0.1dev"
-
-# def get_version():
-#     git = tools.Git()
-#     try:
-#         tag = git.get_tag()
-#         if git.get_tag() is not None:
-#             return tag
-#         else:
-#             return "%s_%s" % (git.get_branch(), git.get_revision()[:8])
-#     except:
-#         return hardcode_version
-
-def get_version():
-    return hardcode_version
 
 bcs = "@bincrafters/stable"
 bbcs = "/1.69.0%s" % bcs
@@ -30,11 +15,14 @@ class FoxtrotCppMeta(type):
         n = super().__new__(cls,name,tuple(newbases),dct)
         n.generators = "cmake", "cmake_paths", "virtualrunenv", "cmake_find_package"
         n.settings = "os", "compiler", "build_type", "arch"
+        n.scm = {
+        "type" : "git",
+        "revision" : "auto"}
         return n
 
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.1"
+    version = "0.2"
 
 
 
@@ -43,9 +31,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_channel = "testing"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
-    scm = {
-        "type" : "git",
-        "revision" : "auto"}
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, "src_folder"):
@@ -54,13 +39,13 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         super().__init__(*args, **kwargs)
 
     
-    # def set_version(self):
-    #     git = tools.Git(folder=self.recipe_folder)
-    #     tagged_version = git.get_tag()
-    #     if tagged_version is None or tagged_version[0] != "v":
-    #         self.version = "git%s" % git.get_revision()[:8]
-    #     else:
-    #         self.version = tagged_version[1:]
+    def set_version(self):
+        git = tools.Git(folder=self.recipe_folder)
+        tagged_version = git.get_tag()
+        if tagged_version is None or tagged_version[0] != "v":
+            self.version = "git%s" % git.get_revision()[:8]
+        else:
+            self.version = tagged_version[1:]
 
     def _setup_cmake(self):
         cmake = CMake(self)
