@@ -1,16 +1,15 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 
 class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage,
                             metaclass = ftbase.FoxtrotCppMeta):
     name="foxtrot_protocols"
+    src_folder="protocols"
     description="protocol implementations for  foxtrot"
     exports_sources="CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h"
-    requires = "libusb/1.0.22@bincrafters/stable", \
-               "boost_asio%s" % ftbase.bbcs, \
-               "zlib/1.2.11"
+    requires = "libusb/1.0.24"
 
     default_options = {"libusb:shared" : True}
     

@@ -262,35 +262,35 @@ RTTR_REGISTRATION
     .property("SealingGas", &TC110::getSealingGas,
 	      &TC110::setSealingGas)
 
-    .property("AOConfig", &TC110::getAOConfig,
-	      &TC110::setAOConfig)
+    //.property("AOConfig", &TC110::getAOConfig,
+    //	      &TC110::setAOConfig)
 
-    .property("CtrlInterface", &TC110::getCtrlInterface,
-	      &TC110::setCtrlInterface)
+    //    .property("CtrlInterface", &TC110::getCtrlInterface,
+    //	      &TC110::setCtrlInterface)
 
 
-    .property("InterfaceSelectionLocked",
-	      &TC110::getInterfaceSelectionLocked,
-	      &TC110::setInterfaceSelectionLocked)
+    //    .property("InterfaceSelectionLocked",
+    //	      &TC110::getInterfaceSelectionLocked,
+    //	      &TC110::setInterfaceSelectionLocked)
 
     
     //TODO: DIConfig
 
-    .property_readonly("RemotePriority", &TC110::getRemotePriority)
+    //.property_readonly("RemotePriority", &TC110::getRemotePriority)
 
-    .property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
-    .property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
+    //.property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
+    //.property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
 
-    .property_readonly("SpeedAttained", &TC110::getSpeedAttained)
-    .property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
+    //.property_readonly("SpeedAttained", &TC110::getSpeedAttained)
+    //.property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
 
-    .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
-    .property_readonly("ActiveRotSpeed", &TC110::getActiveRotSpeed)
+    //    .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
+    //.property_readonly("ActiveRotSpeed", &TC110::getActiveRotSpeed)
 
-    .property_readonly("DriveCurrent", &TC110::getDriveCurrent)
-    .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
-    .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
-    .property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
+    //    .property_readonly("DriveCurrent", &TC110::getDriveCurrent)
+    //.property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
+    //.property_readonly("DriveVoltage", &TC110::getDriveVoltage)
+    //.property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
     ;
 
 }

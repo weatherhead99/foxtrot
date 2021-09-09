@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 
 
 class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
@@ -11,19 +11,9 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
     exports_sources = "CMakeLists.txt", "cmake/*.in", \
                       "include/foxtrot/client/*.h", \
                       "src/*.cpp"
-    
-    requires = "boost_program_options%s" % ftbase.bbcs, \
-               "boost_log%s" % ftbase.bbcs, \
-               "boost_filesystem%s" % ftbase.bbcs, \
-               "protobuf/3.9.1%s" % ftbase.bcs, \
-               "cmake_findboost_modular%s" % ftbase.bbcs, \
-               "zlib/1.2.11"
-    default_options = {"boost_log:shared": True,
-                       "boost_thread:shared": True,
-                       "boost_program_options:shared": True,
-                       "boost_filesystem:shared": True,
-                       "boost_regex:shared": True,
-                       "protobuf:with_zlib": True}   
+
+    src_folder = "client"
+
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version, self.user, self.channel))

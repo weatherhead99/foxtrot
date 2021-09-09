@@ -1,11 +1,12 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 
 class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                           metaclass = ftbase.FoxtrotCppMeta):
     name="foxtrot_devices"
+    src_folder="devices"
     description="device drivers for foxtrot"
     exports_sources= ("CMakeLists.txt", "cmake/*.in", "archon/*.cpp",
                       "archon/*.h", "BME280/*.cpp", "BME280/*.h",
@@ -18,12 +19,8 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake",
                       "idscamera/*.cpp", "idscamera/*.h")
 
-    requires =  ("rapidxml/1.13@bincrafters/stable",
-                 "boost_date_time%s" % ftbase.bbcs,
-                 "zlib/1.2.11")
+    requires =  ("rapidxml/1.13")
     
-    default_options = {"OpenSSL:shared" : True,
-                       "libcurl:shared" : True}
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" % (self.version, self.user, self.channel))

@@ -315,7 +315,7 @@ foxtrot::Client::Client(const std::string& connstr)
     _channel = grpc::CreateChannel(connstr,grpc::InsecureChannelCredentials());
     
     _lg.Debug("connect status: " + std::to_string(_channel->GetState(true)));
-    _stub = exptserve::NewStub(_channel);
+    _stub = capability::NewStub(_channel);
     
 }
 

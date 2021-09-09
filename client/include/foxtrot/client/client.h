@@ -15,6 +15,10 @@
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
 
+#include <foxtrot/ft_capability.pb.h>
+#include <foxtrot/ft_capability.grpc.pb.h>
+#include <foxtrot/ft_flags.pb.h>
+
 namespace foxtrot
 {
 
@@ -205,7 +209,7 @@ private:
 
     }
 
-    std::unique_ptr<exptserve::Stub> _stub;
+    std::unique_ptr<capability::Stub> _stub;
     std::shared_ptr<grpc::Channel> _channel;
     int _msgid = 0;
     Logging _lg;

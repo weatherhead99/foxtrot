@@ -1,6 +1,6 @@
 from conans import python_requires, tools
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 
 class FoxtrotLSST(ftbase.FoxtrotCppPackage,
                   metaclass = ftbase.FoxtrotCppMeta):
@@ -12,8 +12,8 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage,
                        "autofilld/*.hh", "testbench_archon_heater.*",
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
-    requires = "OpenSSL/1.0.2s@conan/stable", "zlib/1.2.11"
-
+    src_folder="lsst"
+    
     def requirements(self):
         self.requires("foxtrot_client/%s@%s/%s" % (self.version,self.user,self.channel))
         self.requires("foxtrot_protocols/%s@%s/%s" % (self.version,self.user,self.channel))

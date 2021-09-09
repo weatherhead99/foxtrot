@@ -24,7 +24,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     default_options = {"boost:shared" : True,
                        "libcurl:shared" : True,
                        "OpenSSL:shared" : True,
-                       "libsodium:shared" : True}
+                       "libsodium:shared" : True,
+                       "zlib:shared" : True}
 
     src_folder = "server"
     
