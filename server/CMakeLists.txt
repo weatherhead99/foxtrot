@@ -79,8 +79,10 @@ set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp
 
 
 if(BUILD_AUTH)
-    list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp src/SessionManager.cpp)
-    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp)
+    list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp src/SessionManager.cpp
+                src/auth_layer/SASLAuthProvider.cpp src/auth_layer/UserAuthInterface.cpp)
+    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp src/GetAuthMechanismsImpl.cpp)
+    
 
 endif()
 
@@ -92,6 +94,8 @@ target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARI
 
 if(BUILD_AUTH)
     target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE} ${CONAN_LIBS_LIBSODIUM})
+    #TODO: do this properly!!!
+    target_link_libraries(foxtrot_server PUBLIC -lgcrypt -lgsasl)
 endif()
 
 add_executable(exptserve ${exptserve_srcs})
@@ -121,6 +125,12 @@ if(BUILD_AUTH)
     target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core
     foxtrot_server)
     target_include_directories(ftauth PRIVATE include)
+    
+    add_executable(sasl_auth_play src/sasl_auth_play.cpp)
+    target_link_libraries(sasl_auth_play foxtrot_server)
+    target_include_directories(sasl_auth_play PRIVATE include)
+    
+    
 endif()
 
 if(FOXTROT_SERVER_CONAN_BUILD)

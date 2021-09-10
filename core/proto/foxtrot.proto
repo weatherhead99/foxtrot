@@ -34,4 +34,5 @@ service exptserve
 {
     rpc BroadcastNotification (broadcast_notification) returns (broadcast_notification);
     rpc GetServerInfo (empty) returns (server_info);
+    rpc Disconnect (empty) returns (errstatus);
 }

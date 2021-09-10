@@ -3,6 +3,7 @@ package foxtrot;
 
 message empty {}
 
+
 enum simplevalue_types
 {
     FLOAT_TYPE = 0 ;
