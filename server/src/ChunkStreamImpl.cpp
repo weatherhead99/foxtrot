@@ -38,9 +38,7 @@ bool foxtrot::ChunkStreamLogic::HandleRequest(foxtrot::ChunkStreamLogic::reqtp& 
     return false;
     
   }
-  
-  
-  
+    
   if(_extra_chunk)
   {
     _lg.Debug("writing extra chunk");
@@ -59,6 +57,8 @@ bool foxtrot::ChunkStreamLogic::HandleRequest(foxtrot::ChunkStreamLogic::reqtp& 
     respond.Finish(grpc::Status::OK,tag);
     return true;
   }
-  
+
+  //WARNING: not sure about this
+  return true;
 
 }
