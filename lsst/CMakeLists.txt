@@ -34,6 +34,9 @@ foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
 
 
+add_executable(vacuum_pump_play vacuum_pump_play.cpp)
+target_link_libraries(vacuum_pump_play foxtrot::foxtrot_devices)
+
 #only build if on idscamera enabled system
 if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
     set(motor_setup_srcs motor_test_setup.cpp)

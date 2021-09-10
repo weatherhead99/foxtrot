@@ -254,16 +254,16 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
                        });
     
     //===============spot motor system======================//
-    setup_with_disable("BSC203", setup_params, lg,
-                       [&harness, &lg, &params]() {
-                          lg.Info("setting up BSC203 motor controller");
-                          auto bsc_params = params->at("bsc203_params");
-                          auto proto= std::make_shared<foxtrot::protocols::SerialPort>(&bsc_params);
-                          auto stages = std::unique_ptr<foxtrot::devices::BSC203>(
-                              new foxtrot::devices::BSC203(proto));
-                          harness.AddDevice(std::move(stages));
-                       });
+    // setup_with_disable("BSC203", setup_params, lg,
+    //                    [&harness, &lg, &params]() {
+    //                       lg.Info("setting up BSC203 motor controller");
+    //                       auto bsc_params = params->at("bsc203_params");
+    //                       auto proto= std::make_shared<foxtrot::protocols::SerialPort>(&bsc_params);
+    //                       auto stages = std::unique_ptr<foxtrot::devices::BSC203>(
+    //                           new foxtrot::devices::BSC203(proto));
+    //                       harness.AddDevice(std::move(stages));
+    //                    });
     
-    return 0;  
+   return 0;  
 };
 }
