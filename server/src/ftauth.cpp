@@ -50,7 +50,15 @@ int main(int argc, char** argv)
         cout << "usage: " << argv[0] << " command [userid] [options]" << endl;
         cout << "description of options: " << endl;
         cout << desc << endl;
-        std::exit(0);
+
+
+	cout << "list of commands:" << endl;
+	cout << "    createuser" << endl;
+	cout << "    authuser" << endl;
+	cout << "    exportuser" << endl;
+	cout << endl << endl;
+
+	std::exit(0);
     }
         
     try

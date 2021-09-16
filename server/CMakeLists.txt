@@ -59,7 +59,9 @@ endif()
 
 set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
 src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp
-src/CmdDevice.cpp src/StreamManager.cpp src/FlagMap.cpp)
+src/CmdDevice.cpp  src/FlagMap.cpp)
+
+
 
 set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp 
     src/InvokeCapabilityImpl.cpp  src/FetchDataImpl.cpp 

@@ -270,6 +270,45 @@ RTTR_REGISTRATION
   using foxtrot::devices::TC110;
 
   using foxtrot::devices::TC110_DOconfigs;
+  using foxtrot::devices::TC110_parameter_no;
+  
+  registration::enumeration<TC110_parameter_no>
+  ("foxtrot::devices::TC110_parameter_no")
+  (value("Heating" , TC110_parameter_no::Heating),
+   value("Standby" , TC110_parameter_no::Standby),
+   value("RUTimeCtrl", TC110_parameter_no::RUTimeCtrl),
+   value("ErrorAckn", TC110_parameter_no::ErrorAckn),
+   value("PumpgStatn", TC110_parameter_no::PumpgStatn),
+   value("EnableVent", TC110_parameter_no::EnableVent),
+   value("CfgSpdSwPt", TC110_parameter_no::CfgSpdSwPt),
+   value("CfgDO2", TC110_parameter_no::CfgDO2),
+   value("MotorPump", TC110_parameter_no::MotorPump),
+   value("CfgDO1", TC110_parameter_no::CfgDO1),
+   value("OpModeBKP", TC110_parameter_no::OpModeBKP),
+   value("SpdSetMode", TC110_parameter_no::SpdSetMode),
+   value("GasMode", TC110_parameter_no::GasMode),
+   value("VentMode", TC110_parameter_no::VentMode),
+   value("CfgAccA1", TC110_parameter_no::CfgAccA1),
+   value("CfgAccB1", TC110_parameter_no::CfgAccB1),
+   value("CfgAccA2", TC110_parameter_no::CfgAccA2),
+   value("CfgAccB2", TC110_parameter_no::CfgAccB2),
+   value("SealingGas", TC110_parameter_no::SealingGas),
+   value("CfgAO1", TC110_parameter_no::CfgAO1),
+   value("CtrlViaInt", TC110_parameter_no::CtrlViaInt),
+   value("IntSelLckd", TC110_parameter_no::IntSelLckd),
+   value("CfgDI1", TC110_parameter_no::CfgDI1),
+   value("CfgDI2", TC110_parameter_no::CfgDI2),
+   value("RemotePrio", TC110_parameter_no::RemotePrio),
+   value("SpdSwPtAtt", TC110_parameter_no::SpdSwPtAtt),
+   value("ErrorCode", TC110_parameter_no::ErrorCode),
+   value("OvTempElec", TC110_parameter_no::OvTempElec),
+   value("OvTempPump", TC110_parameter_no::OvTempPump)
+   
+   );
+  
+  
+  
+  
   registration::enumeration<TC110_DOconfigs>
     ("foxtrot::devices::TC110_DOconfigs")
     (value("Rot_Speed_Switch_Point_Attained",
@@ -277,24 +316,23 @@ RTTR_REGISTRATION
      value("No_Error", TC110_DOconfigs::No_Error)
      );
   
-//   registration::class_<TC110>("foxtrot::devices::TC110")
-//     .property("Heating", &TC110::getHeating,
-// 	      &TC110::setHeating)
-//     .property("Standby", &TC110::getStandby,
-// 	      &TC110::setStandby)
-//     .property("RUTimeCtrl", &TC110::getRUTimeCtrl,
-// 	      &TC110::setRUTimeCtrl)
-//     .property("PumpStationOnOff", &TC110::getPumpStationOnOff,
-// 	      &TC110::setPumpStationOnOff)
-//     .property("VentEnable", &TC110::getVentEnable,
-// 	      &TC110::setVentEnable)
+   registration::class_<TC110>("foxtrot::devices::TC110")
+     .property("Heating", &TC110::getHeating,
+ 	      &TC110::setHeating)
+     .property("Standby", &TC110::getStandby,
+ 	      &TC110::setStandby)
+     .property("RUTimeCtrl", &TC110::getRUTimeCtrl,
+ 	      &TC110::setRUTimeCtrl)
+     .property("PumpStationOnOff", &TC110::getPumpStationOnOff,
+ 	      &TC110::setPumpStationOnOff)
+     .property("VentEnable", &TC110::getVentEnable,
+ 	      &TC110::setVentEnable)
+     .property("SpeedSwitchPointConfig", &TC110::getSpeedSwitchPointConfig,
+ 	      &TC110::setSpeedSwitchPointConfig)
 
-   
-    
-//     .property("SpeedSwitchPointConfig", &TC110::getSpeedSwitchPointConfig,
-// 	      &TC110::setSpeedSwitchPointConfig)
-
-    //TODO::DOConfigs
+//      .property("DOConfig", &TC110::getDOConfig,
+//                &TC110::setDOConfig)
+     
 
 //     .property("MotorPump", &TC110::getMotorPump,
 // 	      &TC110::setMotorPump)

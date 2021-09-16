@@ -21,7 +21,7 @@
 #include "CloseSessionImpl.hh"
 #include "ListSessionsImpl.hh"
 #include "KeepAliveSessionImpl.hh"
-#include "GetAuthMechanismsImpl.h"
+//#include "GetAuthMechanismsImpl.h"
 
 
 #include <foxtrot/server/auth_layer/SASLAuthProvider.hh>
@@ -67,14 +67,14 @@ void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_val
     _lg.strm(sl::info) << "registering AuthHandler";
     _auth_api = std::make_shared<AuthHandler>(credsfile, creds_validity_hours);
     
-    _lg.strm(sl::info) << "setting up SASL auth provider";
-    auto saslprov = std::make_shared<SASLAuthProvider>();
-    _lg.strm(sl::info) << "setting up user credentials provider";
-    std::unique_ptr<UserProviderInterface> userprov{nullptr};
+    //_lg.strm(sl::info) << "setting up SASL auth provider";
+    //auto saslprov = std::make_shared<SASLAuthProvider>();
+    //_lg.strm(sl::info) << "setting up user credentials provider";
+    //std::unique_ptr<UserProviderInterface> userprov{nullptr};
     
-    _lg.strm(sl::info) << "setting up user auth interface";
-    _auth_iface = std::make_shared<UserAuthInterface>(std::move(userprov));
-    _auth_iface->add_provider(saslprov);
+    //_lg.strm(sl::info) << "setting up user auth interface";
+    //_auth_iface = std::make_shared<UserAuthInterface>(std::move(userprov));
+    //_auth_iface->add_provider(saslprov);
     
     
     auth_enabled = true;
@@ -133,7 +133,7 @@ void ServerImpl::setup_common(const std::string& addrstr)
         _lg.Info("setting up authentication system");
         logics.push_back(create_logic_add_helper<AuthRequestLogic>(_auth_api));
         logics.push_back(create_logic_add_helper<AuthRespondLogic>(_auth_api));
-        logics.push_back(create_logic_add_helper<GetAuthMechanismsLogic>(_auth_iface));
+        //logics.push_back(create_logic_add_helper<GetAuthMechanismsLogic>(_auth_iface));
     }
     else
     {
