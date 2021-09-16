@@ -63,7 +63,7 @@ bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
 }
 
 void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
-{
+    {
     write_cmd_helper(channel + _address, TPG_parameter_no::degas, onoff);
 }
 

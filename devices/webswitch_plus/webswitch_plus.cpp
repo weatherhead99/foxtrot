@@ -63,7 +63,10 @@ bool foxtrot::devices::webswitch_plus::GetRelay(int chan)
     _lg.strm(sl::trace) << "got node" ;
     
     if(!relaynode)
+    {
         _lg.strm(sl::error) << "nullptr for node!";
+        throw foxtrot::DeviceError("invalid XML node for relay, perhaps invalid relay number specified");
+    }
     
     
     return std::stoi(relaynode->value());

@@ -13,7 +13,7 @@ class FoxtrotCppMeta(type):
         else:
             newbases = bases
         n = super().__new__(cls,name,tuple(newbases),dct)
-        n.generators = "cmake", "cmake_paths", "virtualrunenv", "cmake_find_package"
+        n.generators = "cmake", "virtualrunenv"
         n.settings = "os", "compiler", "build_type", "arch"
         n.scm = {
         "type" : "git",

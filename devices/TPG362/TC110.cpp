@@ -208,6 +208,62 @@ void foxtrot::devices::TC110::setSealingGas(bool onoff)
     write_cmd_helper(_address, TC110_parameter_no::SealingGas, onoff);
 }
 
+
+int foxtrot::devices::TC110::getSetRotSpeed()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::SetRotSpdHz));
+};
+
+int foxtrot::devices::TC110::getActualRotSpeed()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::ActualSpdHz));
+}
+
+bool foxtrot::devices::TC110::getSpeedAttained()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::SetSpdAtt));
+}
+
+double foxtrot::devices::TC110::getDriveVoltage()
+{
+    return std::stod(read_cmd_helper(_address, TC110_parameter_no::DrvVoltage));
+}
+
+double foxtrot::devices::TC110::getDriveCurrent()
+{
+    return std::stod(read_cmd_helper(_address, TC110_parameter_no::DrvCurrent));
+}
+
+bool foxtrot::devices::TC110::getExcessTemperatureDriveUnit()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::OvTempElec));
+}
+
+bool foxtrot::devices::TC110::getExcessTemperaturePump()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::OvTempPump));
+}
+
+bool foxtrot::devices::TC110::getPumpAccelerates()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::PumpAccel));
+}
+
+int foxtrot::devices::TC110::getOperatingHoursDriveUnit()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::OpHrsElec));
+}
+
+int foxtrot::devices::TC110::getOperatingHoursPump()
+{
+    return std::stoul(read_cmd_helper(_address, TC110_parameter_no::OpHrsPump));
+}
+
+
+
+
+
+
 RTTR_REGISTRATION
 {
   using namespace rttr;
@@ -278,19 +334,16 @@ RTTR_REGISTRATION
 
     //.property_readonly("RemotePriority", &TC110::getRemotePriority)
 
-//     .property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
-//     .property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
-// 
-//     .property_readonly("SpeedAttained", &TC110::getSpeedAttained)
-//     .property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
-// 
-//     .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
-//     .property_readonly("ActiveRotSpeed", &TC110::getActiveRotSpeed)
-
-    //.property_readonly("DriveCurrent", &TC110::getDriveCurrent)
-//     .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
-//     .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
-    //.property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
+    .property_readonly("ExcessTemperatureDriveUnit", &TC110::getExcessTemperatureDriveUnit)
+    .property_readonly("ExcessTemperaturePump", &TC110::getExcessTemperaturePump)
+    .property_readonly("SpeedAttained", &TC110::getSpeedAttained)
+    .property_readonly("PumpAccelerates", &TC110::getPumpAccelerates)
+    .property_readonly("SetRotSpeed", &TC110::getSetRotSpeed)
+    .property_readonly("ActualRotSpeed", &TC110::getActualRotSpeed)
+    .property_readonly("DriveCurrent", &TC110::getDriveCurrent)
+    .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
+    .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
+    .property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
     ;
 
 }

@@ -11,6 +11,7 @@ import grpc
 from itertools import chain
 from .foxtrot_pb2_grpc import exptserveStub
 from .ft_capability_pb2_grpc import capabilityStub
+from .ft_flags_pb2_grpc import flagsStub
 from .common import _check_repl_err
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
@@ -36,6 +37,7 @@ class Client:
             creds = grpc.ssl_channel_credentials(root_certificates=cert)
             self._channel = grpc.secure_channel(connstr, creds)
         self._stub = capabilityStub(self._channel)
+        self._flagstub = flagsStub(self._channel)
 
         self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
         self._comment = self._servdescribe.servcomment

@@ -46,13 +46,13 @@ class ServerFlag:
     def drop(self) -> None:
         req = serverflag()
         req.flagname = self._flagname
-        repl = self._client._stub.DropServerFlag(req)
+        repl = self._client._flagstub.DropServerFlag(req)
         _check_repl_err(repl)
 
     @property
     def value(self):
         req = self.construct_request(self._flagname)
-        ret = self._client._stub.GetServerFlag(req)
+        ret = self._client._flagstub.GetServerFlag(req)
         _check_repl_err(ret)
         whichattr = ret.WhichOneof("arg")
         if whichattr is None:
@@ -62,7 +62,7 @@ class ServerFlag:
     @value.setter
     def value(self, val):
         req = self.construct_request(self._flagname, val)
-        repl = self._client._stub.SetServerFlag(req)
+        repl = self._client._flagstub.SetServerFlag(req)
         _check_repl_err(repl)
         whichattr = repl.WhichOneof("arg")
         if whichattr is None:
@@ -82,7 +82,7 @@ class FlagProxy:
         flg.value = val
 
     def __iter__(self):
-        response = self._cl._stub.ListServerFlags(empty())
+        response = self._cl._flagstub.ListServerFlags(empty())
         _check_repl_err(response)
         self._flaglist = [ServerFlag(self._cl, _.flagname) for _ in response.flags]
         self._flagit = iter(self._flaglist)

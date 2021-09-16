@@ -190,7 +190,7 @@ namespace foxtrot {
             
             
             int getSetRotSpeed();
-            int getActiveRotSpeed();
+            int getActualRotSpeed();
             double getDriveCurrent();
             int getOperatingHoursPump();
             double getDriveVoltage();

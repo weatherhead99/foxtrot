@@ -378,10 +378,58 @@ int main(int argc, char** argv)
         do_fill(client, devid, filltime, relay);
         exit(0);
     }
+    else if(cmd == "pump")
+    {
+      auto devid = foxtrot::find_devid_on_server(servdesc, "TC110");   
+      if(devid < 0)
+      {
+          lg.Fatal("no vacuum pump controller found on this server");
+          exit(1);
+      }
+      
+      po::options_description pump_desc("pump options");
+      pump_desc.add_options()
+      ("subcmd", po::value<std::string>(), "pump subcommand")
+      ("value", po::value<int>(), "subcommand value (on/off)");
+      
+      po::positional_options_description pump_pdesc;
+      pump_pdesc.add("subcmd", 1).add("onoff",2);
+      
+      auto opts = po::collect_unrecognized(parsed.options, po::include_positional);
+      opts.erase(opts.begin());
+      po::store(po::command_line_parser(opts).options(pump_desc).positional(pump_pdesc).run(), vm);
+      
+      auto subcmd = vm["subcmd"].as<std::string>();
+      if(subcmd == "speed")
+      {
+          if(!vm.count("value"))
+          {
+              lg.Info("printing speed...");
+              auto resp = std::get<int>(client.InvokeCapability(devid, "ActualRotSpeed", {}));
+              std::cout << "speed: " << resp << " Hz" << std::endl;
+              exit(0);
+          }
+          
+      }
+      else if(subcmd == "vent")
+      {
+      }
+      else if(subcmd == "power")
+      {
+          
+      }
+      else
+      {
+          lg.Fatal("unrecognised pump subcommand!");
+          exit(1);
+      }
+        
+    }
+    
     
     else
       {
-	std::cout << "unregognised command: " << cmd << std::endl;
+        std::cout << "unrecognised command: " << cmd << std::endl;
       }
 
 

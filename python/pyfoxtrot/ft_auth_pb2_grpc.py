@@ -2,6 +2,7 @@
 import grpc
 
 from . import ft_auth_pb2 as ft__auth__pb2
+from . import ft_types_pb2 as ft__types__pb2
 
 
 class authStub(object):
@@ -24,6 +25,21 @@ class authStub(object):
         request_serializer=ft__auth__pb2.auth_response.SerializeToString,
         response_deserializer=ft__auth__pb2.auth_confirm.FromString,
         )
+    self.GetSupportedAuthMechanisms = channel.unary_unary(
+        '/foxtrot.auth/GetSupportedAuthMechanisms',
+        request_serializer=ft__types__pb2.empty.SerializeToString,
+        response_deserializer=ft__auth__pb2.auth_type_list.FromString,
+        )
+    self.SaslAuthProcess = channel.stream_stream(
+        '/foxtrot.auth/SaslAuthProcess',
+        request_serializer=ft__auth__pb2.sasl_auth_data.SerializeToString,
+        response_deserializer=ft__auth__pb2.sasl_auth_data.FromString,
+        )
+    self.VerifyToken = channel.unary_unary(
+        '/foxtrot.auth/VerifyToken',
+        request_serializer=ft__auth__pb2.sasl_auth_data.SerializeToString,
+        response_deserializer=ft__auth__pb2.sasl_auth_data.FromString,
+        )
 
 
 class authServicer(object):
@@ -44,6 +60,27 @@ class authServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetSupportedAuthMechanisms(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def SaslAuthProcess(self, request_iterator, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def VerifyToken(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_authServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -56,6 +93,21 @@ def add_authServicer_to_server(servicer, server):
           servicer.RespondAuthChallenge,
           request_deserializer=ft__auth__pb2.auth_response.FromString,
           response_serializer=ft__auth__pb2.auth_confirm.SerializeToString,
+      ),
+      'GetSupportedAuthMechanisms': grpc.unary_unary_rpc_method_handler(
+          servicer.GetSupportedAuthMechanisms,
+          request_deserializer=ft__types__pb2.empty.FromString,
+          response_serializer=ft__auth__pb2.auth_type_list.SerializeToString,
+      ),
+      'SaslAuthProcess': grpc.stream_stream_rpc_method_handler(
+          servicer.SaslAuthProcess,
+          request_deserializer=ft__auth__pb2.sasl_auth_data.FromString,
+          response_serializer=ft__auth__pb2.sasl_auth_data.SerializeToString,
+      ),
+      'VerifyToken': grpc.unary_unary_rpc_method_handler(
+          servicer.VerifyToken,
+          request_deserializer=ft__auth__pb2.sasl_auth_data.FromString,
+          response_serializer=ft__auth__pb2.sasl_auth_data.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

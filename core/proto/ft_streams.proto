@@ -8,8 +8,9 @@ import "ft_types.proto";
 enum stream_control_commands
 {
     stop = 0;
+    enable_amqp = 1;
+    disable_amqp = 2;
 }
-
 
 
 message stream_thread_request
@@ -33,6 +34,7 @@ message stream_registration_request
     capability_request req = 3;
     uint32 nticks = 4;
     string streamcomment = 5;
+    bool enable_amqp = 6;
 }
 
 message stream_registration_response
@@ -40,6 +42,7 @@ message stream_registration_response
     errstatus err =1;
     uint32 msgid = 2;
     uint32 streamhandle = 3;
+    int32 current_thread = 4;
 }
 
 message stream_control

@@ -27,7 +27,14 @@ string PfeifferDevice::cmd(const string& request)
     auto serproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
     if(serproto)
       {
-	serproto->flush();
+	try
+	  {
+	    serproto->flush();
+	  }
+	catch(...)
+	  {
+	    _lg.strm(sl::info) <<"failed to flush serial port, never mind..." ;
+	  }
 	serproto->setDrain(true);
 	serproto->setWait(100);
       }
