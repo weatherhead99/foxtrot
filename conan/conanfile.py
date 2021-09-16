@@ -61,11 +61,9 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         env_build = tools.RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake.build()
+        cmake.install()
         cmake.patch_config_paths()
 
-    def package(self):
-        cmake = self._setup_cmake()
-        cmake.install()
 
     def _setup_libdirs_default(self, cppinfo):
         if not self.in_local_cache:
@@ -83,6 +81,9 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         else:
             cppinfo.libdirs = ["lib/foxtrot"]
 
+            
     def package_info(self):
-        self._setup_libdirs_default(self.cpp_info)
+#        self._setup_libdirs_default(self.cpp_info)
         self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libdirs = ["lib/foxtrot"]
+

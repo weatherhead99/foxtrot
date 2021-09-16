@@ -13,3 +13,6 @@ editables:
         path: devices
 root:
     foxtrot_lsst/0.0.1dev@weatherhead99/testing
+layout:
+    conan/conan_layout.ini
+workspace_generator: cmake
