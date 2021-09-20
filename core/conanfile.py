@@ -1,10 +1,9 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 
-class FoxtrotCoreConan(ftbase.FoxtrotCppPackage,
-                       metaclass=ftbase.FoxtrotCppMeta):
+class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
     exports_sources = "CMakeLists.txt", "src/*.cpp", "src/*.cc", \

@@ -23,8 +23,7 @@ set_property(SOURCE ${GEN_SRCS} PROPERTY GENERATED TRUE)
 message("gen_srcs: ${GEN_SRCS}")
 
 add_library(foxtrot_protos OBJECT ${PROTO_HDRS} ${GEN_SRCS})
-message(STATUS "pb_include_dirs: ${PROTOBUF_INCLUDE_DIRS}")
-target_include_directories(foxtrot_protos PUBLIC ${PROTOBUF_INCLUDE_DIRS})
+target_link_libraries(foxtrot_protos PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc)
 
 add_custom_target(copy_protos
   ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.h ${CMAKE_BINARY_DIR}/foxtrot/

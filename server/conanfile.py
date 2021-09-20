@@ -5,8 +5,7 @@ ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
 bbcs = ftbase.bbcs
 bcs = ftbase.bcs
 
-class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
-                         metaclass=ftbase.FoxtrotCppMeta):
+class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     name="foxtrot_server"
     description="foxtrot server components"
     exports_sources = "CMakeLists.txt", "src/*.cpp", \
@@ -14,7 +13,6 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage,
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
-
     requires = ("boost/1.76.0",
                 "libcurl/7.77.0",
                 "libsodium/1.0.18",

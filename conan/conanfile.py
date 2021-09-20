@@ -5,6 +5,8 @@ import os
 bcs = "@bincrafters/stable"
 bbcs = "/1.69.0%s" % bcs
 
+FT_HARDCODE_VERSION = "0.0.1dev"
+
 class FoxtrotCppMeta(type):
     def __new__(cls,name,bases,dct):
         if name != "FoxtrotCppPackage":
@@ -13,7 +15,7 @@ class FoxtrotCppMeta(type):
         else:
             newbases = bases
         n = super().__new__(cls,name,tuple(newbases),dct)
-        n.generators = "cmake", "virtualrunenv", "cmake_find_package"
+        n.generators = "cmake", "virtualrunenv", "cmake_find_package", "cmake_paths"
         n.settings = "os", "compiler", "build_type", "arch"
         n.scm = {
         "type" : "git",
@@ -43,7 +45,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         git = tools.Git(folder=self.recipe_folder)
         tagged_version = git.get_tag()
         if tagged_version is None or tagged_version[0] != "v":
-            self.version = "git%s" % git.get_revision()[:8]
+            self.version = FT_HARDCODE_VERSION
         else:
             self.version = tagged_version[1:]
 
@@ -63,27 +65,12 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
             cmake.build()
         cmake.install()
         cmake.patch_config_paths()
-
-
-    def _setup_libdirs_default(self, cppinfo):
-        if not self.in_local_cache:
-            if os.path.exists(".builddir.info"):
-                self.output.info("found builddir info file")
-                with open(".builddir.info","r") as f:
-                    buildpath = f.read().strip()
-
-                self.output.warn("buildpath: %s" % buildpath)
-                cppinfo.libdirs = [os.path.join(buildpath,"lib"), buildpath]
-                cppinfo.builddirs = [buildpath]
-                cppinfo.includedirs.append(buildpath)
-
-            self.output.warn("build folder: %s" % self.build_folder)
-        else:
-            cppinfo.libdirs = ["lib/foxtrot"]
-
             
     def package_info(self):
 #        self._setup_libdirs_default(self.cpp_info)
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
+        self.cpp_info.names["cmake_find_package"] = "foxtrotCore"
 
+    def layout(self):
+        self.cpp.build.includedirs = [self.build_folder]

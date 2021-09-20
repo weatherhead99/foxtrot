@@ -1,9 +1,8 @@
 project(foxtrot_core C CXX)
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 
 #import other cmake functionality we need later
@@ -19,27 +18,11 @@ endif()
 
 
 #setup conan build if necessary
-message(STATUS "checking for conan build...")
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    message(WARNING "conanbuildinfo detected, building using
-    conan dependencies")
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-    set(FOXTROT_CORE_CONAN_BUILD TRUE)
-    conan_basic_setup()
-    set(HASH "None")
-    set(REFSPEC "None")
-    set(TAG "None")
-    set(TAGGED "false")
-    foxtrot_writeout_build_directory(.builddir.info)
-  else()
-    message(STATUS "not a conan build")
-    include(GitVersion)    
-endif()
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
+include(GitVersion)
 
 
 set(packname "core")
-
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
                 ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 configure_file(${CMAKE_SOURCE_DIR}/share/version.h.in
@@ -74,9 +57,9 @@ foxtrot_generate_export_header(${packname} foxtrot_core)
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(WIN32)
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf gRPC::grpc++ RTTR::Core)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf RTTR::Core)
 else()
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf gRPC::grpc++ gRPC::grpc RTTR::Core)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf  RTTR::Core)
 endif()
 
 
