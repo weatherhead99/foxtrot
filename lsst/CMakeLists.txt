@@ -1,31 +1,19 @@
 project(foxtrotlsst C CXX)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 
-message(STATUS "checking for conan build...")
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  message(WARNING "conanbuildinfo detected, building using conan dependencies")
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  set(FOXTROT_CLIENT_CONAN_BUILD TRUE)
-  conan_basic_setup()
-endif()
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-find_package(foxtrotClient REQUIRED)
-#find_package(foxtrotProtocols REQUIRED)
-find_package(foxtrotDevices REQUIRED)
+set(CONAN_CMAKE_SILENT_OUTPUT TRUE)
+
+find_package(foxtrotCore REQUIRED CONFIG)
+find_package(foxtrotClient REQUIRED CONFIG)
+find_package(foxtrotProtocols REQUIRED CONFIG)
+find_package(foxtrotDevices REQUIRED CONFIG)
 find_package(Boost REQUIRED COMPONENTS program_options date_time)
 
-set(autofilld_srcs autofilld/autofilld.cpp autofilld/autofill_fill_logic.cpp
-    autofilld/autofill_logger.cpp)
-add_executable(autofilld ${autofilld_srcs})
-target_link_libraries(autofilld foxtrot::foxtrot_client Boost::program_options)
-
-set(tbcli_srcs tbprogs/tbcli.cpp tbprogs/tbcli_fill_logic.cpp tbprogs/tbcli_heater_logic.cpp
-    tbprogs/tbcli_mono_logic.cpp tbprogs/tbcli_pressure_logic.cpp)
-    
-add_executable(tbcli ${tbcli_srcs})
-target_link_libraries(tbcli foxtrot::foxtrot_client Boost::program_options)
-
+add_subdirectory(autofilld)
+add_subdirectory(tbprogs)
 
 set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp)
 add_library(lsst_testbench SHARED ${setup_srcs})
@@ -33,9 +21,15 @@ target_link_libraries(lsst_testbench foxtrot::foxtrot_core
 foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
 
+#TODO: fix this, side effect of new conan build!
+target_include_directories(lsst_testbench PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
+find_package(rapidxml REQUIRED)
+target_link_libraries(lsst_testbench rapidxml::rapidxml)
 
-add_executable(vacuum_pump_play vacuum_pump_play.cpp)
-target_link_libraries(vacuum_pump_play foxtrot::foxtrot_devices)
+
+
+#add_executable(vacuum_pump_play vacuum_pump_play.cpp)
+#target_link_libraries(vacuum_pump_play foxtrot::foxtrot_devices)
 
 #only build if on idscamera enabled system
 if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)

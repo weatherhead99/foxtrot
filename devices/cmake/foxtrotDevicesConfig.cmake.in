@@ -14,8 +14,8 @@ set(FOXTROT_DEVICES_BUILTIN "@device_targets@")
 
 
 include(CMakeFindDependencyMacro)
-find_dependency(foxtrotCore REQUIRED)
-find_dependency(foxtrotProtocols REQUIRED)
+find_dependency(foxtrotCore REQUIRED CONFIG)
+find_dependency(foxtrotProtocols REQUIRED CONFIG)
 find_dependency(rttr 0.9.6 REQUIRED)
 if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
   if(BUILD_TREE)
