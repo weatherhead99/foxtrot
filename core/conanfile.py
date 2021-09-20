@@ -25,4 +25,8 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
                        "rttr:with_rtti" : True}
 
     src_folder = "core"
-    
+
+
+    def package_info(self):
+        super().package_info()
+        self.cpp_info.names["cmake_find_package"] = "foxtrotCore"

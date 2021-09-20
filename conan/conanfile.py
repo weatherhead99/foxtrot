@@ -67,10 +67,10 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         cmake.patch_config_paths()
             
     def package_info(self):
-#        self._setup_libdirs_default(self.cpp_info)
         self.cpp_info.libs = tools.collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
-        self.cpp_info.names["cmake_find_package"] = "foxtrotCore"
+        self.cpp_info.names["cmake_find_package"] = "foxtrot"
+        self.cpp_info.builddirs.append("lib")
 
     def layout(self):
         self.cpp.build.includedirs = [self.build_folder]

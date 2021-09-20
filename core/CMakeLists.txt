@@ -59,7 +59,7 @@ target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 if(WIN32)
 target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf RTTR::Core)
 else()
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf  RTTR::Core)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf  RTTR::Core gRPC::grpc++ gRPC::grpc)
 endif()
 
 

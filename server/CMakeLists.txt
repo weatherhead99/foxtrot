@@ -1,22 +1,15 @@
 project(foxtrot_server C CXX)
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "server")
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-message(STATUS "checking for conan build...")
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    message(WARNING "conanbuildinfo detected, building using
-    conan dependencies")
-    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-    set(FOXTROT_SERVER_CONAN_BUILD TRUE)
-    conan_basic_setup()
-endif()
 
 message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
 
-find_package(foxtrotCore REQUIRED)
+find_package(foxtrotCore REQUIRED CONFIG)
 
 get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
 message(ERROR "iid: ${prop}")
@@ -29,7 +22,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 find_package(CURL REQUIRED)
-find_package(rapidjson REQUIRED)
+find_package(RapidJSON REQUIRED)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -51,10 +44,6 @@ include(CMakePackageConfigHelpers)
 
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
-
-if(FOXTROT_SERVER_CONAN_BUILD)
-  foxtrot_writeout_build_directory(.builddir.info)
-endif()
 
 
 set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
@@ -84,10 +73,10 @@ add_library(foxtrot_server ${server_srcs})
 foxtrot_generate_export_header(${packname} foxtrot_server)
 foxtrot_standard_include_dirs(foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL rapidjson::rapidjson)
+target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL RapidJSON::RapidJSON)
 
 if(BUILD_AUTH)
-    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE} ${CONAN_LIBS_LIBSODIUM})
+    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE})
 endif()
 
 add_executable(exptserve ${exptserve_srcs})
@@ -127,9 +116,8 @@ install(EXPORT foxtrot_server
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-        
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake ${CMAKE_CURRENT_LIST_DIR}/cmake/Findrapidjson.cmake
-        DESTINATION ${ft_cmakedir})
+
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
 
 set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
