@@ -248,6 +248,13 @@ if(sodium_USE_STATIC_LIBS)
 else()
     set(_LIB_TYPE SHARED)
 endif()
+
+
+if(TARGET sodium)
+  message(STATUS "sodium target already exists, not doing anything")
+else()
+
+
 add_library(sodium ${_LIB_TYPE} IMPORTED)
 
 set_target_properties(sodium PROPERTIES
@@ -285,4 +292,6 @@ else()
             )
         endif()
     endif()
+endif()
+
 endif()

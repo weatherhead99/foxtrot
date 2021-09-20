@@ -6,16 +6,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
 
-message(STATUS "checking for conan build...")
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  message(WARNING "conanbuildinfo detected, building using conan dependencies")
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  set(FOXTROT_DEVICES_CONAN_BUILD TRUE)
-  conan_basic_setup()
-endif()
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 
-find_package(foxtrotCore REQUIRED)
+find_package(foxtrotCore REQUIRED CONFIG)
 find_package(Boost REQUIRED COMPONENTS date_time)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)

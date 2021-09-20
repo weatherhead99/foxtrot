@@ -1,28 +1,17 @@
 project(foxtrot_client C CXX)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "client")
 
-message(STATUS "checking for conan build...")
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  message(WARNING "conanbuildinfo detected, building using conan dependencies")
-  include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-  set(FOXTROT_CLIENT_CONAN_BUILD TRUE)
-  conan_basic_setup()
-endif()
+include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-
-find_package(foxtrotCore REQUIRED)
+find_package(foxtrotCore REQUIRED CONFIG)
 find_package(gRPC REQUIRED)
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
-
-if(FOXTROT_CLIENT_CONAN_BUILD)
-  foxtrot_writeout_build_directory(.builddir.info)
-endif()
 
 add_library(foxtrot_client src/client.cpp)
 target_include_directories(foxtrot_client PUBLIC 
