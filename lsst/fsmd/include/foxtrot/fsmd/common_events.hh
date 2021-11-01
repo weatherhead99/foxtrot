@@ -1,10 +1,14 @@
 #pragma once
 #include <tinyfsm.hpp>
+#include <chrono>
 
 namespace foxtrot
 {
 namespace fsmd
 {
+    using timept = std::chrono::time_point<std::chrono::system_clock>;
+    using duration_s = std::chrono::seconds;
+    
     struct DataUpdateEvent : public tinyfsm::Event
     {
         //environmental data
@@ -21,7 +25,9 @@ namespace fsmd
         //server flags
         bool autofill_enabled;
         bool experiment_running;
-        bool experiment_lowvibration;
+        bool lowvibration_requested;
+        bool tank_refill_flag_set;
+        
         
     };
 
@@ -29,6 +35,9 @@ namespace fsmd
     {
         
     };
+    
+    
+    
     
 }
 }

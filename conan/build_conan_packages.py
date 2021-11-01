@@ -7,10 +7,8 @@ user="weatherhead99"
 channel="testing"
 
 
-buildtools_version = "0.1"
 print("building python utils for other conan packages...")
-api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel, 
-           version=buildtools_version)
+api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel, version="0.2")
 
 
 createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=False,
@@ -27,7 +25,7 @@ createfun("../server")
 
 #disable building client for now, it doesn't work
 #print("building foxtrot c++ client package...")
-#createfun("../client")
+createfun("../client")
 
 print("building foxtrot protocols package...")
 createfun("../protocols")
