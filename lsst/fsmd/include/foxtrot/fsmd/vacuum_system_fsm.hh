@@ -14,8 +14,8 @@ public:
     VacuumSystemFSM(double pumpdown_thresh, double ambient_thresh, double lowvibration_thresh);
     VacuumSystemFSM() {};
     
-    virtual void react(DataUpdateEvent& ev) {};
-    virtual void react(TimeTickEvent& ev) {};
+    virtual void react(const DataUpdateEvent& ev) {};
+    virtual void react(const TimeTickEvent& ev) {};
     virtual std::string name() const = 0;
     
     virtual void entry()  {};
@@ -31,7 +31,7 @@ private:
 
 class InitialVacuumState : public VacuumSystemFSM 
 {
-    void react(DataUpdateEvent & ev) override;
+    void react(const DataUpdateEvent & ev) override;
     std::string name() const override;
 };
 
@@ -50,6 +50,7 @@ class PumpSpinningDown : public VacuumSystemFSM
 class PumpVenting : public VacuumSystemFSM
 {
     std::string name() const override;
+    void react(const DataUpdateEvent& ev) override;
 };
 
 class PumpedToAtmosphere : public VacuumSystemFSM
@@ -76,7 +77,7 @@ class LowVibrationRunning : public VacuumSystemFSM
 class CryostatPumpDown : public VacuumSystemFSM
 {
     std::string name() const override;
-    
+    void react(const DataUpdateEvent& ev) override;
 };
 
 class EmergencyBailout : public VacuumSystemFSM

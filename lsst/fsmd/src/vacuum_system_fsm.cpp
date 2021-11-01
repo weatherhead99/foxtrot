@@ -20,7 +20,7 @@ foxtrot::fsmd::VacuumSystemFSM::VacuumSystemFSM(double pumpdown_thresh, double a
 
 std::string InitialVacuumState::name() const { return "InitialVacuumState";}
 
-void InitialVacuumState::react(DataUpdateEvent& ev)
+void InitialVacuumState::react(const DataUpdateEvent& ev)
 {
     _lg.strm(sl::debug) << "initial vacuum state started, trying to determine current operation status";
     
@@ -31,12 +31,6 @@ void InitialVacuumState::react(DataUpdateEvent& ev)
         _lg.strm(sl::info) << "conditions appear to indicate we are at ambient";
         transit<PumpedToAtmosphere>();    
     }
-    else if(!ev.pump_enabled  && ev.valve_open)
-    {
-        _lg.strm(sl::info) << "conditions indicate we are venting to ambient";
-        transit<PumpVenting>();
-    }
-    
     
     if(ev.pump_enabled && ev.valve_open && (ev.cryo_pressure > _pumpdown_thresh))
     {
@@ -50,18 +44,7 @@ void InitialVacuumState::react(DataUpdateEvent& ev)
         transit<HighVibrationOperation>();
     }
     
-    if(!ev.pump_enabled && !ev.valve_open && (ev.pump_rot_speed > _pump_lowvibration_rot_thresh))
-    {
-        _lg.strm(sl::info) << "conditions indicate the pump is spinning down";
-        transit<PumpSpinningDown>();
-    }
-    else if(!ev.pump_enabled && !ev.valve_open)
-    {
-        _lg.strm(sl::info) << "conditions indicate we are in low vibration running conditions";
-        transit<LowVibrationRunning>();
-    }
-    
-    
+    throw std::logic_error("cannot transition to a valid operation state!");
     
     
     
@@ -71,8 +54,36 @@ void InitialVacuumState::react(DataUpdateEvent& ev)
 std::string HighVibrationOperation::name() const { return "HighVibrationOperation";};
 std::string PumpSpinningDown::name() const { return "PumpSpinningDown";};
 std::string PumpVenting::name() const { return "Pumpventing";};
+void PumpVenting::react(const DataUpdateEvent& ev)
+{
+    if(!ev.pump_enabled && (ev.cryo_pressure > _ambient_thresh))
+    {
+        _lg.strm(sl::info) << "system has reached ambient pressure";
+    }
+    transit<PumpedToAtmosphere>();
+    
+    
+    
+    
+}
 
 
 std::string PumpedToAtmosphere::name() const { return "PumpedToAtmosphere";}
 std::string LowVibrationRunning::name() const {return "LowVibrationRunning";}
+
 std::string CryostatPumpDown::name() const { return "CryostatPumpDown";}
+void CryostatPumpDown::react(const DataUpdateEvent& ev)
+{
+    if(ev.pump_enabled && (ev.cryo_pressure < _pumpdown_thresh) && !ev.lowvibration_requested)
+    {
+        _lg.strm(sl::info) << "we have reached pumped down status, transitioning to high vibration running";
+        transit<HighVibrationOperation>();
+    }
+    else if(ev.pump_enabled && (ev.cryo_pressure < _pumpdown_thresh))
+    {
+        _lg.strm(sl::info) << "we have reached pumped down status, low vibration operation requested, spinning down";
+        transit<PumpSpinningDown>();
+    }
+    
+}
+
