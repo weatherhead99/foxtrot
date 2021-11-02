@@ -35,6 +35,7 @@ namespace devices
         positive_integer_long = 1,
         positive_fixed_comma_number = 2,
         symbol_chain_short  = 4,
+	  new_boolean = 6,
         positive_integer_short = 7,
         symbol_chain_long = 11
     };
@@ -92,6 +93,11 @@ namespace devices
                     for(int i=0; i< 6; i++)
                         oss << number;
                     break;
+	    case(pfeiffer_data_types::new_boolean):
+	      oss << std::setw(1);
+	      oss << number;
+	      
+	      break;
                 case(pfeiffer_data_types::positive_integer_long):
                 case(pfeiffer_data_types::positive_fixed_comma_number):
                 case(pfeiffer_data_types::symbol_chain_short):
