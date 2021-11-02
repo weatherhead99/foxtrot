@@ -1,7 +1,7 @@
 add_device_object_lib(NAME newport2936R SRCS newport2936R.cpp INCLUDES newport2936R.h)
 
 
-target_compile_definitions(newport2936R PUBLIC -DNEW_RTTR_API)
+#target_compile_definitions(newport2936R PUBLIC -DNEW_RTTR_API)
 
 # target_link_libraries(newport2936R)
 # 

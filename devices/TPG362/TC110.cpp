@@ -1,11 +1,21 @@
 #include "TC110.h"
 #include <rttr/registration>
-
+#include <foxtrot/protocols/SerialPort.h>
 using namespace foxtrot::devices;
 
 foxtrot::devices::TC110::TC110(shared_ptr<foxtrot::SerialProtocol> proto)
 : PfeifferDevice(proto, "TC110")
 {
+  auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto);
+  if(specproto == nullptr)
+    throw std::logic_error("invalid type of protocol passed to TC110 initializer");
+
+  
+  _lg.Info("using RS485 connected vacuum pump controller");
+  specproto->Init(nullptr);
+  specproto->flush();
+  _lg.Info("serial initialization is now done");
+  
 }
 
 bool foxtrot::devices::TC110::getHeating()

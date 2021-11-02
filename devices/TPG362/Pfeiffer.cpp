@@ -34,6 +34,7 @@ string PfeifferDevice::cmd(const string& request)
 	catch(...)
 	  {
 	    _lg.strm(sl::info) <<"failed to flush serial port, never mind..." ;
+
 	  }
 	serproto->setDrain(true);
 	serproto->setWait(100);
