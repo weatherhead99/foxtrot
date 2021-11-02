@@ -1,7 +1,15 @@
 #include "TC110.h"
 #include <rttr/registration>
 #include <foxtrot/protocols/SerialPort.h>
+#include <map>
+
+
+
 using namespace foxtrot::devices;
+
+
+const std::map<TC110_parameter_no, unsigned short> data_types_map = {};
+
 
 foxtrot::devices::TC110::TC110(shared_ptr<foxtrot::SerialProtocol> proto)
 : PfeifferDevice(proto, "TC110")
@@ -25,7 +33,7 @@ bool foxtrot::devices::TC110::getHeating()
 
 void foxtrot::devices::TC110::setHeating(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::Heating, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::Heating, onoff, pfeiffer_data_types::boolean);
 }
 
 
@@ -36,7 +44,7 @@ bool foxtrot::devices::TC110::getStandby()
 
 void foxtrot::devices::TC110::setStandby(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::Standby, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::Standby, onoff, pfeiffer_data_types::boolean);
 }
 
 bool foxtrot::devices::TC110::getRUTimeCtrl()
@@ -46,7 +54,7 @@ bool foxtrot::devices::TC110::getRUTimeCtrl()
 
 void foxtrot::devices::TC110::setRUTimeCtrl(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::RUTimeCtrl, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::RUTimeCtrl, onoff, pfeiffer_data_types::boolean);
 }
 
 bool foxtrot::devices::TC110::getPumpStationOnOff()
@@ -56,7 +64,7 @@ bool foxtrot::devices::TC110::getPumpStationOnOff()
 
 void foxtrot::devices::TC110::setPumpStationOnOff(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::PumpgStatn, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::PumpgStatn, onoff, pfeiffer_data_types::boolean);
 }
 
 bool foxtrot::devices::TC110::getVentEnable()
@@ -66,7 +74,7 @@ bool foxtrot::devices::TC110::getVentEnable()
 
 void foxtrot::devices::TC110::setVentEnable(bool onoff)
 {   
-    write_cmd_helper(_address, TC110_parameter_no::EnableVent, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::EnableVent, onoff, pfeiffer_data_types::boolean);
 }
 
 short unsigned foxtrot::devices::TC110::getSpeedSwitchPointConfig()
@@ -76,7 +84,7 @@ short unsigned foxtrot::devices::TC110::getSpeedSwitchPointConfig()
 
 void foxtrot::devices::TC110::setSpeedSwitchPointConfig(unsigned short switchpt)
 {
-    write_cmd_helper(_address, TC110_parameter_no::CfgSpdSwPt, switchpt);
+    write_cmd_helper(_address, TC110_parameter_no::CfgSpdSwPt, switchpt, pfeiffer_data_types::positive_integer_short);
 }
 
 foxtrot::devices::TC110_parameter_no get_DOparam(unsigned char DOnum)
@@ -102,7 +110,7 @@ foxtrot::devices::TC110_DOconfigs foxtrot::devices::TC110::getDOConfig(unsigned 
 
 void foxtrot::devices::TC110::setDOConfig(unsigned char DOnum, foxtrot::devices::TC110_DOconfigs cfg)
 {
-    write_cmd_helper(_address, get_DOparam(DOnum),cfg);
+    write_cmd_helper(_address, get_DOparam(DOnum),static_cast<unsigned short>(cfg), pfeiffer_data_types::positive_integer_short);
 }
 
 bool foxtrot::devices::TC110::getMotorPump()
@@ -112,7 +120,7 @@ bool foxtrot::devices::TC110::getMotorPump()
 
 void foxtrot::devices::TC110::setMotorPump(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::MotorPump, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::MotorPump, onoff, pfeiffer_data_types::boolean);
 }
 
 foxtrot::devices::TC110_BackingPumpOperatingModes foxtrot::devices::TC110::getBackingPumpMode()
@@ -124,7 +132,7 @@ foxtrot::devices::TC110_BackingPumpOperatingModes foxtrot::devices::TC110::getBa
 
 void foxtrot::devices::TC110::setBackingPumpMode(foxtrot::devices::TC110_BackingPumpOperatingModes mode)
 {
-    write_cmd_helper(_address, TC110_parameter_no::OpModeBKP, mode);
+    write_cmd_helper(_address, TC110_parameter_no::OpModeBKP, static_cast<short unsigned>(mode), pfeiffer_data_types::positive_integer_short);
 }
 
 bool foxtrot::devices::TC110::getRotSpeedSettingMode()
@@ -134,7 +142,7 @@ bool foxtrot::devices::TC110::getRotSpeedSettingMode()
 
 void foxtrot::devices::TC110::setRotSpeedSettingMode(bool mode)
 {
-    write_cmd_helper(_address, TC110_parameter_no::SpdSetMode, mode);
+    write_cmd_helper(_address, static_cast<short unsigned>(TC110_parameter_no::SpdSetMode), mode, pfeiffer_data_types::positive_integer_short);
 }
 
 foxtrot::devices::TC110_GasModes foxtrot::devices::TC110::getGasMode()
@@ -146,7 +154,7 @@ foxtrot::devices::TC110_GasModes foxtrot::devices::TC110::getGasMode()
 
 void foxtrot::devices::TC110::setGasMode(foxtrot::devices::TC110_GasModes mode)
 {
-    write_cmd_helper(_address, TC110_parameter_no::GasMode, mode);
+    write_cmd_helper(_address, TC110_parameter_no::GasMode, static_cast<unsigned short>(mode), pfeiffer_data_types::positive_integer_short);
 }
 
 foxtrot::devices::TC110_VentModes foxtrot::devices::TC110::getVentMode()
@@ -158,7 +166,7 @@ foxtrot::devices::TC110_VentModes foxtrot::devices::TC110::getVentMode()
 
 void foxtrot::devices::TC110::setVentMode(foxtrot::devices::TC110_VentModes mode)
 {
-    write_cmd_helper(_address, TC110_parameter_no::VentMode, mode);
+    write_cmd_helper(_address, TC110_parameter_no::VentMode, static_cast<unsigned short>(mode), pfeiffer_data_types::positive_integer_short);
 }
 
 foxtrot::devices::TC110_parameter_no get_Accparam(char Acclet, unsigned char Accnum)
@@ -205,7 +213,7 @@ foxtrot::devices::TC110_Accconfigs foxtrot::devices::TC110::getAccConfig(char Ac
 void foxtrot::devices::TC110::setAccConfig(char Acclet, unsigned char Accnum, foxtrot::devices::TC110_Accconfigs config)
 {
     TC110_parameter_no param = get_Accparam(Acclet, Accnum);
-    write_cmd_helper(_address, param, config);
+    write_cmd_helper(_address, param, static_cast<unsigned short>(config), pfeiffer_data_types::positive_integer_short);
 }
 
 bool foxtrot::devices::TC110::getSealingGas()
@@ -215,7 +223,7 @@ bool foxtrot::devices::TC110::getSealingGas()
 
 void foxtrot::devices::TC110::setSealingGas(bool onoff)
 {
-    write_cmd_helper(_address, TC110_parameter_no::SealingGas, onoff);
+    write_cmd_helper(_address, TC110_parameter_no::SealingGas, onoff, pfeiffer_data_types::boolean);
 }
 
 

@@ -53,7 +53,7 @@ bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
 
 void foxtrot::devices::TPG362::setGaugeOnOff(unsigned short channel, bool onoff)
 {
-    write_cmd_helper(channel + _address, TPG_parameter_no::sensEnable, onoff);
+    write_cmd_helper(channel + _address, TPG_parameter_no::sensEnable, onoff, pfeiffer_data_types::boolean);
 }
 
 bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
@@ -64,7 +64,7 @@ bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
 
 void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
     {
-    write_cmd_helper(channel + _address, TPG_parameter_no::degas, onoff);
+    write_cmd_helper(channel + _address, TPG_parameter_no::degas, onoff, pfeiffer_data_types::boolean);
 }
 
 

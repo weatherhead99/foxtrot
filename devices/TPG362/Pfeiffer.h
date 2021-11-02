@@ -28,6 +28,17 @@ namespace devices
         describe = 10
     };
     
+    
+    enum class pfeiffer_data_types : short unsigned
+    {
+        boolean = 0,
+        positive_integer_long = 1,
+        positive_fixed_comma_number = 2,
+        symbol_chain_short  = 4,
+        positive_integer_short = 7,
+        symbol_chain_long = 11
+    };
+    
     class PfeifferDevice : public CmdDevice
     {
     RTTR_ENABLE()
@@ -60,12 +71,46 @@ namespace devices
         void validate_response_telegram_parameters(unsigned short address, unsigned short parameter, const std::tuple<int,int,string>& resp);
         
         template<typename T> 
-        string str_from_number(const T& number, unsigned short width=3)
+        string str_from_number(const T& number, unsigned short width)
         {
             std::ostringstream oss;
             oss << std::setw(width) << std::setfill('0') << number;
             return oss.str();
         };
+        
+        template<typename T>
+        string str_from_number(const T& number, pfeiffer_data_types dtype)
+        {
+            
+            using foxtrot::devices::pfeiffer_data_types;
+            
+            std::ostringstream oss;
+            switch(dtype)
+            {
+                case(pfeiffer_data_types::boolean):
+                    oss << std::setw(1);
+                    for(int i=0; i< 5; i++)
+                        oss << number;
+                    break;
+                case(pfeiffer_data_types::positive_integer_long):
+                case(pfeiffer_data_types::positive_fixed_comma_number):
+                case(pfeiffer_data_types::symbol_chain_short):
+                    oss << std::setw(6) << std::setfill('0') << number;
+                    break;
+                case(pfeiffer_data_types::positive_integer_short):
+                    oss << std::setw(3) <<  std::setfill('0') << number;
+                    break;
+                case(pfeiffer_data_types::symbol_chain_long):
+                    oss << std::setw(16) << std::setfill(' ') << number;
+                default:
+                    throw std::logic_error("invalid pfieffer data type!");
+                    
+            }
+            return oss.str();
+        }
+        
+        
+        
         
         template<typename T>
         string read_cmd_helper(int addr, T param)
@@ -78,18 +123,10 @@ namespace devices
             return std::get<2>(interpret);
         };
         
-//         template<typename T, typename Ret>
-//         ret read_cmd_helper(int addr, T param)
-//         {
-//             string resp = read_cmd_helper<T>(addr, param);
-//             
-//             
-//         }
-        
         template<typename T1, typename T2>
-        void write_cmd_helper(int addr, T1 param, T2 value)
+        void write_cmd_helper(int addr, T1 param, T2 value, pfeiffer_data_types dtype)
         {
-            auto st = str_from_number(static_cast<unsigned short>(value));
+            auto st = str_from_number(value, dtype);
             auto ret = semantic_command(addr, param, pfeiffer_action::describe, st);
             
             auto interpret = interpret_response_telegram(ret);
