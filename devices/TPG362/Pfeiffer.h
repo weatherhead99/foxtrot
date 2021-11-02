@@ -89,7 +89,7 @@ namespace devices
             {
                 case(pfeiffer_data_types::boolean):
                     oss << std::setw(1);
-                    for(int i=0; i< 5; i++)
+                    for(int i=0; i< 6; i++)
                         oss << number;
                     break;
                 case(pfeiffer_data_types::positive_integer_long):
