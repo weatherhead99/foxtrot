@@ -35,7 +35,7 @@ endif()
 
 option(BUILD_AUTH "build support for authentication" ON)
 if(BUILD_AUTH)
-  find_package(sodium REQUIRED)
+  find_package(libsodium REQUIRED)
 endif()
 
 include(GenerateExportHeader)
@@ -76,7 +76,7 @@ target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
 target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL RapidJSON::RapidJSON)
 
 if(BUILD_AUTH)
-    target_link_libraries(foxtrot_server PUBLIC ${sodium_LIBRARY_RELEASE})
+    target_link_libraries(foxtrot_server PUBLIC libsodium::libsodium)
 endif()
 
 add_executable(exptserve ${exptserve_srcs})
@@ -88,7 +88,7 @@ target_link_libraries(exptserve PUBLIC foxtrot_server Boost::filesystem Boost::p
 
 if(BUILD_AUTH)
     add_executable(ftauth src/ftauth.cpp)
-    target_link_libraries(ftauth Boost::program_options ${sodium_LIBRARY_RELEASE} foxtrot::foxtrot_core
+    target_link_libraries(ftauth Boost::program_options libsodium::libsodium foxtrot::foxtrot_core
     foxtrot_server)
     target_include_directories(ftauth PRIVATE include)
 endif()

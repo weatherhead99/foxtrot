@@ -26,9 +26,15 @@ find_package(rapidxml REQUIRED)
 target_link_libraries(lsst_testbench rapidxml::rapidxml)
 
 
+option(BUILD_VCPLAY "build vacuum pump test program" OFF)
 
-#add_executable(vacuum_pump_play vacuum_pump_play.cpp)
-#target_link_libraries(vacuum_pump_play foxtrot::foxtrot_devices)
+if(BUILD_VCPLAY)
+add_executable(vacuum_pump_play vacuum_pump_play.cpp)
+target_link_libraries(vacuum_pump_play foxtrot::foxtrot_devices)
+target_include_directories(vacuum_pump_play PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
+
+endif()
+
 
 #only build if on idscamera enabled system
 if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
@@ -39,7 +45,7 @@ if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
 endif()
 
 #NOTE: disable fsmd for now as it's not working
-add_subdirectory(fsmd)
+#add_subdirectory(fsmd)
 
 
 include(GNUInstallDirs)

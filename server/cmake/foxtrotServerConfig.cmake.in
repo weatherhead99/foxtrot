@@ -33,7 +33,7 @@ if(@BUILD_AUTH@)
     else()
         list(APPEND CMAKE_MODULE_PATH "${foxtrot_server_PREFIX}/lib/cmake/foxtrotServer/")
     endif()
-    find_dependency(sodium REQUIRED)
+    find_dependency(libsodium REQUIRED)
 endif()
 
 
