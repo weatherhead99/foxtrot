@@ -25,7 +25,7 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
                        "libsodium:shared" : True,
                        "zlib:shared" : True}
 
-    src_folder = "server"
+    src_folder="server"
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %
