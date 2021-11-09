@@ -8,8 +8,8 @@ Created on Tue Jul 16 15:04:58 2019
 
 #from __future__ import annotations
 from pyfoxtrot.common import _check_repl_err
-from pyfoxtrot.ft_types_pb2 import  empty
-from pyfoxtrot.ft_flags_pb2 import serverflag
+from pyfoxtrot.protos.ft_types_pb2 import  empty
+from pyfoxtrot.protos.ft_flags_pb2 import serverflag
 
 class ServerFlag:
     def __init__(self, client, flagname: str):

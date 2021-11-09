@@ -1,9 +1,9 @@
-from pyfoxtrot.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
-from pyfoxtrot.ft_types_pb2 import simplevalue_types, variant_types
-from pyfoxtrot.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor
-from pyfoxtrot.ft_types_pb2 import tuple_descriptor, ft_tuple
-from .ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE
-from .ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
+from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
+from .protos.ft_types_pb2 import simplevalue_types, variant_types
+from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor
+from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple
+from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE
+from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 
 def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:

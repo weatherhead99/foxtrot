@@ -9,19 +9,19 @@ Created on Wed Apr 19 11:44:13 2017
 import struct
 import grpc
 from itertools import chain
-from .foxtrot_pb2_grpc import exptserveStub
-from .ft_capability_pb2_grpc import capabilityStub
-from .ft_flags_pb2_grpc import flagsStub
+from .protos.foxtrot_pb2_grpc import exptserveStub
+from .protos.ft_capability_pb2_grpc import capabilityStub
+from .protos.ft_flags_pb2_grpc import flagsStub
 from .common import _check_repl_err
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
 from .TypeConversion import string_describe_ft_variant
-from .ft_types_pb2 import empty
-from .foxtrot_pb2 import  broadcast_notification
-from .ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
-from .ft_capability_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
-from .ft_capability_pb2 import chunk_request
-from .ft_types_pb2 import ENUM_TYPE
+from .protos.ft_types_pb2 import empty
+from .protos.foxtrot_pb2 import  broadcast_notification
+from .protos.ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
+from .protos.ft_capability_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
+from .protos.ft_capability_pb2 import chunk_request
+from .protos.ft_types_pb2 import ENUM_TYPE
 from .EnumCreator import define_enum
 
 
