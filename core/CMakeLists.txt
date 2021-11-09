@@ -18,7 +18,6 @@ endif()
 
 
 #setup conan build if necessary
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 include(GitVersion)
 
 
@@ -76,10 +75,6 @@ install(TARGETS foxtrot_core
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
         COMPONENT devel)
-
-install(FILES ${proto_input_files}
-        DESTINATION ${CMAKE_INSTALL_DATADIR}/foxtrot/
-        COMPONENT devels)
 
 install(EXPORT foxtrot_core
         DESTINATION ${ft_cmakedir}

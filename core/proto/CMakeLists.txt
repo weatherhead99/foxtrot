@@ -25,6 +25,12 @@ message("gen_srcs: ${GEN_SRCS}")
 add_library(foxtrot_protos OBJECT ${PROTO_HDRS} ${GEN_SRCS})
 target_link_libraries(foxtrot_protos PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc)
 
+
+message("copying protos into python install directorys")
+file(COPY ${proto_files} DESTINATION ${CMAKE_SOURCE_DIR}/../python/pyfoxtrot/protos)
+
 add_custom_target(copy_protos
   ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/*.h ${CMAKE_BINARY_DIR}/foxtrot/
   DEPENDS foxtrot_protos)
+
+install(FILES ${proto_files} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/foxtrot/protos/)
