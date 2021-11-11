@@ -25,16 +25,8 @@ find_dependency(Boost REQUIRED COMPONENTS program_options filesystem)
 find_dependency(CURL REQUIRED)
 find_dependency(OpenSSL REQUIRED)
 find_dependency(RapidJSON REQUIRED)
+find_dependency(libsodium REQUIRED)
 
-
-if(@BUILD_AUTH@)
-    if(BUILD_TREE)
-        list(APPEND CMAKE_MODULE_PATH "@ft_server_sourcedir@/cmake")
-    else()
-        list(APPEND CMAKE_MODULE_PATH "${foxtrot_server_PREFIX}/lib/cmake/foxtrotServer/")
-    endif()
-    find_dependency(libsodium REQUIRED)
-endif()
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")

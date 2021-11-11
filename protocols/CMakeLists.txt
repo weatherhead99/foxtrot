@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(foxtrotServer REQUIRED CONFIG)
@@ -15,7 +14,6 @@ set(packname "protocols")
 
 set(srcs "")
 set(protos "")
-set(ft_proto_includes "")
 
 macro(foxtrot_build_protocol protoname)
     option(BUILD_${protoname} "build ${protoname} protocol" ON)
@@ -74,7 +72,7 @@ message("protocols enabled for build: ${protos}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(foxtrot_protocols ${srcs})
-foxtrot_standard_include_dirs(foxtrot_protocols)
+target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_server)
 
 if("BulkUSB" IN_LIST protos)
@@ -82,9 +80,10 @@ if("BulkUSB" IN_LIST protos)
     target_link_libraries(foxtrot_protocols PUBLIC libusb::libusb)
 endif()
 
+install(DIRECTORY include/foxtrot
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT devel)
 
-#TODO: do this more elegantly
-target_include_directories(foxtrot_protocols PRIVATE ${ft_proto_includes})
 
 install(TARGETS foxtrot_protocols
         EXPORT foxtrot_protocols

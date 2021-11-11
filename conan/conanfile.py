@@ -1,4 +1,5 @@
 from conans import tools, ConanFile, CMake
+from conan.tools.cmake import CMakeToolchain
 import os
 
 
@@ -15,17 +16,11 @@ class FoxtrotCppMeta(type):
         else:
             newbases = bases
         n = super().__new__(cls,name,tuple(newbases),dct)
-        n.generators = "cmake", "virtualrunenv", "cmake_find_package", "cmake_paths"
-        n.settings = "os", "compiler", "build_type", "arch"
-        n.scm = {
-        "type" : "git",
-        "revision" : "auto"}
         return n
 
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.2"
-
+    version = "0.2.1"
 
 
 class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
@@ -33,6 +28,11 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_channel = "testing"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
+    generators = "CMakeToolchain", "CMakeDeps"
+    settings = "os", "compiler", "build_type", "arch"
+    scm = {"type" : "git",
+           "revision" : "auto"}
+    
 
     def __init__(self, *args, **kwargs):
         if not hasattr(self, "src_folder"):
@@ -48,18 +48,11 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
             self.version = FT_HARDCODE_VERSION
         else:
             self.version = tagged_version[1:]
-
-    def _setup_cmake(self):
-        cmake = CMake(self)
-        if self.develop:
-            self.output.warn("in develop mode")
-            cmake.definitions["FT_EXPORT_TO_PACKAGE_REGISTRY"] = True
-        cmake.definitions["CONAN_PACKAGE_VERSION"] = self.version
-        cmake.configure()
-        return cmake
     
     def build(self):
-        cmake = self._setup_cmake()
+        cmake = CMake(self)
+        cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
+        cmake.configure()
         env_build = tools.RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake.build()
@@ -72,5 +65,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         self.cpp_info.names["cmake_find_package"] = "foxtrot"
         self.cpp_info.builddirs.append("lib")
 
-    def layout(self):
-        self.cpp.build.includedirs = [self.build_folder]
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.generate()
+
+ 

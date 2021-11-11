@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
 
 class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
     name = "foxtrot_core"
@@ -14,7 +14,7 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
                       "proto/CMakeLists.txt"
 
     requires = ("boost/1.76.0",
-                "grpc/1.38.0",
+                "grpc/1.39.1",
                 "rttr/0.9.6")
 
     default_options = {"boost:shared" : True,

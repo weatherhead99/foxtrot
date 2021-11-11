@@ -1,14 +1,12 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
-bbcs = ftbase.bbcs
-bcs = ftbase.bcs
+ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
 
 class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     name="foxtrot_server"
     description="foxtrot server components"
-    exports_sources = "CMakeLists.txt", "src/*.cpp", \
+    exports_sources = "*CMakeLists.txt", "src/*.cpp",\
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \

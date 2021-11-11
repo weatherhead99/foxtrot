@@ -6,8 +6,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
-
 
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(Boost REQUIRED COMPONENTS date_time)
@@ -123,6 +121,8 @@ install(TARGETS foxtrot_devices
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
         
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotDevices)
+
+target_include_directories(foxtrot_devices PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include>)
 
 install(EXPORT foxtrot_devices
         DESTINATION ${ft_cmakedir}

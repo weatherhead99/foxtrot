@@ -2,7 +2,6 @@ project(foxtrotlsst C CXX)
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 set(CONAN_CMAKE_SILENT_OUTPUT TRUE)
 
 find_package(foxtrotCore REQUIRED CONFIG)
