@@ -4,6 +4,8 @@ package foxtrot;
 import "ft_error.proto";
 import "ft_capability.proto";
 import "ft_types.proto";
+import "ft_flags.proto";
+import "google/protobuf/timestamp.proto";
 
 enum stream_control_commands
 {
@@ -60,6 +62,15 @@ message streamthreadlist
 
 }
 
+
+message serverflagupdate
+{
+  google.protobuf.Timestamp tstamp = 1;
+  serverflag updflg = 2;
+   
+}
+
+
 service streams
 {
     rpc CreateStreamThread(stream_thread_request) returns (stream_thread_response);
@@ -68,5 +79,8 @@ service streams
     rpc CreateStream(stream_registration_request) returns (stream_registration_response);
     rpc ListStreams(empty) returns (streamlist);
     rpc ReceiveStream(stream stream_control) returns (stream capability_response);
-    rpc DestroyStream(stream_registration_request) returns (stream_registration_response);
+    rpc DestroyStream(stream_registration_request) returns
+    (stream_registration_response);
+    rpc StreamFlagUpdates(stream stream_control) returns (stream serverflagupdate);
+
 }
