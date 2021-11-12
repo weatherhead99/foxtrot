@@ -5,6 +5,7 @@
 #include <tuple>
 
 #include <foxtrot/server/Device.h>
+#include <foxtrot/server/DeviceLocks.hh>
 
 namespace foxtrot
 {
@@ -25,7 +26,7 @@ namespace foxtrot
       };
       
       
-    class dummyDevice : public foxtrot::Device 
+    class dummyDevice : public virtual foxtrot::Device, public  foxtrot::GlobalDeviceLock<foxtrot::Device>
     {
         RTTR_ENABLE(Device)
     public:

@@ -1,6 +1,6 @@
 set(server_srcs Device.cpp DeviceHarness.cpp ServerUtil.cpp
 ProtocolUtilities.cpp curlRequest.cpp CommunicationProtocol.cpp
-CmdDevice.cpp  FlagMap.cpp auth_utils.cpp)
+CmdDevice.cpp  FlagMap.cpp auth_utils.cpp DeviceLocks.cpp)
 
 
 set(exptserve_srcs ServerImpl.cpp ServerDescribeImpl.cpp 
