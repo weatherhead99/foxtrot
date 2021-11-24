@@ -28,7 +28,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_channel = "testing"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
-    generators = "CMakeToolchain", "CMakeDeps"
+    generators = "CMakeToolchain", "cmake_find_package_multi"
     settings = "os", "compiler", "build_type", "arch"
     scm = {"type" : "git",
            "revision" : "auto"}
