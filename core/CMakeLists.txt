@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 
 #import other cmake functionality we need later
 include(GenerateExportHeader)
@@ -37,7 +37,15 @@ find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time)
 endif()
 find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
-find_package(gRPC REQUIRED)
+
+#NOTE: find via module to force conan dependencies
+if(DEFINED CONAN_EXE_LINKER_FLAGS)
+  find_package(gRPC REQUIRED MODULE)
+else()
+  find_package(gRPC REQUIRED)
+endif()
+
+
 
 #message(WARNING "using protoc program: ${protobuf::protoc}")
 

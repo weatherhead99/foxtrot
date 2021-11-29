@@ -22,7 +22,8 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
                        "protobuf:with_zlib": True,
                        "protobuf:shared" : True,
                        "rttr:shared" : True,
-                       "rttr:with_rtti" : True}
+                       "rttr:with_rtti" : True,
+                       "grpc:cpp_plugin" : True}
 
     src_folder = "core"
 
@@ -30,3 +31,5 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
     def package_info(self):
         super().package_info()
         self.cpp_info.names["cmake_find_package"] = "foxtrotCore"
+        self.cpp_info.names["cmake_find_package_multi"] = "foxtrotCore"
+        self.cpp_info.builddirs.append("lib/cmake/foxtrotCore")
