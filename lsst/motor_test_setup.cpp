@@ -3,7 +3,11 @@
 #include <map>
 #include <foxtrot/devices/BSC203.h>
 #include <foxtrot/devices/TIM101.h>
-//#include <foxtrot/devices/idscamera.h>
+
+
+#ifdef IDS_CAMERA_ENABLED
+#include <foxtrot/devices/idscamera.h>
+#endif
 
 
 using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
@@ -43,11 +47,12 @@ extern "C" {
 //         auto sport_bsc = std::make_shared<foxtrot::protocols::SerialPort> ( &sport_params_bsc );
 //         auto presgauge_bsc = std::unique_ptr<foxtrot::devices::BSC203> ( new foxtrot::devices::BSC203 ( sport_bsc ) );
 //         harness.AddDevice ( std::move ( presgauge_bsc ) );
-        
-//         lg.Info("setting up Camera");
-//         auto presgauge_cam = std::unique_ptr<foxtrot::devices::idscamera> ( new foxtrot::devices::idscamera ( &cameraID ) );
-//         harness.AddDevice ( std::move ( presgauge_cam ) );
 
+#ifdef IDS_CAMERA_ENABLED
+	lg.Info("setting up Camera");
+	auto presgauge_cam = std::unique_ptr<foxtrot::devices::idscamera> ( new foxtrot::devices::idscamera ( &cameraID ) );
+	harness.AddDevice ( std::move ( presgauge_cam ) );
+#endif
         return 0;
 
     }

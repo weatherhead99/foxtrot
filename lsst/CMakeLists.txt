@@ -39,6 +39,12 @@ endif()
 
 set(motor_setup_srcs motor_test_setup.cpp)
 add_library(motor_test SHARED ${motor_setup_srcs})
+
+if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
+  message(STATUS "ids camera support enabled")
+  target_compile_definitions(motor_test PUBLIC -DIDS_CAMERA_ENABLED=1)
+endif()
+
 target_include_directories(motor_test PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
 target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
 set_target_properties(motor_test PROPERTIES PREFIX "")

@@ -71,9 +71,16 @@ message("protocols enabled for build: ${protos}")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+#NOTE: conan fix for system installed rapidjson package
+find_package(RapidJSON REQUIRED MODULE)
+
+
 add_library(foxtrot_protocols ${srcs})
 target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_server)
+
+
+
 
 if("BulkUSB" IN_LIST protos)
     message(STATUS "linking in libusb")
