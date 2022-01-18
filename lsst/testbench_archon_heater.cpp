@@ -250,6 +250,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
                            auto vacpump = std::unique_ptr<foxtrot::devices::TC110>(
                                new foxtrot::devices::TC110(proto));
                            vacpump->setVentEnable(false);
+			   vacpump->setDeviceComment("vacuum_pump");
                            harness.AddDevice(std::move(vacpump));
                        });
     
