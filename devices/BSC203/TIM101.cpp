@@ -101,14 +101,15 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
     return data;
 }
 
-void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
+void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::motor_channel_idents chan, int distance)
 {
 
+    auto dest = foxtrot::devices::destination::sourceTIM101;
     //Setting channel to th active channel
     set_channelenable(dest, chan, true);
 
     //Checking that it is not already in the same position
-    motor_status motorinit = get_status_update(dest, false);
+    motor_status motorinit = get_status_update();
     switch (chan) {
         case foxtrot::devices::motor_channel_idents::channel_1:
             if (motorinit.channel1.position == distance) {
@@ -146,7 +147,7 @@ void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::destination dest,
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     _serport->flush();
 
-    motor_status motorstat = get_status_update(dest);
+    motor_status motorstat = get_status_update();
 
 }
 
@@ -178,7 +179,7 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     _serport->flush();
 
-    motor_status motorstat = get_status_update(dest);
+    motor_status motorstat = get_status_update();
 
 }
 
@@ -198,18 +199,10 @@ void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::de
 
 }
 
-void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::destination dest, const foxtrot::devices::pos_counter_params& poscountarams) {
-
-    auto data = get_pos_counter_request_data(poscountarams);
-
-    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
-
-}
-
 
 foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01);
+    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01, destination::sourceTIM101);
 
     //cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
     
@@ -219,7 +212,7 @@ foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(fox
 
 foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01);
+    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::sourceTIM101);
 
     //cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
     //cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
@@ -228,16 +221,39 @@ foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_ab
 
 }
 
-foxtrot::devices::pos_counter_params foxtrot::devices::TIM101::request_position_counter(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x05,0x01);
 
-    //cout << "Position counter: Channel (hex) = " << std::hex << out.chanIndent << endl;
-    //cout << "Position counter: Position (hex) = " << std::hex << out.position << endl;
+foxtrot::devices::pos_counter_params 
+foxtrot::devices::TIM101::position_counter(foxtrot::devices::motor_channel_idents channel)
+{
+    unsigned char chanchar = static_cast<unsigned char>(channel);
     
+    auto out = request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS,
+                                                bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS,
+                                                destination::sourceTIM101, 0x05, chanchar, destination::sourceTIM101);
     return out;
-
+    
 }
+
+void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::motor_channel_idents 
+channel, int position)
+{
+    pos_counter_params params;
+    params.chanIndent = static_cast<unsigned char>(channel);
+    params.subMsgID = 0x05;
+    params.position = position;
+    params.encCount = 0x00;
+    
+    std::array<unsigned char, sizeof(pos_counter_params)> dat;
+    
+    unsigned char* paramd = reinterpret_cast<unsigned char*>(&params);
+    std::copy(paramd, paramd + sizeof(decltype(params)), dat.begin());
+    
+    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, dat, destination::sourceTIM101, destination::sourceTIM101);
+    
+}
+
+
 
 void foxtrot::devices::TIM101::start_update_messages(foxtrot::devices::destination dest)
 {
@@ -251,8 +267,10 @@ void foxtrot::devices::TIM101::stop_update_messages(foxtrot::devices::destinatio
 
 }
 
-foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtrot::devices::destination dest, bool print)
+foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update()
 {
+    
+    auto dest = foxtrot::devices::destination::sourceTIM101;
     bool hasdata;
     unsigned received_opcode = 0;
     motor_status motorstr;
@@ -281,6 +299,7 @@ foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtr
 
             std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&motorstr));
 
+            bool print=false;
             //Printing motor_status information
             if (print) {
                 print_motor_status(&motorstr);
@@ -298,6 +317,8 @@ foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update(foxtr
         }
 
     }
+    
+    return motorstr;
 
 }
 
@@ -365,17 +386,17 @@ static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtro
 
 }
 
-static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
-{
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
-    unsigned char* positionbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.position));
-    unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.encCount));
-
-
-    std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams.chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
-
-    return data;
-}
+// static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
+// {
+//     unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
+//     unsigned char* positionbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.position));
+//     unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.encCount));
+// 
+// 
+//     std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams.chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
+// 
+//     return data;
+// }
 
 
 //Free functions
@@ -412,7 +433,7 @@ RTTR_REGISTRATION {
     .method("set_channelenable", &TIM101::set_channelenable)
     (parameter_names("destination", "channel", "on/off"))
     .method("absolute_move", &TIM101::absolute_move)
-    (parameter_names("destination", "channel", "distance"))
+    (parameter_names("channel", "position"))
     .method("set_move_absolute_parameters", &TIM101::set_move_absolute_parameters)
     (parameter_names("destination", "move absolute parameters"))
     .method("request_move_absolute_parameters", &TIM101::request_move_absolute_parameters)
@@ -424,11 +445,12 @@ RTTR_REGISTRATION {
     .method("request_jog_parameters", &TIM101::request_jog_parameters)
     (parameter_names("destination"))
     .method("get_status_update", &TIM101::get_status_update)
-    (parameter_names("destination", "boolean print info"))
+    
+    .method("position_counter", &TIM101::position_counter)
+    (parameter_names("channel"))
+    
     .method("set_position_counter", &TIM101::set_position_counter)
-    (parameter_names("destination", "position parameters"))
-    .method("request_position_counter", &TIM101::request_position_counter)
-    (parameter_names("destination"));
+    (parameter_names("channel", "counter_value"));
 
     //Custom structs
     using foxtrot::devices::jogparams;

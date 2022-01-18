@@ -11,6 +11,7 @@
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/server/Device.h>
 
+#include <optional>
 
 //TODO: handle error conditions somehow!!!!
 
@@ -214,10 +215,12 @@ namespace foxtrot {
           bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
       
       template<typename T>
-      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2);
+      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2, std::optional<destination> expd_src = std::nullopt);
     
       template<typename T, typename arrtp>
-      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data);
+      T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data,
+          std::optional<destination> expd_src = std::nullopt
+    );
       
       foxtrot::Logging _lg;
       
@@ -254,12 +257,20 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
 template<typename T>
 T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
                                                     foxtrot::devices::bsc203_opcodes opcode_recv, 
-                                                    destination dest, unsigned char p1, unsigned char p2)
+                                                    destination dest, unsigned char p1, unsigned char p2,
+                                                    std::optional<destination> expd_src
+                                                )
 {
     T out;
     transmit_message(opcode_send, p1, p2, dest);
     bool has_data;
-    auto ret = receive_message_sync(opcode_recv,dest, &has_data);
+    
+    if(!expd_src.has_value())
+    {
+        expd_src = dest;
+    }
+    
+    auto ret = receive_message_sync(opcode_recv, *expd_src, &has_data);
     
     if(!has_data)
         throw DeviceError("expected struct data in response but didn't get any!");
@@ -274,13 +285,19 @@ T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcode
 }
 
 template<typename T, typename arrtp>
-T foxtrot::devices::APT::request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data)
+T foxtrot::devices::APT::request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data, std::optional<destination> expd_src)
 {
     T out;
     transmit_message(opcode_send, data, dest);
     _lg.Trace("after transmit message");
     bool has_data;
-    auto ret = receive_message_sync(opcode_recv, dest, &has_data);
+    
+    if(!expd_src.has_value())
+    {
+        expd_src = dest;
+    }
+    
+    auto ret = receive_message_sync(opcode_recv, *expd_src, &has_data);
     _lg.Trace("after received message");
     if(!has_data)
         throw DeviceError("expected struct data in response but didn't get any!");

@@ -52,7 +52,7 @@ namespace foxtrot {
     {
         unsigned short subMsgID;
         unsigned short chanIndent;
-        unsigned int position;
+        int position;
         unsigned int encCount;
     };
     
@@ -74,15 +74,17 @@ namespace foxtrot {
 	const std::string getDeviceTypeName() const override;
         void identify_module(destination dest);
         void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
-        void absolute_move(destination dest, motor_channel_idents channel, int distance);
+        void absolute_move(motor_channel_idents channel, int distance);
         void set_move_absolute_parameters(destination dest, const move_absolute_params& absparams);
         move_absolute_params request_move_absolute_parameters(destination dest);
         void jog_move(destination dest, motor_channel_idents channel, jogdir direction);
         void set_jog_parameters(destination dest, const jogparams& jogstructp);
         jogparams request_jog_parameters(destination dest);
-        motor_status get_status_update(destination dest, bool print = true);
-        void set_position_counter(destination dest, const pos_counter_params& poscountarams);
-        pos_counter_params request_position_counter(destination dest);
+        motor_status get_status_update();
+        
+        pos_counter_params position_counter(motor_channel_idents channel);
+        void set_position_counter(motor_channel_idents channel, int position);
+        
     protected:
         void start_update_messages(destination dest);
         void stop_update_messages(destination dest);
