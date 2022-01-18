@@ -38,6 +38,7 @@ class Client:
             self._channel = grpc.secure_channel(connstr, creds)
         self._stub = capabilityStub(self._channel)
         self._flagstub = flagsStub(self._channel)
+        self._estub = exptserveStub(self._channel)
 
         self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
         self._comment = self._servdescribe.servcomment
@@ -124,7 +125,7 @@ class Client:
         else:
             req.channel_target = channel
 
-        repl = self._stub.BroadcastNotification(req)
+        repl = self._estub.BroadcastNotification(req)
         _check_repl_err(repl)
 
     @property
