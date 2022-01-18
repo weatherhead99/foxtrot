@@ -13,8 +13,8 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
                       "proto/*.proto", "share/*.in", "devprogs/*" ,\
                       "proto/CMakeLists.txt"
 
-    requires = ("boost/1.76.0",
-                "grpc/1.39.1",
+    requires = ("boost/1.78.0",
+                "grpc/1.43.0",
                 "rttr/0.9.6")
 
     default_options = {"boost:shared" : True,

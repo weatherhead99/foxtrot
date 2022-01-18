@@ -8,10 +8,6 @@ set(CONAN_CMAKE_SILENT_OUTPUT ON)
 set(packname "server")
 
 
-message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
-
-
-
 find_package(foxtrotCore REQUIRED CONFIG)
 
 get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
@@ -25,7 +21,9 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 find_package(CURL REQUIRED MODULE)
-find_package(RapidJSON REQUIRED)
+
+
+find_package(RapidJSON REQUIRED MODULE)
 find_package(libsodium REQUIRED)
 
 

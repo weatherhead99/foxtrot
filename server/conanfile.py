@@ -11,7 +11,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
-    requires = ("boost/1.76.0",
+    requires = ("boost/1.78.0",
+                "openssl/1.1.1m",
                 "libcurl/7.77.0",
                 "libsodium/1.0.18",
                 "rapidjson/1.1.0",
