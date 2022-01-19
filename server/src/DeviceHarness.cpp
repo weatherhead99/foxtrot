@@ -32,27 +32,28 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)>
 {
     
     auto thisid = _id++;
-    _devvec.push_back(std::move(dev));
-    
+
     if(!dev->hasLockImplementation())
     {
         _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
     }
-    
+
+    _devvec.push_back(std::move(dev));
 }
 
 void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 {
     
     auto raw_ptr = dev.release();
+
+    if(raw_ptr == nullptr)
+      throw std::logic_error("raw_ptr is nullptr");
     
     //TODO: some way of doing this with std::default_delete
     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
     (raw_ptr,[](Device* dev) {delete dev;});
     
-    
-
-//     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
+   
 //     (raw_ptr,[](Device* dev) {});
     
     AddDevice(std::move(newptr));
