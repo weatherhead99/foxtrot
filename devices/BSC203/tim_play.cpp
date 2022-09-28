@@ -52,10 +52,10 @@ int main(int argc,char** argv)
   
   motors.set_move_absolute_parameters(foxtrot::devices::destination::sourceTIM101, absparams);*/
   
-  motors.get_status_update(foxtrot::devices::destination::sourceTIM101,true);
+  motors.get_status_update();
   
-  motors.absolute_move(foxtrot::devices::destination::sourceTIM101,foxtrot::devices::motor_channel_idents::channel_1, -150);
+  motors.absolute_move(foxtrot::devices::motor_channel_idents::channel_1, -150);
   
-  motors.get_status_update(foxtrot::devices::destination::sourceTIM101,true);
+  motors.get_status_update();
   
 };

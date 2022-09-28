@@ -5,5 +5,5 @@ target_include_directories(dummy_setup PRIVATE ${CMAKE_BINARY_DIR})
 
 set_target_properties(dummy_setup PROPERTIES PREFIX "")
 
-install(TARGETS dummy_setup EXPORT foxtrot_server
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot)
+#install(TARGETS dummy_setup EXPORT foxtrot_server
+#        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot)

@@ -4,18 +4,19 @@ package foxtrot;
 import "ft_error.proto";
 import "ft_capability.proto";
 import "ft_types.proto";
+import "ft_flags.proto";
+import "google/protobuf/timestamp.proto";
 
 enum stream_control_commands
 {
     stop = 0;
-    enable_amqp = 1;
-    disable_amqp = 2;
+    start = 1;
 }
 
 
 message stream_thread_request
 {
-    uint32 msgid = 1;
+    uint32 threadid = 1;
     uint32 tick_time_ms =2;
     string threadcomment =3;
 }
@@ -29,25 +30,21 @@ message stream_thread_response
 
 message stream_registration_request
 {
-    uint32 msgid = 1;
     uint32 threadid = 2;
     capability_request req = 3;
     uint32 nticks = 4;
     string streamcomment = 5;
-    bool enable_amqp = 6;
 }
 
 message stream_registration_response
 {
     errstatus err =1;
-    uint32 msgid = 2;
     uint32 streamhandle = 3;
-    int32 current_thread = 4;
+    int32 threadid = 4;
 }
 
 message stream_control
 {
-    uint32 msgid = 1;
     uint32 streamhandle = 2;
     stream_control_commands cmd = 3;
 }
@@ -65,6 +62,15 @@ message streamthreadlist
 
 }
 
+
+message serverflagupdate
+{
+  google.protobuf.Timestamp tstamp = 1;
+  serverflag updflg = 2;
+   
+}
+
+
 service streams
 {
     rpc CreateStreamThread(stream_thread_request) returns (stream_thread_response);
@@ -73,5 +79,8 @@ service streams
     rpc CreateStream(stream_registration_request) returns (stream_registration_response);
     rpc ListStreams(empty) returns (streamlist);
     rpc ReceiveStream(stream stream_control) returns (stream capability_response);
-    rpc DestroyStream(stream_registration_request) returns (stream_registration_response);
+    rpc DestroyStream(stream_registration_request) returns
+    (stream_registration_response);
+    rpc StreamFlagUpdates(stream stream_control) returns (stream serverflagupdate);
+
 }

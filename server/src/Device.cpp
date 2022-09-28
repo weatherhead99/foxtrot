@@ -258,6 +258,8 @@ rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_
             auto retval = prop.get_value(*this);
             return retval;
         }
+        
+        throw std::logic_error("code should never reach this point, there is a programming error");
     }
     
     
@@ -328,6 +330,16 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
     
 }
 
+
+std::optional<foxtrot::Lock> foxtrot::Device::obtain_lock(const foxtrot::Capability& cap)
+{
+    lg_.strm(sl::trace) << "lock_device default implementation called";
+    std::optional<Lock> out;
+    return out;
+}
+
+
+bool foxtrot::Device::hasLockImplementation() const {return false;};
 
 void void_helper_function()
 {

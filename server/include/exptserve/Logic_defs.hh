@@ -3,7 +3,6 @@
 #include <boost/mpl/at.hpp>
 #include <type_traits>
 #include <stdexcept>
-#include <grpcpp/server_context.h>
 #include <foxtrot/server/ServerUtil.h>
 #include <foxtrot/Logging.h>
 

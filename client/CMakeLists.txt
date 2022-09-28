@@ -5,7 +5,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "client")
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(gRPC REQUIRED)

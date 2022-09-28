@@ -2,7 +2,6 @@ project(foxtrotlsst C CXX)
 cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 set(CONAN_CMAKE_SILENT_OUTPUT TRUE)
 
 find_package(foxtrotCore REQUIRED CONFIG)
@@ -37,12 +36,18 @@ endif()
 
 
 #only build if on idscamera enabled system
+
+set(motor_setup_srcs motor_test_setup.cpp)
+add_library(motor_test SHARED ${motor_setup_srcs})
+
 if("idscamera" IN_LIST FOXTROT_DEVICES_BUILTIN)
-    set(motor_setup_srcs motor_test_setup.cpp)
-    add_library(motor_test SHARED ${motor_setup_srcs})
-    target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
-    set_target_properties(motor_test PROPERTIES PREFIX "")
+  message(STATUS "ids camera support enabled")
+  target_compile_definitions(motor_test PUBLIC -DIDS_CAMERA_ENABLED=1)
 endif()
+
+target_include_directories(motor_test PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
+target_link_libraries(motor_test foxtrot::foxtrot_core foxtrot::foxtrot_devices)
+set_target_properties(motor_test PROPERTIES PREFIX "")
 
 #NOTE: disable fsmd for now as it's not working
 #add_subdirectory(fsmd)

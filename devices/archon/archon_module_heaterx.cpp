@@ -262,6 +262,9 @@ devices::HeaterXSensors devices::ArchonHeaterX::getHeaterSensor(devices::HeaterX
     return HeaterXSensors::B;
   case(2):
     return HeaterXSensors::C;
+  default:
+      throw foxtrot::DeviceError("invalid sensor case!");
+    
   }
   
 }
@@ -478,6 +481,8 @@ int foxtrot::devices::heater_to_int(devices::HeaterXHeaters heater, bool& succes
             return 0;
         case(devices::HeaterXHeaters::B):
             return 1;
+        default:
+            throw foxtrot::DeviceError("invalid heater value returned");
     }
     
 }
@@ -510,6 +515,9 @@ int foxtrot::devices::sensor_to_int(devices::HeaterXSensors sensor, bool& succes
             return 1;
         case(devices::HeaterXSensors::C):
             return 2;
+            
+        default:
+            throw foxtrot::DeviceError("invalid sensor value!");
     }
     
 }

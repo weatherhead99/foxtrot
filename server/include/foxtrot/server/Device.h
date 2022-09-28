@@ -5,12 +5,17 @@
 #include <rttr/type>
 #include <foxtrot/foxtrot_server_export.h>
 #include <foxtrot/Logging.h>
+#include <mutex>
+#include <optional>
+
+
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
 
 namespace foxtrot
 {
     using rarg_cit = std::vector<rttr::variant>::const_iterator;
+    using Lock = std::unique_lock<std::timed_mutex>;
     
  enum class CapabilityMeta
  {
@@ -61,6 +66,10 @@ namespace foxtrot
                                  rarg_cit beginargs, rarg_cit endargs);
     
     virtual Capability GetCapability(const std::string& capname) const;
+    
+    virtual std::optional<Lock> obtain_lock(const Capability& cap);
+    virtual bool hasLockImplementation() const;
+    
     
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;

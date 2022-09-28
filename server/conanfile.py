@@ -1,19 +1,18 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2@weatherhead99/testing")
-bbcs = ftbase.bbcs
-bcs = ftbase.bcs
+ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
 
 class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     name="foxtrot_server"
     description="foxtrot server components"
-    exports_sources = "CMakeLists.txt", "src/*.cpp", \
+    exports_sources = "*CMakeLists.txt", "src/*.cpp",\
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
-    requires = ("boost/1.76.0",
+    requires = ("boost/1.78.0",
+                "openssl/1.1.1m",
                 "libcurl/7.77.0",
                 "libsodium/1.0.18",
                 "rapidjson/1.1.0",
@@ -25,7 +24,7 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
                        "libsodium:shared" : True,
                        "zlib:shared" : True}
 
-    src_folder = "server"
+    src_folder="server"
     
     def requirements(self):
         self.requires("foxtrot_core/%s@%s/%s" %

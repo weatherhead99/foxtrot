@@ -32,24 +32,28 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)>
 {
     
     auto thisid = _id++;
+
+    if(!dev->hasLockImplementation())
+    {
+        _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
+    }
+
     _devvec.push_back(std::move(dev));
-    
-    _devmutexes.emplace_back();
-       
 }
 
 void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 {
     
     auto raw_ptr = dev.release();
+
+    if(raw_ptr == nullptr)
+      throw std::logic_error("raw_ptr is nullptr");
     
     //TODO: some way of doing this with std::default_delete
     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
     (raw_ptr,[](Device* dev) {delete dev;});
     
-    
-
-//     auto newptr = std::unique_ptr<Device,void(*)(Device*)>
+   
 //     (raw_ptr,[](Device* dev) {});
     
     AddDevice(std::move(newptr));
@@ -81,10 +85,6 @@ Device* const foxtrot::DeviceHarness::GetDevice(int id)
     
 }
 
-std::timed_mutex & foxtrot::DeviceHarness::GetMutex(int id)
-{
-    return _devmutexes[id];
-}
 
 
 
@@ -176,8 +176,28 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
 
 std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
 {
-  auto& mut = GetMutex(devid);
-  std::unique_lock<std::remove_reference<decltype(mut)>::type> lock(mut,std::defer_lock);
+  
+  std::unique_lock<std::timed_mutex> lock;
+    
+  Device* dev = GetDevice(devid);
+  if(!dev)
+      throw std::runtime_error("invalid device id supplied!");
+  if(dev->hasLockImplementation())
+  {
+      //NOTE: This only works for globally locked devices!
+      Capability cap;
+      auto optlck = dev->obtain_lock(cap);
+      if(!optlck)
+          throw std::logic_error("lock function returned null optional");
+      else
+          lock = std::move(*optlck);
+  }
+  else
+  {
+      auto& mut = _devmutexes[devid];
+      lock = std::unique_lock(mut, std::defer_lock);
+  }
+      
   
   if(contention_timeout_ms == 0)
   {

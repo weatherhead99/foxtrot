@@ -3,11 +3,10 @@ cmake_minimum_required(VERSION 3.12)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(CONAN_CMAKE_SILENT_OUTPUT ON)
+
 set(packname "server")
-include(${CMAKE_BINARY_DIR}/conan_paths.cmake)
 
-
-message(STATUS "cmake module path: ${CMAKE_MODULE_PATH}")
 
 find_package(foxtrotCore REQUIRED CONFIG)
 
@@ -21,8 +20,11 @@ message("rttr version: ${rttr_VERSION}")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
-find_package(CURL REQUIRED)
-find_package(RapidJSON REQUIRED)
+find_package(CURL REQUIRED MODULE)
+
+
+find_package(RapidJSON REQUIRED MODULE)
+find_package(libsodium REQUIRED)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -33,10 +35,6 @@ else()
     set(dl "")
 endif()
 
-option(BUILD_AUTH "build support for authentication" ON)
-if(BUILD_AUTH)
-  find_package(libsodium REQUIRED)
-endif()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
@@ -45,85 +43,43 @@ include(CMakePackageConfigHelpers)
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
 
-
-set(server_srcs src/Device.cpp src/DeviceHarness.cpp src/ServerUtil.cpp
-src/ProtocolUtilities.cpp src/curlRequest.cpp src/CommunicationProtocol.cpp
-src/CmdDevice.cpp  src/FlagMap.cpp)
-
-
-
-set(exptserve_srcs src/ServerImpl.cpp src/ServerDescribeImpl.cpp 
-    src/InvokeCapabilityImpl.cpp  src/FetchDataImpl.cpp 
-    src/ExperimentalSetup.cpp src/ChunkStreamImpl.cpp 
-    src/ServerFlagsImpl.cpp  src/BroadcastNotificationImpl.cpp src/FetchDataImpl.cpp src/exptserve.cpp
-    src/StartSessionImpl.cpp src/KeepAliveSessionImpl.cpp
-    src/CloseSessionImpl.cpp src/ListSessionsImpl.cpp
-    src/exptserve_funcs.cpp
-    src/pushbullet_api.cpp 
-    )
-
-
-if(BUILD_AUTH)
-    list(APPEND server_srcs src/AuthHandler.cpp src/auth_utils.cpp src/SessionManager.cpp)
-    list(APPEND exptserve_srcs src/AuthRequestImpl.cpp src/AuthRespondImpl.cpp)
-
-endif()
-
-add_library(foxtrot_server ${server_srcs})
-foxtrot_generate_export_header(${packname} foxtrot_server)
-foxtrot_standard_include_dirs(foxtrot_server)
-target_include_directories(foxtrot_server PUBLIC ${CURL_INCLUDE_DIR})
-target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core ${CURL_LIBRARIES} RTTR::Core OpenSSL::SSL RapidJSON::RapidJSON)
-
-if(BUILD_AUTH)
-    target_link_libraries(foxtrot_server PUBLIC libsodium::libsodium)
-endif()
-
-add_executable(exptserve ${exptserve_srcs})
-target_include_directories(exptserve PRIVATE include/exptserve/)
-foxtrot_standard_include_dirs(exptserve)
-
-target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core)
-target_link_libraries(exptserve PUBLIC foxtrot_server Boost::filesystem Boost::program_options)
-
-if(BUILD_AUTH)
-    add_executable(ftauth src/ftauth.cpp)
-    target_link_libraries(ftauth Boost::program_options libsodium::libsodium foxtrot::foxtrot_core
-    foxtrot_server)
-    target_include_directories(ftauth PRIVATE include)
-endif()
-
+add_subdirectory(src)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 
-install(TARGETS foxtrot_server
-        EXPORT foxtrot_server
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 install(TARGETS exptserve
-        EXPORT foxtrot_server
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+       EXPORT foxtrot_server
+       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-if(BUILD_AUTH)
-    install(TARGETS ftauth
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
+install(TARGETS ftauth
+           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+install(TARGETS foxtrot_server
+       EXPORT foxtrot_server
+       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+
 
 install(EXPORT foxtrot_server
-        DESTINATION ${ft_cmakedir}
-        COMPONENT devel
-        NAMESPACE foxtrot::)
+       DESTINATION ${ft_cmakedir}
+       COMPONENT devel
+       NAMESPACE foxtrot::)
 
+install(DIRECTORY include/foxtrot
+       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+       COMPONENT devel)
+     
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
 
 set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
 foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
-                                ${ft_cmakedir}
-                                "ft_cmakedir;ft_server_sourcedir")
+                               ${ft_cmakedir}
+                               "ft_cmakedir;ft_server_sourcedir")
 
 foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)
 
