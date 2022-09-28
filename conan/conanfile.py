@@ -6,7 +6,7 @@ import os
 bcs = "@bincrafters/stable"
 bbcs = "/1.69.0%s" % bcs
 
-FT_HARDCODE_VERSION = "0.2dev"
+FT_HARDCODE_VERSION = "0.1.1"
 
 class FoxtrotCppMeta(type):
     def __new__(cls,name,bases,dct):
