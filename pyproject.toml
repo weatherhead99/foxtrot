@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "pyfoxtrot"
+version = "0.1.0"
+description = "Client for Foxtrot RPC hardware server"
+authors = ["Dan Weatherill <daniel.weatherill@physics.ox.ac.uk>"]
+packages = [ {include  = "python/pyfoxtrot"},
+	     {include = "python/pyfoxtrot/protos"}]
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+protobuf = "<=3.20"
+poetry-grpc-plugin = "^0.1.2"
+
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry-grpc-plugin]
+proto_path = "./core/proto"
+python_out="python/pyfoxtrot/protos"
