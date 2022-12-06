@@ -18,3 +18,6 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
         self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version, self.user, self.channel))
 
+    def package_info(self):
+        super().package_info()
+        self.fix_cmake_def_names("foxtrotClient")

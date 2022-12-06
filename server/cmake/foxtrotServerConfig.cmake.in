@@ -24,7 +24,7 @@ find_dependency(foxtrotCore REQUIRED)
 find_dependency(Boost REQUIRED COMPONENTS program_options filesystem)
 find_dependency(CURL REQUIRED)
 find_dependency(OpenSSL REQUIRED)
-find_dependency(RapidJSON REQUIRED)
+find_dependency(RapidJSON REQUIRED MODULE)
 find_dependency(libsodium REQUIRED)
 
 
