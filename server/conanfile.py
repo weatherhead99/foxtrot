@@ -11,12 +11,11 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
-    requires = ("boost/1.78.0",
-                "openssl/1.1.1m",
-                "libcurl/7.77.0",
+    requires = (
+                "libcurl/7.86.0",
                 "libsodium/1.0.18",
                 "rapidjson/1.1.0",
-                "zlib/1.2.11")
+                )
         
     default_options = {"boost:shared" : True,
                        "libcurl:shared" : True,
@@ -33,3 +32,8 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
+
+
+    def package_info(self):
+        super().package_info()
+        self.fix_cmake_def_names("foxtrotServer")

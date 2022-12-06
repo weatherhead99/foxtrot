@@ -21,8 +21,7 @@ class FoxtrotCppMeta(type):
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
     version = "0.2.1"
-
-
+    
 class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_user = "weatherhead99"
     default_channel = "testing"
@@ -69,4 +68,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         tc = CMakeToolchain(self)
         tc.generate()
 
+    def fix_cmake_def_names(self, cmakename: str):
+        self.cpp_info.names["cmake_find_package"] = cmakename
+        self.cpp_info.names["cmake_find_package_multi"] = cmakename
+        self.cpp_info.builddirs.append("lib/cmake/%s" % cmakename)
  

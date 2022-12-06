@@ -8,7 +8,7 @@ channel="testing"
 
 
 print("building python utils for other conan packages...")
-api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel, version="0.2")
+api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel)
 
 
 createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=False,
