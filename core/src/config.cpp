@@ -55,7 +55,7 @@ void foxtrot::create_config_file(const string& filename)
         auto path = boost::filesystem::path(filename);
         boost::filesystem::create_directories(path.parent_path());
         lg.Info("creating config file...");
-        boost::filesystem::ofstream ofs(filename);
+	std::ofstream ofs(filename);
         
         if(!ofs)
         {
