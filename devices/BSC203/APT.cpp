@@ -163,11 +163,12 @@ bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest
 }
 
 
-void foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest)
+foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest)
 {   
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
                                                bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00);
-    printhwinfo(out);
+
+    return out;
 };
 
 

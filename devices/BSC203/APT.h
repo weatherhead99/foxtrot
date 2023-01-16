@@ -200,7 +200,7 @@ namespace foxtrot {
     public:
     bool get_channelenable(destination dest, motor_channel_idents channel);
     
-    void get_hwinfo(destination dest);
+    hwinfo get_hwinfo(destination dest);
     
     void home_channel(destination dest, motor_channel_idents channel);
 
