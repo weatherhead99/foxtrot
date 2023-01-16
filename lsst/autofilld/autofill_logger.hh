@@ -3,9 +3,9 @@
 #include <mutex>
 #include <future>
 
-#include <boost/filesystem.hpp>
-
+#include <filesystem>
 #include <foxtrot/Logging.h>
+#include <fstream>
 
 #include "autofill_common.hh"
 
@@ -32,7 +32,7 @@ namespace foxtrot {
         int rotate_time_mins_;
         Logging _lg;
         std::string outfdir_;
-        boost::filesystem::ofstream* _thisfile = nullptr;
+        std::ofstream* _thisfile = nullptr;
         std::mutex file_swap_m;
     };
     

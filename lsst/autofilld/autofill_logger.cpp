@@ -14,10 +14,10 @@ namespace gg = boost::gregorian;
 autofill_logger::autofill_logger(const string& outfdir, int rotate_time_mins)
 : _lg("autofill_logger"), outfdir_(outfdir), rotate_time_mins_(rotate_time_mins)
 {
-    if(!boost::filesystem::exists(outfdir))
+    if(!std::filesystem::exists(outfdir))
     {
         _lg.Info("directory doesn't exist, creating...");
-        boost::filesystem::create_directories(outfdir);
+        std::filesystem::create_directories(outfdir);
         
     }
     
@@ -34,12 +34,12 @@ void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
 {
     std::lock_guard<std::mutex> lck(file_swap_m);
     
-    auto outfpath = boost::filesystem::path(outfdir_);
+    auto outfpath = std::filesystem::path(outfdir_);
     
     auto newfpath = outfpath / (name + ".csv");
     
     int append = 1;
-    while(boost::filesystem::exists(newfpath))
+    while(std::filesystem::exists(newfpath))
     {
         _lg.strm(sl::info) << "file already exists, trying appended number: " << append;
         newfpath = outfpath / (name + "_" + std::to_string(append++) + ".csv");
@@ -49,7 +49,7 @@ void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
         delete _thisfile;
     
     
-    _thisfile = new boost::filesystem::ofstream(newfpath);
+    _thisfile = new std::ofstream(newfpath);
     
     if(!_thisfile)
     {
