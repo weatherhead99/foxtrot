@@ -105,7 +105,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
     auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
     {
-        _lg.Error("unexpected source: " + std::to_string(src) + " - " +  std::to_string(static_cast<decltype(src)>(expected_source)));
+        _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
         throw DeviceError("received unexpected source");
 
     }
@@ -203,8 +203,11 @@ void foxtrot::devices::printhwinfo(foxtrot::devices::hwinfo infostr)
 {
     cout << "Printing hwinfo..." << endl;
     cout << "\tSerial number: " << std::dec << infostr.serno << endl;
-    cout << "\tModel number: " << std::dec << infostr.modelno << endl;
     cout << "\tType: " << std::dec << infostr.type << endl;
+    cout << "\t Model number: ";
+    for(int i=0; i< 8; i++)
+      cout << (char) infostr.modelno[i];
+    cout << endl;
     cout << "\tFirmware Version: " << std::dec << infostr.fwvers << endl;
     cout << "\tNotes: ";
     for (int i = 0; i < 47; i++)

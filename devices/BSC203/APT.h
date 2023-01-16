@@ -170,7 +170,8 @@ namespace foxtrot {
     struct hwinfo
     {
       unsigned int serno;
-      unsigned long modelno;
+      std::array<char, 8> modelno;
+      //      unsigned long modelno;
       unsigned short type;
       unsigned int fwvers;
       std::array<char,48> notes;
