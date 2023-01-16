@@ -1,5 +1,5 @@
-from conans import tools, ConanFile, CMake
-from conan.tools.cmake import CMakeToolchain
+from conans import tools, ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake
 import os
 
 
@@ -50,13 +50,15 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
+        #remove to make new CMake helper error happy
+        #cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
         cmake.configure()
         env_build = tools.RunEnvironment(self)
         with tools.environment_append(env_build.vars):
             cmake.build()
         cmake.install()
-        cmake.patch_config_paths()
+        #remove to make new CMake build helper happy
+#        cmake.patch_config_paths()
             
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
