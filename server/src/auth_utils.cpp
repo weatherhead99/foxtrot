@@ -1,5 +1,6 @@
 #include <foxtrot/server/auth_utils.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
+#include <fstream>
 #include <foxtrot/Logging.h>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -51,15 +52,15 @@ std::tuple<pkarr, skarr> foxtrot::generate_new_key()
 pt::ptree read_or_create_users_ptree(const std::string& fname, foxtrot::Logging& lg)
 {
     pt::ptree creds_tree;
-    if(!boost::filesystem::exists(fname))
+    if(!std::filesystem::exists(fname))
     {
-        auto path = boost::filesystem::path(fname);
+        auto path = std::filesystem::path(fname);
         lg.strm(sl::info) << "requested credentials file: " << fname << " doesn't exist, creating it";
-        if(!boost::filesystem::exists(path.parent_path()))
+        if(!std::filesystem::exists(path.parent_path()))
         {
-            boost::filesystem::create_directories(path.parent_path());
+            std::filesystem::create_directories(path.parent_path());
         }
-        boost::filesystem::ofstream ofs(fname);
+        std::ofstream ofs(fname);
         
         pt::write_json(ofs, creds_tree);
         
@@ -68,7 +69,7 @@ pt::ptree read_or_create_users_ptree(const std::string& fname, foxtrot::Logging&
     {
         lg.strm(sl::info) << "reading existing credentials file: " << fname;
         //read existing credentials
-        boost::filesystem::ifstream ifs(fname);
+        std::ifstream ifs(fname);
         pt::read_json(ifs, creds_tree);
     }
     
@@ -91,7 +92,7 @@ void foxtrot::save_creds_to_file(const std::string& fname, const std::string& us
         auto secretkeystr = detail::bin2base64(std::get<1>(keys));
         creds_tree.put<std::string>(refkey + ".publickey",pubkeystr);
         creds_tree.put<std::string>(refkey + ".secretkey",secretkeystr);
-        boost::filesystem::ofstream ofs(fname);
+        std::ofstream ofs(fname);
         pt::write_json(ofs, creds_tree);
     }
     else
@@ -104,14 +105,14 @@ void foxtrot::save_creds_to_file(const std::string& fname, const std::string& us
 foxtrot::keypair foxtrot::get_creds_from_client_file(const std::string& fname, const std::string& userid)
 {
     foxtrot::Logging lg("get_creds_from_file");
-    if(!boost::filesystem::exists(fname))
+    if(!std::filesystem::exists(fname))
     {
         lg.strm(sl::error) << "credentials file: " << fname << "doesn't exist, can't open";
         throw std::out_of_range("file doesn't exist");
     }
     
     pt::ptree creds_tree;
-    boost::filesystem::ifstream ifs(fname);
+    std::ifstream ifs(fname);
     pt::read_json(ifs, creds_tree);
 
     auto refkey =  userid;
@@ -155,7 +156,7 @@ void foxtrot::auth_user_to_file(const std::string& fname, const std::string& use
         lg.strm(sl::info) << "user not already in server creds, adding it";
         creds_tree.put(userid + ".keys." + keyname, detail::bin2base64(pk));
         creds_tree.put(userid + ".authlevel", authlevel);
-        boost::filesystem::ofstream ofs(fname);
+        std::ofstream ofs(fname);
         pt::write_json(ofs, creds_tree);
     }
     else
@@ -189,7 +190,7 @@ void foxtrot::auth_user_to_file(const std::string& fname, const std::string& use
             creds_tree.put<int>(userid + ".authlevel", authlevel);
         }
         
-        boost::filesystem::ofstream ofs(fname);
+        std::ofstream ofs(fname);
         pt::write_json(ofs, creds_tree);
         
     }
@@ -202,7 +203,7 @@ void foxtrot::export_pubkey(const std::string& outfname, const std::string& user
     auto creds_tree = read_or_create_users_ptree(outfname, lg);
     auto pubkeystr = detail::bin2base64(pk);
     creds_tree.put<std::string>(userid + ".publickey",pubkeystr);
-    boost::filesystem::ofstream ofs(outfname);
+    std::ofstream ofs(outfname);
     pt::write_json(ofs, creds_tree);
     
 }

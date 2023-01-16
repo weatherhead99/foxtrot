@@ -19,7 +19,7 @@ find_package(rttr 0.9.6 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options)
 find_package(CURL REQUIRED MODULE)
 
 
