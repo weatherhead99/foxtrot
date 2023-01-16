@@ -268,7 +268,7 @@ RTTR_REGISTRATION{
     registration::enumeration<destination>("foxtrot::devices::destination")
     (value("host", destination::host),
      value("rack", destination::rack),
-     value("sourceTIM101", destination::sourceTIM101),
+     value("genericUSB", destination::genericUSB),
      value("bay1", destination::bay1),
      value("bay2", destination::bay2),
      value("bay3", destination::bay3));

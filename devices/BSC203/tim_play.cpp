@@ -26,7 +26,7 @@ int main(int argc,char** argv)
   
   //motors.identify_module(foxtrot::devices::destination::sourceTIM101);
   
-  motors.get_hwinfo(foxtrot::devices::destination::sourceTIM101);
+  motors.get_hwinfo(foxtrot::devices::destination::genericUSB);
   
   //JOG MOVE
   /*foxtrot::devices::jogparams jogstruct;

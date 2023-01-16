@@ -32,11 +32,11 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
 
     //send this random magical message that makes stuff work for some reason
     _lg.Debug("disabling flash programming on rack...");
-    transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::sourceTIM101);
+    transmit_message(bsc203_opcodes::MGMSG_HW_NO_FLASH_PROGRAMMING,0,0,destination::genericUSB);
 
     //disable status update messages as they will mess with out synchronous messaging model
     _lg.Debug("stopping update messages...");
-    transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::sourceTIM101);
+    transmit_message(bsc203_opcodes::MGMSG_MOD_STOP_UPDATEMSGS,0,0,destination::genericUSB);
     _lg.Debug("update messages stopped");
     
     
@@ -52,8 +52,7 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     jogstruct.jogStepAccn = 0x000186A0;
 
     move_absolute_params absparams;
-    absparams.subMsgID = 0x0007;
-    absparams.chanIndent = 0x01;
+    absparams.subMsgID = 0x0007;    absparams.chanIndent = 0x01;
     absparams.maxVoltage = 0x006E;
     absparams.stepRate = 0x000000AA;
     absparams.stepAccn = 0x000000F0;
@@ -65,9 +64,9 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     {
         cout << static_cast<short unsigned int>(c) << endl;
         jogstruct.chanIndent = static_cast<short unsigned int>(c);
-        set_jog_parameters(destination::sourceTIM101, jogstruct);
+        set_jog_parameters(destination::genericUSB, jogstruct);
         absparams.chanIndent = static_cast<short unsigned int>(c);
-        set_move_absolute_parameters(destination::sourceTIM101, absparams);
+        set_move_absolute_parameters(destination::genericUSB, absparams);
     }
     
 }
@@ -104,7 +103,7 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
 void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::motor_channel_idents chan, int distance)
 {
 
-    auto dest = foxtrot::devices::destination::sourceTIM101;
+    auto dest = foxtrot::devices::destination::genericUSB;
     //Setting channel to th active channel
     set_channelenable(dest, chan, true);
 
@@ -202,7 +201,7 @@ void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::de
 
 foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01, destination::sourceTIM101);
+    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01, destination::genericUSB);
 
     //cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
     
@@ -212,7 +211,7 @@ foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(fox
 
 foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::sourceTIM101);
+    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::genericUSB);
 
     //cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
     //cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
@@ -230,7 +229,7 @@ foxtrot::devices::TIM101::position_counter(foxtrot::devices::motor_channel_ident
     
     auto out = request_response_struct<pos_counter_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS,
                                                 bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS,
-                                                destination::sourceTIM101, 0x05, chanchar, destination::sourceTIM101);
+                                                destination::genericUSB, 0x05, chanchar, destination::genericUSB);
     return out;
     
 }
@@ -249,7 +248,7 @@ channel, int position)
     unsigned char* paramd = reinterpret_cast<unsigned char*>(&params);
     std::copy(paramd, paramd + sizeof(decltype(params)), dat.begin());
     
-    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, dat, destination::sourceTIM101, destination::sourceTIM101);
+    transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, dat, destination::genericUSB, destination::genericUSB);
     
 }
 
@@ -270,7 +269,7 @@ void foxtrot::devices::TIM101::stop_update_messages(foxtrot::devices::destinatio
 foxtrot::devices::motor_status foxtrot::devices::TIM101::get_status_update()
 {
     
-    auto dest = foxtrot::devices::destination::sourceTIM101;
+    auto dest = foxtrot::devices::destination::genericUSB;
     bool hasdata;
     unsigned received_opcode = 0;
     motor_status motorstr;

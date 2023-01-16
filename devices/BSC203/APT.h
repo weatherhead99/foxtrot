@@ -25,7 +25,7 @@ namespace foxtrot {
     {
         host = 0x01,
         rack = 0x11,
-        sourceTIM101 = 0x50,
+        genericUSB = 0x50,
         bay1 = 0x21,
         bay2 = 0x22,
         bay3 = 0x23
