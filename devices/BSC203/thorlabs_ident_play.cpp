@@ -46,8 +46,12 @@ int main()
 
   //send a "genericc"??? hardware info message - try out different destination targets!!
   auto dest = static_cast<destination>(0u);
+
+  //seems like it sends back src of 0x80. I think I remember this happening before, but can't
+  //remember exactly where or why or how...
+  auto expd_src = static_cast<destination>(0x80);
   
-  auto hwinfo = testdev.get_hwinfo(dest);
+  auto hwinfo = testdev.get_hwinfo(dest, expd_src);
 
 
   

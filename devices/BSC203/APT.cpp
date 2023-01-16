@@ -163,10 +163,12 @@ bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest
 }
 
 
-foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest)
+foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest,
+							   std::optional<destination> expd_src)
 {   
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
-                                               bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00);
+                                               bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00,
+					       expd_src);
 
     return out;
 };
@@ -224,7 +226,7 @@ RTTR_REGISTRATION{
     .method("get_channelenable", &APT::get_channelenable)
     (parameter_names("destination", "channel"))
     .method("get_hwinfo", &APT::get_hwinfo)
-    (parameter_names("destination"))
+      (parameter_names("destination", "expd_src"))
     .method("home_channel", &APT::home_channel)
     (parameter_names("destination", "channel"));
     
