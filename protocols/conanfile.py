@@ -9,7 +9,7 @@ class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
     src_folder="protocols"
     description="protocol implementations for  foxtrot"
     exports_sources="CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h"
-    requires = "libusb/1.0.24"
+    requires = "libusb/1.0.26"
 
     default_options = {"libusb:shared" : True}
     
