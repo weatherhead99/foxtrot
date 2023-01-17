@@ -22,8 +22,23 @@ using std::endl;
 
 //Static functions
 static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::devices::jogparams& jogstruct);
-static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams);
 static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams);
+
+static std::array<unsigned char, 14> construct_piezo_absolute_move_request_data(const
+foxtrot::devices::piezo_move_absolute_params& absparams)
+{
+           unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.subMsgID));
+    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.maxVoltage));
+    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepRate));
+    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepAccn));
+
+    std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
+
+    return data;
+
+    
+}
+
 
 
 foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort > proto) : foxtrot::devices::APT(proto)
@@ -51,7 +66,7 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     jogstruct.jogStepRate = 0x000001F4;
     jogstruct.jogStepAccn = 0x000186A0;
 
-    move_absolute_params absparams;
+    piezo_move_absolute_params absparams;
     absparams.subMsgID = 0x0007;    absparams.chanIndent = 0x01;
     absparams.maxVoltage = 0x006E;
     absparams.stepRate = 0x000000AA;
@@ -83,13 +98,6 @@ void foxtrot::devices::TIM101::identify_module(foxtrot::devices::destination des
 }
 
 
-void foxtrot::devices::TIM101::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
-{
-    unsigned char enable_disable = onoff? 0x01 : 0x02;
-
-    transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
-
-}
 
 template<typename T>
 std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
@@ -190,9 +198,9 @@ void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination 
 
 }
 
-void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, const foxtrot::devices::move_absolute_params& absparams) {
+void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, const foxtrot::devices::piezo_move_absolute_params& absparams) {
 
-    auto data = get_move_absolute_request_data(absparams);
+    auto data = construct_piezo_absolute_move_request_data(absparams);
 
     transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
 
@@ -209,9 +217,9 @@ foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(fox
 
 }
 
-foxtrot::devices::move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
+foxtrot::devices::piezo_move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
 
-    auto out =request_response_struct<move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::genericUSB);
+    auto out =request_response_struct<piezo_move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::genericUSB);
 
     //cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
     //cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
@@ -372,19 +380,6 @@ static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::dev
     return data;
 }
 
-static std::array<unsigned char, 14> get_move_absolute_request_data(const foxtrot::devices::move_absolute_params& absparams)
-{
-    unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.subMsgID));
-    unsigned char* maxVoltagebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&absparams.maxVoltage));
-    unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepRate));
-    unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepAccn));
-
-    std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
-
-    return data;
-
-}
-
 // static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
 // {
 //     unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
@@ -462,14 +457,14 @@ RTTR_REGISTRATION {
     .property("jogStepRate", &jogparams::jogStepRate)
     .property("jogStepAccn", &jogparams::jogStepAccn);
 
-    using foxtrot::devices::move_absolute_params;
-    registration::class_<move_absolute_params>("foxtrot::devices::move_absolute_params")
+    using foxtrot::devices::piezo_move_absolute_params;
+    registration::class_<piezo_move_absolute_params>("foxtrot::devices::piezo_move_absolute_params")
     .constructor()(policy::ctor::as_object)
-    .property("subMsgID", &move_absolute_params::subMsgID)
-    .property("chanIndent", &move_absolute_params::chanIndent)
-    .property("maxVoltage", &move_absolute_params::maxVoltage)
-    .property("stepRate", &move_absolute_params::stepRate)
-    .property("stepAccn", &move_absolute_params::stepAccn);
+    .property("subMsgID", &piezo_move_absolute_params::subMsgID)
+    .property("chanIndent", &piezo_move_absolute_params::chanIndent)
+    .property("maxVoltage", &piezo_move_absolute_params::maxVoltage)
+    .property("stepRate", &piezo_move_absolute_params::stepRate)
+    .property("stepAccn", &piezo_move_absolute_params::stepAccn);
 
     using foxtrot::devices::pos_counter_params;
     registration::class_<pos_counter_params>("foxtrot::devices::pos_counter_params")

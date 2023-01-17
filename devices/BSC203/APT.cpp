@@ -20,6 +20,11 @@
 using std::cout;
 using std::endl;
 
+using namespace foxtrot::devices;
+
+
+
+
 const foxtrot::parameterset bsc203_class_params
 {
   {"baudrate", 115200u},
@@ -41,7 +46,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
 }
 
 
-void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
+void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
   
@@ -52,7 +57,7 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
   
 }
 
-foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtrot::devices::bsc203_opcodes expected_opcode, foxtrot::devices::destination expected_source, bool* has_data, bool check_opcode, unsigned* received_opcode)
+foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source, bool* has_data, bool check_opcode, unsigned* received_opcode)
 {
     unsigned actlen;
     bsc203_reply out;
@@ -151,7 +156,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(foxtr
 }
 
 
-bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel)
+bool foxtrot::devices::APT::get_channelenable(destination dest, motor_channel_idents channel)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE,static_cast<unsigned char>(channel),0, dest);
     
@@ -162,8 +167,17 @@ bool foxtrot::devices::APT::get_channelenable(foxtrot::devices::destination dest
     return onoff;
 }
 
+void foxtrot::devices::APT::set_channelenable(destination dest, motor_channel_idents channel, bool onoff)
+{
+    unsigned char enable_disable = onoff? 0x01 : 0x02;
 
-foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::destination dest,
+    transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
+    
+
+}
+
+
+hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 							   std::optional<destination> expd_src)
 {   
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
@@ -172,6 +186,17 @@ foxtrot::devices::hwinfo foxtrot::devices::APT::get_hwinfo(foxtrot::devices::des
 
     return out;
 };
+
+
+channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel_idents chan)
+{
+    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE,
+                                       bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+                                       dest, static_cast<unsigned char>(chan), 0);
+    
+    return ret;
+}
+
 
 
 void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
@@ -199,35 +224,17 @@ std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::d
 
 
 
-void foxtrot::devices::printhwinfo(foxtrot::devices::hwinfo infostr)
-{
-    cout << "Printing hwinfo..." << endl;
-    cout << "\tSerial number: " << std::dec << infostr.serno << endl;
-    cout << "\tType: " << std::dec << infostr.type << endl;
-    cout << "\t Model number: ";
-    for(int i=0; i< 8; i++)
-      cout << (char) infostr.modelno[i];
-    cout << endl;
-    cout << "\tFirmware Version: " << std::dec << infostr.fwvers << endl;
-    cout << "\tNotes: ";
-    for (int i = 0; i < 47; i++)
-    {
-        cout << infostr.notes[i];
-    }
-    cout << endl;
-    cout << "\tHW Version: " << std::dec <<infostr.HWvers << endl;
-    cout << "\tMod State: " << std::dec << infostr.modstate << endl;
-    cout << "\tNumber of channels: " << std::dec << infostr.nchans << endl;
-    
-}
 
 RTTR_REGISTRATION{
     using namespace rttr;
     using foxtrot::devices::APT;
     registration::class_<APT>("foxtrot::devices::APT")
-    
+
+      
     .method("get_channelenable", &APT::get_channelenable)
     (parameter_names("destination", "channel"))
+      .method("set_channelenable", &APT::set_channelenable)
+      (parameter_names("destination", "channel", "onoff"))
     .method("get_hwinfo", &APT::get_hwinfo)
       (parameter_names("destination", "expd_src"))
     .method("home_channel", &APT::home_channel)

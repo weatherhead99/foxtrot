@@ -190,10 +190,10 @@ void foxtrot::devices::BSC203::require_digoutputs(foxtrot::devices::destination 
 
 void foxtrot::devices::BSC203::set_channelenable(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, bool onoff)
 {
-    unsigned char enable_disable = onoff? 0x01 : 0x02;
+  set_channelenable(dest, channel, onoff);
 
-    transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
-
+  _lg.Debug("transmitting extra REQ_STATUSUPDATE after setting channel enable!");
+  //WARNING: I am unsure why this needs to be there!
     transmit_message(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE, 0x01, 0, dest);
 
 }

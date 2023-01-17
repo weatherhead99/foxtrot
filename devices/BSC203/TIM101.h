@@ -36,17 +36,18 @@ namespace foxtrot {
         unsigned int jogStepRate;
         unsigned int jogStepAccn;
     };
-    
-    #pragma, pack(push,1)
-    struct move_absolute_params
+
+
+    #pragma pack(push,1)
+    struct piezo_move_absolute_params
     {
-        unsigned short subMsgID;
-        unsigned short chanIndent;
-        unsigned short maxVoltage;
-        unsigned int stepRate;
-        unsigned int stepAccn;
+    unsigned short subMsgID;
+    unsigned short chanIndent;
+    unsigned short maxVoltage;
+    unsigned int stepRate;
+    unsigned int stepAccn;
     };
-    
+
     #pragma, pack(push,1)
     struct pos_counter_params
     {
@@ -73,10 +74,9 @@ namespace foxtrot {
         TIM101(std::shared_ptr< protocols::SerialPort > proto);
 	const std::string getDeviceTypeName() const override;
         void identify_module(destination dest);
-        void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
         void absolute_move(motor_channel_idents channel, int distance);
-        void set_move_absolute_parameters(destination dest, const move_absolute_params& absparams);
-        move_absolute_params request_move_absolute_parameters(destination dest);
+        void set_move_absolute_parameters(destination dest, const piezo_move_absolute_params& absparams);
+        piezo_move_absolute_params request_move_absolute_parameters(destination dest);
         void jog_move(destination dest, motor_channel_idents channel, jogdir direction);
         void set_jog_parameters(destination dest, const jogparams& jogstructp);
         jogparams request_jog_parameters(destination dest);

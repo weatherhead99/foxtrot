@@ -20,6 +20,7 @@ using std::endl;
 
 namespace foxtrot {
   namespace devices {
+    
       
     enum class destination : unsigned char
     {
@@ -190,7 +191,8 @@ namespace foxtrot {
        unsigned int statusbits;
    }; 
 
-   
+
+
 #pragma pack(pop)
     
     class APT : public Device
@@ -200,11 +202,20 @@ namespace foxtrot {
         
     public:
     bool get_channelenable(destination dest, motor_channel_idents channel);
-    
-      hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
+    virtual void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
+
+    hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
     
     void home_channel(destination dest, motor_channel_idents channel);
 
+    channel_status get_status(destination dest, motor_channel_idents channel);
+    
+//     void set_move_absolute_parameters(destination dest, const move_absolute_params& params);
+//     
+//     move_absolute_params get_move_absolute_parameters(destination dest);
+    
+      
+      
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
@@ -229,7 +240,6 @@ namespace foxtrot {
     
     };
     
-    void printhwinfo(hwinfo infostr);
     
   }//namespace devices
 } //namespace foxtrot

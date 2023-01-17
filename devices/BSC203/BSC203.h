@@ -103,7 +103,7 @@ namespace foxtrot {
 	const std::string getDeviceTypeName() const override;
 	
         void identify_module (destination rackdest, channelID idchan);
-        void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
+        void set_channelenable(destination dest, motor_channel_idents channel, bool onoff) override;
         void set_limit_switch_params(destination dest, motor_channel_idents channel, const limitswitchparams& limitstr);
         void set_bowindex(destination dest, motor_channel_idents channel, int bowindex);
         void require_status_update(destination dest);
