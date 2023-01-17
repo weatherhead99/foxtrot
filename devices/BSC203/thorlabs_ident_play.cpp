@@ -22,7 +22,7 @@ public:
   Apt_Tester(shared_ptr<SerialPort> proto)
     : APT(proto)
   {
-    
+        stop_update_messages(destination::genericUSB);
 
   }
 
@@ -77,6 +77,8 @@ int main()
   
   cout << "channelenable: " << (int) enablestate << endl;
   
+  auto status = testdev.get_status(destination::genericUSB, chan);
+  cout << "position: " << status.position << endl;
   
 
 }

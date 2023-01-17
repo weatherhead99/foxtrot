@@ -226,6 +226,10 @@ namespace foxtrot {
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
           bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
       
+      void start_update_messages(destination dest);
+      void stop_update_messages(destination dest);
+      
+      
       template<typename T>
       T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2, std::optional<destination> expd_src = std::nullopt);
     

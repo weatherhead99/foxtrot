@@ -391,19 +391,8 @@ foxtrot::devices::channel_status foxtrot::devices::BSC203::get_status_update (fo
         }
     }
 
-
-}
-
-void foxtrot::devices::BSC203::start_update_messages(foxtrot::devices::destination dest)
-{
-    transmit_message(bsc203_opcodes::MGMSG_HW_START_UPDATEMSGS, 0x0A,0x0, dest);
-
-}
-
-void foxtrot::devices::BSC203::stop_update_messages(foxtrot::devices::destination dest)
-{
-    transmit_message(bsc203_opcodes::MGMSG_HW_STOP_UPDATEMSGS, 0x0,0x0, dest);
-
+    throw std::logic_error("status update request never returned. This is program logic bug!");
+    
 }
 
 void foxtrot::devices::BSC203::homing_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)

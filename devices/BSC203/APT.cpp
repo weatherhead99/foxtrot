@@ -43,6 +43,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   _serport->setDrain(true);
   _serport->flush();
 
+  
 }
 
 
@@ -153,6 +154,18 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
     
     return out;
     
+}
+
+
+void foxtrot::devices::APT::start_update_messages(foxtrot::devices::destination dest)
+{
+    transmit_message(bsc203_opcodes::MGMSG_HW_START_UPDATEMSGS, 0x0A,0x0, dest);
+
+}
+
+void foxtrot::devices::APT::stop_update_messages(foxtrot::devices::destination dest)
+{
+    transmit_message(bsc203_opcodes::MGMSG_HW_STOP_UPDATEMSGS, 0x0,0x0, dest);
 }
 
 

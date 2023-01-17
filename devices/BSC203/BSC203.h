@@ -143,8 +143,6 @@ namespace foxtrot {
         void homing_channel(destination dest, motor_channel_idents chan);
         
     protected:
-        void start_update_messages(destination dest);
-        void stop_update_messages(destination dest);
         bool check_code_serport(bsc203_opcodes expected_opcode);
     };
     
