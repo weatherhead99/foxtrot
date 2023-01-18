@@ -203,10 +203,16 @@ hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 
 channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel_idents chan)
 {
+
+  //WARNING: it appears that at least both BSC203 and LTS300 devices (contrary to documentation) actually require to to have "update messages" running to be able to get ANY status messages. Hmph
+  
+  start_update_messages(dest);
     auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE,
                                        bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                                        dest, static_cast<unsigned char>(chan), 0);
-    
+
+    stop_update_messages(dest);
+    _serport->flush();
     return ret;
 }
 

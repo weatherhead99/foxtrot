@@ -159,6 +159,8 @@ namespace foxtrot {
       MGMSG_MOT_SET_PMDJOYSTICKPARAMS = 0x04E6
 
     };
+
+#pragma pack(push, 1)
     
     struct bsc203_reply
     {
@@ -167,7 +169,6 @@ namespace foxtrot {
       std::vector<unsigned char> data;      
     };
     
-#pragma pack(push,1)
     struct hwinfo
     {
       unsigned int serno;
@@ -182,7 +183,6 @@ namespace foxtrot {
       unsigned short nchans;
     };
     
-#pragma pack(push,1)
    struct channel_status
    {
        unsigned short chan_indent;
@@ -207,7 +207,6 @@ namespace foxtrot {
     hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
     
     void home_channel(destination dest, motor_channel_idents channel);
-
     channel_status get_status(destination dest, motor_channel_idents channel);
     
 //     void set_move_absolute_parameters(destination dest, const move_absolute_params& params);

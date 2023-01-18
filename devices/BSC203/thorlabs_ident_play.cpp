@@ -5,6 +5,7 @@
 #include <foxtrot/Logging.h>
 #include <string>
 #include <memory>
+#include <iomanip>
 
 using std::cout;
 using std::endl;
@@ -22,12 +23,14 @@ public:
   Apt_Tester(shared_ptr<SerialPort> proto)
     : APT(proto)
   {
+    _serport->flush();
         stop_update_messages(destination::genericUSB);
-
   }
 
   //override this protected method to public for testing purposes
   using APT::transmit_message;
+  using APT::stop_update_messages;
+  using APT::start_update_messages;
 };
 
 
@@ -47,14 +50,11 @@ int main()
   auto sport = std::make_shared<SerialPort>(&sport_params);
   Apt_Tester testdev(sport);
 
-  //send a "genericc"??? hardware info message - try out different destination targets!!
-  auto dest = static_cast<destination>(1u);
 
   //seems like it sends back src of 0x80. I think I remember this happening before, but can't
   //remember exactly where or why or how...
-  auto expd_src = static_cast<destination>(80u);
   
-  auto info = testdev.get_hwinfo(dest, expd_src);
+  auto info = testdev.get_hwinfo(destination::genericUSB);
 
   cout << "serial number: " << info.serno << endl;
 
@@ -72,13 +72,24 @@ int main()
 
   //OK, now let's try getting channel enable state
   auto chan = motor_channel_idents::channel_1;
-  auto enablestate = testdev.get_channelenable(dest, chan);
+  auto enablestate = testdev.get_channelenable(destination::genericUSB, chan);
+
+  cout << "channelenable: " << (int) enablestate << endl;
+
+
+  //let's try to enable the channel...
+  testdev.set_channelenable(destination::genericUSB, chan, true);
+
+  enablestate = testdev.get_channelenable(destination::genericUSB, chan);
+  cout << "channelenable: " << (int) enablestate << endl;
 
   
-  cout << "channelenable: " << (int) enablestate << endl;
-  
+  //testdev.start_update_messages(destination::genericUSB);
   auto status = testdev.get_status(destination::genericUSB, chan);
+  //testdev.stop_update_messages(destination::genericUSB);
   cout << "position: " << status.position << endl;
+  cout << "encoder count: " << status.enccount << endl;
+  cout << "status bits: " << std::bitset<32>(status.statusbits)  << endl;
   
 
 }
