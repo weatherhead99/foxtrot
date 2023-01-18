@@ -12,6 +12,7 @@
 #include <foxtrot/server/Device.h>
 
 #include <optional>
+#include <chrono>
 
 //TODO: handle error conditions somehow!!!!
 
@@ -203,6 +204,15 @@ namespace foxtrot {
    };
 
 
+   struct velocity_params
+   {
+       unsigned short chan_indent;
+       unsigned int minvel;
+       unsigned int acceleration;
+       unsigned int maxvel;
+   }; 
+
+
 #pragma pack(pop)
     
     class APT : public Device
@@ -223,8 +233,15 @@ namespace foxtrot {
     void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
     
     void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
-
     void stop_move(destination dest, motor_channel_idents channel, bool immediate);
+
+    void absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target);
+      
+
+    void set_velocity_params (destination dest, const velocity_params& velpar);
+      velocity_params get_velocity_params(destination dest, motor_channel_idents channel);
+
+      std::chrono::milliseconds estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start=std::nullopt);
     
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
@@ -264,6 +281,7 @@ namespace foxtrot {
     
     template<typename T>
     std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan); 
+    
     
     
   }//namespace devices

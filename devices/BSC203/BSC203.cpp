@@ -130,7 +130,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
         set_channelenable(elem,foxtrot::devices::motor_channel_idents::channel_1, false);
 
         _lg.Debug("Initializing velocity parameters");
-        set_velocity_params(elem, &velpar);
+        set_velocity_params(elem, velpar);
 
         _lg.Debug("Initializing general move parameters");
         set_generalmove_params(elem, foxtrot::devices::motor_channel_idents::channel_1, 0x1000);
@@ -412,15 +412,6 @@ void foxtrot::devices::BSC203::homing_channel(foxtrot::devices::destination dest
 }
 
 
-void foxtrot::devices::BSC203::set_velocity_params (foxtrot::devices::destination dest, foxtrot::devices::velocity_params* velpar)
-{
-
-    auto data = get_velocityparams_data(*velpar);
-
-    transmit_message(bsc203_opcodes::MGMSG_MOT_SET_VELPARAMS, data, dest);
-
-
-}
 
 void foxtrot::devices::BSC203::set_bowindex(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, int bowindex)
 {
@@ -436,17 +427,7 @@ void foxtrot::devices::BSC203::require_status_update(foxtrot::devices::destinati
 
 }
 
-foxtrot::devices::velocity_params foxtrot::devices::BSC203::get_velocity_params(foxtrot::devices::destination dest)
-{
 
-    auto out =request_response_struct<velocity_params>(bsc203_opcodes::MGMSG_MOT_REQ_VELPARAMS, bsc203_opcodes::MGMSG_MOT_GET_VELPARAMS, dest, 0x01,0x0);
-
-    //cout << "Velocity params, min vel (hex): " << static_cast<unsigned>(out.minvel) << endl;
-    //cout << "Velocity params, max vel (hex): " << static_cast<unsigned>(out.maxvel) << endl;
-    
-    return out;
-
-}
 
 
 void foxtrot::devices::BSC203::set_relative_move_params(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents channel, int distance)
@@ -734,10 +715,6 @@ RTTR_REGISTRATION{
     (parameter_names("destination", "channel (channel 1)", "direction"))
     .method("get_status_update", &BSC203::get_status_update)
     (parameter_names("destination", "print (optional)"))
-    .method("set_velocity_params", &BSC203::set_velocity_params)
-    (parameter_names("destination", "velocity parameters"))
-    .method("get_velocity_params", &BSC203::get_velocity_params)
-    (parameter_names("destination"))
     .method("set_relative_move_params", &BSC203::set_relative_move_params)
     (parameter_names("destination", "channel (channel 1)", "distance"))
     .method("set_absolute_move_params", &BSC203::set_absolute_move_params)

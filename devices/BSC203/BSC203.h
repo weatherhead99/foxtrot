@@ -8,13 +8,7 @@ namespace foxtrot {
   namespace devices {
       
    #pragma pack(push,1)
-   struct velocity_params
-   {
-       unsigned short chan_indent;
-       unsigned int minvel;
-       unsigned int acceleration;
-       unsigned int maxvel;
-   }; 
+
    
    struct move_relative_params{
        unsigned short chanIndent;
@@ -95,8 +89,6 @@ namespace foxtrot {
         void jog_move(destination dest, motor_channel_idents channel, unsigned char direction);
         channel_status get_status_update (destination dest, bool print = true);
         
-        void set_velocity_params (destination dest, velocity_params* velpar);
-        velocity_params get_velocity_params(destination dest);
         
         void set_relative_move_params(destination dest, motor_channel_idents channel, int distance);
         void set_absolute_move_params(destination dest, motor_channel_idents channel, 

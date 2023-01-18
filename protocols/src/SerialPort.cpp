@@ -158,28 +158,34 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
   bool done = false;
   
   if(!wait.has_value())
+    {
     boost::asio::read(*_sport, buffer(out), ec);
+    if(ec)
+      throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
+
+
+    }
   else
     {
-      // steady_timer timer(*_io_service);
-      // timer.expires_from_now(*wait);
-      // timer.async_wait([&ec](const boost::system::error_code ec2) {
-      // 	ec = ec2;
-      // 	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
-	
-      // });
 
       boost::asio::async_read(*_sport, buffer(out),
 			      boost::asio::transfer_exactly(len),
 			      [&ec, &done](const boost::system::error_code ec2, std::size_t bytes_transferred) { ec = ec2; done=true; });
-      _io_service->run_one_for(*wait);
 
-      if(!done)
-	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+      _lg.strm(sl::trace) << "starting run_one_for on io_loop" ;
+      auto n_run = _io_service->run_for(*wait);
+      _lg.strm(sl::trace) << "run_one_for returned";
+      _lg.strm(sl::trace) << "number of posts run: " << n_run;
+      _lg.strm(sl::trace) << "io_service stopped? " << (int) _io_service->stopped();
+      _io_service->restart();
+
+        if(ec)
+	  throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
+	else if(!done)
+	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+
     }
  
-  if(ec)
-    throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
 
   return std::string(out.begin(), out.end());
 }
@@ -332,9 +338,15 @@ std::chrono::milliseconds foxtrot::protocols::SerialPort::calc_minimum_transfer_
   serial_port_base::baud_rate brate;
   _sport->get_option(brate);
 
-  auto single_character_takes = std::chrono::microseconds((int) std::ceil(1./brate.value() * 1000000));
+  _lg.strm(sl::trace) << "brate_value: " << brate.value();
+  
+  double time_ms = 1./brate.value() * len * 1000;
+  _lg.strm(sl::trace) << "time_ms: " << time_ms;
+  
+  int ceil_ms = std::ceil(time_ms);
+  _lg.strm(sl::trace) << "ceil_ms: " << ceil_ms;
 
-  return len * std::chrono::duration_cast<std::chrono::milliseconds>(single_character_takes);
+  return std::chrono::milliseconds(ceil_ms);
 
 }
 

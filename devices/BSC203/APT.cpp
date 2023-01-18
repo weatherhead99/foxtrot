@@ -19,7 +19,7 @@
 #include <string>
 
 #include <set>
-
+#include <cmath>
 using std::cout;
 using std::endl;
 
@@ -121,7 +121,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 
       auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
       _lg.strm(sl::debug) << "data transfer exp'd transfer time:" << datatimeout.count();
-      auto data = _serport->read_definite(dlen, datatimeout*2);
+      auto data = _serport->read_definite(dlen, std::chrono::seconds(1));
       
       out.data = std::vector<unsigned char>(data.begin(),data.end());
       
@@ -242,13 +242,104 @@ void foxtrot::devices::APT::stop_move(destination dest, motor_channel_idents cha
     unsigned short stopmode = immediate? 0x01 : 0x02;
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_STOP, static_cast<unsigned short>( channel), stopmode, dest);
 }
-                           
+
+
+void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target)
+{
+  
+  auto tm = estimate_abs_move_time(dest, channel, target);
+  _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
+
+  start_absolute_move(dest, channel, target);
+
+  auto delay = tm + std::chrono::milliseconds(200);
+
+  std::this_thread::sleep_for(delay);
+
+  auto repl = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, dest);
+  
+   
+
+}
+
+
+foxtrot::devices::velocity_params foxtrot::devices::APT::get_velocity_params(foxtrot::devices::destination dest, motor_channel_idents channel)
+{
+
+  auto out =request_response_struct<velocity_params>(bsc203_opcodes::MGMSG_MOT_REQ_VELPARAMS, bsc203_opcodes::MGMSG_MOT_GET_VELPARAMS, dest, static_cast<unsigned short>(channel),0x0);
+
+    return out;
+
+}
+
+void foxtrot::devices::APT::set_velocity_params (foxtrot::devices::destination dest, const foxtrot::devices::velocity_params& velpar)
+{
+
+  std::array<unsigned char, 14> data;
+
+  auto* datain = reinterpret_cast<const unsigned char*>(&velpar);
+  std::copy(datain, datain +  14, data.begin());
+  
+  transmit_message(bsc203_opcodes::MGMSG_MOT_SET_VELPARAMS, data, dest);
+
+}
+
+
+
+
 
 void foxtrot::devices::APT::start_home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,static_cast<unsigned char>(chan),0,dest);
 };
 
+
+
+std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start)
+{
+  auto velparams = get_velocity_params(dest, channel);
+
+
+  //t1 is the "triangle" area of the vel/ time graph
+  double t1  = velparams.maxvel / velparams.acceleration;
+  double dist1 = velparams.acceleration * t1 * t1;
+
+  int tgt_dist;
+  if(!start.has_value())
+    {
+      auto stat = get_status(dest, channel);
+      tgt_dist = std::abs((int)target - (int)stat.position);
+    }
+  else
+    {
+      tgt_dist = std::abs((int)target - (int)(*start));
+    }
+  
+  _lg.strm(sl::debug) << "target distance for move: " << tgt_dist ;
+
+  //in this case the acceleration periods will be truncated. To be safe, estimate
+  //it'll take the full time anyway
+  if(tgt_dist < (2*dist1))
+    {
+      _lg.strm(sl::trace) << "move distance will truncate edges of target";
+      double t3 = std::sqrt((double)tgt_dist / (double)velparams.acceleration);
+      _lg.strm(sl::trace) << "t3: " << t3;
+      unsigned ms = std::ceil(t3*1000);
+      return std::chrono::milliseconds(ms);
+      
+      
+    }
+  
+
+  double remdist = tgt_dist - 2*dist1;
+  double remtime = remdist / velparams.acceleration;
+
+  _lg.strm(sl::debug) << "extra time: " << remtime;
+
+  unsigned ms = std::ceil(remtime * 1000 );
+  return std::chrono::milliseconds(ms);
+
+}
 
 
 RTTR_REGISTRATION{
@@ -261,8 +352,13 @@ RTTR_REGISTRATION{
     (parameter_names("destination", "channel"))
       .method("set_channelenable", &APT::set_channelenable)
       (parameter_names("destination", "channel", "onoff"))
-    .method("get_hwinfo", &APT::get_hwinfo)
-      (parameter_names("destination", "expd_src"));
+      .method("get_hwinfo", &APT::get_hwinfo)
+      (parameter_names("destination", "expd_src"))
+    .method("set_velocity_params", &APT::set_velocity_params)
+    (parameter_names("destination", "velocity parameters"))
+    .method("get_velocity_params", &APT::get_velocity_params)
+      (parameter_names("destination", "channel"));
+
 //     .method("home_channel", &APT::home_channel)
 //     (parameter_names("destination", "channel"));
 //     

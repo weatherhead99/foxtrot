@@ -25,6 +25,7 @@ public:
   {
     _serport->flush();
         stop_update_messages(destination::genericUSB);
+	stop_motor_messages(destination::genericUSB);
   }
 
   //override this protected method to public for testing purposes
@@ -43,7 +44,7 @@ foxtrot::parameterset sport_params
 
 int main()
 {
-  foxtrot::setLogFilterLevel(sl::trace);
+  foxtrot::setLogFilterLevel(sl::info);
 
   cout << "trying to identify Thorlabs long stage motor controller..." << endl;
 
@@ -90,6 +91,28 @@ int main()
   cout << "position: " << status.position << endl;
   cout << "encoder count: " << status.enccount << endl;
   cout << "status bits: " << std::bitset<32>(status.statusbits)  << endl;
-  
 
+  auto velparams = testdev.get_velocity_params(destination::genericUSB, chan);
+
+  cout << "min velocity: " << velparams.minvel << endl;
+  cout << "max velocity: " << velparams.maxvel << endl;
+  cout << "acceleration: " << velparams.acceleration << endl;
+  
+  auto tgt = status.position + 2000;
+
+  auto tmneed = testdev.estimate_abs_move_time(destination::genericUSB, chan,
+					       tgt);
+
+
+  cout << "estimated move time (ms): " << tmneed.count() << endl;
+
+  cout << "going to try a move! " << endl;
+  testdev.absolute_move_blocking(destination::genericUSB, chan, tgt);
+
+  cout << "move complete" << endl;
+
+  status = testdev.get_status(destination::genericUSB, chan);
+
+  cout << "position: " << status.position << endl;
+  
 }
