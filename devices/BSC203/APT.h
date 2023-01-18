@@ -155,8 +155,11 @@ namespace foxtrot {
       MGMSG_MOD_SET_DIGOUTPUTS = 0x0213,
       MGMSG_MOD_REQ_DIGOUTPUTS = 0x0214,
       MGMSG_MOD_GET_DIGOUTPUTS = 0x0215,
-      MGMSG_MOT_SET_PMDJOYSTICKPARAMS = 0x04E6
+      MGMSG_MOT_SET_PMDJOYSTICKPARAMS = 0x04E6,
 
+      
+      MGMSG_MOT_SUSPEND_ENDOFMOVEMSGS = 0x046B,
+      MGMSG_MOT_RESUME_ENDOFMOVEMSGS = 0x046C
     };
 
 #pragma pack(push, 1)
@@ -213,15 +216,17 @@ namespace foxtrot {
 
     hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
     
-    void home_channel(destination dest, motor_channel_idents channel);
+    void start_home_channel(destination dest, motor_channel_idents channel);
     channel_status get_status(destination dest, motor_channel_idents channel);
     
     dcstatus get_status_dc(destination dest, motor_channel_idents channel);
     
-    virtual void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
+    void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
     
+    void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
+
+    void stop_move(destination dest, motor_channel_idents channel, bool immediate);
     
-      
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
@@ -235,6 +240,8 @@ namespace foxtrot {
       void start_update_messages(destination dest);
       void stop_update_messages(destination dest);
       
+      void start_motor_messages(destination dest);
+      void stop_motor_messages(destination dest);
       
       template<typename T>
       T _response_struct_common(foxtrot::devices::bsc203_opcodes opcode_recv,

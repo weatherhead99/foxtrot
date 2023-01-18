@@ -174,6 +174,17 @@ void foxtrot::devices::APT::stop_update_messages(foxtrot::devices::destination d
     transmit_message(bsc203_opcodes::MGMSG_HW_STOP_UPDATEMSGS, 0x0,0x0, dest);
 }
 
+void foxtrot::devices::APT::start_motor_messages(destination dest)
+{
+    transmit_message(bsc203_opcodes::MGMSG_MOT_RESUME_ENDOFMOVEMSGS, 0x0, 0x0, dest);
+}
+
+void foxtrot::devices::APT::stop_motor_messages(destination dest)
+{
+    transmit_message(bsc203_opcodes::MGMSG_MOT_SUSPEND_ENDOFMOVEMSGS, 0x0, 0x0, dest);
+}
+
+
 
 bool foxtrot::devices::APT::get_channelenable(destination dest, motor_channel_idents channel)
 {
@@ -237,22 +248,26 @@ void foxtrot::devices::APT::start_absolute_move(destination dest, motor_channel_
 {
     auto msgdata = get_move_request_header_data(target, chan);
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE, msgdata, dest);
-    
 }
 
 
+void foxtrot::devices::APT::start_relative_move(destination dest, motor_channel_idents chan, int movedist)
+{
+    auto msgdata = get_move_request_header_data(movedist, chan);
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE, msgdata, dest);
+}
+                                        
+void foxtrot::devices::APT::stop_move(destination dest, motor_channel_idents channel, bool immediate)
+{
+    unsigned short stopmode = immediate? 0x01 : 0x02;
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_STOP, static_cast<unsigned short>( channel), stopmode, dest);
+}
 
-void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
+                                        
+
+void foxtrot::devices::APT::start_home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,static_cast<unsigned char>(chan),0,dest);
-
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,dest);
-    
-    if(ret.p1 != static_cast<unsigned char>(chan))
-    {
-        throw DeviceError("invalid channel returned...");
-    }
-    
 };
 
 
