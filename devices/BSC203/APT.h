@@ -155,7 +155,6 @@ namespace foxtrot {
       MGMSG_MOD_SET_DIGOUTPUTS = 0x0213,
       MGMSG_MOD_REQ_DIGOUTPUTS = 0x0214,
       MGMSG_MOD_GET_DIGOUTPUTS = 0x0215,
-      
       MGMSG_MOT_SET_PMDJOYSTICKPARAMS = 0x04E6
 
     };
@@ -191,6 +190,14 @@ namespace foxtrot {
        unsigned int statusbits;
    }; 
 
+   struct dcstatus 
+   {
+       unsigned short chan_ident;
+       unsigned int position;
+       unsigned short velocity;
+       unsigned short motorcurrent;
+       unsigned int statusbits;
+   };
 
 
 #pragma pack(pop)
@@ -209,11 +216,11 @@ namespace foxtrot {
     void home_channel(destination dest, motor_channel_idents channel);
     channel_status get_status(destination dest, motor_channel_idents channel);
     
-//     void set_move_absolute_parameters(destination dest, const move_absolute_params& params);
-//     
-//     move_absolute_params get_move_absolute_parameters(destination dest);
+    dcstatus get_status_dc(destination dest, motor_channel_idents channel);
     
-      
+    virtual void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
+    
+    
       
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
@@ -230,6 +237,11 @@ namespace foxtrot {
       
       
       template<typename T>
+      T _response_struct_common(foxtrot::devices::bsc203_opcodes opcode_recv,
+                                foxtrot::devices::destination dest,
+                                std::optional<foxtrot::devices::destination> expd_src);
+      
+      template<typename T>
       T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2, std::optional<destination> expd_src = std::nullopt);
     
       template<typename T, typename arrtp>
@@ -242,6 +254,10 @@ namespace foxtrot {
       std::shared_ptr<protocols::SerialPort> _serport;
     
     };
+    
+    
+    template<typename T>
+    std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan); 
     
     
   }//namespace devices
@@ -268,6 +284,28 @@ void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes op
 
 }
 
+
+template<typename T> 
+T foxtrot::devices::APT::_response_struct_common(bsc203_opcodes opcode_recv,
+    destination dest, std::optional<destination> expd_src)
+{
+    T out;
+    bool has_data;
+    if(!expd_src.has_value())
+        expd_src = dest;
+    
+    auto ret = this->receive_message_sync(opcode_recv, *expd_src, &has_data);
+    if(!has_data)
+        throw foxtrot::DeviceError("expected struct data in response but didn't get any!");
+    
+    if(ret.data.size() != sizeof(T))
+        throw std::logic_error("mismatch between received data size and struct size!");
+    
+    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    return out;
+    
+}
+
 template<typename T>
 T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
                                                     foxtrot::devices::bsc203_opcodes opcode_recv, 
@@ -275,51 +313,25 @@ T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcode
                                                     std::optional<destination> expd_src
                                                 )
 {
-    T out;
+
     transmit_message(opcode_send, p1, p2, dest);
-    bool has_data;
-    
-    if(!expd_src.has_value())
-    {
-        expd_src = dest;
-    }
-    
-    auto ret = receive_message_sync(opcode_recv, *expd_src, &has_data);
-    
-    if(!has_data)
-        throw DeviceError("expected struct data in response but didn't get any!");
-    
-    if(ret.data.size() != sizeof(T))
-        throw std::logic_error("mismatch between received data size and struct size!");
-    
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
-    
-    return out;
-    
+    return _response_struct_common<T>(opcode_recv, dest, expd_src);
 }
 
 template<typename T, typename arrtp>
 T foxtrot::devices::APT::request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data, std::optional<destination> expd_src)
 {
-    T out;
     transmit_message(opcode_send, data, dest);
-    _lg.Trace("after transmit message");
-    bool has_data;
-    
-    if(!expd_src.has_value())
-    {
-        expd_src = dest;
-    }
-    
-    auto ret = receive_message_sync(opcode_recv, *expd_src, &has_data);
-    _lg.Trace("after received message");
-    if(!has_data)
-        throw DeviceError("expected struct data in response but didn't get any!");
-    
-    if(ret.data.size() != sizeof(T))
-        throw std::logic_error("mismatch between receieved data size and struct size!");
-    
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
-    return out;
+    return _response_struct_common<T>(opcode_recv, dest, expd_src);
 }
+
+template<typename T>
+std::array<unsigned char, 6> foxtrot::devices::get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
+{
+    unsigned char* distbytes = reinterpret_cast<unsigned char*>(&distance);
+    std::array<unsigned char, 6> data {static_cast<unsigned char>(chan), 0, distbytes[0], distbytes[1], distbytes[2], distbytes[3]};
+
+    return data;
+}
+    
 

@@ -99,15 +99,6 @@ void foxtrot::devices::TIM101::identify_module(foxtrot::devices::destination des
 
 
 
-template<typename T>
-std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
-{
-    unsigned char* distbytes = reinterpret_cast<unsigned char*>(&distance);
-    std::array<unsigned char, 6> data {static_cast<unsigned char>(chan), 0, distbytes[0], distbytes[1], distbytes[2], distbytes[3]};
-
-    return data;
-}
-
 void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::motor_channel_idents chan, int distance)
 {
 

@@ -18,6 +18,8 @@
 using std::cout;
 using std::endl;
 
+
+
 static std::array<unsigned char, 14> get_velocityparams_data(const foxtrot::devices::velocity_params& velpar);
 
 static std::array<unsigned char, 22> get_jog_set_request_data(const foxtrot::devices::jogparamsBSC& jogstructp);
@@ -223,14 +225,7 @@ bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination de
     return used;
 };
 
-template<typename T>
-std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
-{
-    unsigned char* distbytes = reinterpret_cast<unsigned char*>(&distance);
-    std::array<unsigned char, 6> data {static_cast<unsigned char>(chan), 0, distbytes[0], distbytes[1], distbytes[2], distbytes[3]};
 
-    return data;
-}
 
 void foxtrot::devices::BSC203::relative_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, int distance)
 {

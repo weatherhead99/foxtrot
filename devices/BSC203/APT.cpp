@@ -217,6 +217,25 @@ channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel
 }
 
 
+dcstatus foxtrot::devices::APT::get_status_dc(destination dest, motor_channel_idents ident)
+{
+    auto ret = request_response_struct<dcstatus>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE, 
+                                            bsc203_opcodes::MGMSG_MOT_GET_DCSTATUSUPDATE,
+                                            dest, static_cast<unsigned char>(ident), 0);
+    
+    return ret;
+    
+}
+
+
+void foxtrot::devices::APT::start_absolute_move(destination dest, motor_channel_idents chan, unsigned int target)
+{
+    auto msgdata = get_move_request_header_data(target, chan);
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_ABSOLUTE, msgdata, dest);
+    
+}
+
+
 
 void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
@@ -229,18 +248,7 @@ void foxtrot::devices::APT::home_channel(foxtrot::devices::destination dest, fox
         throw DeviceError("invalid channel returned...");
     }
     
-    
-
 };
-
-template<typename T>
-std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan)
-{
-    unsigned char* distbytes = reinterpret_cast<unsigned char*>(&distance);
-    std::array<unsigned char, 6> data{static_cast<unsigned char>(chan), 0, distbytes[0], distbytes[1], distbytes[2], distbytes[3]};
-    return data;
-}
-
 
 
 

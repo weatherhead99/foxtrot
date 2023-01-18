@@ -1,16 +1,4 @@
 #pragma once
-
-#include <vector>
-#include <array>
-
-#include <rttr/registration>
-
-#include <foxtrot/Logging.h>
-#include <foxtrot/DeviceError.h>
-
-#include <foxtrot/protocols/SerialPort.h>
-#include <foxtrot/server/Device.h>
-
 #include "APT.h"
 
 
@@ -19,7 +7,7 @@
 namespace foxtrot {
   namespace devices {
       
-    #pragma pack(push,1)
+   #pragma pack(push,1)
    struct velocity_params
    {
        unsigned short chan_indent;
@@ -28,19 +16,16 @@ namespace foxtrot {
        unsigned int maxvel;
    }; 
    
-    #pragma pack(push,1)
    struct move_relative_params{
        unsigned short chanIndent;
        unsigned int rel_distance;
    };
    
-    #pragma pack(push,1)
    struct position_counter{
        unsigned short chanindent;
        unsigned int position;
    };
    
-    #pragma pack (push,1)
    struct jogparamsBSC{
         unsigned short chanIndent;
         unsigned short jogMode;
@@ -51,7 +36,6 @@ namespace foxtrot {
         unsigned short jogStopMode;
    };
    
-    #pragma pack (push,1)
    struct homeparams{
        unsigned short chanIndent;
        unsigned short homeDir; //1->UP; 2->DOWN.
@@ -60,7 +44,6 @@ namespace foxtrot {
        unsigned int offsetDistance;
    };
    
-    #pragma pack (push,1)
    struct powerparams{
        unsigned short chanIndent;
        unsigned short restFactor;
@@ -73,7 +56,6 @@ namespace foxtrot {
        channel_3 = 0x03,
    };
    
-   #pragma pack (push,1)
    struct limitswitchparams{
        unsigned short chan_indent;
        unsigned short CWhard;
@@ -83,7 +65,6 @@ namespace foxtrot {
        unsigned short limitMode;
    };
    
-   #pragma pack (push,1)
    struct PMDjoystickparams{
        unsigned short chan_indent;
        unsigned int lowMaxVel;
