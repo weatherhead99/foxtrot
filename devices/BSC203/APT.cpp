@@ -72,46 +72,27 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
     std::this_thread::sleep_for(std::chrono::milliseconds(50)); // IT SEEMS TO WORK FINE WITH 50 ms, PLEASE DO NOT CHANGE IT.
     
     //cout << " Bytes available: " << std::hex << _serport->bytes_available() << endl;
+
+    auto timeout = _serport->calc_minimum_transfer_time(6);
+    _lg.strm(sl::debug) << "transfer time:"  << timeout.count() ;
     
-    auto headerstr = _serport->read(6,&actlen);
-    
-    //TODO: replace this with something slightly nicer and async ideally
-    while(headerstr[0] == 0){
-        if (_serport->bytes_available() == 0){
-            break;
-        }
-        auto extra_byte = _serport->read(1);
-        std::copy(headerstr.begin() + 1, headerstr.end() + 1, headerstr.begin());
-    }
-    
-    if(actlen != 6)
-    {
-        _lg.Error("bad reply length: " + std::to_string(actlen));
-        throw DeviceError("received bad reply length..." );
-    };
-    
+    auto headerstr = _serport->read_definite(6, timeout * 5);
+       
     unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF); 
     //std::cout << std::hex << (unsigned) opcode << std::endl;
     
     if (received_opcode != nullptr)
-    {
         *received_opcode = opcode;
-    }
 
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
     {
+      auto errtp = check_opcode? sl::error : sl::debug;
+
+      _lg.strm(errtp) << "got opcode: " << std::hex << opcode;
+      _lg.strm(errtp) << "but expected: "<< std::hex <<  static_cast<decltype(opcode)>(expected_opcode);
         
-        std::ostringstream oss;
-        oss << "unexpected opcode: " << std::hex << opcode ;
-        _lg.Error(oss.str());
-        oss.str("");
-        oss << "expected: " << std::hex << static_cast<decltype(opcode)>(expected_opcode);
-        _lg.Error(oss.str());
-        
-        if (check_opcode)
-        {
-            throw DeviceError("received unexpected opcode");
-        }
+      if (check_opcode)
+	throw DeviceError("received unexpected opcode");
     }
 
     if (headerstr[4] == 0)
@@ -137,28 +118,21 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
       unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
       
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
-      
-      auto data = _serport->read(dlen,&actlen);
-      
-      if(actlen != dlen)
-      {
-          _lg.Error("didn't read all the data..." + std::to_string(actlen));
-          throw DeviceError("unexpected data length!");
-      }
+
+      auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
+      _lg.strm(sl::debug) << "data transfer exp'd transfer time:" << datatimeout.count();
+      auto data = _serport->read_definite(dlen, datatimeout*2);
       
       out.data = std::vector<unsigned char>(data.begin(),data.end());
       
       if(has_data != nullptr)
-      {
           *has_data = true;
-      }
+
     }
     else
     {
         if(has_data != nullptr)
-        {
             *has_data = false;
-        }
     }
     
     out.p1 = headerstr[2];
