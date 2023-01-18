@@ -218,7 +218,6 @@ namespace foxtrot {
     
     void start_home_channel(destination dest, motor_channel_idents channel);
     channel_status get_status(destination dest, motor_channel_idents channel);
-    
     dcstatus get_status_dc(destination dest, motor_channel_idents channel);
     
     void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);

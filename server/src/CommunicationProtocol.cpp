@@ -1,5 +1,6 @@
 #include <foxtrot/protocols/CommunicationProtocol.h>
 #include <foxtrot/protocols/SerialProtocol.h>
+#include <stdexcept>
 
 foxtrot::SerialProtocol::SerialProtocol(const foxtrot::parameterset* const instance_parameters)
   : CommunicationProtocol(instance_parameters)
@@ -8,14 +9,17 @@ foxtrot::SerialProtocol::SerialProtocol(const foxtrot::parameterset* const insta
 };
 
 
+string foxtrot::SerialProtocol::read_definite(unsigned, foxtrot::opttimeout)
+{
+  throw std::logic_error("use of new unimplimented read function");
+}
+
 
 foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters) 
 {
   
   if(instance_parameters != nullptr)
-  {
    _params = *instance_parameters; 
-  }
 
 }
 
@@ -24,12 +28,10 @@ foxtrot::CommunicationProtocol::~CommunicationProtocol()
 
 }
 
-
-
 void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters)
 {
   
-  
+
   if(class_parameters != nullptr)    
   {
     //merge parameter sets, with a preference for class parameters
@@ -37,11 +39,11 @@ void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const cla
   
     newparams.insert(_params.begin(), _params.end());
     std::swap(_params,newparams);
-    
-    
+
+
   }
-  
-  
+
+
 }
 
 

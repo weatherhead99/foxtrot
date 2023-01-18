@@ -1,11 +1,14 @@
 #pragma once
+#include <boost/asio/io_context.hpp>
+#include <chrono>
 #include <string>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/io_service.hpp>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/protocols/SerialProtocol.h>
-
+#include <future>
+#include <memory>
 
 using namespace boost::asio;
 
@@ -15,14 +18,22 @@ namespace foxtrot
 namespace protocols
 {
 
-
+  using std::shared_ptr;
+  using std::unique_ptr;
+  
 class FOXTROT_SERVER_EXPORT SerialPort : public SerialProtocol
 {
 public:
-    SerialPort ( const parameterset*const instance_parameters );
+  [[deprecated("opening serial port without an io_context")]] SerialPort ( const parameterset*const instance_parameters );
+    SerialPort ( const parameterset*const instance_parameters,
+		 shared_ptr<io_context> ctxt);
     ~SerialPort();
     virtual void Init ( const parameterset*const class_parameters ) override;
-    virtual std::string read ( unsigned int len, unsigned* actlen= nullptr ) override;
+
+    //this read is the one we just deprecated!
+    virtual std::string read ( unsigned int len, unsigned* actlen= nullptr) override;
+    virtual std::string read_definite(unsigned int len, opttimeout wait=nullopt) override; 
+
     virtual void write ( const std::string& data ) override;
 
 
@@ -37,11 +48,15 @@ public:
     void setWait ( unsigned wait_ms );
     unsigned getWait() const;
 
+
+    std::chrono::milliseconds calc_minimum_transfer_time(std::size_t len);
+    
 private:
     foxtrot::Logging _lg;
 
-    boost::asio::io_service _io_service;
-    boost::asio::serial_port _sport;
+    shared_ptr<io_context> _io_service;
+    unique_ptr<serial_port> _sport;
+    //    boost::asio::serial_port _sport;
 
     std::string _port;
     int _baudrate;

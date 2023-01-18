@@ -1,22 +1,33 @@
 #pragma once
 #include <string>
-
+#include <future>
 #include <foxtrot/protocols/CommunicationProtocol.h>
+#include <atomic>
+#include <optional>
+#include <chrono>
+
+using std::chrono::milliseconds;
+using std::nullopt;
+using std::optional;
+using std::string;
 
 
 namespace foxtrot
 {
- class FOXTROT_SERVER_EXPORT SerialProtocol : public CommunicationProtocol
- {
+  using opttimeout = std::optional<milliseconds>;
+  
+  class FOXTROT_SERVER_EXPORT SerialProtocol : public CommunicationProtocol
+  {
+   
  public:
     SerialProtocol(const parameterset*const instance_parameters);
    
-   virtual void write(const std::string& data) = 0;
-   virtual std::string read(unsigned len, unsigned* actlen=nullptr) = 0;
-    
-   virtual std::string read_until_endl( char endlchar = '\n') = 0;
-   
-   
+   virtual void write(const string& data) = 0;
+   virtual string read_definite(unsigned len, opttimeout wait=nullopt);
+
+   virtual string read(unsigned len, unsigned* actlen=nullptr) = 0;
+   virtual string read_until_endl( char endlchar = '\n') = 0;
+
    
  };
   

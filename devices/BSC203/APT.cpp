@@ -18,12 +18,17 @@
 #include <chrono>
 #include <string>
 
+#include <set>
+
 using std::cout;
 using std::endl;
 
 using namespace foxtrot::devices;
 
-
+const std::set<foxtrot::devices::bsc203_opcodes> motor_finish_messages =
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
 
 const foxtrot::parameterset bsc203_class_params
@@ -70,6 +75,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
     
     auto headerstr = _serport->read(6,&actlen);
     
+    //TODO: replace this with something slightly nicer and async ideally
     while(headerstr[0] == 0){
         if (_serport->bytes_available() == 0){
             break;
@@ -262,8 +268,7 @@ void foxtrot::devices::APT::stop_move(destination dest, motor_channel_idents cha
     unsigned short stopmode = immediate? 0x01 : 0x02;
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_STOP, static_cast<unsigned short>( channel), stopmode, dest);
 }
-
-                                        
+                           
 
 void foxtrot::devices::APT::start_home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
@@ -283,10 +288,10 @@ RTTR_REGISTRATION{
       .method("set_channelenable", &APT::set_channelenable)
       (parameter_names("destination", "channel", "onoff"))
     .method("get_hwinfo", &APT::get_hwinfo)
-      (parameter_names("destination", "expd_src"))
-    .method("home_channel", &APT::home_channel)
-    (parameter_names("destination", "channel"));
-    
+      (parameter_names("destination", "expd_src"));
+//     .method("home_channel", &APT::home_channel)
+//     (parameter_names("destination", "channel"));
+//     
     
     //Custom structs
     using foxtrot::devices::bsc203_reply;
