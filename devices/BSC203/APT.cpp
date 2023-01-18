@@ -13,6 +13,7 @@
 #include <byteswap.h>
 #endif
 
+#include <sstream>
 #include <thread>
 #include <chrono>
 #include <string>
@@ -93,8 +94,13 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
     {
-        _lg.Error("unexpected opcode: " + std::to_string(opcode));
-        _lg.Error("expected: " + std::to_string(static_cast<decltype(opcode)>(expected_opcode)));
+        
+        std::ostringstream oss;
+        oss << "unexpected opcode: " << std::hex << opcode ;
+        _lg.Error(oss.str());
+        oss.str("");
+        oss << "expected: " << std::hex << static_cast<decltype(opcode)>(expected_opcode);
+        _lg.Error(oss.str());
         
         if (check_opcode)
         {
@@ -206,13 +212,12 @@ channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel
 
   //WARNING: it appears that at least both BSC203 and LTS300 devices (contrary to documentation) actually require to to have "update messages" running to be able to get ANY status messages. Hmph
   
-  start_update_messages(dest);
-    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE,
+  //WARNING: at least for LTS300, it appears that you can send MGMSG_MOD_REQ_DCSTATUSUPDATE and get back a "normal" status update in return. Utter madness
+    
+    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE,
                                        bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                                        dest, static_cast<unsigned char>(chan), 0);
 
-    stop_update_messages(dest);
-    _serport->flush();
     return ret;
 }
 
