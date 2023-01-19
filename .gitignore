@@ -9,6 +9,55 @@ build/*
 *.mypy_cache*
 */.spyproject/*
 *.egg
+*.eggs/
 *.builddir.info*
 */conanbuild/*
 python/dist/*
+
+*.orig
+
+*/CMakeUserPresets.json
+
+python/pyfoxtrot/protos/*.proto
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
