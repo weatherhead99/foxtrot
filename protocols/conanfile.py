@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.2.1]@weatherhead99/stable")
 
 class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
 #                            metaclass = ftbase.FoxtrotCppMeta):
@@ -14,7 +14,7 @@ class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
     default_options = {"libusb:shared" : True}
     
     def requirements(self):
-        self.requires("foxtrot_server/%s@%s/%s" % (self.version,self.user, self.channel))
+        ftbase.ft_require(self, "server")
 
     def package_info(self):
         super().package_info()

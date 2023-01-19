@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.2.1]@weatherhead99/stable")
 
 class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                           metaclass = ftbase.FoxtrotCppMeta):
@@ -23,8 +23,8 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
     
     
     def requirements(self):
-        self.requires("foxtrot_core/%s@%s/%s" % (self.version, self.user, self.channel))
-        self.requires("foxtrot_protocols/%s@%s/%s" % (self.version, self.user, self.channel))
+        ftbase.ft_require(self, "core")
+        ftbase.ft_require(self, "protocols")
 
 
     def package_info(self):
