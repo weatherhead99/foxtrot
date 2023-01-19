@@ -1,6 +1,6 @@
 from conans import python_requires, tools
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
 
 class FoxtrotLSST(ftbase.FoxtrotCppPackage):
     name="foxtrot_lsst"

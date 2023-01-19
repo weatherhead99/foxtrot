@@ -20,15 +20,19 @@ def ft_require(conanfile, substr: str) -> None:
     
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.2.2"
+    version = "0.3"
+    default_user = "weatherill"
+    default_channel = "stable"
     
 class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
-    default_user = "weatherhead99"
-    default_channel = "testing"
+    default_user = "weatherill"
+    default_channel = "stable"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
+    url = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     generators = "CMakeToolchain", "cmake_find_package", "virtualrunenv"
     settings = "os", "compiler", "build_type", "arch"
+    license = "UNLICENSED"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
