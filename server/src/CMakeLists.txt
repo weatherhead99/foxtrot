@@ -26,7 +26,7 @@ target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core  RTTR::Core Op
 add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE ${CMAKE_SOURCE_DIR}/include/exptserve/)
 
-target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core foxtrot_server Boost::filesystem Boost::program_options)
+target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core foxtrot_server Boost::program_options)
 
 add_executable(ftauth ftauth.cpp)
 target_link_libraries(ftauth Boost::program_options libsodium::libsodium foxtrot::foxtrot_core  foxtrot_server)
