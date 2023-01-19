@@ -1,12 +1,9 @@
-from conans import tools, ConanFile
+from conans import ConanFile
 from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.scm import Git
+from conan.tools.files import load, update_conandata
+from conans.tools import environment_append, RunEnvironment, collect_libs
 import os
-
-
-bcs = "@bincrafters/stable"
-bbcs = "/1.69.0%s" % bcs
-
-FT_HARDCODE_VERSION = "0.1.1"
 
 class FoxtrotCppMeta(type):
     def __new__(cls,name,bases,dct):
@@ -18,9 +15,12 @@ class FoxtrotCppMeta(type):
         n = super().__new__(cls,name,tuple(newbases),dct)
         return n
 
+def ft_require(conanfile, substr: str) -> None:
+    conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
+    
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.2.1"
+    version = "0.2.2"
     
 class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_user = "weatherhead99"
@@ -29,39 +29,39 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     generators = "CMakeToolchain", "cmake_find_package", "virtualrunenv"
     settings = "os", "compiler", "build_type", "arch"
-    scm = {"type" : "git",
-           "revision" : "auto"}
-    
 
     def __init__(self, *args, **kwargs):
-        if not hasattr(self, "src_folder"):
-            raise RuntimeError("no src_folder attribute provided")
-        self.scm["subfolder"] = self.src_folder
         super().__init__(*args, **kwargs)
 
-    
+    def export(self):
+        git = Git(self, self.recipe_folder)
+        if git.is_dirty():
+            self.output.info("git repo is dirty, local create command will not capture SCM info")
+            return
+        scm_url, scm_commit = git.get_url_and_commit()
+        update_conandata(self, {"sources" : {"commit" : scm_commit, "url" : scm_url}})
+
+    def layout(self):
+        self.folders.source = "."
+
     def set_version(self):
-        git = tools.Git(folder=self.recipe_folder)
-        tagged_version = git.get_tag()
-        if tagged_version is None or tagged_version[0] != "v":
-            self.version = FT_HARDCODE_VERSION
-        else:
-            self.version = tagged_version[1:]
-    
+        git = Git(self, self.recipe_folder)
+        gitversion = git.run("describe --tags")
+        if gitversion[0] == "v":
+            gitversion = gitversion[1:]
+        self.version = gitversion
+            
     def build(self):
         cmake = CMake(self)
         #remove to make new CMake helper error happy
-        #cmake.definitions["CMAKE_TOOLCHAIN_FILE"] = "conan_toolchain.cmake"
         cmake.configure()
-        env_build = tools.RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
+        env_build = RunEnvironment(self)
+        with environment_append(env_build.vars):
             cmake.build()
         cmake.install()
-        #remove to make new CMake build helper happy
-#        cmake.patch_config_paths()
             
     def package_info(self):
-        self.cpp_info.libs = tools.collect_libs(self)
+        self.cpp_info.libs = collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
         self.cpp_info.names["cmake_find_package"] = "foxtrot"
         self.cpp_info.builddirs.append("lib")

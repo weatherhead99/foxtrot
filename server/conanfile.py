@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/0.2.1@weatherhead99/testing")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.2.1]@weatherhead99/stable")
 
 class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
     name="foxtrot_server"
@@ -29,7 +29,6 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
         self.requires("foxtrot_core/%s@%s/%s" %
                       (self.version,self.user,self.channel))
         
-
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
 
