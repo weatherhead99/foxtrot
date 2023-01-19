@@ -6,7 +6,7 @@
 #include <rapidxml.hpp>
 
 #include <foxtrot/Logging.h>
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 
 #include <foxtrot/protocols/curlRequest.h>
 

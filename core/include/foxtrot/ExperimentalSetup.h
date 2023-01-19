@@ -7,19 +7,23 @@
 #include <windows.h>
 #endif
 
-#include <boost/variant.hpp>
+#include <variant>
+#include <map>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/StubError.h>
 
-#include <foxtrot/protocols/CommunicationProtocol.h>
 
-
-
-using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
+// note: the below are redefinitions of stuff that's in protocols. One day
+// all parameter handling should probably be moved into core
 
 namespace foxtrot
 {
+
+    using parameterset = std::map<std::string, std::variant<int, std::string>>;
+    using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
+
+  
     class DeviceHarness;
     class TelemetryServer;
     class Client;

@@ -11,7 +11,7 @@ foxtrot::devices::webswitch_plus::webswitch_plus(std::shared_ptr<CurlRequest>& p
 }
 
 foxtrot::devices::webswitch_plus::webswitch_plus(std::shared_ptr<CurlRequest>& proto, const foxtrot::parameterset& params)
-: webswitch_plus(proto, boost::get<std::string>(params.at("url")))
+: webswitch_plus(proto, std::get<std::string>(params.at("url")))
 {
 }
 

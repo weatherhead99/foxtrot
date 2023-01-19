@@ -6,8 +6,8 @@
 #include <rttr/type>
 
 #include <foxtrot/ContentionError.h>
-#include <foxtrot/server/DeviceHarness.h>
-#include <foxtrot/server/ServerUtil.h>
+#include <foxtrot/DeviceHarness.h>
+//#include <foxtrot/server/ServerUtil.h>
 #include <foxtrot/typeUtil.h>
 
 
@@ -99,6 +99,8 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
 
 }
 
+#if 0
+
 foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, const std::string& capname)
 {
     auto dev = GetDevice(devid);
@@ -173,6 +175,7 @@ foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, co
 }
 
 
+#endif
 
 std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
 {

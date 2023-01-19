@@ -3,7 +3,7 @@
 #include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 #include "Logic_defs.hh"
 #include <foxtrot/server/SessionHandlerMixin.hh>
 

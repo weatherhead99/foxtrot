@@ -1,5 +1,5 @@
 #pragma once
-#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/SerialProtocol.h>
 
 

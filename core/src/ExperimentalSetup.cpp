@@ -3,8 +3,8 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/Error.h>
 
-#include <foxtrot/server/ExperimentalSetup.h>
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/ExperimentalSetup.h>
+#include <foxtrot/DeviceHarness.h>
 
 using namespace foxtrot;
 

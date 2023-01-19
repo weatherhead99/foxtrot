@@ -16,7 +16,7 @@ namespace foxtrot
 {
   using opttimeout = std::optional<milliseconds>;
   
-  class FOXTROT_SERVER_EXPORT SerialProtocol : public CommunicationProtocol
+  class  SerialProtocol : public CommunicationProtocol
   {
    
  public:

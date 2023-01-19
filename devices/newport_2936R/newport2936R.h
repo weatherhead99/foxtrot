@@ -5,7 +5,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/DeviceError.h>
 
-#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/SerialProtocol.h>
 
 using std::string;

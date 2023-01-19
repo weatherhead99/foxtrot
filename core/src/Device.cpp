@@ -4,7 +4,7 @@
 
 #include <rttr/registration>
 
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include <foxtrot/ReflectionError.h>
 
 

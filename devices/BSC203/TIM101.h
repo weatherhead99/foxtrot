@@ -9,7 +9,7 @@
 #include <foxtrot/DeviceError.h>
 
 #include <foxtrot/protocols/SerialPort.h>
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 
 #include "APT.h"
 

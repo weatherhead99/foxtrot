@@ -1,7 +1,7 @@
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
 
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include <foxtrot/server/ServerUtil.h>
 
 #include "FetchDataImpl.h"

@@ -7,8 +7,8 @@
 #include <deque>
 #include <variant>
 
-#include <foxtrot/server/Device.h>
-#include <foxtrot/ft_capability.grpc.pb.h>
+#include <foxtrot/Device.h>
+//#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 using prop_or_meth = std::variant<rttr::property, rttr::method>;
@@ -30,7 +30,7 @@ namespace foxtrot
         
         
         std::vector<std::string> GetCapabilityNames(int devid);
-        devcapability GetDeviceCapability(int devid, const std::string& capname);
+      //devcapability GetDeviceCapability(int devid, const std::string& capname);
         
         //TODO:must be a more elegant way to do this trick
         const std::map<int,const Device*> GetDevMap() const;

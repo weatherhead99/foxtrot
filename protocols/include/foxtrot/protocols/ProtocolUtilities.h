@@ -10,7 +10,19 @@
 #include <foxtrot/protocols/SerialProtocol.h>
 
 
+template<typename V>
+std::string get_variant_held_typename(V&& var)
+{
+
+  std::string tpname;
+  std::visit([&tpname] (auto&& arg) { tpname = typeid(arg).name();}, var);
+  return tpname;
+}
+
+
+
 namespace foxtrot {
+
   
 
 template <typename T> bool extract_parameter_value(T& param_out, const parameterset& params,
@@ -18,32 +30,26 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
 {
   try
   {
-    param_out = boost::get<T>(params.at(paramname));
+    param_out = std::get<T>(params.at(paramname));
       //TODO: logging here!
   }
-  catch(boost::bad_get)
+  catch(std::bad_variant_access)
   {
     foxtrot::Logging lg("extract_parameter_value");
-    lg.Error("type held by variant: " + std::to_string(params.at(paramname).which()));
+    auto type_held = get_variant_held_typename(params.at(paramname));
+    lg.Error("type held by variant: " + type_held);
     lg.Error(std::string("type expected: ") + typeid(T).name());
     throw foxtrot::ProtocolError(std::string("invalid type ") + typeid(T).name() +   " specified for parameter: " );
-    
-    
+
   }
   catch(std::out_of_range)
   {
    if(required)
-   {
     throw std::runtime_error(std::string("the required parameter ") + paramname + " is undefined"); 
-   }
    //TODO: logging here
    else
-   {
-     return false;
-   };
-    
+     return false; 
   }
-  
   return true;
   
 };
@@ -78,7 +84,7 @@ void extract_parameter_map_cast(const std::map<keytp,valtp>& map, valtp& param_o
 
 //std::string read_until_endl(SerialProtocol* proto, unsigned readlen, char endlchar='\n');
 
-std::map<std::string,foxtrot::parameterset> FOXTROT_SERVER_EXPORT read_parameter_json_file(const std::string& fname);
+std::map<std::string,foxtrot::parameterset>  read_parameter_json_file(const std::string& fname);
 
 
 };

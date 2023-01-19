@@ -11,7 +11,7 @@
 
 #include <rttr/registration>
 
-#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/Logging.h>
 

@@ -6,7 +6,7 @@
 
 #include <foxtrot/Logging.h>
 
-#include <foxtrot/server/CmdDevice.h>
+#include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/SerialProtocol.h>
 
 #include "Pfeiffer.h"

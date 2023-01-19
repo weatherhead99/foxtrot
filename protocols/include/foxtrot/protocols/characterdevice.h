@@ -3,7 +3,6 @@
 #include <string>
 #include <fstream>
 
-#include <foxtrot/foxtrot_server_export.h>
 #include <foxtrot/protocols/SerialProtocol.h>
 
 using std::string;
@@ -13,7 +12,7 @@ namespace foxtrot {
  namespace protocols {
    
    
-   class FOXTROT_SERVER_EXPORT characterdevice : public SerialProtocol
+   class  characterdevice : public SerialProtocol
    {
    public:
      characterdevice(const parameterset* const instance_parameters);

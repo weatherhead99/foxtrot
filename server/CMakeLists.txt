@@ -9,6 +9,7 @@ set(packname "server")
 
 
 find_package(foxtrotCore REQUIRED CONFIG)
+find_package(foxtrotProtocols REQUIRED CONFIG)
 
 get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
 message(ERROR "iid: ${prop}")
@@ -20,8 +21,6 @@ message("rttr version: ${rttr_VERSION}")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
-find_package(CURL REQUIRED MODULE)
-
 
 find_package(RapidJSON REQUIRED MODULE)
 find_package(libsodium REQUIRED)
@@ -42,6 +41,7 @@ include(CMakePackageConfigHelpers)
 
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
+
 
 add_subdirectory(src)
 

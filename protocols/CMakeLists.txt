@@ -1,23 +1,21 @@
 project(foxtrot_protocols C CXX)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
 find_package(foxtrotCore REQUIRED CONFIG)
-find_package(foxtrotServer REQUIRED CONFIG)
 
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
 
 set(packname "protocols")
 
-set(srcs "")
+set(srcs "src/ProtocolUtilities.cpp;src/CommunicationProtocol.cpp")
 set(protos "")
 
 macro(foxtrot_build_protocol protoname)
-    option(BUILD_${protoname} "build ${protoname} protocol" ON)
-    
+    option(BUILD_${protoname} "build ${protoname} protocol" ON)    
     if(BUILD_${protoname})
         list(APPEND srcs src/${protoname}.cpp)
         list(APPEND protos ${protoname})
@@ -31,6 +29,12 @@ if(${libusb_FOUND})
     message(STATUS "BulkUSB dependencies found")
     foxtrot_build_protocol(BulkUSB)
 endif()
+
+
+#this is required on all platforms, otherwise we can't build server
+#may change once Direct is useful
+find_package(CURL REQUIRED MODULE)
+foxtrot_build_protocol(curlRequest)
 
 
 #character device has no dependencies
@@ -72,12 +76,13 @@ message("protocols enabled for build: ${protos}")
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #NOTE: conan fix for system installed rapidjson package
-find_package(RapidJSON REQUIRED MODULE)
+#find_package(RapidJSON REQUIRED MODULE)
 
 
 add_library(foxtrot_protocols ${srcs})
 target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
-target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_server)
+target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core CURL::libcurl)
+
 
 
 

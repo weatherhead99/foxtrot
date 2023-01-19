@@ -16,11 +16,14 @@ class FoxtrotCppMeta(type):
         return n
 
 def ft_require(conanfile, substr: str) -> None:
-    conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
+    if getattr(conanfile, "stable_release", False):
+        conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
+    else:
+        conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version},include_prerelease=True]@{conanfile.user}/{conanfile.channel}")
     
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.3"
+    version = "0.3.2"
     default_user = "weatherill"
     default_channel = "stable"
     
@@ -53,6 +56,9 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         gitversion = git.run("describe --tags")
         if gitversion[0] == "v":
             gitversion = gitversion[1:]
+        if git.is_dirty():
+            gitversion += "-dirty"
+            
         self.version = gitversion
             
     def build(self):

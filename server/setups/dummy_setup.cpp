@@ -6,7 +6,7 @@
 #include <boost/variant.hpp>
 
 #include <foxtrot/devices/dummyDevice.h>
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 #include <foxtrot/DeviceError.h>
 
 #include <foxtrot/Logging.h>

@@ -3,8 +3,7 @@
 
 #include <foxtrot/Logging.h>
 
-#include <foxtrot/server/Device.h>
-
+#include <foxtrot/Device.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
 
 #define FX2_VID 0x04B4

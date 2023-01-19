@@ -8,7 +8,7 @@
 
 #include <rttr/type>
 
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include "archon.h"
 
 namespace foxtrot

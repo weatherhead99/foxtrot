@@ -31,9 +31,9 @@ message("foxtrot core version: ${VERSION}")
 
 if(WIN32)
 #need boost::thread on windows
-find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time thread)
+find_package(Boost REQUIRED COMPONENTS log program_options  date_time thread)
 else()
-find_package(Boost REQUIRED COMPONENTS log program_options filesystem date_time)
+find_package(Boost REQUIRED COMPONENTS log program_options date_time)
 endif()
 find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
@@ -52,7 +52,7 @@ endif()
 #build foxtrot core library (errors and logging)
 
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc)
+src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc src/Device.cpp src/DeviceHarness.cpp src/ExperimentalSetup.cpp src/CmdDevice.cpp)
 
 add_subdirectory(proto)
 add_library(foxtrot_core ${srcs} $<TARGET_OBJECTS:foxtrot_protos> ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)

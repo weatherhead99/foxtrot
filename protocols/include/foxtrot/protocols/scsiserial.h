@@ -29,7 +29,7 @@ namespace foxtrot
 	#endif
     
     
-    class FOXTROT_SERVER_EXPORT scsiserial : public SerialProtocol
+    class  scsiserial : public SerialProtocol
     {
     public:
     scsiserial(const parameterset*const instance_parameters);

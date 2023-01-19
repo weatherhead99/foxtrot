@@ -15,9 +15,11 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/config.h>
 
+#include <foxtrot/DeviceHarness.h>
+#include <foxtrot/ExperimentalSetup.h>
+
+//needed only for reading parameter json file I think!
 #include <foxtrot/protocols/ProtocolUtilities.h>
-#include <foxtrot/server/DeviceHarness.h>
-#include <foxtrot/server/ExperimentalSetup.h>
 
 #include "exptserve.h"
 #include "ServerImpl.h"

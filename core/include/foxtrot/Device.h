@@ -3,7 +3,6 @@
 #include <memory>
 #include <string>
 #include <rttr/type>
-#include <foxtrot/foxtrot_server_export.h>
 #include <foxtrot/Logging.h>
 #include <mutex>
 #include <optional>
@@ -51,7 +50,7 @@ namespace foxtrot
  
   class CommunicationProtocol;
   
-  class FOXTROT_SERVER_EXPORT Device
+  class  Device
   {
     RTTR_ENABLE()
   public:

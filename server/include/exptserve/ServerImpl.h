@@ -20,7 +20,7 @@
 #include <foxtrot/ft_auth.grpc.pb.h>
 #include <foxtrot/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/FlagMap.hh>
 #include <foxtrot/server/SessionManager.hh>

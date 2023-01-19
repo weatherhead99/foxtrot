@@ -4,7 +4,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 
 #include "exptserve.h"
 

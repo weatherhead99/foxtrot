@@ -2,7 +2,7 @@
 
 
 
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 
 namespace foxtrot
 {

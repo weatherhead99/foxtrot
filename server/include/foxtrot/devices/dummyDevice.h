@@ -4,7 +4,7 @@
 #include <string>
 #include <tuple>
 
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
 
 namespace foxtrot

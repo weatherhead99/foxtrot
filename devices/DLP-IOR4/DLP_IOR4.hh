@@ -1,5 +1,5 @@
 #pragma once
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/Logging.h>
 

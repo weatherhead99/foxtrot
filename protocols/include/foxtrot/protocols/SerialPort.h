@@ -21,7 +21,7 @@ namespace protocols
   using std::shared_ptr;
   using std::unique_ptr;
   
-class FOXTROT_SERVER_EXPORT SerialPort : public SerialProtocol
+class  SerialPort : public SerialProtocol
 {
 public:
   [[deprecated("opening serial port without an io_context")]] SerialPort ( const parameterset*const instance_parameters );

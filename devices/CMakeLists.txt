@@ -36,7 +36,6 @@ macro(add_device_object_lib)
 	  add_library(${olib_NAME} OBJECT ${olib_SRCS})
 
     target_include_directories(${olib_NAME} PRIVATE
-    $<TARGET_PROPERTY:foxtrot::foxtrot_server,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>
     $<TARGET_PROPERTY:foxtrot::foxtrot_protocols,INTERFACE_INCLUDE_DIRECTORIES>)
   
