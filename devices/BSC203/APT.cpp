@@ -20,6 +20,7 @@
 
 #include <set>
 #include <cmath>
+
 using std::cout;
 using std::endl;
 
@@ -66,20 +67,10 @@ void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned cha
 
 foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source, bool* has_data, bool check_opcode, unsigned* received_opcode)
 {
-    unsigned actlen;
     bsc203_reply out;
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(50)); // IT SEEMS TO WORK FINE WITH 50 ms, PLEASE DO NOT CHANGE IT.
-    
-    //cout << " Bytes available: " << std::hex << _serport->bytes_available() << endl;
 
-    auto timeout = _serport->calc_minimum_transfer_time(6);
-    _lg.strm(sl::debug) << "transfer time:"  << timeout.count() ;
-    
-    auto headerstr = _serport->read_definite(6, timeout * 5);
-       
-    unsigned opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF); 
-    //std::cout << std::hex << (unsigned) opcode << std::endl;
+    auto [aptreply, opcode] = receive_sync_common(expected_source);
+
     
     if (received_opcode != nullptr)
         *received_opcode = opcode;
@@ -95,48 +86,14 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 	throw DeviceError("received unexpected opcode");
     }
 
-    if (headerstr[4] == 0)
-    {
-        _lg.Error("null destination");
-        throw DeviceError("received null destination");
-    }
+    if(has_data!=nullptr)
+      *has_data = aptreply.data.has_value();
 
-    auto src = headerstr[5];
-    if(src != static_cast<decltype(src)>(expected_source))
-    {
-        _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
-        throw DeviceError("received unexpected source");
-
-    }
+    if(aptreply.data.has_value())
+      out.data = std::move(*aptreply.data);
     
-    //check if data packet present 
-    if( (headerstr[4] & 0x80) == 0x80)
-    {
-        //WARNING: IS THE DLEN MSB OR LSB?
-      _lg.strm(sl::trace) << "headerstr[3]: " << (int) headerstr[3] << " headerstr[2]: " << (int) headerstr[2];
-      //      unsigned short dlen = (static_cast<int>(headerstr[3]) << 8 ) & static_cast<int>(headerstr[2]);
-      unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
-      
-      _lg.Trace("data packet present, length: " + std::to_string(dlen));
-
-      auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
-      _lg.strm(sl::debug) << "data transfer exp'd transfer time:" << datatimeout.count();
-      auto data = _serport->read_definite(dlen, std::chrono::seconds(1));
-      
-      out.data = std::vector<unsigned char>(data.begin(),data.end());
-      
-      if(has_data != nullptr)
-          *has_data = true;
-
-    }
-    else
-    {
-        if(has_data != nullptr)
-            *has_data = false;
-    }
-    
-    out.p1 = headerstr[2];
-    out.p2 = headerstr[3];
+    out.p1 = aptreply.p1;
+    out.p2 = aptreply.p2;
     
     return out;
     
@@ -262,6 +219,23 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
 
 }
 
+void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
+{
+  auto tm = estimate_rel_move_time(dest, channel, target);
+  _lg.strm(sl::debug) << "estimated relative move time(ms): " << tm.count() ;
+
+  start_relative_move(dest,channel, target);
+  auto delay = tm + std::chrono::milliseconds(200);
+
+  std::this_thread::sleep_for(delay);
+  auto repl = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, dest);
+
+
+
+
+}
+
+
 
 foxtrot::devices::velocity_params foxtrot::devices::APT::get_velocity_params(foxtrot::devices::destination dest, motor_channel_idents channel)
 {
@@ -297,13 +271,6 @@ void foxtrot::devices::APT::start_home_channel(foxtrot::devices::destination des
 
 std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start)
 {
-  auto velparams = get_velocity_params(dest, channel);
-
-
-  //t1 is the "triangle" area of the vel/ time graph
-  double t1  = velparams.maxvel / velparams.acceleration;
-  double dist1 = velparams.acceleration * t1 * t1;
-
   int tgt_dist;
   if(!start.has_value())
     {
@@ -314,6 +281,21 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destinat
     {
       tgt_dist = std::abs((int)target - (int)(*start));
     }
+  
+  return estimate_rel_move_time(dest, channel, tgt_dist);
+}
+
+std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destination dest, motor_channel_idents channel, int target)
+{
+  int tgt_dist = std::abs(target);
+
+  _lg.strm(sl::debug) << "retrieving velocity params to calculate move time...";
+
+  auto velparams = get_velocity_params(dest, channel);
+  //t1 is the "triangle" area of the vel/ time graph
+  double t1  = velparams.maxvel / velparams.acceleration;
+  double dist1 = velparams.acceleration * t1 * t1;
+
   
   _lg.strm(sl::debug) << "target distance for move: " << tgt_dist ;
 
@@ -337,9 +319,62 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destinat
   _lg.strm(sl::debug) << "extra time: " << remtime;
 
   unsigned ms = std::ceil(remtime * 1000 );
-  return std::chrono::milliseconds(ms);
+  return std::chrono::milliseconds(ms);  
 
 }
+
+std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source)
+{
+
+  apt_reply out;
+
+  //read the header in from the serial port
+  auto timeout = _serport->calc_minimum_transfer_time(6);
+  auto headerstr = _serport->read_definite(6, timeout * 5);
+
+  unsigned short recv_opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF);
+
+  
+  if (headerstr[4] == 0)
+    {
+        _lg.Error("null destination");
+        throw DeviceError("received null destination");
+    }
+
+
+  auto src = headerstr[5];
+    if(src != static_cast<decltype(src)>(expected_source))
+    {
+        _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
+        throw DeviceError("received unexpected source");
+
+    }
+
+
+    //check if data packet present 
+    if( (headerstr[4] & 0x80) == 0x80)
+    {
+        //WARNING: IS THE DLEN MSB OR LSB?
+      _lg.strm(sl::trace) << "headerstr[3]: " << (int) headerstr[3] << " headerstr[2]: " << (int) headerstr[2];
+      unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
+      
+      _lg.Trace("data packet present, length: " + std::to_string(dlen));
+
+      auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
+      _lg.strm(sl::debug) << "data transfer exp'd transfer time:" << datatimeout.count();
+      auto data = _serport->read_definite(dlen, std::chrono::seconds(1));
+      
+      out.data = std::vector<unsigned char>(data.begin(),data.end());
+
+    }
+    
+    out.p1 = headerstr[2];
+    out.p2 = headerstr[3];
+    
+    return {out, recv_opcode};
+
+}
+
 
 
 RTTR_REGISTRATION{

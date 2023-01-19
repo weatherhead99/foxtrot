@@ -13,6 +13,7 @@
 
 #include <optional>
 #include <chrono>
+#include <tuple>
 
 //TODO: handle error conditions somehow!!!!
 
@@ -163,7 +164,6 @@ namespace foxtrot {
       MGMSG_MOT_RESUME_ENDOFMOVEMSGS = 0x046C
     };
 
-#pragma pack(push, 1)
     
     struct bsc203_reply
     {
@@ -171,7 +171,15 @@ namespace foxtrot {
       unsigned char p2;
       std::vector<unsigned char> data;      
     };
-    
+
+    struct apt_reply
+    {
+      unsigned char p1;
+      unsigned char p2;
+      std::optional<std::vector<unsigned char>> data = std::nullopt;
+    };
+
+#pragma pack(push, 1)
     struct hwinfo
     {
       unsigned int serno;
@@ -226,23 +234,23 @@ namespace foxtrot {
 
     hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
     
-    void start_home_channel(destination dest, motor_channel_idents channel);
+
     channel_status get_status(destination dest, motor_channel_idents channel);
     dcstatus get_status_dc(destination dest, motor_channel_idents channel);
     
-    void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
-    
-    void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
     void stop_move(destination dest, motor_channel_idents channel, bool immediate);
 
     void absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target);
-      
+
+    void relative_move_blocking(destination dest, motor_channel_idents channel, int target);
 
     void set_velocity_params (destination dest, const velocity_params& velpar);
       velocity_params get_velocity_params(destination dest, motor_channel_idents channel);
 
       std::chrono::milliseconds estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start=std::nullopt);
-    
+
+      std::chrono::milliseconds estimate_rel_move_time(destination dest, motor_channel_idents channel, int target);
+      
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
@@ -252,6 +260,16 @@ namespace foxtrot {
       
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
           bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
+
+
+      template<typename It>
+      bsc203_reply receive_message_sync(It expected_opcodes_begin, It expected_opcodes_end, destination expected_source, bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
+      
+      void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
+    
+      void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
+      void start_home_channel(destination dest, motor_channel_idents channel);
+
       
       void start_update_messages(destination dest);
       void stop_update_messages(destination dest);
@@ -275,7 +293,11 @@ namespace foxtrot {
       foxtrot::Logging _lg;
       
       std::shared_ptr<protocols::SerialPort> _serport;
-    
+
+    private:
+      std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source);
+
+      
     };
     
     
