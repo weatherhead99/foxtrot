@@ -30,13 +30,7 @@ namespace foxtrot {
         unsigned short jogStopMode;
    };
    
-   struct homeparams{
-       unsigned short chanIndent;
-       unsigned short homeDir; //1->UP; 2->DOWN.
-       unsigned short limitSwitch;
-       unsigned int homeVelocity;
-       unsigned int offsetDistance;
-   };
+
    
    struct powerparams{
        unsigned short chanIndent;

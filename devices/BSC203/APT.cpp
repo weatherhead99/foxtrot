@@ -49,9 +49,15 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
   _serport->flush();
-
-  
 }
+
+
+#pragma pack(push, 1)
+struct poscounter_throwaway {
+  unsigned short chan_ident;
+  int position_counter_value;
+};
+#pragma pack(pop)
 
 
 void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
@@ -120,6 +126,39 @@ void foxtrot::devices::APT::stop_motor_messages(destination dest)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOT_SUSPEND_ENDOFMOVEMSGS, 0x0, 0x0, dest);
 }
+
+
+int foxtrot::devices::APT::get_position_counter(destination dest, motor_channel_idents channel)
+{
+  auto repl = request_response_struct<poscounter_throwaway>(
+      bsc203_opcodes::MGMSG_MOT_REQ_POSCOUNTER,
+      bsc203_opcodes::MGMSG_MOT_GET_POSCOUNTER,
+      dest, 0, 0);
+  
+  return repl.position_counter_value;
+  
+}
+
+void foxtrot::devices::APT::set_position_counter(destination dest, motor_channel_idents channel, int val)
+{
+  poscounter_throwaway in;
+  in.position_counter_value = val;
+  in.chan_ident = static_cast<decltype(in.chan_ident)>(channel);
+  auto data = copy_struct_to_array(in);
+  transmit_message(bsc203_opcodes::MGMSG_MOT_SET_POSCOUNTER, data, dest);
+}
+
+
+foxtrot::devices::homeparams foxtrot::devices::APT::get_homeparams(destination dest, motor_channel_idents channel)
+{
+  auto ret = request_response_struct<homeparams>(bsc203_opcodes::MGMSG_MOT_REQ_HOMEPARAMS,
+						 bsc203_opcodes::MGMSG_MOT_GET_HOMEPARAMS,
+						 dest, static_cast<unsigned short>(channel), 0);
+
+  return ret;
+
+}
+
 
 
 
@@ -210,14 +249,18 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
   start_absolute_move(dest, channel, target);
 
   auto delay = tm + std::chrono::milliseconds(200);
-
   std::this_thread::sleep_for(delay);
 
-  auto repl = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, dest);
-  
-   
 
+  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(),
+						   motor_finish_messages.end(),
+						   dest);
+
+  
+  
 }
+
+
 
 void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
 {
@@ -249,11 +292,7 @@ foxtrot::devices::velocity_params foxtrot::devices::APT::get_velocity_params(fox
 void foxtrot::devices::APT::set_velocity_params (foxtrot::devices::destination dest, const foxtrot::devices::velocity_params& velpar)
 {
 
-  std::array<unsigned char, 14> data;
-
-  auto* datain = reinterpret_cast<const unsigned char*>(&velpar);
-  std::copy(datain, datain +  14, data.begin());
-  
+  auto data = copy_struct_to_array(velpar);  
   transmit_message(bsc203_opcodes::MGMSG_MOT_SET_VELPARAMS, data, dest);
 
 }
@@ -321,6 +360,21 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
   unsigned ms = std::ceil(remtime * 1000 );
   return std::chrono::milliseconds(ms);  
 
+}
+
+foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source)
+{
+  auto [out, recvd_opcode ] = receive_sync_common(expected_source);
+
+  if(recvd_opcode != static_cast<unsigned short>(expected_opcode))
+    {
+      _lg.strm(sl::error) << "expected opcode:  0x" << std::hex << static_cast<unsigned short>(expected_opcode);
+      _lg.strm(sl::error) << "but received : 0x" << std::hex << recvd_opcode;
+      throw DeviceError("unexpected opcode received in message!");
+      
+    }
+  
+  return out;
 }
 
 std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source)
