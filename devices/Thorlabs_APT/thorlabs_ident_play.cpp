@@ -1,5 +1,6 @@
 #include <iostream>
 #include "APT.h"
+#include <thread>
 
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/backward.hpp>
