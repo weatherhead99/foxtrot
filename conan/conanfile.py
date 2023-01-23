@@ -28,13 +28,13 @@ class FoxtrotCppMeta(type):
 
 def ft_require(conanfile, substr: str) -> None:
     if getattr(conanfile, "stable_release", False):
-        conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
+        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
     else:
-        conanfile.requires(f"foxtrot_{substr}/[^{conanfile.version},include_prerelease=True]@{conanfile.user}/{conanfile.channel}")
+        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version},include_prerelease=True]@{conanfile.user}/{conanfile.channel}")
     
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.3.4"
+    version = "0.3.5"
     default_user = "weatherill"
     default_channel = "stable"
 

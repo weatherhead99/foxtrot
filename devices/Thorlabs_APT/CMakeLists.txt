@@ -1,5 +1,5 @@
 
-add_device_object_lib(NAME Thorlabs_APT SRCS BSC203.cpp TIM101.cpp APT.cpp INCLUDES BSC203.h TIM101.h APT.h)
+add_device_object_lib(NAME Thorlabs_APT SRCS BSC203.cpp TIM101.cpp APT.cpp INCLUDES BSC203.h TIM101.h APT.h APT_defs.hh)
 
 
 add_executable(thorlabs_ident_play thorlabs_ident_play.cpp)
