@@ -94,7 +94,7 @@ namespace foxtrot
                 return false;
             
             //invoke parent check_metadata
-            _lg.strm(sl::info) << "SessionHandlerMixin processing metadata";
+            _lg.strm(sl::trace) << "SessionHandlerMixin processing metadata";
             
             //check if we require a session auth
             if(detail::check_session_needed(req,*_sesman, *_devharness, _lg))

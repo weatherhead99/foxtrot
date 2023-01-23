@@ -27,6 +27,8 @@ public:
         _serport->flush();
         stop_update_messages(destination::genericUSB);
 	//stop_motor_messages(destination::genericUSB);
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	_serport->flush();
   }
 
   ~Apt_Tester()
@@ -114,21 +116,10 @@ int main()
 
 
   cout << "starting homing move..." << endl;
-  //testdev.home_move_blocking(destination::genericUSB, chan);
+  testdev.home_move_blocking(destination::genericUSB, chan);
   
   
   
-
-  // cout << "starting blocking homing move..." << endl;
-  // testdev.home_move_blocking(destination::genericUSB, chan, max_possible_distance);
-
-
-  // status = testdev.get_status(destination::genericUSB, chan);
-  // //testdev.stop_update_messages(destination::genericUSB);
-  // cout << "position: " << status.position << endl;
-  // cout << "encoder count: " << status.enccount << endl;
-  // cout << "status bits: " << std::bitset<32>(status.statusbits)  << endl;
-  // cout << "status bits (hex):" << std::hex << status.statusbits << endl;
 
   
 

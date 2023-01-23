@@ -109,7 +109,7 @@ namespace foxtrot {
                              );
                               
       bool check_status_bits(const allstatus& status, bool check_limitswitch=true,
-          bool require_moving=true) const;
+          bool require_moving=true);
       
       void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
     

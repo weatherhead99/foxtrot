@@ -86,7 +86,7 @@ void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode,
 }
 
 
-bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool check_limitswitch, bool require_moving) const
+bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool check_limitswitch, bool require_moving)
 {
     unsigned int statusbits;
     bool is_dcstatus;
@@ -102,6 +102,7 @@ bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool chec
     }, status);
     
     std::bitset<32> bits(statusbits);
+    _lg.strm(sl::trace) << "statusbits: " << bits;
     
     if(check_limitswitch and (bits[0] or bits[1] or bits[2] or bits[3]))
         return false;
@@ -310,10 +311,13 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
                                                std::chrono::milliseconds total_move_timeout
                                               )
 {
+  
     start_update_messages(dest);
     _lg.strm(sl::debug) << "waiting for motion complete message";
     
     auto starttime = std::chrono::steady_clock::now();
+    bool should_finish = false;
+    
     while(true)
     {
         auto [repl, opcode] = receive_message_sync_check(motor_status_messages.begin(), 
@@ -329,8 +333,21 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
             //NOTE: this is the thing that'll need to be changed probably for BSC203
             dcstatus stat;
             std::copy(dat.begin(), dat.end(), reinterpret_cast<unsigned char*>(&stat));
-            if(! check_status_bits(stat, true, true))
-                throw ThorlabsMotorError("motor status check failed!");
+	    auto thischeck = check_status_bits(stat, true, true);
+            if(!thischeck)
+	      {
+		//check if the motor thinks it's homing
+		std::bitset<32> bits(stat.statusbits);
+		if(bits[9])
+		  {
+		    _lg.strm(sl::debug) << "motor status failed, but reports still homing";
+		    continue;
+		  }
+
+		throw ThorlabsMotorError("motor status check failed!");
+
+	      }
+	    
         }
         else
         {
@@ -523,7 +540,7 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
 
       auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
-      _lg.strm(sl::debug) << "data transfer exp'd transfer time:" << datatimeout.count();
+      _lg.strm(sl::trace) << "data transfer exp'd transfer time:" << datatimeout.count();
       auto data = _serport->read_definite(dlen, std::chrono::seconds(1));
       
       out.data = std::vector<unsigned char>(data.begin(),data.end());
