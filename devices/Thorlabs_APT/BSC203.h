@@ -44,15 +44,6 @@ namespace foxtrot {
        channel_3 = 0x03,
    };
    
-   struct limitswitchparams{
-       unsigned short chan_indent;
-       unsigned short CWhard;
-       unsigned short CCWhard;
-       unsigned int CWsoft;
-       unsigned int CCWsoft;
-       unsigned short limitMode;
-   };
-   
    struct PMDjoystickparams{
        unsigned short chan_indent;
        unsigned int lowMaxVel;

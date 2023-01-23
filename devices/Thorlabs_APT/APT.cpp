@@ -2,13 +2,6 @@
 #include "APT.h"
 
 
-#define DEST_HOST_CONTROLLER 0x01
-#define DEST_RACK_CONTROLLER 0x11
-#define DEST_BAY_1 0x21
-#define DEST_BAY_2 0x22
-#define DEST_BAY_3 0x23
-#define DEST_GENERIC_USB_HW_UNIT 0x50
-
 #ifdef linux
 #include <byteswap.h>
 #endif
@@ -49,7 +42,7 @@ const foxtrot::parameterset bsc203_class_params
 
 
 foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 
-: foxtrot::Device(proto), _serport(proto), _lg("BSC203")
+: foxtrot::Device(proto),  _lg("BSC203"), _serport(proto)
 {
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
@@ -64,6 +57,10 @@ struct poscounter_throwaway {
 };
 #pragma pack(pop)
 
+foxtrot::devices::ThorlabsMotorError::ThorlabsMotorError(const std::string& msg)
+: Error(msg)
+{};
+
 
 void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
@@ -76,6 +73,43 @@ void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned cha
 
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
   
+}
+
+void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode,
+                                             destination dest, motor_channel_idents chan,
+                                             destination src)
+{
+      transmit_message(opcode,
+                     static_cast<unsigned short>(chan),
+                     0, dest, src);
+    
+}
+
+
+bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool check_limitswitch, bool require_moving) const
+{
+    unsigned int statusbits;
+    bool is_dcstatus;
+    std::visit([&statusbits, &is_dcstatus](auto& v) { 
+
+        statusbits = v.statusbits;
+        
+        if constexpr(std::is_same_v<decltype(v), dcstatus>)
+            is_dcstatus = true;
+        else
+            is_dcstatus = false;
+        
+    }, status);
+    
+    std::bitset<32> bits(statusbits);
+    
+    if(check_limitswitch and (bits[0] or bits[1] or bits[2] or bits[3]))
+        return false;
+    
+    if(require_moving and  not (bits[4] or bits[5] or bits[6] or bits[7]))
+        return false;
+        
+    return true;
 }
 
 foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source, bool* has_data, bool check_opcode, unsigned* received_opcode)
@@ -166,12 +200,36 @@ foxtrot::devices::homeparams foxtrot::devices::APT::get_homeparams(destination d
 
 }
 
+void foxtrot::devices::APT::set_homeparams(destination dest,
+                                           const homeparams& params)
+{
+    auto dat = copy_struct_to_array(params);    
+    transmit_message(bsc203_opcodes::MGMSG_MOT_SET_HOMEPARAMS, dat, dest);
+
+}
+
+limitswitchparams foxtrot::devices::APT::get_limitswitchparams(destination dest, motor_channel_idents channel)
+{
+    auto out = request_response_struct<limitswitchparams>(bsc203_opcodes::MGMSG_MOT_REQ_LIMSWITCHPARAMS, bsc203_opcodes::MGMSG_MOT_GET_LIMSWITCHPARAMS, dest, static_cast<unsigned short>(channel), 0);
+    
+    return out;
+}
+
+void foxtrot::devices::APT::set_limitswitchparams(destination dest,
+                                                  const limitswitchparams& params)
+{
+    
+    auto dat = copy_struct_to_array(params);
+    transmit_message(bsc203_opcodes::MGMSG_MOT_SET_LIMSWITCHPARAMS,
+                     dat, dest);
+}
+
 
 
 
 bool foxtrot::devices::APT::get_channelenable(destination dest, motor_channel_idents channel)
 {
-    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE,static_cast<unsigned char>(channel),0, dest);
+    transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE, dest, channel);
     
     auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
@@ -186,7 +244,6 @@ void foxtrot::devices::APT::set_channelenable(destination dest, motor_channel_id
 
     transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
     
-
 }
 
 
@@ -201,28 +258,12 @@ hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 };
 
 
-channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel_idents chan)
+std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destination dest, motor_channel_idents channel)
 {
-
-  //WARNING: it appears that at least both BSC203 and LTS300 devices (contrary to documentation) actually require to to have "update messages" running to be able to get ANY status messages. Hmph
-  
-  //WARNING: at least for LTS300, it appears that you can send MGMSG_MOD_REQ_DCSTATUSUPDATE and get back a "normal" status update in return. Utter madness
+    auto repl = request_response_struct<dcstatus>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE, bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE, dest, static_cast<unsigned char>(channel),
+                                                  0, dest);
     
-    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE,
-                                       bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
-                                       dest, static_cast<unsigned char>(chan), 0);
-
-    return ret;
-}
-
-
-dcstatus foxtrot::devices::APT::get_status_dc(destination dest, motor_channel_idents ident)
-{
-    auto ret = request_response_struct<dcstatus>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE, 
-                                            bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
-                                            dest, static_cast<unsigned char>(ident), 0);
-    
-    return ret;
+    return repl;
     
 }
 
@@ -254,64 +295,84 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
   _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
 
   start_absolute_move(dest, channel, target);
-
-  //this should be the maximum timeout to get back a completed message
-  // in practice it seems way generous. But we set it as timeout.
-  // If the motor message returns earlier then receive_message_sync_check should pop back
-  auto delay = tm + std::chrono::milliseconds(200);
-  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(),motor_finish_messages.end(),dest, delay);
- 
-}
-
-void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
-{
-  auto tm = estimate_rel_move_time(dest, channel, target);
-  _lg.strm(sl::debug) << "estimated relative move time(ms): " << tm.count() ;
-
-  start_relative_move(dest,channel, target);
-  //see comment above on absolute_move_blocking about this
-  auto delay = tm + std::chrono::milliseconds(200);
-  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(), motor_finish_messages.end(), dest, delay);
+  
+  wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+                     dest, channel, std::chrono::milliseconds(1000),
+                     tm);
   
 }
 
+void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode,
+                                               bsc203_opcodes completionexpectedopcode,
+                                               destination dest, motor_channel_idents chan,
+                                               std::chrono::milliseconds update_timeout,
+                                               std::chrono::milliseconds total_move_timeout
+                                              )
+{
+    start_update_messages(dest);
+    _lg.strm(sl::debug) << "waiting for motion complete message";
+    
+    auto starttime = std::chrono::steady_clock::now();
+    while(true)
+    {
+        auto [repl, opcode] = receive_message_sync_check(motor_status_messages.begin(), 
+                                                         motor_status_messages.end(), dest, update_timeout);
+        
+        if(opcode == static_cast<decltype(opcode)>(statusupdateopcode))
+        {
+            //NOTE: this should always have a data field, no need to check unless
+            // we see things going really wrong
+            _lg.strm(sl::trace) << "received motor status update msg";
+            auto dat = *repl.data;
+            
+            //NOTE: this is the thing that'll need to be changed probably for BSC203
+            dcstatus stat;
+            std::copy(dat.begin(), dat.end(), reinterpret_cast<unsigned char*>(&stat));
+            if(! check_status_bits(stat, true, true))
+                throw ThorlabsMotorError("motor status check failed!");
+        }
+        else
+        {
+            _lg.strm(sl::debug) << "received move completion message!";
+            if(opcode != static_cast<decltype(opcode)>(completionexpectedopcode))
+                throw ThorlabsMotorError("got unexpected type of completion message!");
+            break;
+            
+        }
+    }
+    
+    stop_update_messages(dest);
+    _serport->flush();
+    
+}
+
+
 void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_idents channel)
 {
-  start_update_messages(dest);
-  start_home_channel(dest, channel);
-  auto delay = std::chrono::milliseconds(1000);
+ start_home_channel(dest, channel); 
+  wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+                     bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
+                     dest, channel, std::chrono::milliseconds(1000), 
+                     //WARNING: this one is not used for now 
+                     std::chrono::milliseconds(1000));
 
-  _lg.strm(sl::debug) << "waiting for motion complete message";
-  while(true)
-    {
-      auto [repl,  opcode] = receive_message_sync_check(motor_status_messages.begin(), motor_status_messages.end(), dest, delay);
+}
 
-      if(opcode == static_cast<decltype(opcode)>(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE))
-	{
-	  _lg.strm(sl::debug) << "received motor status update msg";
-	  
-	  auto dat = *repl.data;
-	  dcstatus stat;
-	  std::copy(dat.begin(), dat.end(), reinterpret_cast<unsigned char*>(&stat));
 
-	  _lg.strm(sl::debug) << "velocity: " << std::dec << stat.velocity;
-	  _lg.strm(sl::debug) << "status bits: "<< std::hex << stat.statusbits;
-
-	  _lg.strm(sl::debug) << "position: " << std::dec << stat.position;
-
-	}
-	else
-	  {
-	    _lg.strm(sl::debug) << "received move completion message!" ;
-	    if(opcode != static_cast<decltype(opcode)>(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED))
-	      throw DeviceError("expected home complete message, got a different one!");
-	    break;
-	  }
-    }
-
-  stop_update_messages(dest);
-
-  _serport->flush();
+void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
+{
+    
+    auto tm = estimate_rel_move_time(dest, channel, target);
+    _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
+    
+    start_relative_move(dest, channel, target);
+    wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+                       bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+                       dest, channel, std::chrono::milliseconds(1000),
+                       tm);
+    
+    
 }
 
 
@@ -349,7 +410,9 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destinat
   int tgt_dist;
   if(!start.has_value())
     {
-      auto stat = get_status(dest, channel);
+      auto statvar = get_status(dest, channel);
+      dcstatus stat = std::get<dcstatus>(statvar);
+      
       tgt_dist = std::abs((int)target - (int)stat.position);
     }
   else
@@ -415,13 +478,6 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 }
 
 
-void foxtrot::devices::APT::check_limit_switches(destination dest, motor_channel_idents channel)
-{
-  auto stat = get_status(dest, channel);
-
-  
-
-}
 
 
 std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
@@ -490,15 +546,39 @@ RTTR_REGISTRATION{
 
       
     .method("get_channelenable", &APT::get_channelenable)
-    (parameter_names("destination", "channel"))
+    (parameter_names("dest", "channel"))
       .method("set_channelenable", &APT::set_channelenable)
-      (parameter_names("destination", "channel", "onoff"))
+      (parameter_names("dest", "channel", "onoff"))
       .method("get_hwinfo", &APT::get_hwinfo)
-      (parameter_names("destination", "expd_src"))
+      (parameter_names("dest", "expd_src"))
+      .method("get_status", &APT::get_status)
+      (parameter_names("dest", "channel"))
+      .method("stop_move", &APT::stop_move)
+      (parameter_names("dest", "channel", "immediate"))
+      .method("absolute_move_blocking", &APT::absolute_move_blocking)
+      (parameter_names("dest", "channel", "target"))
+      .method("relative_move_blocking", &APT::relative_move_blocking)
+      (parameter_names("dest", "channel", "target"))
+      .method("home_move_blocking", &APT::home_move_blocking)
+      (parameter_names("dest","channel"))
     .method("set_velocity_params", &APT::set_velocity_params)
     (parameter_names("destination", "velocity parameters"))
     .method("get_velocity_params", &APT::get_velocity_params)
-      (parameter_names("destination", "channel"));
+      (parameter_names("destination", "channel"))
+      .method("get_position_counter", &APT::get_position_counter)
+              (parameter_names("dest", "channel"))
+     .method("set_position_counter", &APT::set_position_counter)
+             (parameter_names("dest", "channel", "val"))
+      .method("get_homeparams", &APT::get_homeparams)
+      (parameter_names("dest", "channel"))
+      .method("set_homeparams", &APT::set_homeparams)
+      (parameter_names("dest", "params"))
+      .method("get_limitswitchparams", &APT::get_limitswitchparams)
+      (parameter_names("dest", "params"))
+      .method("set_limitswitchparams", &APT::set_limitswitchparams)
+      (parameter_names("dest", "params"))
+      
+      ;
 
 //     .method("home_channel", &APT::home_channel)
 //     (parameter_names("destination", "channel"));
@@ -528,10 +608,39 @@ RTTR_REGISTRATION{
     using foxtrot::devices::channel_status;
     registration::class_<channel_status>("foxtrot::devices::channel_status")
     .constructor()(policy::ctor::as_object)
-    .property("chan_indent", &channel_status::chan_indent)
+    .property("chan_indent", &channel_status::chan_ident)
     .property("position", &channel_status::position)
     .property("enccount", &channel_status::enccount)
     .property("statusbits", &channel_status::statusbits);
+    
+    using foxtrot::devices::velocity_params;
+    registration::class_<velocity_params>("foxtrot::devices::velocity_params")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_indent", &velocity_params::chan_ident)
+    .property("minvel", &velocity_params::minvel)
+    .property("acceleration", &velocity_params::acceleration)
+    .property("maxvel", &velocity_params::maxvel);
+    
+    using foxtrot::devices::homeparams;
+    registration::class_<homeparams>("foxtrot::devices::homeparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_ident", &homeparams::chan_ident)
+    .property("homeDir", &homeparams::homeDir)
+    .property("limitSwitch", &homeparams::limitSwitch)
+    .property("homeVelocity", &homeparams::homeVelocity)
+    .property("offsetDistance", &homeparams::offsetDistance);
+    
+    using foxtrot::devices::limitswitchparams;
+    registration::class_<limitswitchparams>("foxtrot::devices::limitswitchparams")
+    .constructor()(policy::ctor::as_object)
+    .property("chan_ident", &limitswitchparams::chan_ident)
+    .property("CWhard", &limitswitchparams::CWhard)
+    .property("CCWhard", &limitswitchparams::CCWhard)
+    .property("CWsoft", &limitswitchparams::CWsoft)
+    .property("CCWsoft", &limitswitchparams::CCWsoft)
+    .property("limitMode", &limitswitchparams::limitMode);
+    
+    
     
     //Custom enums
     using foxtrot::devices::destination;

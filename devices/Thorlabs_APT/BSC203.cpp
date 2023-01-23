@@ -79,7 +79,7 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
 
     //Values
     foxtrot::devices::velocity_params velpar;
-    velpar.chan_indent = 0x01;
+    velpar.chan_ident = 0x01;
     velpar.minvel = 0;
     //velpar.acceleration = 0x09600100; // Default acceleration
     //velpar.maxvel = 0x1A36E2EB; // Default velocity
@@ -94,14 +94,14 @@ foxtrot::devices::BSC203::BSC203(std::shared_ptr< foxtrot::protocols::SerialPort
     powerstr.restFactor = 0x0;
 
     foxtrot::devices::homeparams homestr;
-    homestr.chanIndent = 0x01;
+    homestr.chan_ident = 0x01;
     homestr.homeDir = 0x02;
     homestr.limitSwitch = 0x01;// If homeDir == 1 -> 4, if 2-> 1
     homestr.homeVelocity = 0x014F8B59;
     homestr.offsetDistance = 0x0A000;
 
     foxtrot::devices::limitswitchparams limitstr;
-    limitstr.chan_indent = 0x01;
+    limitstr.chan_ident = 0x01;
     limitstr.CWhard = 0x03;
     limitstr.CCWhard = 0x03;
     limitstr.CWsoft = 0x12c000;
@@ -622,7 +622,7 @@ static std::array<unsigned char, 14> get_homeparams_data(const foxtrot::devices:
     unsigned char* homevelbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&homeparams.homeVelocity));
     unsigned char* offsetbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&homeparams.offsetDistance));
 
-    std::array<unsigned char, 14> data { static_cast<unsigned char>(homeparams.chanIndent), 0, homedirbytes[0], homedirbytes[1], limitswitchbytes[0], limitswitchbytes[1], homevelbytes[0], homevelbytes[1], homevelbytes[2], homevelbytes[3], offsetbytes[0], offsetbytes[1], offsetbytes[2], offsetbytes[3]};
+    std::array<unsigned char, 14> data { static_cast<unsigned char>(homeparams.chan_ident), 0, homedirbytes[0], homedirbytes[1], limitswitchbytes[0], limitswitchbytes[1], homevelbytes[0], homevelbytes[1], homevelbytes[2], homevelbytes[3], offsetbytes[0], offsetbytes[1], offsetbytes[2], offsetbytes[3]};
 
     return data;
 
@@ -635,7 +635,7 @@ static std::array<unsigned char, 14> get_velocityparams_data(const foxtrot::devi
     unsigned char* accbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&velpar.acceleration));
     unsigned char* maxvelbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&velpar.maxvel));
 
-    std::array<unsigned char, 14> data { static_cast<unsigned char>(velpar.chan_indent), 0, minvelbytes[0], minvelbytes[1], minvelbytes[2], minvelbytes[3], accbytes[0], accbytes[1], accbytes[2], accbytes[3], maxvelbytes[0], maxvelbytes[1], maxvelbytes[2], maxvelbytes[3]};
+    std::array<unsigned char, 14> data { static_cast<unsigned char>(velpar.chan_ident), 0, minvelbytes[0], minvelbytes[1], minvelbytes[2], minvelbytes[3], accbytes[0], accbytes[1], accbytes[2], accbytes[3], maxvelbytes[0], maxvelbytes[1], maxvelbytes[2], maxvelbytes[3]};
 
     return data;
 
@@ -666,7 +666,7 @@ static std::array<unsigned char, 16> get_limitswitch_params(const foxtrot::devic
     unsigned char* CCWsoftbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&limitstr.CCWsoft));
     unsigned char* limitModebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&limitstr.limitMode));
 
-    std::array<unsigned char, 16> data { static_cast<unsigned char>(limitstr.chan_indent), 0, CWhardbytes[0], CWhardbytes[1], CCWhardbytes[0], CCWhardbytes[1], CWsoftbytes[0], CWsoftbytes[1], CWsoftbytes[2], CWsoftbytes[3], CCWsoftbytes[0], CCWsoftbytes[1], CCWsoftbytes[2], CCWsoftbytes[3], limitModebytes[0], limitModebytes[1]};
+    std::array<unsigned char, 16> data { static_cast<unsigned char>(limitstr.chan_ident), 0, CWhardbytes[0], CWhardbytes[1], CCWhardbytes[0], CCWhardbytes[1], CWsoftbytes[0], CWsoftbytes[1], CWsoftbytes[2], CWsoftbytes[3], CCWsoftbytes[0], CCWsoftbytes[1], CCWsoftbytes[2], CCWsoftbytes[3], limitModebytes[0], limitModebytes[1]};
 
     return data;
 
@@ -750,14 +750,6 @@ RTTR_REGISTRATION{
     .method("homing_channel", &BSC203::homing_channel)
     (parameter_names("destination", "channel (channel 1)"));
     
-    //Custom structs
-    using foxtrot::devices::velocity_params;
-    registration::class_<velocity_params>("foxtrot::devices::velocity_params")
-    .constructor()(policy::ctor::as_object)
-    .property("chan_indent", &velocity_params::chan_indent)
-    .property("minvel", &velocity_params::minvel)
-    .property("acceleration", &velocity_params::acceleration)
-    .property("maxvel", &velocity_params::maxvel);
     
     using foxtrot::devices::move_relative_params;
     registration::class_<move_relative_params>("foxtrot::devices::move_relative_params")
@@ -782,14 +774,6 @@ RTTR_REGISTRATION{
     .property("jogMaxVel", &jogparamsBSC::jogMaxVel)
     .property("jogStopMode", &jogparamsBSC::jogStopMode);
     
-    using foxtrot::devices::homeparams;
-    registration::class_<homeparams>("foxtrot::devices::homeparams")
-    .constructor()(policy::ctor::as_object)
-    .property("chanIndent", &homeparams::chanIndent)
-    .property("homeDir", &homeparams::homeDir)
-    .property("limitSwitch", &homeparams::limitSwitch)
-    .property("homeVelocity", &homeparams::homeVelocity)
-    .property("offsetDistance", &homeparams::offsetDistance);
     
     using foxtrot::devices::powerparams;
     registration::class_<powerparams>("foxtrot::devices::powerparams")
@@ -798,16 +782,7 @@ RTTR_REGISTRATION{
     .property("restFactor", &powerparams::restFactor)
     .property("moveFactor", &powerparams::moveFactor);
     
-    using foxtrot::devices::limitswitchparams;
-    registration::class_<limitswitchparams>("foxtrot::devices::limitswitchparams")
-    .constructor()(policy::ctor::as_object)
-    .property("chan_indent", &limitswitchparams::chan_indent)
-    .property("CWhard", &limitswitchparams::CWhard)
-    .property("CCWhard", &limitswitchparams::CCWhard)
-    .property("CWsoft", &limitswitchparams::CWsoft)
-    .property("CCWsoft", &limitswitchparams::CCWsoft)
-    .property("limitMode", &limitswitchparams::limitMode);
-    
+
     using foxtrot::devices::PMDjoystickparams;
     registration::class_<PMDjoystickparams>("foxtrot::devices::PMDjoystickparams")
     .constructor()(policy::ctor::as_object)

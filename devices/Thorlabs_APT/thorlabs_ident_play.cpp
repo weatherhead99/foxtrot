@@ -93,7 +93,8 @@ int main()
 
   
   //testdev.start_update_messages(destination::genericUSB);
-  auto status = testdev.get_status_dc(destination::genericUSB, chan);
+  auto statvar = testdev.get_status(destination::genericUSB, chan);
+  auto status = std::get<foxtrot::devices::dcstatus>(statvar);
   //testdev.stop_update_messages(destination::genericUSB);
   cout << "position: " << status.position << endl;
   //cout << "encoder count: " << status.enccount << endl;
