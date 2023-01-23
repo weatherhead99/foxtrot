@@ -34,7 +34,7 @@ def ft_require(conanfile, substr: str) -> None:
     
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.3.3"
+    version = "0.3.4"
     default_user = "weatherill"
     default_channel = "stable"
 
@@ -99,9 +99,17 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
  
 
 def semver_from_git_describe(gitobj) -> str:
-    last_tagged_version = gitobj.run("describe --tags --abbrev=0")
-    full_desc = gitobj.run("describe --tags")
     is_dirty = gitobj.is_dirty()
+        
+    try:
+        last_tagged_version = gitobj.run("describe --tags --abbrev=0")
+        full_desc = gitobj.run("describe --tags")
+    except Exception as err:
+        self.output.warning("couldn't get a description from git, using defaults")
+        if is_dirty:
+            return "0.0.1-dev-dirty"
+        return "0.0.1-dev"
+        
 
     verstr = semver_string_parsing_thing(last_tagged_version, full_desc, is_dirty)
     return verstr    
