@@ -16,6 +16,26 @@
 
 #include "newport2936R.h"
 
+#if __GNUC__ > 9
+const foxtrot::parameterset newport2936R_usb_params 
+{
+  {"vid", 0x104d},
+  {"pid", 0xcec7},
+  {"epin", 0x81},
+  {"epout", 0x02}
+  
+};
+
+const foxtrot::parameterset newport2936R_serial_params
+{
+  {"baudrate", 38400},
+  {"stopbits",  1},
+  {"bits",  8},
+  {"parity",  "none"},
+  {"flowcontrol", "none"}
+    
+  };
+#else
 const foxtrot::parameterset newport2936R_usb_params 
 {
   {"vid", 0x104du},
@@ -34,7 +54,7 @@ const foxtrot::parameterset newport2936R_serial_params
   {"flowcontrol", "none"}
     
   };
-  
+#endif
 
 
 

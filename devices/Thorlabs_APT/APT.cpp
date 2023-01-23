@@ -30,15 +30,23 @@ const std::set<foxtrot::devices::bsc203_opcodes> motor_status_messages =
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
 
+#if __GNUC__ > 9
+const foxtrot::parameterset bsc203_class_params
+{
+  {"baudrate", 115200},
+  {"stopbits", 1},
+  {"flowcontrol", "hardware"},
+  {"parity", "none"}
+};
+#else
 const foxtrot::parameterset bsc203_class_params
 {
   {"baudrate", 115200u},
   {"stopbits", 1u},
   {"flowcontrol", "hardware"},
   {"parity", "none"}
-  
-  
 };
+#endif
 
 
 foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 

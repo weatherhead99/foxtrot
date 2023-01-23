@@ -17,6 +17,17 @@
 
 #include "cornerstone260.h"
 
+//WARNING: unsigned_signed_parameter_bug
+#if __GNUC__ > 9
+const foxtrot::parameterset cornerstone_class_params_serial
+{
+  {"baudrate" , 9600},
+  {"parity", "none"},
+  {"stopbits", 1},
+  {"flowcontrol", "none"},
+  {"bits", 8}
+};
+#else
 const foxtrot::parameterset cornerstone_class_params_serial
 {
   {"baudrate" , 9600u},
@@ -25,6 +36,7 @@ const foxtrot::parameterset cornerstone_class_params_serial
   {"flowcontrol", "none"},
   {"bits", 8u}
 };
+#endif
 
 const std::map<unsigned char, std::string> cornerstone_error_strings
 {

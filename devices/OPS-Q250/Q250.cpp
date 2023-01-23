@@ -7,11 +7,17 @@
 using namespace foxtrot;
 
 
-
+#if __GNUC__ > 9
+const foxtrot::parameterset Q250_class_parameters
+{
+  {"LBA", 100000}
+};
+#else
 const foxtrot::parameterset Q250_class_parameters
 {
   {"LBA", 100000u}
 };
+#endif
 
 foxtrot::devices::Q250::Q250(std::shared_ptr<protocols::scsiserial> proto)
 : CmdDevice(proto), _scsiproto(proto)

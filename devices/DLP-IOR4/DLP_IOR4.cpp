@@ -7,6 +7,18 @@
 
 //see https://docs.rs-online.com/9004/0900766b814bfd24.pdf for details
 
+
+//WARNING: unsigned_signed_parameter_bug
+#if __GNUC__ > 9
+const foxtrot::parameterset IOR4_serial_params
+{
+    {"baudrate", 9600},
+    {"stopbits", 1},
+    {"bits", 8},
+    {"parity", "none"},
+    {"flowcontrol", "none"}
+};
+#else
 const foxtrot::parameterset IOR4_serial_params
 {
     {"baudrate", 9600u},
@@ -15,7 +27,7 @@ const foxtrot::parameterset IOR4_serial_params
     {"parity", "none"},
     {"flowcontrol", "none"}
 };
-
+#endif
 
 
 using namespace foxtrot::devices;
