@@ -10,7 +10,7 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
     description="device drivers for foxtrot"
     exports_sources= ("CMakeLists.txt", "cmake/*.in", "archon/*.cpp",
                       "archon/*.h", "BME280/*.cpp", "BME280/*.h",
-                      "BSC203/*.h", "BSC203/*.cpp", "cornerstone_260/*.h",
+                      "Thorlabs_APT/*.h", "Thorlabs_APT/*.hh", "Thorlabs_APT/*.cpp", "cornerstone_260/*.h",
                       "cornerstone_260/*.cpp", "DM3068/*.cpp", "DM3068/*.h",
                       "newport_2936R/*.h", "newport_2936R/*.cpp", "OPS-Q250/*.h",
                       "OPS-Q250/*.cpp", "stellarnet/*.h", "stellarnet/*.cpp",
