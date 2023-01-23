@@ -105,7 +105,6 @@ def semver_from_git_describe(gitobj) -> str:
         last_tagged_version = gitobj.run("describe --tags --abbrev=0")
         full_desc = gitobj.run("describe --tags")
     except Exception as err:
-        self.output.warning("couldn't get a description from git, using defaults")
         if is_dirty:
             return "0.0.1-dev-dirty"
         return "0.0.1-dev"
