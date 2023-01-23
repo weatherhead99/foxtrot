@@ -31,6 +31,11 @@ const std::set<foxtrot::devices::bsc203_opcodes> motor_finish_messages =
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
+const std::set<foxtrot::devices::bsc203_opcodes> motor_status_messages =
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
 
 const foxtrot::parameterset bsc203_class_params
 {
@@ -63,11 +68,13 @@ struct poscounter_throwaway {
 void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src)
 {
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
-  
   std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
   
   _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
+
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(50));
   
 }
 
@@ -201,7 +208,7 @@ channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel
   
   //WARNING: at least for LTS300, it appears that you can send MGMSG_MOD_REQ_DCSTATUSUPDATE and get back a "normal" status update in return. Utter madness
     
-    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE,
+    auto ret = request_response_struct<channel_status>(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE,
                                        bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                                        dest, static_cast<unsigned char>(chan), 0);
 
@@ -212,7 +219,7 @@ channel_status foxtrot::devices::APT::get_status(destination dest, motor_channel
 dcstatus foxtrot::devices::APT::get_status_dc(destination dest, motor_channel_idents ident)
 {
     auto ret = request_response_struct<dcstatus>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE, 
-                                            bsc203_opcodes::MGMSG_MOT_GET_DCSTATUSUPDATE,
+                                            bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                                             dest, static_cast<unsigned char>(ident), 0);
     
     return ret;
@@ -248,19 +255,13 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
 
   start_absolute_move(dest, channel, target);
 
+  //this should be the maximum timeout to get back a completed message
+  // in practice it seems way generous. But we set it as timeout.
+  // If the motor message returns earlier then receive_message_sync_check should pop back
   auto delay = tm + std::chrono::milliseconds(200);
-  std::this_thread::sleep_for(delay);
-
-
-  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(),
-						   motor_finish_messages.end(),
-						   dest);
-
-  
-  
+  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(),motor_finish_messages.end(),dest, delay);
+ 
 }
-
-
 
 void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
 {
@@ -268,14 +269,49 @@ void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_chann
   _lg.strm(sl::debug) << "estimated relative move time(ms): " << tm.count() ;
 
   start_relative_move(dest,channel, target);
+  //see comment above on absolute_move_blocking about this
   auto delay = tm + std::chrono::milliseconds(200);
+  auto [repl, opcode] = receive_message_sync_check(motor_finish_messages.begin(), motor_finish_messages.end(), dest, delay);
+  
+}
 
-  std::this_thread::sleep_for(delay);
-  auto repl = receive_message_sync(bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, dest);
+void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_idents channel)
+{
+  start_update_messages(dest);
+  start_home_channel(dest, channel);
+  auto delay = std::chrono::milliseconds(1000);
 
+  _lg.strm(sl::debug) << "waiting for motion complete message";
+  while(true)
+    {
+      auto [repl,  opcode] = receive_message_sync_check(motor_status_messages.begin(), motor_status_messages.end(), dest, delay);
 
+      if(opcode == static_cast<decltype(opcode)>(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE))
+	{
+	  _lg.strm(sl::debug) << "received motor status update msg";
+	  
+	  auto dat = *repl.data;
+	  dcstatus stat;
+	  std::copy(dat.begin(), dat.end(), reinterpret_cast<unsigned char*>(&stat));
 
+	  _lg.strm(sl::debug) << "velocity: " << std::dec << stat.velocity;
+	  _lg.strm(sl::debug) << "status bits: "<< std::hex << stat.statusbits;
 
+	  _lg.strm(sl::debug) << "position: " << std::dec << stat.position;
+
+	}
+	else
+	  {
+	    _lg.strm(sl::debug) << "received move completion message!" ;
+	    if(opcode != static_cast<decltype(opcode)>(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED))
+	      throw DeviceError("expected home complete message, got a different one!");
+	    break;
+	  }
+    }
+
+  stop_update_messages(dest);
+
+  _serport->flush();
 }
 
 
@@ -303,7 +339,7 @@ void foxtrot::devices::APT::set_velocity_params (foxtrot::devices::destination d
 
 void foxtrot::devices::APT::start_home_channel(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan)
 {
-    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,static_cast<unsigned char>(chan),0,dest);
+    transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_HOME,static_cast<unsigned char>(chan),0,dest);
 };
 
 
@@ -332,7 +368,8 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
 
   auto velparams = get_velocity_params(dest, channel);
   //t1 is the "triangle" area of the vel/ time graph
-  double t1  = velparams.maxvel / velparams.acceleration;
+  //NOTE: the over 16 I think is to do with the trinamics/non-trinamics thing
+  double t1  = velparams.maxvel / velparams.acceleration / 16;
   double dist1 = velparams.acceleration * t1 * t1;
 
   
@@ -362,9 +399,9 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
 
 }
 
-foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source)
+foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout)
 {
-  auto [out, recvd_opcode ] = receive_sync_common(expected_source);
+  auto [out, recvd_opcode ] = receive_sync_common(expected_source, timeout);
 
   if(recvd_opcode != static_cast<unsigned short>(expected_opcode))
     {
@@ -377,14 +414,29 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
   return out;
 }
 
-std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source)
+
+void foxtrot::devices::APT::check_limit_switches(destination dest, motor_channel_idents channel)
+{
+  auto stat = get_status(dest, channel);
+
+  
+
+}
+
+
+std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
 {
 
   apt_reply out;
 
   //read the header in from the serial port
-  auto timeout = _serport->calc_minimum_transfer_time(6);
-  auto headerstr = _serport->read_definite(6, timeout * 5);
+  if(!timeout.has_value())
+      timeout = _serport->calc_minimum_transfer_time(6) * 5;
+      
+    
+
+  _lg.strm(sl::trace) << "timeout is: " << (*timeout).count();
+  auto headerstr = _serport->read_definite(6, *timeout);
 
   unsigned short recv_opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF);
 

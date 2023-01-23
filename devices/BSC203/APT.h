@@ -252,14 +252,23 @@ namespace foxtrot {
     void absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target);
 
     void relative_move_blocking(destination dest, motor_channel_idents channel, int target);
+      
+      void home_move_blocking(destination dest, motor_channel_idents channel);
 
     void set_velocity_params (destination dest, const velocity_params& velpar);
       velocity_params get_velocity_params(destination dest, motor_channel_idents channel);
+
+
+      
 
       std::chrono::milliseconds estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start=std::nullopt);
 
       std::chrono::milliseconds estimate_rel_move_time(destination dest, motor_channel_idents channel, int target);
 
+      int get_position_counter(destination dest, motor_channel_idents channel);
+      void set_position_counter(destination dest, motor_channel_idents channel, int val);
+
+      homeparams get_homeparams(destination dest, motor_channel_idents channel);
 
       
       
@@ -273,10 +282,10 @@ namespace foxtrot {
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
           bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
 
-      apt_reply receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source);
+      apt_reply receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout=std::nullopt);
 
       template<typename It>
-      std::tuple<apt_reply, bsc203_opcodes>  receive_message_sync_check(It&& allowed_opcodes_begin, It&& allowed_opcodes_end, destination expected_source);
+      std::tuple<apt_reply, bsc203_opcodes>  receive_message_sync_check(It&& allowed_opcodes_begin, It&& allowed_opcodes_end, destination expected_source, optional<milliseconds> timeout=std::nullopt);
       
       void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
     
@@ -290,11 +299,7 @@ namespace foxtrot {
       void start_motor_messages(destination dest);
       void stop_motor_messages(destination dest);
 
-
-      int get_position_counter(destination dest, motor_channel_idents channel);
-      void set_position_counter(destination dest, motor_channel_idents channel, int val);
-
-      homeparams get_homeparams(destination dest, motor_channel_idents channel);
+      void check_limit_switches(destination dest, motor_channel_idents channel);
       
       
       template<typename T>
@@ -315,7 +320,7 @@ namespace foxtrot {
       std::shared_ptr<protocols::SerialPort> _serport;
 
     private:
-      std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source);
+      std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt);
 
       
     };
@@ -402,9 +407,9 @@ using foxtrot::devices::apt_reply;
 using foxtrot::devices::bsc203_opcodes;
 
 template<typename It>
-std::tuple<apt_reply, bsc203_opcodes> foxtrot::devices::APT::receive_message_sync_check(It&& expected_opcodes_begin, It&& expected_opcodes_end, destination expected_source)
+std::tuple<apt_reply, bsc203_opcodes> foxtrot::devices::APT::receive_message_sync_check(It&& expected_opcodes_begin, It&& expected_opcodes_end, destination expected_source, optional<milliseconds> timeout)
 {
-  auto [repl, recvd_opcode] = receive_sync_common(expected_source);
+  auto [repl, recvd_opcode] = receive_sync_common(expected_source, timeout);
 
   auto pos = std::find_if(expected_opcodes_begin, expected_opcodes_end,
 			  [recvd_opcode] (auto& c) { return static_cast<unsigned short>(c) == recvd_opcode;});

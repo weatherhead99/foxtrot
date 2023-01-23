@@ -2,6 +2,7 @@
 #include "APT.h"
 
 #include <foxtrot/protocols/SerialPort.h>
+#include <foxtrot/backward.hpp>
 #include <foxtrot/Logging.h>
 #include <string>
 #include <memory>
@@ -23,15 +24,21 @@ public:
   Apt_Tester(shared_ptr<SerialPort> proto)
     : APT(proto)
   {
-    _serport->flush();
+        _serport->flush();
         stop_update_messages(destination::genericUSB);
-	stop_motor_messages(destination::genericUSB);
+	//stop_motor_messages(destination::genericUSB);
+  }
+
+  ~Apt_Tester()
+  {
+    _serport->flush();
   }
 
   //override this protected method to public for testing purposes
   using APT::transmit_message;
   using APT::stop_update_messages;
   using APT::start_update_messages;
+  using APT::start_home_channel;
 };
 
 
@@ -44,7 +51,8 @@ foxtrot::parameterset sport_params
 
 int main()
 {
-  foxtrot::setLogFilterLevel(sl::info);
+  backward::SignalHandling sh;
+  foxtrot::setLogFilterLevel(sl::debug);
 
   cout << "trying to identify Thorlabs long stage motor controller..." << endl;
 
@@ -56,7 +64,6 @@ int main()
   //remember exactly where or why or how...
   
   auto info = testdev.get_hwinfo(destination::genericUSB);
-
   cout << "serial number: " << info.serno << endl;
 
   std::string modelstr;
@@ -86,11 +93,12 @@ int main()
 
   
   //testdev.start_update_messages(destination::genericUSB);
-  auto status = testdev.get_status(destination::genericUSB, chan);
+  auto status = testdev.get_status_dc(destination::genericUSB, chan);
   //testdev.stop_update_messages(destination::genericUSB);
   cout << "position: " << status.position << endl;
-  cout << "encoder count: " << status.enccount << endl;
+  //cout << "encoder count: " << status.enccount << endl;
   cout << "status bits: " << std::bitset<32>(status.statusbits)  << endl;
+  cout << "status bits (hex):" << std::hex << status.statusbits << endl << std::dec;
 
   auto velparams = testdev.get_velocity_params(destination::genericUSB, chan);
 
@@ -98,21 +106,30 @@ int main()
   cout << "max velocity: " << velparams.maxvel << endl;
   cout << "acceleration: " << velparams.acceleration << endl;
   
-  auto tgt = status.position + 2000;
 
-  auto tmneed = testdev.estimate_abs_move_time(destination::genericUSB, chan,
-					       tgt);
+  //move away from home
+  cout << "relative move away from home" << endl;
+  testdev.relative_move_blocking(destination::genericUSB, chan, 1200000);
 
 
-  cout << "estimated move time (ms): " << tmneed.count() << endl;
+  cout << "starting homing move..." << endl;
+  //testdev.home_move_blocking(destination::genericUSB, chan);
+  
+  
+  
 
-  cout << "going to try a move! " << endl;
-  testdev.absolute_move_blocking(destination::genericUSB, chan, tgt);
+  // cout << "starting blocking homing move..." << endl;
+  // testdev.home_move_blocking(destination::genericUSB, chan, max_possible_distance);
 
-  cout << "move complete" << endl;
 
-  status = testdev.get_status(destination::genericUSB, chan);
+  // status = testdev.get_status(destination::genericUSB, chan);
+  // //testdev.stop_update_messages(destination::genericUSB);
+  // cout << "position: " << status.position << endl;
+  // cout << "encoder count: " << status.enccount << endl;
+  // cout << "status bits: " << std::bitset<32>(status.statusbits)  << endl;
+  // cout << "status bits (hex):" << std::hex << status.statusbits << endl;
 
-  cout << "position: " << status.position << endl;
+  
+
   
 }
