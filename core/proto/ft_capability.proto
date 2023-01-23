@@ -13,20 +13,6 @@ enum capability_types
 }
 
 
-enum byte_data_types
-{
-    UCHAR_TYPE = 0;
-    CHAR_TYPE = 1;
-    USHORT_TYPE = 2;
-    UINT_TYPE = 3;
-    ULONG_TYPE = 4;
-    SHORT_TYPE = 5;
-    IINT_TYPE = 6;
-    LONG_TYPE = 7;
-    BFLOAT_TYPE =8;
-    BDOUBLE_TYPE = 9;
-}
-
 message devcapability
 {
     capability_types tp = 1;

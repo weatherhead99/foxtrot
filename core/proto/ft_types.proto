@@ -1,6 +1,8 @@
 syntax="proto3";
 package foxtrot;
 
+import "google/protobuf/timestamp.proto";
+
 message empty {}
 
 
@@ -12,7 +14,29 @@ enum simplevalue_types
     BOOL_TYPE = 3;
     STRING_TYPE = 4;
     VOID_TYPE = 5;
+  //0.3.0 new types
+    DATETIME_TYPE = 6;
 }
+
+enum byte_data_types
+{
+    UCHAR_TYPE = 0;
+    CHAR_TYPE = 1;
+    USHORT_TYPE = 2;
+    UINT_TYPE = 3;
+    ULONG_TYPE = 4;
+    SHORT_TYPE = 5;
+    IINT_TYPE = 6;
+    LONG_TYPE = 7;
+    BFLOAT_TYPE =8;
+    BDOUBLE_TYPE = 9;
+
+  //0.3.0 new types
+    BCOMPLEX_TYPE=11;
+    BDATETIME_TYPE=12;
+    BOPAQUE_TYPE=13;
+}
+
 
 enum variant_types
 {
@@ -20,6 +44,7 @@ enum variant_types
     STRUCT_TYPE = 1;
     ENUM_TYPE = 2;
     TUPLE_TYPE = 3;
+    HOMOG_ARRAY_TYPE=4;
 }
 
 message variant_descriptor
@@ -30,6 +55,7 @@ message variant_descriptor
     struct_descriptor struct_desc = 4;
     enum_descriptor enum_desc = 5;
     tuple_descriptor tuple_desc = 6;
+    homog_array_descriptor homog_array_desc = 7;
 }
 
 message struct_descriptor
@@ -49,12 +75,20 @@ message tuple_descriptor
     repeated variant_descriptor tuple_map = 1;
 }
 
+message homog_array_descriptor
+{
+  
+}
+
 message ft_variant {
     oneof value {
         ft_simplevariant simplevar = 1;
         ft_struct structval = 2;
         ft_enum enumval = 3;
         ft_tuple tupleval = 4;
+
+	//0.3.0 new types
+	ft_homog_array arrayval = 5;
     }
 }
 
@@ -65,6 +99,7 @@ message ft_simplevariant {
         uint64 uintval = 3;
         bool boolval = 4;
         string stringval = 5;
+	google.protobuf.Timestamp tstampval = 8;
         }
     uint32 size = 6;
     bool is_void = 7;
@@ -85,4 +120,94 @@ message ft_enum {
 message ft_tuple {
     repeated ft_variant value = 2;
 }
+
+
+// new in 0.3.0
+message ft_homog_array {
+  oneof array {
+    ft_homog_array_static arr_static = 1;
+    ft_homog_array_dynamic arr_dynamic = 2;
+  }
+}
+
+//new in 0.3.0
+message ft_homog_array_dynamic
+{
+  byte_data_types dtp = 1;
+  bytes data = 2;
+}
+
+
+//new in 0.3.0
+message ft_homog_array_static_value
+{
+  
+
+}
+
+
+message ft_homog_array_static
+{
+  oneof array
+  {
+    ft_uint8_arr arr_uint8 = 1;
+    //NOTE there is no 16-bit native protobuf type
+    ft_uint32_arr arr_uint16 = 2;
+    ft_sint32_arr arr_sint16 = 3;
+    ft_uint32_arr arr_uint32 = 4;
+    ft_sint32_arr arr_sint32 = 5;
+    ft_uint64_arr arr_uint64 = 6;
+    ft_sint64_arr arr_sint64 = 7;
+    ft_float_arr arr_float = 8;
+    ft_double_arr arr_double = 9;
+  }
+}
+
+message ft_uint8_arr
+{
+  repeated uint32 values = 1;
+}
+
+message ft_uint16_arr
+{
+  //note no native 16 bit protobuf types
+  repeated uint32 values = 1;
+}
+
+message ft_sint16_arr
+{
+  repeated sint32 values = 1;
+}
+
+message ft_uint32_arr
+{
+  repeated uint32 values = 1;
+}
+
+message ft_sint32_arr
+{
+  repeated sint32 values = 1;
+}
+
+message ft_uint64_arr
+{
+  repeated uint64 values = 1;
+}
+
+message ft_sint64_arr
+{
+  repeated sint64 values = 1;
+}
+
+message ft_float_arr
+{
+  repeated float values = 1;
+}
+
+message ft_double_arr
+{
+  repeated double values = 1;
+}
+
+
 
