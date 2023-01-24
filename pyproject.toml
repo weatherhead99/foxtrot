@@ -1,6 +1,8 @@
 [tool.poetry]
 name = "pyfoxtrot"
-version = "0.1.1"
+
+#manual coding versions for now, sort it out properly later 
+version = "0.3.0-alpha1"
 description = "Client for Foxtrot RPC hardware server"
 authors = ["Dan Weatherill <daniel.weatherill@physics.ox.ac.uk>"]
 packages = [ {include  = "python/pyfoxtrot"},
@@ -11,14 +13,20 @@ packages = [ {include  = "python/pyfoxtrot"},
 python = "^3.8"
 protobuf = "<=3.20"
 poetry-grpc-plugin = "^0.1.2"
+#poetry-dynamic-versioning = "^0.21.3"
 
 
 [tool.poetry.dev-dependencies]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+#build-backend = "poetry_dynamic_versioning.backend"
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry-grpc-plugin]
 proto_path = "./core/proto"
 python_out="python/pyfoxtrot/protos"
+
+[tool.poetry-dynamic-versioning]
+enable = true
+
