@@ -34,11 +34,21 @@ namespace foxtrot {
     public:
         ThorlabsMotorError(const std::string& msg);
     };
-      
+
+    class APT;
+    struct AptUpdateMessageScopeGuard
+    {
+      AptUpdateMessageScopeGuard(APT* obj, destination dest);
+      ~AptUpdateMessageScopeGuard();
+
+      APT* _obj = nullptr;
+      destination _dest;
+    };
+    
       
     class APT : public Device
     {
-
+      friend class AptUpdateMessageScopeGuard;
     RTTR_ENABLE(Device)
         
     public:
@@ -62,8 +72,6 @@ namespace foxtrot {
       velocity_params get_velocity_params(destination dest, motor_channel_idents channel);
 
 
-      
-
       std::chrono::milliseconds estimate_abs_move_time(destination dest, motor_channel_idents channel, unsigned int target, std::optional<unsigned int> start=std::nullopt);
 
       std::chrono::milliseconds estimate_rel_move_time(destination dest, motor_channel_idents channel, int target);
@@ -72,11 +80,9 @@ namespace foxtrot {
       void set_position_counter(destination dest, motor_channel_idents channel, int val);
 
       homeparams get_homeparams(destination dest, motor_channel_idents channel);
-
       void set_homeparams(destination dest, const homeparams& params);
       
       limitswitchparams get_limitswitchparams(destination dest, motor_channel_idents channel);
-      
       void set_limitswitchparams(destination dest, const limitswitchparams& params);
       
       

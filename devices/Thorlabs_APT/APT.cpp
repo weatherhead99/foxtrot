@@ -51,6 +51,20 @@ const foxtrot::parameterset bsc203_class_params
 #endif
 
 
+foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* obj, destination dest)
+  : _obj(obj), _dest(dest)
+{
+  if(obj != nullptr)
+    obj -> start_update_messages(dest);
+};
+
+foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
+{
+  if(_obj != nullptr)
+    _obj -> stop_update_messages(_dest);
+}
+
+
 foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 
 : foxtrot::Device(proto),  _lg("BSC203"), _serport(proto)
 {
@@ -322,7 +336,7 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
                                               )
 {
   
-    start_update_messages(dest);
+  AptUpdateMessageScopeGuard(this, dest);
     _lg.strm(sl::debug) << "waiting for motion complete message";
     
     auto starttime = std::chrono::steady_clock::now();
