@@ -354,7 +354,8 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    continue;
 		  }
 
-		throw ThorlabsMotorError("motor status check failed!");
+		_serport->flush();
+		throw ThorlabsMotorError("motor status check failed! (Maybe a limit switch has been engaged)");
 
 	      }
 	    
