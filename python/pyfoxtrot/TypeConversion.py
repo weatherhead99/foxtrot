@@ -135,15 +135,16 @@ _simplevar_stringdescs_py_style = {(FLOAT_TYPE, 4): "float[4]",
                                    VOID_TYPE: "void",
                                    STRING_TYPE: "str"}
 
-
 def string_describe_ft_variant(descriptor: variant_descriptor):
     if descriptor.variant_type == SIMPLEVAR_TYPE:
         tp = descriptor.simplevalue_type
         size = descriptor.simplevalue_sizeof
         if tp in (BOOL_TYPE, VOID_TYPE, STRING_TYPE):
             typestr = _simplevar_stringdescs_py_style[tp]
+        elif (tp, size) in _simplevar_stringdescs_py_style:
+            typestr = _simplevar_stringdescs_py_style[(tp,size)]
         else:
-            typestr = _simplevar_stringdescs_py_style[(tp, size)]
+            typestr = f"cpptype[{descriptor.cpp_type_name}]"
     elif descriptor.variant_type == ENUM_TYPE:
         enum_name = descriptor.enum_desc.enum_name.replace("::", "_")
         return "enum[%s]" % enum_name

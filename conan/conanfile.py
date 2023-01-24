@@ -58,8 +58,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         scm_url, scm_commit = git.get_url_and_commit()
         update_conandata(self, {"sources" : {"commit" : scm_commit, "url" : scm_url}})
 
-    def layout(self):
-        self.folders.source = "."
 
     def set_version(self):
         git = Git(self, self.recipe_folder)

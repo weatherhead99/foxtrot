@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <tuple>
+#include <any>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
@@ -46,7 +47,7 @@ namespace foxtrot
         void resetCounter();
 
         void brokenMethod();
-        std::vector<int> unsupportedtype();
+        std::any unsupportedtype();
             
         int add(int a1, int a2);
             

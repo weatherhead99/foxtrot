@@ -19,7 +19,7 @@ from .TypeConversion import string_describe_ft_variant
 from .protos.ft_types_pb2 import empty
 from .protos.foxtrot_pb2 import  broadcast_notification
 from .protos.ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
-from .protos.ft_capability_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
+from .protos.ft_types_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
 from .protos.ft_capability_pb2 import chunk_request
 from .protos.ft_types_pb2 import ENUM_TYPE
 from .EnumCreator import define_enum

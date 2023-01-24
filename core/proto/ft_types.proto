@@ -56,6 +56,9 @@ message variant_descriptor
     enum_descriptor enum_desc = 5;
     tuple_descriptor tuple_desc = 6;
     homog_array_descriptor homog_array_desc = 7;
+
+  //new in 0.3.0
+    string cpp_type_name = 8;
 }
 
 message struct_descriptor
@@ -77,8 +80,15 @@ message tuple_descriptor
 
 message homog_array_descriptor
 {
+  bool is_simple = 1;
+  bool is_encoded = 2;
+  bool has_fixed_size = 3;
+  uint64 fixed_size = 4;
+  simplevalue_types valtype = 5;
+  variant_descriptor complex_value_type = 6;
   
 }
+
 
 message ft_variant {
     oneof value {
@@ -90,6 +100,8 @@ message ft_variant {
 	//0.3.0 new types
 	ft_homog_array arrayval = 5;
     }
+
+  //0.3.0 new values
 }
 
 message ft_simplevariant {
@@ -125,13 +137,13 @@ message ft_tuple {
 // new in 0.3.0
 message ft_homog_array {
   oneof array {
-    ft_homog_array_static arr_static = 1;
-    ft_homog_array_dynamic arr_dynamic = 2;
+    ft_homog_array_decoded arr_decoded = 1;
+    ft_homog_array_encoded arr_encoded = 2;
   }
 }
 
 //new in 0.3.0
-message ft_homog_array_dynamic
+message ft_homog_array_encoded
 {
   byte_data_types dtp = 1;
   bytes data = 2;
@@ -139,14 +151,7 @@ message ft_homog_array_dynamic
 
 
 //new in 0.3.0
-message ft_homog_array_static_value
-{
-  
-
-}
-
-
-message ft_homog_array_static
+message ft_homog_array_decoded
 {
   oneof array
   {

@@ -7,6 +7,7 @@
 #include <rttr/registration>
 
 #include <foxtrot/DeviceError.h>
+#include <any>
 
 #include <foxtrot/devices/dummyDevice.h>
 #include <foxtrot/ft_tuple_helper.hh>
@@ -63,7 +64,7 @@ void foxtrot::devices::dummyDevice::brokenMethod()
 }
 
 
-std::vector<int> foxtrot::devices::dummyDevice::unsupportedtype()
+std::any foxtrot::devices::dummyDevice::unsupportedtype()
 {
     std::vector<int> out {1,2,3,4};
     return out;

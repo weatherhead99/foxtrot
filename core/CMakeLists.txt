@@ -104,4 +104,4 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
 #add to package registry
 foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)
 
-#add_subdirectory(devprogs)
+add_subdirectory(devprogs)

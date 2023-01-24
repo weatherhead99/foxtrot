@@ -1,8 +1,115 @@
 #include <foxtrot/typeUtil.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/ft_tuple_helper.hh>
+#include <foxtrot/ReflectionError.h>
+
+#include <boost/hana/map.hpp>
+#include <boost/hana/pair.hpp>
+#include <boost/hana/ext/std/integral_constant.hpp>
+#include <boost/hana/find.hpp>
+
+#include <foxtrot/device_utils.hh>
+#include <map>
+#include <typeinfo>
 
 using namespace foxtrot;
+
+
+using boost::hana::pair;
+
+using boost::hana::make_map;
+using boost::hana::make_pair;
+using boost::hana::type_c;
+
+const auto bdt_map = make_map(
+                    make_pair(type_c<unsigned char>, byte_data_types::UCHAR_TYPE),
+                    make_pair(type_c<char>, byte_data_types::CHAR_TYPE),
+                    make_pair(type_c<unsigned short>, byte_data_types::USHORT_TYPE),
+                    make_pair(type_c<unsigned>, byte_data_types::UINT_TYPE),
+                    make_pair(type_c<unsigned long>, byte_data_types::ULONG_TYPE),
+                    make_pair(type_c<short>, byte_data_types::USHORT_TYPE),
+                    make_pair(type_c<int>, byte_data_types::IINT_TYPE),
+                    make_pair(type_c<long>, byte_data_types::LONG_TYPE),
+                    make_pair(type_c<float>, byte_data_types::BFLOAT_TYPE),
+                    make_pair(type_c<double>, byte_data_types::BDOUBLE_TYPE)
+                              );
+
+template<typename T>
+using Sizeof = std::integral_constant<unsigned char, sizeof(T)>;
+
+    
+
+std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, bool check, Logging* lg)
+{
+    if(check)
+    {
+        if(!var.get_type().is_sequential_container())
+            throw std::logic_error("variant is not a sequential container, can't turn it into bytes!!!");
+    }
+    
+    auto view = var.create_sequential_view();
+    
+    if(check)
+        if(!view.get_rank() == 1)
+            throw std::logic_error("can only deal with rank 1 arrays for now!");
+        
+    
+    std::size_t nbytes = view.get_value_type().get_sizeof() / sizeof(unsigned char) * view.get_size();
+    
+    bool done = false;
+    std::vector<unsigned char> out;
+    out.resize(nbytes);
+    
+    boost::hana::for_each(bdt_map, [&view, &done, &out, nbytes] (auto v) {
+        if(done)
+            return;
+       using K = typename decltype(+hana::first(v))::type;
+       auto value_type = view.get_value_type();
+       if(rttr::type::get<K>() == value_type)
+       {
+           std::vector<K> intermediate;
+           intermediate.reserve(view.get_size());
+           for(auto& item : view)
+           {
+               bool ok;
+               intermediate.push_back( item.convert<K>(&ok));
+               if(!ok)
+                   throw std::logic_error("failed to convert byte to intermediate array!");
+           }
+           
+           auto* ptr = reinterpret_cast<unsigned char*>(intermediate.data());
+           std::copy(ptr, ptr+nbytes, out.begin());
+           done = true;
+       }
+    });
+    
+    if(!done)
+        throw std::logic_error("failed to convert array to bytes");
+    return out;   
+}
+
+
+rttr::variant foxtrot::bytes_to_variant(unsigned char* indata, const rttr::type& tgt_value_type, Logging* lg)
+{
+    rttr::variant out = tgt_value_type.create();
+    bool done;
+    boost::hana::for_each(bdt_map, [indata, &done, &tgt_value_type, &out] (auto v) {
+        using K = typename decltype(+boost::hana::first(v))::type;
+        if(done)
+            return;
+        if(rttr::type::get<K>() == tgt_value_type)
+        {
+            K intermediate = *( reinterpret_cast<K*>(indata));
+            out = intermediate;
+        }
+    });
+    
+    if(!done)
+        throw std::logic_error("failed to convert bytes to variant!");
+    
+    std::advance(indata, tgt_value_type.get_sizeof());
+    return out;
+}
 
 bool foxtrot::is_POD_struct(const rttr::type& tp, Logging* lg)
 {
@@ -49,6 +156,7 @@ decltype( (std::declval<rttr::variant>().*callable)(), T())
     return (var.*callable)();
 }
 
+#if 0
 struct variant_setter
 {
     variant_setter(const rttr::variant& var, ft_simplevariant& out, bool& success)
@@ -89,6 +197,8 @@ struct variant_setter
     
 };
 
+#endif
+
 
 ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg)
 {
@@ -110,53 +220,117 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         throw std::logic_error("simple_variant got invalid input!");
     }
     out.set_is_void(false);
+          
     
+    auto stdvariant = rttr_to_std_variant_converter(var, lg);
+    if(stdvariant.index() == std::variant_npos)
+        throw std::logic_error("couldn't find matching mapping for variant with type: " +   var.get_type().get_name().to_string());
 
-    using rttr::variant;
-    variant_setter setter(var, out, success);
-    if(tp.is_arithmetic())
-    {
-        out.set_size(tp.get_sizeof());
-        if(setter.set_check<bool>(&variant::to_bool, &ft_simplevariant::set_boolval))
-            return out;
-        if(setter.set_check<double>(&variant::to_double, &ft_simplevariant::set_dblval)) 
-            return out;
-        if(setter.set_check<float>(&variant::to_float, &ft_simplevariant::set_dblval))
-            return out;
-        if(setter.set_check<int>(&variant::to_int, &ft_simplevariant::set_intval))
-            return out;
-        if(setter.set_check<short>(&variant::to_int16, &ft_simplevariant::set_intval))
-            return out;
-        if(setter.set_check<char>(&variant::to_int8, &ft_simplevariant::set_intval))
-            return out;
-        if(setter.set_check<unsigned>(&variant::to_uint32, &ft_simplevariant::set_uintval))
-            return out;
-        if(setter.set_check<unsigned short>(&variant::to_uint16, &ft_simplevariant::set_uintval))
-            return out;
-        if(setter.set_check<unsigned char>(&variant::to_uint8, &ft_simplevariant::set_uintval))
-            return out;
-    }
-    else
-    {
+    //this visitor should get all the arithmetic and string types...
+    
+    bool done = false;
+    
+    if(lg)
+        lg->strm(sl::debug) << "variant index: "<< (int) stdvariant.index();
+    
+    std::visit([&out, lg, & done] (auto && v) {
+        namespace hana = boost::hana;
         
-        if(var.get_type() == rttr::type::get<std::string>())
+        const auto dblval_types = hana::make_set( hana::type_c<float>,
+                                                    hana::type_c<double>);
+        
+        const auto intval_types = hana::make_set(hana::type_c<int>,
+                                                    hana::type_c<short>,
+                                                    hana::type_c<char>,
+                                                    hana::type_c<long>
+                                        );
+        
+        const auto uintval_types = hana::make_set(hana::type_c<unsigned>,
+                                                    hana::type_c<unsigned short>,
+                                                    hana::type_c<unsigned char>,
+                                                    hana::type_c<unsigned long>);
+        
+        using Vtype = decltype(v);
+        auto VT = hana::type_c<Vtype>;
+        
+        out.set_size(sizeof(Vtype));
+        
+        if(lg)
+            lg->strm(sl::debug) << typeid(Vtype).name() ;
+        
+        if constexpr(hana::contains(dblval_types, VT) == hana::true_())
         {
-            auto str = var.to_string(&success);
-            if(!success)
-                throw std::logic_error("failed to convert string value!");
-            out.set_stringval(std::move(str));
-            return out;
+            if(lg)
+                lg->strm(sl::trace) << "stdvariant dblval" ;
+            out.set_dblval(v);
+            done =true;
         }
-        else
+        else if constexpr(VT == hana::type_c<bool>)
         {
-            throw std::logic_error("couldn't find matching mapping for variant with type: " + var.get_type().get_name().to_string());
+            if(lg)
+                lg->strm(sl::trace) << "stdvariant boolval";
+            out.set_boolval(v);
+            done = true;
         }
-    }
+        else if constexpr(hana::contains(intval_types, VT) == hana::true_())
+        {
+            if(lg)
+                lg->strm(sl::trace) << "stdvariant intval";
+            out.set_intval(v);
+            done = true;
+        }
+        else if constexpr(hana::contains(uintval_types, VT) == hana::true_())
+        {
+            if(lg)
+                lg->strm(sl::trace) << "stdvariant uintval";
+            out.set_uintval(v);
+            done = true;
+        }
+        else if constexpr(VT == hana::type_c<string>)
+        {
+            if(lg)
+                lg->strm(sl::trace) << "stdvariant string value";
+            out.set_stringval(v);
+            done = true;
+        }
+    }, stdvariant);
     
-    throw std::logic_error("invalid control path reached! This is an internal foxtrot bug");
-    
+    if(!done)
+        throw std::logic_error("invalid control flow in simplevalue conversion ,shouldn't ever happen!");
+    return out;
 };
 
+
+byte_data_types foxtrot::get_byte_data_type(const rttr::type& tp, Logging* lg)
+{
+    byte_data_types out;
+    bool done = false;
+    
+    boost::hana::for_each(bdt_map,
+                          [&tp, &out, &done] (auto v) {
+                             
+                              if(done)
+                                  return;
+                              
+                              //K is the type of the variant we're matching on
+                               using K = typename decltype(+hana::first(v))::type;
+                               auto rttr_cmp = rttr::type::get<K>();
+                               if(tp == rttr_cmp)
+                               {
+                                   out = hana::second(v);
+                                   done = true;
+                               }
+                          });
+    
+    if(!done)
+    {
+        if(lg)
+            lg->strm(sl::error) << "failed getting BDT from rttr type with name: " << tp.get_name().to_string();
+        throw std::logic_error("couldn't get byte data type");
+    }
+    
+    return out;
+}
 
 ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var, Logging* lg)
 {
@@ -215,6 +389,48 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
     return out;
 }
 
+ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
+                                   Logging* lg)
+{
+    auto view = var.create_sequential_view();
+    if(view.get_rank() > 1)
+    {
+        if(lg)
+            lg->strm(sl::error) << "array rank is: " << view.get_rank();
+            throw ReflectionError("unable to deal with arrays of greater than rank 1");
+    }
+    
+    auto contained_type = view.get_rank_type(1);
+    
+    byte_data_types bdt;
+    try 
+    {
+        bdt = get_byte_data_type(contained_type, lg);
+    }
+    catch(std::logic_error& err)
+    {
+        if(lg)
+            lg->strm(sl::error) << "contained type was not a simple variant when trying to map array!";
+        throw(err);
+    }
+    
+    ft_homog_array_encoded encout;
+    encout.set_dtp(bdt);
+    
+    auto tmpdat = variant_to_bytes(var, false, lg);
+    
+    auto* dat = encout.mutable_data();
+    dat->resize(tmpdat.size());
+    std::copy(tmpdat.begin(), tmpdat.end(), dat);
+    
+    
+    ft_homog_array out;
+    *out.mutable_arr_encoded() = std::move(encout);
+    
+    return out;
+}
+
+
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
                                           Logging* lg)
 {
@@ -246,6 +462,14 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
             lg->strm(sl::trace) << "enumeration logic";
         ft_enum* enumval = out.mutable_enumval();
         *enumval = get_enum_wire_type(var, lg);
+    }
+    else if(tp.is_sequential_container())
+    {
+        if(lg)
+            lg->strm(sl::trace) << "array logic";
+        auto* arrayval = out.mutable_arrayval();
+        *arrayval = get_array_wire_type(var, lg);
+        
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
@@ -373,6 +597,15 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 
         return wire_type_to_variant(wiretp.enumval(),target_tp, lg);
     }
+    else if(target_tp.is_sequential_container())
+    {
+        if(lg)
+            lg->strm(sl::trace) << "checking array case";
+        if(wiretp.value_case() != ft_variant::ValueCase::kArrayval)
+            throw std::runtime_error("expected array, got something else in supplied type");
+        return wire_type_to_array(wiretp.arrayval(), target_tp, lg);
+        
+    }
     else if(target_tp.is_class() && target_tp != rttr::type::get<std::string>())
     {
         if(lg)
@@ -391,15 +624,65 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 
 }
 
+rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg)
+{
+    if(wiretp.has_arr_encoded())
+        throw std::logic_error("can't deal with decoded arrays at the moment!");
+    
+    auto encarr = wiretp.arr_encoded();
+    
+    rttr::variant out = target_tp.create();
+    
+    if(!target_tp.is_sequential_container())
+        throw std::logic_error("tried to create an array at non target array type");
+    
+    auto view = out.create_sequential_view();
+    
+    if(view.is_dynamic())
+        view.set_size(encarr.data().size());
+    else
+        if(view.get_size() != encarr.data().size())
+            throw ReflectionError("invalid array size passed");
+
+    if(view.get_rank() != 1)
+        throw std::logic_error("can only handle arrays of rank 1 at present!");
+    auto value_type = view.get_rank_type(1);
+    
+    auto bdt = get_byte_data_type(value_type, lg);
+    if(bdt != encarr.dtp())
+    {
+        if(lg)
+        {
+            lg->strm(sl::error) << "target value type: " << value_type.get_name().to_string();
+            lg->strm(sl::error) << "byte data type: " << (int) bdt;
+        throw ReflectionError("invalid byte data type passed!");
+        }  
+    }
+    
+    auto szof = value_type.get_sizeof();    
+    auto* stringit = reinterpret_cast<unsigned char*>(encarr.mutable_data()->data());
+    for(auto tgt_item : view)
+    {
+        auto tgtvar = bytes_to_variant(stringit, value_type, lg);
+    }
+    
+    return out;
+    
+}
+
+
 variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging* lg)
 {
     variant_descriptor out;
+    out.set_cpp_type_name(tp.get_name().to_string());
+    
     if(tp.is_enumeration())
     {
         if(lg)
             lg->strm(sl::debug) << "type is enumeration";
         auto* desc = out.mutable_enum_desc();
         *desc = describe_enum(tp);
+        
         out.set_variant_type(variant_types::ENUM_TYPE);
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() 
@@ -465,6 +748,23 @@ enum_descriptor foxtrot::describe_enum(const rttr::type& tp, Logging* lg)
     
     return out;
 };
+
+homog_array_descriptor describe_array(const rttr::type& tp,
+                                      Logging* lg)
+{
+    
+    
+    homog_array_descriptor out;
+    //for now, all arrays are "simple"
+    out.set_is_simple(true);
+    //for now, all arrays are "encoded"
+    out.set_is_encoded(true);
+    //and they are all not fixed size
+    out.set_has_fixed_size(false);
+    
+    return out;
+}
+
 
 
 template<typename First, typename... Ts> 
@@ -548,3 +848,5 @@ tuple_descriptor foxtrot::describe_tuple(const rttr::type& tp, Logging* lg)
     
     return out;
 };
+
+
