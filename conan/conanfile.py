@@ -115,9 +115,13 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
     extra_matter = full_desc.split(last_tagged)[1]
     if len(extra_matter) ==0 and not is_dirty:
         #this is an actual full tagged version
+        if(last_tagged[0] == "v" or last_tagged[0] == "V"):
+            return last_tagged[1:]
         return last_tagged
     elif len(extra_matter) == 0:
         #bump the patch version
+        if(last_tagged[0] == "v" or last_tagged[0] == "V"):
+            return last_tagged[1:] + "-dirty"
         return last_tagged + "-dirty"
 
     _, n_commits, other = extra_matter.split("-",2)
