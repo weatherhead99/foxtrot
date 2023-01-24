@@ -673,7 +673,7 @@ RTTR_REGISTRATION{
       .property("chan_ident", &dcstatus::chan_ident)
       .property("position", &dcstatus::position)
       .property("velocity", &dcstatus::velocity)
-      .propertY("motorcurrent", &dcstatus::motorcurrent)
+      .property("motorcurrent", &dcstatus::motorcurrent)
       .property("statusbits", &dcstatus::statusbits);
       
     
