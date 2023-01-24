@@ -5,8 +5,8 @@ name = "pyfoxtrot"
 version = "0.3.0-alpha1"
 description = "Client for Foxtrot RPC hardware server"
 authors = ["Dan Weatherill <daniel.weatherill@physics.ox.ac.uk>"]
-packages = [ {include  = "python/pyfoxtrot"},
-	     {include = "python/pyfoxtrot/protos"}]
+packages = [ {include  = "pyfoxtrot", from="python"}
+	   ]
 
 
 [tool.poetry.dependencies]
