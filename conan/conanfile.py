@@ -148,8 +148,11 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
     else:
         fullstr = f"{newvers}.{devstr}"
 
+    if fullstr[0] == "v" or fullstr[0] == "V":
+        fullstr = fullstr[1:]
+    
     if is_dirty:
         return fullstr + "-dirty"
-        
+
     return fullstr
         
