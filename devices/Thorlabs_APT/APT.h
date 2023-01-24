@@ -39,8 +39,7 @@ namespace foxtrot {
     class APT : public Device
     {
 
-      
-    RTTR_ENABLE()
+    RTTR_ENABLE(Device)
         
     public:
     bool get_channelenable(destination dest, motor_channel_idents channel);
