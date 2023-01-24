@@ -281,7 +281,7 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
         out.Returntype = proptp;
         
         
-        if(proptp.is_sequential_container())
+        if(is_ft_call_streaming(prop))
         {
             out.type = CapabilityType::STREAM;
         }
@@ -299,7 +299,8 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
     }
     else if(meth)
     {
-        if(meth.get_return_type().is_sequential_container())
+        
+        if(is_ft_call_streaming(meth))
         {
             out.type = CapabilityType::STREAM;
         }

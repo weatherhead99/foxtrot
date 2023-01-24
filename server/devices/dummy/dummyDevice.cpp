@@ -189,6 +189,33 @@ void foxtrot::devices::dummyDevice::doNothing()
 {
 };
 
+std::array<unsigned char, 5> foxtrot::devices::dummyDevice::returns_std_array()
+{
+    std::array<unsigned char, 5> out ={1,2,3,4,5};
+    return out;
+    
+}
+
+std::array<int, 3> foxtrot::devices::dummyDevice::returns_std_int_array()
+{
+    std::array<int, 3> out = {1567, 1568, 1577};
+    return out;
+}
+
+
+foxtrot::devices::arrStruct foxtrot::devices::dummyDevice::returns_struct_std_array() 
+{
+    arrStruct out;
+    
+    out.boom2 = returns_std_array();
+    out.boom=12;
+    return out;
+
+    
+}
+
+
+
 
 RTTR_REGISTRATION
 {
@@ -229,13 +256,18 @@ RTTR_REGISTRATION
  .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
  .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
  .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
- .method("returns_pair", &dummyDevice::returns_pair);
-
+ .method("returns_pair", &dummyDevice::returns_pair)
+ .method("returns_unregistered_tuple", &dummyDevice::returns_unregistered_tuple)
+ .method("returns_std_array", &dummyDevice::returns_std_array)
+ .method("returns_struct_std_array", &dummyDevice::returns_struct_std_array)
+ .method("returns_std_int_array", &dummyDevice::returns_std_int_array);
+ 
  foxtrot::register_tuple<std::pair<int,double>>();
  foxtrot::register_tuple<std::tuple<int,std::string>>();
  
  using foxtrot::devices::dummyEnum;
  using foxtrot::devices::dummyStruct;
+ using foxtrot::devices::arrStruct;
  
  registration::class_<dummyStruct>("foxtrot::devices::dummyStruct")
  .constructor()(policy::ctor::as_object)
@@ -243,6 +275,11 @@ RTTR_REGISTRATION
  .property("uval", &dummyStruct::uval)
  .property("bval", &dummyStruct::bval)
  .property("dval", &dummyStruct::dval);
+ 
+ registration::class_<arrStruct>("foxtrot::devices::arrStruct")
+ .constructor()(policy::ctor::as_object)
+ .property("boom", &arrStruct::boom)
+ .property("boom2", &arrStruct::boom2);
  
  
  registration::enumeration<dummyEnum>("foxtrot::devices::dummyEnum")

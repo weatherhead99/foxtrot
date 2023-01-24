@@ -2,6 +2,7 @@
 #include <random>
 #include <vector>
 #include <string>
+#include <array>
 #include <tuple>
 #include <any>
 
@@ -24,6 +25,13 @@ namespace foxtrot
           unsigned uval;
           bool bval;
           double dval;
+      };
+      
+      struct arrStruct
+      {
+          int boom;
+          std::array<unsigned char, 5> boom2;
+          
       };
       
       
@@ -72,6 +80,10 @@ namespace foxtrot
         
 	std::vector<unsigned char> getCountStream(int n);
     std::vector<double> getRandomVector(int n);
+    
+    std::array<unsigned char, 5> returns_std_array();
+    std::array<int,3 > returns_std_int_array();
+    arrStruct returns_struct_std_array();
 
     int longdurationmethod(int n_sec);
     

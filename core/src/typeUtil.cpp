@@ -41,6 +41,8 @@ using Sizeof = std::integral_constant<unsigned char, sizeof(T)>;
 
 std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, bool check, Logging* lg)
 {
+    if(lg)
+        lg->strm(sl::debug) << "in new variant_to_bytes function" ;
     if(check)
     {
         if(!var.get_type().is_sequential_container())
@@ -56,30 +58,66 @@ std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, b
     
     std::size_t nbytes = view.get_value_type().get_sizeof() / sizeof(unsigned char) * view.get_size();
     
+    if(lg)
+        lg->strm(sl::trace) << "nbytes: " << nbytes;
+    
     bool done = false;
     std::vector<unsigned char> out;
     out.resize(nbytes);
     
-    boost::hana::for_each(bdt_map, [&view, &done, &out, nbytes] (auto v) {
+    boost::hana::for_each(bdt_map, [&view, &done, &out, nbytes, lg] (auto v) {
         if(done)
             return;
        using K = typename decltype(+hana::first(v))::type;
        auto value_type = view.get_value_type();
        if(rttr::type::get<K>() == value_type)
        {
+           if(lg)
+               lg->strm(sl::debug) << "matched value type: " << value_type.get_name().to_string();
            std::vector<K> intermediate;
            intermediate.reserve(view.get_size());
+        
+           std::optional<bool> is_wrapped;
+           
            for(auto& item : view)
+           {   
+               //TODO: not sure if this works for non-wrapped values as well
+               if(!is_wrapped.has_value())
+                   *is_wrapped = item.get_type().is_wrapper();
+               
+               if(*is_wrapped)
+                   intermediate.push_back(item.get_wrapped_value<K>());
+               else
+                   intermediate.push_back(item.get_value<K>());
+               
+//                if(lg)
+//                    lg->strm(sl::trace) << "value type trace: " << item.get_type().get_name().to_string();
+           }
+           if(lg)
            {
-               bool ok;
-               intermediate.push_back( item.convert<K>(&ok));
-               if(!ok)
-                   throw std::logic_error("failed to convert byte to intermediate array!");
+               lg->strm(sl::debug) << "intermediate array is populated";
+               lg->strm(sl::debug) << "intermediate size: " << intermediate.size();
+               
+               std::ostringstream oss;
+               for(auto v : intermediate)
+                   oss << std::dec << (int) v  << ",";
+               
+               lg->strm(sl::trace) << "array values: " << oss.str();
+               
+               oss.str("");
+               for(auto item: view)
+                   oss << item.to_string() << ",";
+               lg->strm(sl::trace) << "orig values: " << oss.str();
+               
+                   
            }
            
            auto* ptr = reinterpret_cast<unsigned char*>(intermediate.data());
            std::copy(ptr, ptr+nbytes, out.begin());
            done = true;
+           
+           if(lg)
+               lg->strm(sl::trace) << "copy to unsigned char vector complete";
        }
     });
     
@@ -250,7 +288,9 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
                                                     hana::type_c<unsigned char>,
                                                     hana::type_c<unsigned long>);
         
-        using Vtype = decltype(v);
+    
+        //NOTE: the std::decay_t thing here is CRUCIALLY important!
+        using Vtype = std::decay_t<decltype(v)>;
         auto VT = hana::type_c<Vtype>;
         
         out.set_size(sizeof(Vtype));
@@ -258,7 +298,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         if(lg)
             lg->strm(sl::debug) << typeid(Vtype).name() ;
         
-        if constexpr(hana::contains(dblval_types, VT) == hana::true_())
+        if constexpr(hana::contains(dblval_types, VT))
         {
             if(lg)
                 lg->strm(sl::trace) << "stdvariant dblval" ;
@@ -417,11 +457,17 @@ ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
     ft_homog_array_encoded encout;
     encout.set_dtp(bdt);
     
+    if(lg)
+        lg->strm(sl::trace) << "copying byte data to return type";
+    
     auto tmpdat = variant_to_bytes(var, false, lg);
+    std::string tmpstr{tmpdat.begin(), tmpdat.end()};
     
     auto* dat = encout.mutable_data();
-    dat->resize(tmpdat.size());
-    std::copy(tmpdat.begin(), tmpdat.end(), dat);
+    *dat = tmpstr;
+    
+    if(lg)
+        lg->strm(sl::trace) << "byte data copy completed";
     
     
     ft_homog_array out;
@@ -469,6 +515,9 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
             lg->strm(sl::trace) << "array logic";
         auto* arrayval = out.mutable_arrayval();
         *arrayval = get_array_wire_type(var, lg);
+        
+        if(lg)
+            lg->strm(sl::trace) << "wrote output array definition";
         
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))

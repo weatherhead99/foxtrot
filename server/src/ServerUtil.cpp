@@ -135,6 +135,7 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
     foxtrot::Logging lg("variant_to_bytes");
   lg.strm(sl::trace) << "received type: " << vt.get_type().get_name();
   
+  
   auto view = vt.create_sequential_view();
   auto value_type = view.get_value_type();
 
@@ -148,6 +149,10 @@ template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::v
   
   byte_size = sizeof(T) / sizeof(unsigned char) * view.get_size();
   auto data = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
+  
+  
+  if(rttr::type::get<std::vector<T>>() != vt.get_type())
+      throw std::logic_error("conversion to vector for this streammeta will fail! Aborting!");
   
   auto& source = rttr::variant_cast<std::vector<T>&>(vt);
   auto targetptr = reinterpret_cast<unsigned char*>(source.data());

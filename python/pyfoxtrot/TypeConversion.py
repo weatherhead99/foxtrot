@@ -1,9 +1,35 @@
-from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct
+from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct, ft_homog_array
 from .protos.ft_types_pb2 import simplevalue_types, variant_types
-from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor
+from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor, homog_array_descriptor
 from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple
 from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE
 from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
+
+from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE
+import struct
+
+
+def get_struct_string(dtp, length: int) -> str:
+    if dtp == UCHAR_TYPE:
+        structstr = '<%dB' % length
+    elif dtp == CHAR_TYPE:
+        structstr = '<%db' % length
+    elif dtp == USHORT_TYPE:
+        structstr = '<%dH' % (length // 2)
+    elif dtp == UINT_TYPE:
+        structstr = '<%dI' % (length // 4)
+    elif dtp == IINT_TYPE:
+        structstr = '<%di' % (length // 4)
+    elif dtp == BDOUBLE_TYPE:
+        structstr = '<%dd' % (length // 8)
+    elif dtp == BFLOAT_TYPE:
+        structstr = '<%df' % (length // 4)
+    else:
+        #NOTE: all the others are dodgy at the moment
+        raise NotImplementedError("data type not supported yet")
+
+    return structstr
+
 
 
 def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
@@ -98,9 +124,21 @@ def value_from_ft_variant(variant):
         return value_from_ft_enum(variant.enumval)
     elif whichattr == "tupleval":
         return value_from_ft_tuple(variant.tupleval)
+    elif whichattr == "arrayval":
+        return value_from_ft_array(variant.arrayval)
     else:
         raise ValueError("couldn't determine variant type")
 
+
+def value_from_ft_array(variant: ft_homog_array):
+    whichattr = variant.WhichOneof("array")
+    if whichattr == "arr_decoded":
+        raise NotImplementedError("don't understand decoded arrays yet")
+    else:
+        rawdat = variant.arr_encoded.data
+        dtp = variant.arr_encoded.dtp
+        structstr = get_struct_string(dtp, len(rawdat))
+        return struct.unpack(structstr, rawdat)
 
 def value_from_ft_simplevar(variant: ft_simplevariant):
     whichattr = variant.WhichOneof("value")
