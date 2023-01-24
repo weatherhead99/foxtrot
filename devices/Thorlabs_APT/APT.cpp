@@ -1,5 +1,7 @@
 #include <foxtrot/DeviceError.h>
+#include <sys/types.h>
 #include "APT.h"
+#include "APT_defs.hh"
 
 
 #ifdef linux
@@ -664,8 +666,16 @@ RTTR_REGISTRATION{
     .property("CWsoft", &limitswitchparams::CWsoft)
     .property("CCWsoft", &limitswitchparams::CCWsoft)
     .property("limitMode", &limitswitchparams::limitMode);
-    
-    
+
+    using foxtrot::devices::dcstatus;
+    registration::class_<dcstatus>("foxtrot::devices::dcstatus")
+      .constructor()(policy::ctor::as_object)
+      .property("chan_ident", &dcstatus::chan_ident)
+      .property("position", &dcstatus::position)
+      .property("velocity", &dcstatus::velocity)
+      .propertY("motorcurrent", &dcstatus::motorcurrent)
+      .property("statusbits", &dcstatus::statusbits);
+      
     
     //Custom enums
     using foxtrot::devices::destination;
