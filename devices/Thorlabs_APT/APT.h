@@ -43,6 +43,7 @@ namespace foxtrot {
 
       APT* _obj = nullptr;
       destination _dest;
+      foxtrot::Logging lg;
     };
     
       

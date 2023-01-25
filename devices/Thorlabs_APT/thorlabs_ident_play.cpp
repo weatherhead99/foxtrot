@@ -48,14 +48,14 @@ public:
 //default values for pplxdaq30
 foxtrot::parameterset sport_params    
   {
-    {"port", "/dev/ttyUSB0"}
+    {"port", "/dev/ttylongthrowstage_speckle"}
   };
 
 
 int main()
 {
   backward::SignalHandling sh;
-  foxtrot::setLogFilterLevel(sl::debug);
+  foxtrot::setLogFilterLevel(sl::trace);
 
   cout << "trying to identify Thorlabs long stage motor controller..." << endl;
 

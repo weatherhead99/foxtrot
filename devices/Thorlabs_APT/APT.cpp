@@ -52,21 +52,30 @@ const foxtrot::parameterset bsc203_class_params
 
 
 foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* obj, destination dest)
-  : _obj(obj), _dest(dest)
+  : _obj(obj), _dest(dest), lg("AptUpdateMessageScopeGuard")
 {
   if(obj != nullptr)
     obj -> start_update_messages(dest);
+
+  lg.strm(sl::debug) << "entering update message scope guard";
 };
 
 foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
 {
   if(_obj != nullptr)
+    {
     _obj -> stop_update_messages(_dest);
+    lg.strm(sl::debug) << "leaving update message scope guard";
+    }
+  else
+    {
+      lg.strm(sl::debug) << "scope guard destroyed but no object left";
+    }
 }
 
 
 foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 
-: foxtrot::Device(proto),  _lg("BSC203"), _serport(proto)
+: foxtrot::Device(proto),  _lg("APT"), _serport(proto)
 {
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
@@ -336,7 +345,7 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
                                               )
 {
   
-  AptUpdateMessageScopeGuard(this, dest);
+  AptUpdateMessageScopeGuard msgguard(this, dest);
     _lg.strm(sl::debug) << "waiting for motion complete message";
     
     auto starttime = std::chrono::steady_clock::now();
@@ -395,7 +404,7 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
  start_home_channel(dest, channel); 
   wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                      bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
-                     dest, channel, std::chrono::milliseconds(1000), 
+                     dest, channel, std::chrono::milliseconds(2000), 
                      //WARNING: this one is not used for now 
                      std::chrono::milliseconds(1000));
 
