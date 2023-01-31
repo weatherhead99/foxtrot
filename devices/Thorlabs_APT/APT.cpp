@@ -160,8 +160,8 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
     {
       auto errtp = check_opcode? sl::error : sl::debug;
 
-      _lg.strm(errtp) << "got opcode: " << std::hex << opcode;
-      _lg.strm(errtp) << "but expected: "<< std::hex <<  static_cast<decltype(opcode)>(expected_opcode);
+      _lg.strm(errtp) << "got opcode: 0x" << std::hex << opcode;
+      _lg.strm(errtp) << "but expected: 0x"<< std::hex <<  static_cast<decltype(opcode)>(expected_opcode);
         
       if (check_opcode)
 	throw DeviceError("received unexpected opcode");

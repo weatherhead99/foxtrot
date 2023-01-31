@@ -131,7 +131,6 @@ namespace foxtrot {
 
       
       
-      
       template<typename T>
       T _response_struct_common(foxtrot::devices::bsc203_opcodes opcode_recv,
                                 foxtrot::devices::destination dest,
@@ -192,15 +191,16 @@ T foxtrot::devices::APT::_response_struct_common(bsc203_opcodes opcode_recv,
     bool has_data;
     if(!expd_src.has_value())
         expd_src = dest;
+
+    auto ret = this->receive_message_sync_check(opcode_recv, *expd_src);
     
-    auto ret = this->receive_message_sync(opcode_recv, *expd_src, &has_data);
-    if(!has_data)
+    if(!ret.data.has_value())
         throw foxtrot::DeviceError("expected struct data in response but didn't get any!");
     
-    if(ret.data.size() != sizeof(T))
+    if(ret.data->size() != sizeof(T))
         throw std::logic_error("mismatch between received data size and struct size!");
     
-    std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&out));
+    std::copy(ret.data->begin(), ret.data->end(), reinterpret_cast<unsigned char*>(&out));
     return out;
     
 }
