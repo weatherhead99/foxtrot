@@ -98,11 +98,12 @@ namespace foxtrot {
       template<typename arrtp>
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, destination src = destination::host);
       
-      
+
+      [[deprecated]]
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
           bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
 
-      apt_reply receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout=std::nullopt);
+      apt_reply receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout=std::nullopt, bool discard_motor_status=true);
 
       template<typename It>
       std::tuple<apt_reply, bsc203_opcodes>  receive_message_sync_check(It&& allowed_opcodes_begin, It&& allowed_opcodes_end, destination expected_source, optional<milliseconds> timeout=std::nullopt);
@@ -111,7 +112,7 @@ namespace foxtrot {
                               bsc203_opcodes completionexpectedopcode,
                               destination dest, motor_channel_idents chan,
                               std::chrono::milliseconds update_timeout,
-                              std::chrono::milliseconds total_move_timeout
+                              std::chrono::milliseconds total_move_timeout, bool init_limit_state
                              );
                               
       bool check_status_bits(const allstatus& status, bool check_limitswitch=true,
@@ -122,6 +123,7 @@ namespace foxtrot {
       void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
       void start_home_channel(destination dest, motor_channel_idents channel);
 
+      virtual bool is_limited(destination dest, motor_channel_idents channel);
       
       void start_update_messages(destination dest);
       void stop_update_messages(destination dest);
@@ -151,7 +153,6 @@ namespace foxtrot {
     private:
       std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt);
 
-      
     };
     
     
@@ -247,6 +248,8 @@ std::tuple<apt_reply, bsc203_opcodes> foxtrot::devices::APT::receive_message_syn
   if(pos == expected_opcodes_end)
     {
       _lg.strm(sl::error) << "received opcode: " << std::hex << recvd_opcode;
+
+      
 
       std::ostringstream oss;
       for(auto it = expected_opcodes_begin; it !=expected_opcodes_end; it++)

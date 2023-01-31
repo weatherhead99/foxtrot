@@ -2,7 +2,7 @@
 #include <sys/types.h>
 #include "APT.h"
 #include "APT_defs.hh"
-
+#include <foxtrot/ProtocolTimeoutError.h>
 
 #ifdef linux
 #include <byteswap.h>
@@ -64,7 +64,7 @@ foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
 {
   if(_obj != nullptr)
     {
-    _obj -> stop_update_messages(_dest);
+    _obj -> stop_update_messages(_dest);   
     lg.strm(sl::debug) << "leaving update message scope guard";
     }
   else
@@ -264,8 +264,9 @@ void foxtrot::devices::APT::set_limitswitchparams(destination dest,
 bool foxtrot::devices::APT::get_channelenable(destination dest, motor_channel_idents channel)
 {
     transmit_message(bsc203_opcodes::MGMSG_MOD_REQ_CHANENABLESTATE, dest, channel);
-    
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
+
+    auto ret = receive_message_sync_check(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE, dest);
+    //    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
     
     bool onoff = (ret.p2 == 0x01) ? true : false;
     
@@ -328,28 +329,47 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
   auto tm = estimate_abs_move_time(dest, channel, target);
   _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
 
+
+  auto limstate = is_limited(dest, channel);
+  
   start_absolute_move(dest, channel, target);
   
   wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                      bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                      dest, channel, std::chrono::milliseconds(1000),
-                     tm);
+                     tm, limstate);
   
 }
+
+bool foxtrot::devices::APT::is_limited(destination dest, motor_channel_idents channel)
+{
+  _lg.strm(sl::trace) << "is_limited";
+  auto stat = get_status(dest, channel);
+  _lg.strm(sl::trace) << "got status";
+  bool out = std::visit([] (auto& v) {
+    auto statusbits = v.statusbits;
+    std::bitset<32> bits(statusbits);
+    return bits[0] or bits[1] or bits[2] or bits[3];}, stat);
+
+  return out;
+}
+
 
 void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode,
                                                bsc203_opcodes completionexpectedopcode,
                                                destination dest, motor_channel_idents chan,
                                                std::chrono::milliseconds update_timeout,
-                                               std::chrono::milliseconds total_move_timeout
+                                               std::chrono::milliseconds total_move_timeout, bool init_limit_state
                                               )
 {
-  
   AptUpdateMessageScopeGuard msgguard(this, dest);
+  
+  
     _lg.strm(sl::debug) << "waiting for motion complete message";
-    
+
     auto starttime = std::chrono::steady_clock::now();
     bool should_finish = false;
+
     
     while(true)
     {
@@ -376,6 +396,13 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    _lg.strm(sl::debug) << "motor status failed, but reports still homing";
 		    continue;
 		  }
+		else if(bits[0] or bits[1] or bits[2] or bits[3] and init_limit_state)
+		  {
+		    _lg.strm(sl::debug) << "got a limit switch message, but we started there so ignoring one";
+		    init_limit_state = false;
+		    continue;
+
+		  }
 
 		_serport->flush();
 		throw ThorlabsMotorError("motor status check failed! (Maybe a limit switch has been engaged)");
@@ -392,21 +419,20 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
             
         }
     }
-    
-    stop_update_messages(dest);
     _serport->flush();
-    
 }
 
 
 void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_idents channel)
 {
+
+  auto limitstate = is_limited(dest, channel);
  start_home_channel(dest, channel); 
   wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                      bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
                      dest, channel, std::chrono::milliseconds(2000), 
                      //WARNING: this one is not used for now 
-                     std::chrono::milliseconds(1000));
+                     std::chrono::milliseconds(1000), limitstate);
 
 }
 
@@ -416,12 +442,14 @@ void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_chann
     
     auto tm = estimate_rel_move_time(dest, channel, target);
     _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
-    
+
+
+    auto limitstate = is_limited(dest, channel);
     start_relative_move(dest, channel, target);
     wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
                        bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                        dest, channel, std::chrono::milliseconds(1000),
-                       tm);
+                       tm, limitstate);
     
     
 }
@@ -481,9 +509,14 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
   _lg.strm(sl::debug) << "retrieving velocity params to calculate move time...";
 
   auto velparams = get_velocity_params(dest, channel);
+
+  //this cast is to prevent a core dump floating point exception
+  //when it happens to be 0
+  auto accel = static_cast<double>(velparams.acceleration);
+  
   //t1 is the "triangle" area of the vel/ time graph
   //NOTE: the over 16 I think is to do with the trinamics/non-trinamics thing
-  double t1  = velparams.maxvel / velparams.acceleration / 16;
+  double t1  = velparams.maxvel / accel / 16;
   double dist1 = velparams.acceleration * t1 * t1;
 
   
@@ -494,15 +527,14 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
   if(tgt_dist < (2*dist1))
     {
       _lg.strm(sl::trace) << "move distance will truncate edges of target";
-      double t3 = std::sqrt((double)tgt_dist / (double)velparams.acceleration);
+      double t3 = std::sqrt((double)tgt_dist / accel);
       _lg.strm(sl::trace) << "t3: " << t3;
       unsigned ms = std::ceil(t3*1000);
       return std::chrono::milliseconds(ms);
       
       
     }
-  
-
+ 
   double remdist = tgt_dist - 2*dist1;
   double remtime = remdist / velparams.acceleration;
 
@@ -513,12 +545,31 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
 
 }
 
-foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout)
+foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout, bool discard_motor_status)
 {
+
+  
   auto [out, recvd_opcode ] = receive_sync_common(expected_source, timeout);
+
 
   if(recvd_opcode != static_cast<unsigned short>(expected_opcode))
     {
+
+      if(discard_motor_status)
+	{
+	  auto statpos = std::find_if(motor_status_messages.begin(),
+				      motor_status_messages.end(), [recvd_opcode](auto& c) { return static_cast<unsigned short>(c) == recvd_opcode;});
+
+	  if(statpos != motor_status_messages.end())
+	    {
+	      _lg.strm(sl::warning) << "got an extra motor status, but we have been told to ignore it...";
+	      _lg.strm(sl::debug) << "extra motor status has opcode: " << std::hex << static_cast<unsigned short>(recvd_opcode) << std::dec;
+
+	      return receive_message_sync_check(expected_opcode, expected_source, timeout, false);
+	    }
+
+	}
+      
       _lg.strm(sl::error) << "expected opcode:  0x" << std::hex << static_cast<unsigned short>(expected_opcode);
       _lg.strm(sl::error) << "but received : 0x" << std::hex << recvd_opcode;
       throw DeviceError("unexpected opcode received in message!");
@@ -539,8 +590,7 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
   //read the header in from the serial port
   if(!timeout.has_value())
       timeout = _serport->calc_minimum_transfer_time(6) * 5;
-      
-    
+
 
   _lg.strm(sl::trace) << "timeout is: " << (*timeout).count();
   auto headerstr = _serport->read_definite(6, *timeout);
