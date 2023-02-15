@@ -1,23 +1,13 @@
 project(foxtrot_core C CXX)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.18)
 set(CMAKE_CXX_STANDARD 17)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 
 #import other cmake functionality we need later
-include(GenerateExportHeader)
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 include(FoxtrotCommonSetup)
-
-#fix GRPC windows building issues
-if(WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0A00)
-endif()
-
-
-#setup conan build if necessary
 include(GitVersion)
 
 
@@ -31,23 +21,13 @@ message("foxtrot core version: ${VERSION}")
 
 if(WIN32)
 #need boost::thread on windows
-find_package(Boost REQUIRED COMPONENTS log program_options  date_time thread)
+find_package(Boost REQUIRED COMPONENTS log program_options thread)
 else()
-find_package(Boost REQUIRED COMPONENTS log program_options date_time)
+find_package(Boost REQUIRED COMPONENTS log program_options)
 endif()
 find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
-
-#NOTE: find via module to force conan dependencies
-if(DEFINED CONAN_EXE_LINKER_FLAGS)
-  find_package(gRPC REQUIRED MODULE)
-else()
-  find_package(gRPC REQUIRED)
-endif()
-
-
-
-#message(WARNING "using protoc program: ${protobuf::protoc}")
+find_package(gRPC REQUIRED)
 
 #build foxtrot core library (errors and logging)
 
@@ -64,9 +44,9 @@ foxtrot_generate_export_header(${packname} foxtrot_core)
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(WIN32)
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf RTTR::Core)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options protobuf::libprotobuf RTTR::Core)
 else()
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options Boost::filesystem Boost::date_time protobuf::libprotobuf  RTTR::Core gRPC::grpc++ gRPC::grpc)
+target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options protobuf::libprotobuf  RTTR::Core gRPC::grpc++ gRPC::grpc)
 endif()
 
 

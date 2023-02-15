@@ -3,7 +3,6 @@
 @PACKAGE_INIT@
 set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
 
-#set(CMAKE_MODULE_PATH "${CMAKE_MODLE_PATH}/${foxtrot_CMAKE_DIR}")
 set(foxtrot_core_PREFIX ${PACKAGE_PREFIX_DIR})
 
 include(CMakeFindDependencyMacro)
@@ -23,15 +22,10 @@ else()
     list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 endif()
 
-find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread date_time)
+find_dependency(Boost REQUIRED COMPONENTS log program_options thread)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)
-
-#WARNING: hack to make it work on windows
-if(WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0A00)
-endif()
 
 
 if(BUILD_TREE)
@@ -41,7 +35,7 @@ if(BUILD_TREE)
       "${CMAKE_CURRENT_LIST_DIR};@PACKAGE_ft_core_sourcedir@/include")
 else()
     if(NOT TARGET foxtrot::foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
-        include(${foxtrot_core_PREFIX}/lib/cmake/foxtrotCore/foxtrot_core.cmake)
+        include(${foxtrot_core_PREFIX}/cmake/foxtrotCore/foxtrot_core.cmake)
     endif()
     list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
 endif()

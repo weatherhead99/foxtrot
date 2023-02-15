@@ -70,7 +70,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         env_build = RunEnvironment(self)
         with environment_append(env_build.vars):
             cmake.build()
-        cmake.install()
+            cmake.install()
             
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
@@ -134,11 +134,15 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
     if cvers.pre is None:
         #bump the patch version, and add a dev string
         if cvers.patch is not None:
-            newvers = str(cvers.bump(2))
+            if not str(cvers.patch).isnumeric():
+                number, rest = string_digit_split(str(cvers.patch))
+                newvers = f"{cvers.major}.{cvers.minor}.{number+1}"
+            else:
+                newvers = str(cvers.bump(2))
         else:
             newmajor = cvers.major
             newminor = cvers.minor if cvers.minor is not None else 0
-            nerpatch = 1
+            newpatch = 1
             newvers = str(Version(newmajor, newminor, newpatch))
     else:
         #version stays the same, we will just add a devstring
@@ -160,3 +164,15 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
 
     return fullstr
         
+
+def string_digit_split(st: str):
+    gen = iter(st)
+    outdigits = []
+    for char in gen:
+        if char.isdigit():
+            outdigits.append(char)
+        else:
+            break
+
+    outrest = [_ for _ in gen]
+    return int("".join(outdigits)), outrest

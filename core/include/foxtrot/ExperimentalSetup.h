@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#ifdef linux
+#ifdef __linux__
 #include <dlfcn.h>
 #else
 #define NOMINMAX
@@ -40,7 +40,7 @@ namespace foxtrot
         
         template<typename funtp> funtp get_function(const std::string& name)
         {
-		#ifdef linux
+#ifdef __linux__
             _lg.Trace("calling dlsym...");
             auto sym = dlsym(_dl,name.c_str());
         #else
@@ -60,7 +60,7 @@ namespace foxtrot
         
         Logging _lg;
     private:
-#ifdef linux
+#ifdef __linux__
         void* _dl = nullptr;
 #else
         HMODULE _dl = nullptr;

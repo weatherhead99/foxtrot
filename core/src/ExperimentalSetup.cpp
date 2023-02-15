@@ -19,7 +19,7 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
         _lg.Warning("file doesn't seem to exist...");
     }
     
-	#ifdef linux
+	#ifdef __linux__
 	
 		_dl = dlopen(file.c_str(), RTLD_LAZY);
 		  
@@ -30,7 +30,7 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
     
 	  if(_dl == nullptr)
 	  {    
-#ifdef linux
+#ifdef __linux__
           _lg.strm(sl::error) << "error loading library: " << dlerror();
 		throw std::runtime_error(dlerror());
 #else
@@ -39,7 +39,7 @@ foxtrot::ft_plugin::ft_plugin(const std::string& file)
 #endif
 	  }
 
-#ifdef linux
+#ifdef __linux__
 	  dlerror();
 #endif
 }
@@ -48,7 +48,7 @@ foxtrot::ft_plugin::~ft_plugin()
 {
     if(_dl != nullptr)
     {
-		#ifdef linux
+		#ifdef __linux__
         dlclose(_dl);
 		#else
         FreeLibrary(_dl);
@@ -60,14 +60,14 @@ void foxtrot::ft_plugin::reload()
 {
     if(_dl != nullptr)
     {
-		#ifdef linux
+		#ifdef __linux__
         dlclose(_dl);
 		#else
 			FreeLibrary(_dl);
 		#endif
     }
 	
-	#ifdef linux
+	#ifdef __linux__
     _dl = dlopen(_fname.c_str(), RTLD_LAZY);
     
     dlerror();
