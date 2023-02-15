@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.4]@weatherill/stable")
 
 class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
 #                            metaclass = ftbase.FoxtrotCppMeta):
@@ -14,7 +14,9 @@ class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
 
     default_options = {"libusb:shared" : True,
                        "libcurl:shared" : True}
-    
+
+    cmakeName = "foxtrotProtocols"
+
     def requirements(self):
         ftbase.ft_require(self, "core")
 

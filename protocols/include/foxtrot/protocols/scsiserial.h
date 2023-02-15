@@ -4,7 +4,7 @@
 #include <array>
 #include <utility>
 #include <type_traits>
-#ifdef linux
+#ifdef __linux__
 #include <scsi/sg.h>
 #endif
 
@@ -15,7 +15,7 @@ namespace foxtrot
 {
   namespace protocols
   {
-	#ifdef linux
+	#ifdef __linux__
     enum class scsidirection
     {
       NONE = SG_DXFER_NONE,

@@ -1,5 +1,5 @@
 from conans import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
+from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 from conan.tools.scm import Git, Version
 from conan.tools.files import load, update_conandata
 from conans.tools import environment_append, RunEnvironment, collect_libs
@@ -34,7 +34,7 @@ def ft_require(conanfile, substr: str) -> None:
     
 class FoxtrotBuildUtils(ConanFile):
     name = "FoxtrotBuildUtils"
-    version = "0.3.5"
+    version = "0.4"
     default_user = "weatherill"
     default_channel = "stable"
 
@@ -44,7 +44,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     url = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
-    generators = "CMakeToolchain", "cmake_find_package", "virtualrunenv"
+    generators =  "virtualrunenv"
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
     options = {"silent_build" : [True, False]}
@@ -70,8 +70,19 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         env_build = RunEnvironment(self)
         with environment_append(env_build.vars):
             cmake.build()
-            cmake.install()
-            
+
+    def package(self):
+        cmake = CMake(self)
+        cmake.install()
+
+    def layout(self):
+        cmake_layout(self)
+        self.cpp.package.builddirs.append("lib")
+        if not hasattr(self,"cmakeName"):
+            self.output.warn("no cmakeName attribute set, not adding to build dirs")
+        else:
+            self.cpp.package.builddirs.append(f"lib/cmake/{self.cmakeName}")
+    
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
@@ -80,10 +91,12 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
 
     def generate(self):
         tc = CMakeToolchain(self)
+        deps = CMakeDeps(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
         if self.options["silent_build"]:
             tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
         tc.generate()
+        deps.generate()
 
     def fix_cmake_def_names(self, cmakename: str):
         self.cpp_info.names["cmake_find_package"] = cmakename

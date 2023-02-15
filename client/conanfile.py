@@ -1,7 +1,7 @@
 import os
 from conans import python_requires
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.4]@weatherill/stable")
 
 
 class FoxtrotClientConan(ftbase.FoxtrotCppPackage,

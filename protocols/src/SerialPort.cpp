@@ -10,7 +10,7 @@
 #include <thread>
 #include <cmath>
 #include <algorithm>
-#ifdef linux
+#ifdef __linux__
 #include <termios.h>
 #else
 #include <Windows.h>
@@ -205,7 +205,7 @@ void foxtrot::protocols::SerialPort::write(const std::string& data)
     if(_drain)
     {
   
-    #ifdef linux
+    #ifdef __linux__
     //drain serial port
       _lg.strm(sl::trace) << "draining serial port";
     auto ret = tcdrain( _sport->native_handle() );
@@ -248,7 +248,7 @@ void foxtrot::protocols::SerialPort::setDrain(bool drain)
 
 void foxtrot::protocols::SerialPort::flush()
 {
-#ifdef linux
+#ifdef __linux__
 	
   auto ret = tcflush(  _sport->native_handle(), TCIOFLUSH);
   if(ret < 0)
@@ -269,7 +269,7 @@ void foxtrot::protocols::SerialPort::flush()
 
 unsigned foxtrot::protocols::SerialPort::bytes_available()
 {
-#ifdef linux
+#ifdef __linux__
   unsigned bytes_available;
   auto ret = ioctl(_sport->native_handle(), FIONREAD, &bytes_available);
 
