@@ -39,3 +39,5 @@ class FoxtrotCoreConan(ftbase.FoxtrotCppPackage):
     def layout(self):
         super().layout()
         self.cpp.source.includedirs.append("include")
+        self.cpp.source.builddirs = ["cmake"]
+        self.cpp.build.builddirs = ["."]

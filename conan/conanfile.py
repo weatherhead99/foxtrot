@@ -90,6 +90,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         self.cpp_info.builddirs.append("lib")
 
     def generate(self):
+        if not self.in_local_cache:
+            self.output.warn("not a local cache build")
         tc = CMakeToolchain(self)
         deps = CMakeDeps(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
