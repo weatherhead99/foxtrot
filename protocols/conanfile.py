@@ -23,3 +23,9 @@ class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
     def package_info(self):
         super().package_info()
         self.fix_cmake_def_names("foxtrotProtocols")
+        self.cpp_info.set_property("cmake_find_mode", "none")
+
+    def layout(self):
+        super().layout()
+        self.cpp.source.includedirs.append("include")
+        self.cpp.build.builddirs=["."]

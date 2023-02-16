@@ -1,6 +1,6 @@
 from conans import python_requires, tools
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
+ftbase = python_requires("FoxtrotBuildUtils/[^0.4]@weatherill/stable")
 
 class FoxtrotLSST(ftbase.FoxtrotCppPackage):
     name="foxtrot_lsst"
@@ -17,6 +17,9 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage):
         ftbase.ft_require(self, "client")
         ftbase.ft_require(self, "protocols")
         ftbase.ft_require(self, "devices")
+
+        #this is only needed as a dep to run the exptserve binary conveniently
+        ftbase.ft_require(self, "server")
 
     def deploy(self):
         self.copy_deps("*exptserve")

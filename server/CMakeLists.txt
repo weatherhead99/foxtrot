@@ -22,7 +22,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 find_package(Boost REQUIRED COMPONENTS program_options)
 
-find_package(RapidJSON REQUIRED MODULE)
+find_package(RapidJSON REQUIRED)
 find_package(libsodium REQUIRED)
 
 

@@ -16,7 +16,7 @@ add_subdirectory(streams)
 add_library(foxtrot_server ${server_srcs} $<TARGET_OBJECTS:ft_server_streams>)
 foxtrot_generate_export_header(${packname} foxtrot_server)
 target_include_directories(foxtrot_server PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:include>)
-target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols OpenSSL::SSL RapidJSON::RapidJSON libsodium::libsodium)
+target_link_libraries(foxtrot_server PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols OpenSSL::SSL rapidjson libsodium::libsodium)
 
 
 add_executable(exptserve ${exptserve_srcs})

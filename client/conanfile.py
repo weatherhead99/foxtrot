@@ -13,6 +13,7 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
                       "src/*.cpp"
 
     src_folder = "client"
+    cmakeName = "foxtrotClient"
 
     def requirements(self):
         ftbase.ft_require(self, "core")
@@ -20,3 +21,8 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
     def package_info(self):
         super().package_info()
         self.fix_cmake_def_names("foxtrotClient")
+
+    def layout(self):
+        super().layout()
+        self.cpp.source.includedirs.append("include")
+        self.cpp.build.builddirs = ["."]

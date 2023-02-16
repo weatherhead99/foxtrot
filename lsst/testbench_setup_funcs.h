@@ -1,7 +1,7 @@
 #pragma once 
 
 #include <map>
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 #include <foxtrot/devices/archon_modules.h>
 
 

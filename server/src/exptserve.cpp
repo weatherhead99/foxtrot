@@ -9,8 +9,6 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/parsers.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <foxtrot/backward.hpp>
 #include <foxtrot/Logging.h>
 #include <foxtrot/config.h>

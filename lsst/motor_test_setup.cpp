@@ -1,4 +1,4 @@
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <map>
 #include <foxtrot/devices/BSC203.h>

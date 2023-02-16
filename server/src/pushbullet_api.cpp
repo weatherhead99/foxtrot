@@ -3,7 +3,7 @@
 #include <rapidjson/writer.h>
 #include <iostream>
 
-#ifdef linux
+#ifdef __linux__
 #include <stdlib.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -74,7 +74,7 @@ string foxtrot::get_pushbullet_authkey(const string& client_id)
 //     std::cout << "string is: " << oss.str() << std::endl;
     
     
-#ifdef linux
+#ifdef __linux__
     
     char buffer[2048];
     

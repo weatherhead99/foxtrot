@@ -5,7 +5,7 @@
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/Logging.h>
 
-#include <foxtrot/server/DeviceHarness.h>
+#include <foxtrot/DeviceHarness.h>
 
 #include <foxtrot/devices/archon.h>
 #include <foxtrot/devices/archon_modules.h>
@@ -46,7 +46,7 @@ template<typename T> void setup_with_disable(const std::string& device_name, std
 {
   
   auto disable_str = "disable_" + device_name;
-  if(!boost::get<int>(params[disable_str]))
+  if(!std::get<int>(params[disable_str]))
   {
     fun();
   }
@@ -88,7 +88,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 		     [&harness, &setup_params, &params, &lg]()
 		     {
     
-			auto archon_reset = static_cast<bool>(boost::get<int>(setup_params.at("archon_reset")));
+			auto archon_reset = static_cast<bool>(std::get<int>(setup_params.at("archon_reset")));
 			lg.Info("setting up Archon....");
 			auto archon_params = params->at("archon_params");
 			auto archontcp = std::make_shared<foxtrot::protocols::simpleTCP>(&archon_params);
@@ -146,7 +146,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 		       [&harness, &lg, &setup_params] ()
 		       {
 			 lg.Info("setting up Stellarnet Spectrometer");
-			 auto firmware_file = boost::get<std::string>(setup_params.at("stellarnet_firmware"));
+			 auto firmware_file = std::get<std::string>(setup_params.at("stellarnet_firmware"));
 
 			 auto spectrometer = std::unique_ptr<foxtrot::devices::stellarnet>(new foxtrot::devices::stellarnet(firmware_file,1000));
 			 harness.AddDevice(std::move(spectrometer));

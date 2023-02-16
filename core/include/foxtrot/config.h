@@ -1,7 +1,7 @@
 #pragma once
-#include <boost/optional.hpp>
 #include <string>
 #include <cstdlib>
+#include <optional>
 
 using std::string;
 
@@ -18,12 +18,12 @@ namespace foxtrot
     
     struct exptserve_options
     {
-        boost::optional<string> setupfile;
-        boost::optional<string> parameterfile;
-        boost::optional<int> threads;
-        boost::optional<int> debuglevel;
-        boost::optional<string> keyfile;
-        boost::optional<string> certfile;
+      std::optional<string> setupfile;
+        std::optional<string> parameterfile;
+        std::optional<int> threads;
+        std::optional<int> debuglevel;
+        std::optional<string> keyfile;
+        std::optional<string> certfile;
     };
     
     

@@ -1,5 +1,4 @@
 #include <fstream>
-#include <boost/filesystem.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/program_options.hpp>
@@ -7,6 +6,7 @@
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/config.h>
+#include <filesystem>
 
 namespace pt = boost::property_tree;
 namespace po = boost::program_options;
@@ -23,17 +23,17 @@ std::string foxtrot::get_config_file_path(const std::string& envvarname,
     if(path == nullptr)
     {
         lg.Info("no environment variable, getting config from default path");
-#ifdef linux
+#ifdef __linux__
         char* homeenv = std::getenv("HOME");
 #else
         char* homedrive = std::getenv("HOMEDRIVE");
         char* homepath = std::getenv("HOMEPATH");
         
-        auto homeenv = boost::filesystem::path(homedrive);
+        auto homeenv = std::filesystem::path(homedrive);
         homeenv /= homepath;
         
 #endif
-        auto home = boost::filesystem::path(homeenv);
+        auto home = std::filesystem::path(homeenv);
         home /= ".foxtrot" ;
         home /= defaultfilename ;
         return home.string();
@@ -50,10 +50,10 @@ std::string foxtrot::get_config_file_path(const std::string& envvarname,
 void foxtrot::create_config_file(const string& filename)
 {
     foxtrot::Logging lg("create_config_file");
-    if(!boost::filesystem::exists(filename))
+    if(!std::filesystem::exists(filename))
     {
-        auto path = boost::filesystem::path(filename);
-        boost::filesystem::create_directories(path.parent_path());
+        auto path = std::filesystem::path(filename);
+        std::filesystem::create_directories(path.parent_path());
         lg.Info("creating config file...");
 	std::ofstream ofs(filename);
         
