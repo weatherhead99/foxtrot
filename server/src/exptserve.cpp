@@ -22,6 +22,8 @@
 #include "exptserve.h"
 #include "ServerImpl.h"
 
+#include <filesystem>
+
 using namespace foxtrot;
 using std::cout;
 using std::endl;
@@ -199,7 +201,7 @@ int main(int argc, char** argv)
     
     
     lg.Info("trying to load credentials for authentication");
-    if(!boost::filesystem::exists(servercreds))
+    if(!std::filesystem::exists(servercreds))
     {
         lg.Warning("no credentials info found, not setting up authentication");
     }
