@@ -19,6 +19,8 @@ message devcapability
 {
     capability_types tp = 1;
     string capname = 2;
+    uint32 capid = 8;
+
     repeated string argnames = 3;
     repeated variant_descriptor argtypes = 4;
     //TODO: allow for return of vector types
@@ -42,7 +44,8 @@ message capability_request
 {
     uint32 msgid = 1;
     uint32 devid = 2;
-    string capname  = 3;
+    string capname = 3;
+    uint32 capid = 6;
     repeated capability_argument args = 4; 
     uint32 contention_timeout = 5;
 }
@@ -52,6 +55,7 @@ message capability_response
     uint32 msgid = 1;
     uint32 devid = 2;
     string capname = 3;
+    uint32 capid = 7;
     ft_variant returnval = 4;
     errstatus err = 5;
     google.protobuf.Timestamp tstamp = 6;
@@ -63,6 +67,7 @@ message chunk_request
     uint32 msgid = 1;
     uint32 devid = 2;
     string capname = 3;
+    uint32 capid = 8;
     repeated capability_argument args = 4;
     uint32 chunksize = 6;
     uint32 contention_timeout = 7;
@@ -74,6 +79,7 @@ message datachunk
     bytes data = 1;
     uint32 msgid = 2;
     uint32 devid = 3;
+    uint32 capid = 8;
     string capname = 4;
     errstatus err = 6;
     byte_data_types dtp = 7;
@@ -110,6 +116,7 @@ message devdescribe
 message servdescribe
 {
     string servcomment = 1;
+    string version = 4;
     map<uint32, devdescribe> devs_attached = 2;
     errstatus err = 3;
 }

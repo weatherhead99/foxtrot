@@ -1,11 +1,12 @@
 #include <sstream>
 #include <algorithm>
-#include <variant>
+
 
 #include <rttr/registration>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/ReflectionError.h>
+
 
 //NOTE: copied (probably missing edge cases!) from boost::hash_combine
 template<typename T>
@@ -66,9 +67,11 @@ std::size_t foxtrot::CapabilityHash::operator()(const foxtrot::Capability& cap) 
 };
 
 
-foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
+foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment, bool load_capabilities)
 : _proto(std::move(proto)), _devcomment(comment), lg_("Device")
 {
+    if(load_capabilities)
+        load_capability_map(true);
 }
 
 foxtrot::Device::~Device()
@@ -169,106 +172,114 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
 rttr::variant foxtrot::Device::Invoke(const Capability& cap, foxtrot::rarg_cit argbegin,
                                       foxtrot::rarg_cit argend)
 {
-    return Invoke(cap.CapabilityName, argbegin, argend);
+    if(cap.invokable.has_value())
+        return Invoke(*(cap.invokable), argbegin, argend);
+    else
+        return Invoke(cap.CapabilityName, argbegin, argend);
+
+}
+
+
+rttr::variant foxtrot::Device::Invoke(const std::variant< rttr::property, rttr::method >& invokable, foxtrot::rarg_cit beginargs, foxtrot::rarg_cit endargs)
+{
+        rttr::variant ret = std::visit([&beginargs, &endargs, this] (auto&& v)
+        {
+            using T = std::decay_t<decltype(v)>;
+
+            if constexpr(std::is_same_v<T, rttr::property>)
+            {
+                auto nargs = std::distance(beginargs,endargs);
+                if(v.is_readonly())
+                {
+                auto ret = v.get_value(*this);
+                return ret;
+                }
+                else if(nargs > 1)
+                {
+                throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
+                }
+                else if(nargs == 1)
+                {
+                bool success;
+                auto argcpy = *beginargs;
+                sanitize_arg(argcpy,v.get_type(),1);
+                success = v.set_value(*this, argcpy);
+                if(!success)
+                    throw std::runtime_error("failed to set property!");
+
+                //NOTE: return void here because that's what the other side expects!
+                auto voidmeth = rttr::type::get_global_method("void_helper_function");
+                auto voidret = voidmeth.invoke({});
+
+                return voidret;
+                }
+                else if(nargs == 0)
+                {
+                auto retval = v.get_value(*this);
+                return retval;
+                }
+            }
+            else if constexpr(std::is_same_v<T, rttr::method>)
+            {
+                //method call
+                if(!v.is_valid())
+                    throw std::logic_error("invalid method!");
+
+                std::vector<rttr::variant> argcopy(beginargs, endargs);
+        //TODO: check arguments here
+                auto paraminfs = v.get_parameter_infos();
+                auto paraminfsit = paraminfs.begin();
+                if(argcopy.size() != paraminfs.size())
+                    throw std::runtime_error("wrong number of arguments provided");
+
+                int i =1;
+                for(auto& a : argcopy)
+                {
+                    auto target_tp = (paraminfsit++)->get_type();
+                    if(a.get_type().is_wrapper())
+                    {
+                        lg_.strm(sl::warning) << "an argument type ended up as a wrapper. This will cause a copy and is inefficient";
+                        lg_.strm(sl::warning) << "the argument type is:"  << a.get_type().get_name().to_string();
+
+                        a = a.extract_wrapped_value();
+                    }
+
+
+                    sanitize_arg(a, target_tp, i++, &lg_);
+                }
+
+                std::vector<rttr::argument> argvec(argcopy.begin(), argcopy.end());
+                auto retval = v.invoke_variadic(*this,argvec);
+                if(!retval)
+                    throw std::logic_error("failed to invoke method!");
+                return retval;
+            }
+            else
+            {
+                static_assert("non exhaustive visit!");
+            }
+
+        }, invokable);
+
+        return ret;
 }
 
 
 rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_cit argbegin,
                                       foxtrot::rarg_cit argend)
 {
-       //default (rttr based) implementation. Override in e.g. python devices
-    auto devtp = rttr::type::get(*this);
-    
-    auto prop = devtp.get_property(capname.c_str());
-    auto meth = devtp.get_method(capname.c_str());
-    
-    if(!meth && !prop)
-    {
-        throw ReflectionError("no matching property or method");
-    }
-    else if(!prop)
-    {
-        //method call
-        if(!meth.is_valid())
-        {
-            throw std::logic_error("invalid method!");
-        }
-        
-        std::vector<rttr::variant> argcopy(argbegin, argend);
-        //TODO: check arguments here
-        auto paraminfs = meth.get_parameter_infos();
-        auto paraminfsit = paraminfs.begin();
-        if(argcopy.size() != paraminfs.size())
-        {
-            throw std::runtime_error("wrong number of arguments provided");
-        }
-        
-        int i =1;
-        for(auto& a : argcopy)
-        {
-            auto target_tp = (paraminfsit++)->get_type();
-	    
-	    
-            if(a.get_type().is_wrapper() and ! target_tp.is_wrapper())
-            {
-                lg_.strm(sl::warning) << "in capability with name: " << capname;
-                lg_.strm(sl::warning) << "an argument type ended up as a wrapper. This will cause a copy and is inefficient";
-                lg_.strm(sl::warning) << "the argument type is:"  << a.get_type().get_name().to_string();
-                
-                a = a.extract_wrapped_value();
-            }
-            
-            
-            sanitize_arg(a, target_tp, i++, &lg_);
-        }
-        
-        std::vector<rttr::argument> argvec(argcopy.begin(), argcopy.end());
-        auto retval = meth.invoke_variadic(*this,argvec);
-        if(!retval)
-            throw std::logic_error("failed to invoke method!");
-        return retval;
-        
-    }
-    else
-    {
-        auto nargs = std::distance(argbegin,argend);
-        if(prop.is_readonly())
-        {
-            auto ret = prop.get_value(*this);
-            return ret;
-        }
-        else if(nargs > 1)
-        {
-            throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
-        }
-        else if(nargs == 1)
-        {
-            bool success;
-            auto argcpy = *argbegin;
-            sanitize_arg(argcpy,prop.get_type(),1);
-            success = prop.set_value(*this, argcpy);
-            if(!success)
-                throw std::runtime_error("failed to set property!");
-            
-//             auto voidtp = rttr::type::get<void>();
-//             auto voidval = voidtp.create();
-//HACK: creating void type doesn't seem to work somehow!
-            auto voidmeth = rttr::type::get_global_method("void_helper_function");
-            auto voidret = voidmeth.invoke({});
-            
-            return voidret;
-        }
-        else if(nargs == 0)
-        {
-            auto retval = prop.get_value(*this);
-            return retval;
-        }
-        
-        throw std::logic_error("code should never reach this point, there is a programming error");
-    }
-    
-    
-    
+    auto capid = _cap_string_registry.at(capname);
+    return Invoke(capid, argbegin, argend);
+}
+
+rttr::variant foxtrot::Device::Invoke(unsigned short capid, foxtrot::rarg_cit beginargs,
+                                      foxtrot::rarg_cit endargs)
+{
+    auto pm = _cap_registry.at(capid).invokable;
+    if(!pm.has_value())
+        throw std::logic_error("invokable in table has no value! This should NEVER happen");
+
+    return Invoke(*pm, beginargs, endargs);
 }
 
 foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) const
@@ -284,64 +295,11 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
     rttr::variant flagmaskmeta;
     
     if(prop)
-    {
-        auto proptp = prop.get_type();
-        out.Returntype = proptp;
-        
-        
-        if(is_ft_call_streaming(prop))
-        {
-            out.type = CapabilityType::STREAM;
-        }
-        
-        else if(prop.is_readonly())
-        {
-            out.type = CapabilityType::VALUE_READONLY;
-        }
-        else
-        {
-            out.type = CapabilityType::VALUE_READWRITE;
-            out.Argnames.push_back(std::string{proptp.get_name()});
-            out.Argtypes.push_back(proptp);
-        }
-
-	flagmeta = prop.get_metadata("ft_flags");
-	flagmaskmeta = prop.get_metadata("ft_flagmask");
-       
-    }
+        return GetCapability(prop);
     else if(meth)
-    {
-        
-        if(is_ft_call_streaming(meth))
-        {
-            out.type = CapabilityType::STREAM;
-        }
-        else
-        {
-            out.type = CapabilityType::ACTION;
-        }
-        
-        auto args = meth.get_parameter_infos();
-        auto rettp = meth.get_return_type();
-        
-        out.Returntype = rettp;
-        out.Argnames.reserve(args.size());
-        out.Argtypes.reserve(args.size());
-        
-        for(auto& arg : args)
-        {
-            out.Argnames.push_back(std::string(arg.get_name()));
-            out.Argtypes.push_back(arg.get_type());
-        }
-
-	flagmeta = meth.get_metadata("ft_flags");
-	flagmaskmeta = meth.get_metadata("ft_flagmask");
-
-    }
+        return GetCapability(meth);
     else
-    {
-        throw std::out_of_range("requested capability which doesn't seem to exist!");
-    }
+        throw std::out_of_range("requested capability doesn't seem to exist!");
 
     bool both_metas = flagmeta.is_valid() and flagmaskmeta.is_valid();
     
@@ -365,6 +323,41 @@ void void_helper_function()
 };
 
 
+bool foxtrot::Device::Reconnect()
+{
+    return false;
+};
+
+bool foxtrot::Device::Reset()
+{
+    return false;
+}
+
+void foxtrot::Device::load_capability_map(bool force_reload)
+{
+    if(!_registry_is_loaded or force_reload)
+    {
+        _cap_registry.clear();
+        _cap_string_registry.clear();
+        unsigned short idx = 0;
+        auto reflecttp = rttr::type::get(*this);
+        for(auto& prop : reflecttp.get_properties())
+        {
+            auto cap = GetCapability(prop);
+            _cap_registry.insert({idx, cap});
+            _cap_string_registry.insert({cap.CapabilityName, idx++});
+        }
+        for(auto& meth : reflecttp.get_methods())
+        {
+            auto cap = GetCapability(meth);
+            _cap_registry.insert({idx++, cap});
+            _cap_string_registry.insert({cap.CapabilityName, idx++});
+        }
+    }
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -372,6 +365,8 @@ RTTR_REGISTRATION
  registration::class_<Device>("foxtrot::Device")
  .property_readonly("getDeviceTypeName", &Device::getDeviceTypeName)
  .property_readonly("getDeviceComment", &Device::getDeviceComment)
+ .method("Reconnect", &Device::Reconnect)
+ .method("Reset", &Device::Reset)
  ;
  
  registration::method("void_helper_function", &void_helper_function);
