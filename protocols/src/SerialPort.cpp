@@ -156,21 +156,22 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
 
   boost::system::error_code ec;
   bool done = false;
+  std::size_t actlen;
+  auto cond = boost::asio::transfer_exactly(len);
   
   if(!wait.has_value())
     {
-    boost::asio::read(*_sport, buffer(out), ec);
-    if(ec)
-      throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
-
-
+      _lg.strm(sl::trace) << "no timeout value, doing boost::asio::read";
+      actlen = boost::asio::read(*_sport, buffer(out),
+				 cond,
+				 ec);
     }
   else
     {
-
+      _lg.strm(sl::trace) << "timeout value, doing boost::async_read";
       boost::asio::async_read(*_sport, buffer(out),
-			      boost::asio::transfer_exactly(len),
-			      [&ec, &done](const boost::system::error_code ec2, std::size_t bytes_transferred) { ec = ec2; done=true; });
+			      cond,
+			      [&ec, &done, &actlen](const boost::system::error_code ec2, std::size_t bytes_transferred) { ec = ec2; done=true; actlen = bytes_transferred; });
 
       _lg.strm(sl::trace) << "starting run_one_for on io_loop" ;
       auto n_run = _io_service->run_for(*wait);
@@ -179,12 +180,18 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
       _lg.strm(sl::trace) << "io_service stopped? " << (int) _io_service->stopped();
       _io_service->restart();
 
-        if(ec)
-	  throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
-	else if(!done)
+      if(!done)
 	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
-
     }
+
+  if(actlen != len)
+    {
+      _lg.strm(sl::error) << "expected bytes transferred: " << len;
+      _lg.strm(sl::error) << "actual bytes transferred: " << actlen;
+      throw std::logic_error(std::string("actlen bytes transferred not equal to requested bytes transferred, should never happen!"));
+    }
+  if(ec)
+    throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
  
 
   return std::string(out.begin(), out.end());
