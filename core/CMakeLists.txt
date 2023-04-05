@@ -39,11 +39,7 @@ find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
 
 #NOTE: find via module to force conan dependencies
-if(DEFINED CONAN_EXE_LINKER_FLAGS)
-  find_package(gRPC REQUIRED MODULE)
-else()
-  find_package(gRPC REQUIRED)
-endif()
+find_package(gRPC REQUIRED)
 
 
 

@@ -1,8 +1,9 @@
-from conans import ConanFile
-from conan.tools.cmake import CMakeToolchain, CMake
+from conan import ConanFile
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
 from conan.tools.scm import Git, Version
 from conan.tools.files import load, update_conandata
-from conans.tools import environment_append, RunEnvironment, collect_libs
+from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
+from conan.tools.files import  collect_libs
 import os
 
 class FoxtrotCppMeta(type):
@@ -33,8 +34,8 @@ def ft_require(conanfile, substr: str) -> None:
         conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version},include_prerelease=True]@{conanfile.user}/{conanfile.channel}")
     
 class FoxtrotBuildUtils(ConanFile):
-    name = "FoxtrotBuildUtils"
-    version = "0.3.5"
+    name = "foxtrotbuildutils"
+    version = "0.4.0"
     default_user = "weatherill"
     default_channel = "stable"
 
@@ -44,7 +45,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     url = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
-    generators = "CMakeToolchain", "cmake_find_package", "virtualrunenv"
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
     options = {"silent_build" : [True, False]}
@@ -65,11 +65,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
             
     def build(self):
         cmake = CMake(self)
-        #remove to make new CMake helper error happy
         cmake.configure()
-        env_build = RunEnvironment(self)
-        with environment_append(env_build.vars):
-            cmake.build()
+        cmake.build()
         cmake.install()
             
     def package_info(self):
@@ -79,6 +76,13 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         self.cpp_info.builddirs.append("lib")
 
     def generate(self):
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        
         tc = CMakeToolchain(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
         if self.options["silent_build"]:
