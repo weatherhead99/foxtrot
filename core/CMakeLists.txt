@@ -6,8 +6,18 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 
 #import other cmake functionality we need later
+include(GenerateExportHeader)
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 include(FoxtrotCommonSetup)
+
+#fix GRPC windows building issues
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0A00)
+endif()
+
+
+#setup conan build if necessary
 include(GitVersion)
 
 
