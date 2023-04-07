@@ -1,31 +1,24 @@
 import os
-from conans import python_requires
+from conan import ConanFile
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.4]@weatherill/stable")
+#ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
 
-class FoxtrotProtocolsConan(ftbase.FoxtrotCppPackage):
-#                            metaclass = ftbase.FoxtrotCppMeta):
+class FoxtrotProtocolsConan(ConanFile):
+    python_requires="foxtrotbuildutils/[^0.4.0]"
+    python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_protocols"
     src_folder="protocols"
     description="protocol implementations for  foxtrot"
     exports_sources="CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h"
     requires = ("libusb/[^1.0.26]",
-                "libcurl/[^7.86.0]")
+                "libcurl/[^7.88.1]")
 
-    default_options = {"libusb:shared" : True,
-                       "libcurl:shared" : True}
-
-    cmakeName = "foxtrotProtocols"
-
+    default_options = {"libusb/*:shared" : True,
+                       "libcurl/*:shared" : True}
+    
     def requirements(self):
-        ftbase.ft_require(self, "core")
+        self.python_requires["foxtrotbuildutils"].module.ft_require(self, "core")
 
     def package_info(self):
         super().package_info()
-        self.fix_cmake_def_names("foxtrotProtocols")
-        self.cpp_info.set_property("cmake_find_mode", "none")
-
-    def layout(self):
-        super().layout()
-        self.cpp.source.includedirs.append("include")
-        self.cpp.build.builddirs=["."]
+        self.conan2_fix_cmake_names("foxtrotProtocols")

@@ -29,9 +29,9 @@ class FoxtrotCppMeta(type):
 
 def ft_require(conanfile, substr: str) -> None:
     if getattr(conanfile, "stable_release", False):
-        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version}]@{conanfile.user}/{conanfile.channel}")
+        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version}]")
     else:
-        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version},include_prerelease=True]@{conanfile.user}/{conanfile.channel}")
+        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version},include_prerelease=True]")
     
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
@@ -75,7 +75,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
-        self.cpp_info.names["cmake_find_package"] = "foxtrot"
         self.cpp_info.builddirs.append("lib")
 
     def generate(self):
@@ -96,6 +95,13 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         self.cpp_info.names["cmake_find_package"] = cmakename
         self.cpp_info.names["cmake_find_package_multi"] = cmakename
         self.cpp_info.builddirs.append("lib/cmake/%s" % cmakename)
+
+    def conan2_fix_cmake_names(self, cmakename: str):
+        self.cpp_info.builddirs.append(f"lib/cmake/{cmakename}")
+        self.cpp_info.set_property("cmake_target_name", f"foxtrot::{cmakename}")
+        self.cpp_info.set_property("cmake_file_name", f"{cmakename}Config.cmake")
+        
+        
 
     def package_id(self):
         pass
@@ -138,6 +144,10 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
     chash = other[1:]
     
     cvers = Version(last_tagged)
+
+    print(f"pre: {cvers.pre}")
+    print(f"patch: {cvers.patch}")
+    
     if cvers.pre is None:
         #bump the patch version, and add a dev string
         if cvers.patch is not None:
@@ -150,7 +160,7 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
             newmajor = cvers.major
             newminor = cvers.minor if cvers.minor is not None else 0
             newpatch = 1
-            newvers = str(Version(newmajor, newminor, newpatch))
+            newvers = str(".".join([str(_) for _ in (newmajor, newminor, newpatch)]))
     else:
         #version stays the same, we will just add a devstring
         newvers = str(cvers)
