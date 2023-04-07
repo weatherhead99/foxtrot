@@ -15,10 +15,8 @@ class FoxtrotProtocolsConan(ConanFile):
 
     default_options = {"libusb/*:shared" : True,
                        "libcurl/*:shared" : True}
-    
-    def requirements(self):
-        self.python_requires["foxtrotbuildutils"].module.ft_require(self, "core")
 
-    def package_info(self):
-        super().package_info()
-        self.conan2_fix_cmake_names("foxtrotProtocols")
+    ft_package_requires = "core",
+    cmake_package_name = "foxtrotProtocols"
+
+    overrides = "openssl/3.1.0",

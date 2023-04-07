@@ -1,9 +1,8 @@
-import os
-from conans import python_requires
+from conan import ConanFile
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
-
-class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
+class FoxtrotServerConan(ConanFile):
+    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_server"
     description="foxtrot server components"
     exports_sources = "*CMakeLists.txt", "src/*.cpp",\
@@ -15,22 +14,15 @@ class FoxtrotServerConan(ftbase.FoxtrotCppPackage):
                 "libsodium/[^1.0.18]",
                 "rapidjson/[^1.1.0]",
                 )
-        
-    default_options = {"boost:shared" : True,
-                       "OpenSSL:shared" : True,
-                       "libsodium:shared" : True,
-                       "zlib:shared" : True}
+
+    default_options = {"boost/*:shared" : True,
+                       "libsodium/*:shared" : True,
+                       "zlib/*:shared" : True}
 
     src_folder="server"
-    
-    def requirements(self):
-        ftbase.ft_require(self, "core")
-        ftbase.ft_require(self, "protocols")
-        
+
+    ft_package_requires = "core", "protocols"
+    cmake_package_name = "foxtrotServer"
+
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
-
-
-    def package_info(self):
-        super().package_info()
-        self.fix_cmake_def_names("foxtrotServer")

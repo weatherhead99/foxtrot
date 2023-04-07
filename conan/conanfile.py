@@ -6,6 +6,8 @@ from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import  collect_libs
 import os
 
+FOXTROT_GLOBAL_OVERRIDES = []
+
 class FoxtrotCppMeta(type):
     BASE_PKG_NAME = "FoxtrotCppPackage"
     
@@ -74,6 +76,21 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         self.cpp_info.libdirs = ["lib/foxtrot"]
         self.cpp_info.builddirs.append("lib")
 
+        if hasattr(self, "cmake_package_name"):
+            self.conan2_fix_cmake_names(self.cmake_package_name)
+
+    def requirements(self):
+        if hasattr(self, "ft_package_requires"):
+            for pack in self.ft_package_requires:
+                self.output.info(f"adding other foxtrot package {pack} to dependencies")
+                ft_require(self, pack)
+
+        if hasattr(self, "overrides"):
+            for pack in self.overrides:
+                self.output.info(f"got override {pack} from local overrides")
+                self.requires(pack, override=True)
+                FOXTROT_GLOBAL_OVERRIDES.append(pack)
+
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
@@ -81,7 +98,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         deps = CMakeDeps(self)
         deps.generate()
 
-        
+
         tc = CMakeToolchain(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
         if self.options["silent_build"]:

@@ -1,10 +1,9 @@
 import os
-from conans import python_requires
+from conan import ConanFile
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
-
-class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
-                          metaclass = ftbase.FoxtrotCppMeta):
+class FoxtrotDevicesConan(ConanFile):
+    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_devices"
     src_folder="devices"
     description="device drivers for foxtrot"
@@ -20,13 +19,6 @@ class FoxtrotDevicesConan(ftbase.FoxtrotCppPackage,
                       "idscamera/*.cpp", "idscamera/*.h")
 
     requires =  ("rapidxml/1.13")
-    
-    
-    def requirements(self):
-        ftbase.ft_require(self, "core")
-        ftbase.ft_require(self, "protocols")
+    ft_package_requires = "core", "protocols"
+    cmake_package_name = "foxtrotDevices"
 
-
-    def package_info(self):
-        super().package_info()
-        self.fix_cmake_def_names("foxtrotDevices")

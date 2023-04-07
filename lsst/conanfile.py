@@ -3,6 +3,8 @@ from conans import python_requires, tools
 ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
 
 class FoxtrotLSST(ftbase.FoxtrotCppPackage):
+    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_lsst"
     description="LSST test stand specific stuff for foxtrot"
     exports_sources = ("CMakeLists.txt", "*/CMakeLists.txt", 
@@ -12,11 +14,7 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage):
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
     src_folder="lsst"
-    
-    def requirements(self):
-        ftbase.ft_require(self, "client")
-        ftbase.ft_require(self, "protocols")
-        ftbase.ft_require(self, "devices")
+    ft_package_requires = "client" , "protocols", "devices"
 
     def deploy(self):
         self.copy_deps("*exptserve")
@@ -24,8 +22,3 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage):
         self.copy("*tbcli")
         self.copy("*autofilld")
         self.copy("*lsst_testbench.so")
-
-    def package_info(self):
-        super().package_info()
-        self.cpp_info.libdirs = ["lib"]
-        self.cpp_info.libs = tools.collect_libs(self)

@@ -1,11 +1,9 @@
-import os
-from conans import python_requires
-
-ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
+from conan import ConanFile
 
 
-class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
-                         metaclass=ftbase.FoxtrotCppMeta):
+class FoxtrotClientConan(ConanFile):
+    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_client"
     description="foxtrot c++ client"
     exports_sources = "CMakeLists.txt", "cmake/*.in", \
@@ -13,10 +11,6 @@ class FoxtrotClientConan(ftbase.FoxtrotCppPackage,
                       "src/*.cpp"
 
     src_folder = "client"
+    ft_package_requires = "core",
+    cmake_package_name = "foxtrotClient"
 
-    def requirements(self):
-        ftbase.ft_require(self, "core")
-
-    def package_info(self):
-        super().package_info()
-        self.fix_cmake_def_names("foxtrotClient")
