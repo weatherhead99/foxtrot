@@ -5,9 +5,11 @@ from conan.tools.env import VirtualRunEnv
 
 #ftbase = python_requires("foxtrotbuildutils/[^0.4]@weatherill/stable")
 
+
 class FoxtrotCoreConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
+    overrides = "openssl/3.1.0",
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
     exports_sources = "CMakeLists.txt", "src/*.cpp", "src/*.cc", \
@@ -21,7 +23,8 @@ class FoxtrotCoreConan(ConanFile):
                 "grpc/[^1.50.1]",
                 "rttr/[^0.9.6]")
 
-    
+    cmake_package_name = "foxtrotCore"
+
     default_options = {"boost/*:shared" : True,
                        "OpenSSL/*:shared": True,
                        "protobuf/*:with_zlib": True,
@@ -32,15 +35,6 @@ class FoxtrotCoreConan(ConanFile):
                        "grpc/*:shared" : True}
 
     src_folder = "core"
-
-
-    def requirements(self):
-        #override to new openSSL to fix version conflicts
-        self.requires("openssl/3.1.0", override=True)
-    
-    def package_info(self):
-        super().package_info()
-        self.conan2_fix_cmake_names("foxtrotCore")
 
     def build(self):
         cmake = CMake(self)
