@@ -42,7 +42,7 @@ find_package(gRPC REQUIRED)
 #build foxtrot core library (errors and logging)
 
 set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc src/Device.cpp src/DeviceHarness.cpp src/ExperimentalSetup.cpp src/CmdDevice.cpp)
+src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc src/Device.cpp src/DeviceHarness.cpp src/ExperimentalSetup.cpp src/CmdDevice.cpp src/DeviceFactory.cpp)
 
 add_subdirectory(proto)
 add_library(foxtrot_core ${srcs} $<TARGET_OBJECTS:foxtrot_protos> ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)

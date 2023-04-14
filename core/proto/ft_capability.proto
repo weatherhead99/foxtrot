@@ -99,6 +99,6 @@ service capability
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
     rpc FetchData(chunk_request) returns (stream datachunk);
-
+    rpc CloseDevice(empty) returns (errstatus);
 }
 

@@ -70,6 +70,10 @@ std::size_t foxtrot::CapabilityHash::operator()(const foxtrot::Capability& cap) 
 foxtrot::Device::Device(std::shared_ptr< foxtrot::CommunicationProtocol > proto, const std::string& comment)
 : _proto(std::move(proto)), _devcomment(comment), lg_("Device")
 {
+}
+
+foxtrot::Device::~Device()
+{
 
 }
 

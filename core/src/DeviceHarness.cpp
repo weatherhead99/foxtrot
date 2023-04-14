@@ -1,4 +1,7 @@
+#include <asm-generic/errno.h>
+#include <exception>
 #include <iostream>
+#include <mutex>
 #include <utility>
 #include <algorithm>
 #include <sstream>
@@ -61,7 +64,7 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 
 void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
 {
-    _lg.Info("clearing all devices");
+    _lg.Info("clearuing all devices");
     _lg.Debug("locking all devices");
     std::vector<std::unique_lock<std::timed_mutex>> locks;
     for(int id=0; id < _devvec.size(); id++)
@@ -76,6 +79,24 @@ void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
     
 }
 
+
+void foxtrot::DeviceHarness::RemoveDevice(int id)
+{
+
+  if( !_devvec[id]->hasLockImplementation())
+    {
+      _devvec.erase(_devvec.begin() + id);
+      _devmutexes.erase(id);
+    }
+  else
+    {
+      {
+	      std::unique_lock lck(_devmutexes.at(id));
+	_devvec.erase(_devvec.begin() + id);
+      }
+      _devmutexes.erase(id);
+    }
+};
 
 Device* const foxtrot::DeviceHarness::GetDevice(int id)
 {
