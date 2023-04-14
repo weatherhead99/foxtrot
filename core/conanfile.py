@@ -3,8 +3,6 @@ from conan import ConanFile
 from conan.tools.cmake import CMake
 from conan.tools.env import VirtualRunEnv
 
-#ftbase = python_requires("foxtrotbuildutils/[^0.4]@weatherill/stable")
-
 
 class FoxtrotCoreConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
@@ -25,14 +23,11 @@ class FoxtrotCoreConan(ConanFile):
 
     cmake_package_name = "foxtrotCore"
 
-    default_options = {"boost/*:shared" : True,
-                       "OpenSSL/*:shared": True,
+    package_type = "shared-library"
+    default_options = {"*:shared" : True,
                        "protobuf/*:with_zlib": True,
-                       "protobuf/*:shared" : True,
-                       "rttr/*:shared" : True,
                        "rttr/*:with_rtti" : True,
-                       "grpc/*:cpp_plugin" : True,
-                       "grpc/*:shared" : True}
+                       "grpc/*:cpp_plugin" : True}
 
     src_folder = "core"
 

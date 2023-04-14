@@ -1,4 +1,5 @@
 from conan import ConanFile
+from conan.tools.cmake import CMakeDeps, CMakeToolchain
 
 class FoxtrotServerConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
@@ -23,6 +24,20 @@ class FoxtrotServerConan(ConanFile):
 
     ft_package_requires = "core", "protocols"
     cmake_package_name = "foxtrotServer"
+    package_type = "application"
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
+
+    def generate(self):
+        #NOTE: need to alter target name of rapidJSON which differs from
+        #upstream cmake build (I think)
+        deps = CMakeDeps(self)
+        deps.set_property("rapidjson", "cmake_target_name",
+                          "RapidJSON::RapidJSON")
+        deps.generate()
+
+        tc = CMakeToolchain(self)
+        tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
+        tc.generate()
+
