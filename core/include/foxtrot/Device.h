@@ -50,11 +50,12 @@ namespace foxtrot
  
   class CommunicationProtocol;
   
-  class  Device
+  class  Device : public std::enable_shared_from_this<Device>
   {
     RTTR_ENABLE()
   public:
     Device(std::shared_ptr<CommunicationProtocol> proto, const std::string& comment = "");
+    virtual ~Device();
     
     virtual const std::string getDeviceTypeName() const;
     const std::string getDeviceComment() const;

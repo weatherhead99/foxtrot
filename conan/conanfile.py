@@ -51,6 +51,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     license = "UNLICENSED"
     options = {"silent_build" : [True, False]}
     default_options = {"silent_build" : True}
+    package_type = "python-require"
     
     def export(self):
         git = Git(self, self.recipe_folder)
@@ -121,6 +122,10 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         pass
         #silent build doest not affect binary output
         del self.info.options.silent_build
+
+    def layout(self):
+        self.folders.build = "conanbuild"
+        self.folders.generators = "conanbuild"
  
 
 def semver_from_git_describe(gitobj) -> str:
