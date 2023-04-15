@@ -1,7 +1,7 @@
 import os
 from conan import ConanFile
-from conan.tools.cmake import CMake
-from conan.tools.env import VirtualRunEnv
+from conan.tools.cmake import CMake, CMakeDeps
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 
 
 class FoxtrotCoreConan(ConanFile):
@@ -40,5 +40,17 @@ class FoxtrotCoreConan(ConanFile):
         with envvars.apply():
             cmake.build()
 
+    def generate(self):
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        tc = self._setup_cmake_tc()
+        tc.generate()
+
+    def package(self):
+        cmake = CMake(self)
         cmake.install()
-        
+
