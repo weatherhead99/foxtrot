@@ -10,6 +10,7 @@ enum capability_types
     VALUE_READWRITE = 1;
     ACTION = 2;
     STREAM = 3;
+    CONSTRUCTOR = 4;
 }
 
 
@@ -94,11 +95,33 @@ message servdescribe
     errstatus err = 3;
 }
 
+message devicechooser
+{
+  uint32 devid = 1;
+}
+
+message device_setup_request
+{
+  string devtypename = 1;
+  string devcomment = 2;
+  repeated capability_argument args = 3; 
+}
+
+message device_setup_response
+{
+  errstatus err = 1;
+  devdescribe dev = 2;
+}
+
+  
+
 service capability
 {
     rpc InvokeCapability (capability_request) returns (capability_response);
     rpc DescribeServer(empty) returns (servdescribe);
     rpc FetchData(chunk_request) returns (stream datachunk);
-    rpc CloseDevice(empty) returns (errstatus);
+    rpc CloseDevice(devicechooser) returns (errstatus);
+    rpc RescanDevices(empty) returns (errstatus);
+    rpc SetupDevice(device_setup_request) returns (device_setup_response);
 }
 

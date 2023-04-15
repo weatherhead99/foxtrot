@@ -4,6 +4,7 @@ from conan.tools.scm import Git, Version
 from conan.tools.files import load, update_conandata
 from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import  collect_libs
+from conan.tools.cmake import cmake_layout
 import os
 
 FOXTROT_GLOBAL_OVERRIDES = []
@@ -92,6 +93,14 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
                 self.requires(pack, override=True)
                 FOXTROT_GLOBAL_OVERRIDES.append(pack)
 
+
+    def _setup_cmake_tc(self):
+        tc = CMakeToolchain(self)
+        tc.variables["VERSION_FROM_CONAN"] = self.version
+        if self.options["silent_build"]:
+            tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
+        return tc
+    
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
@@ -99,11 +108,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         deps = CMakeDeps(self)
         deps.generate()
 
-
-        tc = CMakeToolchain(self)
-        tc.variables["VERSION_FROM_CONAN"] = self.version
-        if self.options["silent_build"]:
-            tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
+        tc = self._setup_cmake_tc()
         tc.generate()
 
     def fix_cmake_def_names(self, cmakename: str):
@@ -124,8 +129,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         del self.info.options.silent_build
 
     def layout(self):
-        self.folders.build = "conanbuild"
-        self.folders.generators = "conanbuild"
+        cmake_layout(self, build_folder="conanbuild")
  
 
 def semver_from_git_describe(gitobj) -> str:
