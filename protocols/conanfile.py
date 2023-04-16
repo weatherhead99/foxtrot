@@ -16,6 +16,7 @@ class FoxtrotProtocolsConan(ConanFile):
     default_options = {"libusb/*:shared" : True,
                        "libcurl/*:shared" : True}
 
+    package_type = "shared-library"
     ft_package_requires = "core",
     cmake_package_name = "foxtrotProtocols"
 

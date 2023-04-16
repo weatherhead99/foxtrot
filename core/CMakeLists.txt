@@ -85,8 +85,10 @@ install(EXPORT foxtrot_core
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} 
-    "ft_cmakedir;ft_core_sourcedir;ft_core_binarydir")
+foxtrot_setup_cmake_package(cmake/foxtrotCoreConfig.cmake.in foxtrotCore foxtrot_core)
+      
+#foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} 
+#    "ft_cmakedir;ft_core_sourcedir;ft_core_binarydir")
 
 #install cmake macro files
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
@@ -98,6 +100,6 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
 
         
 #add to package registry
-foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)
+#foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)
 
 add_subdirectory(devprogs)

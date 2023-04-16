@@ -41,6 +41,7 @@ class FoxtrotBuildUtils(ConanFile):
     version = "0.4.0"
     default_user = "weatherill"
     default_channel = "stable"
+    package_type = "python-require"
 
 class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     default_user = "weatherill"
@@ -50,9 +51,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
-    options = {"silent_build" : [True, False]}
-    default_options = {"silent_build" : True}
-    package_type = "python-require"
+
     
     def export(self):
         git = Git(self, self.recipe_folder)
@@ -97,8 +96,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     def _setup_cmake_tc(self):
         tc = CMakeToolchain(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
-        if self.options["silent_build"]:
-            tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
         return tc
     
     def generate(self):
@@ -118,18 +115,17 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
 
     def conan2_fix_cmake_names(self, cmakename: str):
         self.cpp_info.builddirs.append(f"lib/cmake/{cmakename}")
-        self.cpp_info.set_property("cmake_target_name", f"foxtrot::{cmakename}")
-        self.cpp_info.set_property("cmake_file_name", f"{cmakename}Config.cmake")
-        
-        
+        #self.cpp_info.set_property("cmake_target_name", f"foxtrot::{cmakename}")
+        #self.cpp_info.set_property("cmake_file_name", f"{cmakename}Config.cmake")
 
-    def package_id(self):
-        pass
-        #silent build doest not affect binary output
-        del self.info.options.silent_build
+        #we provide our own configuration files and as such disable CMakeDeps for ourselves
+        self.cpp_info.set_property("cmake_find_mode", None)
+        
+        
 
     def layout(self):
         cmake_layout(self, build_folder="conanbuild")
+        self.cpp.build.builddirs.append("")
  
 
 def semver_from_git_describe(gitobj) -> str:

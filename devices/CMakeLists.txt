@@ -127,9 +127,5 @@ cmake/Findueye.cmake DESTINATION ${ft_cmakedir})
         
 set(ft_devices_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
-foxtrot_create_package_config(cmake/foxtrotDevicesConfig.cmake.in ${ft_cmakedir} 
-"ft_cmakedir;device_targets;ft_devices_sourcedir")
-
-foxtrot_add_to_package_registry(foxtrot_devices
-foxtrotDevices)
+foxtrot_setup_cmake_package(cmake/foxtrotDevicesConfig.cmake.in foxtrotDevices foxtrot_devices)
 

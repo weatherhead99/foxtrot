@@ -3,12 +3,11 @@
 @PACKAGE_INIT@
 set(foxtrot_core_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
 
-#set(CMAKE_MODULE_PATH "${CMAKE_MODLE_PATH}/${foxtrot_CMAKE_DIR}")
 set(foxtrot_core_PREFIX ${PACKAGE_PREFIX_DIR})
 
 include(CMakeFindDependencyMacro)
 
-if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/installtree)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/foxtrotCoreexports.cmake)
         message(WARNING "foxtrotCoreConfig configuring from BUILD TREE! You may not want this!")
     set(BUILD_TREE TRUE)
 else()
@@ -41,7 +40,9 @@ if(BUILD_TREE)
       "${CMAKE_CURRENT_LIST_DIR};@PACKAGE_ft_core_sourcedir@/include")
 else()
     if(NOT TARGET foxtrot::foxtrot_core AND NOT foxtrot_core_BINARY_DIR)
-        include(${foxtrot_core_PREFIX}/lib/cmake/foxtrotCore/foxtrot_core.cmake)
+      include(${foxtrot_core_PREFIX}/lib/cmake/foxtrotCore/foxtrot_core.cmake)
+    else()
+      message(WARNING "targets were already declared, this configuration file did nothing!")
     endif()
     list(APPEND CMAKE_MODULE_PATH "@PACKAGE_ft_cmakedir@")
 endif()
