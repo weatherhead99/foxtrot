@@ -37,13 +37,13 @@ function(foxtrot_create_package_config infile destdir path_vars)
     include(CMakePackageConfigHelpers)
     get_filename_component(outfname_withpath ${infile} NAME_WE)
     get_filename_component(outfname ${outfname_withpath} NAME)
-
+    
     configure_package_config_file(${infile} ${outfname}.cmake
-                        INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+                        INSTALL_DESTINATION ${destdir}
                         PATH_VARS ${path_vars}
                         INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}.cmake
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/installtree/${outfname}.cmake
             DESTINATION ${destdir}
             COMPONENT devel)
 endfunction()
@@ -57,6 +57,26 @@ function(foxtrot_add_to_package_registry exportname packagename)
         export(PACKAGE ${packagename})
     endif()
 endfunction()
+
+function(foxtrot_setup_cmake_package infile packname target_name)
+  include(CMakePackageConfigHelpers)
+
+  #work out where the file will go (just the build directory)
+  get_filename_component(outfname_withpath ${infile} NAME_WE)
+  get_filename_component(outfname ${outfname_withpath} NAME)
+
+  set(CMAKE_DEST ${CMAKE_INSTALL_LIBDIR}/cmake/${packname}/)
+  
+  configure_package_config_file(${infile} ${CMAKE_CURRENT_BINARY_DIR}/${outfname}.cmake
+    INSTALL_DESTINATION ${CMAKE_DEST})
+  
+  export(EXPORT ${target_name} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packname}exports.cmake NAMESPACE foxtrot::)
+
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}.cmake
+    DESTINATION ${CMAKE_DEST} COMPONENT devel)
+  
+endfunction()
+
 
 
 macro(foxtrot_writeout_build_directory filename)

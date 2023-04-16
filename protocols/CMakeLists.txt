@@ -110,11 +110,9 @@ install(EXPORT foxtrot_protocols
         COMPONENT devel)
 
 set(ft_protocols_sourcedir ${CMAKE_SOURCE_DIR})
-foxtrot_create_package_config(cmake/foxtrotProtocolsConfig.cmake.in
-                                ${ft_cmakedir}
-                                "ft_cmakedir;protos;ft_protocols_sourcedir")
 
-foxtrot_add_to_package_registry(foxtrot_protocols foxtrotProtocols)
+
+foxtrot_setup_cmake_package(cmake/foxtrotProtocolsConfig.cmake.in foxtrotProtocols foxtrot_protocols)
 
 
 
