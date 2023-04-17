@@ -14,14 +14,14 @@
 using std::shared_ptr;
 using std::string;
 using std::optional;
-using std::string_view;
+
 
 namespace foxtrot
 {
 namespace devices
 {
     
-    
+  using string_view = std::basic_string_view<char>;
     enum class pfeiffer_action : short unsigned
     {
         read = 0,

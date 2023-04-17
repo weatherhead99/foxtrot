@@ -22,12 +22,14 @@ class FoxtrotCppMeta(type):
 
         if name != cls.BASE_PKG_NAME:
             #merge in the options
-
+            print("merging in the options and default options")
             basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
         
             n.options = getattr(n, "options", {}) | bases[basepkg].options
             n.default_options = getattr(n, "default_options", {}) | bases[basepkg].default_options
 
+            print(f" options: {n.options}")
+            print(f"default options: {n.default_options}")
         return n
 
 def ft_require(conanfile, substr: str) -> None:
@@ -52,6 +54,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
 
+    def __init_subclass__(cls):
+        pass
     
     def export(self):
         git = Git(self, self.recipe_folder)
@@ -68,13 +72,13 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
             
     def build(self):
         cmake = CMake(self)
-        #remove to make new CMake helper error happy
         cmake.configure()
-        env_build = RunEnvironment(self)
-        with environment_append(env_build.vars):
-            cmake.build()
+        cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
         cmake.install()
-            
+
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
@@ -100,7 +104,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         tc = CMakeToolchain(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
         return tc
-    
+
+
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()

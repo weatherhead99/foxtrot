@@ -115,4 +115,3 @@ set(ft_protocols_sourcedir ${CMAKE_SOURCE_DIR})
 foxtrot_setup_cmake_package(cmake/foxtrotProtocolsConfig.cmake.in foxtrotProtocols foxtrot_protocols)
 
 
-

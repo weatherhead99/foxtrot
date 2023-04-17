@@ -37,7 +37,13 @@ find_package(Boost REQUIRED COMPONENTS log program_options)
 endif()
 find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
+
+#NOTE: find via module to force conan dependencies
 find_package(gRPC REQUIRED)
+
+
+
+#message(WARNING "using protoc program: ${protobuf::protoc}")
 
 #build foxtrot core library (errors and logging)
 
