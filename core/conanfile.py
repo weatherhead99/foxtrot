@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
-
+from conan.tools.files import collect_libs
 
 class FoxtrotCoreConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
@@ -18,8 +18,7 @@ class FoxtrotCoreConan(ConanFile):
                       "proto/CMakeLists.txt"
 
     requires = ("boost/[^1.80.0]",
-                "grpc/[^1.50.1]",
-                "rttr/[^0.9.6]")
+                "grpc/[^1.50.1]")
 
     cmake_package_name = "foxtrotCore"
 
@@ -31,6 +30,11 @@ class FoxtrotCoreConan(ConanFile):
 
     src_folder = "core"
 
+    def requirements(self):
+        super().requirements()
+        self.requires("rttr/0.9.6", headers=True, libs=True,
+                      transitive_headers=True)
+
     def build(self):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared
@@ -39,18 +43,4 @@ class FoxtrotCoreConan(ConanFile):
         cmake.configure()
         with envvars.apply():
             cmake.build()
-
-    def generate(self):
-        buildenv = VirtualBuildEnv(self)
-        buildenv.generate()
-
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        tc = self._setup_cmake_tc()
-        tc.generate()
-
-    def package(self):
-        cmake = CMake(self)
-        cmake.install()
 

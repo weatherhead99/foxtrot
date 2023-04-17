@@ -22,12 +22,14 @@ class FoxtrotCppMeta(type):
 
         if name != cls.BASE_PKG_NAME:
             #merge in the options
-
+            print("merging in the options and default options")
             basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
         
             n.options = getattr(n, "options", {}) | bases[basepkg].options
             n.default_options = getattr(n, "default_options", {}) | bases[basepkg].default_options
 
+            print(f" options: {n.options}")
+            print(f"default options: {n.default_options}")
         return n
 
 def ft_require(conanfile, substr: str) -> None:
@@ -43,7 +45,7 @@ class FoxtrotBuildUtils(ConanFile):
     default_channel = "stable"
     package_type = "python-require"
 
-class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
+class FoxtrotCppPackage:
     default_user = "weatherill"
     default_channel = "stable"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
@@ -52,6 +54,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
 
+    def __init_subclass__(cls):
+        pass
     
     def export(self):
         git = Git(self, self.recipe_folder)
@@ -70,15 +74,16 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def package(self):
+        cmake = CMake(self)
         cmake.install()
-            
+
     def package_info(self):
         self.cpp_info.libs = collect_libs(self)
         self.cpp_info.libdirs = ["lib/foxtrot"]
-        self.cpp_info.builddirs.append("lib")
-
-        if hasattr(self, "cmake_package_name"):
-            self.conan2_fix_cmake_names(self.cmake_package_name)
+        self.cpp_info.builddirs = [""]
+        self.cpp_info.set_property("cmake_find_mode", None)
 
     def requirements(self):
         if hasattr(self, "ft_package_requires"):
@@ -97,7 +102,8 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         tc = CMakeToolchain(self)
         tc.variables["VERSION_FROM_CONAN"] = self.version
         return tc
-    
+
+
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
@@ -108,25 +114,9 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         tc = self._setup_cmake_tc()
         tc.generate()
 
-    def fix_cmake_def_names(self, cmakename: str):
-        self.cpp_info.names["cmake_find_package"] = cmakename
-        self.cpp_info.names["cmake_find_package_multi"] = cmakename
-        self.cpp_info.builddirs.append("lib/cmake/%s" % cmakename)
-
-    def conan2_fix_cmake_names(self, cmakename: str):
-        self.cpp_info.builddirs.append(f"lib/cmake/{cmakename}")
-        #self.cpp_info.set_property("cmake_target_name", f"foxtrot::{cmakename}")
-        #self.cpp_info.set_property("cmake_file_name", f"{cmakename}Config.cmake")
-
-        #we provide our own configuration files and as such disable CMakeDeps for ourselves
-        self.cpp_info.set_property("cmake_find_mode", None)
-        
-        
-
     def layout(self):
         cmake_layout(self, build_folder="conanbuild")
         self.cpp.build.builddirs.append("")
- 
 
 def semver_from_git_describe(gitobj) -> str:
     is_dirty = gitobj.is_dirty()

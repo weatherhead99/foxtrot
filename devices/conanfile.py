@@ -1,5 +1,6 @@
 import os
 from conan import ConanFile
+from conan.tools.cmake import CMakeDeps
 
 class FoxtrotDevicesConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
@@ -18,7 +19,23 @@ class FoxtrotDevicesConan(ConanFile):
                       "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake",
                       "idscamera/*.cpp", "idscamera/*.h")
 
-    requires =  ("rapidxml/1.13")
-    ft_package_requires = "core", "protocols"
+    requires =  ("rapidxml/1.13",
+                 "libusb/[^1.0.26]")
+    package_type = "shared-library"
+
+    ft_package_requires = "protocols","core"
     cmake_package_name = "foxtrotDevices"
 
+    def generate(self):
+        super().generate()
+        rttr = self.dependencies["rttr"]
+        self.output.info(f"is rttr build_context? {rttr.is_build_context}")
+        self.output.info(f"rttr pref: {rttr.pref}")
+        self.output.info(f"rttr cpp_info: {rttr.cpp_info}")
+
+        reqclause = ( k for k,v in self.dependencies.items() if v is self.dependencies["rttr"])
+
+        req2 = next(reqclause)
+
+        self.output.info(f"rttr transitive headers: {req2.transitive_headers}")
+        self.output.info(f"rttr headers: {req2.headers}")

@@ -1,44 +1,40 @@
 project(foxtrot_devices C CXX)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
 
-find_package(foxtrotCore REQUIRED)
 find_package(Boost REQUIRED COMPONENTS date_time)
-include(FoxtrotCommonSetup)
+
 include(GNUInstallDirs)
 include(CMakeParseArguments)
-
-if(FOXTROT_DEVICES_CONAN_BUILD)
-  foxtrot_writeout_build_directory(.builddir.info)
-endif()
-
+find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
-find_package(rttr 0.9.6 REQUIRED)
-
+include(FoxtrotCommonSetup)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 set(device_targets "")
 set(link_later_libs "")
 
 #list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+get_target_property(FT_INCLUDES foxtrot::foxtrot_core INTERFACE_LINK_LIBRARIES)
+get_target_property(RTTR_INCLUDE RTTR::Core INTERFACE_LINK_LIBRARIES)
+
+
+message(ERROR "FT_INCLUDES: ${FT_INCLUDES}")
+message(ERROR "rttr_include: ${RTTR_INCLUDE}")
 
 macro(add_device_object_lib)
     set(options OPTIONAL)
     set(oneValueArgs NAME)
     set(multiValueArgs SRCS INCLUDES LINKLIBS)
     cmake_parse_arguments(olib "${options}" "${oneValueArgs}" 
-            "${multiValueArgs}" ${ARGN})
-            
-	  add_library(${olib_NAME} OBJECT ${olib_SRCS})
+      "${multiValueArgs}" ${ARGN})
 
-    target_include_directories(${olib_NAME} PRIVATE
-    $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>
-    $<TARGET_PROPERTY:foxtrot::foxtrot_protocols,INTERFACE_INCLUDE_DIRECTORIES>)
-  
+    add_library(${olib_NAME} OBJECT ${olib_SRCS})
+    target_link_libraries(${olib_NAME} PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
     list(APPEND device_targets ${olib_NAME})
     set(device_targets ${device_targets} PARENT_SCOPE)
     
@@ -46,8 +42,7 @@ macro(add_device_object_lib)
     set(link_later_libs ${link_later_libs} PARENT_SCOPE)
 
     foreach(lib ${link_later_libs})
-      target_include_directories(${olib_NAME} PUBLIC
-	$<TARGET_PROPERTY:${lib},INTERFACE_INCLUDE_DIRECTORIES>)
+      target_link_libraries(${olib_NAME} PUBLIC ${lib})
     endforeach()
     
     set(olib_INCLUDES_abs "")

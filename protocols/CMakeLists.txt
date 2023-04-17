@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-find_package(foxtrotCore REQUIRED CONFIG)
+find_package(foxtrotCore REQUIRED)
 
 include(FoxtrotCommonSetup)
 include(GNUInstallDirs)
@@ -113,6 +113,5 @@ set(ft_protocols_sourcedir ${CMAKE_SOURCE_DIR})
 
 
 foxtrot_setup_cmake_package(cmake/foxtrotProtocolsConfig.cmake.in foxtrotProtocols foxtrot_protocols)
-
 
 
