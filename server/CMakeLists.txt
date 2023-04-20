@@ -11,10 +11,6 @@ set(packname "server")
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(foxtrotProtocols REQUIRED CONFIG)
 
-get_target_property(prop foxtrot::foxtrot_core INTERFACE_INCLUDE_DIRECTORIES)
-message(ERROR "iid: ${prop}")
-
-
 find_package(OpenSSL REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
@@ -37,7 +33,6 @@ endif()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
@@ -77,11 +72,8 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_
 
 set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
-foxtrot_create_package_config(cmake/foxtrotServerConfig.cmake.in
-                               ${ft_cmakedir}
-                               "ft_cmakedir;ft_server_sourcedir")
+foxtrot_setup_cmake_package(cmake/foxtrotServerConfig.cmake.in foxtrotServer foxtrot_server)
 
-foxtrot_add_to_package_registry(foxtrot_server foxtrotServer)
 
 add_subdirectory(devprogs)
 

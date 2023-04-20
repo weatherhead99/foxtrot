@@ -2,6 +2,8 @@
 add_device_object_lib(NAME Thorlabs_APT SRCS BSC203.cpp TIM101.cpp APT.cpp INCLUDES BSC203.h TIM101.h APT.h APT_defs.hh)
 
 
+target_link_libraries(Thorlabs_APT PUBLIC RTTR::Core)
+
 add_executable(thorlabs_ident_play thorlabs_ident_play.cpp)
 target_link_libraries(thorlabs_ident_play Thorlabs_APT foxtrot::foxtrot_core RTTR::Core foxtrot::foxtrot_protocols)
 # add_executable(bsc_play bsc_play.cpp)

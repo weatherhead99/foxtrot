@@ -16,10 +16,7 @@ class FoxtrotServerConan(ConanFile):
                 "rapidjson/[^1.1.0]",
                 )
 
-    default_options = {"boost/*:shared" : True,
-                       "libsodium/*:shared" : True,
-                       "zlib/*:shared" : True}
-
+    default_options = {"*:shared" : True}
     src_folder="server"
 
     ft_package_requires = "core", "protocols"
@@ -37,7 +34,6 @@ class FoxtrotServerConan(ConanFile):
                           "RapidJSON::RapidJSON")
         deps.generate()
 
-        tc = CMakeToolchain(self)
-        tc.variables["CONAN_CMAKE_SILENT_OUTPUT"] = True
+        tc = self._setup_cmake_tc()
         tc.generate()
 
