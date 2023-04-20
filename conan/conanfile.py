@@ -36,7 +36,8 @@ def ft_require(conanfile, substr: str) -> None:
     if getattr(conanfile, "stable_release", False):
         conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version}]")
     else:
-        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version},include_prerelease=True]")
+        reqstr = ft_version_get_req_str(conanfile.version)
+        conanfile.requires(f"foxtrot_{substr}/{reqstr}")
     
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
@@ -118,6 +119,22 @@ class FoxtrotCppPackage:
         cmake_layout(self, build_folder="conanbuild")
         self.cpp.build.builddirs.append("")
 
+
+def ft_version_get_req_str(verstr: str) -> str:
+    vers = Version(verstr)
+    cmpout = []
+    for cmpin in (vers.major, vers.minor):
+        if cmpin is not None:
+            cmpout.append(str(cmpin))
+        else:
+            break
+
+    reqstr = f"[^{'.'.join(cmpout)},include_prerelease=True]"
+    return reqstr
+
+    
+
+        
 def semver_from_git_describe(gitobj) -> str:
     is_dirty = gitobj.is_dirty()
         

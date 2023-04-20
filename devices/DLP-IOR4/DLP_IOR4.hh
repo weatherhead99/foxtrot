@@ -31,7 +31,7 @@ namespace devices
     
     class DLP_IOR4  : public Device
     {
-        RTTR_ENABLE()
+        RTTR_ENABLE(Device)
     public:
         DLP_IOR4(shared_ptr<SerialPort> proto, 
                  const std::string& comment,
