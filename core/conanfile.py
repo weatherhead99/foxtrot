@@ -17,9 +17,6 @@ class FoxtrotCoreConan(ConanFile):
                       "proto/*.proto", "share/*.in", "devprogs/*" ,\
                       "proto/CMakeLists.txt"
 
-    requires = ("boost/[^1.80.0]",
-                "grpc/[^1.50.1]")
-
     cmake_package_name = "foxtrotCore"
 
     package_type = "shared-library"
@@ -33,8 +30,17 @@ class FoxtrotCoreConan(ConanFile):
     def requirements(self):
         super().requirements()
         self.requires("rttr/0.9.6", headers=True, libs=True,
-                      transitive_headers=True)
+                      transitive_headers=True,
+                      transitive_libs=True)
 
+        self.requires("grpc/[^1.50.1]", headers=True, libs=True,
+                      transitive_headers=True,
+                      transitive_libs=True)
+
+        self.requires("boost/[^1.80.0]", headers=True, libs=True,
+                      transitive_headers=True,
+                      transitive_libs=True)
+        
     def build(self):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared

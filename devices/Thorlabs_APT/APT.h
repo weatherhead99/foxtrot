@@ -53,6 +53,9 @@ namespace foxtrot {
     RTTR_ENABLE(Device)
         
     public:
+
+    virtual ~APT();
+    
     bool get_channelenable(destination dest, motor_channel_idents channel);
     virtual void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
 

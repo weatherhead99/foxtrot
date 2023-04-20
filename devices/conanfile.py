@@ -23,6 +23,8 @@ class FoxtrotDevicesConan(ConanFile):
                  "libusb/[^1.0.26]")
     package_type = "shared-library"
 
+    default_options = {"*:shared" : True}
+    
     ft_package_requires = "protocols","core"
     cmake_package_name = "foxtrotDevices"
 

@@ -83,6 +83,9 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
 }
 
 
+foxtrot::devices::APT::~APT() {}
+
+
 #pragma pack(push, 1)
 struct poscounter_throwaway {
   unsigned short chan_ident;
