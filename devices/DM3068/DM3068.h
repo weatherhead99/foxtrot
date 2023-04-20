@@ -18,7 +18,7 @@ namespace foxtrot {
     public:
       DM3068(std::shared_ptr<SerialProtocol> proto);
       virtual ~DM3068();
-      virtual std::string cmd(const std::string& request);
+      virtual std::string cmd(const std::string& request) override;
       string getIDNString();
       double get4WireResistance();
       
