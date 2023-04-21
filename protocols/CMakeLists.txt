@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-
 find_package(foxtrotCore REQUIRED)
 
 include(FoxtrotCommonSetup)
@@ -33,7 +32,7 @@ endif()
 
 #this is required on all platforms, otherwise we can't build server
 #may change once Direct is useful
-find_package(CURL REQUIRED MODULE)
+find_package(CURL REQUIRED)
 foxtrot_build_protocol(curlRequest)
 
 
@@ -111,7 +110,19 @@ install(EXPORT foxtrot_protocols
 
 set(ft_protocols_sourcedir ${CMAKE_SOURCE_DIR})
 
+set(ft_protocols_deps_script
+  "
+find_dependency(foxtrotCore REQUIRED)
+find_dependency(CURL REQUIRED)
+")
 
-foxtrot_setup_cmake_package(cmake/foxtrotProtocolsConfig.cmake.in foxtrotProtocols foxtrot_protocols)
+if("BulkUSB" IN_LIST protos)
+  set(ft_protocols_deps_script ${ft_protocols_deps_script}"
+  find_dependency(libusb REQUIRED)
+")
+endif()
+
+
+foxtrot_setup_cmake_package(foxtrotProtocols foxtrot_protocols protocols ${ft_protocols_deps_script})
 
 

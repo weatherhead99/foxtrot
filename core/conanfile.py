@@ -40,6 +40,20 @@ class FoxtrotCoreConan(ConanFile):
         self.requires("boost/[^1.80.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
+
+
+    def generate(self):
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
+
+        deps = CMakeDeps(self)
+        deps.generate()
+
+        tc = self._setup_cmake_tc()
+        
+        tc.generate()
+
+
         
     def build(self):
         cmake = CMake(self)

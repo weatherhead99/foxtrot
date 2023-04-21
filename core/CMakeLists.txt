@@ -8,7 +8,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 #import other cmake functionality we need later
 include(GenerateExportHeader)
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 include(FoxtrotCommonSetup)
 
 #fix GRPC windows building issues
@@ -85,8 +84,25 @@ install(EXPORT foxtrot_core
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-foxtrot_setup_cmake_package(cmake/foxtrotCoreConfig.cmake.in foxtrotCore foxtrot_core)
-      
+#foxtrot_setup_cmake_package(cmake/foxtrotCoreConfig.cmake.in foxtrotCore foxtrot_core)
+
+set(ft_core_deps_script
+"include(CMakeFindDependencyMacro)
+ find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread date_time)
+find_dependency(Protobuf REQUIRED)
+find_dependency(gRPC REQUIRED)
+find_dependency(rttr 0.9.6 REQUIRED)
+
+#WARNING: hack to make it work on windows
+if(WIN32)
+    add_definitions(-D_WIN32_WINNT=0x0A00)
+endif()
+"
+  )
+
+
+foxtrot_setup_cmake_package(foxtrotCore foxtrot_core core ${ft_core_deps_script})
+
 #foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} 
 #    "ft_cmakedir;ft_core_sourcedir;ft_core_binarydir")
 
