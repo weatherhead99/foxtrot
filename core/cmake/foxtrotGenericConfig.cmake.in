@@ -9,8 +9,9 @@ include (CMakeFindDependencyMacro)
 @DEPS_SCRIPT@
 
 
+
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/@PACKNAME@exports.cmake)
-  message(WARNING "foxtrot package: @PACKAGE_PACKNAME@ is configuring from BUILD TREE! Make sure this is what you want!")
+  message(WARNING "foxtrot package: @PACKNAME@ is configuring from BUILD TREE! Make sure this is what you want!")
 
   set(@PACKNAME@prefix "${PACKAGE_PREFIX_DIR}/@SOURCEDIR_NAME@")
   

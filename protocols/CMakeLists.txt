@@ -117,9 +117,9 @@ find_dependency(CURL REQUIRED)
 ")
 
 if("BulkUSB" IN_LIST protos)
-  set(ft_protocols_deps_script ${ft_protocols_deps_script}"
-  find_dependency(libusb REQUIRED)
-")
+  set(ft_protocols_deps_script "${ft_protocols_deps_script}
+find_dependency(libusb REQUIRED)"
+)
 endif()
 
 

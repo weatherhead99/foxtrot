@@ -40,9 +40,7 @@ include(FoxtrotCommonSetup)
 
 add_subdirectory(src)
 
-
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
-
 
 install(TARGETS exptserve
        EXPORT foxtrot_server
@@ -70,9 +68,25 @@ install(DIRECTORY include/foxtrot
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
 
-set(ft_server_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
+set(ft_server_dep_str
+"
+find_dependency(foxtrotCore REQUIRED)
+find_dependency(Boost REQUIRED COMPONENTS program_options filesystem)
+find_dependency(CURL REQUIRED)
+find_dependency(OpenSSL REQUIRED)
+find_dependency(RapidJSON REQUIRED MODULE)
+find_dependency(libsodium REQUIRED)
 
-foxtrot_setup_cmake_package(cmake/foxtrotServerConfig.cmake.in foxtrotServer foxtrot_server)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    find_library(dl dl)
+    message(STATUS "libdl: ${dl}")
+else()
+    message(STATUS "windows build, don't need libdl")
+    set(dl "")
+endif()
+")
+
+foxtrot_standard_setup_cmake_package(server ${ft_server_dep_str})
 
 
 add_subdirectory(devprogs)
