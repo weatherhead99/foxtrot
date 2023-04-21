@@ -52,6 +52,10 @@ public:
     std::chrono::milliseconds calc_minimum_transfer_time(std::size_t len);
     
 private:
+
+  std::string read_until_endl_asio_impl(char endlchar='\n', opttimeout wait=nullopt);
+  std::string read_until_endl_poll_impl(char endlchar='\n');
+  
     foxtrot::Logging _lg;
 
     shared_ptr<io_context> _io_service;
