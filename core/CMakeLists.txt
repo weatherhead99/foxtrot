@@ -114,6 +114,10 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibusb.cmake
         DESTINATION ${ft_cmakedir})
 
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/foxtrotGenericConfig.cmake.in
+	DESTINATION ${ft_cmakedir}
+	COMPONENT devel)
+
         
 #add to package registry
 #foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)
