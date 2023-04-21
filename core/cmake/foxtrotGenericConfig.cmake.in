@@ -1,0 +1,36 @@
+##Config file for generic foxtrot packages
+##Templated for the @PACKNAME@ package
+
+
+@PACKAGE_INIT@
+
+include (CMakeFindDependencyMacro)
+
+@DEPS_SCRIPT@
+
+
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/@PACKNAME@exports.cmake)
+  message(WARNING "foxtrot package: @PACKAGE_PACKNAME@ is configuring from BUILD TREE! Make sure this is what you want!")
+
+  set(@PACKNAME@prefix "${PACKAGE_PREFIX_DIR}/@SOURCEDIR_NAME@")
+  
+  include(${CMAKE_CURRENT_LIST_DIR}/@PACKNAME@exports.cmake)
+
+  set_property(TARGET foxtrot::@TARGETNAME@ PROPERTY
+    INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR};${@PACKNAME@prefix}/include")
+
+  list(APPEND CMAKE_MODULE_PATH ${@PACKNAME@prefix}/cmake)  
+
+else()
+  message(STATUS "foxtrot package: @PACKNAME@ is configuring from install tree (normal behaviour)")
+  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
+
+  if(NOT TARGET foxtrot::@TARGETNAME@)
+    include(${PACKAGE_PREFIX_DIR}/lib/cmake/@PACKNAME@/@TARGETNAME@.cmake)
+  else()
+    message(STATUS  "targets were already declared, this configuration file did nothing")
+  endif()
+    
+endif()
+
+check_required_components(@TARGETNAME@)
