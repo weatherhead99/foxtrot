@@ -1,3 +1,4 @@
+#include <boost/asio/detail/io_control.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/serial_port_base.hpp>
 #include <boost/system/error_code.hpp>
@@ -22,6 +23,7 @@
 #include <boost/asio/read.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/asio/completion_condition.hpp>
+#include <boost/asio/read_until.hpp>
 
 #include <foxtrot/ProtocolError.h>
 #include <foxtrot/ProtocolTimeoutError.h>
@@ -148,6 +150,66 @@ std::string foxtrot::protocols::SerialPort::read(unsigned int len, unsigned* act
   
   return std::string(out.begin(), out.end());
 }
+
+std::string foxtrot::protocols::SerialPort::read_until_endl_poll_impl(char endlchar)
+{
+  
+  auto avail = bytes_available();
+  auto ret = this->read(avail);
+  
+  decltype(ret.begin()) endlpos;
+
+
+  while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(_wait_ms));
+      avail = bytes_available();
+      if(avail == 0)
+          throw foxtrot::ProtocolError("ran out of bytes to read in serial port! Perhaps wait_ms is not configured properly or this command does not return a response");
+      ret += read(bytes_available());
+
+    };
+
+  return ret;
+}
+
+std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlchar, opttimeout wait)
+{
+  std::string strbuf;
+  auto buf = boost::asio::dynamic_buffer(strbuf);
+  boost::system::error_code ec;
+  bool done = false;
+
+  if(!wait.has_value())
+    {
+      _lg.strm(sl::trace) << "no timeout value, doing boost::asio::read_until";
+      boost::asio::read_until(*_sport, buf, endlchar, ec);
+    }
+  else
+    {
+      _lg.strm(sl::trace) << "timeout value, doing boost::async_read_until";
+      boost::asio::async_read_until(*_sport, buf,
+				    endlchar,
+				    [&ec, &done](const boost::system::error_code ec2, std::size_t bytes_transferred){ ec = ec2; done = true;});
+
+      auto n_run = _io_service->run_for(*wait);
+      _io_service->restart();
+      
+      if(!done)
+	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+      
+    }
+
+  if(ec)
+    throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
+ 
+      
+  return strbuf;
+  
+
+}
+
+
 
 std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, opttimeout wait)
 {
@@ -305,25 +367,7 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
 
 std::string foxtrot::protocols::SerialPort::read_until_endl(char endlchar)
 {
-
-  auto avail = bytes_available();
-  auto ret = this->read(avail);
-  
-  decltype(ret.begin()) endlpos;
-
-
-  while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(_wait_ms));
-      avail = bytes_available();
-      if(avail == 0)
-          throw foxtrot::ProtocolError("ran out of bytes to read in serial port! Perhaps wait_ms is not configured properly or this command does not return a response");
-      ret += read(bytes_available());
-
-    };
-
-  return ret;
-  
+  return read_until_endl_poll_impl(endlchar);
 
 }
 
