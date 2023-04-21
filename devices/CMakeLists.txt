@@ -122,5 +122,36 @@ cmake/Findueye.cmake DESTINATION ${ft_cmakedir})
         
 set(ft_devices_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
-foxtrot_setup_cmake_package(cmake/foxtrotDevicesConfig.cmake.in foxtrotDevices foxtrot_devices)
+#foxtrot_setup_cmake_package(foxtrotDevices foxtrot_devices devices 
+
+set(ft_devices_dep_str "
+find_dependency(foxtrotCore REQUIRED)
+find_dependency(foxtrotProtocols REQUIRED)
+find_dependency(rttr 0.9.6 REQUIRED)
+"
+  )
+
+if("idscamera" IN_LIST device_targets)
+  string(APPEND ft_devices_dep_str
+    "
+find_dependency(ueye REQUIRED)
+")
+endif()
+
+if("webswitch_plus" IN_LIST device_targets)
+  string(APPEND ft_devices_dep_str
+    "
+find_dependency(rapidxml REQUIRED)
+")
+endif()
+
+if("webswitch_plus" IN_LIST device_targets)
+  string(APPEND ft_devices_dep_str
+    "
+find_dependency(rapidxml REQUIRED)
+")
+endif()
+
+foxtrot_standard_setup_cmake_package(devices ${ft_devices_dep_str})
+
 

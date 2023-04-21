@@ -27,8 +27,6 @@ find_dependency(OpenSSL REQUIRED)
 find_dependency(RapidJSON REQUIRED MODULE)
 find_dependency(libsodium REQUIRED)
 
-
-
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_library(dl dl)
     message(STATUS "libdl: ${dl}")

@@ -83,9 +83,25 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
 
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
     DESTINATION ${CMAKE_DEST} COMPONENT devel)
+
+endfunction()
+
+
+function(foxtrot_standard_setup_cmake_package sourcedir_name deps_script)
+  string(SUBSTRING ${sourcedir_name} 0 1  FIRST_LETTER) 
+  string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
+
+  string(SUBSTRING ${sourcedir_name} 1 -1 REST)
+  string(CONCAT name_capitalized ${FIRST_LETTER} ${REST})
   
+  set(PACKNAME "foxtrot${name_capitalized}")
+  set(TARGETNAME "foxtrot_${sourcedir_name}")
+
+  message(STATUS "packagename: ${PACKNAME}")
+  message(STATUS "target name: ${TARGETNAME}")
   
 
+  foxtrot_setup_cmake_package(${PACKNAME} ${TARGETNAME} ${sourcedir_name}  ${deps_script})
 endfunction()
 
 
