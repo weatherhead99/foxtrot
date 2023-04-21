@@ -60,7 +60,7 @@ namespace foxtrot
     
     class newport2936R : public CmdDevice
     {
-      RTTR_ENABLE()
+      RTTR_ENABLE(CmdDevice)
     public:
     newport2936R(std::shared_ptr< SerialProtocol> proto);
     const std::string getDeviceTypeName() const override;

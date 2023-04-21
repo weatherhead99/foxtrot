@@ -1,10 +1,12 @@
 from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
 from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
 from conan.tools.scm import Git, Version
 from conan.tools.files import load, update_conandata
 from conan.tools.env import Environment, VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import  collect_libs
 from conan.tools.cmake import cmake_layout
+from conan.tools.build import valid_min_cppstd
 import os
 
 FOXTROT_GLOBAL_OVERRIDES = []
@@ -66,6 +68,11 @@ class FoxtrotCppPackage:
         scm_url, scm_commit = git.get_url_and_commit()
         update_conandata(self, {"sources" : {"commit" : scm_commit, "url" : scm_url}})
 
+    def validate_build(self):
+        if not valid_min_cppstd(self, 17):
+            self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
+            self.output.error("failed check requiring minimum of c++17")
+            raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
 
     def set_version(self):
         git = Git(self, self.recipe_folder)
