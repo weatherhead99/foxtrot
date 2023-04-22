@@ -61,13 +61,13 @@ endfunction()
 
 
 function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_script)
-  
-  
+   
   find_file(package_infile "foxtrotGenericConfig.cmake.in"
     HINTS ${CMAKE_MODULE_PATH} REQUIRED)
 
+  message(STATUS "package infile: ${package_infile}")
   set(outfname ${packname}Config.cmake)
-  set(CMAKE_DEST ${CMAKE_INSTALL_LIBDIR}/cmake/${packname}/)
+  set(CMAKE_DEST ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/${packname}/)
 
   set(DEPS_SCRIPT ${deps_script})
   set(PACKNAME ${packname})
@@ -77,7 +77,8 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
   include(CMakePackageConfigHelpers)
   
   configure_package_config_file(${package_infile} ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
-    INSTALL_DESTINATION ${CMAKE_DEST})
+    INSTALL_DESTINATION ${CMAKE_DEST}
+  PATH_VARS CMAKE_DEST)
 
   export(EXPORT ${target_name} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packname}exports.cmake NAMESPACE foxtrot::)
 
