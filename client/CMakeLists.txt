@@ -1,5 +1,5 @@
 project(foxtrot_client C CXX)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -38,5 +38,10 @@ install(EXPORT foxtrot_client
         COMPONENT devel
         NAMESPACE foxtrot::)
 
-foxtrot_create_package_config(cmake/foxtrotClientConfig.cmake.in ${ft_cmakedir} ft_cmakedir)
-foxtrot_add_to_package_registry(foxtrot_client foxtrotClient)
+set(ft_client_deps_script "
+find_dependency(foxtrotCore REQUIRED)
+find_dependency(gRPC REQUIRED)
+
+")
+
+foxtrot_standard_setup_cmake_package(client ${ft_client_deps_script}) 
