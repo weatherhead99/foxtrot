@@ -12,5 +12,4 @@ class FoxtrotClientConan(ConanFile):
 
     src_folder = "client"
     ft_package_requires = "core",
-    cmake_package_name = "foxtrotClient"
 
