@@ -11,7 +11,6 @@ set(packname "server")
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(foxtrotProtocols REQUIRED CONFIG)
 
-find_package(OpenSSL REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
@@ -73,7 +72,6 @@ set(ft_server_dep_str
 find_dependency(foxtrotCore REQUIRED)
 find_dependency(Boost REQUIRED COMPONENTS program_options filesystem)
 find_dependency(CURL REQUIRED)
-find_dependency(OpenSSL REQUIRED)
 find_dependency(RapidJSON REQUIRED MODULE)
 find_dependency(libsodium REQUIRED)
 
