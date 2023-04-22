@@ -15,28 +15,32 @@ using std::shared_ptr;
 
 namespace foxtrot
 {
-  class DeviceFactory : public Device
+  template<typename T>
+  class DeviceFactory: public Device
   {
+    RTTR_ENABLE(Device)
+    using DeviceType = T;
     
   public:
     DeviceFactory(shared_ptr<DeviceHarness> harness,
 		  const string& comment = "",
-		  shared_ptr<CommunicationProtocol> proto=nullptr);
+		  shared_ptr<CommunicationProtocol> proto=nullptr): _harness(harness), _lg("DeviceFactory"), Device(proto, comment) {};
     
-    RTTR_ENABLE(Device)
+
     virtual void discover() = 0;
-    const vector<string>& get_available_devices() const;
+    const vector<string>& get_available_devices() const
+    { return _available_devices;}
 
     template<typename... Ts>
-    shared_ptr<Device> 
+    shared_ptr<T> 
     open_device(const string& ident, Ts... args)
     {
       throw std::logic_error("don't know how to make a device with this set of arguments");
     };
 
-    virtual shared_ptr<Device> open_device(const string& ident) = 0;
+    virtual shared_ptr<T> open_device(const string& ident) = 0;
 
-    virtual shared_ptr<Device> open_device(const string& ident, const std::vector<rttr::variant>& args) = 0;
+    virtual shared_ptr<T> open_device(const string& ident, const std::vector<rttr::variant>& args) = 0;
   
   private:
     std::vector<string> _available_devices;

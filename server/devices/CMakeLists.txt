@@ -1,4 +1,5 @@
-add_library(dummydevice STATIC dummy/dummyDevice.cpp)
+add_library(dummydevice STATIC dummy/dummyDevice.cpp
+fakefactory/fakedevice.cpp)
 target_link_libraries(dummydevice foxtrot_server)
 
 #have this here as a one off as it's usually built with server package
