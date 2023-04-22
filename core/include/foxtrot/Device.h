@@ -27,7 +27,8 @@ namespace foxtrot
      VALUE_READONLY,
      VALUE_READWRITE,
      ACTION,
-     STREAM 
+     STREAM,
+     CONSTRUCT
  };
 
   struct Capability
