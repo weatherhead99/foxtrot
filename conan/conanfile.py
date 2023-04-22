@@ -76,7 +76,8 @@ class FoxtrotCppPackage:
 
     def set_version(self):
         git = Git(self, self.recipe_folder)
-        self.version = semver_from_git_describe(git)
+        if not self.version:
+            self.version = semver_from_git_describe(git)
             
     def build(self):
         cmake = CMake(self)
