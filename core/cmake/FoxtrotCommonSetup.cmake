@@ -61,8 +61,8 @@ endfunction()
 function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_script)
   message(STATUS "include path: ${CMAKE_INCLUDE_PATH}")
   message(STATUS "module path: ${CMAKE_MODULE_PATH}")
-  find_file(package_infile "foxtrotGenericConfig.cmake.in"
-    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${CMAKE_MODULE_PATH}" REQUIRED NO_CACHE)
+  find_file(package_infile NAMES "foxtrotGenericConfig.cmake.in"
+    HINTS ${CMAKE_MODULE_PATH} REQUIRED NO_CACHE)
 
   message(STATUS "package infile: ${package_infile}")
   set(outfname ${packname}Config.cmake)
