@@ -3,7 +3,7 @@
 #include <foxtrot/Device.h>
 #include <foxtrot/DeviceFactory.hh>
 #include <rttr/registration>
-
+#include <memory>
 
 namespace foxtrot
 {
@@ -19,10 +19,12 @@ namespace foxtrot
       double getRandomDouble();
       void setValue(const string& val);
       string getValue() const;
+      virtual ~fakeDevice();
+
       
       private:
       fakeDevice(const string& my_ident, std::size_t rndseed);
-      fakeDeviceImpl* _impl = nullptr;
+      std::unique_ptr<_impl> = nullptr;
       
     };
 

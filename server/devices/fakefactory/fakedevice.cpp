@@ -9,7 +9,11 @@ using std::string;
 fakeDeviceFactory::fakeDeviceFactory(shared_ptr<DeviceHarness> harness,
                                               int n_devices_avail,
                                               const string &comment)
-    : DeviceFactory(harness, comment), _n_devices_avail(n_devices_avail) {}
+  : DeviceFactory(harness, comment), _n_devices_avail(n_devices_avail), _impl(new fakeDeviceImpl) {}
+
+
+fakeDeviceFactory::~fakeDeviceFactory
+
 
 
 class fakeDeviceImpl
