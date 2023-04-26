@@ -1,5 +1,5 @@
 project(foxtrot_protocols C CXX)
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -22,11 +22,14 @@ macro(foxtrot_build_protocol protoname)
 endmacro()
 
 
+
 #BulkUSB setup and check
 find_package(libusb REQUIRED)
 if(${libusb_FOUND})
-    message(STATUS "BulkUSB dependencies found")
-    foxtrot_build_protocol(BulkUSB)
+  message(STATUS "BulkUSB dependencies found")
+  option(BUILD_BulkUSB "build BulkUSB protocol" ON)
+  list(APPEND srcs src/BulkUSB.cpp src/libUsbProtocol.cpp)
+  list(APPEND protos "BulkUSB")
 endif()
 
 
