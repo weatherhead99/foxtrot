@@ -9,7 +9,8 @@ class FoxtrotProtocolsConan(ConanFile):
     name="foxtrot_protocols"
     src_folder="protocols"
     description="protocol implementations for  foxtrot"
-    exports_sources="CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h"
+    exports_sources= ("CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h",
+                      "include/foxtrot/protocols/*.hh")
     requires = ("libusb/[^1.0.26]",
                 "libcurl/[^7.88.1]")
 

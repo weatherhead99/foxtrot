@@ -56,6 +56,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
+    tool_requires = "cmake/[>=3.20.0]"
 
     def __init_subclass__(cls):
         pass
