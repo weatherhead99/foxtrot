@@ -1,5 +1,7 @@
 import os
 from conan import ConanFile
+from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
+from conan.tools.cmake import CMakeDeps
 
 #ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
 
@@ -14,7 +16,11 @@ class FoxtrotProtocolsConan(ConanFile):
     requires = ("libusb/[^1.0.26]",
                 "libcurl/[^7.88.1]")
 
-    default_options = {"*/*:shared" : True}
+    options = {"use_asio_impls" : [True, False]}
+    default_options = {"*/*:shared" : True,
+                       "use_asio_impls" : True}
+
+    
 
     package_type = "shared-library"
     ft_package_requires = "core",
@@ -23,15 +29,17 @@ class FoxtrotProtocolsConan(ConanFile):
     overrides = "openssl/3.1.0",
 
     def generate(self):
-        super().generate()
-        rttr = self.dependencies["rttr"]
-        self.output.info(f"is rttr build_context? {rttr.is_build_context}")
-        self.output.info(f"rttr pref: {rttr.pref}")
-        self.output.info(f"rttr cpp_info: {rttr.cpp_info}")
+        buildenv = VirtualBuildEnv(self)
+        buildenv.generate()
 
-        reqclause = ( k for k,v in self.dependencies.items() if v is self.dependencies["rttr"])
+        deps = CMakeDeps(self)
+        deps.generate()
+        
+        tc = self._setup_cmake_tc()
 
-        req2 = next(reqclause)
+        if self.options.use_asio_impls:
+            tc.cache_variables["USE_ASIO"] = True
 
-        self.output.info(f"rttr transitive headers: {req2.transitive_headers}")
-        self.output.info(f"rttr headers: {req2.headers}")
+        tc.generate()
+        
+        

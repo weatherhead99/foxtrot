@@ -367,8 +367,13 @@ unsigned foxtrot::protocols::SerialPort::bytes_available()
 
 std::string foxtrot::protocols::SerialPort::read_until_endl(char endlchar)
 {
+#ifdef FT_USE_ASIO_IMPLS
+  auto waitms = std::chrono::milliseconds(_wait_ms);
+  return read_until_endl_asio_impl(endlchar, waitms);
+  
+#else
   return read_until_endl_poll_impl(endlchar);
-
+#endif
 }
 
 unsigned int foxtrot::protocols::SerialPort::getWait() const

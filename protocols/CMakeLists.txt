@@ -13,6 +13,11 @@ set(packname "protocols")
 set(srcs "src/ProtocolUtilities.cpp;src/CommunicationProtocol.cpp")
 set(protos "")
 
+
+option(USE_ASIO "use ASIO implementations rather than polling" ON)
+
+
+
 macro(foxtrot_build_protocol protoname)
     option(BUILD_${protoname} "build ${protoname} protocol" ON)    
     if(BUILD_${protoname})
@@ -50,8 +55,8 @@ foxtrot_build_protocol(simpleTCP)
 message(STATUS "finding dependencies for serial port")
 find_package(Boost REQUIRED)
 if(Boost_FOUND)
-    message(STATUS "found serial port dependencies")
-    foxtrot_build_protocol(SerialPort)
+  message(STATUS "found serial port dependencies")
+  foxtrot_build_protocol(SerialPort)
 endif()
 
 #some protocols only work on linux
@@ -84,6 +89,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(foxtrot_protocols ${srcs})
 target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core CURL::libcurl)
+
+if(USE_ASIO)
+  target_compile_definitions(foxtrot_protocols PRIVATE FT_USE_ASIO_IMPLS=1)
+endif()
 
 
 
