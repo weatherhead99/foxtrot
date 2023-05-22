@@ -145,13 +145,6 @@ find_dependency(rapidxml REQUIRED)
 ")
 endif()
 
-if("webswitch_plus" IN_LIST device_targets)
-  string(APPEND ft_devices_dep_str
-    "
-find_dependency(rapidxml REQUIRED)
-")
-endif()
-
 foxtrot_standard_setup_cmake_package(devices ${ft_devices_dep_str})
 
 

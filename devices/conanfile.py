@@ -19,8 +19,16 @@ class FoxtrotDevicesConan(ConanFile):
                       "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake",
                       "idscamera/*.cpp", "idscamera/*.h")
 
-    requires =  ("rapidxml/1.13",
-                 "libusb/[^1.0.26]")
+    requires =  ("libusb/[^1.0.26]")
+
+
+    def requirements(self):
+        super().requirements()
+        self.requires("rapidxml/1.13",
+                      headers=True, libs=True,
+                      transitive_headers=True,
+                      transitive_libs=True)
+        
     package_type = "shared-library"
 
     default_options = {"*:shared" : True}
@@ -28,16 +36,3 @@ class FoxtrotDevicesConan(ConanFile):
     ft_package_requires = "protocols","core"
     cmake_package_name = "foxtrotDevices"
 
-    def generate(self):
-        super().generate()
-        rttr = self.dependencies["rttr"]
-        self.output.info(f"is rttr build_context? {rttr.is_build_context}")
-        self.output.info(f"rttr pref: {rttr.pref}")
-        self.output.info(f"rttr cpp_info: {rttr.cpp_info}")
-
-        reqclause = ( k for k,v in self.dependencies.items() if v is self.dependencies["rttr"])
-
-        req2 = next(reqclause)
-
-        self.output.info(f"rttr transitive headers: {req2.transitive_headers}")
-        self.output.info(f"rttr headers: {req2.headers}")
