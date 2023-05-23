@@ -153,7 +153,7 @@ std::string foxtrot::protocols::SerialPort::read(unsigned int len, unsigned* act
 
 std::string foxtrot::protocols::SerialPort::read_until_endl_poll_impl(char endlchar)
 {
-  
+  _lg.strm(sl::trace) << "read_until_endl poll impl";
   auto avail = bytes_available();
   auto ret = this->read(avail);
   
@@ -162,6 +162,7 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_poll_impl(char endlc
 
   while( (endlpos = std::find(ret.begin(),ret.end(),endlchar) ) == ret.end())
     {
+     
       std::this_thread::sleep_for(std::chrono::milliseconds(_wait_ms));
       avail = bytes_available();
       if(avail == 0)
@@ -175,6 +176,8 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_poll_impl(char endlc
 
 std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlchar, opttimeout wait)
 {
+  _lg.strm(sl::trace) << "read_until_endl asio impl";
+  
   std::string strbuf;
   auto buf = boost::asio::dynamic_buffer(strbuf);
   boost::system::error_code ec;
