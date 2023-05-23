@@ -68,10 +68,10 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 
     using foxtrot::devices::fakeDeviceFactory;
 
-    auto fakedevfactptr = std::make_unique<fakeDeviceFactory>(harness, 3,
-							      "fakeDeviceFactory");
+    //    auto fakedevfactptr = std::make_unique<fakeDeviceFactory>(harness, 3,
+    //							      "fakeDeviceFactory");
 
-    harness.AddDevice(std::move(fakedevfactptr));
+    //harness.AddDevice(std::move(fakedevfactptr));
     
     return 0;
 };

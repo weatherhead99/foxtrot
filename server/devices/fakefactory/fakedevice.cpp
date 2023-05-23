@@ -12,11 +12,11 @@ namespace foxtrot
 {
   namespace devices
   {
-  class fakeDeviceImpl {
+  class fakeDeviceFactoryImpl {
   public:
     string _value;
 
-    fakeDeviceImpl(std::size_t seed) : _dist(0.0, 1.0) { _eng.seed(seed); }
+    fakeDeviceFactoryImpl(std::size_t seed) : _dist(0.0, 1.0) { _eng.seed(seed); }
 
     std::default_random_engine _eng;
     std::uniform_real_distribution<double> _dist;
@@ -45,7 +45,7 @@ void fakeDeviceFactory::discover(){
 
 
 fakeDevice::fakeDevice(const string &my_ident, std::size_t rndseed)
-  : _impl(new fakeDeviceImpl(rndseed)), Device(nullptr, my_ident)
+  : _impl(new fakeDeviceFactoryImpl(rndseed)), Device(nullptr, my_ident)
 {
   _impl->_value = my_ident;
 }

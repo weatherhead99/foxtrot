@@ -24,7 +24,7 @@ namespace foxtrot
       
       private:
       fakeDevice(const string& my_ident, std::size_t rndseed);
-      std::unique_ptr<fakeDeviceImpl> _impl;
+      std::unique_ptr<fakeDeviceFactoryImpl> _impl;
       
     };
 
@@ -44,7 +44,7 @@ namespace foxtrot
 
       void discover() override;
       shared_ptr<fakeDevice> open_device(const string& ident,
-				     const std::vector<rttr::variant>& args) override;
+				     const std::vector<rttr::variant>& args);
 
     private:
       int _n_devices_avail;
