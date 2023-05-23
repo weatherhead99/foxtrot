@@ -6,6 +6,7 @@
 #include <boost/variant.hpp>
 
 #include <foxtrot/devices/dummyDevice.h>
+#include <foxtrot/devices/fakedevice.hh>
 #include <foxtrot/DeviceHarness.h>
 #include <foxtrot/DeviceError.h>
 
@@ -61,7 +62,16 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     lg.Debug("adding to harness..");
     harness.AddDevice(std::move(devptr));
     harness.AddDevice(std::move(devptr2));
-    
+
+
+    lg.Info("attempting to set up fakeDeviceFactory");
+
+    using foxtrot::devices::fakeDeviceFactory;
+
+    auto fakedevfactptr = std::make_unique<fakeDeviceFactory>(harness, 3,
+							      "fakeDeviceFactory");
+
+    harness.AddDevice(std::move(fakedevfactptr));
     
     return 0;
 };

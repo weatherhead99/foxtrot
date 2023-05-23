@@ -9,7 +9,7 @@ namespace foxtrot
 {
   namespace devices
   {
-    class fakeDeviceFactoryImpl;
+    class fakeDeviceImpl;
     
     class fakeDevice : public Device
     {
@@ -40,15 +40,11 @@ namespace foxtrot
 			const string& comment = ""
 			);
 
-      virtual ~fakeDeviceFactory() override;
-
       void discover() override;
-      shared_ptr<fakeDevice> open_device(const string& ident,
-				     const std::vector<rttr::variant>& args) override;
 
     private:
       int _n_devices_avail;
-      std::unique_ptr<fakeDeviceFactoryImpl> _impl = nullptr;
+      
     };
 
 

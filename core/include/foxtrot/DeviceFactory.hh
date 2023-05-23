@@ -11,10 +11,18 @@
 using std::string;
 using std::vector;
 using std::shared_ptr;
-
+using std::unique_ptr;
 
 namespace foxtrot
 {
+
+  struct DeviceFactoryDescriptor
+  { 
+    string ident;
+    string comment;
+  };
+
+  
   template<typename T>
   class DeviceFactory: public Device
   {
@@ -28,22 +36,41 @@ namespace foxtrot
     
 
     virtual void discover() = 0;
-    const vector<string>& get_available_devices() const
+    
+    const vector<DeviceFactoryDescriptor>& get_available_devices() const
     { return _available_devices;}
 
     template<typename... Ts>
-    shared_ptr<T> 
+    unique_ptr<T> 
     open_device(const string& ident, Ts... args)
     {
-      throw std::logic_error("don't know how to make a device with this set of arguments");
+      return std::make_unique<T>(std::forward<Ts...>(args...));
     };
 
-    virtual shared_ptr<T> open_device(const string& ident) = 0;
+    template<typename... Ts>
+    int add_device(const string& ident, Ts... args)
+    {
+      auto uptr = std::make_unique<T>(std::forward<Ts...>(args...));
 
-    virtual shared_ptr<T> open_device(const string& ident, const std::vector<rttr::variant>& args) = 0;
+      auto strongptr = _harness.lock();
+      if(strongptr)
+	{
+	  strongptr->AddDevice(std::move(uptr));
+	  //TODO: once DeviceHarness adding returns devids, put it out here
+	  return -1;
+	}
+
+      else {
+	throw std::runtime_error("DeviceFactory no longer has access to DeviceHarness! Something is wrong");
+      }
+      
+    };
+
+  protected:
+    std::vector<DeviceFactoryDescriptor> _available_devices;
   
   private:
-    std::vector<string> _available_devices;
+
     std::weak_ptr<DeviceHarness> _harness;
     foxtrot::Logging _lg;
   };
