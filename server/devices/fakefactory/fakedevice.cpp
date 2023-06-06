@@ -29,6 +29,12 @@ fakeDeviceFactory::fakeDeviceFactory(shared_ptr<DeviceHarness> harness,
                                               const string &comment)
   : DeviceFactory(harness, comment), _n_devices_avail(n_devices_avail) {}
 
+fakeDeviceFactory::~fakeDeviceFactory()
+{
+
+}
+
+
 void fakeDeviceFactory::discover(){
 
   std::ostringstream oss;
@@ -47,13 +53,8 @@ void fakeDeviceFactory::discover(){
 fakeDevice::fakeDevice(const string &my_ident, std::size_t rndseed)
   : _impl(new fakeDeviceFactoryImpl(rndseed)), Device(nullptr, my_ident)
 {
-  _impl->_value = my_ident;
-}
 
-double fakeDevice::getRandomDouble()
-{
-  return _impl->_dist(_impl->_eng);
-}
+
 
 
 
@@ -66,7 +67,9 @@ RTTR_REGISTRATION {
 
 
   registration::class_<fakeDevice>("foxtrot::devices::fakeDevice")
-    .property_readonly("getRandomDouble", &fakeDevice::getRandomDouble);
+    .property_readonly("getRandomDouble", &fakeDevice::getRandomDouble)
+    .property("Value", &fakeDevice::getValue, &fakeDevice::setValue)
+    (policy::prop::as_reference_wrapper);
   
   registration::class_<fakeDeviceFactory>("foxtrot::devices::fakeDeviceFactory");
 
