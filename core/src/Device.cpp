@@ -106,7 +106,7 @@ void sanitize_arg(rttr::variant& argin, const rttr::type& target_tp, int pos, fo
         oss << "argument at position: " << pos << "of type: " << argin.get_type().get_name() << "cannot be converted to needed type: " << target_tp.get_name();
         throw std::logic_error(oss.str());
     }
-    
+
     if(argin.get_type() != target_tp)
     {
         if(lg)
@@ -208,7 +208,9 @@ rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_
         for(auto& a : argcopy)
         {
             auto target_tp = (paraminfsit++)->get_type();
-            if(a.get_type().is_wrapper())
+	    
+	    
+            if(a.get_type().is_wrapper() and ! target_tp.is_wrapper())
             {
                 lg_.strm(sl::warning) << "in capability with name: " << capname;
                 lg_.strm(sl::warning) << "an argument type ended up as a wrapper. This will cause a copy and is inefficient";
