@@ -113,15 +113,29 @@ message device_setup_response
   devdescribe dev = 2;
 }
 
-  
+message handlechooser
+{
+  uint64 handle = 1;
+  string cpp_type_name = 2;
+}
+
+message handlelist
+{
+  repeated handlechooser handles = 1;
+
+}
+
 
 service capability
 {
-    rpc InvokeCapability (capability_request) returns (capability_response);
-    rpc DescribeServer(empty) returns (servdescribe);
-    rpc FetchData(chunk_request) returns (stream datachunk);
-    rpc CloseDevice(devicechooser) returns (errstatus);
-    rpc RescanDevices(empty) returns (errstatus);
-    rpc SetupDevice(device_setup_request) returns (device_setup_response);
+  rpc InvokeCapability (capability_request) returns (capability_response);
+  rpc DescribeServer(empty) returns (servdescribe);
+  rpc FetchData(chunk_request) returns (stream datachunk);
+  rpc CloseDevice(devicechooser) returns (errstatus);
+  rpc RescanDevices(empty) returns (errstatus);
+  rpc SetupDevice(device_setup_request) returns (device_setup_response);
+
+  rpc ListHandles(empty) returns (handlelist);
+  rpc DisposeHandle(handlechooser) returns (errstatus);
 }
 

@@ -16,6 +16,8 @@ enum simplevalue_types
     VOID_TYPE = 5;
   //0.3.0 new types
     DATETIME_TYPE = 6;
+  //0.3.1 new types
+    REMOTE_HANDLE_TYPE = 7;
 }
 
 enum byte_data_types
@@ -112,6 +114,7 @@ message ft_simplevariant {
         bool boolval = 4;
         string stringval = 5;
 	google.protobuf.Timestamp tstampval = 8;
+	uint64 handleval = 9;
         }
     uint32 size = 6;
     bool is_void = 7;
@@ -137,7 +140,6 @@ message ft_tuple {
 // new in 0.3.0
 message ft_homog_array {
   oneof array {
-    ft_homog_array_decoded arr_decoded = 1;
     ft_homog_array_encoded arr_encoded = 2;
   }
 }
@@ -150,69 +152,6 @@ message ft_homog_array_encoded
 }
 
 
-//new in 0.3.0
-message ft_homog_array_decoded
-{
-  oneof array
-  {
-    ft_uint8_arr arr_uint8 = 1;
-    //NOTE there is no 16-bit native protobuf type
-    ft_uint32_arr arr_uint16 = 2;
-    ft_sint32_arr arr_sint16 = 3;
-    ft_uint32_arr arr_uint32 = 4;
-    ft_sint32_arr arr_sint32 = 5;
-    ft_uint64_arr arr_uint64 = 6;
-    ft_sint64_arr arr_sint64 = 7;
-    ft_float_arr arr_float = 8;
-    ft_double_arr arr_double = 9;
-  }
-}
-
-message ft_uint8_arr
-{
-  repeated uint32 values = 1;
-}
-
-message ft_uint16_arr
-{
-  //note no native 16 bit protobuf types
-  repeated uint32 values = 1;
-}
-
-message ft_sint16_arr
-{
-  repeated sint32 values = 1;
-}
-
-message ft_uint32_arr
-{
-  repeated uint32 values = 1;
-}
-
-message ft_sint32_arr
-{
-  repeated sint32 values = 1;
-}
-
-message ft_uint64_arr
-{
-  repeated uint64 values = 1;
-}
-
-message ft_sint64_arr
-{
-  repeated sint64 values = 1;
-}
-
-message ft_float_arr
-{
-  repeated float values = 1;
-}
-
-message ft_double_arr
-{
-  repeated double values = 1;
-}
 
 
 

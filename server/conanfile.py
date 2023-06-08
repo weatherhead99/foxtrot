@@ -9,6 +9,7 @@ class FoxtrotServerConan(ConanFile):
     exports_sources = "*CMakeLists.txt", "src/*.cpp",\
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
+    "include/foxtrot/devices/*.hh", \
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = (
