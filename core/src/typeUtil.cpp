@@ -11,6 +11,7 @@
 #include <foxtrot/device_utils.hh>
 #include <map>
 #include <typeinfo>
+#include <any>
 
 using namespace foxtrot;
 
@@ -854,6 +855,9 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out = simplevalue_types::VOID_TYPE;
         else if(tp == rttr::type::get<std::string>())
             out =  simplevalue_types::STRING_TYPE;
+	else if(tp == rttr::type::get<std::any>() or tp.is_wrapper() or tp.is_pointer())
+	  out = simplevalue_types::REMOTE_HANDLE_TYPE;
+	
     }
     else
     {

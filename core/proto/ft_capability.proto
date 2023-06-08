@@ -3,6 +3,7 @@ package foxtrot;
 import "ft_types.proto";
 import "ft_error.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 enum capability_types
 {
@@ -136,6 +137,7 @@ message stream_control
 {
   capability_request req = 1;
   stream_control_commands cmd = 2;
+  google.protobuf.Duration interval = 3;
 }
 
 service capability

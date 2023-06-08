@@ -10,3 +10,5 @@ add_executable(byte_convert_play byte_convert_play.cpp)
 target_link_libraries(byte_convert_play PUBLIC RTTR::Core foxtrot_core)
 target_include_directories(byte_convert_play PUBLIC ${CMAKE_BINARY_DIR})
 
+add_executable(arith_test arith_test.cpp)
+target_link_libraries(arith_test PUBLIC RTTR::Core)
