@@ -1,30 +1,30 @@
-[tool.poetry]
-name = "foxtrotpy"
-version = "0.1.1"
+[project]
+name = "pyfoxtrot"
+
+#manual coding versions for now, sort it out properly later 
+version = "0.3.0-alpha1"
 description = "Client for Foxtrot RPC hardware server"
-authors = ["Dan Weatherill <daniel.weatherill@physics.ox.ac.uk>"]
-packages = [ {include  = "pyfoxtrot", from="python"},
-	     {include = "pyfoxtrot/protos", from="python"}]
+authors = [ { name="Dan Weatherill", email="daniel.weatherill@physics.ox.ac.uk" }]
+packages = [ {include  = "pyfoxtrot", from="python"}
+	   ]
 
+dependencies = ["protobuf"]
+requires-python=">=3.9"
 
-[tool.poetry.dependencies]
-python = "^3.8"
-protobuf = "<=3.20"
-poetry-grpc-plugin = "^0.1.2"
-#poetry-dynamic-versioning = "^0.21.3"
+[tool.hatch.build]
+packages=["python/pyfoxtrot"]
 
-
-[tool.poetry.dev-dependencies]
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["hatchling", "grpcio-tools"]
 #build-backend = "poetry_dynamic_versioning.backend"
-build-backend = "poetry.core.masonry.api"
+#build-backend = "poetry.core.masonry.api"
+build-backend = "hatchling.build"
 
-[tool.poetry-grpc-plugin]
-proto_path = "./core/proto"
-python_out="python/pyfoxtrot/protos"
+[tool.hatch.build.hooks.custom]
+path="python/hatch_build.py"
+proto_source_dir="core/proto"
+proto_output_dir="python/pyfoxtrot/protos"
 
-[tool.poetry-dynamic-versioning]
-enable = true
+
 
