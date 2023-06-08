@@ -17,6 +17,8 @@ class ProtobufBuildHook(BuildHookInterface):
         print(f"root: {self.root}")
         print(f"config: {self.config}")
 
+        build_data["artifacts"].extend(["*.proto", "*.pyi", "*_pb2.py", "*_pb2_grpc.py"])
+        
         if "proto_source_dir" not in self.config:
             raise ValueError("need to specify proto_source_dir")
         if "proto_output_dir" not in self.config:
@@ -33,4 +35,5 @@ class ProtobufBuildHook(BuildHookInterface):
 
         self.app.display_info(f"running protoc to generate python pb2 and grpc files")
         command.build_package_protos(ddir)
+
 
