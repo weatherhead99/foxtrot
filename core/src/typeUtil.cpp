@@ -536,11 +536,6 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         ft_tuple* tupleval = out.mutable_tupleval();
         *tupleval = get_tuple_wire_type(var, lg);
     }
-    else if(tp.is_class() && tp != rttr::type::get<std::string>())
-    {
-        std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
-        throw std::logic_error(err_msg);
-    }
     else if(tp.is_wrapper() or tp == rttr::type::get<std::any>() or tp.is_pointer())
       {
 	if(lg)
@@ -550,8 +545,12 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 	auto maninst = foxtrot::HandleManager::instance();
 	auto key = maninst->add(std::move(var));
 	simplevarval->set_handleval(key);
-
-      }
+     }
+    else if(tp.is_class() && tp != rttr::type::get<std::string>())
+    {
+        std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
+        throw std::logic_error(err_msg);
+    }
     else
     {
         if(lg)
@@ -632,6 +631,11 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
         case(ft_simplevariant::ValueCase::kStringval):
             out = wiretp.stringval();
             break;
+        case(ft_simplevariant::ValueCase::kHandleval):
+	  auto handleinst = foxtrot::HandleManager::instance();
+	  out = handleinst->lookup(wiretp.handleval());
+	  break;
+      
     }
     
     if(!out.can_convert(target_tp))
@@ -651,6 +655,19 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
     {
         lg->strm(sl::debug) << "target type: " << target_tp.get_name().to_string();
     }
+
+    
+    //check if this is a remote object
+    if(wiretp.value_case() == ft_variant::ValueCase::kSimplevar
+       and wiretp.simplevar().value_case() == ft_simplevariant::ValueCase::kHandleval)
+      {
+	lg->strm(sl::debug) << "this is a value from the remote object store";
+	auto handler = foxtrot::HandleManager::instance();
+	return handler->lookup(wiretp.simplevar().handleval());
+
+      }
+    
+    
     
     if(target_tp.is_enumeration())
     {

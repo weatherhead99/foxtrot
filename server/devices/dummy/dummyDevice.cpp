@@ -64,11 +64,21 @@ void foxtrot::devices::dummyDevice::brokenMethod()
 }
 
 
-std::any foxtrot::devices::dummyDevice::unsupportedtype()
+std::any foxtrot::devices::dummyDevice::remoteBindTypeAny()
 {
     std::vector<int> out {1,2,3,4};
     return out;
 }
+
+std::shared_ptr<std::string> foxtrot::devices::dummyDevice::remoteBindTypePointer(const std::string& inp)
+{
+  std::ostringstream oss;
+  oss << "ok then, " << inp << "!";
+  
+  return std::make_unique<std::string>(oss.str());
+ 
+}
+
 
 std::vector< unsigned char > foxtrot::devices::dummyDevice::getCountStream(int n)
 {
@@ -167,6 +177,12 @@ foxtrot::devices::dummyStruct foxtrot::devices::dummyDevice::returns_custom_stru
     return out;
 }
 
+std::string foxtrot::devices::dummyDevice::takes_remote_obj(
+    std::shared_ptr<std::string> ptr)
+{
+  return *ptr;
+};
+
 
 std::tuple<int,std::string> foxtrot::devices::dummyDevice::returns_int_str_tuple()
 {
@@ -230,7 +246,8 @@ RTTR_REGISTRATION
      parameter_names("a1","a2")
      )
  .method("brokenMethod",&dummyDevice::brokenMethod)
- .property_readonly("unsupportedtype",&dummyDevice::unsupportedtype)
+   .property_readonly("remoteBindTypeAny", &dummyDevice::remoteBindTypeAny)
+   .method("remoteBindTypePointer", &dummyDevice::remoteBindTypePointer)
  .method("getCountStream",&dummyDevice::getCountStream)
  (
    parameter_names("n"),
@@ -260,7 +277,8 @@ RTTR_REGISTRATION
  .method("returns_unregistered_tuple", &dummyDevice::returns_unregistered_tuple)
  .method("returns_std_array", &dummyDevice::returns_std_array)
  .method("returns_struct_std_array", &dummyDevice::returns_struct_std_array)
- .method("returns_std_int_array", &dummyDevice::returns_std_int_array);
+ .method("returns_std_int_array", &dummyDevice::returns_std_int_array)
+ .method("takes_remote_obj", &dummyDevice::takes_remote_obj);
  
  foxtrot::register_tuple<std::pair<int,double>>();
  foxtrot::register_tuple<std::tuple<int,std::string>>();

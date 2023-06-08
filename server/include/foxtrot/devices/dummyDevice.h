@@ -55,7 +55,9 @@ namespace foxtrot
         void resetCounter();
 
         void brokenMethod();
-        std::any unsupportedtype();
+        std::any remoteBindTypeAny();
+
+      std::shared_ptr<std::string> remoteBindTypePointer(const std::string& inp);
             
         int add(int a1, int a2);
             
@@ -67,6 +69,8 @@ namespace foxtrot
         dummyEnum returns_custom_enum(int in);
         int takes_custom_enum(dummyEnum in);
 
+      std::string  takes_remote_obj(std::shared_ptr<std::string> ptr);
+      
         std::string takes_custom_struct(const dummyStruct& in);
         
         bool takes_pointer_type(int* in=nullptr);

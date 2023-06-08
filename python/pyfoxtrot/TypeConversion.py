@@ -73,11 +73,14 @@ def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
     elif svt == simplevalue_types.Value("STRING_TYPE"):
         _ensure_type(val, str)
         out.stringval = val.encode("UTF-8")
+    elif svt ==simplevalue_types.Value("REMOTE_HANDLE_TYPE"):
+        _ensure_type(val, int)
+        out.handleval = val
     elif svt == simplevalue_types.Value("VOID_TYPE"):
         raise TypeError("cannot assign to void type")
     else:
         raise RuntimeError("failed to convert, maybe a problem in descriptor")
-    
+
     return out
 
 
