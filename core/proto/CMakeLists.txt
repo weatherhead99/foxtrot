@@ -2,7 +2,6 @@ set(proto_files foxtrot.proto
   ft_types.proto
   ft_auth.proto
   ft_error.proto
-  ft_streams.proto
   ft_capability.proto
   ft_sessions.proto
   ft_flags.proto)

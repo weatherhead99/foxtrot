@@ -126,6 +126,18 @@ message handlelist
 }
 
 
+enum stream_control_commands
+{
+    stop = 0;
+    start = 1;
+}
+
+message stream_control
+{
+  capability_request req = 1;
+  stream_control_commands cmd = 2;
+}
+
 service capability
 {
   rpc InvokeCapability (capability_request) returns (capability_response);
@@ -137,5 +149,9 @@ service capability
 
   rpc ListHandles(empty) returns (handlelist);
   rpc DisposeHandle(handlechooser) returns (errstatus);
+
+  rpc StreamCapability(stream stream_control) returns (stream capability_response);
+  
+  
 }
 

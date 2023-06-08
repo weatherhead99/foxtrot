@@ -56,7 +56,7 @@ fakeDevice::fakeDevice(const string &my_ident, std::size_t rndseed)
 
 
 
-
+}
 
 
 
@@ -67,9 +67,7 @@ RTTR_REGISTRATION {
 
 
   registration::class_<fakeDevice>("foxtrot::devices::fakeDevice")
-    .property_readonly("getRandomDouble", &fakeDevice::getRandomDouble)
-    .property("Value", &fakeDevice::getValue, &fakeDevice::setValue)
-    (policy::prop::as_reference_wrapper);
+    .property_readonly("getRandomDouble", &fakeDevice::getRandomDouble);
   
   registration::class_<fakeDeviceFactory>("foxtrot::devices::fakeDeviceFactory");
 
