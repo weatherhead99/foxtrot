@@ -2,6 +2,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/ft_tuple_helper.hh>
 #include <foxtrot/ReflectionError.h>
+#include <foxtrot/HandleManager.hh>
 
 #include <boost/hana/map.hpp>
 #include <boost/hana/pair.hpp>
@@ -543,10 +544,12 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
     else if(tp.is_wrapper() or tp == rttr::type::get<std::any>() or tp.is_pointer())
       {
 	if(lg)
-	  lg.strm(sl::trace) << "remote wrapper type logic";
+	  lg->strm(sl::trace) << "remote wrapper type logic";
 
 	ft_simplevariant* simplevarval = out.mutable_simplevar();
-	
+	auto maninst = foxtrot::HandleManager::instance();
+	auto key = maninst->add(std::move(var));
+	simplevarval->set_handleval(key);
 
       }
     else
