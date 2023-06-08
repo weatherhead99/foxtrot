@@ -78,7 +78,7 @@ void foxtrot::ft_plugin::reload()
 };
 
 
-foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets )
+foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const foxtrot::mapofparametersets* const paramsets )
 : ft_plugin(setupfile), _harness(harness),  _paramsets(paramsets)
 {
     _lg.setLogChannel("ExperimentalSetup");

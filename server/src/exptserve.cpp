@@ -145,7 +145,7 @@ int main(int argc, char** argv)
     else
     {
       lg.Info("reading parameter sets...");
-      params.reset( new std::map<std::string,foxtrot::parameterset>(foxtrot::read_parameter_json_file(parameterfile)));
+      params.reset( new foxtrot::mapofparametersets(foxtrot::read_parameter_json_file(parameterfile)));
       
     }
     

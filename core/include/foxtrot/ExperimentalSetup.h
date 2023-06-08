@@ -13,6 +13,8 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/StubError.h>
 
+#include <foxtrot/parameter_defs.hh>
+
 
 // note: the below are redefinitions of stuff that's in protocols. One day
 // all parameter handling should probably be moved into core
@@ -20,10 +22,6 @@
 namespace foxtrot
 {
 
-    using parameterset = std::map<std::string, std::variant<int, std::string>>;
-    using mapofparametersets = std::map<std::string, foxtrot::parameterset>;
-
-  
     class DeviceHarness;
     class TelemetryServer;
     class Client;
@@ -67,12 +65,15 @@ namespace foxtrot
 #endif
         std::string _fname;
     };
-    
+
+  using foxtrot::mapofparametersets;
     
     class ExperimentalSetup : public ft_plugin
     {
     public:
-        ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness, const mapofparametersets* const paramsets = nullptr);
+
+        ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness,
+			  const foxtrot::mapofparametersets* const paramsets = nullptr);
         void reset();
         
     private:

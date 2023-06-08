@@ -1,19 +1,12 @@
 #pragma once 
 
-#include <map>
-#include <variant>
-#include <string>
-#include <boost/mpl/vector.hpp>
+#include <foxtrot/parameter_defs.hh>
 
 #include <utility>
 
 namespace foxtrot
 {
   
-  using parameter_types = boost::mpl::vector<unsigned,char, int , std::string>;
-  using parameter_types_minimal = boost::mpl::vector<int,std::string>;
-  using parameter = std::variant<int, unsigned, std::string>;
-  using parameterset = std::map<std::string, parameter>;
   
   
   // class parameter_visit : public std::static_visitor<>
