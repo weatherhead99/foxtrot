@@ -5,9 +5,11 @@
 #include <utility>
 #include <foxtrot/foxtrot_core_export.h>
 #include <vector>
+#include <foxtrot/HandleManager.hh>
 
 namespace foxtrot{
     class Logging;
+  
     
     FOXTROT_CORE_EXPORT std::vector<unsigned char> variant_to_bytes(const rttr::variant& var, bool check=false, Logging* lg=nullptr);
     
@@ -27,7 +29,8 @@ namespace foxtrot{
     
     
     FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var,
-                                                         Logging* lg=nullptr);
+                                                         Logging* lg=nullptr,
+							 );
     
     
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_variant& wiretp, 

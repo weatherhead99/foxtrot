@@ -540,6 +540,15 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         std::string err_msg = "dont understand how to convert type: " + tp.get_name().to_string();
         throw std::logic_error(err_msg);
     }
+    else if(tp.is_wrapper() or tp == rttr::type::get<std::any>() or tp.is_pointer())
+      {
+	if(lg)
+	  lg.strm(sl::trace) << "remote wrapper type logic";
+
+	ft_simplevariant* simplevarval = out.mutable_simplevar();
+	
+
+      }
     else
     {
         if(lg)
