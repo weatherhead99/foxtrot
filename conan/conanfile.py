@@ -13,7 +13,7 @@ FOXTROT_GLOBAL_OVERRIDES = []
 
 class FoxtrotCppMeta(type):
     BASE_PKG_NAME = "FoxtrotCppPackage"
-    
+
     def __new__(cls,name,bases,dct):
         if name != cls.BASE_PKG_NAME:
             newbases = list(bases)
@@ -26,7 +26,7 @@ class FoxtrotCppMeta(type):
             #merge in the options
             print("merging in the options and default options")
             basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
-        
+
             n.options = getattr(n, "options", {}) | bases[basepkg].options
             n.default_options = getattr(n, "default_options", {}) | bases[basepkg].default_options
 
@@ -99,15 +99,19 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
 
     def requirements(self):
         if hasattr(self, "ft_package_requires"):
+            if isinstance(self.ft_package_requires, str):
+                ft_require(self, self.ft_package_requires)
+                return
+            
             for pack in self.ft_package_requires:
                 self.output.info(f"adding other foxtrot package {pack} to dependencies")
                 ft_require(self, pack)
 
-        if hasattr(self, "overrides"):
-            for pack in self.overrides:
-                self.output.info(f"got override {pack} from local overrides")
-                self.requires(pack, override=True)
-                FOXTROT_GLOBAL_OVERRIDES.append(pack)
+        # if hasattr(self, "overrides"):
+        #     for pack in self.overrides:
+        #         self.output.info(f"got override {pack} from local overrides")
+        #         self.requires(pack, override=True)
+        #         FOXTROT_GLOBAL_OVERRIDES.append(pack)
 
 
     def _setup_cmake_tc(self):

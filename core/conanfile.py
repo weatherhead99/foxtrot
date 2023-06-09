@@ -48,11 +48,9 @@ class FoxtrotCoreConan(ConanFile):
         deps.generate()
 
         tc = self._setup_cmake_tc()
-        
         tc.generate()
 
 
-        
     def build(self):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared

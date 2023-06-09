@@ -15,13 +15,13 @@ class FoxtrotServerConan(ConanFile):
     requires = (
         "libsodium/[^1.0.18]",
         "rapidjson/[^1.1.0]",
-#        "asio-grpc/[^2.4.0]"
+        "asio-grpc/[^2.4.0]"
                 )
 
     default_options = {"*:shared" : True}
-    src_folder="server"
+    src_folder= "server"
 
-    ft_package_requires = "core", "protocols"
+    ft_package_requires = ( "protocols")
     cmake_package_name = "foxtrotServer"
     package_type = "application"
 
