@@ -9,6 +9,7 @@ class FoxtrotServerConan(ConanFile):
     exports_sources = "*CMakeLists.txt", "src/*.cpp",\
     "include/exptserve/*.h", "include/foxtrot/server/*.h", \
     "include/foxtrot/server/*.hh", "include/foxtrot/devices/*.h",\
+    "include/foxtrot/devices/*.hh", \
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = (
@@ -19,9 +20,10 @@ class FoxtrotServerConan(ConanFile):
     default_options = {"*:shared" : True}
     src_folder="server"
 
-    ft_package_requires = "core", "protocols"
+    ft_package_requires = ( "protocols")
     cmake_package_name = "foxtrotServer"
     package_type = "application"
+
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)

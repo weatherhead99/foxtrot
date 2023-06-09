@@ -20,13 +20,10 @@ class FoxtrotProtocolsConan(ConanFile):
     default_options = {"*/*:shared" : True,
                        "use_asio_impls" : True}
 
-    
 
     package_type = "shared-library"
     ft_package_requires = "core",
     cmake_package_name = "foxtrotProtocols"
-
-    overrides = "openssl/3.1.0",
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
@@ -41,5 +38,3 @@ class FoxtrotProtocolsConan(ConanFile):
             tc.cache_variables["USE_ASIO"] = True
 
         tc.generate()
-        
-        
