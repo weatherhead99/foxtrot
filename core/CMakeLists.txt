@@ -50,7 +50,7 @@ set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
 src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc src/Device.cpp src/DeviceHarness.cpp src/ExperimentalSetup.cpp src/CmdDevice.cpp src/DeviceFactory.cpp src/HandleManager.cpp)
 
 add_subdirectory(proto)
-add_library(foxtrot_core ${srcs} $<TARGET_OBJECTS:foxtrot_protos> ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+add_library(foxtrot_core ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 
 add_dependencies(foxtrot_core copy_protos)
 
@@ -70,11 +70,13 @@ set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
 set(ft_core_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 set(ft_core_binarydir ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS foxtrot_core 
+install(TARGETS foxtrot_core foxtrot_protos
     EXPORT foxtrot_core
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
-    
+
+
+  
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
         COMPONENT devel)
@@ -88,7 +90,7 @@ install(EXPORT foxtrot_core
 
 set(ft_core_deps_script
 "include(CMakeFindDependencyMacro)
- find_dependency(Boost REQUIRED COMPONENTS log program_options filesystem thread date_time)
+ find_dependency(Boost REQUIRED COMPONENTS system log program_options filesystem thread date_time)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)

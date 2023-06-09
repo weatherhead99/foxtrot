@@ -7,7 +7,6 @@ from conan.tools.files import collect_libs
 class FoxtrotCoreConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
-    overrides = "openssl/3.1.0",
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
     exports_sources = "CMakeLists.txt", "src/*.cpp", "src/*.cc", \
@@ -20,7 +19,7 @@ class FoxtrotCoreConan(ConanFile):
     cmake_package_name = "foxtrotCore"
 
     package_type = "shared-library"
-    default_options = {"*:shared" : True,
+    default_options = {"*/*:shared" : True,
                        "protobuf/*:with_zlib": True,
                        "rttr/*:with_rtti" : True,
                        "grpc/*:cpp_plugin" : True}
@@ -37,10 +36,9 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("boost/[^1.80.0]", headers=True, libs=True,
+        self.requires("boost/[^1.82.0]", headers=True, libs=True,
                       transitive_headers=True,
-                      transitive_libs=True)
-
+                      transitive_libs=True, override=True)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)

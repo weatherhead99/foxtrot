@@ -13,8 +13,9 @@ class FoxtrotServerConan(ConanFile):
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = (
-                "libsodium/[^1.0.18]",
-                "rapidjson/[^1.1.0]",
+        "libsodium/[^1.0.18]",
+        "rapidjson/[^1.1.0]",
+#        "asio-grpc/[^2.4.0]"
                 )
 
     default_options = {"*:shared" : True}
@@ -23,6 +24,7 @@ class FoxtrotServerConan(ConanFile):
     ft_package_requires = "core", "protocols"
     cmake_package_name = "foxtrotServer"
     package_type = "application"
+
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)

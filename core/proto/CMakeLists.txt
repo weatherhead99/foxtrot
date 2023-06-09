@@ -7,14 +7,25 @@ set(proto_files foxtrot.proto
   ft_flags.proto)
 
 
+#NOTE: find via module to force conan dependencies
+find_package(gRPC REQUIRED)
+
+
 message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
 
 protobuf_generate(OUT_VAR PROTO_HDRS  PROTOS ${proto_files} PLUGIN protoc-gen-grpc=${GRPC_CPP_PLUGIN_PROGRAM} PROTOC_OPTIONS --grpc_out=${CMAKE_CURRENT_BINARY_DIR})
 
+#asio_grpc_protobuf_generate(PROTOS ${proto_files} OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+#  OUT_VAR ASIO_PROTO_HDRS TARGET GENERATE_GRPC) 
+
+
 set(GEN_SRCS "")
 foreach(src ${proto_files})
   get_filename_component(bn ${src} NAME_WE)
+  list(APPEND GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/${bn}.pb.cc)
+  list(APPEND GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/${bn}.pb.h)
   list(APPEND GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/${bn}.grpc.pb.cc)
+  list(APPEND GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/${bn}.grpc.pb.h)
 endforeach()
 set_property(SOURCE ${GEN_SRCS} PROPERTY GENERATED TRUE)
 
@@ -22,6 +33,7 @@ set_property(SOURCE ${GEN_SRCS} PROPERTY GENERATED TRUE)
 message("gen_srcs: ${GEN_SRCS}")
 
 add_library(foxtrot_protos OBJECT ${PROTO_HDRS} ${GEN_SRCS})
+#add_library(foxtrot_protos OBJECT ${ASIO_PROTO_HDRS})
 target_link_libraries(foxtrot_protos PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc)
 
 add_custom_target(copy_protos
