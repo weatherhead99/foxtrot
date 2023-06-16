@@ -58,12 +58,14 @@ foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+set(link_libs "foxtrot_protos;Boost::log;Boost::program_options;Boost::filesystem;Boost::date_time;protobuf::libprotobuf;RTTR::Core")
+
 if(WIN32)
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::thread Boost::program_options protobuf::libprotobuf RTTR::Core)
-else()
-target_link_libraries(foxtrot_core PUBLIC Boost::log Boost::program_options protobuf::libprotobuf  RTTR::Core gRPC::grpc++ gRPC::grpc)
+  list(APPEND link_libs "Boost::thread")
 endif()
 
+
+target_link_libraries(foxtrot_core PUBLIC ${link_libs})
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)

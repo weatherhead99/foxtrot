@@ -4,8 +4,9 @@ from conan.tools.cmake import CMake, CMakeDeps
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import collect_libs
 
+
 class FoxtrotCoreConan(ConanFile):
-    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires = "foxtrotbuildutils/[^0.4]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name = "foxtrot_core"
     description = "core libraries for foxtrot"
@@ -21,8 +22,14 @@ class FoxtrotCoreConan(ConanFile):
     package_type = "shared-library"
     default_options = {"*/*:shared" : True,
                        "protobuf/*:with_zlib": True,
-                       "rttr/*:with_rtti" : True,
-                       "grpc/*:cpp_plugin" : True}
+                       "grpc/*:csharp_ext" : False,
+                       "grpc/*:node_plugin" : False,
+                       "grpc/*:php_plugin" : False,
+                       "grpc/*:ruby_plugin" : False,
+                       "grpc/*:python_plugin" : True,
+                       "rttr/*:shared" : True,
+                       "rttr/*:with_rtti" : True
+                       }
 
     src_folder = "core"
 
@@ -39,6 +46,8 @@ class FoxtrotCoreConan(ConanFile):
         self.requires("boost/[^1.82.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True, override=True)
+
+
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)

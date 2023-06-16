@@ -40,15 +40,25 @@ def ft_require(conanfile, substr: str) -> None:
     else:
         reqstr = ft_version_get_req_str(conanfile.version)
         conanfile.requires(f"foxtrot_{substr}/{reqstr}")
-    
+
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
-    version = "0.4.0"
+    version = "0.4.1"
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
 
-class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
+
+def add_grpc_options(configs):
+    for opt_name in ["csharp_ext", "node_plugin", "php_plugin", "ruby_plugin", "python_plugin"]:
+        fulloptname = f"grpc/*:{opt_name}"
+        configs.append({"options" : [(fulloptname, True), (fulloptname, False)]})
+
+    return configs
+
+
+    
+class FoxtrotCppPackage:
     default_user = "weatherill"
     default_channel = "stable"
     homepage = "https://gitlab.physics.ox.ac.uk/OPMD_LSST/foxtrot"
@@ -58,9 +68,13 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     license = "UNLICENSED"
     tool_requires = "cmake/[>=3.20.0]"
 
+    def compatibility(self):
+        configs = {}
+        return add_grpc_options(configs)
+
     def __init_subclass__(cls):
         pass
-    
+
     def export(self):
         git = Git(self, self.recipe_folder)
         if git.is_dirty():
@@ -79,7 +93,7 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
         git = Git(self, self.recipe_folder)
         if not self.version:
             self.version = semver_from_git_describe(git)
-            
+
     def build(self):
         cmake = CMake(self)
         cmake.configure()
@@ -148,7 +162,6 @@ class FoxtrotCppPackage(metaclass=FoxtrotCppMeta):
     def layout(self):
         cmake_layout(self, build_folder="conanbuild")
         self.cpp.build.builddirs.append("")
- 
 
 
 def ft_version_get_req_str(verstr: str) -> str:
@@ -239,6 +252,17 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
     return fullstr
         
 
+def string_digit_split(st: str):
+    gen = iter(st)
+    outdigits = []
+    for char in gen:
+        if char.isdigit():
+            outdigits.append(char)
+        else:
+            break
+
+    outrest = [_ for _ in gen]
+    return int("".join(outdigits)), outrest
 def string_digit_split(st: str):
     gen = iter(st)
     outdigits = []
