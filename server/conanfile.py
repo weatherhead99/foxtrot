@@ -2,7 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain
 
 class FoxtrotServerConan(ConanFile):
-    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires = "foxtrotbuildutils/[^0.4.1]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_server"
     description="foxtrot server components"
@@ -18,10 +18,10 @@ class FoxtrotServerConan(ConanFile):
         "asio-grpc/[^2.4.0]"
                 )
 
-    default_options = {"*:shared" : True}
+    default_options = {"*/*:shared" : True}
     src_folder= "server"
 
-    ft_package_requires = ( "protocols")
+    ft_package_requires = ( "core", "protocols")
     cmake_package_name = "foxtrotServer"
     package_type = "application"
 

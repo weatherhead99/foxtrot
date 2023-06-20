@@ -8,14 +8,21 @@ set(CONAN_CMAKE_SILENT_OUTPUT ON)
 set(packname "server")
 
 
-find_package(foxtrotCore REQUIRED CONFIG)
-find_package(foxtrotProtocols REQUIRED CONFIG)
-
 find_package(rttr 0.9.6 REQUIRED)
+find_package(foxtrotCore REQUIRED)
+find_package(foxtrotProtocols REQUIRED)
+
+
 message("rttr version: ${rttr_VERSION}")
+
+
+get_target_property(rttr_incl RTTR::Core INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
+message(STATUS "rttr_incl: ${rttr_incl}")
+
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-find_package(Boost REQUIRED COMPONENTS program_options)
+find_package(Boost REQUIRED COMPONENTS program_options asio filesystem)
 
 find_package(RapidJSON REQUIRED)
 find_package(libsodium REQUIRED)
@@ -70,10 +77,11 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_
 set(ft_server_dep_str
 "
 find_dependency(foxtrotCore REQUIRED)
-find_dependency(Boost REQUIRED COMPONENTS program_options filesystem)
+find_dependency(Boost REQUIRED COMPONENTS program_options filesystem asio)
 find_dependency(CURL REQUIRED)
 find_dependency(RapidJSON REQUIRED MODULE)
 find_dependency(libsodium REQUIRED)
+find_dependency(rttr 0.9.6 REQUIRED)
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_library(dl dl)
