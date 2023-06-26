@@ -2,7 +2,6 @@
 #include <iostream>
 
 
-#include <agrpc/asio_grpc.hpp>
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
 #include <boost/asio/thread_pool.hpp>
@@ -12,7 +11,7 @@
 
 
 namespace asio = boost::asio;
-using agrpc::GrpcContext;
+//using agrpc::GrpcContext;
 
 
 
@@ -30,11 +29,11 @@ int main()
   cout << "hello" << endl;
   foxtrot::setDefaultSink();
   
-
+  
 
   grpc::ServerBuilder builder;
 
-  GrpcContext ctxt(builder.AddCompletionQueue());
+  //  GrpcContext ctxt(builder.AddCompletionQueue());
 
   builder.AddListeningPort("localhost:50051", grpc::InsecureServerCredentials());
 

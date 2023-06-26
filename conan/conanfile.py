@@ -68,9 +68,9 @@ class FoxtrotCppPackage:
     license = "UNLICENSED"
     tool_requires = "cmake/[>=3.20.0]"
 
-    def compatibility(self):
-        configs = []
-        return add_grpc_options(configs)
+#    def compatibility(self):
+#        configs = []
+#        return add_grpc_options(configs)
 
     def __init_subclass__(cls):
         pass

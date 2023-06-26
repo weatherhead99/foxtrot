@@ -22,12 +22,6 @@ class FoxtrotCoreConan(ConanFile):
     package_type = "shared-library"
     default_options = {"*/*:shared" : True,
                        "protobuf/*:with_zlib": True,
-                       "grpc/*:csharp_ext" : False,
-                       "grpc/*:node_plugin" : False,
-                       "grpc/*:php_plugin" : False,
-                       "grpc/*:ruby_plugin" : False,
-                       "grpc/*:python_plugin" : True,
-                       "rttr/*:shared" : True,
                        "rttr/*:with_rtti" : True
                        }
 
@@ -47,6 +41,8 @@ class FoxtrotCoreConan(ConanFile):
         self.requires("rttr/0.9.6", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
+
+        self.requires("openssl/3.1.1", override=True)
 
 
 

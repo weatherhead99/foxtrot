@@ -13,6 +13,21 @@ find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 
 
+#NOTE: the below is to get around gRPC "infinite loop" bugs in their initialization
+#if we are using asio-grpc directly from upstream this should work
+set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
+find_package(asio-grpc)
+
+#however, if we're using the conan package, then the above is currently not supported.
+#we can do the below ugly hack to mess around with the deps in that case
+if(TARGET asio-grpc_DEPS_TARGET)
+  message(WARNING "CONAN BUILD hack: patching asio-grpc deps...")
+  set_target_properties(asio-grpc_DEPS_TARGET PROPERTIES INTERFACE_LINK_LIBRARIES
+  "$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:Boost::headers>")
+
+endif()
+
+
 message("rttr version: ${rttr_VERSION}")
 
 
@@ -82,6 +97,19 @@ find_dependency(CURL REQUIRED)
 find_dependency(RapidJSON REQUIRED MODULE)
 find_dependency(libsodium REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)
+
+set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
+find_dependency(asio-grpc)
+
+#however, if we're using the conan package, then the above is currently not supported.
+#we can do the below ugly hack to mess around with the deps in that case
+if(TARGET asio-grpc_DEPS_TARGET)
+  message(WARNING "CONAN BUILD hack: patching asio-grpc deps...")
+  set_target_properties(asio-grpc_DEPS_TARGET PROPERTIES INTERFACE_LINK_LIBRARIES
+  "$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:Boost::headers>")
+
+endif()
+
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     find_library(dl dl)

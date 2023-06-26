@@ -16,7 +16,6 @@ class FoxtrotServerConan(ConanFile):
         "libsodium/[^1.0.18]",
         "rapidjson/[^1.1.0]",
         "asio-grpc/[^2.4.0]",
-        "boost/[^1.80.0]",
         "grpc/[^1.50.1]"
                 )
 
@@ -28,6 +27,11 @@ class FoxtrotServerConan(ConanFile):
     package_type = "application"
 
 
+    def requirements(self):
+        super().requirements()
+
+        self.requires("boost/[^1.82.0]", override=True)
+    
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
 
