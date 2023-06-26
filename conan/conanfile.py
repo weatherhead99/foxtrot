@@ -69,7 +69,7 @@ class FoxtrotCppPackage:
     tool_requires = "cmake/[>=3.20.0]"
 
     def compatibility(self):
-        configs = {}
+        configs = []
         return add_grpc_options(configs)
 
     def __init_subclass__(cls):
