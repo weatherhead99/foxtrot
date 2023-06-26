@@ -116,7 +116,7 @@ class FoxtrotCppPackage:
             if isinstance(self.ft_package_requires, str):
                 ft_require(self, self.ft_package_requires)
                 return
-            
+
             for pack in self.ft_package_requires:
                 self.output.info(f"adding other foxtrot package {pack} to dependencies")
                 ft_require(self, pack)

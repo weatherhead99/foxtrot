@@ -7,7 +7,7 @@
 #include <grpcpp/server_builder.h>
 #include <boost/asio/thread_pool.hpp>
 
-
+#include <foxtrot/Logging.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
 
 
@@ -28,6 +28,9 @@ using std::endl;
 int main()
 {
   cout << "hello" << endl;
+  foxtrot::setDefaultSink();
+  
+
 
   grpc::ServerBuilder builder;
 

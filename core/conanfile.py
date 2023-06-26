@@ -35,9 +35,6 @@ class FoxtrotCoreConan(ConanFile):
 
     def requirements(self):
         super().requirements()
-        self.requires("rttr/0.9.6", headers=True, libs=True,
-                      transitive_headers=True,
-                      transitive_libs=True)
 
         self.requires("grpc/[^1.50.1]", headers=True, libs=True,
                       transitive_headers=True,
@@ -45,7 +42,11 @@ class FoxtrotCoreConan(ConanFile):
 
         self.requires("boost/[^1.82.0]", headers=True, libs=True,
                       transitive_headers=True,
-                      transitive_libs=True, override=True)
+                      transitive_libs=True)
+
+        self.requires("rttr/0.9.6", headers=True, libs=True,
+                      transitive_headers=True,
+                      transitive_libs=True)
 
 
 
