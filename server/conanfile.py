@@ -19,19 +19,19 @@ class FoxtrotServerConan(ConanFile):
         "grpc/[^1.50.1]"
                 )
 
-    default_options = {"*/*:shared" : True}
+    default_options = {"*/*:shared" : True,
+                       "grpc/*:shared" : True,
+                       "boost/*:shared" : True}
     src_folder= "server"
 
     ft_package_requires = ( "core", "protocols")
     cmake_package_name = "foxtrotServer"
     package_type = "application"
-
-
+    
     def requirements(self):
         super().requirements()
-
         self.requires("boost/[^1.82.0]", override=True)
-    
+
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
 
