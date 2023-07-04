@@ -9,3 +9,4 @@ target_include_directories(byte_convert_play PUBLIC ${CMAKE_BINARY_DIR})
 
 add_executable(arith_test arith_test.cpp)
 target_link_libraries(arith_test PUBLIC foxtrot_core RTTR::Core)
+target_include_directories(arith_test PUBLIC ${CMAKE_BINARY_DIR})

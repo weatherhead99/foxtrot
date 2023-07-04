@@ -51,6 +51,8 @@ src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/Content
 
 add_subdirectory(proto)
 add_library(foxtrot_core ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
+target_compile_definitions(foxtrot_core PUBLIC -DBOOST_LOG_DYN_LINK)
+
 
 add_dependencies(foxtrot_core copy_protos)
 

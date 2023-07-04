@@ -1,5 +1,7 @@
 #include <rttr/type>
 #include <iostream>
+#include <foxtrot/Logging.h>
+
 
 class MyObj
   {
