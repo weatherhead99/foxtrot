@@ -13,6 +13,22 @@ find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 
 
+option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
+function(coro_logic target)
+  if(${USE_CORO_IMPLEMENTATIONS})
+    message(STATUS "attempting using c++20 coroutine implementations")
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+      if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10)
+	message(FATAL_ERROR "coro implementations require gcc 10 or greater!")
+      endif()
+      target_compile_options(exptserve PRIVATE -fcoroutines)
+    endif()
+  endif()
+endfunction()
+
+
+
+
 #NOTE: the below is to get around gRPC "infinite loop" bugs in their initialization
 #if we are using asio-grpc directly from upstream this should work
 set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
@@ -37,7 +53,7 @@ message(STATUS "rttr_incl: ${rttr_incl}")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-find_package(Boost REQUIRED COMPONENTS program_options asio filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options asio filesystem coroutine)
 
 find_package(RapidJSON REQUIRED)
 find_package(libsodium REQUIRED)
@@ -88,6 +104,8 @@ install(DIRECTORY include/foxtrot
      
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
+
+
 
 set(ft_server_dep_str
 "

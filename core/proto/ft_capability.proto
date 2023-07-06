@@ -55,6 +55,7 @@ message capability_response
     ft_variant returnval = 4;
     errstatus err = 5;
     google.protobuf.Timestamp tstamp = 6;
+    google.protobuf.Timestamp tstamp_dispatch = 7;
 }
 
 message chunk_request
@@ -77,6 +78,23 @@ message datachunk
     errstatus err = 6;
     byte_data_types dtp = 7;
 
+}
+
+
+message bulkdata_chunk
+{
+  bytes data = 1;
+  byte_data_types dtp = 2;
+  errstatus err =3;
+  string cpp_type_name = 4;
+  uint32 pagenum = 5;
+  uint32 totalnum = 6;
+}
+
+message bulkdata_request
+{
+  handlechooser handle = 1;
+  uint32 chunksize = 2;
 }
 
 
@@ -140,6 +158,27 @@ message stream_control
   google.protobuf.Duration interval = 3;
 }
 
+enum async_control_commands
+{
+  initial = 0;
+  check = 1;
+  get = 2;
+
+}
+
+message async_control
+{
+  capability_request req = 1;
+  async_control_commands cmd = 2;
+}
+
+message async_response
+{
+  bool done = 1;
+  capability_response resp = 2;
+}
+
+
 service capability
 {
   rpc InvokeCapability (capability_request) returns (capability_response);
@@ -153,7 +192,8 @@ service capability
   rpc DisposeHandle(handlechooser) returns (errstatus);
 
   rpc StreamCapability(stream stream_control) returns (stream capability_response);
-  
+  rpc BulkDataDownload(bulkdata_request) returns (stream bulkdata_chunk);
+  rpc InvokeServerAsync(stream async_control) returns (stream async_response);
   
 }
 

@@ -25,6 +25,10 @@ target_include_directories(exptserve PRIVATE ${CMAKE_SOURCE_DIR}/include/exptser
 
 target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} RTTR::Core foxtrot_server Boost::program_options)
 
+coro_logic(exptserve)
+
+
+
 add_executable(ftauth ftauth.cpp)
 target_link_libraries(ftauth Boost::program_options libsodium::libsodium foxtrot::foxtrot_core foxtrot::foxtrot_protocols  foxtrot_server)
 target_include_directories(ftauth PRIVATE include)

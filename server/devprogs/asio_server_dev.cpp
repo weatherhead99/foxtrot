@@ -6,6 +6,8 @@
 #include <grpcpp/server_builder.h>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/asio/spawn.hpp>
+#include <boost/asio/bind_executor.hpp>
+#include <boost/asio/detached.hpp>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -23,8 +25,8 @@ using std::endl;
 
 foxtrot::exptserve::AsyncService service;
 
-template<typename H>
-void handler(asio::basic_yield_context<H>& yield)
+
+void handler(asio::yield_context yield)
 {
   grpc::ServerContext sctxt;
   foxtrot::empty req;
@@ -38,11 +40,21 @@ void handler(asio::basic_yield_context<H>& yield)
   foxtrot::server_info repl;
   repl.set_rpc_version(12);
 
-
+  agrpc::finish(writer, repl, grpc::Status::OK, yield);
 }
 
 
+template <typename Context, typename Executor, typename CompletionToken>
+void rep_handler(Context&& ctxt, Executor&& exec, CompletionToken&& token)
+{
+  auto resp = ctxt.responder();
+  foxtrot::server_info repl;
 
+  repl.set_rpc_version(12);
+
+  agrpc::finish(resp, repl, grpc::Status::OK, token);
+
+}
 
 
 int main()
@@ -54,8 +66,6 @@ int main()
   grpc::ServerBuilder builder;
 
   GrpcContext ctxt(builder.AddCompletionQueue());
-
-  asio::basic_yield_context<agrpc::GrpcExecutor> yield;
   
   auto exec = ctxt.get_executor();
 
@@ -64,7 +74,19 @@ int main()
   builder.RegisterService(&service);
   auto serv = builder.BuildAndStart();
 
-  //  asio::spawn(ctxt, handler<decltype(exec)>);;
-  
+  cout << "calling repeatedly_request" << endl;
+  agrpc::repeatedly_request(&foxtrot::exptserve::AsyncService::RequestGetServerInfo,
+			    service,
+			    asio::bind_executor(ctxt, 
+			    [](auto&& rctxt, auto&& exec)
+			    {
+			      auto resp = rctxt.responder();
+			      foxtrot::server_info repl;
+			      repl.set_rpc_version(12);
+			      agrpc::finish(resp, repl, grpc::Status::OK, asio::detached);
+
+			    }));
+
+  ctxt.run();
 
 }
