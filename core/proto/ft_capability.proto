@@ -160,10 +160,11 @@ message stream_control
 
 enum async_control_commands
 {
-  initial = 0;
+  dispatch = 0;
   check = 1;
   get = 2;
-
+  defer = 3;
+  run_all = 4;
 }
 
 message async_control
