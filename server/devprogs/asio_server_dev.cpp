@@ -8,6 +8,8 @@
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/bind_executor.hpp>
 #include <boost/asio/detached.hpp>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/use_awaitable.hpp>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/foxtrot.grpc.pb.h>
@@ -26,36 +28,6 @@ using std::endl;
 foxtrot::exptserve::AsyncService service;
 
 
-void handler(asio::yield_context yield)
-{
-  grpc::ServerContext sctxt;
-  foxtrot::empty req;
-
-  grpc::ServerAsyncResponseWriter<foxtrot::server_info> writer{&sctxt};
-
-  agrpc::request(&foxtrot::exptserve::AsyncService::RequestGetServerInfo,
-		 service, sctxt, req, writer, yield);
-  
-
-  foxtrot::server_info repl;
-  repl.set_rpc_version(12);
-
-  agrpc::finish(writer, repl, grpc::Status::OK, yield);
-}
-
-
-template <typename Context, typename Executor, typename CompletionToken>
-void rep_handler(Context&& ctxt, Executor&& exec, CompletionToken&& token)
-{
-  auto resp = ctxt.responder();
-  foxtrot::server_info repl;
-
-  repl.set_rpc_version(12);
-
-  agrpc::finish(resp, repl, grpc::Status::OK, token);
-
-}
-
 
 int main()
 {
@@ -67,25 +39,28 @@ int main()
 
   GrpcContext ctxt(builder.AddCompletionQueue());
   
-  auto exec = ctxt.get_executor();
 
   builder.AddListeningPort("localhost:50051", grpc::InsecureServerCredentials());
 
   builder.RegisterService(&service);
   auto serv = builder.BuildAndStart();
 
+  
   cout << "calling repeatedly_request" << endl;
   agrpc::repeatedly_request(&foxtrot::exptserve::AsyncService::RequestGetServerInfo,
 			    service,
-			    asio::bind_executor(ctxt, 
-			    [](auto&& rctxt, auto&& exec)
+			    asio::bind_executor(ctxt,
+			    [] (auto& sctxt, auto& request, auto& responder) -> asio::awaitable<void>
 			    {
-			      auto resp = rctxt.responder();
-			      foxtrot::server_info repl;
-			      repl.set_rpc_version(12);
-			      agrpc::finish(resp, repl, grpc::Status::OK, asio::detached);
+			      foxtrot::server_info sinfo;
+			      sinfo.set_rpc_version(12);
+			      co_await agrpc::finish(responder, sinfo, grpc::Status::OK,
+						     asio::use_awaitable);
 
-			    }));
+			      co_return;
+			    })
+			  
+			    );
 
   ctxt.run();
 

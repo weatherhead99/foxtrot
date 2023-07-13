@@ -1,7 +1,16 @@
 project(foxtrot_server C CXX)
 cmake_minimum_required(VERSION 3.12)
-set(CMAKE_CXX_STANDARD 17)
+
+option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+
+if(USE_CORO_IMPLEMENTATIONS)
+  set(CMAKE_CXX_STANDARD 20)
+else()
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 
 set(CONAN_CMAKE_SILENT_OUTPUT ON)
 
@@ -13,15 +22,16 @@ find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 
 
-option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
+
 function(coro_logic target)
   if(${USE_CORO_IMPLEMENTATIONS})
     message(STATUS "attempting using c++20 coroutine implementations")
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
       if(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 10)
 	message(FATAL_ERROR "coro implementations require gcc 10 or greater!")
+      elseif(${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 11)
+	target_compile_options(${target} PRIVATE -fcoroutines)
       endif()
-      target_compile_options(exptserve PRIVATE -fcoroutines)
     endif()
   endif()
 endfunction()
