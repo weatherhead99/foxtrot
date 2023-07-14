@@ -61,10 +61,32 @@ foxtrot::protocols::CurlRequest::~CurlRequest()
 }
 
 
+
+template <typename CurlInstance>
+void CurlRequest::common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header)
+{
+  thisreq_builder.str("");
+  curl_checkerror(curl_easy_setopt(inst, CURLOPT_URL, path.c_str()));
+
+  slistuptr headerptr(nullptr, curl_slist_free_all);
+
+  if(header)
+    {
+      _lg.Debug("header present");
+      headerptr = set_curl_header(*header);
+    }
+
+}
+		  
+
+
+
 void CurlRequest::Init(const parameterset *const)
 {
 
 }
+
+
 
 
 string CurlRequest::blocking_get_request(const string& path,
@@ -72,16 +94,7 @@ string CurlRequest::blocking_get_request(const string& path,
 )
 {
     curl_easy_reset(_curlinstance);
-    thisreq_builder.str("");
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
-    
-    slistuptr headerptr(nullptr, curl_slist_free_all);
-    
-    if(header)
-    {
-        _lg.Debug("header present");
-        headerptr = set_curl_header(*header);
-    }
+    common_curl_setup(_curlinstance, path, header);
     
     curl_common_performreq();
     return thisreq_builder.str();
@@ -92,20 +105,11 @@ string CurlRequest::blocking_post_request(const string& path,
                                           const vector<string>* header)
 {
     curl_easy_reset(_curlinstance);
-    thisreq_builder.str("");
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_URL, path.c_str()));
+
+    common_curl_setup(_curlinstance, path, header);
     curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_POSTFIELDS, body.c_str()));
-    
-    slistuptr headerptr(nullptr,curl_slist_free_all);
-    if(header)
-    {
-        _lg.Debug("header present");
-        headerptr = set_curl_header(*header);
-    }
-    
+
     curl_common_performreq();
-    
-    
     return thisreq_builder.str();
 };
 

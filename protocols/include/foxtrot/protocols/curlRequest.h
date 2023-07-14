@@ -58,6 +58,11 @@ private:
     static int _nCurlInstances;
     void* _curlinstance;
     Logging _lg;
+
+
+  template<typename CurlInstance>
+  void common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header);
+  
 };
 
 }
