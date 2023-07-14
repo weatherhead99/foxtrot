@@ -13,20 +13,23 @@ class curl_slist;
 
 using slistuptr = std::unique_ptr<curl_slist, void ( * ) ( curl_slist* ) >;
 
+
+namespace foxtrot
+{
+
 namespace detail
 {
 size_t write_cback ( char* ptr, size_t size, size_t nmemb, void* userdata );
 
 }
 
-namespace foxtrot
-{
+  
 namespace protocols
 {
 
 class CurlRequest : public CommunicationProtocol
 {
-    friend size_t detail::write_cback ( char*, size_t, size_t, void* );
+  friend size_t foxtrot::detail::write_cback ( char*, size_t, size_t, void* );
 public:
     CurlRequest();
     virtual ~CurlRequest();

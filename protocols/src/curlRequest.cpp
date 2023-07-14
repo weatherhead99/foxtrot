@@ -11,7 +11,8 @@ using namespace foxtrot::protocols;
 int CurlRequest::_nCurlInstances = 0;
 
 
-size_t detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
+
+size_t foxtrot::detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
         auto* req = reinterpret_cast<CurlRequest*>(userdata);
         std::string stringdat(ptr,nmemb);

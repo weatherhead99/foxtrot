@@ -5,7 +5,7 @@
 
 #include <foxtrot/Logging.h>
 
-#include "pushbullet_api.hh"
+
 #include "HandlerBase.h"
 #include "Logic_defs.hh"
 
@@ -13,6 +13,8 @@ using std::string;
 
 namespace foxtrot 
 {
+
+  class pushbullet_api;
     
     
     struct BroadcastNotificationLogic

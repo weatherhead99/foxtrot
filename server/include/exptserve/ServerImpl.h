@@ -31,14 +31,37 @@ using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
 using grpc::ServerBuilder;
 
+using std::shared_ptr;
 using std::string;
+using std::unique_ptr;
 
 namespace foxtrot{
     using ft_std_variant = std::variant<double,int,bool,std::string>;
     using flagmap =  std::map<std::string, ft_std_variant> ;
 
 
+  struct _ServerImplInternal;
+  struct pushbullet_api;
+
   class ServerImpl{
+  public:
+    ServerImpl(const string& servcomment, std::shared_ptr<DeviceHarness> harness,
+	       const string& connstr);
+
+    ~ServerImpl();
+    
+    void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
+
+    void SetupSSL(const string& crtfile, const string& keyfile,
+		  bool force_client_auth = false);
+
+
+  protected:
+    unique_ptr<pushbullet_api> steal_noti_api();
+    
+  private:
+    foxtrot::Logging _lg;
+    unique_ptr<_ServerImplInternal> _impl;
 
   };
   

@@ -27,7 +27,6 @@
 #include <foxtrot/server/auth_layer/AuthBase.hh>
 
 #include "HandlerBase.h"
-#include "pushbullet_api.hh"
 
 #include "ServerImpl.h"
 
@@ -46,7 +45,7 @@ public:
     ServerImplLegacy(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness);
     ServerImplLegacy(const std::string& servcomment, std::shared_ptr<DeviceHarness> harness, const std::string& connstr);
     
-    void setup_notifications(const string& apikey, const string& default_title, const string& default_channel);
+
     void setup_auth(const std::string& credsfile, int creds_validity_seconds);
     
     ~ServerImplLegacy();
@@ -178,7 +177,6 @@ private:
     
     Logging _lg;
     std::shared_ptr<AuthHandler> _auth_api = nullptr;
-    std::unique_ptr<pushbullet_api> _noti_api = nullptr;
     std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
     std::shared_ptr<UserAuthInterface> _auth_iface = nullptr;
     

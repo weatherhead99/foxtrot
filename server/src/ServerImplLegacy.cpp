@@ -23,6 +23,8 @@
 #include "KeepAliveSessionImpl.hh"
 //#include "GetAuthMechanismsImpl.h"
 
+#include "pushbullet_api.hh"
+
 
 #include <foxtrot/server/auth_layer/SASLAuthProvider.hh>
 
@@ -36,7 +38,7 @@ using std::string;
 using namespace foxtrot;
 
 foxtrot::ServerImplLegacy::ServerImplLegacy(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
-: _servcomment(servcomment), _harness(harness), _lg("ServerImplLegacy"), _connstr("0.0.0.0:50051"),
+  : ServerImpl(servcomment, harness, "0.0.0.0:50051"), _servcomment(servcomment), _harness(harness), _lg("ServerImplLegacy"), _connstr("0.0.0.0:50051"),
 _serverflags{new FlagMap}
 {
     //TODO: option for length of session
@@ -51,15 +53,6 @@ ServerImplLegacy::ServerImplLegacy(const string& servcomment, std::shared_ptr<De
 
 }
 
-void foxtrot::ServerImplLegacy::setup_notifications(const string& apikey, const string& default_title,
-                                              const string& default_channel)
-{
-    _lg.strm(sl::info) << "API key: " << apikey;
-    _noti_api = std::make_unique<pushbullet_api>(apikey);
-    notifications_enabled = true;
-    default_channel_ = default_channel;
-    default_title_ = default_title;
-}
 
 void foxtrot::ServerImplLegacy::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
@@ -119,7 +112,8 @@ void ServerImplLegacy::setup_common(const std::string& addrstr)
     if(notifications_enabled)
     {
         _lg.Info("setting up pushbullet notification logic");
-        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(std::move(_noti_api),
+	
+        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api(),
                                                                              default_title_, default_channel_));
     }
     else
