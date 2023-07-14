@@ -11,7 +11,7 @@ set(proto_files foxtrot.proto
 find_package(gRPC REQUIRED)
 
 
-message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
+#message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
 
 protobuf_generate(OUT_VAR PROTO_HDRS  PROTOS ${proto_files} PLUGIN protoc-gen-grpc=${GRPC_CPP_PLUGIN_PROGRAM} PROTOC_OPTIONS --grpc_out=${CMAKE_CURRENT_BINARY_DIR})
 
@@ -30,7 +30,7 @@ endforeach()
 set_property(SOURCE ${GEN_SRCS} PROPERTY GENERATED TRUE)
 
 
-message("gen_srcs: ${GEN_SRCS}")
+#message("gen_srcs: ${GEN_SRCS}")
 
 add_library(foxtrot_protos OBJECT ${PROTO_HDRS} ${GEN_SRCS})
 #add_library(foxtrot_protos OBJECT ${ASIO_PROTO_HDRS})

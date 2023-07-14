@@ -59,8 +59,9 @@ function(foxtrot_add_to_package_registry exportname packagename)
 endfunction()
 
 function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_script)
-  message(STATUS "include path: ${CMAKE_INCLUDE_PATH}")
-  message(STATUS "module path: ${CMAKE_MODULE_PATH}")
+#  message(STATUS "include path: ${CMAKE_INCLUDE_PATH}")
+#  message(STATUS "module path: ${CMAKE_MODULE_PATH}")
+  message(STATUS "source dir: ${CMAKE_CURRENT_SOURCE_DIR}")
   find_file(package_infile NAMES "foxtrotGenericConfig.cmake.in"
     HINTS ${CMAKE_MODULE_PATH} REQUIRED NO_CACHE)
 
@@ -72,12 +73,13 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
   set(PACKNAME ${packname})
   set(TARGETNAME ${target_name})
   set(SOURCEDIR_NAME ${sourcedir_name})
+  set(SOURCEDIR_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
   include(CMakePackageConfigHelpers)
   
   configure_package_config_file(${package_infile} ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
     INSTALL_DESTINATION ${CMAKE_DEST}
-  PATH_VARS CMAKE_DEST)
+  PATH_VARS CMAKE_DEST SOURCEDIR_PATH)
 
   export(EXPORT ${target_name} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packname}exports.cmake NAMESPACE foxtrot::)
 
