@@ -21,10 +21,7 @@ namespace foxtrot
     : public Serverlogic_defs<&exptserve::AsyncService::RequestBroadcastNotification,
     exptserve::AsyncService>
     {
-        BroadcastNotificationLogic(std::unique_ptr<pushbullet_api> api, 
-            const string& default_title="",
-            const string& default_channel=""
-        );
+        BroadcastNotificationLogic(std::unique_ptr<pushbullet_api> api);
         
         bool HandleRequest(reqtp& req, repltp& repl, respondertp& respond,
                            HandlerTag* tag);
@@ -32,9 +29,6 @@ namespace foxtrot
     private:
         std::unique_ptr<pushbullet_api> api_;
         Logging lg_;
-        string default_title_;
-        string default_channel_;
-
-
+ 
     };
 }

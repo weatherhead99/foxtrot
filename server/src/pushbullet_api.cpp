@@ -22,6 +22,16 @@ foxtrot::pushbullet_api::pushbullet_api(const string & api_key)
 }
 
 
+foxtrot::pushbullet_api::pushbullet_api(const string &api_key,
+                                        const string &default_title,
+                                        const string &default_channel)
+  : lg_("pushbullet_api"), api_key_(api_key), _default_title(default_title), _default_channel(default_channel)
+{
+  proto_ = std::make_shared<foxtrot::protocols::CurlRequest>();
+
+}
+
+
 void foxtrot::pushbullet_api::push_to_channel(const string& title, const string& body,
                                                   const string& channel)
 {
@@ -61,6 +71,20 @@ void foxtrot::pushbullet_api::push_to_channel(const string& title, const string&
     }
     
 }
+
+void foxtrot::pushbullet_api::push_to_channel_with_defaults(const string& body, optstring title,
+					      optstring channel)
+{
+
+  string passed_title = title.has_value() ? title.value().get() : _default_title.value();
+  string passed_channel = channel.has_value() ? channel.value().get() : _default_channel.value();
+  
+  push_to_channel(passed_title, body, passed_channel);
+  
+
+
+}
+
 
 
 

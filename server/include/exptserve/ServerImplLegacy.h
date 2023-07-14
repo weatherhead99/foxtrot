@@ -10,7 +10,6 @@
 #include <typeinfo>
 
 #include <grpc++/grpc++.h>
-#include <grpc++/security/credentials.h>
 
 
 #include <foxtrot/foxtrot.pb.h>
@@ -23,7 +22,6 @@
 #include <foxtrot/DeviceHarness.h>
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/FlagMap.hh>
-#include <foxtrot/server/SessionManager.hh>
 #include <foxtrot/server/auth_layer/AuthBase.hh>
 
 #include "HandlerBase.h"
@@ -33,7 +31,7 @@
 using grpc::Server;
 using grpc::ServerCompletionQueue;
 using grpc::ServerContext;
-using grpc::ServerBuilder;
+
 
 using std::string;
 
@@ -55,9 +53,6 @@ public:
     std::vector<std::future<std::exception_ptr>> RunMultithread(int nthreads);
     
     int join_multithreaded();
-    
-    void SetupSSL(const std::string& crtfile, const std::string& keyfile,
-		  bool force_client_auth = false);
     
     template<typename T> T* register_get_service()
     {
@@ -140,13 +135,10 @@ private:
         new HandlerBase<T,Service>(serv, _cq.get(), logic);
     }
     
-    bool notifications_enabled = false;
     bool auth_enabled = false;
     std::shared_ptr<FlagMap> _serverflags;
     
-    std::string _connstr;
-  
-    void setup_common(const std::string& addrstr );
+    void setup_common();
   
     std::mutex _exitmut;
     std::condition_variable _condvar;
@@ -164,20 +156,13 @@ private:
     foxtrot::flags::AsyncService _flagservice;
     foxtrot::auth::AsyncService _authservice;
     
-    std::shared_ptr<SessionManager> _sesman;
     
     grpc::ServerBuilder builder;
     std::vector<std::shared_ptr<void>> _logics;
     
-    std::string _servcomment;
-    std::shared_ptr<DeviceHarness> _harness;
-    
-    std::string default_channel_;
-    std::string default_title_;
-    
+        
     Logging _lg;
     std::shared_ptr<AuthHandler> _auth_api = nullptr;
-    std::shared_ptr<grpc::ServerCredentials> _creds = nullptr;
     std::shared_ptr<UserAuthInterface> _auth_iface = nullptr;
     
 };

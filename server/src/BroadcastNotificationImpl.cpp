@@ -5,10 +5,8 @@
 
 
 foxtrot::BroadcastNotificationLogic::BroadcastNotificationLogic(
-    std::unique_ptr<foxtrot::pushbullet_api> api, const string& default_title,
-    const string& default_channel)
-: lg_("BroadcastNotificationLogic"), api_(std::move(api)), default_title_(default_title),
-default_channel_(default_channel)
+    std::unique_ptr<foxtrot::pushbullet_api> api)
+: lg_("BroadcastNotificationLogic"), api_(std::move(api))
 {
     
 }
@@ -21,16 +19,27 @@ bool foxtrot::BroadcastNotificationLogic::HandleRequest(
     lg_.strm(sl::debug) << "got broadcast notification request";
     
     repl.set_msgid(req.msgid());
-    
-    string title = req.use_default_title() ? default_title_ : req.title() ;
-    string channel = req.use_default_channel() ? default_channel_ : req.channel_target();
+
+    optstring title, channel;
+
+    if(!req.use_default_title())
+      {
+	string temptitle = req.title();
+	title = std::ref(temptitle);
+      }
+    if(!req.use_default_channel())
+      {
+	string tempchan = req.channel_target();
+	channel = std::ref(tempchan);
+      }
+
     
     if(!api_)
     {
         throw foxtrot::ServerError("broadcast notifications not enabled on this server");
     }
     
-    api_->push_to_channel(title,req.body(),channel);
+    api_->push_to_channel_with_defaults(req.body(), title, channel);
     
     respond.Finish(repl,grpc::Status::OK,tag);
     return true;

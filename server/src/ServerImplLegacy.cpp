@@ -1,6 +1,5 @@
 #include <string>
 #include <fstream>
-#include <sstream>
 //might be needed on windows?
 #include <exception>
 #include <iostream>
@@ -38,18 +37,14 @@ using std::string;
 using namespace foxtrot;
 
 foxtrot::ServerImplLegacy::ServerImplLegacy(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
-  : ServerImpl(servcomment, harness, "0.0.0.0:50051"), _servcomment(servcomment), _harness(harness), _lg("ServerImplLegacy"), _connstr("0.0.0.0:50051"),
+  : ServerImpl(servcomment, harness, "0.0.0.0:50051"),  _lg("ServerImplLegacy"),
 _serverflags{new FlagMap}
 {
-    //TODO: option for length of session
-    auto session_length = std::chrono::minutes(10);
-    _sesman = std::make_shared<SessionManager>(session_length);
 }
 
 ServerImplLegacy::ServerImplLegacy(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
-: ServerImplLegacy(servcomment,harness)
+  : ServerImpl(servcomment, harness, connstr), _lg("ServerImplLegacy"), _serverflags(new FlagMap)
 {
-  _connstr = connstr;
 
 }
 
@@ -84,37 +79,30 @@ ServerImplLegacy::~ServerImplLegacy()
     
 }
 
-void ServerImplLegacy::setup_common(const std::string& addrstr)
+void ServerImplLegacy::setup_common()
 {
-  
-    if(_creds == nullptr)
-    {
-      _creds = grpc::InsecureServerCredentials();
-      
-    };
-  
-    builder.AddListeningPort(addrstr,_creds);
+    common_build(builder);   
     _cq = builder.AddCompletionQueue();
     
     std::vector<std::unique_ptr<logic_add_helper_base>> logics;
     
-    logics.push_back( create_logic_add_helper<ServerDescribeLogic>(_servcomment,_harness));
-    logics.push_back( create_logic_add_helper<InvokeCapabilityWithSession>(_sesman, _harness, _harness));
-    logics.push_back( create_logic_add_helper<FetchDataLogic>(_harness));
+    logics.push_back( create_logic_add_helper<ServerDescribeLogic>(servcomment(),harness()));
+    logics.push_back( create_logic_add_helper<InvokeCapabilityWithSession>(sesman(),harness(), harness()));
+    logics.push_back( create_logic_add_helper<FetchDataLogic>(harness()));
     logics.push_back( create_logic_add_helper<SetServerFlagsLogic>(_serverflags));
     logics.push_back( create_logic_add_helper<GetServerFlagsLogic>(_serverflags));
     logics.push_back( create_logic_add_helper<ListServerFlagsLogic>(_serverflags));
     logics.push_back( create_logic_add_helper<DropServerFlagLogic>(_serverflags));
-    logics.push_back( create_logic_add_helper<StartSessionLogic>(_sesman));
-    logics.push_back( create_logic_add_helper<CloseSessionLogic>(_sesman));
-    logics.push_back( create_logic_add_helper<ListSessionsLogic>(_sesman));
-    logics.push_back( create_logic_add_helper<KeepAliveSessionLogic>(_sesman));
-    if(notifications_enabled)
+    logics.push_back( create_logic_add_helper<StartSessionLogic>(sesman()));
+    logics.push_back( create_logic_add_helper<CloseSessionLogic>(sesman()));
+    logics.push_back( create_logic_add_helper<ListSessionsLogic>(sesman()));
+    logics.push_back( create_logic_add_helper<KeepAliveSessionLogic>(sesman()));
+
+    auto noti_api = steal_noti_api();
+    if(noti_api != nullptr)
     {
         _lg.Info("setting up pushbullet notification logic");
-	
-        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api(),
-                                                                             default_title_, default_channel_));
+        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api()));
     }
     else
     {
@@ -139,23 +127,22 @@ void ServerImplLegacy::setup_common(const std::string& addrstr)
     _server = builder.BuildAndStart();
     
 
-    
-    _lg.Info("server listening on " + addrstr );
-    
+    _lg.Info("server has started...");
 }
 
 
 
 void ServerImplLegacy::Run()
 {
-    setup_common(_connstr);
+  
+    setup_common();
         
     HandleRpcs();
 }
 
 std::vector< std::future< std::exception_ptr > > ServerImplLegacy::RunMultithread(int nthreads)
 {
-  setup_common(_connstr);
+  setup_common();
   
   std::vector<std::future<std::exception_ptr>> out;
   out.reserve(nthreads);
@@ -231,35 +218,6 @@ void foxtrot::ServerImplLegacy::HandleRpcs()
 }
 
 
-void ServerImplLegacy::SetupSSL(const string& crtfile, const string& keyfile, bool force_client_auth)
-{
-  grpc::SslServerCredentialsOptions::PemKeyCertPair kp;
-  
-  std::ifstream ifs(crtfile);
-  std::stringstream iss;
-  
-  iss << ifs.rdbuf();
-  
-  kp.cert_chain = iss.str();
-  ifs.close();
-  ifs.clear();
-  
-  
-  ifs.open(keyfile);
-  iss.str("");
-  iss << ifs.rdbuf();
-  
-  kp.private_key = iss.str();
-  
-  grpc::SslServerCredentialsOptions opts;
-  opts.pem_key_cert_pairs.push_back(kp);
-  
-  opts.force_client_auth = force_client_auth;
-  
-  
-  _creds = grpc::SslServerCredentials(opts);
-  
-}
 
 ServerCompletionQueue* ServerImplLegacy::getCQ()
 {
