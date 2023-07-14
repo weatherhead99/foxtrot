@@ -9,7 +9,7 @@
 #include <foxtrot/server/AuthHandler.h>
 
 //these should be included via the buildsystem
-#include "ServerImpl.h"
+#include "ServerImplLegacy.h"
 #include "ServerDescribeImpl.h"
 #include "InvokeCapabilityImpl.h"
 #include "FetchDataImpl.h"
@@ -35,8 +35,8 @@
 using std::string;
 using namespace foxtrot;
 
-foxtrot::ServerImpl::ServerImpl(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
-: _servcomment(servcomment), _harness(harness), _lg("ServerImpl"), _connstr("0.0.0.0:50051"),
+foxtrot::ServerImplLegacy::ServerImplLegacy(const std::string& servcomment, std::shared_ptr<foxtrot::DeviceHarness> harness)
+: _servcomment(servcomment), _harness(harness), _lg("ServerImplLegacy"), _connstr("0.0.0.0:50051"),
 _serverflags{new FlagMap}
 {
     //TODO: option for length of session
@@ -44,14 +44,14 @@ _serverflags{new FlagMap}
     _sesman = std::make_shared<SessionManager>(session_length);
 }
 
-ServerImpl::ServerImpl(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
-: ServerImpl(servcomment,harness)
+ServerImplLegacy::ServerImplLegacy(const string& servcomment, std::shared_ptr<DeviceHarness> harness, const string& connstr)
+: ServerImplLegacy(servcomment,harness)
 {
   _connstr = connstr;
 
 }
 
-void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string& default_title,
+void foxtrot::ServerImplLegacy::setup_notifications(const string& apikey, const string& default_title,
                                               const string& default_channel)
 {
     _lg.strm(sl::info) << "API key: " << apikey;
@@ -61,7 +61,7 @@ void foxtrot::ServerImpl::setup_notifications(const string& apikey, const string
     default_title_ = default_title;
 }
 
-void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_validity_hours)
+void foxtrot::ServerImplLegacy::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
     _lg.strm(sl::debug) << "credsfile: " << credsfile;
     _lg.strm(sl::info) << "registering AuthHandler";
@@ -84,14 +84,14 @@ void foxtrot::ServerImpl::setup_auth(const std::string& credsfile, int creds_val
 
 
 
-ServerImpl::~ServerImpl()
+ServerImplLegacy::~ServerImplLegacy()
 {
     _server->Shutdown();
     _cq->Shutdown();
     
 }
 
-void ServerImpl::setup_common(const std::string& addrstr)
+void ServerImplLegacy::setup_common(const std::string& addrstr)
 {
   
     if(_creds == nullptr)
@@ -152,14 +152,14 @@ void ServerImpl::setup_common(const std::string& addrstr)
 
 
 
-void ServerImpl::Run()
+void ServerImplLegacy::Run()
 {
     setup_common(_connstr);
         
     HandleRpcs();
 }
 
-std::vector< std::future< std::exception_ptr > > ServerImpl::RunMultithread(int nthreads)
+std::vector< std::future< std::exception_ptr > > ServerImplLegacy::RunMultithread(int nthreads)
 {
   setup_common(_connstr);
   
@@ -194,7 +194,7 @@ std::vector< std::future< std::exception_ptr > > ServerImpl::RunMultithread(int 
 
 }
 
-int ServerImpl::join_multithreaded()
+int ServerImplLegacy::join_multithreaded()
 {
   std::unique_lock<std::mutex> lock(_exitmut);
   _lg.Debug("waiting on exit condition...");
@@ -207,7 +207,7 @@ int ServerImpl::join_multithreaded()
 
 
 
-void foxtrot::ServerImpl::HandleRpcs()
+void foxtrot::ServerImplLegacy::HandleRpcs()
 {
     
     void* tag;
@@ -237,7 +237,7 @@ void foxtrot::ServerImpl::HandleRpcs()
 }
 
 
-void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool force_client_auth)
+void ServerImplLegacy::SetupSSL(const string& crtfile, const string& keyfile, bool force_client_auth)
 {
   grpc::SslServerCredentialsOptions::PemKeyCertPair kp;
   
@@ -267,7 +267,7 @@ void ServerImpl::SetupSSL(const string& crtfile, const string& keyfile, bool for
   
 }
 
-ServerCompletionQueue* ServerImpl::getCQ()
+ServerCompletionQueue* ServerImplLegacy::getCQ()
 {
     return _cq.get();
 }

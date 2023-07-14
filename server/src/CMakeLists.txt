@@ -1,7 +1,7 @@
 set(server_srcs ServerUtil.cpp  FlagMap.cpp auth_utils.cpp DeviceLocks.cpp)
 
 
-set(exptserve_srcs ServerImpl.cpp ServerDescribeImpl.cpp 
+set(exptserve_srcs ServerImplLegacy.cpp ServerDescribeImpl.cpp 
     InvokeCapabilityImpl.cpp  FetchDataImpl.cpp 
      ChunkStreamImpl.cpp ServerFlagsImpl.cpp  BroadcastNotificationImpl.cpp FetchDataImpl.cpp exptserve.cpp StartSessionImpl.cpp KeepAliveSessionImpl.cpp
     CloseSessionImpl.cpp ListSessionsImpl.cpp

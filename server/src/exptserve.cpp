@@ -20,7 +20,7 @@
 #include <foxtrot/protocols/ProtocolUtilities.h>
 
 #include "exptserve.h"
-#include "ServerImpl.h"
+#include "ServerImplLegacy.h"
 
 #include <filesystem>
 
@@ -169,7 +169,7 @@ int main(int argc, char** argv)
     
     std::string connstr = bindstr + ":" + std::to_string(port);
     
-    foxtrot::ServerImpl serv(servname,harness,connstr);
+    foxtrot::ServerImplLegacy serv(servname,harness,connstr);
     
     
     
