@@ -46,7 +46,8 @@ namespace foxtrot{
 		  bool force_client_auth = false);
 
 
-    void add_feature(ServerFeatureBase&& feat);
+    template<typename F>
+    void add_feature(F&& feat);
 
   protected:
     unique_ptr<pushbullet_api> steal_noti_api();
@@ -63,5 +64,16 @@ namespace foxtrot{
     unique_ptr<_ServerImplInternal> _impl;
 
   };
+  
+}
+
+
+template <typename F>
+void foxtrot::ServerImpl::add_feature(F&& feat)
+{
+  static_assert(std::is_base_of<foxtrot::ServerFeatureBase, F>::value,
+		"must use features derived from ServerFeatureBase");
+
+  feat.register_handlers(*this);
   
 }
