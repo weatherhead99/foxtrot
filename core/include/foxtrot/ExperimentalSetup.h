@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#ifdef __linux__
+#ifdef linux
 #include <dlfcn.h>
 #else
 #define NOMINMAX
@@ -38,7 +38,7 @@ namespace foxtrot
         
         template<typename funtp> funtp get_function(const std::string& name)
         {
-#ifdef __linux__
+		#ifdef linux
             _lg.Trace("calling dlsym...");
             auto sym = dlsym(_dl,name.c_str());
         #else
@@ -58,7 +58,7 @@ namespace foxtrot
         
         Logging _lg;
     private:
-#ifdef __linux__
+#ifdef linux
         void* _dl = nullptr;
 #else
         HMODULE _dl = nullptr;
@@ -72,12 +72,15 @@ namespace foxtrot
     {
     public:
 
-        ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness,
+        [[deprecated]] ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness,
 			  const foxtrot::mapofparametersets* const paramsets = nullptr);
+
+      ExperimentalSetup(const std::string& setupfile, std::shared_ptr<DeviceHarness> harness,
+			const foxtrot::mapofparametersets* const paramsets = nullptr);
         void reset();
         
     private:
-        DeviceHarness& _harness;
+      std::shared_ptr<DeviceHarness> _harness;
 	const mapofparametersets* const _paramsets;
      int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
     };

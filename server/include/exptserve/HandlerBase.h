@@ -43,7 +43,7 @@ namespace foxtrot
         : _service(service), _cq(cq), _responder(&_ctxt),  _logic(logic), _status(status::CREATE),
         _lg("HandlerBase")
         {
-            Proceed();
+          Proceed();
         }
         virtual void Proceed() final
         {
@@ -63,6 +63,7 @@ namespace foxtrot
                     if(!this)
                         _lg.Error("this is nullptr");
                     _lg.Trace("about to call requestfunptr");
+		    
                     (_service->*T::requestfunptr)(&_ctxt,&_req,&_responder,_cq,_cq,this);
                     _lg.Trace("requestfunptr returned");
                     

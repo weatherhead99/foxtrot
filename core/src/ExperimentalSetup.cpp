@@ -79,7 +79,7 @@ void foxtrot::ft_plugin::reload()
 
 
 foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxtrot::DeviceHarness& harness, const foxtrot::mapofparametersets* const paramsets )
-: ft_plugin(setupfile), _harness(harness),  _paramsets(paramsets)
+  : ft_plugin(setupfile), _harness(harness.ptr()),  _paramsets(paramsets)
 {
     _lg.setLogChannel("ExperimentalSetup");
     setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
@@ -88,13 +88,29 @@ foxtrot::ExperimentalSetup::ExperimentalSetup(const std::string& setupfile, foxt
       throw std::runtime_error("no valid setup function found in setupfile...");
     }
     setup_fun(harness, _paramsets);
-      
 };
+
+foxtrot::ExperimentalSetup::ExperimentalSetup(
+    const std::string &setupfile,
+    std::shared_ptr<foxtrot::DeviceHarness> harness,
+    const foxtrot::mapofparametersets *const paramsets) : ft_plugin(setupfile), _harness(harness), _paramsets(paramsets)
+{
+    _lg.setLogChannel("ExperimentalSetup");
+    setup_fun = get_function<int(*)(foxtrot::DeviceHarness&, const mapofparametersets* const)>("setup");
+    if(!setup_fun)
+    {
+      throw std::runtime_error("no valid setup function found in setupfile...");
+    }
+    setup_fun(*harness, _paramsets);
+    
+}
+    
+
 
 void foxtrot::ExperimentalSetup::reset()
 {
     _lg.Debug("clearing all devices...");
-    _harness.ClearDevices(1000);
+    _harness->ClearDevices(1000);
     
     _lg.Debug("reloading setup file...");
     reload();
@@ -107,7 +123,7 @@ void foxtrot::ExperimentalSetup::reset()
     
     _lg.Debug("running setup function...");
     
-    setup_fun(_harness,_paramsets);
+    setup_fun(*_harness,_paramsets);
     
     
 }

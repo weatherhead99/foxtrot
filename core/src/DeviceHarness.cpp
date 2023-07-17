@@ -22,6 +22,11 @@ using namespace foxtrot;
 using namespace rttr;
 
 
+std::shared_ptr<foxtrot::DeviceHarness> foxtrot::DeviceHarness::ptr()
+{
+  return shared_from_this();
+}
+
 
 
 foxtrot::DeviceHarness::DeviceHarness() : _lg("DeviceHarness")

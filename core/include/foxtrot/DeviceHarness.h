@@ -17,10 +17,10 @@ using prop_or_meth = std::variant<rttr::property, rttr::method>;
 namespace foxtrot
 {
     
-    class DeviceHarness
+  class DeviceHarness : public std::enable_shared_from_this<DeviceHarness>
     {
     public:
-        DeviceHarness();
+      std::shared_ptr<DeviceHarness> ptr();
         void AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
         void AddDevice(std::unique_ptr<Device> dev);
         
@@ -39,9 +39,8 @@ namespace foxtrot
 	std::unique_lock<std::timed_mutex> lock_device_contentious(int devid, unsigned contention_timeout_ms);
 	
 	
-	
     private:          
-      
+        DeviceHarness();      
         int _id = 0;
         foxtrot::Logging _lg;
 //         std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
