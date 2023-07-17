@@ -8,6 +8,7 @@
 #include <foxtrot/server/ServerUtil.h>
 #include <foxtrot/typeUtil.h>
 #include <foxtrot/foxtrot.pb.h>
+#include <foxtrot/ReflectionError.h>
 
 using namespace foxtrot;
 
@@ -53,178 +54,6 @@ void foxtrot::set_retval_from_variant(const rttr::variant& in, foxtrot::capabili
 }
 
 
-// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::variant& var)
-// {
-//   
-//   if(!var.is_valid())
-//   {
-//     throw std::logic_error("variant supplied to get_appropriate_wire_type is invalid!");
-//   }
-//   
-//   auto tp = var.get_type();
-//   
-//   if(!tp.is_valid())
-//   {
-//     throw std::logic_error("invalid type check previous!");
-//   }
-//   
-//   
-// //   if( var.can_convert<int>() || var.can_convert<unsigned>() )
-// //     {
-// //       if(tp != rttr::type::get<double>() && tp != rttr::type::get<float>())
-// // 	{
-// // 	  return value_types::INT;
-// // 	}
-// //     }
-// //     
-//   return get_appropriate_wire_type(tp);
-// }
-// 
-// foxtrot::value_types foxtrot::get_appropriate_wire_type(const rttr::type& tp)
-// {
-//     using namespace rttr;
-//     
-//     
-//     if(!tp.is_valid())
-//     {
-//         throw std::logic_error("invalid type supplied to get_appropriate_wire_type");
-//     }
-//     
-//     
-//     if(tp == type::get<void>())
-//     {
-//         return value_types::VOID_TYPE;
-//     }
-//     
-//     //check for bool
-//     if(tp == type::get<bool>())
-//     {
-//         return value_types::BOOL_TYPE;
-//     }
-//     
-//     //check for float
-//     if( (tp == type::get<double>()) || (tp == type::get<float>())) 
-//     {
-//         return value_types::FLOAT_TYPE;
-//     }
-//     
-//     if( tp == type::get<std::string>())
-//     {
-//       return value_types::STRING_TYPE;
-//     }
-//     
-//     if(tp.is_enumeration())
-//     {
-//       return value_types::INT_TYPE;
-//     }
-//     
-//     
-//     if(!tp.is_arithmetic() )
-//     {
-//         return value_types::STRING_TYPE;
-//     }
-//     
-//     
-//     return value_types::INT_TYPE;
-// }
-
-
-
-template <typename T>  std::unique_ptr<unsigned char[]> variant_to_bytes(rttr::variant& vt, unsigned& byte_size)
-{ 
-    foxtrot::Logging lg("variant_to_bytes");
-  lg.strm(sl::trace) << "received type: " << vt.get_type().get_name();
-  
-  
-  auto view = vt.create_sequential_view();
-  auto value_type = view.get_value_type();
-
-  lg.strm(sl::trace) << " value type: " << value_type.get_name();
-  
-  if(rttr::type::get<T>() != value_type)
-  {
-      lg.Trace("unequal types...");
-      return nullptr;
-  }
-  
-  byte_size = sizeof(T) / sizeof(unsigned char) * view.get_size();
-  auto data = std::unique_ptr<unsigned char[]>(new unsigned char[byte_size]);
-  
-  
-  if(rttr::type::get<std::vector<T>>() != vt.get_type())
-      throw std::logic_error("conversion to vector for this streammeta will fail! Aborting!");
-  
-  auto& source = rttr::variant_cast<std::vector<T>&>(vt);
-  auto targetptr = reinterpret_cast<unsigned char*>(source.data());
-  std::copy(targetptr, targetptr + byte_size, data.get());
-  
-  return data;
- 
-    
-}
-
-std::unique_ptr<unsigned char[]> old_rttr_array_converter(rttr::variant& arr, foxtrot::Logging& lg, unsigned int& byte_size, foxtrot::byte_data_types& dt)
-{
-  std::unique_ptr<unsigned char[]> data;
-    //find type
-    if(data = variant_to_bytes<unsigned char>(arr,byte_size))
-    {
-      lg.Trace("UCHAR");
-     dt = foxtrot::byte_data_types::UCHAR_TYPE;   
-     return data;
-    }
-    else if(data = variant_to_bytes<unsigned short>(arr,byte_size))
-    {
-      lg.Trace("USHORT");
-        dt = foxtrot::byte_data_types::USHORT_TYPE;
-        return data;
-    }
-    else if(data = variant_to_bytes<unsigned int>(arr,byte_size))
-    {
-      lg.Trace("UINT");
-        dt = foxtrot::byte_data_types::UINT_TYPE;
-        return data;
-    }
-    else if(data = variant_to_bytes<unsigned long>(arr,byte_size))
-    {
-      lg.Trace("ULONG");
-        dt = foxtrot::byte_data_types::ULONG_TYPE;
-        return data;
-    }
-    else if(data = variant_to_bytes<short>(arr,byte_size))
-    {
-      lg.Trace("SHORT");
-        dt = foxtrot::byte_data_types::SHORT_TYPE;
-        return data;
-    }
-    else if(data= variant_to_bytes<int>(arr,byte_size))
-    {
-      lg.Trace("IINT");
-        dt = foxtrot::byte_data_types::IINT_TYPE;
-        return data;
-    }
-    else if(data =  variant_to_bytes<long>(arr,byte_size))
-    {
-      lg.Trace("LONG");
-        dt = foxtrot::byte_data_types::LONG_TYPE;
-        return data;
-    }
-    else if(data = variant_to_bytes<float>(arr,byte_size))
-    {
-      lg.Trace("BFLOAT");
-        dt = foxtrot::byte_data_types::BFLOAT_TYPE;
-        return data;
-    }
-    else if(data = variant_to_bytes<double>(arr,byte_size))
-    {
-      lg.Trace("BDOUBLE");
-        dt = foxtrot::byte_data_types::BDOUBLE_TYPE;
-        return data;
-    }
-    throw std::logic_error("function couldn't convert to recognized array type...");
-    
-};
-
 
 std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, unsigned int& byte_size, foxtrot::byte_data_types& dt)
 {
@@ -238,9 +67,29 @@ std::unique_ptr<unsigned char[]>  foxtrot::byte_view_data(rttr::variant& arr, un
     
     
     lg.strm(sl::debug) << "variant type: " << arr.get_type().get_name();
+
+    auto view = arr.create_sequential_view();
+    if(view.get_rank() > 1)
+      {
+	lg.Error("can only deal with arrays of rank 1!");
+	throw foxtrot::ReflectionError("unable to deal with arrays of rank > 1");
+      }
+
+   
+    
+    dt = foxtrot::get_byte_data_type(view.get_rank_type(1), &lg);
+    auto dat = foxtrot::variant_to_bytes(arr, &lg);
+    byte_size = dat.size();
+    
+    auto out = std::unique_ptr<unsigned char[]>(new unsigned char[dat.size()]);
+
+    
+    std::copy(dat.begin(), dat.end(), out.get());
+    
+    return out;
+
     
 
-    return old_rttr_array_converter(arr,lg,byte_size,dt);
     
 }
 

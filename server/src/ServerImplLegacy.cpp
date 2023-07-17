@@ -84,25 +84,24 @@ void ServerImplLegacy::setup_common()
     common_build(builder);   
     _cq = builder.AddCompletionQueue();
     
-    std::vector<std::unique_ptr<logic_add_helper_base>> logics;
     
-    logics.push_back( create_logic_add_helper<ServerDescribeLogic>(servcomment(),harness()));
-    logics.push_back( create_logic_add_helper<InvokeCapabilityWithSession>(sesman(),harness(), harness()));
-    logics.push_back( create_logic_add_helper<FetchDataLogic>(harness()));
-    logics.push_back( create_logic_add_helper<SetServerFlagsLogic>(_serverflags));
-    logics.push_back( create_logic_add_helper<GetServerFlagsLogic>(_serverflags));
-    logics.push_back( create_logic_add_helper<ListServerFlagsLogic>(_serverflags));
-    logics.push_back( create_logic_add_helper<DropServerFlagLogic>(_serverflags));
-    logics.push_back( create_logic_add_helper<StartSessionLogic>(sesman()));
-    logics.push_back( create_logic_add_helper<CloseSessionLogic>(sesman()));
-    logics.push_back( create_logic_add_helper<ListSessionsLogic>(sesman()));
-    logics.push_back( create_logic_add_helper<KeepAliveSessionLogic>(sesman()));
+     auto l1 = create_logic_add_helper<ServerDescribeLogic>(servcomment(),harness());
+     auto l2 = create_logic_add_helper<InvokeCapabilityWithSession>(sesman(),harness(), harness());
+     auto l3 = create_logic_add_helper<FetchDataLogic>(harness());
+     auto l4 = create_logic_add_helper<SetServerFlagsLogic>(_serverflags);
+     auto l5 = create_logic_add_helper<GetServerFlagsLogic>(_serverflags);
+     auto l6 = create_logic_add_helper<ListServerFlagsLogic>(_serverflags);
+     auto l7 = create_logic_add_helper<DropServerFlagLogic>(_serverflags);
+     // auto l8 = create_logic_add_helper<StartSessionLogic>(sesman());
+     // auto l9 = create_logic_add_helper<CloseSessionLogic>(sesman());
+     // auto l10 = create_logic_add_helper<ListSessionsLogic>(sesman());
+     // auto l11 = create_logic_add_helper<KeepAliveSessionLogic>(sesman());
 
-    auto noti_api = steal_noti_api();
+     //auto noti_api = steal_noti_api();
     if(noti_api != nullptr)
     {
-        _lg.Info("setting up pushbullet notification logic");
-        logics.push_back(create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api()));
+        // _lg.Info("setting up pushbullet notification logic");
+        // auto l12 = create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api());
     }
     else
     {
@@ -112,21 +111,20 @@ void ServerImplLegacy::setup_common()
 
     if(auth_enabled)
     {
-        _lg.Info("setting up authentication system");
-        logics.push_back(create_logic_add_helper<AuthRequestLogic>(_auth_api));
-        logics.push_back(create_logic_add_helper<AuthRespondLogic>(_auth_api));
+        // _lg.Info("setting up authentication system");
+        // auto l13 = create_logic_add_helper<AuthRequestLogic>(_auth_api);
+        // auto l14 = create_logic_add_helper<AuthRespondLogic>(_auth_api);
         //logics.push_back(create_logic_add_helper<GetAuthMechanismsLogic>(_auth_iface));
     }
     else
     {
-        _lg.Info("authentication system disabled");
-        logics.push_back(create_logic_add_helper<AuthRequestLogic>(nullptr));
-        logics.push_back(create_logic_add_helper<AuthRespondLogic>(nullptr));
+        // _lg.Info("authentication system disabled");
+        // auto l15 = create_logic_add_helper<AuthRequestLogic>(nullptr);
+        // auto l16 = create_logic_add_helper<AuthRespondLogic>(nullptr);
     }
 
+   
     _server = builder.BuildAndStart();
-    
-
     _lg.Info("server has started...");
 }
 

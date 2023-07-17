@@ -6,8 +6,9 @@
 
 #include <grpc++/server_builder.h>
 #include <chrono>
-
+#include <vector>
 #include <variant>
+#include <unordered_map>
 
 #include <foxtrot/Logging.h>
 
@@ -26,7 +27,7 @@ namespace foxtrot{
 
 
   
-
+  class ServerFeatureBase;
   class DeviceHarness;
   struct _ServerImplInternal;
   struct pushbullet_api;
@@ -45,6 +46,8 @@ namespace foxtrot{
 		  bool force_client_auth = false);
 
 
+    void add_feature(ServerFeatureBase&& feat);
+
   protected:
     unique_ptr<pushbullet_api> steal_noti_api();
     const string& servcomment() const;
@@ -55,6 +58,7 @@ namespace foxtrot{
     shared_ptr<DeviceHarness> harness();
 
   private:
+
     foxtrot::Logging _lg;
     unique_ptr<_ServerImplInternal> _impl;
 

@@ -8,6 +8,7 @@
 #include <mutex>
 #include <map>
 #include <typeinfo>
+#include <any>
 
 #include <grpc++/grpc++.h>
 
@@ -90,7 +91,7 @@ private:
       {
           _lg.Trace("creating new logic object");
           _logic = std::make_shared<T>( std::forward<initargs>(args)...);
-          _impl.add_logic_shared_ptr(_logic);
+	  _impl._logics.push_back(std::static_pointer_cast<void>(_logic));
           _impl.register_get_service<Service>();
       }
       
@@ -108,32 +109,25 @@ private:
     };
     
     template<typename T, typename... initargs>
-    std::unique_ptr<logic_add_helper<T>> create_logic_add_helper(initargs&&... args)
+    logic_add_helper<T> create_logic_add_helper(initargs&&... args)
     {
-        return std::make_unique<logic_add_helper<T>>(*this, std::forward<initargs>(args)...);
+        return logic_add_helper<T>(*this, std::forward<initargs>(args)...);
     };
     
     
-    template<typename T>
-    void add_logic_shared_ptr(std::shared_ptr<T> logic)
-    {
-        _logics.push_back(std::static_pointer_cast<void>(logic));
-        
-    }
+    /* template<typename T, typename... initargs> void add_logic(initargs&&... args) */
+    /* { */
+    /*     using Service = typename T::servicetp; */
+    /*     auto serv = register_get_service<Service>(); */
+    /*     std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...)); */
+    /*     new HandlerBase<T>(serv, _cq.get(), logic); */
+    /* }; */
     
-    template<typename T, typename... initargs> void add_logic(initargs&&... args)
-    {
-        using Service = typename T::servicetp;
-        auto serv = register_get_service<Service>();
-        std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...));
-        new HandlerBase<T>(serv, _cq.get(), logic);
-    };
-    
-    template<typename T, typename Service, typename... initargs> void add_logic_with_service(Service* serv, initargs&&... args)
-    {
-        std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...));
-        new HandlerBase<T,Service>(serv, _cq.get(), logic);
-    }
+    /* template<typename T, typename Service, typename... initargs> void add_logic_with_service(Service* serv, initargs&&... args) */
+    /* { */
+    /*     std::shared_ptr<T> logic(new T(std::forward<initargs>(args)...)); */
+    /*     new HandlerBase<T,Service>(serv, _cq.get(), logic); */
+    /* } */
     
     bool auth_enabled = false;
     std::shared_ptr<FlagMap> _serverflags;
