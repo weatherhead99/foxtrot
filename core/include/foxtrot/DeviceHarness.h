@@ -20,6 +20,8 @@ namespace foxtrot
   class DeviceHarness : public std::enable_shared_from_this<DeviceHarness>
     {
     public:
+      [[nodiscard]] static std::shared_ptr<DeviceHarness> create();
+      
       std::shared_ptr<DeviceHarness> ptr();
         void AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
         void AddDevice(std::unique_ptr<Device> dev);

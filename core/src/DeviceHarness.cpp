@@ -22,6 +22,12 @@ using namespace foxtrot;
 using namespace rttr;
 
 
+static std::shared_ptr<foxtrot::DeviceHarness> foxtrot::DeviceHarness::create()
+{
+  return std::shared_ptr<DeviceHarness>(new foxtrot::DeviceHarness());
+}
+
+
 std::shared_ptr<foxtrot::DeviceHarness> foxtrot::DeviceHarness::ptr()
 {
   return shared_from_this();

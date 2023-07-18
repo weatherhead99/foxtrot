@@ -58,7 +58,7 @@ add_dependencies(foxtrot_core copy_protos)
 
 foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
-target_include_directories(foxtrot_core PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(foxtrot_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
 set(link_libs "foxtrot_protos;Boost::log;Boost::program_options;Boost::filesystem;Boost::date_time;protobuf::libprotobuf;RTTR::Core;Boost::thread")
 

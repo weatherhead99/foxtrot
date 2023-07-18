@@ -152,7 +152,7 @@ int main(int argc, char** argv)
     lg.strm(sl::debug) << "passed all the option tests..";
     
     
-    auto harness = std::make_shared<DeviceHarness>();
+    auto harness = foxtrot::DeviceHarness::create();
 
     foxtrot::ExperimentalSetup setup(setupfile,*harness,params.get());
     
