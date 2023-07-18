@@ -97,31 +97,21 @@ void ServerImplLegacy::setup_common()
      auto l10 = create_logic_add_helper<ListSessionsLogic>(sesman());
      auto l11 = create_logic_add_helper<KeepAliveSessionLogic>(sesman());
 
-     //auto noti_api = steal_noti_api();
-     //    if(noti_api != nullptr)
-    {
-        // _lg.Info("setting up pushbullet notification logic");
-        // auto l12 = create_logic_add_helper<BroadcastNotificationLogic>(steal_noti_api());
-    }
-    //else
-    {
-        _lg.Info("notifications are not enabled");
-//         logics.push_back<BroadcastNotificationLogic>(nullptr);
-    }
+     auto l12 = create_logic_add_helper<foxtrot::BroadcastNotificationLogic>(steal_noti_api());
 
-    // if(auth_enabled)
-    // {
-    //      _lg.Info("setting up authentication system");
-    //      auto l13 = create_logic_add_helper<AuthRequestLogic>(_auth_api);
-    //      auto l14 = create_logic_add_helper<AuthRespondLogic>(_auth_api);
-    //     logics.push_back(create_logic_add_helper<GetAuthMechanismsLogic>(_auth_iface));
-    // }
-    // else
-    // {
-    _lg.Info("authentication system disabled");
-    //      auto l15 = create_logic_add_helper<AuthRequestLogic>(nullptr);
-    //      auto l16 = create_logic_add_helper<AuthRespondLogic>(nullptr);
-    // }
+     // if(auth_enabled)
+     // {
+     //      _lg.Info("setting up authentication system");
+     //      auto l13 = create_logic_add_helper<AuthRequestLogic>(_auth_api);
+     //      auto l14 = create_logic_add_helper<AuthRespondLogic>(_auth_api);
+     //      //auto l18 = create_logic_add_helper<GetAuthMechanismsLogic>(_auth_iface);
+     // }
+     // else
+     // {
+     //   _lg.Info("authentication system disabled");
+     //      auto l15 = create_logic_add_helper<AuthRequestLogic>(nullptr);
+     //      auto l16 = create_logic_add_helper<AuthRespondLogic>(nullptr);
+     // }
 
    
     _server = builder.BuildAndStart();
