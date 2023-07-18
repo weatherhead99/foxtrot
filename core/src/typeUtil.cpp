@@ -75,7 +75,7 @@ std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, b
        if(rttr::type::get<K>() == value_type)
        {
            if(lg)
-               lg->strm(sl::debug) << "matched value type: " << value_type.get_name().to_string();
+               lg->strm(sl::trace) << "matched value type: " << value_type.get_name().to_string();
            std::vector<K> intermediate;
            intermediate.reserve(view.get_size());
         
@@ -173,7 +173,7 @@ bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
     if(!tp.get_metadata("tuplemeta").is_valid())
     {
         if(lg)
-            lg->strm(sl::debug) << "no tuplemeta";
+            lg->strm(sl::trace) << "no tuplemeta";
         return false;
     }
     return true;
@@ -298,7 +298,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         out.set_size(sizeof(Vtype));
         
         if(lg)
-            lg->strm(sl::debug) << typeid(Vtype).name() ;
+            lg->strm(sl::trace) << typeid(Vtype).name() ;
         
         if constexpr(hana::contains(dblval_types, VT))
         {
@@ -588,9 +588,9 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
     
     if(lg)
     {
-        lg->strm(sl::debug) << "is type valid? " << target_tp.is_valid();
-        lg->strm(sl::debug) << "is created variant valid: " << out.is_valid();
-        lg->strm(sl::debug) << "type of created variant: " << out.get_type().get_name().to_string();
+        lg->strm(sl::trace) << "is type valid? " << target_tp.is_valid();
+        lg->strm(sl::trace) << "is created variant valid: " << out.is_valid();
+        lg->strm(sl::trace) << "type of created variant: " << out.get_type().get_name().to_string();
     }
     
     for(auto& prop : target_tp.get_properties())
@@ -599,9 +599,9 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
         rttr::variant in_variant = wire_type_to_variant(invar, prop.get_type(), lg);
         if(lg)
         {
-            lg->strm(sl::debug) << "is in_variant valid? " << in_variant.is_valid();
+            lg->strm(sl::trace) << "is in_variant valid? " << in_variant.is_valid();
             
-            lg->strm(sl::debug) << "is prop valid?" << prop.is_valid();
+            lg->strm(sl::trace) << "is prop valid?" << prop.is_valid();
             
         }
         prop.set_value(out,in_variant);
@@ -653,7 +653,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 {
     if(lg)
     {
-        lg->strm(sl::debug) << "target type: " << target_tp.get_name().to_string();
+        lg->strm(sl::trace) << "target type: " << target_tp.get_name().to_string();
     }
 
     
@@ -758,7 +758,7 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
     if(tp.is_enumeration())
     {
         if(lg)
-            lg->strm(sl::debug) << "type is enumeration";
+            lg->strm(sl::trace) << "type is enumeration";
         auto* desc = out.mutable_enum_desc();
         *desc = describe_enum(tp);
         
@@ -768,7 +768,7 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
             && is_POD_struct(tp))
     {
         if(lg)
-            lg->strm(sl::debug) << "type is struct";
+            lg->strm(sl::trace) << "type is struct";
         auto* desc = out.mutable_struct_desc();
         *desc = describe_struct(tp);
         out.set_variant_type(variant_types::STRUCT_TYPE);
@@ -784,7 +784,7 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
     else
     {
         if(lg)
-            lg->strm(sl::debug) << "type is simple";
+            lg->strm(sl::trace) << "type is simple";
         auto desc = describe_simple_type(tp,lg);
         out.set_simplevalue_sizeof(desc.second);
         out.set_simplevalue_type(desc.first);

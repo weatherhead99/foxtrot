@@ -71,7 +71,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 
         try{
             outarg = wire_type_to_variant(inarg.value(), target_tp, &_lg);
-            _lg.strm(sl::debug) << "is outarg valid? " << outarg.is_valid() ;
+            _lg.strm(sl::trace) << "is outarg valid? " << outarg.is_valid() ;
         }
         catch(...)
         {
