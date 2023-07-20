@@ -596,7 +596,7 @@ void foxtrot::devices::APT::attempt_error_recover()
 
 
 
-std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
+std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout, bool throw_on_errors)
 {
 
   apt_reply out;
@@ -611,7 +611,6 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
 
   unsigned short recv_opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF);
 
-  
   if (headerstr[4] == 0)
     {
       _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;            _lg.Error("null destination");
@@ -621,6 +620,14 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
         throw DeviceError("received null destination");
     }
 
+
+  if(std::all_of(headerstr.begin(), headerstr.end(), [](auto& c) { return c == 0;}))
+    {
+      _lg.strm(sl::error) << "headerstr is ALL ZEROS!";
+      _lg.strm(sl::info) << "flushing serial port" ;
+      _serport->flush();
+      throw DeviceError("received all zeros");
+    }
 
   auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
