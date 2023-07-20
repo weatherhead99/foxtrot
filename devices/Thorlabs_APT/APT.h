@@ -154,7 +154,7 @@ namespace foxtrot {
       std::shared_ptr<protocols::SerialPort> _serport;
 
     private:
-      std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt);
+      std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt, bool throw_on_errors=true);
 
     };
     
