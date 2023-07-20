@@ -89,7 +89,7 @@ namespace foxtrot {
       limitswitchparams get_limitswitchparams(destination dest, motor_channel_idents channel);
       void set_limitswitchparams(destination dest, const limitswitchparams& params);
       
-      
+      void attempt_error_recover();
       
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);

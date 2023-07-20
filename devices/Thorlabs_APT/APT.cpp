@@ -396,12 +396,14 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		std::bitset<32> bits(stat.statusbits);
 		if(bits[9])
 		  {
-		    _lg.strm(sl::debug) << "motor status failed, but reports still homing";
+		    _lg.strm(sl::info) << "motor status failed, but reports still homing";
 		    continue;
 		  }
-		else if(bits[0] or bits[1] or bits[2] or bits[3] and init_limit_state)
+		else if( (bits[0] or bits[1] or bits[2] or bits[3]) and init_limit_state)
 		  {
-		    _lg.strm(sl::debug) << "got a limit switch message, but we started there so ignoring one";
+
+		    _lg.strm(sl::debug) << "init_limit_state: " << (int) init_limit_state;
+		    _lg.strm(sl::info) << "got a limit switch message, but we started there so ignoring one";
 		    init_limit_state = false;
 		    continue;
 
@@ -583,6 +585,15 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 }
 
 
+void foxtrot::devices::APT::attempt_error_recover()
+{
+  _lg.strm(sl::info) << "attempting error recovery...";
+  _lg.strm(sl::info) << "flusing serial port...";
+  _serport->flush();
+
+
+};
+
 
 
 std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
@@ -603,7 +614,10 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
   
   if (headerstr[4] == 0)
     {
-        _lg.Error("null destination");
+      _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;            _lg.Error("null destination");
+      _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
+      _lg.Info("flushing serial port");
+      _serport->flush();
         throw DeviceError("received null destination");
     }
 
@@ -611,6 +625,12 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
   auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
     {
+            _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;
+	    _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
+
+	    _lg.Error("null destination");
+	    _lg.Info("flushing serial port");
+	    _serport->flush();
         _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
         throw DeviceError("received unexpected source");
 
@@ -681,6 +701,8 @@ RTTR_REGISTRATION{
       (parameter_names("dest", "params"))
       .method("set_limitswitchparams", &APT::set_limitswitchparams)
       (parameter_names("dest", "params"))
+      .method("attempt_error_recover", &APT::attempt_error_recover)
+      
       
       ;
 
