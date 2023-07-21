@@ -627,13 +627,28 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
 
   if (headerstr[4] == 0)
     {
-      _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;            _lg.Error("null destination");
+
+      std::ostringstream oss;
+      oss << std::hex;
+      for(auto c: headerstr)
+	oss << (int) c << " ";
+      
+      
+      _lg.strm(sl::error) << "headerstr is (hex): " << oss.str();
+      _lg.Error("null destination");
       _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
       _lg.Info("flushing serial port");
       _serport->flush();
         throw DeviceError("received null destination");
     }
 
+
+  if( (recv_opcode == static_cast<unsigned short>(bsc203_opcodes::MGMSG_HW_RESPONSE)) and throw_on_errors) 
+    {
+      _lg.strm(sl::error) << "got MGMSG_HW_RESPONSE message,usually an error!";
+
+
+    }
 
   if(std::all_of(headerstr.begin(), headerstr.end(), [](auto& c) { return c == 0;}))
     {
@@ -649,7 +664,6 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
             _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;
 	    _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
 
-	    _lg.Error("null destination");
 	    _lg.Info("flushing serial port");
 	    _serport->flush();
         _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
