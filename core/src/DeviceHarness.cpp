@@ -42,7 +42,7 @@ foxtrot::DeviceHarness::DeviceHarness() : _lg("DeviceHarness")
 }
 
 
-void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> dev)
+int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> dev)
 {
     
     auto thisid = _id++;
@@ -53,9 +53,11 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)>
     }
 
     _devvec.push_back(std::move(dev));
+    return thisid;
+    
 }
 
-void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
+int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 {
     
     auto raw_ptr = dev.release();
@@ -70,7 +72,7 @@ void foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
    
 //     (raw_ptr,[](Device* dev) {});
     
-    AddDevice(std::move(newptr));
+    return AddDevice(std::move(newptr));
 }
 
 void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)

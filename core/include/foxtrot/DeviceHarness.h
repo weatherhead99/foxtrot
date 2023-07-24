@@ -23,8 +23,8 @@ namespace foxtrot
       [[nodiscard]] static std::shared_ptr<DeviceHarness> create();
       
       std::shared_ptr<DeviceHarness> ptr();
-        void AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
-        void AddDevice(std::unique_ptr<Device> dev);
+        int AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
+        int AddDevice(std::unique_ptr<Device> dev);
         
         Device* const GetDevice(int id);
         
