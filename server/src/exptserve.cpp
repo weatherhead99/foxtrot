@@ -32,7 +32,7 @@ namespace po = boost::program_options;
 
 int main(int argc, char** argv)
 {
-#ifndef linux
+#ifndef __linux__
     std::set_terminate([] () 
     {
        auto eptr = std::current_exception();
