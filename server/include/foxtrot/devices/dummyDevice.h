@@ -5,6 +5,7 @@
 #include <array>
 #include <tuple>
 #include <any>
+#include <variant>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
@@ -90,7 +91,16 @@ namespace foxtrot
     arrStruct returns_struct_std_array();
 
     int longdurationmethod(int n_sec);
-    
+      
+      std::variant<int, double, std::string> returns_variant(int i);
+
+      std::variant<double, unsigned> returns_unregistered_variant();
+
+      int takes_variant(std::variant<int, double, std::string> var);
+
+      std::variant<int,double,std::string> takes_tuple(const std::tuple<int,double,std::string>& in);
+      
+      
     protected:
         
         

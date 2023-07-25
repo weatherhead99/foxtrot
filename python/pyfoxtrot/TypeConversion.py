@@ -2,11 +2,13 @@ from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struc
 from .protos.ft_types_pb2 import simplevalue_types, variant_types
 from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor, homog_array_descriptor
 from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple
-from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE
+from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE
 from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE
 import struct
+import warnings
+from typing import Iterable
 
 
 def get_struct_string(dtp, length: int) -> str:
@@ -41,6 +43,10 @@ def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
         out.structval.CopyFrom(ft_struct_from_value(val, descriptor))
     elif vartype == ENUM_TYPE:
         out.enumval.CopyFrom(ft_enum_from_value(val, descriptor))
+    elif vartype == UNION_TYPE:
+        out = ft_union_from_value(val, descriptor)
+    elif vartype == TUPLE_TYPE:
+        out.tupleval.CopyFrom(ft_tuple_from_value(val, descriptor.tuple_desc))
     else:
         raise RuntimeError("couldn't determine type from descriptor")
     return out
@@ -83,6 +89,20 @@ def ft_simplevariant_from_value(val, descriptor: variant_descriptor):
 
     return out
 
+def ft_tuple_from_value(val: tuple, descriptor: tuple_descriptor) -> ft_tuple:
+    out = ft_tuple()
+    if not isinstance(val, Iterable):
+        raise TypeError("value must be an iterable")
+
+    if len(val) != len(descriptor.tuple_map):
+        raise ValueError(f"invalid tuple length {len(val)} supplied, requested length is {len(descriptor.tuple_map)}")
+    
+    for innerval, innerdesc in zip(val, descriptor.tuple_map):
+        out.value.append(ft_variant_from_value(innerval, innerdesc))
+
+    return out
+
+
 
 def ft_struct_from_value(val: dict,
                          descriptor: variant_descriptor) -> ft_struct:
@@ -115,6 +135,19 @@ def ft_enum_from_value(val, descriptor: variant_descriptor) -> ft_enum:
 
     out.enum_value = sanval
     return out
+
+def ft_union_from_value(val,
+                        descriptor: variant_descriptor) -> ft_variant:
+
+    for possible_type in descriptor.union_desc.possible_types:
+        try:
+            out = ft_variant_from_value(val, possible_type)
+            return out
+        except Exception as err:
+            continue
+    else:
+        raise RuntimeError("failed to convert union value!")
+
 
 
 def value_from_ft_variant(variant):
@@ -186,6 +219,7 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
             typestr = _simplevar_stringdescs_py_style[(tp,size)]
         else:
             typestr = f"cpptype[{descriptor.cpp_type_name}]"
+        return typestr
     elif descriptor.variant_type == ENUM_TYPE:
         enum_name = descriptor.enum_desc.enum_name.replace("::", "_")
         return "enum[%s]" % enum_name
@@ -195,4 +229,10 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
     elif descriptor.variant_type == TUPLE_TYPE:
         types = ",".join(string_describe_ft_variant(_) for _ in descriptor.tuple_desc.tuple_map)
         return "tuple[%s]" % types
-    return typestr
+    elif descriptor.variant_type == UNION_TYPE:
+        types = "/".join(string_describe_ft_variant(_) for _ in descriptor.union_desc.possible_types)
+        return "union[%s]" % types
+    else:
+        warnings.warn("encountered unknown variant type when trying to describe")
+        return f"cpptype[{descriptor.cpp_type_name}]"
+

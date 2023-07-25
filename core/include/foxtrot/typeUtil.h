@@ -5,11 +5,12 @@
 #include <utility>
 #include <foxtrot/foxtrot_core_export.h>
 #include <vector>
+#include <optional>
 
 
 namespace foxtrot{
     class Logging;
-  
+
     
     FOXTROT_CORE_EXPORT std::vector<unsigned char> variant_to_bytes(const rttr::variant& var, bool check=false, Logging* lg=nullptr);
     
@@ -27,11 +28,13 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT ft_tuple get_tuple_wire_type(const rttr::variant& var, Logging* lg = nullptr);
     FOXTROT_CORE_EXPORT ft_homog_array get_array_wire_type(const rttr::variant& var, Logging* lg=nullptr);
     
-    
     FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var,
                                                          Logging* lg=nullptr);
     
-    
+
+  FOXTROT_CORE_EXPORT ft_variant get_union_wire_type(const rttr::variant& var,
+						     Logging* lg = nullptr);
+  
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_variant& wiretp, 
                                        const rttr::type& target_tp, Logging* lg=nullptr);
     
@@ -41,7 +44,10 @@ namespace foxtrot{
                                        const rttr::type& target_tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_enum& wiretp,
                                        const rttr::type& target_tp, Logging* lg=nullptr);
-    
+
+  FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_tuple& wiretp,
+							 const rttr::type& target_tp, Logging* lg = nullptr);
+  
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg=nullptr);
     
     FOXTROT_CORE_EXPORT variant_descriptor describe_type(const rttr::type& tp, Logging* lg=nullptr);
@@ -54,5 +60,10 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT tuple_descriptor describe_tuple(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT homog_array_descriptor describe_array(
         const rttr::type& tp, Logging* lg=nullptr);
-    
+
+  FOXTROT_CORE_EXPORT union_descriptor describe_union(const rttr::type& tp, Logging* lg = nullptr);
+
+
+  FOXTROT_CORE_EXPORT std::optional<variant_types> get_variant_type_from_metadata(const rttr::type& tp,
+										  Logging* lg = nullptr);
 }

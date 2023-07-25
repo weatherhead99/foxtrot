@@ -47,6 +47,8 @@ enum variant_types
     ENUM_TYPE = 2;
     TUPLE_TYPE = 3;
     HOMOG_ARRAY_TYPE=4;
+    UNION_TYPE = 5;
+  
 }
 
 message variant_descriptor
@@ -58,7 +60,7 @@ message variant_descriptor
     enum_descriptor enum_desc = 5;
     tuple_descriptor tuple_desc = 6;
     homog_array_descriptor homog_array_desc = 7;
-
+    union_descriptor union_desc = 9;
   //new in 0.3.0
     string cpp_type_name = 8;
 }
@@ -89,6 +91,13 @@ message homog_array_descriptor
   simplevalue_types valtype = 5;
   variant_descriptor complex_value_type = 6;
   
+}
+
+
+message union_descriptor
+{
+  repeated variant_descriptor possible_types = 1;
+
 }
 
 
@@ -143,6 +152,8 @@ message ft_homog_array {
     ft_homog_array_encoded arr_encoded = 2;
   }
 }
+
+
 
 //new in 0.3.0
 message ft_homog_array_encoded

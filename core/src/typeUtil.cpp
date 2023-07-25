@@ -1,6 +1,7 @@
 #include <foxtrot/typeUtil.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/ft_tuple_helper.hh>
+#include <foxtrot/ft_union_helper.hh>
 #include <foxtrot/ReflectionError.h>
 #include <foxtrot/HandleManager.hh>
 
@@ -181,6 +182,30 @@ bool foxtrot::is_tuple(const rttr::type& tp, Logging* lg)
 }
 
 
+std::optional<variant_types>  foxtrot::get_variant_type_from_metadata(const rttr::type& tp,
+								      Logging* lg)
+{
+  std::optional<variant_types> out;
+
+  auto mdat = tp.get_metadata("ft_type");
+  
+  if( mdat.is_valid() and mdat.is_type<variant_types>())
+    {
+      if(lg)
+	lg->strm(sl::debug) << "found type from metadata, value (int): " << mdat.to_int() ;
+      
+      out = mdat.get_value<variant_types>();
+  if(lg)
+    lg->strm(sl::trace) << "should now have value in out:" <<(int) out.has_value();
+      
+    }
+
+  
+    return out;
+
+}
+
+
 template<typename T, typename Tcall>
 auto get_from_variant(const rttr::variant& var, Tcall callable, bool& success) ->
 decltype( (std::declval<rttr::variant>().*callable)(std::declval<bool*>()), T())
@@ -195,49 +220,6 @@ decltype( (std::declval<rttr::variant>().*callable)(), T())
     success = true;
     return (var.*callable)();
 }
-
-#if 0
-struct variant_setter
-{
-    variant_setter(const rttr::variant& var, ft_simplevariant& out, bool& success)
-    : _var(var), _out(out), _success(success) {};
-
-    template<typename T, typename Tvarcall, typename Tmesscall>
-    bool set_val(Tvarcall varcall, Tmesscall messcall)
-    {
-        auto tp = _var.get_type();
-        if(tp == rttr::type::get<T>())
-        {
-            T val = get_from_variant<T>(_var,varcall, _success);
-            (_out.*messcall)(val);
-            return true;
-        }
-        return false;
-    };
-    
-    template<typename T, typename Tvarcall, typename Tmesscall>
-    bool set_check(Tvarcall varcall, Tmesscall messcall)
-    {
-        if(set_val<T>(varcall, messcall))
-        {
-            if(!_success)
-            {
-                auto tp = _var.get_type();
-                throw std::logic_error("failed to convert type with name: " 
-                + tp.get_name().to_string());
-            }
-            return true;
-        }
-        return false;
-    };
-    
-    const rttr::variant& _var;
-    ft_simplevariant& _out;
-    bool& _success;
-    
-};
-
-#endif
 
 
 ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg)
@@ -487,11 +469,46 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         lg->strm(sl::trace) << "var is valid? " << var.is_valid();
         lg->strm(sl::trace) << "var type: " << var.get_type().get_name();
     }
+
     
     ft_variant out;
     auto tp = var.get_type();
     if(!tp.is_valid())
         throw std::logic_error("got invalid RTTR type, this is a foxtrot bug");
+
+
+    auto vartype = foxtrot::get_variant_type_from_metadata(tp, lg);
+    if(vartype.has_value())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "have valid variant type from metadata, using it...";
+	switch(*vartype)
+	  {
+	  case(variant_types::TUPLE_TYPE):
+	    {
+	      if(lg)
+		lg->strm(sl::trace) << "tuple logic";
+	      ft_tuple* tupleval = out.mutable_tupleval();
+	      *tupleval = get_tuple_wire_type(var, lg);
+	      return out;
+	      
+	    }
+	    break;
+	  case(variant_types::UNION_TYPE):
+	    {
+	      if(lg)
+		lg->strm(sl::trace) << "union logic";
+
+	      rttr::variant inner_var = foxtrot::union_get(var);
+	      return get_variant_wire_type(inner_var, lg);
+	    }
+	    break;
+	  default:
+	    if(lg)
+	      lg->strm(sl::warning) << "have ft_type metadata but no associated fast path logic, performing slow type logic...";
+	    
+	  }
+      }
     
     if(tp == rttr::type::get<void>())
     {
@@ -520,7 +537,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         
         if(lg)
             lg->strm(sl::trace) << "wrote output array definition";
-        
+   
     }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
@@ -528,13 +545,6 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
             lg->strm(sl::trace) << "struct logic";
         ft_struct* structval = out.mutable_structval();
         *structval = get_struct_wire_type(var, lg);
-    }
-    else if(is_tuple(tp,lg))
-    {
-        if(lg)
-            lg->strm(sl::trace) << "tuple logic";
-        ft_tuple* tupleval = out.mutable_tupleval();
-        *tupleval = get_tuple_wire_type(var, lg);
     }
     else if(tp.is_wrapper() or tp == rttr::type::get<std::any>() or tp.is_pointer())
       {
@@ -567,6 +577,10 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp,
                                             const rttr::type& target_tp, Logging* lg)
 {
     rttr::variant out = wiretp.enum_value();
+
+    if(!target_tp.is_enumeration())
+      throw std::logic_error("target type is not an enumeration!");
+    
     if(! out.can_convert(target_tp))
     {
         throw std::runtime_error("can't convert received type: " + out.get_type().get_name().to_string() + 
@@ -581,10 +595,56 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp,
     return out;
 };
 
+
+rttr::variant foxtrot::wire_type_to_variant(const ft_tuple& wiretp,
+					    const rttr::type& target_tp, Logging* lg)
+{
+  //findo out the target types of the tuple
+  auto tsz = foxtrot::tuple_size(target_tp);
+  if(wiretp.value_size() != tsz)
+    {
+      if(lg)
+	{
+	  lg->strm(sl::error) << "target type expects: " << tsz << "arguments";
+	  lg->strm(sl::error) << "but wire type has only: " << wiretp.value_size();
+	}
+      throw std::runtime_error("mismatch of target and wire type value sizes");
+    }
+    
+  std::vector<rttr::variant> argvals;
+  argvals.reserve(wiretp.value_size());
+
+  int i= 0;
+
+  for(const auto& inarg: wiretp.value())
+    {
+      auto thistarg = foxtrot::tuple_element_type(target_tp, i++);
+      argvals.push_back(wire_type_to_variant(inarg, thistarg, lg));
+    }
+
+
+  std::vector<rttr::argument> args(argvals.begin(), argvals.end());
+  
+  rttr::variant out = target_tp.create(args);
+  if(!out.is_valid())
+    throw std::runtime_error("failed to create tuple type with given arguments");
+
+  return out;
+  
+}
+
 rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
                                             const rttr::type& target_tp, Logging* lg)
 {
+
+  if(!target_tp.is_class())
+    throw std::runtime_error("target type is not a struct!");
+
+  
     rttr::variant out = target_tp.create();
+
+    if(!out.is_valid())
+      throw std::runtime_error("failed to construct target struct type!");
     
     if(lg)
     {
@@ -632,6 +692,8 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
             out = wiretp.stringval();
             break;
         case(ft_simplevariant::ValueCase::kHandleval):
+	  if(lg)
+	      lg->strm(sl::debug) << "this is a value from the remote object store";
 	  auto handleinst = foxtrot::HandleManager::instance();
 	  out = handleinst->lookup(wiretp.handleval());
 	  break;
@@ -656,51 +718,48 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
         lg->strm(sl::trace) << "target type: " << target_tp.get_name().to_string();
     }
 
-    
-    //check if this is a remote object
-    if(wiretp.value_case() == ft_variant::ValueCase::kSimplevar
-       and wiretp.simplevar().value_case() == ft_simplevariant::ValueCase::kHandleval)
+
+    rttr::variant out;
+
+    switch(wiretp.value_case())
       {
-	lg->strm(sl::debug) << "this is a value from the remote object store";
-	auto handler = foxtrot::HandleManager::instance();
-	return handler->lookup(wiretp.simplevar().handleval());
+      case(ft_variant::ValueCase::kSimplevar):
+	out = wire_type_to_variant(wiretp.simplevar(), target_tp, lg); break;
+      case(ft_variant::ValueCase::kEnumval):
+	out = wire_type_to_variant(wiretp.enumval(), target_tp, lg); break;
+      case(ft_variant::ValueCase::kArrayval):
+	out = wire_type_to_array(wiretp.arrayval(), target_tp, lg); break;
+      case(ft_variant::ValueCase::kStructval):
+	out =  wire_type_to_variant(wiretp.structval(), target_tp, lg); break;
+      case(ft_variant::ValueCase::kTupleval):
+       	out = wire_type_to_variant(wiretp.tupleval(), target_tp, lg); break;
+      default:
+	throw std::logic_error("no variant logic has happened!");
+      }    
 
+    if(out.get_type() == target_tp)
+      {
+
+	if(lg)
+	  lg->strm(sl::debug) << "created type matches target exactly... nothing more to do";
       }
-    
-    
-    
-    if(target_tp.is_enumeration())
-    {
-        if(wiretp.value_case() != ft_variant::ValueCase::kEnumval)
-            throw std::runtime_error("expected variant, got something else in supplied type");
-
-        return wire_type_to_variant(wiretp.enumval(),target_tp, lg);
-    }
-    else if(target_tp.is_sequential_container())
-    {
-        if(lg)
-            lg->strm(sl::trace) << "checking array case";
-        if(wiretp.value_case() != ft_variant::ValueCase::kArrayval)
-            throw std::runtime_error("expected array, got something else in supplied type");
-        return wire_type_to_array(wiretp.arrayval(), target_tp, lg);
-        
-    }
-    else if(target_tp.is_class() && target_tp != rttr::type::get<std::string>())
-    {
-        if(lg)
-            lg->strm(sl::trace) << "checking struct case";
-        
-        if(wiretp.value_case() != ft_variant::ValueCase::kStructval)
-            throw std::runtime_error("expected struct, got something else in supplied type");
-        return wire_type_to_variant(wiretp.structval(), target_tp, lg);
-    }
     else
-    {
-        if(wiretp.value_case() != ft_variant::ValueCase::kSimplevar)
-            throw std::runtime_error("expected simple var, got something else in supplied type");
-        return wire_type_to_variant(wiretp.simplevar(), target_tp, lg);
-    }
+      {
+	if(lg)
+	  {
+	    lg->strm(sl::debug) << "created type is: " << out.get_type().get_name();
+	    lg->strm(sl::debug) << "whereas target type is: " << target_tp.get_name();
+	  }
+	if(!out.can_convert(target_tp))
+	   throw std::runtime_error("won't be able to convert this type!");
 
+	if(!out.convert(target_tp))
+	  throw std::runtime_error("type conversion is possible but this one failed!");
+
+	
+      }
+
+    return out;
 }
 
 rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg)
@@ -754,7 +813,39 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
 {
     variant_descriptor out;
     out.set_cpp_type_name(tp.get_name().to_string());
-    
+
+    auto optfast = foxtrot::get_variant_type_from_metadata(tp, lg);
+    if(optfast.has_value())
+      {
+	if(lg)
+	  lg->strm(sl::debug) << "variant type has ft_type metadata...";
+	out.set_variant_type(*optfast);
+	
+	
+	switch(*optfast)
+	  {
+	  case variant_types::TUPLE_TYPE:
+	    {
+	      auto* desc = out.mutable_tuple_desc();
+	      *desc = describe_tuple(tp, lg);
+	      return out;
+	    }
+
+	  case variant_types::UNION_TYPE:
+	    {
+	      auto* desc = out.mutable_union_desc();
+	      *desc = describe_union(tp, lg);
+	      return out;
+	    }
+
+	  default:
+	    if(lg)
+	      lg->strm(sl::debug) << "metadata present but unhandled, going through long-hand derivation";
+
+	  }
+	
+      }
+
     if(tp.is_enumeration())
     {
         if(lg)
@@ -772,14 +863,6 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
         auto* desc = out.mutable_struct_desc();
         *desc = describe_struct(tp);
         out.set_variant_type(variant_types::STRUCT_TYPE);
-    }
-    else if(is_tuple(tp,lg))
-    {
-        if(lg)
-            lg->strm(sl::trace) << "type is tuple";
-        auto* desc = out.mutable_tuple_desc();
-        *desc = describe_tuple(tp);
-        out.set_variant_type(variant_types::TUPLE_TYPE);
     }
     else
     {
@@ -932,3 +1015,29 @@ tuple_descriptor foxtrot::describe_tuple(const rttr::type& tp, Logging* lg)
 };
 
 
+
+union_descriptor foxtrot::describe_union(const rttr::type& tp, Logging* lg)
+{
+  union_descriptor out;
+
+  if(lg)
+    lg->strm(sl::debug) << "union type name: " << tp.get_name();
+
+  
+  
+  auto meth = tp.get_method("get");  
+  
+  if(!meth.is_valid())
+    throw std::logic_error("get method on union type is invalid. Maybe this union hasn't been registered");
+
+  for(auto t : tp.get_template_arguments())
+    {
+      variant_descriptor* desc = out.add_possible_types();
+      *desc = foxtrot::describe_type(t, lg);
+
+    }
+
+  return out;
+
+
+}

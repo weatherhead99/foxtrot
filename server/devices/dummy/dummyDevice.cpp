@@ -3,6 +3,8 @@
 #include <thread>
 #include <chrono>
 
+#include <type_traits>
+
 #include <rttr/type>
 #include <rttr/registration>
 
@@ -11,6 +13,7 @@
 
 #include <foxtrot/devices/dummyDevice.h>
 #include <foxtrot/ft_tuple_helper.hh>
+#include <foxtrot/ft_union_helper.hh>
 
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
@@ -231,6 +234,60 @@ foxtrot::devices::arrStruct foxtrot::devices::dummyDevice::returns_struct_std_ar
 }
 
 
+std::variant<int,double,std::string> foxtrot::devices::dummyDevice::returns_variant(int i)
+{
+
+  std::variant<int,double,std::string> out;
+  
+  switch(i)
+    {
+    case(0):
+      out = 12; break;
+    case(1):
+      out = 7.253; break;
+    case(2): 
+      out = "badabingbadaboom"; break;
+    default:
+      throw std::out_of_range("invalid argument");
+    }
+
+  return out;
+}
+
+std::variant<double, unsigned> foxtrot::devices::dummyDevice::returns_unregistered_variant()
+{
+  std::variant<double, unsigned> out = 1.0;
+  return out;
+}
+
+int foxtrot::devices::dummyDevice::takes_variant(std::variant<int, double, std::string> var)
+{
+  return std::visit( [] (auto& arg)
+  {
+    using T = std::decay_t<decltype(arg)>;
+    if constexpr(std::is_same_v<T, int>)
+      return 0;
+    else if constexpr(std::is_same_v<T, double>)
+      return 1;
+    else if constexpr(std::is_same_v<T, std::string>)
+      return 2;
+  }
+
+ , var);
+
+}
+
+
+
+std::variant<int, double, std::string> foxtrot::devices::dummyDevice::takes_tuple(const std::tuple<int, double, std::string>& in)
+{
+
+
+  return std::get<2>(in);
+
+}
+
+
 
 
 RTTR_REGISTRATION
@@ -278,10 +335,20 @@ RTTR_REGISTRATION
  .method("returns_std_array", &dummyDevice::returns_std_array)
  .method("returns_struct_std_array", &dummyDevice::returns_struct_std_array)
  .method("returns_std_int_array", &dummyDevice::returns_std_int_array)
- .method("takes_remote_obj", &dummyDevice::takes_remote_obj);
+ .method("takes_remote_obj", &dummyDevice::takes_remote_obj)
+   .method("returns_variant", &dummyDevice::returns_variant)(parameter_names("n"))
+   .method("returns_unregistered_variant", &dummyDevice::returns_unregistered_variant)
+   .method("takes_variant", &dummyDevice::takes_variant)(parameter_names("var"))
+   .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"));
+ 
+ foxtrot::register_tuple<std::tuple<int, double, std::string>>;
+
+ using Var = std::result_of< decltype(&dummyDevice::returns_variant)(dummyDevice, int)>::type;
+ foxtrot::register_union<Var>();
  
  foxtrot::register_tuple<std::pair<int,double>>();
  foxtrot::register_tuple<std::tuple<int,std::string>>();
+ foxtrot::register_tuple<std::tuple<int, double ,std::string>>();
  
  using foxtrot::devices::dummyEnum;
  using foxtrot::devices::dummyStruct;
