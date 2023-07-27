@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <foxtrot/server/Device.h>
+#include <foxtrot/Device.h>
 #include <foxtrot/Logging.h>
 #include <rttr/registration>
 

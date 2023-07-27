@@ -18,7 +18,7 @@ file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot)
 set(device_targets "")
 set(link_later_libs "")
 
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 get_target_property(FT_INCLUDES foxtrot::foxtrot_core INTERFACE_LINK_LIBRARIES)
 get_target_property(RTTR_INCLUDE RTTR::Core INTERFACE_LINK_LIBRARIES)
 
@@ -74,7 +74,13 @@ endif()
 add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
 add_subdirectory(digitaldiscovery)
-add_subdirectory(idscamera)
+
+find_package(ueye)
+
+if(${ueye_FOUND})
+  add_subdirectory(idscamera)
+endif()
+  
 add_subdirectory(DLP-IOR4)
 
 set(libobjs "")
@@ -99,6 +105,7 @@ endforeach()
 
 
 if(${ueye_FOUND})
+  message(STATUS "found ueye library, building idscamera device...")
   add_executable(idscamera_play idscamera/idscamera_play.cpp)
   target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
 endif()
