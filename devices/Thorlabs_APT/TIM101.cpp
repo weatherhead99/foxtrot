@@ -1,5 +1,6 @@
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/protocols/SerialPort.h>
+#include "APT_defs.hh"
 #include "TIM101.h"
 
 
@@ -32,7 +33,7 @@ foxtrot::devices::piezo_move_absolute_params& absparams)
     unsigned char* stepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepRate));
     unsigned char* stepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&absparams.stepAccn));
 
-    std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIndent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
+    std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(absparams.chanIdent), 0, maxVoltagebytes[0], maxVoltagebytes[1], stepRatebytes[0], stepRatebytes[1], stepRatebytes[2], stepRatebytes[3], stepAccnbytes[0], stepAccnbytes[1], stepAccnbytes[2], stepAccnbytes[3]};
 
     return data;
 
@@ -60,14 +61,15 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     //Initialize movement parameters
     jogparams jogstruct;
     jogstruct.subMsgID = 0x0009;
-    jogstruct.chanIndent = 0x01;
+    jogstruct.chanIdent = 0x01;
     jogstruct.jogMode = 0x0002; //step mode
     jogstruct.jogStepSize = 250;//Can be positive or negative
     jogstruct.jogStepRate = 0x000001F4;
     jogstruct.jogStepAccn = 0x000186A0;
 
     piezo_move_absolute_params absparams;
-    absparams.subMsgID = 0x0007;    absparams.chanIndent = 0x01;
+    absparams.subMsgID = 0x0007;
+    absparams.chanIdent = 0x01;
     absparams.maxVoltage = 0x006E;
     absparams.stepRate = 0x000000AA;
     absparams.stepAccn = 0x000000F0;
@@ -78,10 +80,10 @@ foxtrot::devices::TIM101::TIM101(std::shared_ptr< foxtrot::protocols::SerialPort
     for (auto c:channels)
     {
         cout << static_cast<short unsigned int>(c) << endl;
-        jogstruct.chanIndent = static_cast<short unsigned int>(c);
-        set_jog_parameters(destination::genericUSB, jogstruct);
-        absparams.chanIndent = static_cast<short unsigned int>(c);
-        set_move_absolute_parameters(destination::genericUSB, absparams);
+        jogstruct.chanIdent = static_cast<short unsigned int>(c);
+        set_jog_parameters(jogstruct);
+        absparams.chanIdent = static_cast<short unsigned int>(c);
+        set_move_absolute_parameters(absparams);
     }
     
 }
@@ -91,8 +93,10 @@ const std::string foxtrot::devices::TIM101::getDeviceTypeName() const
   return "TIM101";
 }
 
-void foxtrot::devices::TIM101::identify_module(foxtrot::devices::destination dest)
+void foxtrot::devices::TIM101::identify_module()
 {
+
+  auto dest = foxtrot::devices::destination::genericUSB;
     //no reply expected
     transmit_message(bsc203_opcodes::MGMSG_MOD_IDENTIFY,0,0,dest);
 }
@@ -150,9 +154,11 @@ void foxtrot::devices::TIM101::absolute_move(foxtrot::devices::motor_channel_ide
 }
 
 
-void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxtrot::devices::motor_channel_idents chan, foxtrot::devices::jogdir direction)
+void foxtrot::devices::TIM101::jog_move(foxtrot::devices::motor_channel_idents chan, foxtrot::devices::jogdir direction)
 {
 
+    auto dest = foxtrot::devices::destination::genericUSB;
+  
     bool hasdata;
     unsigned received_opcode = 0;
     motor_status motorstr;
@@ -181,16 +187,18 @@ void foxtrot::devices::TIM101::jog_move(foxtrot::devices::destination dest, foxt
 
 }
 
-void foxtrot::devices::TIM101::set_jog_parameters(foxtrot::devices::destination dest, const foxtrot::devices::jogparams& jogstruct) {
+void foxtrot::devices::TIM101::set_jog_parameters( const foxtrot::devices::jogparams& jogstruct) {
 
+    auto dest = foxtrot::devices::destination::genericUSB;
     auto data = get_jog_set_request_data(jogstruct);
 
     transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
 
 }
 
-void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::destination dest, const foxtrot::devices::piezo_move_absolute_params& absparams) {
+void foxtrot::devices::TIM101::set_move_absolute_parameters(const foxtrot::devices::piezo_move_absolute_params& absparams) {
 
+  auto dest = foxtrot::devices::destination::genericUSB;
     auto data = construct_piezo_absolute_move_request_data(absparams);
 
     transmit_message(bsc203_opcodes::MGMSG_PZMOT_SET_PARAMS, data, dest);
@@ -198,9 +206,15 @@ void foxtrot::devices::TIM101::set_move_absolute_parameters(foxtrot::devices::de
 }
 
 
-foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::destination dest) {
+foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(foxtrot::devices::motor_channel_idents chan) {
 
-    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,0x01, destination::genericUSB);
+    auto dest = foxtrot::devices::destination::genericUSB;
+
+    set_channelenable(dest, chan, true);
+
+    unsigned char chanchar = static_cast<unsigned char>(chan);
+    
+    auto out =request_response_struct<jogparams>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x09,chanchar, destination::genericUSB);
 
     //cout << " Jog parameters: Step size = " << std::hex << out.jogStepSize << endl;
     
@@ -208,15 +222,14 @@ foxtrot::devices::jogparams foxtrot::devices::TIM101::request_jog_parameters(fox
 
 }
 
-foxtrot::devices::piezo_move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::destination dest) {
+foxtrot::devices::piezo_move_absolute_params foxtrot::devices::TIM101::request_move_absolute_parameters(foxtrot::devices::motor_channel_idents chan) {
 
-    auto out =request_response_struct<piezo_move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,0x01, destination::genericUSB);
-
-    //cout << "Move absolute parameters: Step rate (hex) = " << std::hex << out.stepRate << endl;
-    //cout << "Move absolute parameters: Step acceleration (hex) = " << std::hex << out.stepAccn << endl;
-    
+  auto dest = foxtrot::devices::destination::genericUSB;
+  auto chanchar = static_cast<unsigned char>(chan);
+  
+  
+    auto out =request_response_struct<piezo_move_absolute_params>(bsc203_opcodes::MGMSG_PZMOT_REQ_PARAMS, bsc203_opcodes::MGMSG_PZMOT_GET_PARAMS, dest, 0x07,chanchar, destination::genericUSB);
     return out;
-
 }
 
 
@@ -237,7 +250,7 @@ void foxtrot::devices::TIM101::set_position_counter(foxtrot::devices::motor_chan
 channel, int position)
 {
     pos_counter_params params;
-    params.chanIndent = static_cast<unsigned char>(channel);
+    params.chanIdent = static_cast<unsigned char>(channel);
     params.subMsgID = 0x05;
     params.position = position;
     params.encCount = 0x00;
@@ -366,23 +379,10 @@ static std::array<unsigned char, 18> get_jog_set_request_data(const foxtrot::dev
     unsigned char* subJogStepRatebytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepRate));
     unsigned char* subJogStepAccnbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&jogstructp.jogStepAccn));
 
-    std::array<unsigned char, 18> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp.chanIndent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
+    std::array<unsigned char, 18> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(jogstructp.chanIdent), 0, subJogModebytes[0], subJogModebytes[1], subJogStepSizebytes[0], subJogStepSizebytes[1], subJogStepSizebytes[2], subJogStepSizebytes[3], subJogStepRatebytes[0], subJogStepRatebytes[1], subJogStepRatebytes[2], subJogStepRatebytes[3], subJogStepAccnbytes[0], subJogStepAccnbytes[1], subJogStepAccnbytes[2], subJogStepAccnbytes[3]};
 
     return data;
 }
-
-// static std::array<unsigned char, 14> get_pos_counter_request_data(const foxtrot::devices::pos_counter_params& poscountparams)
-// {
-//     unsigned char* subMsgbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned short*>(&poscountparams.subMsgID));
-//     unsigned char* positionbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.position));
-//     unsigned char* enccountbytes = reinterpret_cast<unsigned char*>(const_cast<unsigned int*>(&poscountparams.encCount));
-// 
-// 
-//     std::array<unsigned char, 14> data {subMsgbytes[0], subMsgbytes[1], static_cast<unsigned char>(poscountparams.chanIndent), 0, positionbytes[0], positionbytes[1], positionbytes[2], positionbytes[3], enccountbytes[0], enccountbytes[1], enccountbytes[2], enccountbytes[3]};
-// 
-//     return data;
-// }
-
 
 //Free functions
 void foxtrot::devices::print_motor_status(foxtrot::devices::motor_status* motorstr) {
@@ -414,23 +414,17 @@ RTTR_REGISTRATION {
     registration::class_<TIM101>("foxtrot::devices::TIM101")
 
     .method("identify_module", &TIM101::identify_module)
-    (parameter_names("destination"))
-    .method("set_channelenable", &TIM101::set_channelenable)
-    (parameter_names("destination", "channel", "on/off"))
     .method("absolute_move", &TIM101::absolute_move)
     (parameter_names("channel", "position"))
     .method("set_move_absolute_parameters", &TIM101::set_move_absolute_parameters)
-    (parameter_names("destination", "move absolute parameters"))
+    (parameter_names("move absolute parameters"))
     .method("request_move_absolute_parameters", &TIM101::request_move_absolute_parameters)
-    (parameter_names("destination"))
     .method("jog_move", &TIM101::jog_move)
-    (parameter_names("destination", "channel", "direction"))
+    (parameter_names( "channel", "direction"))
     .method("set_jog_parameters", &TIM101::set_jog_parameters)
-    (parameter_names("destination", "jog parameters"))
+    (parameter_names( "jog parameters"))
     .method("request_jog_parameters", &TIM101::request_jog_parameters)
-    (parameter_names("destination"))
     .method("get_status_update", &TIM101::get_status_update)
-    
     .method("position_counter", &TIM101::position_counter)
     (parameter_names("channel"))
     
@@ -442,7 +436,7 @@ RTTR_REGISTRATION {
     registration::class_<jogparams>("foxtrot::devices::jogparams")
     .constructor()(policy::ctor::as_object)
     .property("subMsgID", &jogparams::subMsgID)
-    .property("chanIndent", &jogparams::chanIndent)
+    .property("chanIdent", &jogparams::chanIdent)
     .property("jogMode", &jogparams::jogMode)
     .property("jogStepSize", &jogparams::jogStepSize)
     .property("jogStepRate", &jogparams::jogStepRate)
@@ -452,7 +446,7 @@ RTTR_REGISTRATION {
     registration::class_<piezo_move_absolute_params>("foxtrot::devices::piezo_move_absolute_params")
     .constructor()(policy::ctor::as_object)
     .property("subMsgID", &piezo_move_absolute_params::subMsgID)
-    .property("chanIndent", &piezo_move_absolute_params::chanIndent)
+    .property("chanIdent", &piezo_move_absolute_params::chanIdent)
     .property("maxVoltage", &piezo_move_absolute_params::maxVoltage)
     .property("stepRate", &piezo_move_absolute_params::stepRate)
     .property("stepAccn", &piezo_move_absolute_params::stepAccn);
@@ -461,7 +455,7 @@ RTTR_REGISTRATION {
     registration::class_<pos_counter_params>("foxtrot::devices::pos_counter_params")
     .constructor()(policy::ctor::as_object)
     .property("subMsgID", &pos_counter_params::subMsgID)
-    .property("chanIndent", &pos_counter_params::chanIndent)
+    .property("chanIdent", &pos_counter_params::chanIdent)
     .property("position", &pos_counter_params::position)
     .property("encCount", &pos_counter_params::encCount);
 
