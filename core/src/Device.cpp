@@ -1,12 +1,11 @@
 #include <sstream>
 #include <algorithm>
-
+#include <variant>
 
 #include <rttr/registration>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/ReflectionError.h>
-
 
 //NOTE: copied (probably missing edge cases!) from boost::hash_combine
 template<typename T>
@@ -279,7 +278,10 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
     auto meth = reflecttp.get_method(capname.c_str());
     
     Capability out;
-    out.CapabilityName = capname;
+    out.CapabilityName = capname;    
+
+    rttr::variant flagmeta;
+    rttr::variant flagmaskmeta;
     
     if(prop)
     {
@@ -302,6 +304,10 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
             out.Argnames.push_back(std::string{proptp.get_name()});
             out.Argtypes.push_back(proptp);
         }
+
+	flagmeta = prop.get_metadata("ft_flags");
+	flagmaskmeta = prop.get_metadata("ft_flagmask");
+       
     }
     else if(meth)
     {
@@ -327,11 +333,17 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
             out.Argnames.push_back(std::string(arg.get_name()));
             out.Argtypes.push_back(arg.get_type());
         }
+
+	flagmeta = meth.get_metadata("ft_flags");
+	flagmaskmeta = meth.get_metadata("ft_flagmask");
+
     }
     else
     {
         throw std::out_of_range("requested capability which doesn't seem to exist!");
     }
+
+    bool both_metas = flagmeta.is_valid() and flagmaskmeta.is_valid();
     
     return out;
     

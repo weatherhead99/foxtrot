@@ -31,6 +31,13 @@ namespace foxtrot
      CONSTRUCT
  };
 
+
+  enum class CapabilityFlags:  unsigned long
+  {
+    REMOTE_STORE_OBJECT = 0x01
+
+  };
+
   struct Capability
   {
       CapabilityType type;
@@ -40,6 +47,9 @@ namespace foxtrot
       rttr::type Returntype = rttr::type::get<void>();
 
       bool operator==(const Capability& other);
+
+    unsigned long flags = 0;
+    unsigned long flagmask = 0;
 
   };
  
