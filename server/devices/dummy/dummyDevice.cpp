@@ -15,6 +15,8 @@
 #include <foxtrot/ft_tuple_helper.hh>
 #include <foxtrot/ft_union_helper.hh>
 
+#include <foxtrot/ft_optional_helper.hh>
+
 // dummyDevice::dummyDevice() : Device(nullptr)
 foxtrot::devices::dummyDevice::dummyDevice() : Device(nullptr)
 {
@@ -281,13 +283,33 @@ int foxtrot::devices::dummyDevice::takes_variant(std::variant<int, double, std::
 
 std::variant<int, double, std::string> foxtrot::devices::dummyDevice::takes_tuple(const std::tuple<int, double, std::string>& in)
 {
-
-
   return std::get<2>(in);
-
 }
 
+bool foxtrot::devices::dummyDevice::takes_optional(std::optional<int> opt)
+{
+  if(opt.has_value())
+    {
+      _lastopt = *opt;
+      return true;
+    }
 
+  return false;
+  
+}
+
+std::optional<int> foxtrot::devices::dummyDevice::returns_optional(int val, bool ret)
+{
+  if(!ret)
+    return std::nullopt;
+
+  return val;
+}
+
+int foxtrot::devices::dummyDevice::get_last_supplied_optional_value() const
+{
+  return _lastopt;
+}
 
 
 RTTR_REGISTRATION
@@ -339,7 +361,10 @@ RTTR_REGISTRATION
    .method("returns_variant", &dummyDevice::returns_variant)(parameter_names("n"))
    .method("returns_unregistered_variant", &dummyDevice::returns_unregistered_variant)
    .method("takes_variant", &dummyDevice::takes_variant)(parameter_names("var"))
-   .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"));
+   .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"))
+   .property_readonly("last_supplied_optional_value", &dummyDevice::get_last_supplied_optional_value)
+   .method("takes_optional", &dummyDevice::takes_optional)(parameter_names("opt"))
+   .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"));
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
 

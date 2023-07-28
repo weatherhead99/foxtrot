@@ -115,11 +115,7 @@ namespace foxtrot
 
       };
 
-
-      
-      
-
-      
+     
     }
     
 template<typename T>

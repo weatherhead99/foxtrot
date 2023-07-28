@@ -6,6 +6,7 @@
 #include <tuple>
 #include <any>
 #include <variant>
+#include <optional>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
@@ -91,15 +92,17 @@ namespace foxtrot
     arrStruct returns_struct_std_array();
 
     int longdurationmethod(int n_sec);
-      
+
+      //Union test methods
       std::variant<int, double, std::string> returns_variant(int i);
-
       std::variant<double, unsigned> returns_unregistered_variant();
-
       int takes_variant(std::variant<int, double, std::string> var);
-
       std::variant<int,double,std::string> takes_tuple(const std::tuple<int,double,std::string>& in);
       
+      bool takes_optional(std::optional<int> opt);
+      int get_last_supplied_optional_value() const;
+      std::optional<int> returns_optional(int val, bool ret);
+
       
     protected:
         
@@ -112,6 +115,8 @@ namespace foxtrot
         
         int _int = 0;
         double _womble = 0.0;
+
+      int _lastopt = 0;
         
     };
     

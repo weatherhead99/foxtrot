@@ -1,6 +1,8 @@
 #pragma once
+#include <boost/hana/concept/product.hpp>
 #include <rttr/wrapper_mapper.h>
 #include <optional>
+#include <rttr/registration>
 
 
 namespace rttr
@@ -20,11 +22,20 @@ namespace rttr
     {
       return std::optional<T>(value);
     }
+
+    template<typename U>
+    inline static std::optional<T> convert(const type& source, bool& ok)
+    {
+
+    }
     
 
   };
-  
 
+}
+
+namespace foxtrot
+{  
 
 }
 

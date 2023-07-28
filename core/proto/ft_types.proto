@@ -37,6 +37,7 @@ enum byte_data_types
     BCOMPLEX_TYPE=11;
     BDATETIME_TYPE=12;
     BOPAQUE_TYPE=13;
+   
 }
 
 
@@ -48,7 +49,6 @@ enum variant_types
     TUPLE_TYPE = 3;
     HOMOG_ARRAY_TYPE=4;
     UNION_TYPE = 5;
-  
 }
 
 message variant_descriptor
@@ -63,6 +63,7 @@ message variant_descriptor
     union_descriptor union_desc = 9;
   //new in 0.3.0
     string cpp_type_name = 8;
+    bool is_nullable = 10;
 }
 
 message struct_descriptor
@@ -89,8 +90,7 @@ message homog_array_descriptor
   bool has_fixed_size = 3;
   uint64 fixed_size = 4;
   simplevalue_types valtype = 5;
-  variant_descriptor complex_value_type = 6;
-  
+  variant_descriptor complex_value_type = 6;  
 }
 
 
@@ -99,7 +99,6 @@ message union_descriptor
   repeated variant_descriptor possible_types = 1;
 
 }
-
 
 message ft_variant {
     oneof value {
