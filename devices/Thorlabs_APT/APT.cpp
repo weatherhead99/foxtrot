@@ -373,6 +373,8 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
     auto starttime = std::chrono::steady_clock::now();
     bool should_finish = false;
 
+
+    int fail_status_retries = 0;
     
     while(true)
     {
@@ -397,6 +399,18 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		if(bits[9])
 		  {
 		    _lg.strm(sl::info) << "motor status failed, but reports still homing";
+		    //NOTE: this will happen both when a motor is homing and hits a limit briefly, but ALSO when it has physically crashed into something. Therefore, check this a few times and if it gets above a threshold bail out, sending an emergency stop message...
+		    //For now we make it not configurable, if we need that later we'll add it
+		    if(fail_status_retries++ >= 10)
+		      {
+			_lg.strm(sl::error) << "motor status checks failed 10 times, likely motor has stalled or crashed!";
+		    
+			stop_move(dest, chan, true);
+		    throw DeviceError("motor status check failed 10 times. Motor crash suspected. Emergency stop issued. If this is not a crash, maybe retry number needs adjusting!");
+		      }
+		    
+
+		    
 		    continue;
 		  }
 		else if( (bits[0] or bits[1] or bits[2] or bits[3]) and init_limit_state)
