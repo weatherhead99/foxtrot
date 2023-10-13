@@ -47,6 +47,7 @@ class FoxtrotBuildUtils(ConanFile):
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
+    revision_mode= "scm_folder"
 
 
 def add_grpc_options(configs):
@@ -67,6 +68,7 @@ class FoxtrotCppPackage:
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
     tool_requires = "cmake/[>=3.20.0]"
+    revision_mode = "scm_folder"
 
 #    def compatibility(self):
 #        configs = []
@@ -77,11 +79,14 @@ class FoxtrotCppPackage:
 
     def export(self):
         git = Git(self, self.recipe_folder)
+        self.output.info(f"version: {self.version}")
+        update_conandata(self, {"frozen_version" : self.version})
         if git.is_dirty():
             self.output.info("git repo is dirty, local create command will not capture SCM info")
             return
         scm_url, scm_commit = git.get_url_and_commit()
-        update_conandata(self, {"sources" : {"commit" : scm_commit, "url" : scm_url}})
+        update_conandata(self, {"sources" : {"commit" : scm_commit, "url" : scm_url},
+                                })
 
     def validate_build(self):
         if not valid_min_cppstd(self, 17):
@@ -90,9 +95,12 @@ class FoxtrotCppPackage:
             raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
 
     def set_version(self):
-        git = Git(self, self.recipe_folder)
-        if not self.version:
-            self.version = semver_from_git_describe(git)
+        if hasattr(self, "conandata") and "frozen_version" in self.conandata:
+            self.version = self.conandata["frozen_version"]
+        else:
+            git = Git(self, self.recipe_folder)
+            if not self.version:
+                self.version = semver_from_git_describe(git)
 
     def build(self):
         cmake = CMake(self)
