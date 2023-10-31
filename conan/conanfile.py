@@ -181,7 +181,7 @@ def ft_version_get_req_str(verstr: str) -> str:
         else:
             break
 
-    reqstr = f"[^{'.'.join(cmpout)},include_prerelease=True]"
+        reqstr = f"[^{'.'.join(cmpout)}, include_prerelease=True]"
     return reqstr
 
     
