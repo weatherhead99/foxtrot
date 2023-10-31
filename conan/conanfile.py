@@ -175,7 +175,7 @@ class FoxtrotCppPackage:
 def ft_version_get_req_str(verstr: str) -> str:
     vers = Version(verstr)
     cmpout = []
-    for cmpin in (vers.major, vers.minor):
+    for cmpin in (vers.major, vers.minor, vers.patch):
         if cmpin is not None:
             cmpout.append(str(cmpin))
         else:
