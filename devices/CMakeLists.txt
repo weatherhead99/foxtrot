@@ -125,7 +125,7 @@ install(EXPORT foxtrot_devices
         COMPONENT devel)
 
 install(FILES cmake/Findrapidxml.cmake cmake/FindDWF.cmake 
-cmake/Findueye.cmake DESTINATION ${ft_cmakedir})
+ DESTINATION ${ft_cmakedir})
         
 set(ft_devices_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
 
