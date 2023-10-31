@@ -243,7 +243,7 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
         #version stays the same, we will just add a devstring
         newvers = str(cvers)
 
-    devstr = f"dev.{n_commits}+{chash}"
+    devstr = f"+dev-{n_commits}-g{chash}"
 
     if cvers.pre is None:
         #the devstring is now the pre
