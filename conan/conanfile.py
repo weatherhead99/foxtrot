@@ -249,7 +249,7 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
         #the devstring is now the pre
         fullstr = f"{newvers}-{devstr}"
     else:
-        fullstr = f"{newvers}.{devstr}"
+        fullstr = f"{newvers}{devstr}"
 
     if fullstr[0] == "v" or fullstr[0] == "V":
         fullstr = fullstr[1:]
