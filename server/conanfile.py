@@ -44,6 +44,7 @@ class FoxtrotServerConan(ConanFile):
     def requirements(self):
         super().requirements()
         self.requires("boost/[^1.82.0]", override=True)
+        self.requires("zlib/1.2.13", override=True)
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
