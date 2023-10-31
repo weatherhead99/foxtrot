@@ -181,10 +181,11 @@ def ft_version_get_req_str(verstr: str) -> str:
         else:
             break
 
-        reqstr = f"[^{'.'.join(cmpout)}, include_prerelease=True]"
+    if vers.pre is None:
+        reqstr = f"[~{'.'.join(cmpout)}, include_prerelease=True]"
+    else:
+        reqstr = f"[~{'.'.join(cmpout)}-{vers.pre}, include_prerelease=True]"
     return reqstr
-
-    
 
         
 def semver_from_git_describe(gitobj) -> str:
