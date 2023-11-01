@@ -7,7 +7,7 @@ set(exptserve_srcs ServerImplLegacy.cpp ServerImpl.cpp ServerDescribeImpl.cpp
     CloseSessionImpl.cpp ListSessionsImpl.cpp
     exptserve_funcs.cpp pushbullet_api.cpp
     AuthHandler.cpp SessionManager.cpp
-    AuthRequestImpl.cpp AuthRespondImpl.cpp
+    AuthRequestImpl.cpp AuthRespondImpl.cpp ServerFeature.cpp
   )
     
 
