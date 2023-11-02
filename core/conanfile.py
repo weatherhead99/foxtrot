@@ -30,7 +30,7 @@ class FoxtrotCoreConan(ConanFile):
     def requirements(self):
         super().requirements()
 
-        self.requires("grpc/[^1.50.1]", headers=True, libs=True,
+        self.requires("grpc/[^1.54.1]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
