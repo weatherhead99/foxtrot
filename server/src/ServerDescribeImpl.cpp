@@ -70,7 +70,7 @@ foxtrot::devcapability GetDeviceCapability(const foxtrot::Capability& cap, foxtr
     for(auto& type: cap.Argtypes)
     {
       if(lg)
-        lg->strm(sl::debug) << "describing argument with type: " <<type.get_name().to_string();
+        lg->strm(sl::debug) << "describing argument with type: " << type.get_name().to_string();
       *(out.add_argtypes()) = describe_type(type, lg);
 
     }
