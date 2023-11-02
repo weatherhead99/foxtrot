@@ -32,7 +32,11 @@ namespace foxtrot
   template<typename T>
   class ServerFeature : public ServerFeatureBase
   {
-    static std::size_t feat_type_id() noexcept;
+    static std::size_t feat_type_id() noexcept
+    {
+      static std::size_t typeid_ = ServerFeatureBase::next_id();
+      return typeid_;
+    };
 
   };
 

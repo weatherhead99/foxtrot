@@ -1,6 +1,7 @@
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps, CMakeToolchain
 from conan.tools.scm import Version
+from conan.tools.build import check_min_cppstd
 
 class FoxtrotServerConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.1]"
@@ -14,10 +15,9 @@ class FoxtrotServerConan(ConanFile):
     "include/foxtrot/protocols/*.h", "include/exptserve/*.hh", \
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = (
-        "libsodium/[^1.0.18]",
+        "libsodium/[^1.0.19]",
         "rapidjson/[^1.1.0]",
-        "asio-grpc/[^2.4.0]",
-        "grpc/[^1.50.1]"
+        "asio-grpc/[^2.6.0]"
                 )
 
     options = {"use_coro" : [True, False] }
@@ -40,11 +40,16 @@ class FoxtrotServerConan(ConanFile):
                 self.output.info("gcc < 10, no use_coro option")
                 self.options.rm_safe("use_coro")
 
+    def validate_build(self):
+        if self.options.get_safe("use_coro"):
+            check_min_cppstd(self, 20)
+
 
     def requirements(self):
         super().requirements()
         self.requires("boost/[^1.82.0]", override=True)
         self.requires("zlib/1.2.13", override=True)
+        self.requires("grpc/[^1.54.1]", override=True)
 
     def deploy(self):
         self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)

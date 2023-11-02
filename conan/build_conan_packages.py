@@ -1,34 +1,40 @@
-from conans.client import conan_api
+import argparse
+from conan.api.conan_api import ConanAPI
 import os
 
-api, cache, userio = conan_api.Conan.factory()
+ft_modules = ["core", "protocols", "devices", "server"]
 
-user="weatherhead99"
-channel="testing"
+def remove_all_recipes(api, searchterm: str):
+    recipes = api.search.recipes(searchterm)
+    revs = [api.list.recipe_revisions(_) for _ in recipes]
 
-
-print("building python utils for other conan packages...")
-api.export(".", name="FoxtrotBuildUtils", user=user, channel=channel)
-
-
-createfun = lambda s : api.create(s, user=user, channel=channel, keep_source=False,
-                                  update=True, build_modes=["missing"])
-
-curdir = os.path.abspath(os.curdir)
-
-print("building foxtrot core conan package...")
-createfun("../core")
-
-print("building foxtrot server conan package...")
-createfun("../server")
+    for rev in revs:
+        print(f" removeing: {rev}")
+        api.remove.all_recipe_revisions(rev)
+        api.remove.recipe(rev)
 
 
-#disable building client for now, it doesn't work
-#print("building foxtrot c++ client package...")
-createfun("../client")
+def main():
+    capi = ConanAPI()
 
-print("building foxtrot protocols package...")
-createfun("../protocols")
+    parser = argparse.ArgumentParser(prog="build_conan_packages")
+    parser.add_argument("-c", "--clean", action="store_true")
+    args = parser.parse_args()
 
-print("building foxtrot devices package...")
-createfun("../devices")
+    if args.clean:
+        print("cleaning foxtrot packages...")
+        remove_all_recipes(capi, "foxtrotbuildutils/*")
+        remove_all_recipes(capi, "foxtrot_*/*")
+
+    for pkg in ft_modules:
+        conanfile = os.path.join("..", pkg, "conanfile.py")
+        print(f" exporting: {pkg}")
+        capi.export.export(conanfile, None, None, None, None)
+
+
+    
+
+
+if __name__ == "__main__":
+    main()
+    
