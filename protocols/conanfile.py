@@ -31,7 +31,7 @@ class FoxtrotProtocolsConan(ConanFile):
 
         deps = CMakeDeps(self)
         deps.generate()
-        
+
         tc = self._setup_cmake_tc()
 
         if self.options.use_asio_impls:

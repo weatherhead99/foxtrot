@@ -16,6 +16,7 @@ namespace foxtrot
     
   private:
     virtual std::string cmd(const std::string& request) = 0;
+    virtual void cmd_no_response(const std::string& request);
     
   };
   
