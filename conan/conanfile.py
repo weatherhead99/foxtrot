@@ -35,11 +35,8 @@ class FoxtrotCppMeta(type):
         return n
 
 def ft_require(conanfile, substr: str) -> None:
-    if getattr(conanfile, "stable_release", False):
-        conanfile.requires(f"foxtrot_{substr}/[~{conanfile.version}]")
-    else:
-        reqstr = ft_version_get_req_str(conanfile.version)
-        conanfile.requires(f"foxtrot_{substr}/{reqstr}")
+    reqstr = ft_version_get_req_str(conanfile.version)
+    conanfile.requires(f"foxtrot_{substr}/{reqstr}")
 
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
