@@ -1,0 +1,62 @@
+{
+    "version": "0.5",
+    "requires": [
+        "zlib/1.2.13#97d5730b529b4224045fe7090592d4c1%1696198450.0",
+        "rttr/0.9.6#e314c9dc3d27f18cb97709b848ff02a7%1681350796.0",
+        "re2/20230301#79c185a83ffb324e8b0b1d60dee22d41%1696198448.0",
+        "rapidjson/1.1.0#219bf1ea2756b263575da26288753262%1681350796.0",
+        "protobuf/3.21.12#8210c0b1bb46b08ff2814614ec091a9c%1698887547.0",
+        "openssl/3.1.4#23d3e83fe4db5a4575d8a7848abad9f9%1698887546.0",
+        "libusb/1.0.26#c0c00750b383839aa140a0be628d552c%1682106135.0",
+        "libudev/system#86e335f85cbb299d6c9fc6260b3f1b0b%1682106135.0",
+        "libsodium/1.0.19#3ddd1bc0d6b40a078f9441e46b73008c%1698887546.0",
+        "libcurl/7.88.1#dfe7354dcc3a0f5be8f02b5d2c2562b2%1696198440.0",
+        "libbacktrace/cci.20210118#ec1aa63bbc10145c6a299e68e711670c%1681350791.0",
+        "grpc/1.54.3#b9dab567bb1de36e1fababfa2ee5edac%1698887545.0",
+        "foxtrot_protocols/0.4.0-a2+dev-1-gfcac2fa-dirty#d0b07f0636edc65a46ce47d69fffe2e795fab5ae%1698899701.475215",
+        "foxtrot_core/0.4.0-a2+dev-1-gfcac2fa-dirty#fcac2faf1abba472d055abf036100ab0476d4050%1698899698.3469722",
+        "c-ares/1.19.1#420a0b77e370f4b96bee88ef91837ccc%1698887543.0",
+        "bzip2/1.0.8#411fc05e80d47a89045edc1ee6f23c1d%1681350767.0",
+        "boost/1.83.0#e948ecbe69e6e240658ba2eda46ba8e8%1696198433.0",
+        "asio-grpc/2.6.0#34b505b81ee473f4db9b9aa201215a4c%1698887542.0",
+        "abseil/20230125.3#5431a4c609f5fb48bb8d8567e953243f%1698887542.0"
+    ],
+    "build_requires": [
+        "pkgconf/1.9.3#3e658ebc066dc868a1f8a472c1065368%1698887547.0",
+        "ninja/1.11.1#77587f8c8318662ac8e5a7867eb4be21%1696198444.0",
+        "meson/1.2.2#aace9dcc1db58fa42ecb5292f724092d%1698887546.0",
+        "m4/1.4.19#adbdd7fb7db33e609425c797196baccb%1698887546.0",
+        "libtool/2.4.7#d55a3c2435c19e830fa77aa5c6c19350%1681350792.0",
+        "gnu-config/cci.20210814#df744500fb411937e3b45e30e9dc356c%1681350773.0",
+        "cmake/3.27.7#6e11610a238b9292dffda14c34bb53e6%1698887543.0",
+        "b2/4.10.1#8dc3df1cc73ad65d86cbdfd31fdb011f%1696198430.0",
+        "automake/1.16.5#058bda3e21c36c9aa8425daf3c1faf50%1696198430.0",
+        "autoconf/2.71#ce232afdcd21d1269419c355375731e6%1696198430.0"
+    ],
+    "python_requires": [
+        "foxtrotbuildutils/0.4.1#9bb80ce49be8f03d6815b54c5cc0afb3cdcda4a0%1698899481.6083574"
+    ],
+    "overrides": {
+        "grpc/1.50.1": [
+            "grpc/[^1.54.1]"
+        ],
+        "boost/1.83.0": [
+            "boost/[^1.82.0]"
+        ],
+        "zlib/[>=1.2.11 <2]": [
+            "zlib/1.2.13#97d5730b529b4224045fe7090592d4c1"
+        ],
+        "grpc/[^1.54.1]": [
+            "grpc/1.54.3#b9dab567bb1de36e1fababfa2ee5edac"
+        ],
+        "boost/[^1.82.0]": [
+            "boost/1.83.0#e948ecbe69e6e240658ba2eda46ba8e8"
+        ],
+        "openssl/[>=1.1 <4]": [
+            "openssl/3.1.4#23d3e83fe4db5a4575d8a7848abad9f9"
+        ],
+        "zlib/1.2.13": [
+            "zlib/1.2.13#97d5730b529b4224045fe7090592d4c1"
+        ]
+    }
+}
