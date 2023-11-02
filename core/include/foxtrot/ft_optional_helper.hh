@@ -10,7 +10,7 @@ namespace rttr
   template<typename T>
   struct wrapper_mapper<std::optional<T>>
   {
-    using wrapped_type = std::optional<T>::value_type;
+    using wrapped_type = typename std::optional<T>::value_type;
     using type = std::optional<T>;
 
     inline static wrapped_type get(const type& obj)
