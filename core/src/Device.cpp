@@ -184,47 +184,49 @@ rttr::variant foxtrot::Device::Invoke(const std::variant< rttr::property, rttr::
 {
         rttr::variant ret = std::visit([&beginargs, &endargs, this] (auto&& v)
         {
+
+	  rttr::variant out;
             using T = std::decay_t<decltype(v)>;
 
             if constexpr(std::is_same_v<T, rttr::property>)
-            {
+	      {
                 auto nargs = std::distance(beginargs,endargs);
                 if(v.is_readonly())
-                {
-                auto ret = v.get_value(*this);
-                return ret;
-                }
+		  {
+		    out = v.get_value(*this);
+		    return out;
+		  }
                 else if(nargs > 1)
-                {
-                throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
-                }
+		  {
+		    throw std::logic_error("require only 1 argument to writable property, this may be an error in your device driver");
+		  }
                 else if(nargs == 1)
-                {
-                bool success;
-                auto argcpy = *beginargs;
-                sanitize_arg(argcpy,v.get_type(),1);
-                success = v.set_value(*this, argcpy);
-                if(!success)
-                    throw std::runtime_error("failed to set property!");
+		  {
+		    bool success;
+		    auto argcpy = *beginargs;
+		    sanitize_arg(argcpy,v.get_type(),1);
+		    success = v.set_value(*this, argcpy);
+		    if(!success)
+		      throw std::runtime_error("failed to set property!");
 
-                //NOTE: return void here because that's what the other side expects!
-                auto voidmeth = rttr::type::get_global_method("void_helper_function");
-                auto voidret = voidmeth.invoke({});
+		    //NOTE: return void here because that's what the other side expects!
+		    auto voidmeth = rttr::type::get_global_method("void_helper_function");
+		    out = voidmeth.invoke({});
 
-                return voidret;
-                }
+		    return out;;
+		  }
                 else if(nargs == 0)
-                {
-                auto retval = v.get_value(*this);
-                return retval;
-                }
-            }
+		  {
+		    out = v.get_value(*this);
+		    return out;
+		  }
+	      }
             else if constexpr(std::is_same_v<T, rttr::method>)
-            {
+	      {
                 //method call
                 if(!v.is_valid())
                     throw std::logic_error("invalid method!");
-
+		
                 std::vector<rttr::variant> argcopy(beginargs, endargs);
         //TODO: check arguments here
                 auto paraminfs = v.get_parameter_infos();
@@ -234,30 +236,30 @@ rttr::variant foxtrot::Device::Invoke(const std::variant< rttr::property, rttr::
 
                 int i =1;
                 for(auto& a : argcopy)
-                {
+		  {
                     auto target_tp = (paraminfsit++)->get_type();
                     if(a.get_type().is_wrapper())
-                    {
+		      {
                         lg_.strm(sl::warning) << "an argument type ended up as a wrapper. This will cause a copy and is inefficient";
                         lg_.strm(sl::warning) << "the argument type is:"  << a.get_type().get_name().to_string();
-
                         a = a.extract_wrapped_value();
-                    }
-
+		      }
 
                     sanitize_arg(a, target_tp, i++, &lg_);
                 }
 
                 std::vector<rttr::argument> argvec(argcopy.begin(), argcopy.end());
-                auto retval = v.invoke_variadic(*this,argvec);
-                if(!retval)
+                out = v.invoke_variadic(*this,argvec);
+                if(!out)
                     throw std::logic_error("failed to invoke method!");
-                return retval;
+                return out;
             }
             else
             {
                 static_assert("non exhaustive visit!");
             }
+
+	    return out;
 
         }, invokable);
 

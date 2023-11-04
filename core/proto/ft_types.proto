@@ -48,7 +48,7 @@ enum variant_types
     TUPLE_TYPE = 3;
     HOMOG_ARRAY_TYPE=4;
     UNION_TYPE = 5;
-    DYNAMIC_TYPE=5;
+    DYNAMIC_TYPE=6;
 }
 
 message variant_descriptor

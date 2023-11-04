@@ -91,6 +91,8 @@ namespace foxtrot
     virtual bool Reconnect();
     virtual bool Reset();
 
+    virtual ~Device();
+    
     
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;

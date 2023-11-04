@@ -59,7 +59,7 @@ message capability_response
     ft_variant returnval = 4;
     errstatus err = 5;
     google.protobuf.Timestamp tstamp = 6;
-    google.protobuf.Timestamp tstamp_dispatch = 7;
+    google.protobuf.Timestamp tstamp_dispatch = 8;
 }
 
 message chunk_request
