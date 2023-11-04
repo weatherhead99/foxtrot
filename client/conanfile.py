@@ -11,5 +11,10 @@ class FoxtrotClientConan(ConanFile):
                       "src/*.cpp"
 
     src_folder = "client"
-    ft_package_requires = "core",
+    ft_package_requires = ("core")
+    package_type = "shared-library"
+    cmake_package_name = "foxtrotClient"
+
+    default_options = {"*/*:shared" : True,
+                       "grpc/*:shared" : True}
 
