@@ -2,7 +2,7 @@ from conan import ConanFile
 
 
 class FoxtrotClientConan(ConanFile):
-    python_requires = "foxtrotbuildutils/[^0.4.0]"
+    python_requires = "foxtrotbuildutils/[^0.4.1]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_client"
     description="foxtrot c++ client"
