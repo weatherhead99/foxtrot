@@ -11,7 +11,7 @@ class FoxtrotLSST(ConanFile):
                        "autofilld/*.hh", "testbench_archon_heater.*",
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
-    src_folder="lsst"
+    src_folder= "lsst"
     ft_package_requires = ("core", "client" , "devices", "server")
 
     def requirements(self):
