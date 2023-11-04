@@ -12,8 +12,12 @@ class FoxtrotLSST(ConanFile):
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
     src_folder="lsst"
-    ft_package_requires = "client" , "devices", "server"
+    ft_package_requires = ("core", "client" , "devices", "server")
 
+    def requirements(self):
+        super().requirements()
+        self.requires("zlib/1.2.13", override=True)
+        self.requires("grpc/1.54.3", override=True)
 
     def deploy(self):
         self.copy_deps("*exptserve")
