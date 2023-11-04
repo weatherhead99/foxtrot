@@ -1,6 +1,5 @@
 #include <memory>
 #include <map>
-#include <boost/variant.hpp>
 
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/Logging.h>
@@ -32,6 +31,9 @@
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/protocols/BulkUSB.h>
 #include <foxtrot/protocols/curlRequest.h>
+
+#include "chiller_setup_funcs.hh"
+
 
 
 #include "testbench_setup_funcs.h"
@@ -264,6 +266,10 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     //                           new foxtrot::devices::BSC203(proto));
     //                       harness.AddDevice(std::move(stages));
     //                    });
+
+    //MAGIS chiller system
+    setup_chiller(lg, harness, params);
+
     
    return 0;  
 };

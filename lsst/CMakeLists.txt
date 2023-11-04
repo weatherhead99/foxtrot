@@ -10,14 +10,30 @@ find_package(foxtrotProtocols REQUIRED CONFIG)
 find_package(foxtrotDevices REQUIRED CONFIG)
 find_package(Boost REQUIRED COMPONENTS program_options date_time)
 
+option(MAGIS_CHILLER "include chiller setup for MAGIS experiments" OFF)
+
+
 add_subdirectory(autofilld)
 add_subdirectory(tbprogs)
 
-set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp)
+set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp chiller_setup_funcs.cpp)
 add_library(lsst_testbench SHARED ${setup_srcs})
+if(${MAGIS_CHILLER})
+  target_compile_definitions(lsst_testbench PRIVATE -DWITH_CHILLER)
+endif()
+
 target_link_libraries(lsst_testbench foxtrot::foxtrot_core 
 foxtrot::foxtrot_devices)
 set_target_properties(lsst_testbench PROPERTIES PREFIX "")
+
+if(${MAGIS_CHILLER})
+  message(WARNING "prefix path ${CMAKE_PREFIX_PATH}")
+  find_package(foxtrotMagis REQUIRED)
+  target_link_libraries(lsst_testbench foxtrot::magis_foxtrot_devices)
+endif()
+
+
+
 
 #TODO: fix this, side effect of new conan build!
 target_include_directories(lsst_testbench PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
