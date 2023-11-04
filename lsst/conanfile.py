@@ -10,7 +10,7 @@ class FoxtrotLSST(ConanFile):
     description="LSST test stand specific stuff for foxtrot"
     exports_sources = ("CMakeLists.txt", "*/CMakeLists.txt", 
                        "testbench_setup_funcs.*", "tbprogs/*.h",
-                       "chiller_setup_funccs.*",
+                       "chiller_setup_funcs.*",
                        "tbprogs/*.cpp", "autofilld/*.cpp",
                        "autofilld/*.hh", "testbench_archon_heater.*",
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
