@@ -1,9 +1,7 @@
-from conans import python_requires, tools
+from conan import ConanFile
 
-ftbase = python_requires("FoxtrotBuildUtils/[^0.4]@weatherill/stable")
-
-class FoxtrotLSST(ftbase.FoxtrotCppPackage):
-    python_requires = "foxtrotbuildutils/[^0.4.0]"
+class FoxtrotLSST(ConanFile):
+    python_requires = "foxtrotbuildutils/[^0.4.1]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_lsst"
     description="LSST test stand specific stuff for foxtrot"
@@ -14,10 +12,8 @@ class FoxtrotLSST(ftbase.FoxtrotCppPackage):
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
     src_folder="lsst"
-    ft_package_requires = "client" , "protocols", "devices"
+    ft_package_requires = "client" , "devices", "server"
 
-        #this is only needed as a dep to run the exptserve binary conveniently
-        ftbase.ft_require(self, "server")
 
     def deploy(self):
         self.copy_deps("*exptserve")
