@@ -114,7 +114,7 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
           
           //WARNING: SLOOOOW
           auto capnames = devpair.second->GetCapabilityNames();
-          for(auto& capname : capnames)
+          for(const auto& capname : capnames)
           {
               _lg.strm(sl::debug) << "adding capability: " << capname ;
 	      auto* dev = _harness->GetDevice(devid);
