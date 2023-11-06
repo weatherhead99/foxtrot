@@ -90,10 +90,10 @@ class FoxtrotCppPackage:
             self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
             self.output.error("failed check requiring minimum of c++17")
             raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
-
-    def set_version(self):
-        if hasattr(self, "conandata") and "frozen_version" in self.conandata:
-            self.version = self.conandata["frozen_version"]
+ 
+   def set_version(self):
+        if hasattr(self, "conan_data") and "frozen_version" in self.conan_data:
+            self.version = self.conan_data["frozen_version"]
         else:
             git = Git(self, self.recipe_folder)
             if not self.version:
