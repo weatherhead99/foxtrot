@@ -44,7 +44,7 @@ class FoxtrotBuildUtils(ConanFile):
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
-    revision_mode= "scm_folder"
+    revision_mode= "hash"
 
 
 def add_grpc_options(configs):
@@ -92,10 +92,11 @@ class FoxtrotCppPackage:
             raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
 
     def set_version(self):
-        if all(hasattr(self, "conan_data"),
-               self.conan_data is not None,
-               "frozen_version" in self.conan_data):
-            self.version = self.conan_data["frozen_version"]
+        cdata = getattr(self, "conan_data", dict())
+        if cdata is not None:
+            fversion = cdata.get("frozen_version", None)
+            if fversion is not None:
+                self.version = fversion
         else:
             git = Git(self, self.recipe_folder)
             if not self.version:
