@@ -92,7 +92,9 @@ class FoxtrotCppPackage:
             raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
 
     def set_version(self):
-        if hasattr(self, "conan_data") and "frozen_version" in self.conan_data:
+        if all(hasattr(self, "conan_data"),
+               self.conan_data is not None,
+               "frozen_version" in self.conan_data):
             self.version = self.conan_data["frozen_version"]
         else:
             git = Git(self, self.recipe_folder)
