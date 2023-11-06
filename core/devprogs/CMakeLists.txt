@@ -16,3 +16,7 @@ target_include_directories(arith_test PUBLIC ${CMAKE_BINARY_DIR})
 add_executable(union_play union_play.cpp)
 target_link_libraries(union_play PUBLIC foxtrot_core RTTR::Core)
 target_include_directories(union_play PUBLIC ${CMAKE_BINARY_DIR})
+
+add_executable(timestamp_play timestamp_play.cpp)
+target_link_libraries(timestamp_play protobuf::libprotobuf)
+target_include_directories(timestamp_play PUBLIC ${CMAKE_SOURCE_DIR}/include)

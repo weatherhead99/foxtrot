@@ -22,7 +22,8 @@ class FoxtrotCoreConan(ConanFile):
     package_type = "shared-library"
     default_options = {"*/*:shared" : True,
                        "protobuf/*:with_zlib": True,
-                       "rttr/*:with_rtti" : True
+                       "rttr/*:with_rtti" : True,
+                       "absl/*:shared" : False
                        }
 
     src_folder = "core"
