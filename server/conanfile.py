@@ -16,8 +16,7 @@ class FoxtrotServerConan(ConanFile):
     "cmake/*", "setups/*", "devprogs/*", "devices/*"
     requires = (
         "libsodium/[^1.0.19]",
-        "rapidjson/[^1.1.0]",
-        "asio-grpc/[^2.6.0]"
+        "rapidjson/[^1.1.0]"
                 )
 
     options = {"use_coro" : [True, False] }
@@ -47,6 +46,13 @@ class FoxtrotServerConan(ConanFile):
 
     def requirements(self):
         super().requirements()
+
+        gcc_version = int(self.settings.compiler.version.value)
+        if gcc_version <= 11:
+            self.requires("asio-grpc/[<2.7]", override=True)
+        else:
+            self.requires("asio-grpc[^2.6.0]", override=True)
+
         self.requires("boost/[^1.82.0]", override=True)
         self.requires("zlib/1.2.13", override=True)
         self.requires("grpc/[^1.54.1]", override=True)
