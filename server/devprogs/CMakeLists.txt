@@ -5,7 +5,7 @@ add_executable(auth_play auth_play.cpp)
 #TODO: should be fixed somehow
 #target_link_libraries(auth_play Boost::program_options)
 
-if(USE_CORO_IMPLEMENTATIONS)
+if(${USE_CORO_IMPLEMENTATIONS})
   
   add_executable(asio_server_dev asio_server_dev.cpp)
   target_link_libraries(asio_server_dev PUBLIC foxtrot::foxtrot_core
