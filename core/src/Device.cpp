@@ -132,17 +132,6 @@ void sanitize_arg(rttr::variant& argin, const rttr::type& target_tp, int pos, fo
 
 
 
-template<typename T> bool is_ft_call_streaming ( const T& propmeth )
-{
-    auto streammeta = propmeth.get_metadata ( "streamdata" );
-    if ( streammeta.is_valid() ) {
-        if ( streammeta.to_bool() ) {
-            return true;
-        };
-
-    };
-    return false;
-};
 
 
 
@@ -270,14 +259,18 @@ rttr::variant foxtrot::Device::Invoke(const std::variant< rttr::property, rttr::
 rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_cit argbegin,
                                       foxtrot::rarg_cit argend)
 {
+    lg_.strm(sl::trace) << "cap string registry size is: "<< _cap_string_registry.size();
     auto capid = _cap_string_registry.at(capname);
+    lg_.strm(sl::debug) << "found capid: " << capid;
     return Invoke(capid, argbegin, argend);
 }
 
 rttr::variant foxtrot::Device::Invoke(unsigned short capid, foxtrot::rarg_cit beginargs,
                                       foxtrot::rarg_cit endargs)
 {
+
     auto pm = _cap_registry.at(capid).invokable;
+    lg_.strm(sl::trace) << "found invokable in registry";
     if(!pm.has_value())
         throw std::logic_error("invokable in table has no value! This should NEVER happen");
 
@@ -287,6 +280,7 @@ rttr::variant foxtrot::Device::Invoke(unsigned short capid, foxtrot::rarg_cit be
 foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) const
 {
     auto reflecttp = rttr::type::get(*this);
+
     auto prop = reflecttp.get_property(capname.c_str());
     auto meth = reflecttp.get_method(capname.c_str());
     
@@ -337,22 +331,32 @@ bool foxtrot::Device::Reset()
 
 void foxtrot::Device::load_capability_map(bool force_reload)
 {
+
+  lg_.strm(sl::debug) << "loading capability map...";
+  
     if(!_registry_is_loaded or force_reload)
     {
+      lg_.strm(sl::trace) << "in capability map load loop";
+      
         _cap_registry.clear();
         _cap_string_registry.clear();
         unsigned short idx = 0;
         auto reflecttp = rttr::type::get(*this);
+
+	lg_.strm(sl::debug) << "reflecttp name is: " << reflecttp.get_name();
+	
         for(auto& prop : reflecttp.get_properties())
         {
-            auto cap = GetCapability(prop);
+	  lg_.strm(sl::trace) << "prop: " << prop.get_name();
+	   auto cap = GetCapability(prop);
             _cap_registry.insert({idx, cap});
             _cap_string_registry.insert({cap.CapabilityName, idx++});
         }
         for(auto& meth : reflecttp.get_methods())
         {
-            auto cap = GetCapability(meth);
-            _cap_registry.insert({idx++, cap});
+	  lg_.strm(sl::trace) << "meth: " << meth.get_name();
+	  auto cap = GetCapability(meth);
+            _cap_registry.insert({idx, cap});
             _cap_string_registry.insert({cap.CapabilityName, idx++});
         }
     }

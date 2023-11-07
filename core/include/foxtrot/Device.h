@@ -8,16 +8,38 @@
 #include <optional>
 #include <variant>
 #include <map>
+#include <type_traits>
+
 
 
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
+
+namespace detail
+{
+template<typename T> bool is_ft_call_streaming ( const T& propmeth )
+{
+    auto streammeta = propmeth.get_metadata ( "streamdata" );
+    if ( streammeta.is_valid() ) {
+        if ( streammeta.to_bool() ) {
+            return true;
+        };
+
+    };
+    return false;
+};
+
+}
+
 
 
 namespace foxtrot
 {
     using rarg_cit = std::vector<rttr::variant>::const_iterator;
     using Lock = std::unique_lock<std::timed_mutex>;
-    
+
+
+  class DeviceHarness;
+  
  enum class CapabilityMeta
  {
   STREAMINGDATA 
@@ -66,6 +88,9 @@ namespace foxtrot
   
   class  Device : public std::enable_shared_from_this<Device>
   {
+
+    friend class DeviceHarness;
+    
     RTTR_ENABLE()
   public:
     Device(std::shared_ptr<CommunicationProtocol> proto, const std::string& comment = "", bool load_capabilities=true);
@@ -108,13 +133,15 @@ namespace foxtrot
         out.CapabilityName = std::string{pm.get_name()};
         out.invokable = pm;
 
-        if constexpr(std::is_same_v<PropMeth, rttr::property>)
+
+	using ActT =  std::decay_t<decltype(pm)>;
+	
+	
+        if constexpr(std::is_same_v<ActT, rttr::property>)
         {
             out.Returntype = pm.get_type();
 
-            if(is_ft_call_streaming(pm))
-                out.type=CapabilityType::STREAM;
-            else if(pm.is_readonly())
+            if(pm.is_readonly())
                 out.type = CapabilityType::VALUE_READONLY;
             else
             {
@@ -123,9 +150,9 @@ namespace foxtrot
                 out.Argtypes.push_back(out.Returntype);
             }
         }
-        else if constexpr(std::is_same_v<PropMeth, rttr::method>)
+        else if constexpr(std::is_same_v<ActT, rttr::method>)
         {
-            if(is_ft_call_streaming(pm))
+	  if(::detail::is_ft_call_streaming(pm))
                 out.type = CapabilityType::STREAM;
             else
                 out.type = CapabilityType::ACTION;

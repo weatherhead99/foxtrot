@@ -52,7 +52,16 @@ int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> 
         _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
     }
 
+
+    //NOTE: call this in case devices haven't in their constructor (a bit messy)
+    dev->load_capability_map(true);
+    
     _devvec.push_back(std::move(dev));
+
+    
+    
+
+    
     return thisid;
     
 }
