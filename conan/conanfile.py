@@ -163,7 +163,7 @@ class FoxtrotCppPackage:
         #self.cpp_info.set_property("cmake_file_name", f"{cmakename}Config.cmake")
 
         #we provide our own configuration files and as such disable CMakeDeps for ourselves
-        self.cpp_info.set_property("cmake_find_mode", None)
+        self.cpp_info.set_property("cmake_find_mode", "none")
         
         
 
