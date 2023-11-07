@@ -26,7 +26,7 @@ void setup_chiller(foxtrot::Logging& lg,
     {
       auto chiller_params = params->at("chiller_params");
 
-      if(std::get<int>(params["disable_chiller"]))
+      if(std::get<int>(chiller_params["disable_chiller"]))
 	{
 	  lg.strm(sl::info) << "chiller disabled in the config file, not continuing setup...";
 	  return;
