@@ -19,7 +19,7 @@ add_subdirectory(tbprogs)
 set(setup_srcs testbench_archon_heater.cpp testbench_setup_funcs.cpp chiller_setup_funcs.cpp)
 add_library(lsst_testbench SHARED ${setup_srcs})
 if(${MAGIS_CHILLER})
-  target_compile_definitions(lsst_testbench PRIVATE -DWITH_CHILLER)
+  target_compile_definitions(lsst_testbench PRIVATE -DMAGIS_CHILLER)
 endif()
 
 target_link_libraries(lsst_testbench foxtrot::foxtrot_core 
