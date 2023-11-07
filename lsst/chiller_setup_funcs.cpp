@@ -36,6 +36,7 @@ void setup_chiller(foxtrot::Logging& lg,
   catch(std::out_of_range)
     {
       lg.strm(sl::warning) << "chiller parameters not found, not enabling" ;
+      return;
     }
 
   auto chiller = std::make_unique<foxtrot::devices::TCubeEdge>(sport);
