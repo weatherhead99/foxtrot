@@ -601,7 +601,7 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 
 
 
-std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
+std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout, bool throw_on_errors)
 {
 
   apt_reply out;
