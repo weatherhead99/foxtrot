@@ -27,6 +27,8 @@ class FoxtrotCppMeta(type):
             print("merging in the options and default options")
             basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
 
+            basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
+        
             n.options = getattr(n, "options", {}) | bases[basepkg].options
             n.default_options = getattr(n, "default_options", {}) | bases[basepkg].default_options
 

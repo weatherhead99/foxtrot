@@ -18,6 +18,11 @@ class FoxtrotServerConan(ConanFile):
         "libsodium/[^1.0.19]",
         "rapidjson/[^1.1.0]"
                 )
+        
+    default_options = {"boost:shared" : True,
+                       "OpenSSL:shared" : True,
+                       "libsodium:shared" : True,
+                       "zlib:shared" : True}
 
     options = {"use_coro" : [True, False] }
 

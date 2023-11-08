@@ -6,6 +6,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
 
+find_package(foxtrotCore REQUIRED)
 find_package(Boost REQUIRED COMPONENTS date_time)
 
 include(GNUInstallDirs)

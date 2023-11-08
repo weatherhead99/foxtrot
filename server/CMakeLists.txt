@@ -80,6 +80,7 @@ endif()
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 message("module dir: ${CMAKE_MODULE_PATH}")
 include(FoxtrotCommonSetup)
@@ -87,7 +88,9 @@ include(FoxtrotCommonSetup)
 
 add_subdirectory(src)
 
+
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
+
 
 install(TARGETS exptserve
        EXPORT foxtrot_server
@@ -114,8 +117,6 @@ install(DIRECTORY include/foxtrot
      
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
-
-
 
 set(ft_server_dep_str
 "

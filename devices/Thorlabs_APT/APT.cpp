@@ -599,18 +599,9 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 }
 
 
-void foxtrot::devices::APT::attempt_error_recover()
-{
-  _lg.strm(sl::info) << "attempting error recovery...";
-  _lg.strm(sl::info) << "flusing serial port...";
-  _serport->flush();
 
 
-};
-
-
-
-std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout, bool throw_on_errors)
+std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::receive_sync_common(destination expected_source, optional<milliseconds> timeout)
 {
 
   apt_reply out;
@@ -625,17 +616,10 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
 
   unsigned short recv_opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF);
 
+  
   if (headerstr[4] == 0)
     {
-
-      std::ostringstream oss;
-      oss << std::hex;
-      for(auto c: headerstr)
-	oss << (int) c << " ";
-      
-      
-      _lg.strm(sl::error) << "headerstr is (hex): " << oss.str();
-      _lg.Error("null destination");
+      _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;            _lg.Error("null destination");
       _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
       _lg.Info("flushing serial port");
       _serport->flush();

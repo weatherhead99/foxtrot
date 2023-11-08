@@ -44,7 +44,7 @@ namespace foxtrot
 
       void discover() override;
       shared_ptr<fakeDevice> open_device(const string& ident,
-				     const std::vector<rttr::variant>& args);
+				     const std::vector<rttr::variant>& args) override;
 
     private:
       int _n_devices_avail;
