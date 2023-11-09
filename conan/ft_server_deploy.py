@@ -6,7 +6,7 @@ SCRIPT_BASE = """\
 #!/bin/bash
 export dir="{DIRPATH}"
 source ${{dir}}/conanrun.sh
-${{dir}}/exptserve {SETUP} "$@"
+${{dir}}/exptserve ${{dir}}/{SETUP} "$@"
 """
 
 
