@@ -56,7 +56,7 @@ class FoxtrotServerConan(ConanFile):
         if gcc_version <= 11:
             self.requires("asio-grpc/[<2.7]")
         else:
-            self.requires("asio-grpc[^2.6.0]")
+            self.requires("asio-grpc/[^2.6.0]")
 
         self.requires("boost/[^1.82.0]", override=True)
         self.requires("zlib/1.2.13", override=True)
