@@ -22,7 +22,7 @@ class FoxtrotLSST(ConanFile):
     default_options = {"*/*:shared" : True,
                        "magis_chiller" : False}
 
-    deploy_setups = ("lsst_testbench.so")
+    deploy_setups = ("lsst_testbench.so",)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
