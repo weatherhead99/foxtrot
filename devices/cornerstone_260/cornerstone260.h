@@ -1,18 +1,24 @@
 #pragma once
 #include <foxtrot/CmdDevice.h>
-#include <foxtrot/protocols/SerialProtocol.h>
-
+#include <foxtrot/Logging.h>
 
 namespace foxtrot
 {
+  namespace protocols
+  {
+    class SerialPort;
+  }
+
+  
   namespace devices
   {
     
     class cornerstone260 : public CmdDevice
     {
       RTTR_ENABLE(CmdDevice)
+
     public:
-      cornerstone260(std::shared_ptr< SerialProtocol> proto);
+      cornerstone260(std::shared_ptr<foxtrot::protocols::SerialPort> proto);
       
       const std::string getDeviceTypeName() const override;
       
@@ -30,14 +36,18 @@ namespace foxtrot
       int getGrating();
       
       void setGratingCalibration(int gr, int lines, double factor, double zero, double offset, std::string label);
+
+      void abort();
+      std::string lasterror();
+      bool errstatus();
       
     protected:
       std::string cmd(const std::string& request) override;
       std::string readecho(const std::string& request);
       
       bool _cancelecho = true;
-      std::shared_ptr<SerialProtocol> _serproto;
-      
+    private:
+      foxtrot::Logging _lg;
 
             
     };

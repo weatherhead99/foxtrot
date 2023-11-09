@@ -17,6 +17,8 @@
 
 #include "cornerstone260.h"
 
+using foxtrot::protocols::SerialPort;
+
 //WARNING: unsigned_signed_parameter_bug
 #if __GNUC__ > 9
 const foxtrot::parameterset cornerstone_class_params_serial
@@ -53,80 +55,37 @@ const std::map<unsigned char, std::string> cornerstone_error_strings
 
 
 
-foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr< foxtrot::SerialProtocol> proto)
-: CmdDevice(proto), _serproto(proto)
+foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr<SerialPort> proto)
+  : CmdDevice(proto),  _lg("cornerstone260")
 {
-  
-  auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(proto);
-  if(serportptr == nullptr)
-  {
-    throw ProtocolError("only SerialPort connection currently supported");
-  };
+
   
   //initialize communication port
   _cancelecho = true;
-  serportptr->Init(&cornerstone_class_params_serial);
-  serportptr->flush();
+  proto->Init(&cornerstone_class_params_serial);
+  proto->flush();
   
 }
 
 
 std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
-  
-  auto serportptr = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
 
-  if(serportptr == nullptr)
-    {
-      throw ProtocolError("only serial port supported at the moment");
-    }
-   else
-   {
-    serportptr->flush(); 
-     
-   }
+  auto serportptr = std::static_pointer_cast<SerialPort>(_proto);
+
+  serportptr->flush();
       
-
-  
-  
-//   std::cout << "request size: " << request.size() << std::endl;
-  
-  _serproto->write(request + '\n');
-  
-  //read echo, and throw away
- 
-  unsigned actlen;
-  
-//   int timeneeded = std::round(1./9600 * request.size() * 1000);
-  
-
-//   std::this_thread::sleep_for(std::chrono::milliseconds(2*timeneeded));
-  
-  std::this_thread::sleep_for(std::chrono::milliseconds(200));
-
-  
-//   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
-
-//   std::cout << "reading echo" << std::endl;
+  auto timeout = serportptr->calc_minimum_transfer_time(request.size() + 1) * 5;
+  serportptr->setWait(timeout.count());
+  serportptr->write(request + '\n');
   
   auto echo = readecho(request);
 
-//   std::cout << "echo ok" << std::endl;
-//   std::cout << echo << std::endl;
-  
-//   std::cout << "bytes available: " << serportptr->bytes_available() << std::endl;
-
-  //HACK: if no bytes available, assume no response
-  if( serportptr->bytes_available() == 0)
-  {
-    return "";
-  }
-  
+  serportptr->setWait(2000);
   auto response = serportptr->read_until_endl('\r');
-
   auto cretpos = std::find(response.begin(),response.end(),'\r');
  
-  return std::string(response.begin(),cretpos );
+  return std::string(response.begin(),cretpos);
 
 }
 
@@ -139,44 +98,21 @@ const std::string foxtrot::devices::cornerstone260::getDeviceTypeName() const
 std::string foxtrot::devices::cornerstone260::readecho(const std::string& request)
 {
   unsigned actlen;
-  auto echo = _serproto->read(request.size() +1, &actlen);
+
+  auto serportptr = std::static_pointer_cast<SerialPort>(_proto);
+  auto timeout = serportptr->calc_minimum_transfer_time(request.size() +1) * 5;
+  auto echo = serportptr->read_until_endl('\n');
+  echo.erase(std::remove(echo.begin(), echo.end(), '\n'));
   
-  //echo might not be equal to request
-  auto newlpos = std::find(echo.begin(),echo.end(),'\n');
-  
-  
-  if( newlpos == echo.end())
+  if(echo.size() != request.size())
     {
-      std::cout << "echo: " << echo << std::endl;
-      
-      for (auto& c : echo)
-      {
-	std::cout << (int) c << " ";
-      }
-      std::cout << std::endl;
-      
-      throw ProtocolError("couldn't read echo properly");
+      _lg.strm(sl::error) << "size of echo: " << echo.size() << " expected size: " << request.size();
+    throw ProtocolError("invalid size of echo");
     }
-  if( std::string(echo.begin(),echo.end()-1) != request)
-    {
-      
-      std::cout << "echo: " << echo << std::endl;
-      
-      for (auto& c : echo)
-      {
-	std::cout << (int) c << " ";
-      }
-      std::cout << std::endl;
-      
-      
-      throw ProtocolError("echo was invalid");
-    };
 
   return echo;
 
 }
-
-
 
 
 bool foxtrot::devices::cornerstone260::getShutterStatus()
@@ -291,7 +227,40 @@ void foxtrot::devices::cornerstone260::setGratingCalibration(int gr, int lines, 
   oss.str("");
   
   oss << "GRAT" << gr <<"LABEL " << label;
+  cmd(oss.str());
+  
 
+}
+
+
+void foxtrot::devices::cornerstone260::abort()
+{
+  cmd("ABORT");
+}
+
+std::string foxtrot::devices::cornerstone260::lasterror()
+{
+  auto repl = cmd("ERROR?");
+  auto errcode = std::stoul(repl);
+  try
+    {
+      return cornerstone_error_strings.at(errcode);
+    }
+  catch(std::out_of_range& err)
+    {
+      std::ostringstream oss;
+      oss << "unknown error, code: " << std::dec << errcode;
+      return oss.str();
+    }
+  
+  
+}
+
+
+bool foxtrot::devices::cornerstone260::errstatus()
+{
+  auto repl = cmd("STB?");
+  return static_cast<bool>(std::stoul(repl));
 }
 
 
@@ -299,23 +268,41 @@ RTTR_REGISTRATION
 {
   using namespace rttr;
   using foxtrot::devices::cornerstone260;
-  
+
+
+  //deprecate this (painful I know!)
+  // registration::class_<cornerstone260>("foxtrot::devices::cornerstone260")
+  // .property_readonly("getShutterStatus",&cornerstone260::getShutterStatus)
+  //   .method("setShutterStatus",&cornerstone260::setShutterStatus)
+  // .property_readonly("getWave",&cornerstone260::getWave)
+  // .property_readonly("getFilter",&cornerstone260::getFilter)
+  // .property_readonly("getGrating", &cornerstone260::getGrating)
+  // .method("setWave",&cornerstone260::setWave)
+  // (parameter_names("wl_nm"))
+  // .method("setFilter",&cornerstone260::setFilter)
+  // (parameter_names("fl"))
+  // .method("setGrating",&cornerstone260::setGrating)
+  // (parameter_names("gr"))
+  // .method("setGratingCalibration", &cornerstone260::setGratingCalibration)
+  // (parameter_names("gr","lines","factor","zero","offset","label"))
+  // ;
+
+
   registration::class_<cornerstone260>("foxtrot::devices::cornerstone260")
-  .property_readonly("getShutterStatus",&cornerstone260::getShutterStatus)
-    .method("setShutterStatus",&cornerstone260::setShutterStatus)
-  .property_readonly("getWave",&cornerstone260::getWave)
-  .property_readonly("getFilter",&cornerstone260::getFilter)
-  .property_readonly("getGrating", &cornerstone260::getGrating)
-  .method("setWave",&cornerstone260::setWave)
-  (parameter_names("wl_nm"))
-  .method("setFilter",&cornerstone260::setFilter)
-  (parameter_names("fl"))
-  .method("setGrating",&cornerstone260::setGrating)
-  (parameter_names("gr"))
-  .method("setGratingCalibration", &cornerstone260::setGratingCalibration)
-  (parameter_names("gr","lines","factor","zero","offset","label"))
-  ;
-  
+    .property("ShutterStatus", &cornerstone260::getShutterStatus,
+	      &cornerstone260::setShutterStatus)
+    .property("Wave", &cornerstone260::getWave,
+	      &cornerstone260::setWave)
+    .property("Grating", &cornerstone260::getGrating,
+	      &cornerstone260::setGrating)
+    .property("Filter", &cornerstone260::getFilter,
+	      &cornerstone260::setFilter)
+    .method("setGratingCalibration", &cornerstone260::setGratingCalibration)
+    (parameter_names("gr", "lines", "factor", "zero", "offset", "label"))
+    .property_readonly("errstatus", &cornerstone260::errstatus)
+    .property_readonly("lasterror", &cornerstone260::lasterror)
+    .method("abort", &cornerstone260::abort)
+    ;
   
   
   
