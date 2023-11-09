@@ -200,7 +200,7 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
 //   std::cout << "sending command: " << oss.str()<< std::endl;
 
   {
-    SerialPortWaitSetter waiter(_proto, 10000);
+    SerialPortWaitSetter waiter(_proto, 120000);
     cmd_no_response(oss.str());
   }
   err_check();
