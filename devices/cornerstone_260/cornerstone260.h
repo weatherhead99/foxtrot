@@ -40,10 +40,16 @@ namespace foxtrot
       void abort();
       std::string lasterror();
       bool errstatus();
+
+      std::string info();
       
     protected:
       std::string cmd(const std::string& request) override;
+      void cmd_no_response(const std::string& request);
       std::string readecho(const std::string& request);
+
+      void err_check();
+      
       
       bool _cancelecho = true;
     private:

@@ -11,6 +11,7 @@
 #include <rttr/registration>
 
 #include <foxtrot/ProtocolError.h>
+#include <foxtrot/DeviceError.h>
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/SerialPort.h>
@@ -53,6 +54,26 @@ const std::map<unsigned char, std::string> cornerstone_error_strings
 };
 
 
+struct SerialPortWaitSetter
+{
+  SerialPortWaitSetter(std::shared_ptr<foxtrot::CommunicationProtocol> proto,
+		       unsigned wait_ms)
+  {
+    _proto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(proto);
+    storedwait = _proto->getWait();
+    _proto->setWait(wait_ms);
+  }
+
+  ~SerialPortWaitSetter()
+  {
+    _proto->setWait(storedwait);
+  }
+  
+  
+  std::shared_ptr<foxtrot::protocols::SerialPort> _proto;
+  unsigned storedwait;
+};
+
 
 
 foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr<SerialPort> proto)
@@ -64,30 +85,56 @@ foxtrot::devices::cornerstone260::cornerstone260(std::shared_ptr<SerialPort> pro
   _cancelecho = true;
   proto->Init(&cornerstone_class_params_serial);
   proto->flush();
-  
+  proto->setWait(2000);
 }
 
 
 std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
 {
 
+  cmd_no_response(request);
+
+  
   auto serportptr = std::static_pointer_cast<SerialPort>(_proto);
 
-  serportptr->flush();
-      
-  auto timeout = serportptr->calc_minimum_transfer_time(request.size() + 1) * 5;
-  serportptr->setWait(timeout.count());
-  serportptr->write(request + '\n');
-  
-  auto echo = readecho(request);
-
-  serportptr->setWait(2000);
-  auto response = serportptr->read_until_endl('\r');
+  _lg.strm(sl::trace) << "reading response";
+  auto response = serportptr->read_until_endl('\n');
   auto cretpos = std::find(response.begin(),response.end(),'\r');
  
   return std::string(response.begin(),cretpos);
 
 }
+
+void foxtrot::devices::cornerstone260::cmd_no_response(const std::string& request)
+{
+  
+  auto serportptr = std::static_pointer_cast<SerialPort>(_proto);
+  _lg.strm(sl::trace) << "flushing port..";
+  serportptr->flush();
+
+  _lg.strm(sl::trace) << "writing request";
+  serportptr->write(request + '\n');
+
+  _lg.strm(sl::trace) << "reading echo";
+  auto echo = readecho(request);
+  _lg.strm(sl::trace) << "echo is: " << echo;
+
+}
+
+void foxtrot::devices::cornerstone260::err_check()
+{
+
+  auto errstat = errstatus();
+  if(errstat)
+    {
+      auto errstr = lasterror();
+      throw foxtrot::DeviceError(errstr);
+    }
+
+ 
+}
+
+
 
 const std::string foxtrot::devices::cornerstone260::getDeviceTypeName() const
 {
@@ -118,6 +165,8 @@ std::string foxtrot::devices::cornerstone260::readecho(const std::string& reques
 bool foxtrot::devices::cornerstone260::getShutterStatus()
 {
   auto response = cmd("SHUTTER?");
+
+  err_check();
   
   switch(response[0])
     {
@@ -137,7 +186,8 @@ void foxtrot::devices::cornerstone260::setShutterStatus(bool status)
   char cmdch = status ? 'O' : 'C';
   
   std::string request{"SHUTTER "};
-  cmd(request + cmdch);
+  cmd_no_response(request + cmdch);
+  err_check();
   
 }
 
@@ -148,9 +198,12 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
   
   oss << "GOWAVE " << std::setprecision(6) << std::fixed << wl_nm;
 //   std::cout << "sending command: " << oss.str()<< std::endl;
-  
-  cmd(oss.str());
-  
+
+  {
+    SerialPortWaitSetter waiter(_proto, 10000);
+    cmd_no_response(oss.str());
+  }
+  err_check();
 
 }
 
@@ -163,6 +216,8 @@ double foxtrot::devices::cornerstone260::getWave()
   auto repl = cmd(command);
 //   std::cout << "repl is: " << repl << std::endl;
   
+
+  err_check();
   
   return std::stod(repl);
 
@@ -172,13 +227,16 @@ void foxtrot::devices::cornerstone260::setFilter(int fnum)
 {
   std::ostringstream oss;
   oss << "FILTER " << fnum ;
-  cmd(oss.str());
+
+  SerialPortWaitSetter waiter(_proto, 120000);
+  cmd_no_response(oss.str());
 }
 
 int foxtrot::devices::cornerstone260::getFilter()
 {
   std::string command("FILTER?");
   auto repl = cmd(command);
+  err_check();
   
   return std::stoi(repl);
   
@@ -189,6 +247,7 @@ int foxtrot::devices::cornerstone260::getGrating()
 {
   std::string command("GRAT?");
   auto repl = cmd(command);
+  err_check();
   
   return std::stoi(repl);
 
@@ -201,47 +260,82 @@ void foxtrot::devices::cornerstone260::setGrating(int gr)
   
   std::ostringstream oss ;
   oss << "GRAT " << gr ;
-  cmd(oss.str());
+
+  //NOTE: this can take a LOT of time to come back....
+  SerialPortWaitSetter waiter(_proto, 120000);
+  cmd_no_response(oss.str());
+  err_check();
   
 }
 
 void foxtrot::devices::cornerstone260::setGratingCalibration(int gr, int lines, double factor, double zero, double offset, std::string label)
 {
   label = label.substr(0,9);
+
+  _lg.strm(sl::trace) << "LINES";
+  
   std::ostringstream oss;
   oss << "GRAT" << gr << "LINES " << lines;
-  cmd(oss.str());
+  cmd_no_response(oss.str());
+  err_check();
+
   
+
+  _lg.strm(sl::trace) << "FACTOR";
   oss.str("");
   oss << "GRAT" << gr << "FACTOR " << std::setprecision(6) << factor;
-  cmd(oss.str());
+  cmd_no_response(oss.str());
+  err_check();
   oss.str("");
   
-  
+
+  _lg.strm(sl::trace) << "OFFSET";
   oss << "GRAT" << gr << "OFFSET " << std::setprecision(6) << offset;
-  cmd(oss.str());
+  cmd_no_response(oss.str());
+  err_check();
   oss.str("");
-  
+
+  _lg.strm(sl::trace) << "ZERO";
   oss << "GRAT" << gr << "ZERO " << std::setprecision(6) << zero;
-  cmd(oss.str());
+  cmd_no_response(oss.str());
+  err_check();
   oss.str("");
-  
+
+
+  _lg.strm(sl::trace) << "LABEL";
   oss << "GRAT" << gr <<"LABEL " << label;
-  cmd(oss.str());
-  
+  cmd_no_response(oss.str());
+  err_check();
 
 }
 
 
 void foxtrot::devices::cornerstone260::abort()
 {
-  cmd("ABORT");
+  cmd_no_response("ABORT");
+  err_check();
 }
 
 std::string foxtrot::devices::cornerstone260::lasterror()
 {
   auto repl = cmd("ERROR?");
-  auto errcode = std::stoul(repl);
+  unsigned short errcode;
+
+  if(repl.size() == 0)
+    {
+      throw std::runtime_error("no error string stored");
+    }
+
+  try{
+    errcode = std::stoul(repl);
+       }
+  catch(std::exception& err)
+       {
+	 std::ostringstream oss;
+	 oss << "cornerstone260 unknown error, raw: " << repl;
+	 return oss.str();
+       }
+   
   try
     {
       return cornerstone_error_strings.at(errcode);
@@ -249,7 +343,7 @@ std::string foxtrot::devices::cornerstone260::lasterror()
   catch(std::out_of_range& err)
     {
       std::ostringstream oss;
-      oss << "unknown error, code: " << std::dec << errcode;
+      oss << "cornerstone260 unknown error, code: " << std::dec << errcode;
       return oss.str();
     }
   
@@ -261,6 +355,12 @@ bool foxtrot::devices::cornerstone260::errstatus()
 {
   auto repl = cmd("STB?");
   return static_cast<bool>(std::stoul(repl));
+}
+
+std::string foxtrot::devices::cornerstone260::info()
+{
+  return cmd("INFO?");
+  err_check();
 }
 
 
@@ -302,6 +402,7 @@ RTTR_REGISTRATION
     .property_readonly("errstatus", &cornerstone260::errstatus)
     .property_readonly("lasterror", &cornerstone260::lasterror)
     .method("abort", &cornerstone260::abort)
+    .property_readonly("info", &cornerstone260::info)
     ;
   
   
