@@ -9,6 +9,7 @@
 
 #include <variant>
 #include <map>
+#include <memory>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/StubError.h>
@@ -18,9 +19,21 @@
 
 // note: the below are redefinitions of stuff that's in protocols. One day
 // all parameter handling should probably be moved into core
+namespace boost
+{
+  namespace dll
+  {
+    namespace experimental
+    {
+      class smart_library;
+    }
+  }
+}
+
 
 namespace foxtrot
 {
+
 
     class DeviceHarness;
     class TelemetryServer;
@@ -31,39 +44,15 @@ namespace foxtrot
     public:
         ft_plugin(const std::string& file);
         ~ft_plugin();
-        
-        void reload();
+      void reload();
         
     protected:
-        
-        template<typename funtp> funtp get_function(const std::string& name)
-        {
-		#ifdef linux
-            _lg.Trace("calling dlsym...");
-            auto sym = dlsym(_dl,name.c_str());
-        #else
-            _lg.Trace("calling GetProcAddress...");
-            auto sym = GetProcAddress(_dl,name.c_str());
-		#endif
-            
-          if(sym == nullptr)
-          {
-              _lg.Error("couldn't find matching function " + name + " in plugin file");
-              throw std::runtime_error("couldn't find matching function " + name + " in plugin file");
-          }
-          
-          auto fun = reinterpret_cast<funtp>(sym);
-          return fun;
-        };
-        
+
         Logging _lg;
-    private:
-#ifdef linux
-        void* _dl = nullptr;
-#else
-        HMODULE _dl = nullptr;
-#endif
         std::string _fname;
+      std::unique_ptr<boost::dll::experimental::smart_library> _lib;
+
+
     };
 
   using foxtrot::mapofparametersets;
@@ -71,24 +60,24 @@ namespace foxtrot
     class ExperimentalSetup : public ft_plugin
     {
     public:
-
-        [[deprecated]] ExperimentalSetup(const std::string& setupfile, DeviceHarness& harness,
-			  const foxtrot::mapofparametersets* const paramsets = nullptr);
-
       ExperimentalSetup(const std::string& setupfile, std::shared_ptr<DeviceHarness> harness,
 			const foxtrot::mapofparametersets* const paramsets = nullptr);
         void reset();
         
     private:
+      void call_setup_fun();
+      
       std::shared_ptr<DeviceHarness> _harness;
-	const mapofparametersets* const _paramsets;
-     int(*setup_fun)(foxtrot::DeviceHarness&, const mapofparametersets* const) = nullptr;
+      const mapofparametersets* const _paramsets;
+      std::function<int(foxtrot::DeviceHarness&, const mapofparametersets* const)> setup_fun_legacy;
+      std::function<int(std::shared_ptr<foxtrot::DeviceHarness>, const mapofparametersets* const)> setup_fun;
+      bool use_legacy = false;
     };
     
-    class TelemetrySetup : public ft_plugin
+  class TelemetrySetup : public ft_plugin
     {
     public:
-        TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);
+     [[deprecated]] TelemetrySetup(const std::string& file,  TelemetryServer& telemserv, Client& cl);
         
     private:
         
