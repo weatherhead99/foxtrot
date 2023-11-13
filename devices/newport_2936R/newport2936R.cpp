@@ -4,6 +4,7 @@
 #include <thread>
 #include <chrono>
 #include <sstream>
+#include <cctype>
 
 #include <rttr/registration>
 
@@ -392,6 +393,8 @@ bool foxtrot::devices::newport2936R::getTriggerState()
 std::string foxtrot::devices::newport2936R::getcaldate()
 {
   auto repl = cmd("CALDATE?");
+  repl.erase(std::remove_if(repl.begin(), repl.end(), ::isspace),repl.end());
+  
   return repl;
 
 }
@@ -540,7 +543,9 @@ void foxtrot::devices::newport2936R::setTriggerValue(double meas_val)
 
 string foxtrot::devices::newport2936R::getSerialNumber()
 {
-  return cmd("PM:DETSN?");
+  auto repl =  cmd("PM:DETSN?");
+  repl.erase(std::remove_if(repl.begin(), repl.end(), ::isspace),repl.end());
+  return repl;
 
 }
 
