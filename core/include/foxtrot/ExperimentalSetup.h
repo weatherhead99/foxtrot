@@ -25,6 +25,7 @@ namespace boost
   {
     namespace experimental
     {
+
       class smart_library;
     }
   }

@@ -154,7 +154,7 @@ int main(int argc, char** argv)
     
     auto harness = foxtrot::DeviceHarness::create();
 
-    foxtrot::ExperimentalSetup setup(setupfile,*harness,params.get());
+    foxtrot::ExperimentalSetup setup(setupfile,harness,params.get());
     
     if(vm.count("dump"))
     {

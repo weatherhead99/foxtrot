@@ -1,11 +1,19 @@
 #pragma once
 
-using mapofparametersets = std::map<std::string, std::map<std::string, boost::variant<unsigned,int,std::string>>>;
+#include <foxtrot/parameter_defs.hh>
+
+using foxtrot::mapofparametersets;
+
 
 namespace foxtrot {
     class DeviceHarness;
-}   
-
-extern "C" { 
-    int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets);
 }
+
+
+extern "C" {
+  int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets);
+}
+
+int setup(std::shared_ptr<foxtrot::DeviceHarness> harness, const mapofparametersets* const paramsets);
+
+

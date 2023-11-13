@@ -3,7 +3,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/variant.hpp>
 
 #include <foxtrot/devices/dummyDevice.h>
 #include <foxtrot/devices/fakedevice.hh>
@@ -18,13 +17,63 @@ using std::endl;
 
 using namespace foxtrot;
 
-extern "C" {
+
+
+int setup(std::shared_ptr<foxtrot::DeviceHarness> harness, const mapofparametersets* const paramsets)
+{
+  foxtrot::Logging lg("dummy_setup_new");
+  lg.strm(sl::info) << "running the new style dummy setup function";
+
+  if(!paramsets)
+    {
+      lg.Warning("no parameter sets supplied");
+    }
+  else
+  {
+    std::ostringstream oss;
+    for(auto& paramset : *paramsets)
+    {
+      oss << paramset.first << ", ";
+    }
     
+   lg.Info("parameter sets received: "  + oss.str());
+    
+  }
+  
+    lg.Debug("setting up dummy device..");
+
+    auto devptr = std::make_unique<foxtrot::devices::dummyDevice>("dummy1");
+    auto devptr2 = std::make_unique<foxtrot::devices::dummyDevice>("dummy2");  
+    
+    lg.Debug("adding to harness..");
+    harness->AddDevice(std::move(devptr));
+    harness->AddDevice(std::move(devptr2));
+
+
+    lg.Info("attempting to set up fakeDeviceFactory");
+
+    using foxtrot::devices::fakeDeviceFactory;
+
+    //    auto fakedevfactptr = std::make_unique<fakeDeviceFactory>(harness, 3,
+    //							      "fakeDeviceFactory");
+
+    //harness.AddDevice(std::move(fakedevfactptr));
+    
+    return 0;
+
+}
+
+
+
+extern "C" {
+  //int setup(std::shared_ptr<foxtrot::DeviceHarness> harness, const mapofparametersets* const paramsets)
 int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const paramsets)
 {
   
     
   foxtrot::Logging lg("dummy_setup");
+
+  lg.Warning("we are in the LEGACY setup function! It's deprecated...");
   
   if(!paramsets)
   {
@@ -75,4 +124,5 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
     return 0;
 };
+
 }

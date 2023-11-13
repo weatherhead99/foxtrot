@@ -6,19 +6,22 @@
 #include <foxtrot/ExperimentalSetup.h>
 #include <foxtrot/DeviceHarness.h>
 
+#include <foxtrot/parameter_defs.hh>
+
 #include <boost/dll/smart_library.hpp>
 #include <boost/dll/import_mangled.hpp>
+#include <boost/dll/library_info.hpp>
 
 using namespace foxtrot;
 
 using boost::dll::experimental::smart_library;
-using std::shared_ptr;
-using foxtrot::DeviceHarness;
-using std::filesystem::exists;
-using std::make_unique;
-using std::string;
-using foxtrot::mapofparametersets;
 using boost::system::system_error;
+using foxtrot::DeviceHarness;
+using foxtrot::mapofparametersets;
+using std::make_unique;
+using std::shared_ptr;
+using std::string;
+using std::filesystem::exists;
 
 foxtrot::ft_plugin::ft_plugin(const string& file) 
 : _fname(file), _lg("ft_plugin")
@@ -26,12 +29,24 @@ foxtrot::ft_plugin::ft_plugin(const string& file)
     
     _lg.strm(sl::debug) << "file: " << file;
 	
-    if(exists(file))
+    if(!exists(file))
     {
         _lg.Warning("file doesn't seem to exist...");
     }
 
     _lib = make_unique<smart_library>(file);
+
+    boost::dll::library_info libinfo(file);
+    
+    for(auto& sym : libinfo.symbols())
+    {
+      if(sym.find("setup") != std::string::npos)
+	_lg.strm(sl::debug) << "- " << sym;
+
+      if(sym.find("test") != std::string::npos)
+	_lg.strm(sl::debug) << "- " << sym;
+      
+    }
 
 }
 
@@ -42,6 +57,26 @@ void foxtrot::ft_plugin::reload()
 
   _lib = std::make_unique<smart_library>(_fname);
 
+  if(!_lib->is_loaded())
+    {
+      _lg.strm(sl::error) << "library did not load...";
+      throw std::runtime_error("shared library failed to load!");
+    }
+
+
+  boost::dll::library_info libinfo(_fname);
+  _lg.strm(sl::debug) << "library symbols:" ;
+
+  for(auto& sym : libinfo.symbols())
+    {
+      if(sym.find("setup") != std::string::npos)
+	_lg.strm(sl::debug) << "- " << sym;
+
+      if(sym.find("test") != std::string::npos)
+	_lg.strm(sl::debug) << "- " << sym;
+      
+    }
+  
 }
 
 
@@ -61,18 +96,19 @@ void foxtrot::ExperimentalSetup::reset()
 {
     _lg.Debug("clearing all devices...");
     _harness->ClearDevices(1000);
-    
-    _lg.Debug("reloading setup file...");
-    reload();
+
+    smart_library libb(_fname);
 
 
     try
       {
-	setup_fun = _lib->get_function<int(shared_ptr<DeviceHarness>, const mapofparametersets* const)>("setup");
+	setup_fun = libb.get_function<int(shared_ptr<foxtrot::DeviceHarness>, const mapofparametersets* const)>("setup");
+	
       }
     catch(system_error& err)
       {
 	_lg.strm(sl::warning) << "no setup function defined in library, trying legacy";
+	_lg.strm(sl::debug) << "error caught was: " << err.what();
 	use_legacy = true;
 
       }
@@ -88,6 +124,7 @@ void foxtrot::ExperimentalSetup::reset()
 	catch(system_error& err)
 	  {
 	    _lg.strm(sl::warning) << "no setup function with legacy signature detected, trying C function";
+	    _lg.strm(sl::debug) << "error caught was: " << err.what();
 	    use_c_linkage = true;
 	  }
 
