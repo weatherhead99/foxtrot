@@ -30,11 +30,13 @@ int main() { Var v = "hello";
   auto v4 = v2.get_type().get_method("held_type").invoke(rttr::instance(), v2).get_value<rttr::type>();
 
   std::cout << v4.get_name() << std::endl;
-
   std::cout << v3.get_type().get_name() << std::endl;
-
   std::cout << "value:" << v3.to_string() << std::endl;
 
+  auto v5 = rttr::variant{std::string("hello")};
+  std::cout << v5.can_convert<Var>() << std::endl;
+  std::cout << v5.can_convert(rttr::type::get<Var>()) << std::endl;
+  
   }
 
 

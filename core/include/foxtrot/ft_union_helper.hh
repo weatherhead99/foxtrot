@@ -60,9 +60,45 @@ namespace foxtrot
   }
 
 
-    template<typename T>
-    struct converter_helper {};
-       
+
+    template<typename Variant, std::size_t N = std::variant_size_v<Variant> -1>
+    struct variant_converter_reg
+    {
+      using From = std::variant_alternative_t<N,Variant>;
+      
+      constexpr static void reg()
+      {
+	auto conv_in = [](From in, bool& ok) -> Variant
+	{
+	  ok = true;
+	  return Variant{in};
+	};
+	rttr::type::register_converter_func(conv_in);
+
+        auto conv_out = [](Variant in, bool& ok) -> From
+	{
+	  if(std::holds_alternative<From>(in))
+	    {
+	      ok = true;
+	      return std::get<From>(in);
+	    }
+	  ok = false;
+	  From out;
+	  return out;
+	};
+
+	rttr::type::register_converter_func(conv_out);
+
+	if constexpr(N == 0)
+	  return;
+	else
+	  return variant_converter_reg<Variant, N-1>::reg();
+	
+      }
+
+    };
+
+    
 
   }
 
@@ -82,6 +118,7 @@ namespace foxtrot
       .method("held_type", &detail::union_held_type<T>);
       //      .method("possible_types", &detail::union_possible_types<T>);
 
+    detail::variant_converter_reg<T>::reg();
   }
 
 
