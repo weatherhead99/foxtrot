@@ -36,19 +36,19 @@ namespace foxtrot{
 						     Logging* lg = nullptr);
   
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_variant& wiretp, 
-                                       const rttr::type& target_tp, Logging* lg=nullptr);
+							   const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
     
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_simplevariant& wiretp, 
-                                       const rttr::type& target_tp, Logging* lg=nullptr);
+							   const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_struct& wiretp, 
-                                       const rttr::type& target_tp, Logging* lg=nullptr);
+							   const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_enum& wiretp,
-                                       const rttr::type& target_tp, Logging* lg=nullptr);
+							   const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
 
   FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_tuple& wiretp,
-							 const rttr::type& target_tp, Logging* lg = nullptr);
+							 const rttr::type& target_tp, Logging* lg = nullptr, bool check=true);
   
-    FOXTROT_CORE_EXPORT rttr::variant wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg=nullptr);
+  FOXTROT_CORE_EXPORT rttr::variant wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
     
     FOXTROT_CORE_EXPORT variant_descriptor describe_type(const rttr::type& tp, Logging* lg=nullptr);
     

@@ -1,5 +1,6 @@
 #pragma once
 #include <rttr/registration>
+#include <rttr/type>
 #include <variant>
 #include <foxtrot/ft_types.pb.h>
 
@@ -38,29 +39,31 @@ namespace foxtrot
       
     }
 
-  template<typename T>
-  std::vector<rttr::type> union_possible_types(const T& in)
-  {
-
-    auto void_ = rttr::type::get<void>();
-    auto sz = std::variant_size<T>::value;
-    std::vector<rttr::type> out(sz, void_);
-
-    auto it = out.begin();
-
-    std::visit([&it] (auto& arg)
+    
+    template<typename Variant, std::size_t N = std::variant_size_v<Variant> -1>
+    struct variant_possible_types_helper
     {
-      using A = typename std::decay<decltype(arg)>::type;
-      *(it++) = rttr::type::get<A>();
+      using Tp = std::variant_alternative_t<N,Variant>;
+      constexpr static void build_type_vector(std::vector<rttr::type>& in)
+      {
+	rttr::type tpname = rttr::type::get<Tp>();
+	in.push_back( tpname);
+	if constexpr(N != 0)
+	  variant_possible_types_helper<Variant, N-1>::build_type_vector(in);
+      }
+    };
 
-    }, in);
+    template<typename Variant>
+    std::vector<rttr::type> union_possible_types(const Variant& in)
+    {
+      std::vector<rttr::type> out;
+      out.reserve(std::variant_size_v<Variant>);
 
-    return out;
-
-  }
-
-
-
+      detail::variant_possible_types_helper<Variant>::build_type_vector(out);
+      return out;
+      
+    };
+    
     template<typename Variant, std::size_t N = std::variant_size_v<Variant> -1>
     struct variant_converter_reg
     {
@@ -99,7 +102,6 @@ namespace foxtrot
     };
 
     
-
   }
 
 
@@ -114,6 +116,7 @@ namespace foxtrot
 
     reg(rttr::metadata("unionmeta", true),
 	rttr::metadata("ft_type", variant_types::UNION_TYPE))
+      .constructor()
       .method("get", &detail::union_get<T>)
       .method("held_type", &detail::union_held_type<T>);
       //      .method("possible_types", &detail::union_possible_types<T>);
@@ -123,6 +126,7 @@ namespace foxtrot
 
 
   rttr::variant union_get(const rttr::variant& var);
-  
+  std::vector<rttr::type> union_possible_types(const rttr::variant& var);
+  rttr::type union_held_type(const rttr::variant& var);
 
 }

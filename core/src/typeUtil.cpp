@@ -574,7 +574,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp, 
-                                            const rttr::type& target_tp, Logging* lg)
+                                            const rttr::type& target_tp, Logging* lg, bool check)
 {
     rttr::variant out = wiretp.enum_value();
 
@@ -597,7 +597,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp,
 
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_tuple& wiretp,
-					    const rttr::type& target_tp, Logging* lg)
+					    const rttr::type& target_tp, Logging* lg, bool check)
 {
   //findo out the target types of the tuple
   auto tsz = foxtrot::tuple_size(target_tp);
@@ -634,7 +634,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_tuple& wiretp,
 }
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
-                                            const rttr::type& target_tp, Logging* lg)
+                                            const rttr::type& target_tp, Logging* lg, bool check)
 {
 
   if(!target_tp.is_class())
@@ -671,7 +671,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_struct& wiretp,
 }
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
-                                            const rttr::type& target_tp, Logging* lg)
+                                            const rttr::type& target_tp, Logging* lg, bool check)
 {
     rttr::variant out;
     switch(wiretp.value_case())
@@ -699,19 +699,23 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
 	  break;
       
     }
-    
-    if(!out.can_convert(target_tp))
-        throw std::runtime_error("cannot convert wire type received: " + out.get_type().get_name().to_string() + " to target type: " + target_tp.get_name().to_string());
 
-    bool success = out.convert(target_tp);
-    if(!success)
-        throw std::runtime_error("type conversion is possible, but failed somehow");
-    
+
+    if(check)
+      {
+	if(!out.can_convert(target_tp))
+	  throw std::runtime_error("cannot convert wire type received: " + out.get_type().get_name().to_string() + " to target type: " + target_tp.get_name().to_string());
+
+	bool success = out.convert(target_tp);
+	if(!success)
+	  throw std::runtime_error("type conversion is possible, but failed somehow");
+
+      }
     return out;
 }
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
-                                            const rttr::type& target_tp, Logging* lg)
+                                            const rttr::type& target_tp, Logging* lg, bool check)
 {
     if(lg)
     {
@@ -719,20 +723,30 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
     }
 
 
+    bool unioncheck = true;
+    if(target_tp.get_metadata("unionmeta"))
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "target type is union, invoking other logic";
+	unioncheck=false;
+      }
+
+    
+    
     rttr::variant out;
 
     switch(wiretp.value_case())
       {
       case(ft_variant::ValueCase::kSimplevar):
-	out = wire_type_to_variant(wiretp.simplevar(), target_tp, lg); break;
+	out = wire_type_to_variant(wiretp.simplevar(), target_tp, lg, unioncheck); break;
       case(ft_variant::ValueCase::kEnumval):
-	out = wire_type_to_variant(wiretp.enumval(), target_tp, lg); break;
+	out = wire_type_to_variant(wiretp.enumval(), target_tp, lg, unioncheck); break;
       case(ft_variant::ValueCase::kArrayval):
-	out = wire_type_to_array(wiretp.arrayval(), target_tp, lg); break;
+	out = wire_type_to_array(wiretp.arrayval(), target_tp, lg, unioncheck); break;
       case(ft_variant::ValueCase::kStructval):
-	out =  wire_type_to_variant(wiretp.structval(), target_tp, lg); break;
+	out =  wire_type_to_variant(wiretp.structval(), target_tp, lg, unioncheck); break;
       case(ft_variant::ValueCase::kTupleval):
-       	out = wire_type_to_variant(wiretp.tupleval(), target_tp, lg); break;
+       	out = wire_type_to_variant(wiretp.tupleval(), target_tp, lg, unioncheck); break;
       default:
 	throw std::logic_error("no variant logic has happened!");
       }    
@@ -745,10 +759,24 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
       }
     else
       {
-	if(lg)
+	if(not unioncheck)
 	  {
-	    lg->strm(sl::debug) << "created type is: " << out.get_type().get_name();
-	    lg->strm(sl::debug) << "whereas target type is: " << target_tp.get_name();
+	    rttr::variant unionout = target_tp.create({out});
+	    if(lg)
+	      {
+		lg->strm(sl::debug) << "type of unionout: " << unionout.get_type().get_name();
+		lg->strm(sl::debug) << "valid?"  << unionout.is_valid();
+	      }
+	    
+	  }
+	else
+	  {
+
+	    if(lg)
+	      {
+		lg->strm(sl::debug) << "created type is: " << out.get_type().get_name();
+		lg->strm(sl::debug) << "whereas target type is: " << target_tp.get_name();
+	      }
 	  }
 	if(!out.can_convert(target_tp))
 	   throw std::runtime_error("won't be able to convert this type!");
@@ -762,7 +790,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
     return out;
 }
 
-rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg)
+rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg, bool check)
 {
     if(wiretp.has_arr_encoded())
         throw std::logic_error("can't deal with decoded arrays at the moment!");

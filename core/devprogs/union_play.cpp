@@ -9,12 +9,10 @@ using Var = std::variant<int, std::string>;
 
 int main() { Var v = "hello";
 
-  
-  rttr::variant v2 = v;
-
-  
+  rttr::variant v2 = v;  
   std::cout <<"held type: " <<  v2.get_type().get_name() << std::endl;
-
+  
+  
   auto targs = v2.get_type().get_template_arguments();
   for(auto& t : targs)
     std::cout << t.get_name() << ",";;
@@ -35,7 +33,16 @@ int main() { Var v = "hello";
 
   auto v5 = rttr::variant{std::string("hello")};
   std::cout << v5.can_convert<Var>() << std::endl;
-  std::cout << v5.can_convert(rttr::type::get<Var>()) << std::endl;
+
+
+  auto postypes = foxtrot::union_possible_types(v2);
+
+  for(auto& tp: postypes)
+    std::cout << tp.get_name() << ",";
+  std::cout << std::endl;
+
+
+
   
   }
 
