@@ -85,13 +85,9 @@ message tuple_descriptor
 
 message homog_array_descriptor
 {
-  bool is_simple = 1;
-  bool is_encoded = 2;
   bool has_fixed_size = 3;
   uint64 fixed_size = 4;
-  simplevalue_types valtype = 5;
-  variant_descriptor complex_value_type = 6;
-  
+  variant_descriptor value_type = 6;
 }
 
 

@@ -223,14 +223,24 @@ decltype( (std::declval<rttr::variant>().*callable)(), T())
 }
 
 
-ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg)
+ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg, bool unwrap)
 {
     ft_simplevariant out;
     
     bool success;
     auto tp = var.get_type();
+
+    
     if(!tp.is_valid())
         throw std::logic_error("invalid RTTR type from variant in get_simple_variant_wire_type");
+
+    if(unwrap and tp.is_wrapper())
+      {
+	tp = tp.get_wrapped_type();
+	if(lg)
+	  lg->strm(sl::trace) << "requested unwrapping and unwrapped type is: " << tp.get_name();
+	
+      }
     
     if(tp == rttr::type::get<void>())
     {
@@ -243,7 +253,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         throw std::logic_error("simple_variant got invalid input!");
     }
     out.set_is_void(false);
-          
+
     
     auto stdvariant = rttr_to_std_variant_converter(var, lg);
     if(stdvariant.index() == std::variant_npos)
@@ -426,44 +436,56 @@ ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
     }
     
     auto contained_type = view.get_rank_type(1);
-    
-    byte_data_types bdt;
+
+    ft_homog_array out;
+
     try 
     {
-        bdt = get_byte_data_type(contained_type, lg);
+        auto bdt = get_byte_data_type(contained_type, lg);
+	ft_homog_array_encoded encout;
+	encout.set_dtp(bdt);
+	if(lg)
+	  lg->strm(sl::trace) << "copying byte data to return type";
+	auto tmpdat = variant_to_bytes(var, false, lg);
+	std::string tmpstr{tmpdat.begin(), tmpdat.end()};
+
+	auto* dat = encout.mutable_data();
+	*dat = tmpstr;
+	if(lg)
+	  lg->strm(sl::trace) << "byte data copy completed";
+	
+	*out.mutable_arr_encoded() = std::move(encout);
+	return out;
     }
     catch(std::logic_error& err)
     {
         if(lg)
             lg->strm(sl::error) << "contained type was not a simple variant when trying to map array!";
-        throw(err);
     }
     
-    ft_homog_array_encoded encout;
-    encout.set_dtp(bdt);
     
     if(lg)
-        lg->strm(sl::trace) << "copying byte data to return type";
+      lg->strm(sl::debug) << "constructing heavy array";
+
+
+    ft_heavy_array* outheavy = out.mutable_arr_heavy();
     
-    auto tmpdat = variant_to_bytes(var, false, lg);
-    std::string tmpstr{tmpdat.begin(), tmpdat.end()};
-    
-    auto* dat = encout.mutable_data();
-    *dat = tmpstr;
-    
-    if(lg)
-        lg->strm(sl::trace) << "byte data copy completed";
-    
-    
-    ft_homog_array out;
-    *out.mutable_arr_encoded() = std::move(encout);
+    for(auto& contained_variant : view)
+      {
+	auto* outwire = outheavy->add_data();
+	*outwire = get_variant_wire_type(contained_variant, lg, true);
+
+	if(lg)
+	  lg->strm(sl::debug) << "outheavy size: " << outheavy->data().size();
+      }
+
     
     return out;
 }
 
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
-                                          Logging* lg)
+                                          Logging* lg, bool unwrap)
 {
     if(lg)
     {
@@ -477,6 +499,13 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
     if(!tp.is_valid())
         throw std::logic_error("got invalid RTTR type, this is a foxtrot bug");
 
+
+    if(unwrap & tp.is_wrapper())
+      {
+	tp = tp.get_wrapped_type();
+	if(lg)
+	  lg->strm(sl::trace) << "unwrapped type: " << tp.get_name();
+      }
 
     auto vartype = foxtrot::get_variant_type_from_metadata(tp, lg);
     if(vartype.has_value())
@@ -501,7 +530,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 		lg->strm(sl::trace) << "union logic";
 
 	      rttr::variant inner_var = foxtrot::union_get(var);
-	      return get_variant_wire_type(inner_var, lg);
+	      return get_variant_wire_type(inner_var, lg, unwrap);
 	    }
 	    break;
 	  default:
@@ -567,7 +596,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         if(lg)
             lg->strm(sl::trace) << "simplevalue logic";
         ft_simplevariant* simplevarval = out.mutable_simplevar();
-        *simplevarval = get_simple_variant_wire_type(var, lg);
+        *simplevarval = get_simple_variant_wire_type(var, lg, unwrap);
     }
 
     return out;
@@ -924,51 +953,51 @@ enum_descriptor foxtrot::describe_enum(const rttr::type& tp, Logging* lg)
 homog_array_descriptor foxtrot::describe_array(const rttr::type& tp,
                                       Logging* lg)
 {
+  foxtrot::homog_array_descriptor out;
+  
+  rttr::type valuetp = rttr::type::get<void>();
 
+  bool valid = false;
+  //first attempt, teyp to create one... 
   auto emptyvar = tp.create();
   if(!emptyvar.is_valid())
-    throw std::logic_error("invalid empty variant");
-
-  auto seqview = emptyvar.create_sequential_view();
-  if(!seqview.is_valid())
-    throw std::logic_error("invalid sequential view!");
-
-  homog_array_descriptor out;
-  
-  if(seqview.is_dynamic())
-    out.set_has_fixed_size(false);
-  else
-    {
-      out.set_has_fixed_size(true);
-      out.set_fixed_size(seqview.get_size());
-    }
-
-  auto valuetp = seqview.get_value_type();
-
-  if(lg)
-    lg->strm(sl::debug) << "attempting to describe inner type";
-
-  try {
-    auto simpledesc = describe_simple_type(tp,lg).first;
-    out.set_valtype(simpledesc);
-  }
-  catch(std::logic_error& err)
     {
       if(lg)
-	lg->strm(sl::debug) << "simple value desc failed, using complex value...";
-     *(out.mutable_complex_value_type()) = describe_type(tp, lg);
-     
+	lg->strm(sl::debug) << "creating empty type failed...";
+    }
+  else
+    {
+      lg->strm(sl::debug) << "managed to create empty type...";
+      auto seqview = emptyvar.create_sequential_view();
+      if(!seqview.is_valid())
+	throw std::logic_error("invalid sequential view!");
+      valuetp = seqview.get_value_type();
+      if(!seqview.is_dynamic())
+	{
+	  out.set_has_fixed_size(true);
+	  out.set_fixed_size(seqview.get_size());
+	}
+      valid = true;
     }
 
-    foxtrot::variant_descriptor vdesc = describe_type(valuetp, lg);
-  
+  if(!valid)
+    {
+      if(tp.is_template_instantiation())
+	{
+	  if(lg)
+	    lg->strm(sl::debug) << "attempting value via template types";
 
-  //for now, all arrays are "simple"
-  out.set_is_simple(true);
-  
+	  valuetp = *(tp.get_template_arguments().begin());
 
+	}
+
+      if(!valuetp.is_valid())
+	throw std::logic_error("array type deduction failed!");
+
+    }
+
+  *(out.mutable_value_type()) = describe_type(valuetp, lg);
   //for now, all arrays are "encoded"
-  out.set_is_encoded(true);
   
   return out;
 }

@@ -176,18 +176,18 @@ class Capability:
         self._cl = client
         self._enum_return_type = None
         self._enum_arg_types = [None] * len(argtypes)
-        
+
         for tp in chain([rettp], argtypes):
             if tp.variant_type == ENUM_TYPE:
                 client._add_enum_type(tp.enum_desc)
-                
+
         if rettp.variant_type == ENUM_TYPE:
             self._enum_return_type = client._lookup_enum_type(rettp.enum_desc)
-            
+
         for idx,var in enumerate(argtypes):
             if var.variant_type == ENUM_TYPE:
                 self._enum_arg_types[idx] = client._lookup_enum_type(var.enum_desc)
-    
+
     def __repr__(self):
         if self._captp == VALUE_READONLY:
             infostr = "readonly value"
@@ -201,14 +201,14 @@ class Capability:
         argnamestrs = map(lambda s : "unknown" if not s else s , self._argnames)
         argtypestrs = [string_describe_ft_variant(_) for _ in self._argtypes]
         rettypestr = string_describe_ft_variant(self._rettp)
-        
+
         argnametypestrs = ["%s:%s" % (n,t) for n,t in zip(argnamestrs,argtypestrs)]
-        
+
         displaystr = "%s (%s) -> %s, [%s]" % (self._capname, 
                       ", ".join(argnametypestrs),
                       rettypestr,
                       infostr)
-        
+
 
         return displaystr
 
@@ -218,7 +218,7 @@ class Capability:
         elif isinstance(argpos, str):
             idx = self._argnames.index(argpos)
             return self._enum_arg_types[idx]
-        
+
     def get_enum(self, argpos, *args, **kwargs):
         tp = self.get_enum_type(argpos)
         return tp(*args, **kwargs)
@@ -305,7 +305,6 @@ class Capability:
             print("session active using metadata")
             metadata = [("session_secret-bin", client._active_session._secret)]
             ret,status = stubfun.with_call(request=req, metadata=metadata)
-        
         return ret
 
     def __call__(self, *args, **kwargs):

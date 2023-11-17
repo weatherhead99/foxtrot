@@ -280,6 +280,16 @@ int foxtrot::devices::dummyDevice::takes_variant(std::variant<int, double, std::
 }
 
 
+std::vector<double> foxtrot::devices::dummyDevice::returns_nonstream_double_vector()
+{
+  return {1.0, 2.0, 3.14159, 4.0, 5.0};
+}
+
+std::vector<std::string> foxtrot::devices::dummyDevice::returns_nonstream_string_vector()
+{
+  return { "red", "yellow" , "green"};
+}
+
 
 std::variant<int, double, std::string> foxtrot::devices::dummyDevice::takes_tuple(const std::tuple<int, double, std::string>& in)
 {
@@ -364,7 +374,9 @@ RTTR_REGISTRATION
    .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"))
    .property_readonly("last_supplied_optional_value", &dummyDevice::get_last_supplied_optional_value)
    .method("takes_optional", &dummyDevice::takes_optional)(parameter_names("opt"))
-   .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"));
+   .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"))
+   .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
+   .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector);
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
 
