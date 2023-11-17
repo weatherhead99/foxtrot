@@ -40,13 +40,13 @@ class Client:
         self._flagstub = flagsStub(self._channel)
         self._estub = exptserveStub(self._channel)
 
-        self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
-        self._comment = self._servdescribe.servcomment
-
         self._enum_descs = []
         self._enum_types = []
         self._active_session = None
-        self._setup_device_tree()
+
+        self._custom_attr_set = set()
+
+        self.reload_devices()
 
     def _add_enum_type(self, enumdesc) -> None:
         if enumdesc not in self._enum_descs:
@@ -71,8 +71,19 @@ class Client:
         for dev in self._devices:
             if dev._comment:
                 setattr(self, dev._comment, dev)
+                self._custom_attr_set.add(dev._comment)
             else:
                 setattr(self, dev._devtp, dev)
+                self._custom_attr_set.add(dev._devtp)
+
+    def reload_devices(self):
+        for attrname in self._custom_attr_set:
+            delattr(self, attrname)
+        self._custom_attr_set.clear()
+        
+        self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
+        self._comment = self._servdescribe.servcomment
+        self._setup_device_tree()
 
     def save_servdesc(self, fname):
         ss = self._servdescribe.SerializeToString()

@@ -105,6 +105,8 @@ void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
 void foxtrot::DeviceHarness::RemoveDevice(int id)
 {
 
+  _lg.strm(sl::debug) << "size of device vector: " << _devvec.size();
+  
   if( !_devvec[id]->hasLockImplementation())
     {
       _devvec.erase(_devvec.begin() + id);
@@ -113,11 +115,13 @@ void foxtrot::DeviceHarness::RemoveDevice(int id)
   else
     {
       {
-	      std::unique_lock lck(_devmutexes.at(id));
+	std::unique_lock lck(_devmutexes.at(id));
 	_devvec.erase(_devvec.begin() + id);
       }
       _devmutexes.erase(id);
     }
+
+  _lg.strm(sl::debug) << "size of device vector after remove: " << _devvec.size();
 };
 
 Device* const foxtrot::DeviceHarness::GetDevice(int id)
