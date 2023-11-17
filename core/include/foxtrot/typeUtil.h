@@ -54,7 +54,7 @@ namespace foxtrot{
     
     
     
-    FOXTROT_CORE_EXPORT std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr);
+  FOXTROT_CORE_EXPORT std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr, bool check_throw=true);
     FOXTROT_CORE_EXPORT struct_descriptor describe_struct(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT enum_descriptor describe_enum(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT tuple_descriptor describe_tuple(const rttr::type& tp, Logging* lg=nullptr);

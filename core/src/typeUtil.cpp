@@ -53,6 +53,7 @@ std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, b
     }
     
     auto view = var.create_sequential_view();
+
     
     if(check)
         if(!view.get_rank() == 1)
@@ -821,7 +822,6 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
 	  lg->strm(sl::debug) << "variant type has ft_type metadata...";
 	out.set_variant_type(*optfast);
 	
-	
 	switch(*optfast)
 	  {
 	  case variant_types::TUPLE_TYPE:
@@ -855,6 +855,16 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
         
         out.set_variant_type(variant_types::ENUM_TYPE);
     }
+    else if(tp.is_sequential_container())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "type is array";
+
+	out.set_variant_type(variant_types::HOMOG_ARRAY_TYPE);
+	auto* arraydesc = out.mutable_homog_array_desc();
+	*arraydesc = describe_array(tp, lg);
+
+      }    
     else if(tp.is_class() && tp != rttr::type::get<std::string>() 
             && is_POD_struct(tp))
     {
@@ -911,20 +921,56 @@ enum_descriptor foxtrot::describe_enum(const rttr::type& tp, Logging* lg)
     return out;
 };
 
-homog_array_descriptor describe_array(const rttr::type& tp,
+homog_array_descriptor foxtrot::describe_array(const rttr::type& tp,
                                       Logging* lg)
 {
-    
-    
-    homog_array_descriptor out;
-    //for now, all arrays are "simple"
-    out.set_is_simple(true);
-    //for now, all arrays are "encoded"
-    out.set_is_encoded(true);
-    //and they are all not fixed size
+
+  auto emptyvar = tp.create();
+  if(!emptyvar.is_valid())
+    throw std::logic_error("invalid empty variant");
+
+  auto seqview = emptyvar.create_sequential_view();
+  if(!seqview.is_valid())
+    throw std::logic_error("invalid sequential view!");
+
+  homog_array_descriptor out;
+  
+  if(seqview.is_dynamic())
     out.set_has_fixed_size(false);
-    
-    return out;
+  else
+    {
+      out.set_has_fixed_size(true);
+      out.set_fixed_size(seqview.get_size());
+    }
+
+  auto valuetp = seqview.get_value_type();
+
+  if(lg)
+    lg->strm(sl::debug) << "attempting to describe inner type";
+
+  try {
+    auto simpledesc = describe_simple_type(tp,lg).first;
+    out.set_valtype(simpledesc);
+  }
+  catch(std::logic_error& err)
+    {
+      if(lg)
+	lg->strm(sl::debug) << "simple value desc failed, using complex value...";
+     *(out.mutable_complex_value_type()) = describe_type(tp, lg);
+     
+    }
+
+    foxtrot::variant_descriptor vdesc = describe_type(valuetp, lg);
+  
+
+  //for now, all arrays are "simple"
+  out.set_is_simple(true);
+  
+
+  //for now, all arrays are "encoded"
+  out.set_is_encoded(true);
+  
+  return out;
 }
 
 
@@ -957,7 +1003,8 @@ bool is_type_any_of(const rttr::type& tp)
 }
 
 
-std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg)
+std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg,
+									 bool check_throw)
 {
     simplevalue_types out;
     decltype(tp.get_sizeof()) size = 0;
@@ -969,7 +1016,7 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out =  simplevalue_types::STRING_TYPE;
 	else if(tp == rttr::type::get<std::any>() or tp.is_wrapper() or tp.is_pointer())
 	  out = simplevalue_types::REMOTE_HANDLE_TYPE;
-	
+
     }
     else
     {
@@ -989,7 +1036,10 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out =  simplevalue_types::UNSIGNED_TYPE;
         else
         {
+	  if(check_throw)
             throw std::logic_error("can't deduce appropriate descriptor for type: " + tp.get_name().to_string());
+	  else
+	    return std::make_pair(out, 0);
         }
         size = tp.get_sizeof();
     }

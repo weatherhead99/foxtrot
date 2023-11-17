@@ -151,6 +151,7 @@ message ft_homog_array {
   oneof array {
     ft_homog_array_decoded arr_decoded = 1;
     ft_homog_array_encoded arr_encoded = 2;
+    ft_heavy_array arr_heavy = 3;
   }
 }
 
@@ -164,6 +165,12 @@ message ft_homog_array_encoded
 message ft_dynamic_type {
     ft_variant value = 1;
     variant_descriptor desc = 2;
+}
+
+
+//new in 0.5.0
+message ft_heavy_array {
+  repeated ft_variant data = 1;
 }
 
 
