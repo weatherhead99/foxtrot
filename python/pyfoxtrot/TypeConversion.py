@@ -239,7 +239,7 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
         types = "/".join(string_describe_ft_variant(_) for _ in descriptor.union_desc.possible_types)
         return "union[%s]" % types
     elif descriptor.variant_type == HOMOG_ARRAY_TYPE:
-        descstr = string_describe_ft_variant(descriptor.value_type)
+        descstr = string_describe_ft_variant(descriptor.homog_array_desc.value_type)
         return "array[%s]" % descstr
     else:
         warnings.warn("encountered unknown variant type when trying to describe")
