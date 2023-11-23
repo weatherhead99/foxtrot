@@ -42,7 +42,7 @@ def ft_require(conanfile, substr: str) -> None:
 
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
-    version = "0.4.1"
+    version = "0.4.2"
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
@@ -183,10 +183,10 @@ def ft_version_get_req_str(verstr: str) -> str:
         else:
             break
 
-    if vers.pre is None:
-        reqstr = f"[~{'.'.join(cmpout)}, include_prerelease=True]"
-    else:
-        reqstr = f"[~{'.'.join(cmpout)}-{vers.pre}, include_prerelease=True]"
+    if len(cmpout) == 0:
+        reqstr = "[>0, include_prerelease]"
+        
+    reqstr = f"[~{'.'.join(cmpout)}, include_prerelease]"
     return reqstr
 
         
@@ -248,12 +248,8 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
 
     devstr = f"+dev-{n_commits}-g{chash}"
 
-    if cvers.pre is None:
-        #the devstring is now the pre
-        fullstr = f"{newvers}-{devstr}"
-    else:
-        fullstr = f"{newvers}{devstr}"
-
+    fullstr = f"{newvers}{devstr}"
+        
     if fullstr[0] == "v" or fullstr[0] == "V":
         fullstr = fullstr[1:]
     
