@@ -1,4 +1,3 @@
-#include <bits/types/struct_FILE.h>
 #include <boost/asio/detail/io_control.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/serial_port_base.hpp>
