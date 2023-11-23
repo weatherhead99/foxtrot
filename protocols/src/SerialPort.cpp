@@ -12,6 +12,7 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <cstddef>
 #include <algorithm>
 #ifdef __linux__
 #include <termios.h>
@@ -197,17 +198,16 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
   else
     {
 
-      
       _lg.strm(sl::trace) << "timeout value, doing boost::async_read_until";
       boost::asio::async_read_until(*_sport, buf,
 				    endlchar,
-				    [&ec, &done. &actbytes](const boost::system::error_code ec2, std::size_t bytes_transferred)
+				    [&ec, &done, &actbytes](const boost::system::error_code ec2, std::size_t bytes_transferred)
 				    { ec = ec2; done = true; actbytes = bytes_transferred;});
 
       auto n_run = _io_service->run_for(*wait);
 
       _lg.strm(sl::trace) << "n handlers run: " << n_run;
-      _lg.strm(sl::trace) << "actual bytes transferred:" << actbytes;
+      _lg.strm(sl::trace) << "actual bytes transferred:" << (long unsigned)actbytes;
       if(ec.value() != boost::system::errc::success)
 	_lg.strm(sl::error) << "ec message: " << ec.message();
       
