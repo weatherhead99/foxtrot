@@ -10,8 +10,17 @@ set(proto_files foxtrot.proto
 #NOTE: find via module to force conan dependencies
 find_package(gRPC REQUIRED)
 
+if(TARGET gRPC::grpc_cpp_plugin)
+  message(STATUS "using gRPC target to find plugin program")
+  get_target_property(GRPC_CPP_PLUGIN_PROGRAM  gRPC::grpc_cpp_plugin  LOCATION)
+else()
+  message(STATUS "gRPC target not declared using old-style variable name")
+endif()
 
-#message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
+message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
+
+if(NOT ${GRPC_CPP_PLUGIN_PROGRAM}
+    message(FATAL_ERROR "couldn't find grpc plugin program")
 
 protobuf_generate(OUT_VAR PROTO_HDRS  PROTOS ${proto_files} PLUGIN protoc-gen-grpc=${GRPC_CPP_PLUGIN_PROGRAM} PROTOC_OPTIONS --grpc_out=${CMAKE_CURRENT_BINARY_DIR})
 
