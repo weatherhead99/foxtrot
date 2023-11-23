@@ -1,6 +1,8 @@
+#include <bits/types/struct_FILE.h>
 #include <boost/asio/detail/io_control.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/serial_port_base.hpp>
+#include <boost/system/detail/errc.hpp>
 #include <boost/system/error_code.hpp>
 #include <ios>
 #include <vector>
@@ -182,6 +184,10 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
   auto buf = boost::asio::dynamic_buffer(strbuf);
   boost::system::error_code ec;
   bool done = false;
+  std::size_t actbytes;
+
+  if(_io_service->stopped())
+    _io_service->restart();  
 
   if(!wait.has_value())
     {
@@ -190,13 +196,20 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
     }
   else
     {
+
+      
       _lg.strm(sl::trace) << "timeout value, doing boost::async_read_until";
       boost::asio::async_read_until(*_sport, buf,
 				    endlchar,
-				    [&ec, &done](const boost::system::error_code ec2, std::size_t bytes_transferred){ ec = ec2; done = true;});
+				    [&ec, &done. &actbytes](const boost::system::error_code ec2, std::size_t bytes_transferred)
+				    { ec = ec2; done = true; actbytes = bytes_transferred;});
 
       auto n_run = _io_service->run_for(*wait);
-      _io_service->restart();
+
+      _lg.strm(sl::trace) << "n handlers run: " << n_run;
+      _lg.strm(sl::trace) << "actual bytes transferred:" << actbytes;
+      if(ec.value() != boost::system::errc::success)
+	_lg.strm(sl::error) << "ec message: " << ec.message();
       
       if(!done)
 	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
@@ -223,6 +236,9 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
   bool done = false;
   std::size_t actlen;
   auto cond = boost::asio::transfer_exactly(len);
+
+  if(_io_service->stopped())
+    _io_service->restart();
   
   if(!wait.has_value())
     {
@@ -243,7 +259,7 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
       _lg.strm(sl::trace) << "run_one_for returned";
       _lg.strm(sl::trace) << "number of posts run: " << n_run;
       _lg.strm(sl::trace) << "io_service stopped? " << (int) _io_service->stopped();
-      _io_service->restart();
+
 
       if(!done)
 	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
