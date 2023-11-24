@@ -19,9 +19,10 @@ endif()
 
 message("grpc_plugin_program: ${GRPC_CPP_PLUGIN_PROGRAM}")
 
-if(NOT ${GRPC_CPP_PLUGIN_PROGRAM}
+if(NOT GRPC_CPP_PLUGIN_PROGRAM)
     message(FATAL_ERROR "couldn't find grpc plugin program")
-
+endif()
+    
 protobuf_generate(OUT_VAR PROTO_HDRS  PROTOS ${proto_files} PLUGIN protoc-gen-grpc=${GRPC_CPP_PLUGIN_PROGRAM} PROTOC_OPTIONS --grpc_out=${CMAKE_CURRENT_BINARY_DIR})
 
 #asio_grpc_protobuf_generate(PROTOS ${proto_files} OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}

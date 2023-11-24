@@ -86,6 +86,8 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
     DESTINATION ${CMAKE_DEST} COMPONENT devel)
 
+  export(PACKAGE ${packname})
+
 endfunction()
 
 
