@@ -38,7 +38,7 @@ class FoxtrotCppMeta(type):
 
 def ft_require(conanfile, substr: str) -> None:
     reqstr = ft_version_get_req_str(conanfile.version)
-    conanfile.requires(f"foxtrot_{substr}/{reqstr}")
+    conanfile.requires(f"foxtrot_{substr}/{reqstr}", transitive_headers=True, transitive_libs=True)
 
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
@@ -176,15 +176,19 @@ class FoxtrotCppPackage:
 
 def ft_version_get_req_str(verstr: str) -> str:
     vers = Version(verstr)
-    cmpout = []
-    for cmpin in (vers.major, vers.minor, vers.patch):
-        if cmpin is not None:
-            cmpout.append(str(cmpin))
-        else:
-            break
+    cmpout = [_ for _ in (vers.major, vers.minor, vers.patch) if _ is not None]
+
+    # for i, c in reversed(list(enumerate(cmpout))):
+    #     if c.value == 0:
+    #         cmpout.pop(i)
+    #     else:
+    #         cmpout[i] = int(c.value)-1
+    #         break
 
     if len(cmpout) == 0:
-        reqstr = "[>0, include_prerelease]"
+        reqstr = "[>0.0.0-0, include_prerelease]"
+
+    cmpout = [str(_) for _ in cmpout]
         
     reqstr = f"[~{'.'.join(cmpout)}, include_prerelease]"
     return reqstr

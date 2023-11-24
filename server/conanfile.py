@@ -62,9 +62,6 @@ class FoxtrotServerConan(ConanFile):
         self.requires("zlib/1.2.13", override=True)
         self.requires("grpc/[^1.54.1]", override=True)
 
-    def deploy(self):
-        self.copy("lib/foxtrot/dummy_setup.so", dst="setups", keep_path=False)
-
     def generate(self):
         #NOTE: need to alter target name of rapidJSON which differs from
         #upstream cmake build (I think)
