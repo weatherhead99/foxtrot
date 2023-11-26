@@ -49,6 +49,8 @@ public:
     unsigned getWait() const;
 
 
+    void reconnect(opttimeout wait_before_reconnect); 
+  
     std::chrono::milliseconds calc_minimum_transfer_time(std::size_t len);
     
 private:

@@ -129,9 +129,39 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   _sport->set_option(serial_port_base::stop_bits(_stopbits));
   _sport->set_option(serial_port_base::character_size(_bits));
   
-  
-  
 };
+
+
+void foxtrot::protocols::SerialPort::reconnect(foxtrot::opttimeout wait_before_reconnect)
+{
+  boost::system::error_code ec;
+  _sport->close(ec);
+
+  if(ec)
+    {
+      _lg.strm(sl::error) << "boost error code message: " << ec.message();
+      throw foxtrot::ProtocolError("error closing the serial port, see ft logs for details");
+    }
+
+  if(wait_before_reconnect.has_value())
+    //TODO: should be done with asio::deadline_timer
+    std::this_thread::sleep_for(*wait_before_reconnect);
+
+  ec.clear();
+
+  _sport->open(_port, ec);
+  if(ec)
+    {
+      _lg.strm(sl::error) << "boost error code message: " << ec.message();
+      throw foxtrot::ProtocolError("error opening the serial port, see ft logs for details");
+    }
+
+  _sport->set_option(serial_port_base::baud_rate(_baudrate));
+  _sport->set_option(serial_port_base::parity(_parity));
+  _sport->set_option(serial_port_base::stop_bits(_stopbits));
+  _sport->set_option(serial_port_base::character_size(_bits));
+
+}
 
 
 
