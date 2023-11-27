@@ -33,6 +33,11 @@ int main(int argc, char** argv)
     cout << "description: " << desc.DebugString() << endl;
     
 
+    std::vector<tupleT> vec;
+    vec.push_back( std::make_tuple(2, std::string{"bobsyouruncle"}));
+
+    
+    
 
     rttr::variant v1 = std::make_tuple(1, std::string{"hello"});
 
@@ -47,6 +52,21 @@ int main(int argc, char** argv)
 
     auto wiretp1= foxtrot::get_tuple_wire_type(v1, &lg); 
     
+
+    rttr::variant v2 = vec;
+    auto view = v2.create_sequential_view();
+
+    auto inner_tp = view.get_rank_type(1);
+    cout << "rank 1 type: " << inner_tp.get_name() << endl;
+    cout << "sz from rank 1 tp: "  << foxtrot::tuple_size(inner_tp) << endl;
+    
+
+    auto innerwiretp1 = foxtrot::get_variant_wire_type(v2, &lg, false);
+    cout << "innerwiretp1:" << innerwiretp1.DebugString() << endl;
+
+    auto innerwiretp2 = foxtrot::get_variant_wire_type(v2, nullptr, true);
+    cout << "innerwiretp2:" << innerwiretp2.DebugString() << endl;
+
     
     
     std::ofstream ofs("test.out");
