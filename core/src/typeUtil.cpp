@@ -411,6 +411,9 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
         lg->strm(sl::trace) << "getting tuple wire type";
     
     //WARNING: does not work yet!!!
+    if(lg)
+      lg->strm(sl::trace) << "type is: " <<var.get_type().get_name();
+
     auto sz = tuple_size(var.get_type());
     if(lg)
         lg->strm(sl::trace) << "tuple size: " << sz;

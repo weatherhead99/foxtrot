@@ -32,6 +32,21 @@ int main(int argc, char** argv)
     
     cout << "description: " << desc.DebugString() << endl;
     
+
+
+    rttr::variant v1 = std::make_tuple(1, std::string{"hello"});
+
+    cout << "match typs: " << (int) (v1.get_type() == tp) << endl;
+    cout << "tp direct: " << tp.get_name() << endl;
+    cout << "tp indirect: " << v1.get_type().get_name() << endl;
+
+    
+    auto sz2 = foxtrot::tuple_size(v1.get_type());
+    cout << "size: " << sz2 << endl;
+    
+
+    auto wiretp1= foxtrot::get_tuple_wire_type(v1, &lg); 
+    
     
     
     std::ofstream ofs("test.out");
