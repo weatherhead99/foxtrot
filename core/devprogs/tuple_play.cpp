@@ -61,11 +61,8 @@ int main(int argc, char** argv)
     cout << "sz from rank 1 tp: "  << foxtrot::tuple_size(inner_tp) << endl;
     
 
-    auto innerwiretp1 = foxtrot::get_variant_wire_type(v2, &lg, false);
+    auto innerwiretp1 = foxtrot::get_variant_wire_type(v2, &lg, true);
     cout << "innerwiretp1:" << innerwiretp1.DebugString() << endl;
-
-    auto innerwiretp2 = foxtrot::get_variant_wire_type(v2, nullptr, true);
-    cout << "innerwiretp2:" << innerwiretp2.DebugString() << endl;
 
     
     
