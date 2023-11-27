@@ -53,6 +53,7 @@ std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, b
     }
     
     auto view = var.create_sequential_view();
+
     
     if(check)
         if(!view.get_rank() == 1)
@@ -222,14 +223,24 @@ decltype( (std::declval<rttr::variant>().*callable)(), T())
 }
 
 
-ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg)
+ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var, Logging* lg, bool unwrap)
 {
     ft_simplevariant out;
     
     bool success;
     auto tp = var.get_type();
+
+    
     if(!tp.is_valid())
         throw std::logic_error("invalid RTTR type from variant in get_simple_variant_wire_type");
+
+    if(unwrap and tp.is_wrapper())
+      {
+	tp = tp.get_wrapped_type();
+	if(lg)
+	  lg->strm(sl::trace) << "requested unwrapping and unwrapped type is: " << tp.get_name();
+	
+      }
     
     if(tp == rttr::type::get<void>())
     {
@@ -242,7 +253,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         throw std::logic_error("simple_variant got invalid input!");
     }
     out.set_is_void(false);
-          
+
     
     auto stdvariant = rttr_to_std_variant_converter(var, lg);
     if(stdvariant.index() == std::variant_npos)
@@ -425,44 +436,56 @@ ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
     }
     
     auto contained_type = view.get_rank_type(1);
-    
-    byte_data_types bdt;
+
+    ft_homog_array out;
+
     try 
     {
-        bdt = get_byte_data_type(contained_type, lg);
+        auto bdt = get_byte_data_type(contained_type, lg);
+	ft_homog_array_encoded encout;
+	encout.set_dtp(bdt);
+	if(lg)
+	  lg->strm(sl::trace) << "copying byte data to return type";
+	auto tmpdat = variant_to_bytes(var, false, lg);
+	std::string tmpstr{tmpdat.begin(), tmpdat.end()};
+
+	auto* dat = encout.mutable_data();
+	*dat = tmpstr;
+	if(lg)
+	  lg->strm(sl::trace) << "byte data copy completed";
+	
+	*out.mutable_arr_encoded() = std::move(encout);
+	return out;
     }
     catch(std::logic_error& err)
     {
         if(lg)
             lg->strm(sl::error) << "contained type was not a simple variant when trying to map array!";
-        throw(err);
     }
     
-    ft_homog_array_encoded encout;
-    encout.set_dtp(bdt);
     
     if(lg)
-        lg->strm(sl::trace) << "copying byte data to return type";
+      lg->strm(sl::debug) << "constructing heavy array";
+
+
+    ft_heavy_array* outheavy = out.mutable_arr_heavy();
     
-    auto tmpdat = variant_to_bytes(var, false, lg);
-    std::string tmpstr{tmpdat.begin(), tmpdat.end()};
-    
-    auto* dat = encout.mutable_data();
-    *dat = tmpstr;
-    
-    if(lg)
-        lg->strm(sl::trace) << "byte data copy completed";
-    
-    
-    ft_homog_array out;
-    *out.mutable_arr_encoded() = std::move(encout);
+    for(auto& contained_variant : view)
+      {
+	auto* outwire = outheavy->add_data();
+	*outwire = get_variant_wire_type(contained_variant, lg, true);
+
+	if(lg)
+	  lg->strm(sl::debug) << "outheavy size: " << outheavy->data().size();
+      }
+
     
     return out;
 }
 
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
-                                          Logging* lg)
+                                          Logging* lg, bool unwrap)
 {
     if(lg)
     {
@@ -476,6 +499,13 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
     if(!tp.is_valid())
         throw std::logic_error("got invalid RTTR type, this is a foxtrot bug");
 
+
+    if(unwrap & tp.is_wrapper())
+      {
+	tp = tp.get_wrapped_type();
+	if(lg)
+	  lg->strm(sl::trace) << "unwrapped type: " << tp.get_name();
+      }
 
     auto vartype = foxtrot::get_variant_type_from_metadata(tp, lg);
     if(vartype.has_value())
@@ -500,7 +530,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 		lg->strm(sl::trace) << "union logic";
 
 	      rttr::variant inner_var = foxtrot::union_get(var);
-	      return get_variant_wire_type(inner_var, lg);
+	      return get_variant_wire_type(inner_var, lg, unwrap);
 	    }
 	    break;
 	  default:
@@ -566,7 +596,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         if(lg)
             lg->strm(sl::trace) << "simplevalue logic";
         ft_simplevariant* simplevarval = out.mutable_simplevar();
-        *simplevarval = get_simple_variant_wire_type(var, lg);
+        *simplevarval = get_simple_variant_wire_type(var, lg, unwrap);
     }
 
     return out;
@@ -849,7 +879,6 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
 	  lg->strm(sl::debug) << "variant type has ft_type metadata...";
 	out.set_variant_type(*optfast);
 	
-	
 	switch(*optfast)
 	  {
 	  case variant_types::TUPLE_TYPE:
@@ -883,6 +912,16 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
         
         out.set_variant_type(variant_types::ENUM_TYPE);
     }
+    else if(tp.is_sequential_container())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "type is array";
+
+	out.set_variant_type(variant_types::HOMOG_ARRAY_TYPE);
+	auto* arraydesc = out.mutable_homog_array_desc();
+	*arraydesc = describe_array(tp, lg);
+
+      }    
     else if(tp.is_class() && tp != rttr::type::get<std::string>() 
             && is_POD_struct(tp))
     {
@@ -939,20 +978,56 @@ enum_descriptor foxtrot::describe_enum(const rttr::type& tp, Logging* lg)
     return out;
 };
 
-homog_array_descriptor describe_array(const rttr::type& tp,
+homog_array_descriptor foxtrot::describe_array(const rttr::type& tp,
                                       Logging* lg)
 {
-    
-    
-    homog_array_descriptor out;
-    //for now, all arrays are "simple"
-    out.set_is_simple(true);
-    //for now, all arrays are "encoded"
-    out.set_is_encoded(true);
-    //and they are all not fixed size
-    out.set_has_fixed_size(false);
-    
-    return out;
+  foxtrot::homog_array_descriptor out;
+  
+  rttr::type valuetp = rttr::type::get<void>();
+
+  bool valid = false;
+  //first attempt, teyp to create one... 
+  auto emptyvar = tp.create();
+  if(!emptyvar.is_valid())
+    {
+      if(lg)
+	lg->strm(sl::debug) << "creating empty type failed...";
+    }
+  else
+    {
+      lg->strm(sl::debug) << "managed to create empty type...";
+      auto seqview = emptyvar.create_sequential_view();
+      if(!seqview.is_valid())
+	throw std::logic_error("invalid sequential view!");
+      valuetp = seqview.get_value_type();
+      if(!seqview.is_dynamic())
+	{
+	  out.set_has_fixed_size(true);
+	  out.set_fixed_size(seqview.get_size());
+	}
+      valid = true;
+    }
+
+  if(!valid)
+    {
+      if(tp.is_template_instantiation())
+	{
+	  if(lg)
+	    lg->strm(sl::debug) << "attempting value via template types";
+
+	  valuetp = *(tp.get_template_arguments().begin());
+
+	}
+
+      if(!valuetp.is_valid())
+	throw std::logic_error("array type deduction failed!");
+
+    }
+
+  *(out.mutable_value_type()) = describe_type(valuetp, lg);
+  //for now, all arrays are "encoded"
+  
+  return out;
 }
 
 
@@ -985,7 +1060,8 @@ bool is_type_any_of(const rttr::type& tp)
 }
 
 
-std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg)
+std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const rttr::type& tp, Logging* lg,
+									 bool check_throw)
 {
     simplevalue_types out;
     decltype(tp.get_sizeof()) size = 0;
@@ -997,7 +1073,7 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out =  simplevalue_types::STRING_TYPE;
 	else if(tp == rttr::type::get<std::any>() or tp.is_wrapper() or tp.is_pointer())
 	  out = simplevalue_types::REMOTE_HANDLE_TYPE;
-	
+
     }
     else
     {
@@ -1017,7 +1093,10 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out =  simplevalue_types::UNSIGNED_TYPE;
         else
         {
+	  if(check_throw)
             throw std::logic_error("can't deduce appropriate descriptor for type: " + tp.get_name().to_string());
+	  else
+	    return std::make_pair(out, 0);
         }
         size = tp.get_sizeof();
     }

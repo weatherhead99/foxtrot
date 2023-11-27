@@ -1,6 +1,7 @@
 #include <boost/asio/detail/io_control.hpp>
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/serial_port_base.hpp>
+#include <boost/system/detail/errc.hpp>
 #include <boost/system/error_code.hpp>
 #include <ios>
 #include <vector>
@@ -10,6 +11,7 @@
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <cstddef>
 #include <algorithm>
 #ifdef __linux__
 #include <termios.h>
@@ -127,9 +129,39 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   _sport->set_option(serial_port_base::stop_bits(_stopbits));
   _sport->set_option(serial_port_base::character_size(_bits));
   
-  
-  
 };
+
+
+void foxtrot::protocols::SerialPort::reconnect(foxtrot::opttimeout wait_before_reconnect)
+{
+  boost::system::error_code ec;
+  _sport->close(ec);
+
+  if(ec)
+    {
+      _lg.strm(sl::error) << "boost error code message: " << ec.message();
+      throw foxtrot::ProtocolError("error closing the serial port, see ft logs for details");
+    }
+
+  if(wait_before_reconnect.has_value())
+    //TODO: should be done with asio::deadline_timer
+    std::this_thread::sleep_for(*wait_before_reconnect);
+
+  ec.clear();
+
+  _sport->open(_port, ec);
+  if(ec)
+    {
+      _lg.strm(sl::error) << "boost error code message: " << ec.message();
+      throw foxtrot::ProtocolError("error opening the serial port, see ft logs for details");
+    }
+
+  _sport->set_option(serial_port_base::baud_rate(_baudrate));
+  _sport->set_option(serial_port_base::parity(_parity));
+  _sport->set_option(serial_port_base::stop_bits(_stopbits));
+  _sport->set_option(serial_port_base::character_size(_bits));
+
+}
 
 
 
@@ -182,6 +214,10 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
   auto buf = boost::asio::dynamic_buffer(strbuf);
   boost::system::error_code ec;
   bool done = false;
+  std::size_t actbytes;
+
+  if(_io_service->stopped())
+    _io_service->restart();  
 
   if(!wait.has_value())
     {
@@ -190,13 +226,19 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
     }
   else
     {
+
       _lg.strm(sl::trace) << "timeout value, doing boost::async_read_until";
       boost::asio::async_read_until(*_sport, buf,
 				    endlchar,
-				    [&ec, &done](const boost::system::error_code ec2, std::size_t bytes_transferred){ ec = ec2; done = true;});
+				    [&ec, &done, &actbytes](const boost::system::error_code ec2, std::size_t bytes_transferred)
+				    { ec = ec2; done = true; actbytes = bytes_transferred;});
 
       auto n_run = _io_service->run_for(*wait);
-      _io_service->restart();
+
+      _lg.strm(sl::trace) << "n handlers run: " << n_run;
+      _lg.strm(sl::trace) << "actual bytes transferred:" << (long unsigned)actbytes;
+      if(ec.value() != boost::system::errc::success)
+	_lg.strm(sl::error) << "ec message: " << ec.message();
       
       if(!done)
 	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
@@ -223,6 +265,9 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
   bool done = false;
   std::size_t actlen;
   auto cond = boost::asio::transfer_exactly(len);
+
+  if(_io_service->stopped())
+    _io_service->restart();
   
   if(!wait.has_value())
     {
@@ -243,7 +288,7 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
       _lg.strm(sl::trace) << "run_one_for returned";
       _lg.strm(sl::trace) << "number of posts run: " << n_run;
       _lg.strm(sl::trace) << "io_service stopped? " << (int) _io_service->stopped();
-      _io_service->restart();
+
 
       if(!done)
 	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");

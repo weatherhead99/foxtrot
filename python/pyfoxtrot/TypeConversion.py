@@ -2,7 +2,7 @@ from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struc
 from .protos.ft_types_pb2 import simplevalue_types, variant_types
 from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor, homog_array_descriptor
 from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple
-from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE
+from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE, HOMOG_ARRAY_TYPE
 from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE
@@ -31,7 +31,6 @@ def get_struct_string(dtp, length: int) -> str:
         raise NotImplementedError("data type not supported yet")
 
     return structstr
-
 
 
 def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
@@ -170,6 +169,9 @@ def value_from_ft_array(variant: ft_homog_array):
     whichattr = variant.WhichOneof("array")
     if whichattr == "arr_decoded":
         raise NotImplementedError("don't understand decoded arrays yet")
+    elif whichattr == "arr_heavy":
+        heavy_arr = variant.arr_heavy.data
+        return [value_from_ft_variant(_) for _ in heavy_arr]
     else:
         rawdat = variant.arr_encoded.data
         dtp = variant.arr_encoded.dtp
@@ -209,17 +211,21 @@ _simplevar_stringdescs_py_style = {(FLOAT_TYPE, 4): "float[4]",
                                    VOID_TYPE: "void",
                                    STRING_TYPE: "str"}
 
+def _string_describe_simple_variant(descriptor):
+    tp = descriptor.simplevalue_type
+    size = descriptor.simplevalue_sizeof
+
+    if tp in (BOOL_TYPE, VOID_TYPE, STRING_TYPE):
+        typestr = _simplevar_stringdescs_py_style[tp]
+    elif (tp, size) in _simplevar_stringdescs_py_style:
+        typestr = _simplevar_stringdescs_py_style[(tp,size)]
+    else:
+        typestr = f"cpptype[{descriptor.cpp_type_name}]"
+    return typestr
+
 def string_describe_ft_variant(descriptor: variant_descriptor):
     if descriptor.variant_type == SIMPLEVAR_TYPE:
-        tp = descriptor.simplevalue_type
-        size = descriptor.simplevalue_sizeof
-        if tp in (BOOL_TYPE, VOID_TYPE, STRING_TYPE):
-            typestr = _simplevar_stringdescs_py_style[tp]
-        elif (tp, size) in _simplevar_stringdescs_py_style:
-            typestr = _simplevar_stringdescs_py_style[(tp,size)]
-        else:
-            typestr = f"cpptype[{descriptor.cpp_type_name}]"
-        return typestr
+        return _string_describe_simple_variant(descriptor)
     elif descriptor.variant_type == ENUM_TYPE:
         enum_name = descriptor.enum_desc.enum_name.replace("::", "_")
         return "enum[%s]" % enum_name
@@ -232,6 +238,9 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
     elif descriptor.variant_type == UNION_TYPE:
         types = "/".join(string_describe_ft_variant(_) for _ in descriptor.union_desc.possible_types)
         return "union[%s]" % types
+    elif descriptor.variant_type == HOMOG_ARRAY_TYPE:
+        descstr = string_describe_ft_variant(descriptor.homog_array_desc.value_type)
+        return "array[%s]" % descstr
     else:
         warnings.warn("encountered unknown variant type when trying to describe")
         return f"cpptype[{descriptor.cpp_type_name}]"

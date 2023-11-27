@@ -85,13 +85,9 @@ message tuple_descriptor
 
 message homog_array_descriptor
 {
-  bool is_simple = 1;
-  bool is_encoded = 2;
   bool has_fixed_size = 3;
   uint64 fixed_size = 4;
-  simplevalue_types valtype = 5;
-  variant_descriptor complex_value_type = 6;
-  
+  variant_descriptor value_type = 6;
 }
 
 
@@ -151,6 +147,7 @@ message ft_homog_array {
   oneof array {
     ft_homog_array_decoded arr_decoded = 1;
     ft_homog_array_encoded arr_encoded = 2;
+    ft_heavy_array arr_heavy = 3;
   }
 }
 
@@ -164,6 +161,12 @@ message ft_homog_array_encoded
 message ft_dynamic_type {
     ft_variant value = 1;
     variant_descriptor desc = 2;
+}
+
+
+//new in 0.5.0
+message ft_heavy_array {
+  repeated ft_variant data = 1;
 }
 
 

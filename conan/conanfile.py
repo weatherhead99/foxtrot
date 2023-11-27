@@ -38,11 +38,11 @@ class FoxtrotCppMeta(type):
 
 def ft_require(conanfile, substr: str) -> None:
     reqstr = ft_version_get_req_str(conanfile.version)
-    conanfile.requires(f"foxtrot_{substr}/{reqstr}")
+    conanfile.requires(f"foxtrot_{substr}/{reqstr}", transitive_headers=True, transitive_libs=True)
 
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
-    version = "0.4.1"
+    version = "0.4.2"
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
@@ -176,17 +176,21 @@ class FoxtrotCppPackage:
 
 def ft_version_get_req_str(verstr: str) -> str:
     vers = Version(verstr)
-    cmpout = []
-    for cmpin in (vers.major, vers.minor, vers.patch):
-        if cmpin is not None:
-            cmpout.append(str(cmpin))
-        else:
-            break
+    cmpout = [_ for _ in (vers.major, vers.minor, vers.patch) if _ is not None]
 
-    if vers.pre is None:
-        reqstr = f"[~{'.'.join(cmpout)}, include_prerelease=True]"
-    else:
-        reqstr = f"[~{'.'.join(cmpout)}-{vers.pre}, include_prerelease=True]"
+    # for i, c in reversed(list(enumerate(cmpout))):
+    #     if c.value == 0:
+    #         cmpout.pop(i)
+    #     else:
+    #         cmpout[i] = int(c.value)-1
+    #         break
+
+    if len(cmpout) == 0:
+        reqstr = "[>0.0.0-0, include_prerelease]"
+
+    cmpout = [str(_) for _ in cmpout]
+        
+    reqstr = f"[~{'.'.join(cmpout)}, include_prerelease]"
     return reqstr
 
         
@@ -248,12 +252,8 @@ def semver_string_parsing_thing(last_tagged: str, full_desc: str, is_dirty: bool
 
     devstr = f"+dev-{n_commits}-g{chash}"
 
-    if cvers.pre is None:
-        #the devstring is now the pre
-        fullstr = f"{newvers}-{devstr}"
-    else:
-        fullstr = f"{newvers}{devstr}"
-
+    fullstr = f"{newvers}{devstr}"
+        
     if fullstr[0] == "v" or fullstr[0] == "V":
         fullstr = fullstr[1:]
     

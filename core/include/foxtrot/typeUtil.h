@@ -19,7 +19,7 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT bool is_POD_struct(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT bool is_tuple(const rttr::type& tp, Logging* lg = nullptr);
     
-    FOXTROT_CORE_EXPORT ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var, Logging* lg=nullptr);
+  FOXTROT_CORE_EXPORT ft_simplevariant get_simple_variant_wire_type(const rttr::variant& var, Logging* lg=nullptr, bool unwrap=false);
     
     FOXTROT_CORE_EXPORT byte_data_types get_byte_data_type(const rttr::type& tp, Logging* lg=nullptr);
 
@@ -29,7 +29,7 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT ft_homog_array get_array_wire_type(const rttr::variant& var, Logging* lg=nullptr);
     
     FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var,
-                                                         Logging* lg=nullptr);
+                                                         Logging* lg=nullptr, bool unwrap=false);
     
 
   FOXTROT_CORE_EXPORT ft_variant get_union_wire_type(const rttr::variant& var,
@@ -54,11 +54,11 @@ namespace foxtrot{
     
     
     
-    FOXTROT_CORE_EXPORT std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr);
+  FOXTROT_CORE_EXPORT std::pair<simplevalue_types, unsigned char> describe_simple_type(const rttr::type& tp, Logging* lg=nullptr, bool check_throw=true);
     FOXTROT_CORE_EXPORT struct_descriptor describe_struct(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT enum_descriptor describe_enum(const rttr::type& tp, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT tuple_descriptor describe_tuple(const rttr::type& tp, Logging* lg=nullptr);
-    FOXTROT_CORE_EXPORT homog_array_descriptor describe_array(
+  FOXTROT_CORE_EXPORT homog_array_descriptor describe_array(
         const rttr::type& tp, Logging* lg=nullptr);
 
   FOXTROT_CORE_EXPORT union_descriptor describe_union(const rttr::type& tp, Logging* lg = nullptr);

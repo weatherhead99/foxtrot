@@ -49,14 +49,20 @@ namespace foxtrot
     {
      
         StdVariant out;
-        
         bool done;
         
         boost::hana::for_each(ft_simplevar_types, 
                               [&out, &var, &done] (auto v) {
                                   using Type = typename decltype(+v)::type;
+
+				  if(var.get_type().is_wrapper())
+				    {
+				      if(var.get_type().get_wrapped_type() == rttr::type::get<Type>())
+					out = var.get_wrapped_value<Type>();
+				      done = true;
+				    }
                                   if( var.is_type<Type>())
-                                  {
+				    {
                                       out = var.get_value<Type>();
                                       done = true;
                                   }

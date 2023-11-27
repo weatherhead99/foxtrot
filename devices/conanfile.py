@@ -31,8 +31,8 @@ class FoxtrotDevicesConan(ConanFile):
         
     package_type = "shared-library"
 
-    default_options = {"*:shared" : True}
+    default_options = {"*/*:shared" : True}
     
-    ft_package_requires = "protocols","core"
+    ft_package_requires = ("protocols")
     cmake_package_name = "foxtrotDevices"
 
