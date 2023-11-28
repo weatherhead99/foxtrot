@@ -28,14 +28,14 @@ from .EnumCreator import define_enum
 DEFAULT_CHUNKSIZE = 1000
 
 class Client:
-    def __init__(self, connstr: str, certfile: str = None) -> None:
+    def __init__(self, connstr: str, certfile: str = None, **channelkwargs) -> None:
         if certfile is None:
-            self._channel = grpc.insecure_channel(connstr)
+            self._channel = grpc.insecure_channel(connstr, **channelkwargs)
         else:
             with open(certfile, "rb") as f:
                 cert = f.read()
             creds = grpc.ssl_channel_credentials(root_certificates=cert)
-            self._channel = grpc.secure_channel(connstr, creds)
+            self._channel = grpc.secure_channel(connstr, creds, **channelkwargs)
         self._stub = capabilityStub(self._channel)
         self._flagstub = flagsStub(self._channel)
         self._estub = exptserveStub(self._channel)
