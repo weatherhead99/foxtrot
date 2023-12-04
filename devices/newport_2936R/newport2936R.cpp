@@ -307,24 +307,13 @@ void foxtrot::devices::newport2936R::strip_CRLF(std::string& buffer)
 
 foxtrot::devices::powerunits foxtrot::devices::newport2936R::getUnits()
 {
-  auto repl = cmd("PM:UNIT?");
-  repl.erase(std::remove_if(repl.begin(),repl.end(), ::isspace),repl.end());
-  
-  _lg.Trace("units reply: " + repl);
-  _lg.Trace("units reply length: " + std::to_string(repl.size()));
-  
-  _lg.Trace("stoi: " + std::to_string(std::stoi(repl)));
-  
-  
-  return static_cast<foxtrot::devices::powerunits>(std::stoi(repl));
-
+  return command_get<powerunits>("PM:UNIT?");
 }
 
 void foxtrot::devices::newport2936R::setUnits(foxtrot::devices::powerunits unit)
 {
   command_write("PM:UNIT",static_cast<unsigned>(unit));
-  _proto->write(std::string("PM:UNIT ") + std::to_string(static_cast<unsigned>(unit))+'\r');
-  
+
 }
 
 
@@ -357,30 +346,11 @@ std::string convert_powerunit_to_string(foxtrot::devices::powerunits unit, bool&
 }
 
 
-#ifndef NEW_RTTR_API
 
-foxtrot::devices::powermodes foxtrot::devices::newport2936R::getMode()
+powermodes newport2936R::getMode()
 {
-  auto repl = cmd("PM:MODE?");
-  
-  powermodes  sw = static_cast<powermodes>(std::stoi(repl));
-  return sw;
+  return command_get<powermodes>("PM:MODE?");
 }
-#else
-
-#ifdef linux
-    #warning ("WARNING: using hacked functions for custom return types")
-#else
-    #pragma message ("WARNING: using hacked functions for custom return types")
-#endif 
-int foxtrot::devices::newport2936R::getMode()
-{
-  auto repl = cmd("PM:MODE?");
-  return std::stoi(repl);
-  
-};
-
-#endif
 
 
 
@@ -435,6 +405,7 @@ bool foxtrot::devices::newport2936R::getTriggerState()
 std::string foxtrot::devices::newport2936R::getcaldate()
 {
   auto repl = cmd("CALDATE?");
+  check_and_throw_error()
   repl.erase(std::remove_if(repl.begin(), repl.end(), ::isspace),repl.end());
   
   return repl;
@@ -443,8 +414,7 @@ std::string foxtrot::devices::newport2936R::getcaldate()
 
 double foxtrot::devices::newport2936R::getcaltemp()
 {
-  auto repl = cmd("CALTEMP?");
-  return std::stod(repl);
+  return command_get<double>("CALTEMP?");
   
 }
 
@@ -499,31 +469,26 @@ foxtrot::devices::powerunits convert_string_to_powerunit(std::string s, bool& ok
   
 }
 
-int foxtrot::devices::newport2936R::getExternalTriggerMode()
+int newport2936R::getExternalTriggerMode()
 {
-  auto repl = cmd("PM:TRIG:EXT?");
-  return std::stoi(repl);
-
+  return command_get<int>("PM:TRIG:EXT?");
 }
 
-void foxtrot::devices::newport2936R::setExternalTriggerMode(int mode)
+void newport2936R::setExternalTriggerMode(int mode)
 {
-  std::ostringstream oss;
-  oss << "PM:TRIG:EXT " << mode <<'\r';
-  _proto->write(oss.str());
+  command_write("PM:TRIG:EXT", mode);
 }
 
-powermetertriggerrunmodes foxtrot::devices::newport2936R::getTriggerEndMode()
+powermetertriggerrunmodes newport2936R::getTriggerEndMode()
 {
   return command_get<powermetertriggerrunmodes>("PM:TRIG:STOP?");
 
 }
 
 
-void foxtrot::devices::newport2936R::setTriggerEndMode(powermetertriggerrunmodes mode)
+void newport2936R::setTriggerEndMode(powermetertriggerrunmodes mode)
 {
-  command_write("PM:TRIG:STOP",static_cast<short unsigned>(mode));
- 
+  command_write("PM:TRIG:STOP",mode);
 }
 
 powermetertriggerrunmodes foxtrot::devices::newport2936R::getTriggerStartMode()
@@ -537,18 +502,14 @@ void foxtrot::devices::newport2936R::setTriggerStartMode(powermetertriggerrunmod
 
 }
 
-int foxtrot::devices::newport2936R::getTriggerEdge()
+int newport2936R::getTriggerEdge()
 {
-  auto repl = cmd("PM:TRIG:EDGE?");
-  return std::stoi(repl);
+  return command_get<int>("PM:TRIG:EDGE?");
 }
 
 void foxtrot::devices::newport2936R::setTriggerEdge(int edge)
 {
-  std::ostringstream oss;
-  oss << "PM:TRIG:EDGE " << edge << '\r';
-  _proto->write(oss.str());
-
+  command_write("PM:TRIG:EDGE", edge);
 }
 
 void foxtrot::devices::newport2936R::setTriggerTimeout(int time_ms)
@@ -575,6 +536,7 @@ void foxtrot::devices::newport2936R::setTriggerValue(double meas_val)
 string foxtrot::devices::newport2936R::getSerialNumber()
 {
   auto repl =  cmd("PM:DETSN?");
+  check_and_throw_error();
   repl.erase(std::remove_if(repl.begin(), repl.end(), ::isspace),repl.end());
   return repl;
 
@@ -594,6 +556,7 @@ std::array<double, 3> newport2936R::getCorrection()
 {
   std::array<double, 3> out;
   auto st = cmd("PM:CORR?");
+  check_and_throw_error();
   std::istringstream iss;
 
   for(int i=0; i< 3; i++)
@@ -612,7 +575,10 @@ void newport2936R::setCorrection(double d1, double d2, double d3)
 
 std::string newport2936R::getDetectorModel()
 {
-  return cmd("PM:DETMODEL?");
+  auto dm = cmd("PM:DETMODEL?");
+  check_and_throw_error();
+  return dm;
+  
 };
 
 
@@ -647,14 +613,19 @@ void newport2936R::setOutputRange(powermeteroutputrange range)
   command_write("PM:ANALOG:OUT", range);
 }
 
-bool newport2936R::getAttenuator(){return std::stoi(cmd("PM:ATT?"));}
+bool newport2936R::getAttenuator(){
+  return command_get<int>("PM:ATT?");
+}
 
 std::string newport2936R::getAttenuatorSerialNumber()
 {
-  return cmd("PM:ATTSN?");
+  auto resp= cmd("PM:ATTSN?");
+  check_and_throw_error();
+  return resp;
 }
 
-bool newport2936R::getAutoRange() { return std::stoi(cmd("PM:AUTO?")); }
+bool newport2936R::getAutoRange() {
+  return command_get<int>("PM:AUTO?"); }
 
 void newport2936R::setAutoRange(bool onoff)
 {
@@ -664,7 +635,7 @@ void newport2936R::setAutoRange(bool onoff)
 
 int foxtrot::devices::newport2936R::getDigitalFilter()
 {
-  return std::stoi(cmd("PM:DIGITALFILTER?"));
+  return command_get<int>("PM:DIGITALFILTER?");
 }
 
 void foxtrot::devices::newport2936R::setDigitalFilter(int value)
@@ -685,35 +656,35 @@ void newport2936R::setFilterMode(powermeterfiltermodes mode)
 
 
 
-bool foxtrot::devices::newport2936R::getBufferBehaviour()
+bool newport2936R::getBufferBehaviour()
 {
-    return std::stoi(cmd("PM:DS:BUF?"));
+  return command_get<int>("PM:DS:BUF?");
 }
 
-void foxtrot::devices::newport2936R::setBufferBehaviour(bool mode)
+void newport2936R::setBufferBehaviour(bool mode)
 {
     command_write("PM:DS:BUF", mode);
 }
 
-int foxtrot::devices::newport2936R::getDataStoreCount()
+int newport2936R::getDataStoreCount()
 {
   return command_get<int>("PM:DS:C?");
 }
 
 bool foxtrot::devices::newport2936R::getDataStoreEnable()
 {
-    return std::stoi(cmd("PM:DS:EN?"));
+  return command_get<int>("PM:DS:EN?");
 }
 
 void foxtrot::devices::newport2936R::setDataStoreEnable(bool onoff)
 {
   command_write("PM:DS:EN",onoff);
-  
 }
 
 foxtrot::devices::powerunits foxtrot::devices::newport2936R::getDataStoreUnits()
 {
     auto str = cmd("PM:DS:UNIT?");
+    check_and_throw_error();
     bool ok;
     auto out = convert_string_to_powerunit(str,ok);
     
@@ -866,6 +837,8 @@ void foxtrot::devices::newport2936R::flush_buffers_after_timeout(int n)
 void foxtrot::devices::newport2936R::check_and_throw_error()
 {
   int errc = getErrorCode();
+  if(errc == 0)
+    return;
     _lg.strm(sl::error) << "caught an error, request, code: " << errc;
     throw DeviceError("powermeter error: " + std::to_string(errc));
 

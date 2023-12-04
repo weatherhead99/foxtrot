@@ -304,6 +304,7 @@ namespace foxtrot
       {
         std::ostringstream oss;
         auto str = cmd(req);
+	check_and_throw_error();
         
         T out;
 	
@@ -313,7 +314,6 @@ namespace foxtrot
         catch(std::invalid_argument& err)
         {
             _lg.strm(sl::error) << " error return from request: " << req;
-            check_and_throw_error();
         };
 	
         return out;
