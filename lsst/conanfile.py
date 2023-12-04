@@ -16,7 +16,7 @@ class FoxtrotLSST(ConanFile):
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
     src_folder = "lsst"
-    ft_package_requires = ("core", "client" , "devices", "server")
+    ft_package_requires = ("client" , "devices", "server")
 
     options = {"magis_chiller" : [True, False]}
     default_options = {"*/*:shared" : True,
