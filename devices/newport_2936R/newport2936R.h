@@ -7,6 +7,8 @@
 
 #include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/SerialProtocol.h>
+#include <iostream>
+
 
 using std::string;
 
@@ -108,12 +110,15 @@ namespace foxtrot
       
       template<> struct return_converter<int>
       {
-	static int get(const std::string& in) {return std::stoi(in);};
+	static int get(const std::string& in) {
+
+	  return std::stoi(in);};
       };
       
       template<> struct return_converter<double>
       {
-	static int get(const std::string& in) {return std::stod(in);};
+	static double get(const std::string& in) {
+	  return std::stod(in);};
       };
       
       template<Enumeration T> struct return_converter<T>
@@ -255,7 +260,8 @@ namespace foxtrot
 
 
     private:
-      
+
+      void clear_errors();
       void flush_buffers_after_timeout(int n);
 
       std::vector<double> do_fetch_buffer(int n);
@@ -302,11 +308,12 @@ namespace foxtrot
 	
       template<typename T> T command_get(const std::string&& req)
       {
-        std::ostringstream oss;
         auto str = cmd(req);
 	check_and_throw_error();
         
         T out;
+
+	_lg.strm(sl::trace) <<"return was: [" << str << "]";
 	
         try{
             out = detail::return_converter<T>::get(str);

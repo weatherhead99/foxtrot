@@ -217,7 +217,10 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
   std::size_t actbytes;
 
   if(_io_service->stopped())
-    _io_service->restart();  
+    {
+      _lg.strm(sl::trace) << "restarting io_service";
+      _io_service->restart();
+    }
 
   if(!wait.has_value())
     {

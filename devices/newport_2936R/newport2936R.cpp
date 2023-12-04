@@ -94,6 +94,8 @@ foxtrot::devices::newport2936R::newport2936R(std::shared_ptr< foxtrot::SerialPro
   {
       throw DeviceError("invalid protocol for power meter connection!");
   }
+
+  clear_errors();
 }
 
 foxtrot::devices::newport2936R::newport2936R(
@@ -102,6 +104,7 @@ foxtrot::devices::newport2936R::newport2936R(
 {
 
   setup_usb_mode();
+  clear_errors();
 }
 
 foxtrot::devices::newport2936R::newport2936R(
@@ -110,8 +113,19 @@ foxtrot::devices::newport2936R::newport2936R(
 {
 
   setup_serial_mode();
+  clear_errors();
 }
 
+
+void newport2936R::clear_errors()
+{
+  while(true)
+    {
+      auto errc = getErrorCode();
+      if(errc ==0)
+	break;
+    }
+}
 
 
 
@@ -671,52 +685,39 @@ int newport2936R::getDataStoreCount()
   return command_get<int>("PM:DS:C?");
 }
 
-bool foxtrot::devices::newport2936R::getDataStoreEnable()
+bool newport2936R::getDataStoreEnable()
 {
   return command_get<int>("PM:DS:EN?");
 }
 
-void foxtrot::devices::newport2936R::setDataStoreEnable(bool onoff)
+void newport2936R::setDataStoreEnable(bool onoff)
 {
   command_write("PM:DS:EN",onoff);
 }
 
-foxtrot::devices::powerunits foxtrot::devices::newport2936R::getDataStoreUnits()
+powerunits newport2936R::getDataStoreUnits()
 {
-    auto str = cmd("PM:DS:UNIT?");
-    check_and_throw_error();
-    bool ok;
-    auto out = convert_string_to_powerunit(str,ok);
-    
-    if(!ok)
-    {
-        std::string msg( "couldn't convert string to power unit: ");
-        msg += str;
-        throw DeviceError(msg);
-    }
-        
-    //TODO: error reporting here!
-    return out;    
+  return command_get<powerunits>("PM:DS:UNIT?");
 }
 
-void foxtrot::devices::newport2936R::setDataStoreUnits(foxtrot::devices::powerunits units)
+void newport2936R::setDataStoreUnits(powerunits units)
 {
   command_write("PM:DS:UNIT", units);
 }
 
 
-void foxtrot::devices::newport2936R::clearDataStore()
+void newport2936R::clearDataStore()
 {
   cmd_no_response("PM:DS:CL");
   
 }
 
-int foxtrot::devices::newport2936R::getDataStoreInterval()
+int newport2936R::getDataStoreInterval()
 {
    return command_get<int>("PM:DS:INT?");
 }
 
-void foxtrot::devices::newport2936R::setDataStoreInterval(int interval)
+void newport2936R::setDataStoreInterval(int interval)
 {
   command_write("PM:DS:INT", interval);
 }
@@ -743,39 +744,60 @@ double foxtrot::devices::newport2936R::getDataStoreValue(int idx)
 
 std::vector<double> newport2936R::do_fetch_buffer(int n)
 {
-    std::vector<double> out;
+  std::vector<double> out;
   out.reserve(n);
-  
-  bool data_started = false;
+
+  std::ostringstream buffer;
+
   while(true)
     {
-      auto line = (this->*readlineptr)();
-      _lg.strm(sl::trace) << "buffer line is: " << line;
-      if(line.find("Header") != std::string::npos)
+      auto nextbit = (this->*readlineptr)();
+      _lg.strm(sl::trace) << "next buffer: " << nextbit;
+      buffer << nextbit;
+      if(nextbit.find("End of Data") != std::string::npos)
 	{
-	  //this is the end of the header 
-	  data_started = true;
-	  _lg.strm(sl::trace) << "data_started !!!" ;
-	  continue;
-	}
-      else if(line.find("End") != std::string::npos)
-	{
+	  _lg.strm(sl::debug) << "saw end of data!";
 	  break;
-	  _lg.strm(sl::trace) << "data ended, breaking out";
 	}
-      if(data_started)
-	out.push_back(std::stod(line));
     }
 
+  std::istringstream reader(buffer.str());
+  
+  std::string line;
+  bool data_started = false;
+  while(std::getline(reader, line))
+    {
+      if(line.find("Header")!= std::string::npos)
+	{
+	  data_started = true;
+	  continue;
+	}
+      else if (line.find("End of Data") != std::string::npos)
+	{
+	  _lg.strm(sl::debug) << "saw end of data in parsing!";
+	  break;
+	}
+      else if(data_started)
+	{
+	  out.push_back(std::stod(line));
+	}
+    }
+ 
   return out;
 
 }
 
 std::vector<double> foxtrot::devices::newport2936R::fetchDataStore(int begin, int end)
 {
+  if(begin < 1)
+    throw std::out_of_range("array starts at index 1!");
+  if(end > getDataStoreCount())
+    throw std::out_of_range("requested end longer than data count!");
+  
   std::ostringstream oss;
   oss << "PM:DS:GET? " <<  begin << "-" << end;
   cmd_no_response(oss.str());
+  
   
   return do_fetch_buffer(end - begin);
 
@@ -783,6 +805,11 @@ std::vector<double> foxtrot::devices::newport2936R::fetchDataStore(int begin, in
 
 std::vector< double > foxtrot::devices::newport2936R::fetchDataStoreNewest(int n)
 {
+  if(n < 1)
+    throw std::out_of_range("must choose at least n=1");
+  if(n > getDataStoreCount())
+    throw std::out_of_range("requested more data than available");
+  
   std::ostringstream oss;
   oss <<"PM:DS:GET? "<<  "+" << n;
   cmd_no_response(oss.str());
@@ -791,6 +818,11 @@ std::vector< double > foxtrot::devices::newport2936R::fetchDataStoreNewest(int n
 
 std::vector< double > foxtrot::devices::newport2936R::fetchDataStoreOldest(int n)
 {
+  if(n < 1)
+    throw std::out_of_range("must choose at least n=1");
+  if(n > getDataStoreCount())
+    throw std::out_of_range("requested more data than available");
+
   std::ostringstream oss;
   oss << "PM:DS:GET? "<< "-" << n;
   cmd_no_response(oss.str());
