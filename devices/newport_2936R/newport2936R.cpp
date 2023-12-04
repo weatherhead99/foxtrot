@@ -750,14 +750,19 @@ std::vector<double> newport2936R::do_fetch_buffer(int n)
   while(true)
     {
       auto line = (this->*readlineptr)();
+      lg.strm(sl::trace) << "buffer line is: " << line;
       if(line.find("Header") != std::string::npos)
 	{
 	  //this is the end of the header 
 	  data_started = true;
+	  lg.strm(sl::trace) << "data_started !!!" ;
 	  continue;
 	}
       else if(line.find("End") != std::string::npos)
-	break;
+	{
+	  break;
+	  lg.strm(sl::trace) << "data ended, breaking out";
+	}
       if(data_started)
 	out.push_back(std::stod(line));
     }
@@ -901,6 +906,7 @@ RTTR_REGISTRATION
   using namespace rttr;
 
   foxtrot::register_tuple<std::tuple<int,int>>();
+  foxtrot::register_tuple<std::tuple<double,double>();
   
   registration::enumeration<powermeterimpedance>("foxtrot::devices::powermeterimpedance")
     (value("_50_ohm", powermeterimpedance::_50_ohm),
@@ -970,6 +976,7 @@ RTTR_REGISTRATION
   
   
   registration::class_<newport2936R>("foxtrot::devices::newport2936R")
+    .property_readonly("info", &newport2936R::info)
     .property("AnalogFilter", &newport2936R::getAnalogFilter, &newport2936R::setAnalogFilter)
     .property("OutputImpedance", &newport2936R::getOutputImpedance, &newport2936R::setOutputImpedance)
     .property("OutputRange", &newport2936R::getOutputRange, &newport2936R::setOutputRange)
