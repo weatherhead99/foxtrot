@@ -249,7 +249,7 @@ void foxtrot::devices::newport2936R::setLambda(int l)
 
 int foxtrot::devices::newport2936R::getErrorCode()
 {
-  return command_get<int>("ERRORS?");
+  return std::stoi(cmd("ERRORS?"));
 }
 
 string foxtrot::devices::newport2936R::getErrorString()
@@ -839,8 +839,8 @@ void foxtrot::devices::newport2936R::check_and_throw_error()
   int errc = getErrorCode();
   if(errc == 0)
     return;
-    _lg.strm(sl::error) << "caught an error, request, code: " << errc;
-    throw DeviceError("powermeter error: " + std::to_string(errc));
+  _lg.strm(sl::error) << "caught an error, request, code: " << errc;
+  throw DeviceError("powermeter error: " + std::to_string(errc));
 
 }
 
