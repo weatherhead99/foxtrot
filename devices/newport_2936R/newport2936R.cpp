@@ -750,18 +750,18 @@ std::vector<double> newport2936R::do_fetch_buffer(int n)
   while(true)
     {
       auto line = (this->*readlineptr)();
-      lg.strm(sl::trace) << "buffer line is: " << line;
+      _lg.strm(sl::trace) << "buffer line is: " << line;
       if(line.find("Header") != std::string::npos)
 	{
 	  //this is the end of the header 
 	  data_started = true;
-	  lg.strm(sl::trace) << "data_started !!!" ;
+	  _lg.strm(sl::trace) << "data_started !!!" ;
 	  continue;
 	}
       else if(line.find("End") != std::string::npos)
 	{
 	  break;
-	  lg.strm(sl::trace) << "data ended, breaking out";
+	  _lg.strm(sl::trace) << "data ended, breaking out";
 	}
       if(data_started)
 	out.push_back(std::stod(line));
