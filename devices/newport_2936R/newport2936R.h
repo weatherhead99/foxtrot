@@ -97,10 +97,13 @@ namespace foxtrot
 
       template<typename T>
       concept Enumeration = std::is_enum_v<T>;
+
+      template<typename T> struct always_false :
+	std::false_type {};
       
       template<typename T> struct return_converter
       {
-	static T get(const std::string& in) { static_assert(false);};
+	static T get(const std::string& in) { static_assert(always_false<T>::value);};
       };
       
       template<> struct return_converter<int>
