@@ -906,7 +906,7 @@ RTTR_REGISTRATION
   using namespace rttr;
 
   foxtrot::register_tuple<std::tuple<int,int>>();
-  foxtrot::register_tuple<std::tuple<double,double>();
+  foxtrot::register_tuple<std::tuple<double,double>>();
   
   registration::enumeration<powermeterimpedance>("foxtrot::devices::powermeterimpedance")
     (value("_50_ohm", powermeterimpedance::_50_ohm),
