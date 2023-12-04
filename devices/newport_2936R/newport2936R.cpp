@@ -405,7 +405,7 @@ bool foxtrot::devices::newport2936R::getTriggerState()
 std::string foxtrot::devices::newport2936R::getcaldate()
 {
   auto repl = cmd("CALDATE?");
-  check_and_throw_error()
+  check_and_throw_error();
   repl.erase(std::remove_if(repl.begin(), repl.end(), ::isspace),repl.end());
   
   return repl;
