@@ -15,6 +15,11 @@ namespace foxtrot
       libUsbProtocol(const parameterset* const instance_parameters);
       virtual void Init(const parameterset*const class_parameters) override;
 
+      void set_read_timeout(int timeout_ms);
+      int get_read_timeout() const;
+      void set_write_timeout(int timeout_ms);
+      int get_write_timeout() const;
+      
       
       virtual ~libUsbProtocol();
 

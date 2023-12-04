@@ -100,6 +100,9 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
   _lg.strm(sl::trace) << "reading response";
   auto response = serportptr->read_until_endl('\n');
   auto cretpos = std::find(response.begin(),response.end(),'\r');
+
+  if(cretpos == response.end())
+    throw foxtrot::DeviceError("failed to find carriage return in device response");
  
   return std::string(response.begin(),cretpos);
 
