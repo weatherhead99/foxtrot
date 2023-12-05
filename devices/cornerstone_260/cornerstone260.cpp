@@ -205,8 +205,9 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
   {
     SerialPortWaitSetter waiter(_proto, 120000);
     cmd_no_response(oss.str());
+    err_check();
   }
-  err_check();
+
 
 }
 
