@@ -105,7 +105,27 @@ void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters)
       _lg.Error("error claiming interface");
       throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
     }
-    
-   
 }
+
+void libUsbProtocol::set_read_timeout(int timeout_ms)
+{
+  _read_timeout = timeout_ms;
+}
+
+int libUsbProtocol::get_read_timeout() const
+{
+  return _read_timeout;
+}
+  
+void libUsbProtocol::set_write_timeout(int timeout_ms)
+{
+  _write_timeout = timeout_ms;
+}
+
+int libUsbProtocol::get_write_timeout() const
+{
+  return _write_timeout;
+}
+
+
 

@@ -41,12 +41,24 @@ rttr::type foxtrot::tuple_element_type(const rttr::type& tp, int n)
 
 rttr::variant foxtrot::tuple_get(const rttr::variant& var, int n)
 {
+  bool wrapper = false;
     auto tp = var.get_type();
+    if(tp.is_wrapper())
+      {
+	wrapper = true;
+	tp = tp.get_wrapped_type();
+      }
+    
     auto getmeth = tp.get_method("get");
     if(!getmeth.is_valid())
     {
         throw std::logic_error("tuple doesn't have a get method. Perhaps it isn't registered");
     }
-    return getmeth.invoke(rttr::instance(),var,n);
+
+    if(not wrapper)
+      return  getmeth.invoke(rttr::instance(), var, n);
+
+    //NOTE: unfortunate copy....
+    return getmeth.invoke(rttr::instance(), var.extract_wrapped_value(), n);
 }
 

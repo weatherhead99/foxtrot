@@ -2,7 +2,7 @@ import os
 from conan import ConanFile
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.cmake import CMakeDeps
-
+from conan.tools.build import valid_min_cppstd
 #ftbase = python_requires("FoxtrotBuildUtils/[^0.3]@weatherill/stable")
 
 class FoxtrotProtocolsConan(ConanFile):
@@ -38,3 +38,9 @@ class FoxtrotProtocolsConan(ConanFile):
             tc.cache_variables["USE_ASIO"] = True
 
         tc.generate()
+
+    def validate_build(self):
+        if not valid_min_cppstd(self, 20):
+            self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
+            self.output.error("failed check requiring minimum of c++20")
+            raise ConanInvalidConfiguration("foxtrot modules require at least c++20 standard to build")

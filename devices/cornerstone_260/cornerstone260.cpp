@@ -100,6 +100,9 @@ std::string foxtrot::devices::cornerstone260::cmd(const std::string& request)
   _lg.strm(sl::trace) << "reading response";
   auto response = serportptr->read_until_endl('\n');
   auto cretpos = std::find(response.begin(),response.end(),'\r');
+
+  if(cretpos == response.end())
+    throw foxtrot::DeviceError("failed to find carriage return in device response");
  
   return std::string(response.begin(),cretpos);
 
@@ -202,8 +205,9 @@ void foxtrot::devices::cornerstone260::setWave(double wl_nm)
   {
     SerialPortWaitSetter waiter(_proto, 120000);
     cmd_no_response(oss.str());
+    err_check();
   }
-  err_check();
+
 
 }
 

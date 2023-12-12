@@ -13,12 +13,16 @@
 #include <cmath>
 #include <cstddef>
 #include <algorithm>
+#include <format>
+
 #ifdef __linux__
 #include <termios.h>
 #else
 #include <Windows.h>
 #endif
 #include <fcntl.h>
+
+
 #include <string.h>
 
 #include <boost/asio/write.hpp>
@@ -214,10 +218,13 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
   auto buf = boost::asio::dynamic_buffer(strbuf);
   boost::system::error_code ec;
   bool done = false;
-  std::size_t actbytes;
+  std::size_t actbytes = 0;
 
   if(_io_service->stopped())
-    _io_service->restart();  
+    {
+      _lg.strm(sl::trace) << "restarting io_service";
+      _io_service->restart();
+    }
 
   if(!wait.has_value())
     {
@@ -228,27 +235,47 @@ std::string foxtrot::protocols::SerialPort::read_until_endl_asio_impl(char endlc
     {
 
       _lg.strm(sl::trace) << "timeout value, doing boost::async_read_until";
+      std::ostringstream oss;
+
+      std::string chronostr = std::to_string(  (*wait).count());
+      
+      _lg.strm(sl::trace) << "timeout value is: " << chronostr;
       boost::asio::async_read_until(*_sport, buf,
 				    endlchar,
 				    [&ec, &done, &actbytes](const boost::system::error_code ec2, std::size_t bytes_transferred)
 				    { ec = ec2; done = true; actbytes = bytes_transferred;});
 
       auto n_run = _io_service->run_for(*wait);
-
+      
       _lg.strm(sl::trace) << "n handlers run: " << n_run;
       _lg.strm(sl::trace) << "actual bytes transferred:" << (long unsigned)actbytes;
       if(ec.value() != boost::system::errc::success)
 	_lg.strm(sl::error) << "ec message: " << ec.message();
       
       if(!done)
-	throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+	{
+	  _lg.strm(sl::error);
+	  _sport->cancel();
+
+
+	  //run to get the current thing to cancel....
+	  _io_service->run();
+
+	  _lg.strm(sl::error) << "ec2 value: " << ec.message();
+	  
+	  
+	  
+	  _io_service->stop();
+	  
+	  
+	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+	}
       
     }
 
   if(ec)
     throw ProtocolError(std::string("error reading from serial port: " ) +ec.message());
- 
-      
+
   return strbuf;
   
 

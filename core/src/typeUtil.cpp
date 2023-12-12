@@ -409,14 +409,32 @@ ft_tuple foxtrot::get_tuple_wire_type(const rttr::variant& var, Logging* lg)
     ft_tuple out;
     if(lg)
         lg->strm(sl::trace) << "getting tuple wire type";
-    
+
+    auto tp = var.get_type();
+    if( tp.is_wrapper())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "type is wrpper, unwrapping...";
+	
+	tp = tp.get_wrapped_type();
+      }
+
     //WARNING: does not work yet!!!
-    auto sz = tuple_size(var.get_type());
+    if(lg)
+      {
+	lg->strm(sl::trace) << "var type is: " <<var.get_type().get_name();
+	lg->strm(sl::trace) << "conversion tp is: " << tp.get_name();
+      }
+
+    auto sz = tuple_size(tp);
     if(lg)
         lg->strm(sl::trace) << "tuple size: " << sz;
     for(int i=0; i < sz; i++)
     {
         rttr::variant element_value = foxtrot::tuple_get(var, i);
+	if(!element_value.is_valid())
+	  if(lg)
+	    lg->strm(sl::error) << "element value is invalid!";
         ft_variant* varpt = out.add_value();
         *varpt = get_variant_wire_type(element_value,lg);
     }
