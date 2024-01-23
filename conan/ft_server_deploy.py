@@ -9,6 +9,13 @@ source ${{dir}}/conanrun.sh
 ${{dir}}/exptserve ${{dir}}/{SETUP} "$@"
 """
 
+AUTOFILLD_SCRIPT_BASE = """\
+#!/bin/bash
+export dir="{DIRPATH}"
+source ${{dir}}/conanrun.sh
+${{dir}}/autofilld "$@"
+"""
+
 
 def generate_script(output_folder, script_name: str, setup_name: str):
     pth = os.path.join(output_folder, script_name)
@@ -17,7 +24,13 @@ def generate_script(output_folder, script_name: str, setup_name: str):
         f.write(script)
     os.chmod(pth,0o744)
     
-
+def generate_autofilld_script(output_folder):
+    pth = os.path.join(output_folder, "runautofilld.sh")
+    with open(pth, "w") as f:
+        script = AUTOFILLD_SCRIPT_BASE.format(DIRPATH=output_folder)
+        f.write(script)
+    os.chmod(pth, 0o744)
+    
 
 def copy_setups(conanfile, output_folder):
     allsetups = []
@@ -47,6 +60,8 @@ def deploy(graph, output_folder, **kwargs):
         if "foxtrot_server" in req.ref.name:
             bindir = cfile.cpp_info.bindirs[0]
             copy(cfile, "exptserve", bindir, output_folder)
+            copy(cfile, "autofilld", bindir, output_folder)
+            generate_autofilld_script(output_folder)
 
 #        print(cfile._conanfile)
 #        print(hasattr(cfile._conanfile, "deploy_setups"))
@@ -60,3 +75,5 @@ def deploy(graph, output_folder, **kwargs):
             basename = setup.split(".")[0]
             scriptname = f"runexptserve_{basename}.sh"
             generate_script(output_folder, scriptname, setup)
+
+    
