@@ -336,7 +336,7 @@ void foxtrot::devices::TC110::setRUTimeSVal(int RUTime)
 
 int foxtrot::devices::TC110::getPowerPercent()
 {
-  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::PwdSVal));
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::PwrSVal));
 }
 
 void foxtrot::devices::TC110::setPowerPercent(int power)
@@ -425,20 +425,19 @@ RTTR_REGISTRATION
 
   registration::enumeration<TC110_BackingPumpOperatingModes>
     ("foxtrot::devices::TC110_BackingPumpOperatingModes")
-    (value("Continuous_Operation", &TC110_BackingPumpOperatingModes::Continuous_operation),
-     value("Intermittent_mode", &TC110_BackingPumpOperatingModes::Intermittent_mode),
-     value("Delayed_Switchon", &TC110_BackingPumpOperatingModes::Delayed_Switchon));
+    (value("Continuous_Operation", TC110_BackingPumpOperatingModes::Continuous_operation),
+     value("Intermittent_mode", TC110_BackingPumpOperatingModes::Intermittent_mode),
+     value("Delayed_Switchon", TC110_BackingPumpOperatingModes::Delayed_Switchon));
 
   registration::enumeration<TC110_VentModes>
     ("foxtrot::devices::TC110_VentModes")
-    (value("Delayed_Venting", &TC110_VentModes::Delayed_Venting),
-     value("No_Venting", &TC110_VentModes::No_Venting),
-     value("Direct_Venting", &TC110_VentModes::Direct_Venting));
+    (value("Delayed_Venting", TC110_VentModes::Delayed_Venting),
+     value("No_Venting", TC110_VentModes::No_Venting),
+     value("Direct_Venting", TC110_VentModes::Direct_Venting));
 
   
-	   
+  
 
-);
   
    registration::class_<TC110>("foxtrot::devices::TC110")
      .property("Heating", &TC110::getHeating,
@@ -462,7 +461,7 @@ RTTR_REGISTRATION
  	      &TC110::setMotorPump)
 
      .property("BackingPumpMode", &TC110::getBackingPumpMode,
-	       &TC110::setBackingPumpMode);
+	       &TC110::setBackingPumpMode)
 
 // 
 //     .property("RotSpeedSettingMode", &TC110::getRotSpeedSettingMode,
