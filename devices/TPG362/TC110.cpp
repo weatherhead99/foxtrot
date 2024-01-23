@@ -277,6 +277,95 @@ int foxtrot::devices::TC110::getOperatingHoursPump()
     return std::stoul(read_cmd_helper(_address, TC110_parameter_no::OpHrsPump));
 }
 
+int foxtrot::devices::TC110::getNominalRotSpeed()
+{
+
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::NominalSpd));
+}
+
+double foxtrot::devices::TC110::getDrivePower()
+{
+
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::DrvPower));
+
+}
+
+int foxtrot::devices::TC110::getPumpCycles()
+{
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::PumpCycles));
+}
+
+double foxtrot::devices::TC110::getTempElec()
+{
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::TempElec));
+}
+
+double foxtrot::devices::TC110::getTempPumpBottom()
+{
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::TempPmpBot));
+}
+
+double foxtrot::devices::TC110::getAcceleration()
+{
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::AccelDecel));
+}
+
+double foxtrot::devices::TC110::getTempBearing()
+{
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::TempBearing));
+}
+
+double foxtrot::devices::TC110::getTempMotor()
+{
+  return std::stod(read_cmd_helper(_address, TC110_parameter_no::TempMotor));
+}
+
+int foxtrot::devices::TC110::getRUTimeSVal()
+{
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::RUTimeSVal));
+}
+
+void foxtrot::devices::TC110::setRUTimeSVal(int RUTime)
+{
+  if(RUTime < 1 or RUTime > 120)
+    throw std::out_of_range("supplied an invalid RUTimeSVal");
+
+  write_cmd_helper(_address, TC110_parameter_no::RUTimeSVal, static_cast<unsigned short>(RUTime),
+		   pfeiffer_data_types::positive_integer_long);
+}
+
+int foxtrot::devices::TC110::getPowerPercent()
+{
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::PwdSVal));
+}
+
+void foxtrot::devices::TC110::setPowerPercent(int power)
+{
+  if(power < 10 or power > 100)
+    throw std::out_of_range("supplied invalid power percent");
+
+  write_cmd_helper(_address, TC110_parameter_no::PwrSVal, static_cast<unsigned short>(power),
+		   pfeiffer_data_types::positive_integer_short);
+}
+
+int foxtrot::devices::TC110::getVentTime()
+{
+  return std::stoul(read_cmd_helper(_address, TC110_parameter_no::VentTime));
+}
+
+void foxtrot::devices::TC110::setVentTime(int vent_time)
+{
+  if( vent_time < 0 or vent_time > 3600)
+    throw std::out_of_range("supplied invalid vent time");
+
+  write_cmd_helper(_address, TC110_parameter_no::VentTime, static_cast<unsigned short>(vent_time),
+		   pfeiffer_data_types::positive_integer_long);
+    
+}
+
+
+
+
 
 
 
@@ -333,6 +422,23 @@ RTTR_REGISTRATION
 	   TC110_DOconfigs::Rot_Speed_Switch_Point_Attained),
      value("No_Error", TC110_DOconfigs::No_Error)
      );
+
+  registration::enumeration<TC110_BackingPumpOperatingModes>
+    ("foxtrot::devices::TC110_BackingPumpOperatingModes")
+    (value("Continuous_Operation", &TC110_BackingPumpOperatingModes::Continuous_operation),
+     value("Intermittent_mode", &TC110_BackingPumpOperatingModes::Intermittent_mode),
+     value("Delayed_Switchon", &TC110_BackingPumpOperatingModes::Delayed_Switchon));
+
+  registration::enumeration<TC110_VentModes>
+    ("foxtrot::devices::TC110_VentModes")
+    (value("Delayed_Venting", &TC110_VentModes::Delayed_Venting),
+     value("No_Venting", &TC110_VentModes::No_Venting),
+     value("Direct_Venting", &TC110_VentModes::Direct_Venting));
+
+  
+	   
+
+);
   
    registration::class_<TC110>("foxtrot::devices::TC110")
      .property("Heating", &TC110::getHeating,
@@ -352,13 +458,12 @@ RTTR_REGISTRATION
 //                &TC110::setDOConfig)
      
 
-//     .property("MotorPump", &TC110::getMotorPump,
-// 	      &TC110::setMotorPump)
+     .property("MotorPump", &TC110::getMotorPump,
+ 	      &TC110::setMotorPump)
 
-    //TODO: TC110_backingpumpoperatingmodes
+     .property("BackingPumpMode", &TC110::getBackingPumpMode,
+	       &TC110::setBackingPumpMode);
 
-//     .property("BackingPumpMode", &TC110::getBackingPumpMode,
-// 	      &TC110::setBackingPumpMode)
 // 
 //     .property("RotSpeedSettingMode", &TC110::getRotSpeedSettingMode,
 // 	      &TC110::setRotSpeedSettingMode)
@@ -366,8 +471,8 @@ RTTR_REGISTRATION
 //     .property("GasMode", &TC110::getGasMode,
 // 	      &TC110::setGasMode)
 // 
-//     .property("VentMode", &TC110::getVentMode,
-// 	      &TC110::setVentMode)
+      .property("VentMode", &TC110::getVentMode,
+		&TC110::setVentMode)
 
     //TODO: AccConfig
 
@@ -400,6 +505,18 @@ RTTR_REGISTRATION
     .property_readonly("OperatingHoursPump", &TC110::getOperatingHoursPump)
     .property_readonly("DriveVoltage", &TC110::getDriveVoltage)
     .property_readonly("OperatingHoursDriveUnit", &TC110::getOperatingHoursDriveUnit)
+      .property_readonly("NominalRotSpeed", &TC110::getNominalRotSpeed)
+      .property_readonly("DrivePower", &TC110::getDrivePower)
+      .property_readonly("PumpCycles", &TC110::getPumpCycles)
+      .property_readonly("TempElec", &TC110::getTempElec)
+      .property_readonly("TempPumpBottom", &TC110::getTempPumpBottom)
+      .property_readonly("Acceleration", &TC110::getAcceleration)
+      .property_readonly("TempBearing", &TC110::getTempBearing)
+      .property_readonly("TempMotor", &TC110::getTempMotor)
+      .property("RUTimeSVal", &TC110::getRUTimeSVal, &TC110::setRUTimeSVal)
+      .property("PowerPercent", &TC110::getPowerPercent, &TC110::setPowerPercent)
+      .property("VentTime", &TC110::getVentTime, &TC110::setVentTime)
+      
     ;
 
 }
