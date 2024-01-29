@@ -550,6 +550,27 @@ RTTR_REGISTRATION
  type::register_converter_func(foxtrot::devices::heater_to_int);
  type::register_converter_func(foxtrot::devices::int_to_sensor);
  type::register_converter_func(foxtrot::devices::sensor_to_int);
+
+ using foxtrot::devices::HeaterXSensorTypes;
+ using foxtrot::devices::HeaterXSensors;
+ using foxtrot::devices::HeaterXHeaters;
+ 
+ registration::enumeration<HeaterXSensorTypes>("foxtrot::devices::HeaterXSensorTypes")
+   (value("DT_670", HeaterXSensorTypes::DT_670),
+    value("DT_470", HeaterXSensorTypes::DT_470),
+    value("RTD100", HeaterXSensorTypes::RTD100),
+    value("RTD1000", HeaterXSensorTypes::RTD1000)
+    );
+
+ registration::enumeration<HeaterXSensors>("foxtrot::devices::HeaterXSensors")
+   (value("A", HeaterXSensors::A),
+    value("B", HeaterXSensors::B),
+    value("C", HeaterXSensors::C));
+
+ registration::enumeration<HeaterXHeaters>("foxtrot::devices::HeaterXHeaters")
+   (value("A", HeaterXHeaters::A),
+    value("B", HeaterXHeaters::B));
+
  
  registration::class_<ArchonHeaterX>("foxtrot::devices::ArchonHeaterX")
  .property_readonly("getHeaterAOutput",&ArchonHeaterX::getHeaterAOutput)
