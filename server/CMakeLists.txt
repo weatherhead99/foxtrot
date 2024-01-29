@@ -42,6 +42,7 @@ endfunction()
 #NOTE: the below is to get around gRPC "infinite loop" bugs in their initialization
 #if we are using asio-grpc directly from upstream this should work
 set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
+find_package(Boost REQUIRED COMPONENTS program_options asio filesystem coroutine)
 find_package(asio-grpc)
 
 #however, if we're using the conan package, then the above is currently not supported.
@@ -63,7 +64,7 @@ message(STATUS "rttr_incl: ${rttr_incl}")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-find_package(Boost REQUIRED COMPONENTS program_options asio filesystem coroutine)
+
 
 find_package(RapidJSON REQUIRED)
 find_package(libsodium REQUIRED)

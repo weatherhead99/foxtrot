@@ -58,6 +58,7 @@ class FoxtrotServerConan(ConanFile):
         else:
             self.requires("asio-grpc/[^2.6.0]")
 
+
         self.requires("boost/[^1.82.0]", override=True)
         self.requires("zlib/1.2.13", override=True)
         self.requires("grpc/[^1.54.1]", override=True)
@@ -73,7 +74,7 @@ class FoxtrotServerConan(ConanFile):
         tc = self._setup_cmake_tc()
 
         if "use_coro" in self.options:
-            tc.cache_variables["USE_CORO_IMPLEMENTATIONS"] = bool(self.options["use_coro"])
+            tc.cache_variables["USE_CORO_IMPLEMENTATIONS"] = bool(self.options.use_coro)
         else:
             tc.cache_variables["USE_CORO_IMPLEMENTATIONS"] = False
 
