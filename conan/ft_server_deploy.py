@@ -60,9 +60,12 @@ def deploy(graph, output_folder, **kwargs):
         if "foxtrot_server" in req.ref.name:
             bindir = cfile.cpp_info.bindirs[0]
             copy(cfile, "exptserve", bindir, output_folder)
+        if "foxtrot_lsst" in req.ref.name:
+            bindir = cfile.cpp_info.bindirs[0]
             copy(cfile, "autofilld", bindir, output_folder)
             generate_autofilld_script(output_folder)
-
+            
+            
 #        print(cfile._conanfile)
 #        print(hasattr(cfile._conanfile, "deploy_setups"))
         allsetups.extend(copy_setups(cfile._conanfile, output_folder))
