@@ -258,13 +258,11 @@ std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int 
   else
   {
     _lg.Debug("have timeout, trying to lock...");
-    lock.try_lock_for(std::chrono::milliseconds(contention_timeout_ms));
-    if(!lock.owns_lock())
-    {
+    if(!lock.try_lock_for(std::chrono::milliseconds(contention_timeout_ms)))
+      {
        throw ContentionError("couldn't lock device with id:" + std::to_string(devid));
     }
-  
-  
+
   }
 
   return lock;
