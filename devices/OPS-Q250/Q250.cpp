@@ -19,6 +19,21 @@ const foxtrot::parameterset Q250_class_parameters
 };
 #endif
 
+using std::string;
+using foxtrot::devices::Q250;
+
+
+template<typename Ret>
+Ret command_get(const string& cmdin)
+{
+  auto devrepl = cmd(cmdin);
+  if constexpr(std::is_same_v<Ret, double>)
+    return std::stod(devrepl);
+  else if constexpr(std::is_same_v<Ret, int>)
+    return std::stoi(devrepl);
+}
+
+
 foxtrot::devices::Q250::Q250(std::shared_ptr<protocols::scsiserial> proto)
 : CmdDevice(proto), _scsiproto(proto)
 {
