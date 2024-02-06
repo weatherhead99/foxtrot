@@ -41,27 +41,29 @@ public:
                                         const string& body,
                                         const vector<string>* header = nullptr );
 
-    unsigned long get_last_http_response_code();
-    std::string get_redirect_url();
+    unsigned long get_last_http_response_code(void* curlinstance);
+  unsigned long get_last_http_response_code();
+  
+    std::string get_redirect_url(void* curlinstance);
 
 private:
     void curl_checkerror ( int code );
+  unsigned int last_code = 0;
+    void curl_common_performreq(void* curlinstance);
 
-    void curl_common_performreq();
-
-    slistuptr set_curl_header ( const vector<string>& headerfields );
+  [[nodiscard]] slistuptr set_curl_header ( const vector<string>& headerfields, void* curlinstance );
 
     std::ostringstream& getdatabuilder();
 
 
     std::ostringstream thisreq_builder;
-    static int _nCurlInstances;
-    void* _curlinstance;
+  static std::atomic<int> _nCurlInstances;
+  //    void* _curlinstance;
     Logging _lg;
 
 
   template<typename CurlInstance>
-  void common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header);
+  slistuptr common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header);
   
 };
 

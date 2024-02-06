@@ -25,6 +25,8 @@ namespace foxtrot {
       void push_to_channel(const string& title, const string& body, const string& channel);
 
       void push_to_channel_with_defaults(const string& body, optstring title=std::nullopt, optstring channel=std::nullopt);
+      void push_to_channel_with_defaults(const string& body, const string* title= nullptr, const string* channel=nullptr);
+      
 
       
         

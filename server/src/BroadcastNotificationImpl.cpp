@@ -20,17 +20,16 @@ bool foxtrot::BroadcastNotificationLogic::HandleRequest(
     
     repl.set_msgid(req.msgid());
 
-    optstring title, channel;
+    const string* title = nullptr;
+    const string* channel = nullptr;
 
     if(!req.use_default_title())
       {
-	string temptitle = req.title();
-	title = std::ref(temptitle);
+	title = &req.title();
       }
     if(!req.use_default_channel())
       {
-	string tempchan = req.channel_target();
-	channel = std::ref(tempchan);
+	channel = &req.channel_target();
       }
 
     

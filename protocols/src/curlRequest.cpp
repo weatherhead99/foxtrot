@@ -1,6 +1,8 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 
+#include <iostream>
+
 #include <foxtrot/ProtocolError.h>
 #include <foxtrot/protocols/curlRequest.h>
 
@@ -8,15 +10,19 @@
 using namespace foxtrot;
 using namespace foxtrot::protocols;
 
-int CurlRequest::_nCurlInstances = 0;
+std::atomic<int> CurlRequest::_nCurlInstances = 0;
 
 
 
 size_t foxtrot::detail::write_cback(char* ptr, size_t size, size_t nmemb, void* userdata)
 {
+
+  std::cout << "in write_cback" << std::endl;
         auto* req = reinterpret_cast<CurlRequest*>(userdata);
         std::string stringdat(ptr,nmemb);
         req->getdatabuilder() << stringdat;
+
+	std::cout << "write_cback done" << std::endl;
       return nmemb;
         
 }
@@ -39,18 +45,11 @@ CurlRequest::CurlRequest()
     //increment the number of instances of this class around
     _nCurlInstances++;
     
-    _curlinstance = curl_easy_init();
-    if(!_nCurlInstances)
-    {
-        throw foxtrot::ProtocolError("couldn't initialize libcurl instance", _lg);
-    }
-    
     
 }
 
 foxtrot::protocols::CurlRequest::~CurlRequest()
 {
-    curl_easy_cleanup(_curlinstance);
     
     _nCurlInstances--;
     if(_nCurlInstances == 0)
@@ -63,7 +62,7 @@ foxtrot::protocols::CurlRequest::~CurlRequest()
 
 
 template <typename CurlInstance>
-void CurlRequest::common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header)
+slistuptr CurlRequest::common_curl_setup(CurlInstance inst, const string& path, const vector<string>* header)
 {
   thisreq_builder.str("");
   curl_checkerror(curl_easy_setopt(inst, CURLOPT_URL, path.c_str()));
@@ -73,8 +72,10 @@ void CurlRequest::common_curl_setup(CurlInstance inst, const string& path, const
   if(header)
     {
       _lg.Debug("header present");
-      headerptr = set_curl_header(*header);
+      headerptr = set_curl_header(*header, inst);
     }
+
+  return std::move(headerptr);
 
 }
 		  
@@ -93,23 +94,31 @@ string CurlRequest::blocking_get_request(const string& path,
                                          const vector<string>* header
 )
 {
-    curl_easy_reset(_curlinstance);
-    common_curl_setup(_curlinstance, path, header);
-    
-    curl_common_performreq();
-    return thisreq_builder.str();
+
+  std::unique_ptr<CURL, void(*)(CURL*)> inst(curl_easy_init(), curl_easy_cleanup);
+  
+
+
+  auto hdrs = common_curl_setup(inst.get(), path, header);  
+  curl_common_performreq(inst.get());
+ 
+  
+  return thisreq_builder.str();
 }
 
 string CurlRequest::blocking_post_request(const string& path,
                                           const string& body,
                                           const vector<string>* header)
 {
-    curl_easy_reset(_curlinstance);
 
-    common_curl_setup(_curlinstance, path, header);
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_POSTFIELDS, body.c_str()));
+  std::unique_ptr<CURL, void(*)(CURL*)> inst(curl_easy_init(), curl_easy_cleanup);
 
-    curl_common_performreq();
+  auto hdrs = common_curl_setup(inst.get(), path, header);
+    curl_checkerror(curl_easy_setopt(inst.get(), CURLOPT_POSTFIELDS, body.c_str()));
+
+    curl_common_performreq(inst.get());
+
+    
     return thisreq_builder.str();
 };
 
@@ -126,44 +135,57 @@ void foxtrot::protocols::CurlRequest::curl_checkerror(int code)
     
 }
 
-
 unsigned long foxtrot::protocols::CurlRequest::get_last_http_response_code()
 {
+  return last_code;
+}
+
+
+unsigned long foxtrot::protocols::CurlRequest::get_last_http_response_code(void* inst)
+{
     unsigned long code;
-    curl_checkerror(curl_easy_getinfo(_curlinstance,CURLINFO_RESPONSE_CODE,&code));
+    curl_checkerror(curl_easy_getinfo(inst,CURLINFO_RESPONSE_CODE,&code));
     return code;
     
 }
 
-std::string foxtrot::protocols::CurlRequest::get_redirect_url()
+std::string foxtrot::protocols::CurlRequest::get_redirect_url(void* curlinstance)
 {
     char* url;
-    curl_checkerror(curl_easy_getinfo(_curlinstance, CURLINFO_REDIRECT_URL, &url));
+    curl_checkerror(curl_easy_getinfo(curlinstance, CURLINFO_REDIRECT_URL, &url));
     return std::string(url);
 }
 
 
 
 
-void foxtrot::protocols::CurlRequest::curl_common_performreq()
+void foxtrot::protocols::CurlRequest::curl_common_performreq(void* curlinstance)
 {
     _lg.strm(sl::debug) << "setting write function";
     //NOTE: the + here is drastically important if using a lambda, for ..... reasons.. 
     // (to do with C variadics)
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEFUNCTION, detail::write_cback));
+        curl_checkerror(curl_easy_setopt(curlinstance,CURLOPT_WRITEFUNCTION, detail::write_cback));
     _lg.strm(sl::debug) << "setting write data";
-    curl_checkerror(curl_easy_setopt(_curlinstance,CURLOPT_WRITEDATA,
-        reinterpret_cast<void*>(this)));
+    curl_checkerror(curl_easy_setopt(curlinstance,CURLOPT_WRITEDATA,
+      reinterpret_cast<void*>(this)));
     
     _lg.strm(sl::debug) << "performing request";
-    curl_checkerror(curl_easy_perform(_curlinstance));
 
+    
+    auto ret = curl_easy_perform(curlinstance);
+
+    _lg.strm(sl::debug) << "returned from easy_perform, ret is : " << (int) ret;
+    curl_checkerror(ret);
+
+    
     _lg.strm(sl::debug) << "request done";
+
+    last_code = get_last_http_response_code(curlinstance);
     
     
 };
 
-slistuptr foxtrot::protocols::CurlRequest::set_curl_header(const vector<std::string>& headerfields)
+slistuptr foxtrot::protocols::CurlRequest::set_curl_header(const vector<std::string>& headerfields, void* curlinst)
 {
     std::unique_ptr<curl_slist, void(*)(curl_slist*)> list(nullptr, curl_slist_free_all);
     
@@ -175,9 +197,9 @@ slistuptr foxtrot::protocols::CurlRequest::set_curl_header(const vector<std::str
     }
     list.reset(raw_list);
     
-    curl_checkerror(curl_easy_setopt(_curlinstance, CURLOPT_HTTPHEADER, list.get()));
+    curl_checkerror(curl_easy_setopt(curlinst, CURLOPT_HTTPHEADER, list.get()));
     
-    return std::move(list);
+    return list;
 }
 
 

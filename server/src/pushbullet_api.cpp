@@ -55,8 +55,10 @@ void foxtrot::pushbullet_api::push_to_channel(const string& title, const string&
     writer.EndObject();
     
     std::vector<string> header{"Access-Token: " + api_key_, "Content-Type: application/json"};
+
     
-    auto repl = proto_->blocking_post_request(PUSHBULLET_PUSHES_API,s.GetString(),&header);
+    
+    auto repl = proto_->blocking_post_request(PUSHBULLET_PUSHES_API,s.GetString(), &header);
     auto rcode = proto_->get_last_http_response_code();
     
     lg_.strm(sl::trace) << "header: " << header[0] << " " << header[1] ;
@@ -80,9 +82,16 @@ void foxtrot::pushbullet_api::push_to_channel_with_defaults(const string& body, 
   string passed_channel = channel.has_value() ? channel.value().get() : _default_channel.value();
   
   push_to_channel(passed_title, body, passed_channel);
-  
+}
 
 
+void foxtrot::pushbullet_api::push_to_channel_with_defaults(const string& body, const string* title, const string* channel)
+{
+  string passed_title = title? *title : _default_title.value();
+  string passed_channel = channel? *channel :  _default_channel.value();
+
+  push_to_channel(passed_title, body, passed_channel);
+ 
 }
 
 
