@@ -83,6 +83,7 @@ if(${ueye_FOUND})
 endif()
   
 add_subdirectory(DLP-IOR4)
+add_subdirectory(RLY-8)
 
 set(libobjs "")
 message(STATUS "device targetS: ${device_targets}")
