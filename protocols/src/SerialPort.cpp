@@ -2,7 +2,9 @@
 #include <boost/asio/serial_port.hpp>
 #include <boost/asio/serial_port_base.hpp>
 #include <boost/system/detail/errc.hpp>
+#include <boost/system/detail/error_condition.hpp>
 #include <boost/system/error_code.hpp>
+#include <deque>
 #include <ios>
 #include <vector>
 #include <stdexcept>
@@ -335,6 +337,30 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
 }
 
 
+std::string foxtrot::protocols::SerialPort::read_all(unsigned short read_at_least, std::chrono::milliseconds timeout)
+{
+  std::string strbuf;
+
+  auto buf = boost::asio::dynamic_buffer(strbuf);
+  boost::system::error_code ec;
+
+  std::size_t actbytes = 0;
+
+  if(_io_service->stopped())
+    _io_service->restart();
+
+  
+  boost::asio::async_read(*_sport, buf, boost::asio::transfer_at_least(read_at_least),
+			  [&ec, &actbytes] (const boost::system::error_code ec2, std::size_t transferred)
+			  {
+			    ec = ec2; actbytes=transferred;
+			  });
+
+  auto n_run = _io_service->run_for(timeout);
+  _lg.strm(sl::debug) << "bytes transferred: " << actbytes;
+  return strbuf;
+
+};
 
 
 

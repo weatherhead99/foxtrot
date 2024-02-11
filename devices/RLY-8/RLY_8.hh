@@ -3,25 +3,31 @@
 #include <string>
 #include <vector>
 #include <foxtrot/CmdDevice.h>
-#include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/Logging.h>
 
 using std::string;
 using std::vector;
 using std::shared_ptr;
 using std::unique_ptr;
-using foxtrot::protocols::SerialPort;
 
 namespace foxtrot
 {
 
+  namespace protocols
+  {
+    class SerialPort;
+  }
   
   namespace devices
   {
 
+    using foxtrot::protocols::SerialPort;
     enum class RLY_8_Commands : unsigned char
       {
-
+	QUERY_VERSION = 0x07,
+	QUERY_RELAY_STATE = 0x01,
+	SET_RELAY = 0x00
+	
       };
 
     class RLY_8 : public CmdDevice
@@ -30,12 +36,13 @@ namespace foxtrot
 
       public:
       RLY_8(shared_ptr<SerialPort> proto,
-	    const std::string& comment);
+	    const string& comment="RLY_8", unsigned char addr=0x01);
 
       virtual ~RLY_8();
 
-      string getName();
-      void setName(const string& name);
+      // manual appears inconsistent on this...
+      //      string getName();
+      //void setName(const string& name);
       
       string getVersion();
 
@@ -46,22 +53,31 @@ namespace foxtrot
       unsigned char getRelayState();
 
       bool getRelay(unsigned char channel);
-      void setRelay(unsigned char channel);
+      void setRelay(unsigned char channel, bool onoff);
       
     private:
-      string assemble_cmd(unsigned char addr, RLY_8_Commands cmd,
+      string assemble_cmd(RLY_8_Commands cmd,
 			  const std::vector<unsigned char>& data);
-      unsigned char calc_checksum(string::const_iterator start,
-				  string::const_iterator end) const;
+
+      template<typename It>
+      unsigned char calc_checksum(It start,
+				  It end) const
+      {
+	  unsigned sum = 0;
+	  for( auto it = start; it != end; it++)
+	    sum += *it;
+
+	  return static_cast<unsigned char>(sum % 256);
+      }
       
       
       string cmd(const std::string& request) override;
 
       vector<unsigned char> extract_response(const string& response,
-					     unsigned char expd_addr,
 					     RLY_8_Commands expd_cmd);
       
       foxtrot::Logging _lg;
+      unsigned char _addr;
 
     };
     
