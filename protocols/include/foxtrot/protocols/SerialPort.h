@@ -34,7 +34,8 @@ public:
     virtual std::string read ( unsigned int len, unsigned* actlen= nullptr) override;
     virtual std::string read_definite(unsigned int len, opttimeout wait=nullopt) override;
 
-  virtual std::string read_all(unsigned short read_at_least, std::chrono::milliseconds timeout);
+  virtual std::string read_all(unsigned short read_at_least, std::chrono::milliseconds timeout
+			       );
 
     virtual void write ( const std::string& data ) override;
 

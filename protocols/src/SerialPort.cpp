@@ -337,7 +337,8 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
 }
 
 
-std::string foxtrot::protocols::SerialPort::read_all(unsigned short read_at_least, std::chrono::milliseconds timeout)
+std::string foxtrot::protocols::SerialPort::read_all(unsigned short read_at_least, std::chrono::milliseconds timeout
+						     )
 {
   std::string strbuf;
 
@@ -349,7 +350,6 @@ std::string foxtrot::protocols::SerialPort::read_all(unsigned short read_at_leas
   if(_io_service->stopped())
     _io_service->restart();
 
-  
   boost::asio::async_read(*_sport, buf, boost::asio::transfer_at_least(read_at_least),
 			  [&ec, &actbytes] (const boost::system::error_code ec2, std::size_t transferred)
 			  {
@@ -358,6 +358,12 @@ std::string foxtrot::protocols::SerialPort::read_all(unsigned short read_at_leas
 
   auto n_run = _io_service->run_for(timeout);
   _lg.strm(sl::debug) << "bytes transferred: " << actbytes;
+
+  if(ec)
+    _lg.strm(sl::error) << "boost serial port error: " << ec.message();
+  
+  if(actbytes < read_at_least)
+    throw foxtrot::ProtocolTimeoutError("failed to transfer required bytes in time allowed");
   return strbuf;
 
 };

@@ -5,6 +5,7 @@
 #include <foxtrot/backward.hpp>
 #include <chrono>
 #include <thread>
+#include <bitset>
 
 using std::cout;
 using std::endl;
@@ -30,13 +31,37 @@ int main()
 
   cout << "version: " << vers << endl;
 
-  cout << "relay state: " << std::hex << (int) dev.getRelayState() << endl;
+  auto state = dev.getRelayState();
+  cout << "relay state: " << std::hex << (int) state << endl;
 
   dev.setRelay(1, true);
 
-  cout << "relay state:" << std::hex << (int) dev.getRelayState() << endl;
+
+  cout << "wrote relay state" << endl;
+  state = dev.getRelayState();
+  
+  cout << "relay state:" << std::hex << (int) state << endl;
   std::this_thread::sleep_for(std::chrono::seconds(1));
 
   dev.setRelay(1, false);
+
+
+  for(int i=0; i < 10; i++)
+    {
+      
+      for(int r = 1; r <=8; r++)
+	{
+	  auto rst = dev.getRelayState();
+	  auto bs = std::bitset<8>(rst);
+	  cout << "r: " << i << "value we think: " << bs[r-1];
+
+	  dev.setRelay(r, !bs[r-1]);
+	  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+      
+    }
+
+
+  cout << "version: " << dev.getVersion() << endl;
   
 }

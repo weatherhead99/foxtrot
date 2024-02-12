@@ -1,11 +1,15 @@
 #include "RLY_8.hh"
 
+#include <rttr/registration>
 #include <sstream>
 #include <stdexcept>
+#include <bitset>
 #include <foxtrot/DeviceError.h>
 #include <system_error>
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/ProtocolError.h>
+
+
 
 using namespace foxtrot::devices;
 using namespace foxtrot;
@@ -19,7 +23,7 @@ RLY_8::RLY_8(shared_ptr<SerialPort> proto, const std::string &comment,
 
   proto->Init(nullptr);
   _lg.strm(sl::info) << "RLY_8 init done";
-  
+  //  proto->setDrain(true);
 }
 
 
@@ -114,10 +118,10 @@ string RLY_8::cmd(const string& request)
   _lg.strm(sl::trace) << "request is: " << request;
   protoptr->write(request);
 
-  auto timeout = protoptr->calc_minimum_transfer_time(256) * 10;
+  auto timeout = protoptr->calc_minimum_transfer_time(256) * 100;
 
   //will at least return the same amount of the request
-  auto ret = protoptr->read_all(request.size(), timeout);
+  auto ret = protoptr->read_all(6, timeout);
 
   _lg.strm(sl::trace) << "return length: " << ret.size();
   return ret;
@@ -196,6 +200,25 @@ void RLY_8::setRelay(unsigned char channel, bool onoff)
 
   if(outdat[0] != 0)
     throw foxtrot::DeviceError("failed to set relay for some reason!");
-  
+}
+
+bool RLY_8::getRelay(unsigned char channel)
+{
+  auto state = getRelayState();
+  auto bs = std::bitset<8>(state);
+  return bs[channel-1];
+}
+
+
+RTTR_REGISTRATION{
+
+  using namespace rttr;
+  using foxtrot::devices::RLY_8;
+
+  registration::class_<RLY_8>("foxtrot::devices::RLY_8")
+    .method("getRelay", &RLY_8::getRelay)(parameter_names("channel"))
+    .method("setRelay", &RLY_8::setRelay)(parameter_names("channel", "onoff"))
+    .property_readonly("RelayState", &RLY_8::getRelayState)
+    .property_readonly("Version", &RLY_8::getVersion);
 
 }
