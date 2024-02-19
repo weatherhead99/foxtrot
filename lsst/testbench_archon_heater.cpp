@@ -263,7 +263,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 		       [&harness, &lg, &params]() {
 			 lg.Info("setting up RLY_8 relay controller");
 			 auto parms = params->at("rly_08_params");
-			 auto proto = std::make_shared<foxtrot::protocols::SerialPort(&parms);
+			 auto proto = std::make_shared<foxtrot::protocols::SerialPort>(&parms);
 			 auto dev = std::unique_ptr<foxtrot::devices::RLY_8>(
 									     new foxtrot::devices::RLY_8(proto));
 			 dev->setDeviceComment("vacuum_relays");
