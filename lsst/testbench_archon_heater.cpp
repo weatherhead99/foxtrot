@@ -265,7 +265,7 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			 auto parms = params->at("rly_08_params");
 			 auto proto = std::make_shared<foxtrot::protocols::SerialPort(&parms);
 			 auto dev = std::unique_ptr<foxtrot::devices::RLY_8>(
-									     new foxtrot::devices::RLY_8());
+									     new foxtrot::devices::RLY_8(proto));
 			 dev->setDeviceComment("vacuum_relays");
 			 harness.AddDevice(std::move(dev));
 		       });
