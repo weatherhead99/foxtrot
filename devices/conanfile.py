@@ -31,6 +31,8 @@ class FoxtrotDevicesConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
+        self.requires("zlib/1.2.13", override=True)
+
     def validate_build(self):
         if not valid_min_cppstd(self, 20):
             self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")

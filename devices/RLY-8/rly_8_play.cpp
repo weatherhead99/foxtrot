@@ -28,40 +28,48 @@ int main()
 
   cout << "getting version..." << endl;
   auto vers = dev.getVersion();
+  cout << "enabling relay..." << endl;
 
-  cout << "version: " << vers << endl;
+  dev.setRelay(1,true);
 
-  auto state = dev.getRelayState();
-  cout << "relay state: " << std::hex << (int) state << endl;
+  std::this_thread::sleep_for(std::chrono::seconds(10));
 
-  dev.setRelay(1, true);
+  cout << "disabling relay..." << endl;
+  dev.setRelay(1,false);
+
+  // cout << "version: " << vers << endl;
+
+  // auto state = dev.getRelayState();
+  // cout << "relay state: " << std::hex << (int) state << endl;
+
+  // dev.setRelay(1, true);
 
 
-  cout << "wrote relay state" << endl;
-  state = dev.getRelayState();
+  // cout << "wrote relay state" << endl;
+  // state = dev.getRelayState();
   
-  cout << "relay state:" << std::hex << (int) state << endl;
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  // cout << "relay state:" << std::hex << (int) state << endl;
+  // std::this_thread::sleep_for(std::chrono::seconds(1));
 
-  dev.setRelay(1, false);
+  // dev.setRelay(1, false);
 
 
-  for(int i=0; i < 10; i++)
-    {
+  // for(int i=0; i < 10; i++)
+  //   {
       
-      for(int r = 1; r <=8; r++)
-	{
-	  auto rst = dev.getRelayState();
-	  auto bs = std::bitset<8>(rst);
-	  cout << "r: " << i << "value we think: " << bs[r-1];
+  //     for(int r = 1; r <=8; r++)
+  // 	{
+  // 	  auto rst = dev.getRelayState();
+  // 	  auto bs = std::bitset<8>(rst);
+  // 	  cout << "r: " << i << "value we think: " << bs[r-1];
 
-	  dev.setRelay(r, !bs[r-1]);
-	  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
+  // 	  dev.setRelay(r, !bs[r-1]);
+  // 	  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  // 	}
       
-    }
+  //   }
 
 
-  cout << "version: " << dev.getVersion() << endl;
+  // cout << "version: " << dev.getVersion() << endl;
   
 }

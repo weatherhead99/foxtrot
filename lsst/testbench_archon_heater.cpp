@@ -32,6 +32,8 @@
 #include <foxtrot/protocols/BulkUSB.h>
 #include <foxtrot/protocols/curlRequest.h>
 
+#include <foxtrot/devices/RLY_8.hh>
+
 #include "chiller_setup_funcs.hh"
 
 
@@ -256,6 +258,17 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
 			   vacpump->setDeviceComment("vacuum_pump");
                            harness.AddDevice(std::move(vacpump));
                        });
+
+    setup_with_disable("RLY_8", setup_params, lg,
+		       [&harness, &lg, &params]() {
+			 lg.Info("setting up RLY_8 relay controller");
+			 auto parms = params->at("rly_08_params");
+			 auto proto = std::make_shared<foxtrot::protocols::SerialPort(&parms);
+			 auto dev = std::unique_ptr<foxtrot::devices::RLY_8>(
+									     new foxtrot::devices::RLY_8());
+			 dev->setDeviceComment("vacuum_relays");
+			 harness.AddDevice(std::move(dev));
+		       });
     
     //===============spot motor system======================//
     // setup_with_disable("BSC203", setup_params, lg,
