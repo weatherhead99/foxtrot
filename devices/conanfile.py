@@ -1,3 +1,4 @@
+
 import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps
@@ -16,7 +17,7 @@ class FoxtrotDevicesConan(ConanFile):
                       "newport_2936R/*.h", "newport_2936R/*.cpp", "OPS-Q250/*.h",
                       "OPS-Q250/*.cpp", "stellarnet/*.h", "stellarnet/*.cpp",
                       "TPG362/*.h", "TPG362/*.cpp", "webswitch_plus/*.h",
-                      "DLP-IOR4/*.cpp", "DLP-IOR4/*.hh",
+                      "DLP-IOR4/*.cpp", "DLP-IOR4/*.hh", "RLY-8/*.hh", "RLY-8/*.cpp",
                       "webswitch_plus/*.cpp", "*/CMakeLists.txt", "cmake/Find*.cmake",
                       "idscamera/*.cpp", "idscamera/*.h")
 
