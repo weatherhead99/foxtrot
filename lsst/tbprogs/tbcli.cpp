@@ -380,7 +380,7 @@ int main(int argc, char** argv)
     }
     else if(cmd == "pump")
     {
-      auto devid = foxtrot::find_devid_on_server(servdesc, "TC110");   
+      auto devid = foxtrot::find_devid_on_server(servdesc, "vacuum_pump");   
       if(devid < 0)
       {
           lg.Fatal("no vacuum pump controller found on this server");
@@ -411,12 +411,23 @@ int main(int argc, char** argv)
           }
           
       }
+      else if(subcmd == "turbo")
+	{
+	  if(!vm.count("value"))
+	    {
+	      lg.Info("printing turbo onoff..");
+	      auto resp = std::get<bool>(client.InvokeCapability(devid, "MotorPump"));
+	      std::cout << "turbo motor: " << (int) resp << std::endl;
+	    }
+	}
       else if(subcmd == "vent")
       {
       }
       else if(subcmd == "power")
       {
-          
+	lg.Info("printing power...");
+	  auto resp = std::get<int>(client.InvokeCapability(devid, "DrivePower"));
+	  std::cout << "power: " << resp << " W" << std::endl;
       }
       else
       {
@@ -425,8 +436,11 @@ int main(int argc, char** argv)
       }
         
     }
-    
-    
+    else if(cmd == "valve")
+      {
+	auto devid = foxtrot::find_devid_on_server(servdesc,"vacuum_relays");
+
+      }
     else
       {
         std::cout << "unrecognised command: " << cmd << std::endl;

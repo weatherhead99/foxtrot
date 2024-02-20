@@ -55,6 +55,19 @@ void autofill_logic::register_devid(Client& cl)
         throw std::runtime_error("can't find archon on server");
     archon_devid = devid;
 
+
+    devid = foxtrot::find_devid_on_server(sd, "vacuum_pump");
+    if(devid == -1)
+      throw std::runtime_error("can't find vacuump pump on server!");
+
+    pump_devid = devid;
+    
+    devid = foxtrot::find_devid_on_server(sd, "vacuum_relays");
+    if(devid == -1)
+      throw std::runtime_error("can't find vacuum relays on server!");
+
+    relays_devid = devid;
+
 };
 
 env_data autofill_logic::measure_data(Client& cl)
@@ -83,6 +96,24 @@ env_data autofill_logic::measure_data(Client& cl)
     out.cryo_gauge_enable = get<bool>(cl.InvokeCapability(tpg_devid,"getGaugeOnOff",1));
     lg_.strm(sl::trace) << "getting gauge enable 2";
     out.pump_gauge_enable = get<bool>(cl.InvokeCapability(tpg_devid,"getGaugeOnOff",2));
+
+    
+    lg_.strm(sl::trace) << "getting vac pump rotation speed";
+    out.vac_pump_rotspeed = get<int>(cl.InvokeCapability(pump_devid,"ActualRotSpeed"));
+    lg_.strm(sl::trace) << "getting vac pump drive power";
+    out.vac_pump_drivepower = get<double>(cl.InvokeCapability(pump_devid,"DrivePower"));
+
+    lg_.strm(sl::trace) << "getting vac pump turbo enable";
+    out.vac_pump_turbo = get<bool>(cl.InvokeCapability(pump_devid, "MotorPump"));
+
+    lg_.strm(sl::trace) << "getting vac pump onoff";
+    out.vac_pump_onoff = get<bool>(cl.InvokeCapability(pump_devid, "PumpStationOnOff"));
+
+    lg_.strm(sl::trace) << "getting vac pump powerpercent";
+    out.vac_pump_powerpercent = get<int>(cl.InvokeCapability(pump_devid,"PowerPercent"));
+
+    lg_.strm(sl::trace) << "getting vac relay onoff";
+    out.valve_relay_onoff = get<bool>(cl.InvokeCapability(relays_devid, "getRelay", 1));
     
     return out;
 

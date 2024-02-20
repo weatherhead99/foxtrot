@@ -39,6 +39,8 @@ namespace foxtrot {
         int tpg_devid = -1;
         int heater_devid = -1;
         int archon_devid = -1;
+      int pump_devid = -1;
+      int relays_devid = -1;
         bool dryrun_;
         bool logged_tank_empty = false;
         double empty_temp_;

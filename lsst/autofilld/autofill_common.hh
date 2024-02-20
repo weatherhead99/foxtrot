@@ -13,6 +13,13 @@ struct env_data {
     double heater_target;
     bool cryo_gauge_enable;
     bool pump_gauge_enable;
+  int vac_pump_rotspeed;
+  int vac_pump_powerpercent;
+  double vac_pump_drivepower;
+  bool vac_pump_turbo;
+  bool vac_pump_onoff;
+  bool valve_relay_onoff;
+  
 };
     
     

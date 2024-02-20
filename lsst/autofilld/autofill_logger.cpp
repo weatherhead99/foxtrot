@@ -58,7 +58,7 @@ void foxtrot::autofill_logger::start_new_logfile(const std::string& name)
     
     }
     
-    *(_thisfile) << "#unixtime,datetime,pressure_cryo(hPa),pressure_pump(hPa),temp_stage(C),temp_tank(C),htr(V),target(C),cryo_gauge_onoff,pump_gauge_onoff" << std::endl;
+    *(_thisfile) << "#unixtime,datetime,pressure_cryo(hPa),pressure_pump(hPa),temp_stage(C),temp_tank(C),htr(V),target(C),cryo_gauge_onoff,pump_gauge_onoff,vac_pump_rotspeed(Hz),vac_pump_power(%),vac_pump_drivepower(W),vac_pump_turbomotor,vac_pump_onoff,vac_valve_relay" << std::endl;
     
 }
 
@@ -82,8 +82,15 @@ void foxtrot::autofill_logger::LogEnvData(const foxtrot::env_data& dat)
         "," << dat.tank_temp << 
         "," << dat.heater_output << 
         "," << dat.heater_target << 
-        "," << (int) dat.pump_gauge_enable << 
-        "," << (int) dat.cryo_gauge_enable << std::endl;
+        "," << (int) dat.cryo_gauge_enable <<
+      "," << (int) dat.pump_gauge_enable << 
+      "," << dat.vac_pump_rotspeed <<
+      "," << dat.vac_pump_powerpercent <<
+      "," << dat.vac_pump_drivepower <<
+      "," << dat.vac_pump_turbo <<
+      "," << dat.vac_pump_onoff <<
+      "," << dat.valve_relay_onoff <<
+      std::endl;
 }
 
 void foxtrot::autofill_logger::LogEvent(const foxtrot::event_data& evdat)
