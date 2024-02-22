@@ -1,8 +1,8 @@
 import grpc
 
-from pyfoxtrot.ft_sessions_pb2_grpc import sessionsStub
-from pyfoxtrot.ft_sessions_pb2 import session_info, session_list
-from pyfoxtrot.ft_types_pb2 import empty
+from pyfoxtrot.protos.ft_sessions_pb2_grpc import sessionsStub
+from pyfoxtrot.protos.ft_sessions_pb2 import session_info, session_list
+from pyfoxtrot.protos.ft_types_pb2 import empty
 from pyfoxtrot.Client import Client
 from pyfoxtrot.common import _check_repl_err, decode_sodiumkey, encode_sodiumkey
 from pyfoxtrot.Errors import ServerError
