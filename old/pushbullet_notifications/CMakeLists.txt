@@ -1,5 +1,0 @@
-add_executable(ft_pushbullet_setup pushbullet_authorize.cpp)
-
-add_library(pushbullet_notifications OBJECT pushbullet_client.cpp)
-
-target_link_libraries(ft_pushbullet_setup foxtrot)

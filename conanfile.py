@@ -1,61 +1,17 @@
 import os
-from conans import ConanFile, CMake, tools
-
-bcs = "@bincrafters/stable"
-bbcs = "/1.69.0%s" % bcs
-
+from conan import ConanFile
+from conan.tools.cmake import cmake_layout
 
 class FoxtrotConan(ConanFile):
     name="foxtrot"
     description="a simple device server"
     settings = "os", "compiler" , "build_type" , "arch"
-    generators="cmake", "virtualrunenv"
-    default_options = "rttr:shared=True", "nanomsg:shared=True", \
-                      "mosquitto:shared=True"
-
-    requires= "grpc/1.17.2@inexorgame/stable", \
-    "nanomsg/1.1.2%s" % bcs, \
-    "rttr/0.9.6@weatherhead99/testing", \
-    "boost_log%s" % bbcs, \
-    "boost_date_time%s" % bbcs, \
-    "boost_system%s" % bbcs, \
-    "boost_test%s" % bbcs, \
-    "boost_program_options%s" % bbcs, \
-    "boost_asio%s" % bbcs, \
-    "boost_filesystem%s" % bbcs, \
-    "boost_thread%s" % bbcs, \
-        "libusb/1.0.22%s" % bcs, \
-    "protobuf/3.6.1%s" % bcs, \
-    "mosquitto/1.4.15%s" % bcs, \
-    "libcurl/7.61.1%s" % bcs, \
-    "cmake_findboost_modular%s" % bbcs, \
-    "rapidxml/1.13%s" % bcs, \
-    "rapidjson/1.1.0%s" % bcs, \
-    "OpenSSL/1.0.2q@conan/stable"
-
+    generators = "CMakeDeps", "CMakeToolchain", "VirtualRunEnv", "VirtualBuildEnv"
         
-    def configure(self):
-        pass
-        #on linux, use shared protobuf & grpc builds
-        #if self.settings.os == "Linux":
-            #self.output.info("using shared protobuf build")
-            #self.options["protobuf"].shared = True
+    def requirements(self):
+        for pkg in ["core", "protocols", "devices", "server", "client"]:
+            self.requires(f"foxtrot_{pkg}/[~{self.version},include_prerelease]")
 
-
-    def imports(self):
-        if self.settings.os == "Windows":
-            self.copy("*.dll", dst="bin", src="bin")
-            if self.settings.build_type == "Debug":
-                self.copy("*.pdb", dst="bin", src="bin")
-            
-
-    def build(self):
-        cmake = CMake(self)
-        cmake.definitions["BUILD_DASHBOARD"] = "OFF"
-        cmake.configure()
-
-        
-        env_build = tools.RunEnvironment(self)
-        with tools.environment_append(env_build.vars):
-            cmake.build()
-        
+    def layout(self):
+        cmake_layout(self, src_folder="conansrc", build_folder="conanbuild")
+    
