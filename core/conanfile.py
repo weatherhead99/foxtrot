@@ -33,11 +33,11 @@ class FoxtrotCoreConan(ConanFile):
 
         self.tool_requires("protobuf/3.21.12")
 
-        self.requires("grpc/[^1.54.1]", headers=True, libs=True,
+        self.requires("grpc/[^1.65.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("boost/[^1.82.0]", headers=True, libs=True,
+        self.requires("boost/[^1.85.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
@@ -45,7 +45,7 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("openssl/3.1.1", override=True)
+        self.requires("openssl/3.2.2", override=True)
 
 
 
