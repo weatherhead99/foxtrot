@@ -40,7 +40,7 @@ class FoxtrotCoreConan(ConanFile):
         self.requires(protobuf_req, headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
-        
+
         self.requires("boost/[^1.85.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)

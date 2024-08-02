@@ -1,4 +1,5 @@
 #include <foxtrot/server/FlagMap.hh>
+#include <stdexcept>
 
 using std::string;
 

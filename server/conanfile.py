@@ -45,6 +45,7 @@ class FoxtrotServerConan(ConanFile):
                 self.options.rm_safe("use_coro")
 
     def validate_build(self):
+        super().validate_build()
         if self.options.get_safe("use_coro"):
             check_min_cppstd(self, 20)
 
@@ -53,15 +54,24 @@ class FoxtrotServerConan(ConanFile):
         super().requirements()
 
         gcc_version = int(self.settings.compiler.version.value)
-        if gcc_version <= 11:
-            self.requires("asio-grpc/[<2.7]")
-        else:
-            self.requires("asio-grpc/[^2.9.2]")
+        if self.options.use_coro:
+            if gcc_version <= 11:
+                self.requires("asio-grpc/[<2.7]")
+            else:
+                self.requires("asio-grpc/[^2.9.2]")
 
-
-        self.requires("boost/[^1.82.0]", override=True)
+        self.requires("boost/1.85.0", override=True)
         self.requires("zlib/1.2.13", override=True)
-        self.requires("grpc/[^1.54.1]", override=True)
+        self.requires("grpc/1.65.0", override=True,
+                      transitive_headers=True,
+                      transitive_libs=True)
+
+        #fixing for upstream grpc package bug?
+        self.requires("abseil/20240116.2", libs=True,
+                      transitive_libs=True)
+
+
+
 
     def generate(self):
         #NOTE: need to alter target name of rapidJSON which differs from
