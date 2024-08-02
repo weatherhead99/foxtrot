@@ -1,6 +1,6 @@
 project(foxtrot_core C CXX)
-cmake_minimum_required(VERSION 3.18)
-set(CMAKE_CXX_STANDARD 17)
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_CXX_STANDARD 20)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
@@ -20,7 +20,6 @@ endif()
 #setup conan build if necessary
 include(GitVersion)
 
-
 set(packname "core")
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
                 ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
@@ -37,19 +36,13 @@ find_package(Boost REQUIRED COMPONENTS log program_options)
 endif()
 find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
-
-#NOTE: find via module to force conan dependencies
 find_package(gRPC REQUIRED)
-
 
 
 #message(WARNING "using protoc program: ${protobuf::protoc}")
 
 #build foxtrot core library (errors and logging)
-
-set(srcs src/backward.cpp src/DeviceError.cpp src/Logging.cpp
-src/ProtocolError.cpp src/ProtocolTimeoutError.cpp src/StubError.cpp src/ContentionError.cpp src/Error.cpp src/ProtocolError.cpp src/ServerError.cpp src/TelemetryError.cpp src/ReflectionError.cpp src/config.cpp src/typeUtil.cpp src/ft_tuple_helper.cc src/Device.cpp src/DeviceHarness.cpp src/ExperimentalSetup.cpp src/CmdDevice.cpp src/DeviceFactory.cpp src/HandleManager.cpp src/ft_union_helper.cc)
-
+file(GLOB srcs CONFIGURE_DEPENDS src/*.cpp src/*.cc)
 add_subdirectory(proto)
 add_library(foxtrot_core ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 target_compile_definitions(foxtrot_core PUBLIC -DBOOST_LOG_DYN_LINK)
@@ -61,11 +54,10 @@ foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 target_include_directories(foxtrot_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
-set(link_libs "foxtrot_protos;Boost::log;Boost::program_options;Boost::filesystem;protobuf::libprotobuf;RTTR::Core;Boost::thread")
 
-
-
-target_link_libraries(foxtrot_core PUBLIC ${link_libs})
+target_link_libraries(foxtrot_core PUBLIC foxtrot_protos Boost::log Boost::program_options
+  Boost::filesystem protobuf::libprotobuf
+  RTTR::Core)
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
@@ -77,8 +69,6 @@ install(TARGETS foxtrot_core foxtrot_protos
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
-
-  
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
         COMPONENT devel)
@@ -87,8 +77,6 @@ install(EXPORT foxtrot_core
         DESTINATION ${ft_cmakedir}
         COMPONENT devel
         NAMESPACE foxtrot::)
-
-#foxtrot_setup_cmake_package(cmake/foxtrotCoreConfig.cmake.in foxtrotCore foxtrot_core)
 
 set(ft_core_deps_script
 "include(CMakeFindDependencyMacro)
@@ -104,11 +92,7 @@ endif()
 "
   )
 
-
 foxtrot_setup_cmake_package(foxtrotCore foxtrot_core core ${ft_core_deps_script})
-
-#foxtrot_create_package_config(cmake/foxtrotCoreConfig.cmake.in ${ft_cmakedir} 
-#    "ft_cmakedir;ft_core_sourcedir;ft_core_binarydir")
 
 #install cmake macro files
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
@@ -121,9 +105,5 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/foxtrotGenericConfig.cmake.in
 	DESTINATION ${ft_cmakedir}
 	COMPONENT devel)
-
-        
-#add to package registry
-#foxtrot_add_to_package_registry(foxtrot_core foxtrotCore)
 
 add_subdirectory(devprogs)

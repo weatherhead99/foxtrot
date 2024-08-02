@@ -1,7 +1,5 @@
 #include <foxtrot/ft_tuple_helper.hh>
 
-
-
 std::size_t foxtrot::tuple_size(const rttr::type& tp)
 {
     auto sizeprop = tp.get_property("size");

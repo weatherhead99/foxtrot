@@ -1,14 +1,4 @@
-set(proto_files foxtrot.proto
-  ft_types.proto
-  ft_auth.proto
-  ft_error.proto
-  ft_capability.proto
-  ft_sessions.proto
-  ft_flags.proto)
-
-
-#NOTE: find via module to force conan dependencies
-find_package(gRPC REQUIRED)
+file(GLOB proto_files CONFIGURE_DEPENDS *.proto)
 
 if(TARGET gRPC::grpc_cpp_plugin)
   message(STATUS "using gRPC target to find plugin program")
