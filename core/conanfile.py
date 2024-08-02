@@ -73,3 +73,6 @@ class FoxtrotCoreConan(ConanFile):
         with envvars.apply():
             cmake.build()
 
+    def package_info(self):
+        super().package_info()
+        self.cpp_info.resdirs = ["share/foxtrot"]
