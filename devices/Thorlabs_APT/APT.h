@@ -19,12 +19,15 @@
 #include <tuple>
 #include <exception>
 #include <variant>
-
+#include <set>
 
 //TODO: handle error conditions somehow!!!!
 
 using std::cout;
 using std::endl;
+
+using std::set;
+
 
 namespace foxtrot {
   namespace devices {
@@ -47,6 +50,26 @@ namespace foxtrot {
       APT* _obj = nullptr;
       destination _dest;
       foxtrot::Logging lg;
+    };
+
+
+    struct APTDeviceTraits
+    {
+      bsc203_opcodes status_request_code = bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE;
+      bsc203_opcodes status_get_code = bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE;
+      bsc203_opcodes complete_success_code = bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED;
+
+      set<bsc203_opcodes> motor_status_messages = {
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
+
+      set<bsc203_opcodes> motor_finish_messages = {
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
+
     };
     
       
@@ -96,6 +119,11 @@ namespace foxtrot {
       
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
+
+      //HACK: children should directly set this traits struct in their constructors
+      APTDeviceTraits _traits = APTDeviceTraits();
+
+      
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
       
       void transmit_message(bsc203_opcodes opcode, destination dest,
@@ -103,6 +131,7 @@ namespace foxtrot {
       
       template<typename arrtp>
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, destination src = destination::host);
+
       
 
       [[deprecated]]
@@ -160,7 +189,7 @@ namespace foxtrot {
       std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt, bool throw_on_errors=true);
 
     };
-    
+
     
     template<typename T>
     std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan); 

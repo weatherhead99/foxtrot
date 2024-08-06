@@ -51,6 +51,9 @@ const foxtrot::parameterset bsc203_class_params
 #endif
 
 
+using namespace foxtrot::devices;
+using foxtrot::devices::APT;
+
 foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* obj, destination dest)
   : _obj(obj), _dest(dest), lg("AptUpdateMessageScopeGuard")
 {
@@ -80,6 +83,7 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
   _serport->flush();
+  
 }
 
 
@@ -298,7 +302,7 @@ hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 
 std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destination dest, motor_channel_idents channel)
 {
-    auto repl = request_response_struct<dcstatus>(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE, bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE, dest, static_cast<unsigned char>(channel),
+    auto repl = request_response_struct<dcstatus>(_traits.status_request_code, _traits.status_get_code, dest, static_cast<unsigned char>(channel),
                                                   0, dest);
     
     return repl;
@@ -336,8 +340,8 @@ void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_chann
   
   start_absolute_move(dest, channel, target);
   
-  wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
-                     bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+  wait_blocking_move(_traits.status_get_code,
+                     _traits.complete_success_code,
                      dest, channel, std::chrono::milliseconds(1000),
                      tm, limstate);
   
@@ -377,8 +381,8 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
     
     while(true)
     {
-        auto [repl, opcode] = receive_message_sync_check(motor_status_messages.begin(), 
-                                                         motor_status_messages.end(), dest, update_timeout);
+        auto [repl, opcode] = receive_message_sync_check(_traits.motor_status_messages.begin(), 
+                                                         _traits.motor_status_messages.end(), dest, update_timeout);
         
         if(opcode == static_cast<decltype(opcode)>(statusupdateopcode))
         {
@@ -446,7 +450,7 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
 
   auto limitstate = is_limited(dest, channel);
  start_home_channel(dest, channel); 
-  wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+  wait_blocking_move(_traits.status_get_code,
                      bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
                      dest, channel, std::chrono::milliseconds(2000), 
                      //WARNING: this one is not used for now 
@@ -464,7 +468,7 @@ void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_chann
 
     auto limitstate = is_limited(dest, channel);
     start_relative_move(dest, channel, target);
-    wait_blocking_move(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE,
+    wait_blocking_move(_traits.status_get_code,
                        bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
                        dest, channel, std::chrono::milliseconds(1000),
                        tm, limitstate);
@@ -656,7 +660,7 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
       std::ostringstream oss;
       oss << std::hex;
       for(auto c : headerstr)
-	oss << c << ",";
+	oss <<  static_cast<unsigned int>(c) << ",";
       _lg.strm(sl::error) << "header str (hex) is: " << oss.str();	    
       _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
 
@@ -691,6 +695,9 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
     return {out, recv_opcode};
 
 }
+
+
+
 
 
 
