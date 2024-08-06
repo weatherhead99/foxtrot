@@ -20,6 +20,7 @@
 #include <exception>
 #include <variant>
 
+
 //TODO: handle error conditions somehow!!!!
 
 using std::cout;
@@ -27,6 +28,8 @@ using std::endl;
 
 namespace foxtrot {
   namespace devices {
+
+    
     
     using allstatus = std::variant<channel_status, dcstatus>;
       
