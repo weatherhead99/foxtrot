@@ -302,7 +302,6 @@ std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destina
                                                   0, dest);
     
     return repl;
-    
 }
 
 
@@ -653,12 +652,17 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
   auto src = headerstr[5];
     if(src != static_cast<decltype(src)>(expected_source))
     {
-            _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;
-	    _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
+      _lg.strm(sl::error) << "headerstr is: " << headerstr;
+      std::ostringstream oss;
+      oss << std::hex;
+      for(auto c : headerstr)
+	oss << c << ",";
+      _lg.strm(sl::error) << "header str (hex) is: " << oss.str();	    
+      _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
 
-	    _lg.Info("flushing serial port");
-	    _serport->flush();
-        _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
+      _lg.Info("flushing serial port");
+      _serport->flush();
+      _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
         throw DeviceError("received unexpected source");
 
     }

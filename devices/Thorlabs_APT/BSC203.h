@@ -4,6 +4,8 @@
 
 //TODO: handle error conditions somehow!!!!
 
+using std::optional;
+
 namespace foxtrot {
   namespace devices {
       
@@ -72,7 +74,8 @@ namespace foxtrot {
         void absolute_move(destination dest, motor_channel_idents channel, unsigned distance);
         bool get_bayused_rack(destination dest, unsigned char bay);
         void jog_move(destination dest, motor_channel_idents channel, unsigned char direction);
-        channel_status get_status_update (destination dest, bool print = true);
+
+        channel_status get_status_update(destination dest, optional<milliseconds> timeout=std::nullopt);
         
         
         void set_relative_move_params(destination dest, motor_channel_idents channel, int distance);

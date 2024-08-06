@@ -156,7 +156,7 @@ namespace foxtrot {
     {
       unsigned char p1;
       unsigned char p2;
-      std::vector<unsigned char> data;      
+      std::vector<unsigned char> data;
     };
 
     struct apt_reply

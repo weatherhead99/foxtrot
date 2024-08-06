@@ -1,4 +1,5 @@
 #include <foxtrot/DeviceError.h>
+#include "APT.h"
 #include "BSC203.h"
 
 #define DEST_HOST_CONTROLLER 0x01
@@ -14,9 +15,23 @@
 
 #include <thread>
 #include <chrono>
+#include <set>
 
 using std::cout;
 using std::endl;
+
+
+const std::set<foxtrot::devices::bsc203_opcodes> motor_finish_messages =
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
+
+const std::set<foxtrot::devices::bsc203_opcodes> motor_status_messages =
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
+     foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
+
 
 
 
@@ -211,8 +226,9 @@ void foxtrot::devices::BSC203::set_limit_switch_params(foxtrot::devices::destina
 
 bool foxtrot::devices::BSC203::get_bayused_rack(foxtrot::devices::destination dest, unsigned char bay)
 {
+
     transmit_message(bsc203_opcodes::MGMSG_RACK_REQ_BAYUSED,bay,0,dest);
-    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_RACK_GET_BAYUSED,dest);
+    apt_reply ret = receive_message_sync_check(bsc203_opcodes::MGMSG_RACK_GET_BAYUSED, dest);
 
     if(ret.p1 != bay)
     {
@@ -299,7 +315,7 @@ void foxtrot::devices::BSC203::absolute_move(foxtrot::devices::destination dest,
     set_channelenable(dest, foxtrot::devices::motor_channel_idents::channel_1,true);
     
     //Checking that it is not already in the same position
-    channel_status motorinit = get_status_update(dest, false);
+    channel_status motorinit = get_status_update(dest);
     if (motorinit.position == distance) {
         _lg.Info("The actuator is already in the requested position");
         return;
@@ -352,41 +368,37 @@ void foxtrot::devices::BSC203::jog_move(foxtrot::devices::destination dest, foxt
     channel_status chanstat = get_status_update(dest);
 }
 
-foxtrot::devices::channel_status foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination dest, bool print) {
+foxtrot::devices::channel_status foxtrot::devices::BSC203::get_status_update (foxtrot::devices::destination dest, optional<milliseconds> timeout) {
 
-    bool hasdata;
-    unsigned received_opcode = 0;
-    channel_status chanstr;
 
-    start_update_messages(dest);
-    _serport->flush();
+    AptUpdateMessageScopeGuard grd(this, dest);
+
+    auto [ret, recv_opcode] = receive_message_sync_check(motor_status_messages.begin(),
+							 motor_status_messages.end(),
+							 dest, timeout);
+
+    int retries = 0;
     
-    while(received_opcode != static_cast<decltype(received_opcode)>(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE))
-    {
-        try
-        {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE, dest, &hasdata, true, &received_opcode);
+    while(recv_opcode != static_cast<decltype(recv_opcode)>(bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE))
+      {
+	_lg.strm(sl::debug) << "received motor message but not a status update...";
+	auto [ret, recv_opcode] = receive_message_sync_check(motor_status_messages.begin(),
+							motor_status_messages.end(),
+							dest, timeout);
 
-            std::copy(ret.data.begin(), ret.data.end(), reinterpret_cast<unsigned char*>(&chanstr));
-            
-            if (print){
-                print_channel_status(&chanstr);
-            }
-            
-            stop_update_messages(dest);
-            std::this_thread::sleep_for(std::chrono::milliseconds(150));
-            _serport->flush();
-            
-            return chanstr;
+	if(retries++ > 10)
+	  throw foxtrot::DeviceError("did 10 retries and no motor status update message!");
 
-        } catch (DeviceError excep)
-        {
-            _lg.strm(sl::trace) << "looking for get status...";
-        }
-    }
+      }
 
-    throw std::logic_error("status update request never returned. This is program logic bug!");
+
+    if(!ret.data.has_value())
+      throw foxtrot::DeviceError("expected data array but none returned!");
+
+    channel_status stat;
+    std::copy((*ret.data).begin(), (*ret.data).end(), reinterpret_cast<unsigned char*>(&stat));
+    return stat;
+    
     
 }
 
