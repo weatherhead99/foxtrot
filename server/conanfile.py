@@ -61,7 +61,6 @@ class FoxtrotServerConan(ConanFile):
                 self.requires("asio-grpc/[^2.9.2]")
 
         self.requires("boost/1.85.0", override=True)
-        self.requires("zlib/1.2.13", override=True)
         self.requires("grpc/1.65.0", override=True,
                       transitive_headers=True,
                       transitive_libs=True)
