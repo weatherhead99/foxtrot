@@ -71,7 +71,6 @@ class FoxtrotServerConan(ConanFile):
 
 
 
-
     def generate(self):
         #NOTE: need to alter target name of rapidJSON which differs from
         #upstream cmake build (I think)
