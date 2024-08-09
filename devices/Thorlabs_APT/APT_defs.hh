@@ -23,6 +23,13 @@ namespace foxtrot {
         channel_3 = 0x04,
         channel_4 = 0x08
     };
+
+      enum class status_bit_indices : unsigned char {
+	is_homing = 9
+	
+
+
+      };
     
 
     enum class bsc203_opcodes : unsigned short {

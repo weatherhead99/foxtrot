@@ -70,6 +70,8 @@ namespace foxtrot {
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
+      int n_ignore_failed_motor_msgs = 10;
+      
     };
     
       
@@ -120,6 +122,8 @@ namespace foxtrot {
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
 
+
+      
       //HACK: children should directly set this traits struct in their constructors
       APTDeviceTraits _traits = APTDeviceTraits();
 
@@ -159,6 +163,7 @@ namespace foxtrot {
       void start_home_channel(destination dest, motor_channel_idents channel);
 
       virtual bool is_limited(destination dest, motor_channel_idents channel);
+
       
       void start_update_messages(destination dest);
       void stop_update_messages(destination dest);
@@ -188,6 +193,19 @@ namespace foxtrot {
     private:
       std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt, bool throw_on_errors=true);
 
+      template<int Size>
+      bool extract_status_bit(const allstatus& stat, int bit)
+      {
+	return std::visit([bit] (auto& v)
+	{
+	  auto statusbits = v.statusbits;
+	  std::bitset<Size> bits(statusbits);
+	  return bits[bit];
+	}, stat);
+
+      }
+
+      
     };
 
     
