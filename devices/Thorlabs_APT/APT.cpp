@@ -404,12 +404,12 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    _lg.strm(sl::info) << "motor status failed, but reports still homing";
 		    //NOTE: this will happen both when a motor is homing and hits a limit briefly, but ALSO when it has physically crashed into something. Therefore, check this a few times and if it gets above a threshold bail out, sending an emergency stop message...
 		    //For now we make it not configurable, if we need that later we'll add it
-		    if(fail_status_retries++ >= 10)
+		    if(fail_status_retries++ >= _traits.n_ignore_failed_motor_msgs)
 		      {
-			_lg.strm(sl::error) << "motor status checks failed 10 times, likely motor has stalled or crashed!";
+			_lg.strm(sl::error) << "motor status checks failed " << fail_status_retries << " times, likely motor has stalled or crashed!";
 		    
 			stop_move(dest, chan, true);
-		    throw DeviceError("motor status check failed 10 times. Motor crash suspected. Emergency stop issued. If this is not a crash, maybe retry number needs adjusting!");
+			throw DeviceError("motor status check failed. Motor crash suspected. Emergency stop issued. If this is not a crash, maybe retry number needs adjusting!");
 		      }
 		    
 
@@ -425,11 +425,11 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    continue;
 
 		  }
-
 		_serport->flush();
 		throw ThorlabsMotorError("motor status check failed! (Maybe a limit switch has been engaged)");
-
 	      }
+	    else
+	      fail_status_retries = 0;
 	    
         }
         else
@@ -449,7 +449,31 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
 {
 
   auto limitstate = is_limited(dest, channel);
- start_home_channel(dest, channel); 
+
+  auto stat = get_status(dest, channel);
+  bool is_homing_already = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));
+  
+  if(is_homing_already)
+    _lg.strm(sl::info) << "the stage is already homing, FYI...";
+
+  _lg.strm(sl::debug) << "cancelling all running moves...";
+  stop_move(dest, channel, true);
+
+  stat = get_status(dest, channel);
+  is_homing_already = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));
+
+  if(is_homing_already)
+    {
+      _lg.strm(sl::error) << "it's still homing, somehow stop didn't work...";
+      throw foxtrot::DeviceError("failed to stop a homing move before homing...");
+    }
+
+
+  
+  start_home_channel(dest, channel);
+ 
+
+ 
   wait_blocking_move(_traits.status_get_code,
                      bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
                      dest, channel, std::chrono::milliseconds(2000), 
