@@ -15,11 +15,20 @@ int main()
   
   LibUsbDeviceList devlist;
   cout  << "n_devices found: " << devlist.n_devices() << endl;
+  
   for(int i=0; i < devlist.n_devices(); i++)
     {
       auto dev = devlist[i];
-      cout << "vid: " << dev.device_descriptor().idVendor << ",";
-      cout << "pid: " << dev.device_descriptor().idProduct << endl;
+      auto vid = dev.device_descriptor().idVendor;
+      auto pid = dev.device_descriptor().idProduct;
+      cout << "vid: " << vid << ", pid: " << pid << endl;
+
+      if(vid == 0x0BD7)
+	{
+	  cout << "stellarnet found!" << endl;
+	  dev.open();
+	}
+
     }
 
 }

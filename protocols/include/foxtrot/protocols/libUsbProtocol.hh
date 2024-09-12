@@ -5,7 +5,10 @@
 #include <memory>
 #include <optional>
 #include <iterator>
-
+#include <cstdint>
+#include <span>
+#include <chrono>
+#include <vector>
 
 class libusb_context;
 class libusb_device_handle;
@@ -33,11 +36,35 @@ namespace foxtrot
     public:
       ~LibUsbDevice();
 
-      const libusb_device_descriptor& device_descriptor() const;
+      libusb_device_descriptor device_descriptor() const;
+
+      bool is_open() const;
+      void open();
+      void close() noexcept;
+
+      void claim_interface(std::uint8_t iface);
+      void release_interface();
+
+      std::vector<unsigned char> blocking_control_transfer_receive(std::uint8_t bmRequestType,
+								 std::uint8_t bRequest,
+								 std::uint16_t wValue,
+								 std::uint16_t wIndex,
+								 std::uint16_t wLength,
+								 std::chrono::milliseconds timeout);
+
+      void blocking_control_transfer_send(std::uint8_t bmRequestType,
+					  std::uint8_t bRequest,
+					  std::uint16_t wValue,
+					  std::uint16_t wIndex,
+					  std::span<unsigned char> data,
+					  std::chrono::milliseconds timeout);
+      
+      
     private:
       LibUsbDevice(libusb_device* pdev);
       libusb_device* _devptr;
-      libusb_device_descriptor* _devdesc;
+      libusb_device_handle* _hdl = nullptr;
+      std::optional<std::uint8_t> claimed_interface = std::nullopt;
     };
 
     class LibUsbDeviceList
@@ -57,7 +84,7 @@ namespace foxtrot
       
       LibUsbDevice operator[](std::size_t pos);
       int n_devices() const;
-      std::optional<std::size_t> find_one_device(unsigned vid, unsigned pid);
+      std::optional<std::size_t> find_one_device(unsigned short vid, unsigned short pid);
       
     private:
       struct _LibUsbDeviceListDeleter

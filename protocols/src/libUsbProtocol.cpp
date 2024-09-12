@@ -88,19 +88,89 @@ LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos)
 LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
 {
   libusb_ref_device(pdev);
-  check_libusb_return(libusb_get_device_descriptor(pdev, _devdesc));
-  
 }
 
-const libusb_device_descriptor& LibUsbDevice::device_descriptor() const
+libusb_device_descriptor LibUsbDevice::device_descriptor() const
 {
-  return *_devdesc;
+  libusb_device_descriptor out;
+  check_libusb_return(libusb_get_device_descriptor(_devptr,&out));
+  return out;
 }
 
 LibUsbDevice::~LibUsbDevice()
 {
+  if(is_open())
+    close();
+
   libusb_unref_device(_devptr);
 }
+
+bool LibUsbDevice::is_open() const
+{
+  return _hdl == nullptr;
+}
+
+void LibUsbDevice::open()
+{
+  check_libusb_return(libusb_open(_devptr, &_hdl));
+}
+
+void LibUsbDevice::close() noexcept
+{
+  libusb_close(_hdl);
+  _hdl = nullptr;
+}
+
+void LibUsbDevice::claim_interface(std::uint8_t iface)
+{
+  if(claimed_interface != std::nullopt)
+    throw std::logic_error("an interface is already claimed!");
+  check_libusb_return(libusb_claim_interface(_hdl, iface));
+  claimed_interface = iface;
+}
+
+void LibUsbDevice::release_interface()
+{
+  if(not claimed_interface)
+    throw std::logic_error("no interface is claimed!");
+  
+  check_libusb_return(libusb_release_interface(_hdl, *claimed_interface));
+  claimed_interface = std::nullopt;
+}
+
+std::vector<unsigned char> LibUsbDevice::blocking_control_transfer_receive(std::uint8_t bmRequestType,
+								 std::uint8_t bRequest,
+								 std::uint16_t wValue,
+								 std::uint16_t wIndex,
+								 std::uint16_t wLength,
+								 std::chrono::milliseconds timeout)
+{
+  
+  std::vector <unsigned char> out;
+  out.resize(wLength);
+  check_libusb_return(libusb_control_transfer(_hdl, bmRequestType,
+					      bRequest, wValue, wIndex, out.data(),
+					      wLength, timeout.count()));
+
+  return out;
+}
+
+
+void LibUsbDevice::blocking_control_transfer_send(std::uint8_t bmRequestType,
+						  std::uint8_t bRequest,
+						  std::uint16_t wValue,
+						  std::uint16_t wIndex,
+						  std::span<unsigned char> data,
+						  std::chrono::milliseconds timeout)
+{
+  check_libusb_return(libusb_control_transfer(_hdl, bmRequestType, bRequest,
+					      wValue, wIndex, data.data(),
+					      data.size(), timeout.count()));
+  
+
+}
+					       
+
 
 
 libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)
