@@ -7,6 +7,102 @@
 
 using namespace foxtrot::protocols;
 
+
+std::string format_libusb_err_msg(int errcode)
+{
+  std::ostringstream oss;
+  oss << "libUSB error: " << libusb_error_name(errcode) << ": " << libusb_strerror(errcode);
+  return oss.str();
+}
+
+auto check_libusb_return(auto ret, foxtrot::Logging* lg=nullptr)
+{
+  //NOTE: all libusb error codes are <0, this allows passthrough
+  if(ret < 0)
+    {
+      if(lg  != nullptr)
+	throw LibUsbError(ret, *lg);
+      throw LibUsbError(ret);
+    }
+  return ret;
+}
+
+
+LibUsbError::LibUsbError(int errcode)
+  : ProtocolError(format_libusb_err_msg(errcode))
+{
+  code = errcode;
+};
+
+LibUsbError::LibUsbError(int errcode, foxtrot::Logging& lg)
+  : ProtocolError(format_libusb_err_msg(errcode), lg)
+{
+  code = errcode;
+};
+
+
+void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list)
+{
+  //NOTE: unref the devices, if any other LibUsbDevice objects have been created
+  // they upref themselves on copy / construction
+  libusb_free_device_list(list, true);
+}
+
+
+LibUsbDeviceList::LibUsbDeviceList()
+{
+
+  //NOTE: this is deprecated upstream but only in newer libusb versions than we're using yet
+  check_libusb_return(libusb_init(&_ctxt));
+
+
+  //allocate and get a device list. The machinery of unique_ptr custom deleter should free it when we're done
+  libusb_device** pdevlist;
+  _n_devices = check_libusb_return(libusb_get_device_list(_ctxt, &pdevlist));
+  devlist = decltype(devlist)(pdevlist);
+
+};
+
+LibUsbDeviceList::~LibUsbDeviceList()
+{
+   libusb_exit(_ctxt);
+}
+
+
+int LibUsbDeviceList::n_devices() const
+{
+  return _n_devices;
+}
+
+LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos)
+{
+ 
+  if(pos >= _n_devices)
+    throw std::out_of_range("illegal device list index");
+
+  LibUsbDevice out(*(devlist.get() + pos));
+  return out;
+
+}
+
+LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
+{
+  libusb_ref_device(pdev);
+  check_libusb_return(libusb_get_device_descriptor(pdev, _devdesc));
+  
+}
+
+const libusb_device_descriptor& LibUsbDevice::device_descriptor() const
+{
+  return *_devdesc;
+}
+
+LibUsbDevice::~LibUsbDevice()
+{
+  libusb_unref_device(_devptr);
+}
+
+
 libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)
     : SerialProtocol(instance_parameters), _lg("libUsbProtocol"){
 
