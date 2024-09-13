@@ -73,16 +73,38 @@ namespace foxtrot
 
       class const_iterator
       {
-	using iterator_category = std::random_access_iterator_tag;
+      public:
+	using iterator_category = std::input_iterator_tag;
 	using difference_type = std::ptrdiff_t;
+	using value_type = LibUsbDevice;
+	using pointer = const LibUsbDevice* const;
+	using reference = const LibUsbDevice&;
 
+	value_type operator*();
+
+	const_iterator& operator++();
+	const_iterator operator++(int);
+
+	friend bool operator==(const const_iterator& a, const const_iterator& b);
+	friend bool operator!=(const const_iterator& a, const const_iterator& b);
+	
+      private:
+	explicit const_iterator(LibUsbDeviceList* devlist, int pos);
+	int _pos;
+	LibUsbDeviceList* _devlist;
+	
       };
       
       LibUsbDeviceList();
       ~LibUsbDeviceList();
 
+      const_iterator cbegin();
+      const_iterator cend();
+
+      const_iterator begin() const;
+      const_iterator end() const;
       
-      LibUsbDevice operator[](std::size_t pos);
+      LibUsbDevice operator[](std::size_t pos) const;
       int n_devices() const;
       std::optional<std::size_t> find_one_device(unsigned short vid, unsigned short pid);
       

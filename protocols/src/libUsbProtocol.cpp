@@ -49,6 +49,30 @@ void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list
 }
 
 
+LibUsbDeviceList::const_iterator::const_iterator(LibUsbDeviceList *devlist,
+                                                 int pos)
+    : _devlist(devlist), _pos(pos) {}
+
+LibUsbDevice LibUsbDeviceList::const_iterator::operator*()
+{
+  return _devlist->operator[](_pos);
+}
+
+LibUsbDeviceList::const_iterator& LibUsbDeviceList::const_iterator::operator++()
+{
+  _pos++;
+  return *this;
+}
+
+LibUsbDeviceList::const_iterator LibUsbDeviceList::const_iterator::operator++(int)
+{
+  return const_iterator(_devlist, _pos+1);
+  
+}
+
+
+
+
 LibUsbDeviceList::LibUsbDeviceList()
 {
 
@@ -74,7 +98,7 @@ int LibUsbDeviceList::n_devices() const
   return _n_devices;
 }
 
-LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos)
+LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos) const
 {
  
   if(pos >= _n_devices)
@@ -84,6 +108,18 @@ LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos)
   return out;
 
 }
+
+LibUsbDevice::const_iterator LibUsbDevice::cbegin() const
+{
+  return LibUsbDevice::const_iterator(this, 0);
+}
+
+LibUsbDevice::const_iterator LibUsbDevice::begin() const
+{
+  return cbegin();
+}
+
+
 
 LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
 {
