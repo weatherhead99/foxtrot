@@ -17,6 +17,10 @@ if(WIN32)
 endif()
 
 
+option(BUILD_UDEV_SUPPORT "Build UDEV support library (requires libudev)" ON)
+
+
+
 #setup conan build if necessary
 include(GitVersion)
 
@@ -38,12 +42,23 @@ find_package(Protobuf REQUIRED )
 find_package(rttr 0.9.6 REQUIRED)
 find_package(gRPC REQUIRED)
 
-
-#message(WARNING "using protoc program: ${protobuf::protoc}")
+#configure udev
+find_package(libudev)
 
 #build foxtrot core library (errors and logging)
 file(GLOB srcs CONFIGURE_DEPENDS src/*.cpp src/*.cc)
 add_subdirectory(proto)
+
+
+#configure building of udev support
+if(${BUILD_UDEV_SUPPORT} AND NOT ${libudev_FOUND})
+  message(WARNING "udev support requested but could not find libudev so disabled it")
+
+elseif(${BUILD_UDEV_SUPPORT})
+  file(GLOB udev_srcs CONFIGURE_DEPENDS src/udev/*.cpp src/udev/*.cc)
+  list(APPEND srcs ${udev_srcs})
+endif()
+
 add_library(foxtrot_core ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 target_compile_definitions(foxtrot_core PUBLIC -DBOOST_LOG_DYN_LINK)
 
@@ -58,6 +73,11 @@ target_include_directories(foxtrot_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT
 target_link_libraries(foxtrot_core PUBLIC foxtrot_protos Boost::log Boost::program_options
   Boost::filesystem protobuf::libprotobuf
   RTTR::Core)
+
+if(TARGET udev::libudev)
+  target_link_libraries(foxtrot_core PUBLIC udev::libudev)
+
+endif()
 
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)

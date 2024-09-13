@@ -25,3 +25,10 @@ target_include_directories(timestamp_play PUBLIC ${CMAKE_SOURCE_DIR}/include)
 add_executable(plugin_play plugin_play.cpp)
 target_link_libraries(plugin_play Boost::headers)
 add_library(plugin_example SHARED plugin_example.cpp)
+
+
+if(TARGET udev::libudev)
+  add_executable(udev_play udev_play.cpp)
+  target_link_libraries(udev_play foxtrot_core udev::libudev)
+
+endif()
