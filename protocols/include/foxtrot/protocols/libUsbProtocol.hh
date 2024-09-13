@@ -35,6 +35,8 @@ namespace foxtrot
       friend class LibUsbDeviceList;
     public:
       ~LibUsbDevice();
+      LibUsbDevice(const LibUsbDevice& other);
+      LibUsbDevice(LibUsbDevice&& other);
 
       libusb_device_descriptor device_descriptor() const;
 
@@ -58,6 +60,15 @@ namespace foxtrot
 					  std::uint16_t wIndex,
 					  std::span<unsigned char> data,
 					  std::chrono::milliseconds timeout);
+
+      std::vector<unsigned char> blocking_bulk_transfer_receive(unsigned char endpoint,
+								int maxlen,
+								std::chrono::milliseconds timeout);
+
+      void blocking_bulk_transfer_send(unsigned char endpoint,
+				       std::span<unsigned char> data,
+				       std::chrono::milliseconds timeout);
+				       
       
       
     private:
@@ -73,6 +84,7 @@ namespace foxtrot
 
       class const_iterator
       {
+	friend class LibUsbDeviceList;
       public:
 	using iterator_category = std::input_iterator_tag;
 	using difference_type = std::ptrdiff_t;
@@ -89,17 +101,17 @@ namespace foxtrot
 	friend bool operator!=(const const_iterator& a, const const_iterator& b);
 	
       private:
-	explicit const_iterator(LibUsbDeviceList* devlist, int pos);
+	explicit const_iterator(const LibUsbDeviceList* devlist, int pos);
 	int _pos;
-	LibUsbDeviceList* _devlist;
+	const LibUsbDeviceList* _devlist;
 	
       };
       
       LibUsbDeviceList();
       ~LibUsbDeviceList();
 
-      const_iterator cbegin();
-      const_iterator cend();
+      const_iterator cbegin() const;
+      const_iterator cend() const;
 
       const_iterator begin() const;
       const_iterator end() const;
@@ -117,6 +129,11 @@ namespace foxtrot
       std::size_t _n_devices;
       std::unique_ptr<libusb_device*, _LibUsbDeviceListDeleter> devlist;
     };
+
+    bool operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b);
+    bool operator!=(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b);
+      
+    
     
     class libUsbProtocol : public SerialProtocol
     {
@@ -146,5 +163,6 @@ namespace foxtrot
     private:
       foxtrot::Logging _lg;
     };
+
   }
 }

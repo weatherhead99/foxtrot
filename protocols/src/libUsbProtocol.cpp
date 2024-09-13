@@ -49,7 +49,7 @@ void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list
 }
 
 
-LibUsbDeviceList::const_iterator::const_iterator(LibUsbDeviceList *devlist,
+LibUsbDeviceList::const_iterator::const_iterator(const LibUsbDeviceList *devlist,
                                                  int pos)
     : _devlist(devlist), _pos(pos) {}
 
@@ -58,13 +58,15 @@ LibUsbDevice LibUsbDeviceList::const_iterator::operator*()
   return _devlist->operator[](_pos);
 }
 
-LibUsbDeviceList::const_iterator& LibUsbDeviceList::const_iterator::operator++()
+foxtrot::protocols::LibUsbDeviceList::const_iterator&
+LibUsbDeviceList::const_iterator::operator++()
 {
   _pos++;
   return *this;
 }
 
-LibUsbDeviceList::const_iterator LibUsbDeviceList::const_iterator::operator++(int)
+foxtrot::protocols::LibUsbDeviceList::const_iterator
+LibUsbDeviceList::const_iterator::operator++(int)
 {
   return const_iterator(_devlist, _pos+1);
   
@@ -109,22 +111,41 @@ LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos) const
 
 }
 
-LibUsbDevice::const_iterator LibUsbDevice::cbegin() const
+LibUsbDeviceList::const_iterator LibUsbDeviceList::cbegin() const
 {
-  return LibUsbDevice::const_iterator(this, 0);
+  return const_iterator(this, 0);
 }
 
-LibUsbDevice::const_iterator LibUsbDevice::begin() const
+LibUsbDeviceList::const_iterator LibUsbDeviceList::begin() const
 {
   return cbegin();
 }
 
+LibUsbDeviceList::const_iterator LibUsbDeviceList::cend() const
+{
+  return const_iterator(this, n_devices());
+}
 
+LibUsbDeviceList::const_iterator LibUsbDeviceList::end() const
+{
+  return cend();
+}
 
 LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
 {
   libusb_ref_device(pdev);
 }
+
+bool foxtrot::protocols::operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
+{
+  return (a._pos == b._pos) and ( a._devlist == b._devlist);
+}
+
+bool foxtrot::protocols::operator!=(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
+{
+  return not (a == b);
+}
+
 
 libusb_device_descriptor LibUsbDevice::device_descriptor() const
 {
@@ -140,6 +161,32 @@ LibUsbDevice::~LibUsbDevice()
 
   libusb_unref_device(_devptr);
 }
+
+LibUsbDevice::LibUsbDevice(const LibUsbDevice& other)
+{
+  _devptr = other._devptr;
+  _hdl =  other._hdl;
+
+  if(other.claimed_interface.has_value())
+    *claimed_interface = *other.claimed_interface;
+
+  libusb_ref_device(_devptr);
+}
+
+LibUsbDevice::LibUsbDevice(LibUsbDevice&& other)
+{
+  _devptr = other._devptr;
+  _hdl =  other._hdl;
+
+  other._devptr = nullptr;
+  other._hdl = nullptr;
+
+  if(other.claimed_interface.has_value())
+    *claimed_interface = *other.claimed_interface;
+
+  other.claimed_interface.reset();
+}
+
 
 bool LibUsbDevice::is_open() const
 {
@@ -205,8 +252,37 @@ void LibUsbDevice::blocking_control_transfer_send(std::uint8_t bmRequestType,
   
 
 }
-					       
 
+
+std::vector<unsigned char> LibUsbDevice::blocking_bulk_transfer_receive(unsigned char endpoint,
+									int maxlen, std::chrono::milliseconds timeout)
+{
+  std::vector<unsigned char> out;
+  out.resize(maxlen);
+
+  int transferred = 0;
+  check_libusb_return(libusb_bulk_transfer(_hdl, endpoint, out.data(), maxlen, &transferred, timeout.count()));
+
+  out.resize(transferred);
+  return out;
+}
+
+void LibUsbDevice::blocking_bulk_transfer_send(unsigned char endpoint,
+					       std::span<unsigned char> data,
+					       std::chrono::milliseconds timeout)
+{
+
+  int transferred = 0;
+  check_libusb_return(
+		      libusb_bulk_transfer(_hdl, endpoint, data.data(), data.size(),
+					   &transferred, timeout.count())
+		      );
+
+  if(transferred < data.size())
+    throw std::runtime_error("not all data transferred");
+
+  
+}
 
 
 libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)

@@ -32,7 +32,7 @@ int main()
     }
 
   cout << "------------------" << endl;
-  for(const auto& dev: devlist)
+  for(auto dev: devlist)
     {
       auto desc = dev.device_descriptor();
       cout << "vid: " << desc.idVendor << ", pid: " << desc.idProduct << endl;
