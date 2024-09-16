@@ -4,6 +4,7 @@
 #include <utility>
 #include <string_view>
 #include <iterator>
+#include <optional>
 
 namespace foxtrot
 {
@@ -85,7 +86,7 @@ namespace foxtrot
     friend bool operator!=(const udev_list_iterator& a, const udev_list_iterator& b);
 
   private:
-    udevListEntry(udev_list_entry* ptr);
+    udev_list_iterator(udev_list_entry* ptr);
     
 
   };
@@ -100,7 +101,7 @@ namespace foxtrot
     udev_enum(udev_context& ctxt);
     udev_enum& match_subsystem(const string& expr);
 
-    udev_device_list scan_devices();
+    udev_list_iterator scan_devices();
 
 
   private:

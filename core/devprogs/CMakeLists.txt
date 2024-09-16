@@ -1,6 +1,6 @@
 
 add_executable(tuple_play tuple_play.cpp)
-target_link_libraries(tuple_play PUBLIC protobuf::libprotobuf foxtrot_core)
+target_link_libraries(tuple_play PUBLIC foxtrot_core)
 target_include_directories(tuple_play PRIVATE ${CMAKE_BINARY_DIR})
 
 
@@ -29,6 +29,6 @@ add_library(plugin_example SHARED plugin_example.cpp)
 
 if(TARGET udev::libudev)
   add_executable(udev_play udev_play.cpp)
-  target_link_libraries(udev_play foxtrot_core udev::libudev)
+  target_link_libraries(udev_play foxtrot_core)
 
 endif()

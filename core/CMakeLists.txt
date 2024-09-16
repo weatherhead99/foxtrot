@@ -75,10 +75,11 @@ target_link_libraries(foxtrot_core PUBLIC foxtrot_protos Boost::log Boost::progr
   RTTR::Core)
 
 if(TARGET udev::libudev)
+  message(STATUS "adding libudev to foxtrot_core library dependencies")
   target_link_libraries(foxtrot_core PUBLIC udev::libudev)
 
 endif()
-
+add_subdirectory(devprogs)
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
 set(ft_core_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
@@ -126,4 +127,4 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/foxtrotGenericConfig.cmake.in
 	DESTINATION ${ft_cmakedir}
 	COMPONENT devel)
 
-add_subdirectory(devprogs)
+

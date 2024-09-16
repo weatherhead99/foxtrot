@@ -4,7 +4,7 @@ include(FindPackageHandleStandardArgs)
 
 pkg_check_modules(libudev REQUIRED libudev IMPORTED_TARGET)
 
-if(${LIBUDEV_FOUND})
+if(${libudev_FOUND})
   message(STATUS "found libudev, include directory: ${libudev_INCLUDE_DIRS}")
   message(STATUS "libraries: ${libudev_LIBRARIES}")
 
