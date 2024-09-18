@@ -5,6 +5,7 @@
 #include <string_view>
 #include <iterator>
 #include <optional>
+#include <stdexcept>
 
 namespace foxtrot
 {
@@ -32,10 +33,25 @@ namespace foxtrot
     public:
 
       template<typename... Ts>
-      ExternalRefCountInterface(Ts&&... args) { _ctxt_ptr = NewFunc(args...);};
+      ExternalRefCountInterface(Ts&&... args) { _ctxt_ptr = NewFunc(args...);
+	if(_ctxt_ptr == nullptr)
+	  throw std::bad_alloc();
+      };
+
+      ExternalRefCountInterface(T* existing_ptr, bool ref=true) { _ctxt_ptr = existing_ptr;
+	if(ref)
+	  RefFunc(_ctxt_ptr);
+      }
+
+      ExternalRefCountInterface() { _ctxt_ptr = nullptr;};
+      
       ~ExternalRefCountInterface() {
-	UnrefFunc(_ctxt_ptr);
-	DelFunc(_ctxt_ptr);
+	if(_ctxt_ptr != nullptr)
+	  {
+	    if constexpr(UnrefFunc != DelFunc)
+	      UnrefFunc(_ctxt_ptr);
+	    DelFunc(_ctxt_ptr);
+	  }
       }
 
       ExternalRefCountInterface(const ExternalRefCountInterface& other)
@@ -49,8 +65,27 @@ namespace foxtrot
 	_ctxt_ptr = other._ctxt_ptr;
       }
 
+      ExternalRefCountInterface& operator=(ExternalRefCountInterface& other)
+      {
+	if(this != &other)
+	  {
+	    _ctxt_ptr = other._ctxt_ptr;
+	    RefFunc(_ctxt_ptr);
+	  }
+	return *this;
+      }
 
-      T* const get() { return _ctxt_ptr;};
+      ExternalRefCountInterface& operator=(ExternalRefCountInterface&& other)
+      {
+	if(this != &other)
+	  {
+	    _ctxt_ptr = other._ctxt_ptr;
+	    other._ctxt_ptr = nullptr;
+	  }
+	return *this;
+      }
+
+      T* get() { return _ctxt_ptr;};
 
     private:
       T* _ctxt_ptr;
@@ -73,6 +108,7 @@ namespace foxtrot
   
   class udev_list_iterator
   {
+    friend class udev_list;
   public:
     using iterator_category = std::input_iterator_tag;
     using difference_type = std::ptrdiff_t;
@@ -80,19 +116,36 @@ namespace foxtrot
 
     udevListEntry operator*();
     udev_list_iterator& operator++();
-    udev_list_iterator& operator++(int);
+    udev_list_iterator operator++(int);
 
     friend bool operator==(const udev_list_iterator& a, const udev_list_iterator& b);
     friend bool operator!=(const udev_list_iterator& a, const udev_list_iterator& b);
 
+    udev_list_iterator(const udev_list_iterator& other);
+     
+
   private:
     udev_list_iterator(udev_list_entry* ptr);
+    udev_list_entry* _ptr;
     
 
   };
 
   bool operator==(const udev_list_iterator& a, const udev_list_iterator& b);
   bool operator!=(const udev_list_iterator& a, const udev_list_iterator& b);
+
+
+  class udev_list
+  {
+    friend class udev_enum;
+    friend class udev_device;
+    
+  public:
+    udev_list_iterator begin();
+    udev_list_iterator end();
+  private:
+    udev_list_entry* _start_ptr;
+  };
 
   
   class udev_enum
@@ -101,14 +154,29 @@ namespace foxtrot
     udev_enum(udev_context& ctxt);
     udev_enum& match_subsystem(const string& expr);
 
-    udev_list_iterator scan_devices();
-
+    udev_list scan_devices();
 
   private:
     udev_enum_rc _udev_enum_rc;
+    void check_throw_udev_return(int ret);
 
   };
-  
+
+
+  using udev_device_rc = detail::ExternalRefCountInterface<udev_device, detail::noop<udev_device>,
+							   udev_device_ref, udev_device_unref>;
+
+  class udev_device
+  {
+  public:
+    udev_device(udev_context& ctxt, const std::string& syspath);
+    udev_list properties();
+
+
+  private:
+    udev_device_rc _dev;
+
+  };
   
   
 }

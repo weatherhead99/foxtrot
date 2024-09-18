@@ -1,6 +1,7 @@
 #include <iostream>
 #include <libudev.h>
 #include <string>
+#include <optional>
 
 #include <foxtrot/udev/foxtrot_udev_utils.hh>
 
@@ -11,6 +12,24 @@ int main()
 {
   foxtrot::udev_context ctxt;
   auto qry = foxtrot::udev_enum(ctxt).match_subsystem("block");
+
+  cout << "scanning devices" << endl;
+  for(const auto& [name, val]: qry.scan_devices())
+    {
+      cout << "name: " << name << endl;
+      if(val.has_value())
+	cout << "value: " << *val << endl;
+
+      foxtrot::udev_device dev(ctxt, name);
+      cout << "listing properties..." << endl;
+      for(const auto& [name, val]: dev.properties())
+	{
+	  cout << "--- name: " << name;
+	  if(val.has_value())
+	    cout << " value: " << *val;
+	  cout << endl;
+	}
+    }
 
 
 }
