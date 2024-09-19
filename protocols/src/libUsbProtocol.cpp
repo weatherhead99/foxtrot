@@ -7,6 +7,284 @@
 
 using namespace foxtrot::protocols;
 
+
+std::string format_libusb_err_msg(int errcode)
+{
+  std::ostringstream oss;
+  oss << "libUSB error: " << libusb_error_name(errcode) << ": " << libusb_strerror(errcode);
+  return oss.str();
+}
+
+auto check_libusb_return(auto ret, foxtrot::Logging* lg=nullptr)
+{
+  //NOTE: all libusb error codes are <0, this allows passthrough
+  if(ret < 0)
+    {
+      if(lg  != nullptr)
+	throw LibUsbError(ret, *lg);
+      throw LibUsbError(ret);
+    }
+  return ret;
+}
+
+
+LibUsbError::LibUsbError(int errcode)
+  : ProtocolError(format_libusb_err_msg(errcode))
+{
+  code = errcode;
+};
+
+LibUsbError::LibUsbError(int errcode, foxtrot::Logging& lg)
+  : ProtocolError(format_libusb_err_msg(errcode), lg)
+{
+  code = errcode;
+};
+
+
+void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list)
+{
+  //NOTE: unref the devices, if any other LibUsbDevice objects have been created
+  // they upref themselves on copy / construction
+  libusb_free_device_list(list, true);
+}
+
+
+LibUsbDeviceList::const_iterator::const_iterator(const LibUsbDeviceList *devlist,
+                                                 int pos)
+    : _devlist(devlist), _pos(pos) {}
+
+LibUsbDevice LibUsbDeviceList::const_iterator::operator*()
+{
+  return _devlist->operator[](_pos);
+}
+
+foxtrot::protocols::LibUsbDeviceList::const_iterator&
+LibUsbDeviceList::const_iterator::operator++()
+{
+  _pos++;
+  return *this;
+}
+
+foxtrot::protocols::LibUsbDeviceList::const_iterator
+LibUsbDeviceList::const_iterator::operator++(int)
+{
+  return const_iterator(_devlist, _pos+1);
+  
+}
+
+
+
+
+LibUsbDeviceList::LibUsbDeviceList()
+{
+
+  //NOTE: this is deprecated upstream but only in newer libusb versions than we're using yet
+  check_libusb_return(libusb_init(&_ctxt));
+
+
+  //allocate and get a device list. The machinery of unique_ptr custom deleter should free it when we're done
+  libusb_device** pdevlist;
+  _n_devices = check_libusb_return(libusb_get_device_list(_ctxt, &pdevlist));
+  devlist = decltype(devlist)(pdevlist);
+
+};
+
+LibUsbDeviceList::~LibUsbDeviceList()
+{
+   libusb_exit(_ctxt);
+}
+
+
+int LibUsbDeviceList::n_devices() const
+{
+  return _n_devices;
+}
+
+LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos) const
+{
+ 
+  if(pos >= _n_devices)
+    throw std::out_of_range("illegal device list index");
+
+  LibUsbDevice out(*(devlist.get() + pos));
+  return out;
+
+}
+
+LibUsbDeviceList::const_iterator LibUsbDeviceList::cbegin() const
+{
+  return const_iterator(this, 0);
+}
+
+LibUsbDeviceList::const_iterator LibUsbDeviceList::begin() const
+{
+  return cbegin();
+}
+
+LibUsbDeviceList::const_iterator LibUsbDeviceList::cend() const
+{
+  return const_iterator(this, n_devices());
+}
+
+LibUsbDeviceList::const_iterator LibUsbDeviceList::end() const
+{
+  return cend();
+}
+
+LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
+{
+  libusb_ref_device(pdev);
+}
+
+bool foxtrot::protocols::operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
+{
+  return (a._pos == b._pos) and ( a._devlist == b._devlist);
+}
+
+bool foxtrot::protocols::operator!=(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
+{
+  return not (a == b);
+}
+
+
+libusb_device_descriptor LibUsbDevice::device_descriptor() const
+{
+  libusb_device_descriptor out;
+  check_libusb_return(libusb_get_device_descriptor(_devptr,&out));
+  return out;
+}
+
+LibUsbDevice::~LibUsbDevice()
+{
+  if(is_open())
+    close();
+
+  libusb_unref_device(_devptr);
+}
+
+LibUsbDevice::LibUsbDevice(const LibUsbDevice& other)
+{
+  _devptr = other._devptr;
+  _hdl =  other._hdl;
+
+  if(other.claimed_interface.has_value())
+    *claimed_interface = *other.claimed_interface;
+
+  libusb_ref_device(_devptr);
+}
+
+LibUsbDevice::LibUsbDevice(LibUsbDevice&& other)
+{
+  _devptr = other._devptr;
+  _hdl =  other._hdl;
+
+  other._devptr = nullptr;
+  other._hdl = nullptr;
+
+  if(other.claimed_interface.has_value())
+    *claimed_interface = *other.claimed_interface;
+
+  other.claimed_interface.reset();
+}
+
+
+bool LibUsbDevice::is_open() const
+{
+  return _hdl == nullptr;
+}
+
+void LibUsbDevice::open()
+{
+  check_libusb_return(libusb_open(_devptr, &_hdl));
+}
+
+void LibUsbDevice::close() noexcept
+{
+  libusb_close(_hdl);
+  _hdl = nullptr;
+}
+
+void LibUsbDevice::claim_interface(std::uint8_t iface)
+{
+  if(claimed_interface != std::nullopt)
+    throw std::logic_error("an interface is already claimed!");
+  check_libusb_return(libusb_claim_interface(_hdl, iface));
+  claimed_interface = iface;
+}
+
+void LibUsbDevice::release_interface()
+{
+  if(not claimed_interface)
+    throw std::logic_error("no interface is claimed!");
+  
+  check_libusb_return(libusb_release_interface(_hdl, *claimed_interface));
+  claimed_interface = std::nullopt;
+}
+
+std::vector<unsigned char> LibUsbDevice::blocking_control_transfer_receive(std::uint8_t bmRequestType,
+								 std::uint8_t bRequest,
+								 std::uint16_t wValue,
+								 std::uint16_t wIndex,
+								 std::uint16_t wLength,
+								 std::chrono::milliseconds timeout)
+{
+  
+  std::vector <unsigned char> out;
+  out.resize(wLength);
+  check_libusb_return(libusb_control_transfer(_hdl, bmRequestType,
+					      bRequest, wValue, wIndex, out.data(),
+					      wLength, timeout.count()));
+
+  return out;
+}
+
+
+void LibUsbDevice::blocking_control_transfer_send(std::uint8_t bmRequestType,
+						  std::uint8_t bRequest,
+						  std::uint16_t wValue,
+						  std::uint16_t wIndex,
+						  std::span<unsigned char> data,
+						  std::chrono::milliseconds timeout)
+{
+  check_libusb_return(libusb_control_transfer(_hdl, bmRequestType, bRequest,
+					      wValue, wIndex, data.data(),
+					      data.size(), timeout.count()));
+  
+
+}
+
+
+std::vector<unsigned char> LibUsbDevice::blocking_bulk_transfer_receive(unsigned char endpoint,
+									int maxlen, std::chrono::milliseconds timeout)
+{
+  std::vector<unsigned char> out;
+  out.resize(maxlen);
+
+  int transferred = 0;
+  check_libusb_return(libusb_bulk_transfer(_hdl, endpoint, out.data(), maxlen, &transferred, timeout.count()));
+
+  out.resize(transferred);
+  return out;
+}
+
+void LibUsbDevice::blocking_bulk_transfer_send(unsigned char endpoint,
+					       std::span<unsigned char> data,
+					       std::chrono::milliseconds timeout)
+{
+
+  int transferred = 0;
+  check_libusb_return(
+		      libusb_bulk_transfer(_hdl, endpoint, data.data(), data.size(),
+					   &transferred, timeout.count())
+		      );
+
+  if(transferred < data.size())
+    throw std::runtime_error("not all data transferred");
+
+  
+}
+
+
 libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)
     : SerialProtocol(instance_parameters), _lg("libUsbProtocol"){
 

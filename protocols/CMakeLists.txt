@@ -136,6 +136,9 @@ find_dependency(libusb REQUIRED)"
 endif()
 
 
+add_subdirectory(devprogs)
+
+
 foxtrot_setup_cmake_package(foxtrotProtocols foxtrot_protocols protocols ${ft_protocols_deps_script})
 
 
