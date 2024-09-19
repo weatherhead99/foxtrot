@@ -11,38 +11,17 @@ import os
 
 FOXTROT_GLOBAL_OVERRIDES = []
 
-class FoxtrotCppMeta(type):
-    BASE_PKG_NAME = "FoxtrotCppPackage"
-
-    def __new__(cls,name,bases,dct):
-        if name != cls.BASE_PKG_NAME:
-            newbases = list(bases)
-            newbases.append(ConanFile)
-        else:
-            newbases = bases
-        n = super().__new__(cls,name,tuple(newbases),dct)
-
-        if name != cls.BASE_PKG_NAME:
-            #merge in the options
-            print("merging in the options and default options")
-            basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
-
-            basepkg = [_.__name__ for _ in bases].index(cls.BASE_PKG_NAME)
-        
-            n.options = getattr(n, "options", {}) | bases[basepkg].options
-            n.default_options = getattr(n, "default_options", {}) | bases[basepkg].default_options
-
-            print(f" options: {n.options}")
-            print(f"default options: {n.default_options}")
-        return n
-
 def ft_require(conanfile, substr: str) -> None:
     reqstr = ft_version_get_req_str(conanfile.version)
     conanfile.requires(f"foxtrot_{substr}/{reqstr}", transitive_headers=True, transitive_libs=True)
 
+def libudev_cmake_setup(cfg: CMakeDeps) -> None:
+    deps.set_property("libudev", "cmake_target_name", "udev::libudev")
+    deps.set_property("libudev", "cmake_target_aliases", ["PkgConfig::libudev"])
+
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
-    version = "0.4.2"
+    version = "0.4.3"
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
@@ -56,8 +35,6 @@ def add_grpc_options(configs):
 
     return configs
 
-
-    
 class FoxtrotCppPackage:
     default_user = "weatherill"
     default_channel = "stable"
