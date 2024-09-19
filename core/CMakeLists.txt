@@ -129,6 +129,7 @@ install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake
         ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake.in
         ${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibusb.cmake
+	${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibudev.cmake
         DESTINATION ${ft_cmakedir})
 
 install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/foxtrotGenericConfig.cmake.in
