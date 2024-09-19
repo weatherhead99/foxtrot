@@ -111,7 +111,15 @@ if(WIN32)
     add_definitions(-D_WIN32_WINNT=0x0A00)
 endif()
 "
-  )
+)
+
+if(TARGET udev::libudev)
+  string(APPEND ft_core_deps_script
+    "
+   find_dependency(libudev REQUIRED)
+")
+
+endif()
 
 foxtrot_setup_cmake_package(foxtrotCore foxtrot_core core ${ft_core_deps_script})
 
