@@ -49,9 +49,6 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("openssl/3.2.2", override=True)
-
-
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
