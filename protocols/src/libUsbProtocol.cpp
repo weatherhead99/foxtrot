@@ -50,7 +50,7 @@ void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list
 
 
 LibUsbDeviceList::const_iterator::const_iterator(const LibUsbDeviceList *devlist,
-                                                 int pos)
+						 int pos)
     : _devlist(devlist), _pos(pos) {}
 
 LibUsbDevice LibUsbDeviceList::const_iterator::operator*()
@@ -69,7 +69,7 @@ foxtrot::protocols::LibUsbDeviceList::const_iterator
 LibUsbDeviceList::const_iterator::operator++(int)
 {
   return const_iterator(_devlist, _pos+1);
-  
+
 }
 
 
@@ -102,7 +102,7 @@ int LibUsbDeviceList::n_devices() const
 
 LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos) const
 {
- 
+
   if(pos >= _n_devices)
     throw std::out_of_range("illegal device list index");
 
@@ -131,10 +131,13 @@ LibUsbDeviceList::const_iterator LibUsbDeviceList::end() const
   return cend();
 }
 
+
 LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
 {
   libusb_ref_device(pdev);
 }
+
+
 
 bool foxtrot::protocols::operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
 {
@@ -159,7 +162,8 @@ LibUsbDevice::~LibUsbDevice()
   if(is_open())
     close();
 
-  libusb_unref_device(_devptr);
+  if(_devptr != nullptr)
+    libusb_unref_device(_devptr);
 }
 
 LibUsbDevice::LibUsbDevice(const LibUsbDevice& other)
@@ -198,10 +202,44 @@ void LibUsbDevice::open()
   check_libusb_return(libusb_open(_devptr, &_hdl));
 }
 
+void LibUsbDevice::set_configuration(int configuration)
+{
+  if(not is_open())
+    throw std::logic_error("tried to set configuration on closed device!");
+
+  check_libusb_return(libusb_set_configuration(_hdl, configuration));
+}
+
+int LibUsbDevice::configuration()
+{
+  if(not is_open())
+    throw std::logic_error("tried to get configuration on closed device!");
+
+  int cfg_out;
+
+  check_libusb_return(libusb_get_configuration(_hdl, &cfg_out));
+  return cfg_out;
+}
+
+void LibUsbDevice::clear_halt(unsigned short endpoint)
+{
+  if(not is_open())
+    throw std::logic_error("tried to set configuration on closed device!");
+
+  check_libusb_return(libusb_clear_halt(_hdl, endpoint));
+}
+
 void LibUsbDevice::close() noexcept
 {
   libusb_close(_hdl);
   _hdl = nullptr;
+}
+
+void LibUsbDevice::reset()
+{
+  if(not is_open())
+    throw std::logic_error("tried to set reset a  device!");
+  check_libusb_return(libusb_reset_device(_hdl));
 }
 
 void LibUsbDevice::claim_interface(std::uint8_t iface)
@@ -216,7 +254,7 @@ void LibUsbDevice::release_interface()
 {
   if(not claimed_interface)
     throw std::logic_error("no interface is claimed!");
-  
+
   check_libusb_return(libusb_release_interface(_hdl, *claimed_interface));
   claimed_interface = std::nullopt;
 }
@@ -228,7 +266,7 @@ std::vector<unsigned char> LibUsbDevice::blocking_control_transfer_receive(std::
 								 std::uint16_t wLength,
 								 std::chrono::milliseconds timeout)
 {
-  
+
   std::vector <unsigned char> out;
   out.resize(wLength);
   check_libusb_return(libusb_control_transfer(_hdl, bmRequestType,
@@ -243,13 +281,13 @@ void LibUsbDevice::blocking_control_transfer_send(std::uint8_t bmRequestType,
 						  std::uint8_t bRequest,
 						  std::uint16_t wValue,
 						  std::uint16_t wIndex,
-						  std::span<unsigned char> data,
+						  const std::span<unsigned char> data,
 						  std::chrono::milliseconds timeout)
 {
   check_libusb_return(libusb_control_transfer(_hdl, bmRequestType, bRequest,
 					      wValue, wIndex, data.data(),
 					      data.size(), timeout.count()));
-  
+
 
 }
 
@@ -268,20 +306,41 @@ std::vector<unsigned char> LibUsbDevice::blocking_bulk_transfer_receive(unsigned
 }
 
 void LibUsbDevice::blocking_bulk_transfer_send(unsigned char endpoint,
-					       std::span<unsigned char> data,
-					       std::chrono::milliseconds timeout)
+					       const std::span<unsigned char> data,
+					       std::chrono::milliseconds timeout,
+					       int* transferred)
 {
-
-  int transferred = 0;
   check_libusb_return(
 		      libusb_bulk_transfer(_hdl, endpoint, data.data(), data.size(),
-					   &transferred, timeout.count())
+					   transferred, timeout.count())
 		      );
 
-  if(transferred < data.size())
-    throw std::runtime_error("not all data transferred");
+}
 
-  
+
+std::optional<LibUsbDevice> foxtrot::protocols::find_single_device(unsigned short vid, unsigned short pid, bool throw_on_multi)
+{
+  LibUsbDeviceList devlist;
+  auto match_vidpid = [vid, pid] (const auto& dev)
+  {
+    auto desc = dev.device_descriptor();
+    return (desc.idVendor == vid) and (desc.idProduct == pid);
+  };
+
+  auto devit = std::find_if(devlist.cbegin(), devlist.cend(), match_vidpid);
+  if(devit == devlist.cend())
+    return std::nullopt;
+
+  if(throw_on_multi)
+    {
+      //now we need to check for a 2nd device
+      devit = std::find_if(++devit, devlist.cend(), match_vidpid);
+      if(devit != devlist.cend())
+	throw std::runtime_error("multiple matching devices found");
+    }
+
+  return *devit;
+
 }
 
 
@@ -290,99 +349,46 @@ libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)
 
 }
 
-libUsbProtocol::~libUsbProtocol()
-{
-  if(_hdl != nullptr)
-    libusb_close(_hdl);
-  
-  libusb_exit(_ctxt);
-}
 
 
 void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters)
 {
   //call base class to merge parameters
     foxtrot::CommunicationProtocol::Init(class_parameters);
-  
+
     extract_parameter_value(_vid,_params,"vid");
     extract_parameter_value(_pid,_params,"pid");
     extract_parameter_value(_epin,_params,"epin");
     extract_parameter_value(_epout,_params,"epout");
     extract_parameter_value(_write_timeout,_params,"write_timeout", false);
     extract_parameter_value(_read_timeout,_params,"read_timeout",false);
-    
-    
-    //get usb device
-    auto free_devlist = [] (libusb_device** list) { libusb_free_device_list(list, true);};
-    
-    _lg.Info("reading device list...");
-    
-    libusb_device** listptr;
-    
-//     std::cout << "getting device list" << std::endl;
-    auto num_devs = libusb_get_device_list(_ctxt, &listptr ); 
-    
-//     std::cout << "matching devices: " << num_devs << std::endl;
-    
-    std::vector<libusb_device*> matching_devices;
-    matching_devices.reserve(num_devs);
-    
-    for(auto i=0 ; i < num_devs; i++)
-    {
-//       std::cout << "i: " << i << std::endl;
-      libusb_device_descriptor desc;
-      int ret;
-      if( (ret = libusb_get_device_descriptor(*(listptr +i), &desc)) < 0)
+
+    _lg.Info("searching attached USB devices...");
+    auto found_dev = find_single_device(_vid, _pid);
+
+    if(not found_dev.has_value())
+      throw ProtocolError("failed to find appropriate device!");
+
+    try
       {
-	_lg.Error("error getting device descriptor");
-	throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-      };
-      
-      if(desc.idVendor == _vid && desc.idProduct == _pid)
+	_lg.strm(sl::debug) << "opening device...";
+	(*found_dev).open();
+	_lg.strm(sl::debug) << "resetting device..";
+	(*found_dev).reset();
+	_lg.strm(sl::debug) << "setting configuration...";
+	(*found_dev).set_configuration(1);
+	_lg.strm(sl::debug) << "claiming interface...";
+	(*found_dev).claim_interface(0);
+      }
+    catch(foxtrot::protocols::LibUsbError& err)
       {
-	matching_devices.push_back( *(listptr +i));
-      };
-        
-    };
-    
-    if(matching_devices.size() == 0)
-    {
-      throw ProtocolError("no matching device connected");
-    };
-    
-    
-    if(matching_devices.size() > 1)
-    {
-      throw ProtocolError("multiple device support not implemented yet!"); 
-    };
-    
-    
-    
-    int ret;
-    if(  (ret = libusb_open(matching_devices[0], &_hdl) ) < 0)
-    {
-      _lg.Error("error opening device...");
-      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-    };
-    
-    if( (ret = libusb_reset_device(_hdl)) < 0)
-    {
-      _lg.Error("error resetting device...");
-      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-    }
-    
-    
-    if( (ret = libusb_set_configuration(_hdl,1)) <0)
-    {
-      _lg.Error("error setting configuration");
-      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-    };
-    
-    if( (ret = libusb_claim_interface(_hdl,0)) < 0)
-    {
-      _lg.Error("error claiming interface");
-      throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-    }
+	std::ostringstream oss;
+	oss << "libusb error: " << err.what();
+	throw foxtrot::ProtocolError(oss.str());
+      }
+
+    _dev = std::make_unique<LibUsbDevice>(std::move(*found_dev));
+
 }
 
 void libUsbProtocol::set_read_timeout(int timeout_ms)
@@ -394,7 +400,7 @@ int libUsbProtocol::get_read_timeout() const
 {
   return _read_timeout;
 }
-  
+
 void libUsbProtocol::set_write_timeout(int timeout_ms)
 {
   _write_timeout = timeout_ms;
@@ -404,6 +410,3 @@ int libUsbProtocol::get_write_timeout() const
 {
   return _write_timeout;
 }
-
-
-

@@ -32,13 +32,13 @@ using std::set;
 namespace foxtrot {
   namespace devices {
 
-    
-    
+
+
     using allstatus = std::variant<channel_status, dcstatus>;
-      
+
     class ThorlabsMotorError : public Error {
     public:
-        ThorlabsMotorError(const std::string& msg);
+	ThorlabsMotorError(const std::string& msg);
     };
 
     class APT;
@@ -60,44 +60,44 @@ namespace foxtrot {
       bsc203_opcodes complete_success_code = bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED;
 
       set<bsc203_opcodes> motor_status_messages = {
-	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
 
       set<bsc203_opcodes> motor_finish_messages = {
-	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
       int n_ignore_failed_motor_msgs = 10;
-      
+
     };
-    
-      
+
+
     class APT : public Device
     {
       friend class AptUpdateMessageScopeGuard;
     RTTR_ENABLE(Device)
-        
+
     public:
 
     virtual ~APT();
-    
+
     bool get_channelenable(destination dest, motor_channel_idents channel);
     virtual void set_channelenable(destination dest, motor_channel_idents channel, bool onoff);
 
     hwinfo get_hwinfo(destination dest, std::optional<destination> expd_src=std::nullopt);
-    
+
     virtual allstatus get_status(destination dest, motor_channel_idents channel);
-    
-    
+
+
     void stop_move(destination dest, motor_channel_idents channel, bool immediate);
 
     void absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target);
 
     void relative_move_blocking(destination dest, motor_channel_idents channel, int target);
-      
+
       void home_move_blocking(destination dest, motor_channel_idents channel);
 
     void set_velocity_params (destination dest, const velocity_params& velpar);
@@ -113,81 +113,81 @@ namespace foxtrot {
 
       homeparams get_homeparams(destination dest, motor_channel_idents channel);
       void set_homeparams(destination dest, const homeparams& params);
-      
+
       limitswitchparams get_limitswitchparams(destination dest, motor_channel_idents channel);
       void set_limitswitchparams(destination dest, const limitswitchparams& params);
-      
+
       void attempt_error_recover();
-      
+
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
 
 
-      
+
       //HACK: children should directly set this traits struct in their constructors
       APTDeviceTraits _traits = APTDeviceTraits();
 
-      
+
       void transmit_message(bsc203_opcodes opcode, unsigned char p1, unsigned char p2, destination dest, destination src = destination::host);
-      
+
       void transmit_message(bsc203_opcodes opcode, destination dest,
-                            motor_channel_idents chan, destination src=destination::host);
-      
+			    motor_channel_idents chan, destination src=destination::host);
+
       template<typename arrtp>
       void transmit_message(bsc203_opcodes opcode, arrtp& data, destination dest, destination src = destination::host);
 
-      
+
 
       [[deprecated]]
       bsc203_reply receive_message_sync(bsc203_opcodes expected_opcode, destination expected_source,
-          bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
+	  bool* has_data = nullptr, bool check_opcode = true, unsigned* received_opcode = nullptr);
 
       apt_reply receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout=std::nullopt, bool discard_motor_status=true);
 
       template<typename It>
       std::tuple<apt_reply, bsc203_opcodes>  receive_message_sync_check(It&& allowed_opcodes_begin, It&& allowed_opcodes_end, destination expected_source, optional<milliseconds> timeout=std::nullopt);
-      
+
       void wait_blocking_move(bsc203_opcodes statusupdateopcode,
-                              bsc203_opcodes completionexpectedopcode,
-                              destination dest, motor_channel_idents chan,
-                              std::chrono::milliseconds update_timeout,
-                              std::chrono::milliseconds total_move_timeout, bool init_limit_state
-                             );
-                              
+			      bsc203_opcodes completionexpectedopcode,
+			      destination dest, motor_channel_idents chan,
+			      std::chrono::milliseconds update_timeout,
+			      std::chrono::milliseconds total_move_timeout, bool init_limit_state
+			     );
+
       bool check_status_bits(const allstatus& status, bool check_limitswitch=true,
-          bool require_moving=true);
-      
+	  bool require_moving=true);
+
       void start_absolute_move(destination dest, motor_channel_idents channel, unsigned int target);
-    
+
       void start_relative_move(destination dest, motor_channel_idents channel, int movedist);
       void start_home_channel(destination dest, motor_channel_idents channel);
 
       virtual bool is_limited(destination dest, motor_channel_idents channel);
 
-      
+
       void start_update_messages(destination dest);
       void stop_update_messages(destination dest);
-      
+
       void start_motor_messages(destination dest);
       void stop_motor_messages(destination dest);
 
-      
-      
+
+
       template<typename T>
       T _response_struct_common(foxtrot::devices::bsc203_opcodes opcode_recv,
-                                foxtrot::devices::destination dest,
-                                std::optional<foxtrot::devices::destination> expd_src);
-      
+				foxtrot::devices::destination dest,
+				std::optional<foxtrot::devices::destination> expd_src);
+
       template<typename T>
       T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, unsigned char p1, unsigned char p2, std::optional<destination> expd_src = std::nullopt);
-    
+
       template<typename T, typename arrtp>
       T request_response_struct(bsc203_opcodes opcode_send, bsc203_opcodes opcode_recv, destination dest, arrtp& data,
-          std::optional<destination> expd_src = std::nullopt
+	  std::optional<destination> expd_src = std::nullopt
     );
-      
+
       foxtrot::Logging _lg;
-      
+
       std::shared_ptr<protocols::SerialPort> _serport;
 
     private:
@@ -205,13 +205,13 @@ namespace foxtrot {
 
       }
 
-      
+
     };
 
-    
+
     template<typename T>
-    std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan); 
-    
+    std::array<unsigned char, 6> get_move_request_header_data(T distance, foxtrot::devices::motor_channel_idents chan);
+
   }//namespace devices
 } //namespace foxtrot
 
@@ -221,50 +221,50 @@ namespace foxtrot {
 
 template<typename arrtp>
 void foxtrot::devices::APT::transmit_message(foxtrot::devices::bsc203_opcodes opcode, arrtp& data, destination  dest, destination src)
-{ 
+{
 
   auto size = data.size();
-  unsigned char* len = reinterpret_cast<unsigned char*>(&size); 
+  unsigned char* len = reinterpret_cast<unsigned char*>(&size);
   unsigned char* optpr = reinterpret_cast<unsigned char*>(&opcode);
   unsigned char destaddr = static_cast<unsigned char>(dest) | 0x80;
   unsigned char srcaddr = static_cast<unsigned char>(src);
-  
+
   std::array<unsigned char, 6> header{optpr[0], optpr[1], len[0],len[1], destaddr, srcaddr};
-  
+
   _serport->write(std::string(header.begin(), header.end()));
   _serport->write(std::string(data.begin(), data.end()));
 
 }
 
 
-template<typename T> 
+template<typename T>
 T foxtrot::devices::APT::_response_struct_common(bsc203_opcodes opcode_recv,
     destination dest, std::optional<destination> expd_src)
 {
     T out;
     bool has_data;
     if(!expd_src.has_value())
-        expd_src = dest;
+	expd_src = dest;
 
     auto ret = this->receive_message_sync_check(opcode_recv, *expd_src);
-    
+
     if(!ret.data.has_value())
-        throw foxtrot::DeviceError("expected struct data in response but didn't get any!");
-    
+	throw foxtrot::DeviceError("expected struct data in response but didn't get any!");
+
     if(ret.data->size() != sizeof(T))
-        throw std::logic_error("mismatch between received data size and struct size!");
-    
+	throw std::logic_error("mismatch between received data size and struct size!");
+
     std::copy(ret.data->begin(), ret.data->end(), reinterpret_cast<unsigned char*>(&out));
     return out;
-    
+
 }
 
 template<typename T>
-T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send, 
-                                                    foxtrot::devices::bsc203_opcodes opcode_recv, 
-                                                    destination dest, unsigned char p1, unsigned char p2,
-                                                    std::optional<destination> expd_src
-                                                )
+T foxtrot::devices::APT::request_response_struct(foxtrot::devices::bsc203_opcodes opcode_send,
+						    foxtrot::devices::bsc203_opcodes opcode_recv,
+						    destination dest, unsigned char p1, unsigned char p2,
+						    std::optional<destination> expd_src
+						)
 {
 
     transmit_message(opcode_send, p1, p2, dest);
@@ -302,7 +302,7 @@ std::tuple<apt_reply, bsc203_opcodes> foxtrot::devices::APT::receive_message_syn
     {
       _lg.strm(sl::error) << "received opcode: " << std::hex << recvd_opcode;
 
-      
+
 
       std::ostringstream oss;
       for(auto it = expected_opcodes_begin; it !=expected_opcodes_end; it++)
@@ -314,7 +314,7 @@ std::tuple<apt_reply, bsc203_opcodes> foxtrot::devices::APT::receive_message_syn
     }
 
   return {repl, static_cast<bsc203_opcodes>(recvd_opcode)};
-  
+
 }
 
 
@@ -327,5 +327,3 @@ std::array<unsigned char, sizeof(T)> copy_struct_to_array(T &&strct)
   return out;
 
 }
-
-

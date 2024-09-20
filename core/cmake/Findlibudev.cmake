@@ -8,8 +8,8 @@ if(${libudev_FOUND})
   message(STATUS "found libudev, include directory: ${libudev_INCLUDE_DIRS}")
   message(STATUS "libraries: ${libudev_LIBRARIES}")
 
-  if(NOT TARGET udev::libudev)
-    add_library(udev::libudev ALIAS PkgConfig::libudev)
+  if(NOT TARGET libudev::libudev)
+    add_library(libudev::libudev ALIAS PkgConfig::libudev)
   endif()
 endif()
 

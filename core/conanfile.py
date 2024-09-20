@@ -20,13 +20,17 @@ class FoxtrotCoreConan(ConanFile):
     cmake_package_name = "foxtrotCore"
 
     package_type = "shared-library"
+    options = {"with_udev" : [True, False]}
     default_options = {"*/*:shared" : True,
                        "protobuf/*:with_zlib": True,
                        "rttr/*:with_rtti" : True,
-                       "absl/*:shared" : False
+                       "absl/*:shared" : False,
+                       "with_udev" : True
                        }
 
     src_folder = "core"
+
+
 
     def requirements(self):
         super().requirements()
@@ -41,7 +45,7 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("boost/[^1.85.0]", headers=True, libs=True,
+        self.requires("boost/[^1.86.0]", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
@@ -49,12 +53,20 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
+        if self.options.with_udev:
+            self.requires("libudev/system", headers=True, libs=True,
+                          transitive_libs=True)
+
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
 
         deps = CMakeDeps(self)
+
+        if self.options.with_udev:
+            deps.set_property("libudev", "cmake_target_aliases", ["PkgConfig::libudev"])
+
         deps.generate()
 
         tc = self._setup_cmake_tc()

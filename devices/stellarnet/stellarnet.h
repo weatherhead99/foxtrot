@@ -5,6 +5,8 @@
 
 #include <foxtrot/Device.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
+#include <foxtrot/protocols/libUsbProtocol.hh>
+#include <optional>
 
 #define FX2_VID 0x04B4
 #define FX2_PID 0x8613
@@ -27,26 +29,40 @@ class libusb_device_descriptor;
 namespace foxtrot
 {
  namespace devices {
-    
+
+   using foxtrot::protocols::libUsbProtocol;
+   using foxtrot::protocols::LibUsbDevice;
+
+   using Firmware = std::map<unsigned, std::vector<unsigned char>>;
+   
+   Firmware load_stellarnet_firmware_payload(const string& firmware_file);
+   void upload_stellarnet_device_firmware(LibUsbDevice& dev, const Firmware& fw, std::chrono::milliseconds timeout);
+   
+   
+   
+   
+   
+
    class stellarnet : public Device
    {
      RTTR_ENABLE(Device)
    public:
-     stellarnet(const std::string& firmware_file, int timeout_ms);
+     [[deprecated]] stellarnet(const std::string& firmware_file, int timeout_ms);
      stellarnet(const foxtrot::parameterset& params);
-      virtual const std::string getDeviceTypeName() const;
-      virtual ~stellarnet();
+     virtual const std::string getDeviceTypeName() const;
       
-      std::vector<unsigned short> read_spectrum(int int_time_ms);
-      //NOTE: wavelengths are calculated as p**3 * c3/8 + p**2 * c1/4 + p*c0/2 + c2
-      std::vector<double> get_coeffs() const;
-      
-      
-      
+     std::vector<unsigned short> read_spectrum(int int_time_ms);
+     //NOTE: wavelengths are calculated as p**3 * c3/8 + p**2 * c1/4 + p*c0/2 + c2
+     std::array<double, 4> get_coeffs() const;
+
    private:
+
+     double bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes);
+     double get_stored_coefficient(unsigned int addr);
      
-     void reenumerate_device(libusb_device_descriptor* desc, libusb_device* dev);
-     void setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev);
+     void setup_stellarnet_device(LibUsbDevice& dev);
+     
+     //void setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev);
      
      void set_device_timing(unsigned short tm, unsigned char x_timing);
      
@@ -55,17 +71,19 @@ namespace foxtrot
      
      std::array<unsigned char,0x20> get_stored_bytes(unsigned int addr);
      
-     libusb_context* _ctxt = nullptr;
-     libusb_device_handle* _hdl = nullptr;
+     //     libusb_context* _ctxt = nullptr;
+     //libusb_device_handle* _hdl = nullptr;
+
+     std::unique_ptr<foxtrot::protocols::LibUsbDevice> _dev;
      
      Logging _lg;
      
-     const std::string _firmware_file;
+     //const std::string _firmware_file;
      
      int _timeout_ms;
      
      
-     std::vector<double> _coeffs;
+     std::array<double, 4> _coeffs;
      
      std::string _dettype;
      std::string _devid;

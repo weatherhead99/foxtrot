@@ -29,54 +29,55 @@ foxtrot::protocols::BulkUSB::~BulkUSB()
 std::string foxtrot::protocols::BulkUSB::read(unsigned int len, unsigned* actlen)
 {
   
-  unsigned char* data = new unsigned char[len];
-  
-  
-  int alen_loc;
-  
-  auto err = libusb_bulk_transfer(_hdl,_epin, data,len,&alen_loc,_read_timeout);
-  
-  if(actlen != nullptr)
-  {
-    *actlen = alen_loc; 
-  }
-  
-  if(err < 0)
-  {
-    _lg.Error("error doing bulk transfer for read");
-    _lg.Debug("error code: " + std::to_string(err));
-    if(err == -7)
-    {
-      throw ProtocolTimeoutError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
-    }
-    
-    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
-  };
-  
-  std::string out(data, (data + alen_loc));
-  
-  delete[] data;
-  return std::move(out);
 
+  if(_dev == nullptr)
+    throw foxtrot::ProtocolError("LibUsbProtocol internal device is nullptr for some reason, this shouoldn't happen!");
+
+  std::vector<unsigned char> data;
+  
+  try{
+    auto rt = std::chrono::milliseconds(_read_timeout);
+    data = _dev->blocking_bulk_transfer_receive(_epin, len, rt);
+  }
+  catch(foxtrot::protocols::LibUsbError& err)
+    {
+      _lg.strm(sl::error) << "caught libusb error with code : " << err.code;
+      throw foxtrot::ProtocolError(err.what());
+    }
+
+  if(actlen != nullptr)
+    *actlen = data.size();
+
+  std::string out(data.begin(), data.end());
+  return out;
 }
 
 
 void foxtrot::protocols::BulkUSB::write(const std::string& data)
 {
-  int act_len;
-  auto err = libusb_bulk_transfer(_hdl,_epout,reinterpret_cast<unsigned char*>(const_cast<char*>(data.data())),data.size(),&act_len,_write_timeout);
-  if(err < 0)
-  {
-    _lg.Error("error doing bulk transfer for write");
-    _lg.Debug("error code:  " + std::to_string(err));
-    if(err == -7)
+
+
+  if(_dev == nullptr)
+    throw foxtrot::ProtocolError("LibUsbProtocol internal device is nullptr for some reason, this shouoldn't happen!");
+
+  int actlen;
+  
+  try
     {
-      throw ProtocolTimeoutError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
+      auto wt = std::chrono::milliseconds(_write_timeout);
+      unsigned char* udat = const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>(data.c_str()));
+      std::span<unsigned char> spdat(udat, data.size());
+      
+      _dev->blocking_bulk_transfer_send(_epout, spdat, wt, &actlen);
     }
-    
-    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(err)));
-  };
-  if(act_len != data.size())
+  catch(foxtrot::protocols::LibUsbError& err)
+    {
+      _lg.strm(sl::error) << "caught libusb error with code: " << err.code;
+      throw foxtrot::ProtocolError(err.what());
+    }
+
+
+  if(actlen != data.size())
   {
     throw ProtocolError("didn't write all of data!");  
   };
@@ -85,17 +86,22 @@ void foxtrot::protocols::BulkUSB::write(const std::string& data)
 
 void foxtrot::protocols::BulkUSB::clear_halts()
 {
-  _lg.Debug("attempting clearing halts on endpoints...");
-  int ret;
-  if( (ret = libusb_clear_halt(_hdl,_epout)) < 0)
-  {
-    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-  }
+    if(_dev == nullptr)
+    throw foxtrot::ProtocolError("LibUsbProtocol internal device is nullptr for some reason, this shouoldn't happen!");
+
   
-  if( ( ret = libusb_clear_halt(_hdl,_epin)) < 0)
-  {
-    throw ProtocolError(std::string("libusb error: ") + libusb_strerror(static_cast<libusb_error>(ret)));
-  }
+  _lg.Debug("attempting clearing halts on endpoints...");
+  try
+    {
+      _dev->clear_halt(_epout);
+      _dev->clear_halt(_epin);
+    }
+  catch(foxtrot::protocols::LibUsbError& err)
+    {
+      _lg.strm(sl::error) << "caught libusb error with code: " << err.code;
+      throw foxtrot::ProtocolError(err.what());      
+    }
+
 
 }
 

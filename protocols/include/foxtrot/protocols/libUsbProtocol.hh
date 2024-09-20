@@ -27,7 +27,7 @@ namespace foxtrot
       LibUsbError(int errcode, foxtrot::Logging& lg);
 
       int code = 0;
-      
+
     };
 
     class LibUsbDevice
@@ -42,10 +42,18 @@ namespace foxtrot
 
       bool is_open() const;
       void open();
+      void set_configuration(int configuration);
+      int configuration();
+
+      void clear_halt(unsigned short endpoint);
+
       void close() noexcept;
+
+      void reset();
 
       void claim_interface(std::uint8_t iface);
       void release_interface();
+
 
       std::vector<unsigned char> blocking_control_transfer_receive(std::uint8_t bmRequestType,
 								 std::uint8_t bRequest,
@@ -58,7 +66,7 @@ namespace foxtrot
 					  std::uint8_t bRequest,
 					  std::uint16_t wValue,
 					  std::uint16_t wIndex,
-					  std::span<unsigned char> data,
+					  const std::span<unsigned char> data,
 					  std::chrono::milliseconds timeout);
 
       std::vector<unsigned char> blocking_bulk_transfer_receive(unsigned char endpoint,
@@ -66,11 +74,12 @@ namespace foxtrot
 								std::chrono::milliseconds timeout);
 
       void blocking_bulk_transfer_send(unsigned char endpoint,
-				       std::span<unsigned char> data,
-				       std::chrono::milliseconds timeout);
-				       
-      
-      
+				       const std::span<unsigned char> data,
+				       std::chrono::milliseconds timeout,
+				       int* transferred = nullptr);
+
+      //TODO: fixed size receives!
+
     private:
       LibUsbDevice(libusb_device* pdev);
       libusb_device* _devptr;
@@ -79,7 +88,7 @@ namespace foxtrot
     };
 
     class LibUsbDeviceList
-    { 
+    {
     public:
 
       class const_iterator
@@ -99,14 +108,14 @@ namespace foxtrot
 
 	friend bool operator==(const const_iterator& a, const const_iterator& b);
 	friend bool operator!=(const const_iterator& a, const const_iterator& b);
-	
+
       private:
 	explicit const_iterator(const LibUsbDeviceList* devlist, int pos);
 	int _pos;
 	const LibUsbDeviceList* _devlist;
-	
+
       };
-      
+
       LibUsbDeviceList();
       ~LibUsbDeviceList();
 
@@ -115,11 +124,10 @@ namespace foxtrot
 
       const_iterator begin() const;
       const_iterator end() const;
-      
+
       LibUsbDevice operator[](std::size_t pos) const;
       int n_devices() const;
-      std::optional<std::size_t> find_one_device(unsigned short vid, unsigned short pid);
-      
+
     private:
       struct _LibUsbDeviceListDeleter
       {
@@ -132,9 +140,12 @@ namespace foxtrot
 
     bool operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b);
     bool operator!=(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b);
-      
-    
-    
+
+
+    std::optional<LibUsbDevice> find_single_device(unsigned short vid, unsigned short pid,
+						   bool throw_on_multi=true);
+
+
     class libUsbProtocol : public SerialProtocol
     {
     public:
@@ -145,23 +156,20 @@ namespace foxtrot
       int get_read_timeout() const;
       void set_write_timeout(int timeout_ms);
       int get_write_timeout() const;
-      
-      
-      virtual ~libUsbProtocol();
+
 
     protected:
-      libusb_context* _ctxt = nullptr;
-      libusb_device_handle* _hdl = nullptr;
       int _vid;
       int _pid;
       int _epout;
       int _epin;
       int _write_timeout = 0;
       int _read_timeout = 0;
-
+      std::unique_ptr<LibUsbDevice> _dev = nullptr;
 
     private:
       foxtrot::Logging _lg;
+
     };
 
   }

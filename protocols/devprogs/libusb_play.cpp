@@ -2,6 +2,7 @@
 #include <iostream>
 #include <foxtrot/Logging.h>
 #include <libusb.h>
+#include <algorithm>
 
 
 using namespace foxtrot::protocols;
@@ -15,28 +16,36 @@ int main()
   
   LibUsbDeviceList devlist;
   cout  << "n_devices found: " << devlist.n_devices() << endl;
-  
-  for(int i=0; i < devlist.n_devices(); i++)
-    {
-      auto dev = devlist[i];
-      auto vid = dev.device_descriptor().idVendor;
-      auto pid = dev.device_descriptor().idProduct;
-      cout << "vid: " << vid << ", pid: " << pid << endl;
-
-      if(vid == 0x0BD7)
-	{
-	  cout << "stellarnet found!" << endl;
-	  dev.open();
-	}
-
-    }
 
   cout << "------------------" << endl;
   for(auto dev: devlist)
     {
       auto desc = dev.device_descriptor();
-      cout << "vid: " << desc.idVendor << ", pid: " << desc.idProduct << endl;
+      cout << "vid: 0x" << std::hex << desc.idVendor << ", pid: 0x" << desc.idProduct << endl;
       
     }
 
+
+  const unsigned short VID = 0x047d;
+  const unsigned short PID = 0x1020;
+
+  auto devit = devlist.cbegin();
+  int i= 0;
+  while(devit != devlist.cend())
+    {
+      cout << "i: " << i++ << endl;
+      //find a kensington expert 
+      devit = std::find_if(devit++, devlist.cend(),
+			   [VID, PID] (const auto& dev) {
+			     auto desc = dev.device_descriptor();
+			     return (desc.idVendor == VID) and (desc.idProduct == PID);
+			   });
+
+      if(devit == devlist.cend())
+	cout << "no device found..." << endl;
+      else
+	cout << "device found..." << endl;
+    }
+  
+  
 }

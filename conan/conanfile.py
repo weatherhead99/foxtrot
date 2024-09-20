@@ -16,7 +16,6 @@ def ft_require(conanfile, substr: str) -> None:
     conanfile.requires(f"foxtrot_{substr}/{reqstr}", transitive_headers=True, transitive_libs=True)
 
 def libudev_cmake_setup(cfg: CMakeDeps) -> None:
-    deps.set_property("libudev", "cmake_target_name", "udev::libudev")
     deps.set_property("libudev", "cmake_target_aliases", ["PkgConfig::libudev"])
 
 class FoxtrotBuildUtils(ConanFile):

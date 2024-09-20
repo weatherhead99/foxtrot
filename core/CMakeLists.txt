@@ -74,9 +74,9 @@ target_link_libraries(foxtrot_core PUBLIC foxtrot_protos Boost::log Boost::progr
   Boost::filesystem protobuf::libprotobuf
   RTTR::Core)
 
-if(TARGET udev::libudev)
+if(TARGET libudev::libudev)
   message(STATUS "adding libudev to foxtrot_core library dependencies")
-  target_link_libraries(foxtrot_core PUBLIC udev::libudev)
+  target_link_libraries(foxtrot_core PUBLIC libudev::libudev)
 
 endif()
 add_subdirectory(devprogs)
@@ -113,7 +113,7 @@ endif()
 "
 )
 
-if(TARGET udev::libudev)
+if(TARGET libudev::libudev)
   string(APPEND ft_core_deps_script
     "
    find_dependency(libudev REQUIRED)
