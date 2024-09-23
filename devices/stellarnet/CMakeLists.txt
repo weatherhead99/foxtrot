@@ -9,5 +9,5 @@ else()
 endif()
 
 
-# add_executable(stellarnet_play stellarnet_play.cpp)
-# target_link_libraries(stellarnet_play stellarnet foxtrot foxtrotclient ${libusb})
+add_executable(stellarnet_play stellarnet_play.cpp)
+target_link_libraries(stellarnet_play stellarnet foxtrot::foxtrot_core )

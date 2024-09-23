@@ -34,7 +34,7 @@ auto reqtp_in = LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIE
 
 using namespace foxtrot::devices;
 
-Firmware load_stellarnet_firmware_payload(const string& firmware_file)
+Firmware foxtrot::devices::load_stellarnet_firmware_payload(const string& firmware_file)
 {
    //check on the file first
 
@@ -71,7 +71,7 @@ Firmware load_stellarnet_firmware_payload(const string& firmware_file)
 }
 
 
-void upload_stellarnet_device_firmware(LibUsbDevice& dev, const Firmware& fw, std::chrono::milliseconds timeout)
+void foxtrot::devices::upload_stellarnet_device_firmware(LibUsbDevice& dev, const Firmware& fw, std::chrono::milliseconds timeout)
 {
   foxtrot::Logging lg("stellarnet_firmware_loader");
 
@@ -426,7 +426,7 @@ void foxtrot::devices::stellarnet::set_device_config(short unsigned integration_
 }
 
 
-double bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes)
+double stellarnet::bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes)
 {
   std::string coeffstr;
   //lord help me
