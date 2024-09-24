@@ -1,0 +1,38 @@
+#NOTE: change this line to use a different gcc than the OS default
+{% set gcc_exe = os.system("which gcc")%}
+
+{% set gcc, gccver, gccexe = detect_api.detect_gcc_compiler(gcc_exe) %}
+{% set libctype, libcversion = detect_api.detect_libc() %}
+{% set distroname = platform.freedesktop_os_release()["ID"] %}
+
+[settings]
+os=Linux
+build_type=RelWithDebInfo
+arch={{ detect_api.detect_arch() }}
+compiler.libcxx=libstdc++11
+compiler.version={{ gccver }}
+
+#this is the minimum standard now required to build foxtrot packages
+#if your compiler doesn't support it, too bad
+compiler.cppstd=gnu20
+
+#NOTE: this is a non-standard conan setting. You must
+# have installed settings_user.yml properly for it to work
+
+compiler.glibc={{ libcversion }}
+
+[options]
+# Foxtrot builds are tested with shared library builds only
+*/*:shared=True
+# Modern linux distros we test on are not shipping X11 anymore
+qt/*:with_x11=False
+
+[buildenv]
+{% if distroname == "debian" %}
+#NOTE on Debian a conda env pkg-config can hide the default system one
+#may be the case for ubuntu as well
+PKG_CONFIG_PATH=/usr/lib/{{ platform.processor() }}-linux-gnu/pkgconfig
+
+
+{% endif %}
+
