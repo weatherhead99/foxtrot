@@ -9,6 +9,7 @@
 os=Linux
 build_type=RelWithDebInfo
 arch={{ detect_api.detect_arch() }}
+compiler=gcc
 compiler.libcxx=libstdc++11
 compiler.version={{ gccver }}
 
