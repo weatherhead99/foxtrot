@@ -5,6 +5,7 @@
 #include <foxtrot/ProtocolTimeoutError.h>
 #include <foxtrot/protocols/ProtocolUtilities.h>
 
+
 using namespace foxtrot::protocols;
 
 
@@ -54,7 +55,7 @@ LibUsbDeviceList::const_iterator::const_iterator(const LibUsbDeviceList *devlist
     : _devlist(devlist), _pos(pos) {}
 
 LibUsbDevice LibUsbDeviceList::const_iterator::operator*()
-{
+{  
   return _devlist->operator[](_pos);
 }
 
@@ -103,6 +104,7 @@ int LibUsbDeviceList::n_devices() const
 LibUsbDevice LibUsbDeviceList::operator[](std::size_t pos) const
 {
 
+  
   if(pos >= _n_devices)
     throw std::out_of_range("illegal device list index");
 
@@ -140,7 +142,7 @@ LibUsbDevice::LibUsbDevice(libusb_device* pdev): _devptr(pdev)
 
 
 bool foxtrot::protocols::operator==(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b)
-{
+{ 
   return (a._pos == b._pos) and ( a._devlist == b._devlist);
 }
 
@@ -318,6 +320,7 @@ void LibUsbDevice::blocking_bulk_transfer_send(unsigned char endpoint,
 }
 
 
+
 std::optional<LibUsbDevice> foxtrot::protocols::find_single_device(unsigned short vid, unsigned short pid, bool throw_on_multi)
 {
   LibUsbDeviceList devlist;
@@ -329,13 +332,16 @@ std::optional<LibUsbDevice> foxtrot::protocols::find_single_device(unsigned shor
 
   auto devit = std::find_if(devlist.cbegin(), devlist.cend(), match_vidpid);
   if(devit == devlist.cend())
-    return std::nullopt;
+    {
+      return std::nullopt;
+    }
 
   if(throw_on_multi)
     {
       //now we need to check for a 2nd device
-      devit = std::find_if(++devit, devlist.cend(), match_vidpid);
-      if(devit != devlist.cend())
+      auto devit_cpy = devit;
+      devit_cpy = std::find_if(++devit_cpy, devlist.cend(), match_vidpid);
+      if(devit_cpy != devlist.cend())
 	throw std::runtime_error("multiple matching devices found");
     }
 
