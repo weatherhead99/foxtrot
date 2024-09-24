@@ -119,12 +119,12 @@ void foxtrot::devices::upload_stellarnet_device_firmware(LibUsbDevice& dev, cons
 
 
 stellarnet::stellarnet(const std::string& firmware_file, int timeout_ms): Device(nullptr),
-_lg("stellarnet"),  _timeout_ms(timeout_ms)
+									  _lg("stellarnet"), _timeout_ms(timeout_ms)
 {
 
   //scope this, so that the device gets freed when unloaded_dev disappears
   {
-    auto unloaded_dev = foxtrot::protocols::find_single_device(FX2_VID, FX2_PID);
+    auto unloaded_dev = foxtrot::protocols::find_single_device(ctxt, FX2_VID, FX2_PID);
     if(!unloaded_dev.has_value())
       {
       _lg.strm(sl::info) << ("no unloaded FX2 device found, will proceed with stellarnet device finding...");
@@ -135,12 +135,12 @@ _lg("stellarnet"),  _timeout_ms(timeout_ms)
 	auto fw = load_stellarnet_firmware_payload(firmware_file);
 	upload_stellarnet_device_firmware(*unloaded_dev, fw, tm_ms);
 	_lg.strm(sl::info) << "sleeping for device to come back";
-	std::this_thread::sleep_for(std::chrono::milliseconds(800));
+	std::this_thread::sleep_for(std::chrono::milliseconds(1600));
       }
   }
 
 
-  auto loaded_dev = foxtrot::protocols::find_single_device(STELLARNET_VID, STELLARNET_PID);
+  auto loaded_dev = foxtrot::protocols::find_single_device(ctxt, STELLARNET_VID, STELLARNET_PID);
   if(!loaded_dev.has_value())
     throw DeviceError("couldn't find firmware loaded Stellarnet device!");
 
@@ -151,6 +151,18 @@ _lg("stellarnet"),  _timeout_ms(timeout_ms)
 
 
 
+}
+
+
+stellarnet::stellarnet(int timeout_ms): Device(nullptr), _lg("stellarnet"), _timeout_ms(timeout_ms)
+{
+    auto loaded_dev = foxtrot::protocols::find_single_device(ctxt, STELLARNET_VID, STELLARNET_PID);
+  if(!loaded_dev.has_value())
+    throw DeviceError("couldn't find firmware loaded Stellarnet device!");
+
+ _dev = std::make_unique<foxtrot::devices::LibUsbDevice>(*loaded_dev);
+ setup_stellarnet_device(*_dev);
+ 
 }
 
 
@@ -176,24 +188,32 @@ void stellarnet::setup_stellarnet_device(LibUsbDevice& dev)
       throw foxtrot::DeviceError(err.what());
     }
 
-  auto det_type = get_stored_bytes(COEFF_DEVICE_ID_ADDR);
+  auto det_type = get_stored_bytes(dev, COEFF_DEVICE_ID_ADDR);
   std::string dettypestr(det_type.begin(), det_type.end());
   _lg.strm(sl::info) << "detector type: " << dettypestr;
 
   _lg.Trace("loading lambda coefficients");
 
   //first one is special, it also contains "device index";
-  auto coeff_bytes = get_stored_bytes(COEFF_C1_ADDR);
+
+  auto coeff_bytes = get_stored_bytes(dev, COEFF_C1_ADDR);
 
 
   _coeffs[0] = bytes_to_coeff(coeff_bytes);
-  _coeffs[1] = get_stored_coefficient(COEFF_C2_ADDR);
-  _coeffs[2] = get_stored_coefficient(COEFF_C3_ADDR);
-  _coeffs[3] = get_stored_coefficient(COEFF_C4_ADDR);
+  _lg.strm(sl::trace) << "coeff 0: " << _coeffs[0];
+
+  _coeffs[1] = get_stored_coefficient(dev, COEFF_C2_ADDR);
+  _lg.strm(sl::trace) << "coeff 1: " << _coeffs[1];
+
+  _coeffs[2] = get_stored_coefficient(dev, COEFF_C3_ADDR);
+  _lg.strm(sl::trace) << "coeff 2: " << _coeffs[2];
+
+  _coeffs[3] = get_stored_coefficient(dev, COEFF_C4_ADDR);
+  _lg.strm(sl::trace) << "coeff 3" << _coeffs[3];
 
 
   //WARNING: this is probably total BULLSHIT!
-  set_device_timing(100,3);
+  set_device_timing(dev, 100,3);
   _devidx = coeff_bytes[31] - static_cast<int>('0');
 
 }
@@ -379,7 +399,7 @@ const std::string foxtrot::devices::stellarnet::getDeviceTypeName() const
 
 // }
 
-void foxtrot::devices::stellarnet::set_device_timing(unsigned short tm, unsigned char x_timing)
+void foxtrot::devices::stellarnet::set_device_timing(LibUsbDevice& dev, unsigned short tm, unsigned char x_timing)
 {
   unsigned char msb = tm >>8 ;
   unsigned char lsb = tm & 0xFF;
@@ -390,17 +410,14 @@ void foxtrot::devices::stellarnet::set_device_timing(unsigned short tm, unsigned
 
   std::array<unsigned char,4 > data {msb,lsb,xt,msd};
 
-  if(_dev == nullptr)
-    throw foxtrot::DeviceError("invalid stored USB device");
-
 
   const unsigned char STELLARNET_SET_TIMING_bRequest = 0xB4;
   std::chrono::milliseconds rt(_timeout_ms);
-  _dev->blocking_control_transfer_send(reqtp_out, STELLARNET_SET_TIMING_bRequest, 0, 0, data, rt);
+  dev.blocking_control_transfer_send(reqtp_out, STELLARNET_SET_TIMING_bRequest, 0, 0, data, rt);
 
 }
 
-void foxtrot::devices::stellarnet::set_device_config(short unsigned integration_time, unsigned char XTiming, unsigned short boxcar_smooth, int tempcomp)
+void foxtrot::devices::stellarnet::set_device_config(LibUsbDevice& dev, short unsigned integration_time, unsigned char XTiming, unsigned short boxcar_smooth, int tempcomp)
 {
   if(integration_time < 2)
   {
@@ -420,7 +437,7 @@ void foxtrot::devices::stellarnet::set_device_config(short unsigned integration_
 
   //TODO: set up everything...
 
-  set_device_timing(integration_time, XTiming);
+  set_device_timing(dev, integration_time, XTiming);
 
 
 }
@@ -428,7 +445,7 @@ void foxtrot::devices::stellarnet::set_device_config(short unsigned integration_
 
 double stellarnet::bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes)
 {
-  std::string coeffstr;
+  std::string coeffstr(bytes.begin(), bytes.end());
   //lord help me
   //to be serious, I think this is needed because each address byte thing has
   //more in it than just the double of the coefficient
@@ -438,13 +455,13 @@ double stellarnet::bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes)
 
 }
 
-double stellarnet::get_stored_coefficient(unsigned int addr)
+double stellarnet::get_stored_coefficient(LibUsbDevice& dev, unsigned int addr)
 {
-  auto bytes = get_stored_bytes(addr);
+  auto bytes = get_stored_bytes(dev, addr);
   return bytes_to_coeff(bytes);
 }
 
-std::array< unsigned char, 0x20 > stellarnet::get_stored_bytes(unsigned int addr)
+std::array< unsigned char, 0x20 > stellarnet::get_stored_bytes(LibUsbDevice& dev, unsigned int addr)
 {
   if(addr > 0x100 )
   {
@@ -459,9 +476,6 @@ std::array< unsigned char, 0x20 > stellarnet::get_stored_bytes(unsigned int addr
   //NOTE: explicit cast silences warning...
   std::array<unsigned char,3> out_dat {0, static_cast<unsigned char>(addr), 0};
 
-  if(_dev == nullptr)
-    throw foxtrot::DeviceError("invalid stored USB device");
-
   const std::uint8_t STELLARNET_READ_BYTES_OUT_bRequest = 0xB6;
   const std::uint8_t STELLARNET_READ_BYTES_IN_bRequest = 0xB5;
 
@@ -470,10 +484,10 @@ std::array< unsigned char, 0x20 > stellarnet::get_stored_bytes(unsigned int addr
 
   std::vector<unsigned char> data;
   try{
-    _dev->blocking_control_transfer_send(reqtp_out, STELLARNET_READ_BYTES_OUT_bRequest,
+    dev.blocking_control_transfer_send(reqtp_out, STELLARNET_READ_BYTES_OUT_bRequest,
 					 0, 0, out_dat, tm);
 
-    data = _dev->blocking_control_transfer_receive(reqtp_in, STELLARNET_READ_BYTES_IN_bRequest, 0, 0, EXPECTED_PKT_SIZE, tm);
+    data = dev.blocking_control_transfer_receive(reqtp_in, STELLARNET_READ_BYTES_IN_bRequest, 0, 0, EXPECTED_PKT_SIZE, tm);
 
     if(data.size() != EXPECTED_PKT_SIZE)
       {
@@ -499,19 +513,24 @@ std::array< unsigned char, 0x20 > stellarnet::get_stored_bytes(unsigned int addr
 std::vector< unsigned short> foxtrot::devices::stellarnet::read_spectrum(int int_time)
 {
 
-  set_device_timing(int_time,3);
+
+  if(_dev == nullptr)
+    throw foxtrot::DeviceError("invalid stored device pointer!");
+
+  _lg.strm(sl::trace) << "setting device timing...";
+  set_device_timing(*_dev, int_time,3);
 
   int timeout = (int_time + 500) ;
   _lg.Trace("beginning spectrum integration");
 
   char data[1] {0};
 
-  if(_dev == nullptr)
-    throw foxtrot::DeviceError("invalid stored USB device");
 
   const unsigned char STELLARNET_BEGIN_SPECTRUM_bRequest = 0xB2;
   std::chrono::milliseconds rt(_timeout_ms);
   std::span<unsigned char> empty;
+
+  _lg.strm(sl::trace) << "sending control to start integration";
   _dev->blocking_control_transfer_send(reqtp_out, STELLARNET_BEGIN_SPECTRUM_bRequest,
 				       0, 0, empty, rt); 
   

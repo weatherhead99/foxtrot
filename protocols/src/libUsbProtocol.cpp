@@ -4,6 +4,7 @@
 #include <foxtrot/ProtocolError.h>
 #include <foxtrot/ProtocolTimeoutError.h>
 #include <foxtrot/protocols/ProtocolUtilities.h>
+#include <iostream>
 
 
 using namespace foxtrot::protocols;
@@ -42,6 +43,24 @@ LibUsbError::LibUsbError(int errcode, foxtrot::Logging& lg)
 };
 
 
+LibUsbContext::LibUsbContext()
+{
+  check_libusb_return(libusb_init(&_ptr));
+};
+
+LibUsbContext::~LibUsbContext()
+{
+  if(_ptr != nullptr)
+    libusb_exit(_ptr);
+}
+
+libusb_context* LibUsbContext::ptr()
+{
+  return _ptr;
+}
+
+
+
 void LibUsbDeviceList::_LibUsbDeviceListDeleter::operator()(libusb_device** list)
 {
   //NOTE: unref the devices, if any other LibUsbDevice objects have been created
@@ -76,23 +95,19 @@ LibUsbDeviceList::const_iterator::operator++(int)
 
 
 
-LibUsbDeviceList::LibUsbDeviceList()
+LibUsbDeviceList::LibUsbDeviceList(LibUsbContext& ctxt)
 {
-
-  //NOTE: this is deprecated upstream but only in newer libusb versions than we're using yet
-  check_libusb_return(libusb_init(&_ctxt));
 
 
   //allocate and get a device list. The machinery of unique_ptr custom deleter should free it when we're done
   libusb_device** pdevlist;
-  _n_devices = check_libusb_return(libusb_get_device_list(_ctxt, &pdevlist));
+  _n_devices = check_libusb_return(libusb_get_device_list(ctxt.ptr(), &pdevlist));
   devlist = decltype(devlist)(pdevlist);
 
 };
 
 LibUsbDeviceList::~LibUsbDeviceList()
 {
-   libusb_exit(_ctxt);
 }
 
 
@@ -171,11 +186,6 @@ LibUsbDevice::~LibUsbDevice()
 LibUsbDevice::LibUsbDevice(const LibUsbDevice& other)
 {
   _devptr = other._devptr;
-  _hdl =  other._hdl;
-
-  if(other.claimed_interface.has_value())
-    *claimed_interface = *other.claimed_interface;
-
   libusb_ref_device(_devptr);
 }
 
@@ -196,11 +206,13 @@ LibUsbDevice::LibUsbDevice(LibUsbDevice&& other)
 
 bool LibUsbDevice::is_open() const
 {
-  return _hdl == nullptr;
+  return _hdl != nullptr;
 }
 
 void LibUsbDevice::open()
 {
+  
+  
   check_libusb_return(libusb_open(_devptr, &_hdl));
 }
 
@@ -217,7 +229,7 @@ int LibUsbDevice::configuration()
   if(not is_open())
     throw std::logic_error("tried to get configuration on closed device!");
 
-  int cfg_out;
+  int cfg_out = 0;
 
   check_libusb_return(libusb_get_configuration(_hdl, &cfg_out));
   return cfg_out;
@@ -233,6 +245,9 @@ void LibUsbDevice::clear_halt(unsigned short endpoint)
 
 void LibUsbDevice::close() noexcept
 {
+
+  
+  
   libusb_close(_hdl);
   _hdl = nullptr;
 }
@@ -321,9 +336,9 @@ void LibUsbDevice::blocking_bulk_transfer_send(unsigned char endpoint,
 
 
 
-std::optional<LibUsbDevice> foxtrot::protocols::find_single_device(unsigned short vid, unsigned short pid, bool throw_on_multi)
+std::optional<LibUsbDevice> foxtrot::protocols::find_single_device(LibUsbContext& ctxt, unsigned short vid, unsigned short pid, bool throw_on_multi)
 {
-  LibUsbDeviceList devlist;
+  LibUsbDeviceList devlist(ctxt);
   auto match_vidpid = [vid, pid] (const auto& dev)
   {
     auto desc = dev.device_descriptor();
@@ -370,7 +385,7 @@ void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters)
     extract_parameter_value(_read_timeout,_params,"read_timeout",false);
 
     _lg.Info("searching attached USB devices...");
-    auto found_dev = find_single_device(_vid, _pid);
+    auto found_dev = find_single_device(ctxt, _vid, _pid);
 
     if(not found_dev.has_value())
       throw ProtocolError("failed to find appropriate device!");

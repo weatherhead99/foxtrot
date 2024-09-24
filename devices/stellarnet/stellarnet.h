@@ -38,17 +38,14 @@ namespace foxtrot
    Firmware load_stellarnet_firmware_payload(const string& firmware_file);
    void upload_stellarnet_device_firmware(LibUsbDevice& dev, const Firmware& fw, std::chrono::milliseconds timeout);
    
-   
-   
-   
-   
 
    class stellarnet : public Device
    {
      RTTR_ENABLE(Device)
    public:
      [[deprecated]] stellarnet(const std::string& firmware_file, int timeout_ms);
-     stellarnet(const foxtrot::parameterset& params);
+     [[deprecated]] stellarnet(const foxtrot::parameterset& params);
+     stellarnet(int timeout_ms);
      virtual const std::string getDeviceTypeName() const;
       
      std::vector<unsigned short> read_spectrum(int int_time_ms);
@@ -58,22 +55,26 @@ namespace foxtrot
    private:
 
      double bytes_to_coeff(const std::array<unsigned char, 0x20>& bytes);
-     double get_stored_coefficient(unsigned int addr);
+     double get_stored_coefficient(LibUsbDevice& dev, unsigned int addr);
      
      void setup_stellarnet_device(LibUsbDevice& dev);
      
      //void setup_reenumerated_device(libusb_device_descriptor* desc, libusb_device* dev);
      
-     void set_device_timing(unsigned short tm, unsigned char x_timing);
+     void set_device_timing(LibUsbDevice& dev, unsigned short tm, unsigned char x_timing);
      
-     void set_device_config(short unsigned integration_time, unsigned char XTiming, short unsigned boxcar_smooth, int tempcomp);
+     void set_device_config(LibUsbDevice& dev, short unsigned integration_time, unsigned char XTiming, short unsigned boxcar_smooth, int tempcomp);
      
      
-     std::array<unsigned char,0x20> get_stored_bytes(unsigned int addr);
+     std::array<unsigned char,0x20> get_stored_bytes(LibUsbDevice& dev, unsigned int addr);
      
      //     libusb_context* _ctxt = nullptr;
      //libusb_device_handle* _hdl = nullptr;
 
+     //NOTE: for now, DO NOT re-arrange these!
+     //memory corruption occurs if so due to libusb initialization weirdness
+     //will be fixed at some point
+     foxtrot::protocols::LibUsbContext ctxt;
      std::unique_ptr<foxtrot::protocols::LibUsbDevice> _dev;
      
      Logging _lg;
@@ -89,6 +90,7 @@ namespace foxtrot
      std::string _devid;
      
      int _devidx;
+
      
      
    };

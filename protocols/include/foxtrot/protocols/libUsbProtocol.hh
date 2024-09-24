@@ -30,6 +30,24 @@ namespace foxtrot
 
     };
 
+    class LibUsbContext
+    {
+
+      friend class LibUsbDeviceList;
+      
+    public:
+      LibUsbContext();
+      ~LibUsbContext();
+
+      LibUsbContext(LibUsbContext&& other);
+      LibUsbContext(const LibUsbContext& other) = delete;
+    private:
+      libusb_context* ptr();
+      libusb_context* _ptr;
+
+    };
+    
+
     class LibUsbDevice
     {
       friend class LibUsbDeviceList;
@@ -116,7 +134,7 @@ namespace foxtrot
 
       };
 
-      LibUsbDeviceList();
+      LibUsbDeviceList(LibUsbContext& ctxt);
       ~LibUsbDeviceList();
 
       const_iterator cbegin() const;
@@ -133,7 +151,7 @@ namespace foxtrot
       {
 	void operator()(libusb_device** list);
       };
-      libusb_context* _ctxt = nullptr;
+      
       std::size_t _n_devices;
       std::unique_ptr<libusb_device*, _LibUsbDeviceListDeleter> devlist;
     };
@@ -142,7 +160,7 @@ namespace foxtrot
     bool operator!=(const LibUsbDeviceList::const_iterator& a, const LibUsbDeviceList::const_iterator& b);
 
 
-    std::optional<LibUsbDevice> find_single_device(unsigned short vid, unsigned short pid,
+    std::optional<LibUsbDevice> find_single_device(LibUsbContext& ctxt, unsigned short vid, unsigned short pid,
 						   bool throw_on_multi=true);
 
 
@@ -169,6 +187,7 @@ namespace foxtrot
 
     private:
       foxtrot::Logging _lg;
+      LibUsbContext ctxt;
 
     };
 
