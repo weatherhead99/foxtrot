@@ -54,20 +54,29 @@ const foxtrot::parameterset bsc203_class_params
 using namespace foxtrot::devices;
 using foxtrot::devices::APT;
 
-foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* obj, destination dest)
+foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* obj, destination dest, bool immediate)
   : _obj(obj), _dest(dest), lg("AptUpdateMessageScopeGuard")
 {
-  if(obj != nullptr)
-    obj -> start_update_messages(dest);
-
+  if(immediate)
+    start();
+  
   lg.strm(sl::debug) << "entering update message scope guard";
 };
 
-foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
+void foxtrot::devices::AptUpdateMessageScopeGuard::start()
 {
   if(_obj != nullptr)
+    _obj->start_update_messages(_dest);
+  _started = true;
+
+}
+
+foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
+{
+  if(_obj != nullptr and _started)
     {
-    _obj -> stop_update_messages(_dest);   
+    _obj -> stop_update_messages(_dest);
+    _started = false;
     lg.strm(sl::debug) << "leaving update message scope guard";
     }
   else
@@ -301,10 +310,36 @@ hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 
 std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destination dest, motor_channel_idents channel)
 {
-    auto repl = request_response_struct<dcstatus>(_traits.status_request_code, _traits.status_get_code, dest, static_cast<unsigned char>(channel),
-                                                  0, dest);
+  std::variant<channel_status,dcstatus> out;
+
+  _lg.strm(sl::debug) << "in APT::get_status";
+
+  AptUpdateMessageScopeGuard guard(this, dest, false);
+  
+  if(_traits.require_enable_updates_for_status)
+    guard.start();
+
+  
+  switch(_traits.status_request_code)
+    {
+    case(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE):
+      _lg.strm(sl::debug) << "DC status update type...";
+      out = request_response_struct<dcstatus>(_traits.status_request_code,
+					      _traits.status_get_code, dest,
+					      static_cast<unsigned char>(channel), 0, dest);
+      break;
+    case(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE):
+      _lg.strm(sl::debug) << " normal status update type...";
+      out = request_response_struct<channel_status>(_traits.status_request_code,
+						    _traits.status_get_code, dest, static_cast<unsigned char>(channel),0, dest);
+      break;
+    default:
+      throw std::logic_error("APT traits class does not have valid status request code");
+      
+    }
+  
     
-    return repl;
+  return out;
     
 }
 

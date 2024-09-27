@@ -44,17 +44,20 @@ namespace foxtrot {
     class APT;
     struct AptUpdateMessageScopeGuard
     {
-      AptUpdateMessageScopeGuard(APT* obj, destination dest);
+      AptUpdateMessageScopeGuard(APT* obj, destination dest, bool immediate=true);
+      void start();
       ~AptUpdateMessageScopeGuard();
 
       APT* _obj = nullptr;
       destination _dest;
       foxtrot::Logging lg;
+      bool _started = false;
     };
 
 
     struct APTDeviceTraits
     {
+      
       bsc203_opcodes status_request_code = bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE;
       bsc203_opcodes status_get_code = bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE;
       bsc203_opcodes complete_success_code = bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED;
@@ -71,6 +74,7 @@ namespace foxtrot {
 	foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
       int n_ignore_failed_motor_msgs = 10;
+      bool require_enable_updates_for_status = false;
 
     };
 

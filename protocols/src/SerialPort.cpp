@@ -320,7 +320,20 @@ std::string foxtrot::protocols::SerialPort::read_definite(unsigned int len, optt
 
 
       if(!done)
+	{
+
+	  _lg.strm(sl::error) << "call did not complete in timout time";
+	  _lg.strm(sl::error) << "attempting cancellation";
+
+	  _sport->cancel();
+
+	  _io_service->run();
+	  _lg.strm(sl::error) << "ec2 value:" << ec.message();
+
+	  _io_service->stop();
+	  
 	  throw foxtrot::ProtocolTimeoutError("serial port read timed out...");
+	}
     }
 
   if(actlen != len)
