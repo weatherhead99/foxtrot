@@ -83,7 +83,6 @@ foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > pro
   _serport->Init(&bsc203_class_params);
   _serport->setDrain(true);
   _serport->flush();
-  
 }
 
 
@@ -306,6 +305,7 @@ std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destina
                                                   0, dest);
     
     return repl;
+    
 }
 
 
@@ -425,11 +425,11 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    continue;
 
 		  }
+
 		_serport->flush();
 		throw ThorlabsMotorError("motor status check failed! (Maybe a limit switch has been engaged)");
+
 	      }
-	    else
-	      fail_status_retries = 0;
 	    
         }
         else
@@ -625,6 +625,7 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
   return out;
 }
 
+
 void foxtrot::devices::APT::attempt_error_recover()
 {
   _lg.strm(sl::info) << "attempting error recovery...";
@@ -719,9 +720,6 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
     return {out, recv_opcode};
 
 }
-
-
-
 
 
 

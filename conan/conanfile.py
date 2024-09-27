@@ -11,9 +11,6 @@ import os
 
 FOXTROT_GLOBAL_OVERRIDES = []
 
-def ft_require(conanfile, substr: str) -> None:
-    reqstr = ft_version_get_req_str(conanfile.version)
-    conanfile.requires(f"foxtrot_{substr}/{reqstr}", transitive_headers=True, transitive_libs=True)
 
 def libudev_cmake_setup(cfg: CMakeDeps) -> None:
     deps.set_property("libudev", "cmake_target_aliases", ["PkgConfig::libudev"])
@@ -107,12 +104,6 @@ class FoxtrotCppPackage:
                 self.output.info(f"adding other foxtrot package {pack} to dependencies")
                 ft_require(self, pack)
 
-        # if hasattr(self, "overrides"):
-        #     for pack in self.overrides:
-        #         self.output.info(f"got override {pack} from local overrides")
-        #         self.requires(pack, override=True)
-        #         FOXTROT_GLOBAL_OVERRIDES.append(pack)
-
 
     def _setup_cmake_tc(self):
         tc = CMakeToolchain(self)
@@ -154,12 +145,6 @@ def ft_version_get_req_str(verstr: str) -> str:
     vers = Version(verstr)
     cmpout = [_ for _ in (vers.major, vers.minor, vers.patch) if _ is not None]
 
-    # for i, c in reversed(list(enumerate(cmpout))):
-    #     if c.value == 0:
-    #         cmpout.pop(i)
-    #     else:
-    #         cmpout[i] = int(c.value)-1
-    #         break
 
     if len(cmpout) == 0:
         reqstr = "[>0.0.0-0, include_prerelease]"

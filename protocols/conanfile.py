@@ -21,6 +21,7 @@ class FoxtrotProtocolsConan(ConanFile):
     default_options = {"*/*:shared" : True,
                        "use_asio_impls" : True}
 
+    
 
     package_type = "shared-library"
     ft_package_requires = "core",
