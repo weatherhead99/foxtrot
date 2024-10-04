@@ -136,20 +136,7 @@ void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode,
 
 bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool check_limitswitch, bool require_moving)
 {
-    unsigned int statusbits;
-    bool is_dcstatus;
-    std::visit([&statusbits, &is_dcstatus](auto& v) { 
-
-        statusbits = v.statusbits;
-        
-        if constexpr(std::is_same_v<decltype(v), dcstatus>)
-            is_dcstatus = true;
-        else
-            is_dcstatus = false;
-        
-    }, status);
-    
-    std::bitset<32> bits(statusbits);
+    auto bits = extract_status_bits(status);
     _lg.strm(sl::trace) << "statusbits: " << bits;
     
     if(check_limitswitch and (bits[0] or bits[1] or bits[2] or bits[3]))
@@ -308,9 +295,9 @@ hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 };
 
 
-std::variant<channel_status, dcstatus> foxtrot::devices::APT::get_status(destination dest, motor_channel_idents channel)
+allstatus foxtrot::devices::APT::get_status(destination dest, motor_channel_idents channel)
 {
-  std::variant<channel_status,dcstatus> out;
+  allstatus out;
 
   _lg.strm(sl::debug) << "in APT::get_status";
 
@@ -387,12 +374,10 @@ bool foxtrot::devices::APT::is_limited(destination dest, motor_channel_idents ch
   _lg.strm(sl::trace) << "is_limited";
   auto stat = get_status(dest, channel);
   _lg.strm(sl::trace) << "got status";
-  bool out = std::visit([] (auto& v) {
-    auto statusbits = v.statusbits;
-    std::bitset<32> bits(statusbits);
-    return bits[0] or bits[1] or bits[2] or bits[3];}, stat);
 
-  return out;
+  auto statusbits = extract_status_bits<32>(stat);  
+  return statusbits[0] or statusbits[1] or statusbits[2] or statusbits[3];
+
 }
 
 
@@ -421,20 +406,18 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
         
         if(opcode == static_cast<decltype(opcode)>(statusupdateopcode))
         {
+            _lg.strm(sl::trace) << "received motor status update msg";
             //NOTE: this should always have a data field, no need to check unless
             // we see things going really wrong
-            _lg.strm(sl::trace) << "received motor status update msg";
-            auto dat = *repl.data;
-            
-            //NOTE: this is the thing that'll need to be changed probably for BSC203
-            dcstatus stat;
-            std::copy(dat.begin(), dat.end(), reinterpret_cast<unsigned char*>(&stat));
+	    auto stat = extract_status_from_data(*repl.data);
+	    auto bits = extract_status_bits(stat);
+	    
 	    auto thischeck = check_status_bits(stat, true, true);
             if(!thischeck)
 	      {
 		//check if the motor thinks it's homing
-		std::bitset<32> bits(stat.statusbits);
-		if(bits[9])
+		bool is_homing = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));	      
+		if(is_homing)
 		  {
 		    _lg.strm(sl::info) << "motor status failed, but reports still homing";
 		    //NOTE: this will happen both when a motor is homing and hits a limit briefly, but ALSO when it has physically crashed into something. Therefore, check this a few times and if it gets above a threshold bail out, sending an emergency stop message...
@@ -445,9 +428,7 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    
 			stop_move(dest, chan, true);
 			throw DeviceError("motor status check failed. Motor crash suspected. Emergency stop issued. If this is not a crash, maybe retry number needs adjusting!");
-		      }
-		    
-
+		      }		    
 		    
 		    continue;
 		  }
@@ -503,8 +484,6 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
       throw foxtrot::DeviceError("failed to stop a homing move before homing...");
     }
 
-
-  
   start_home_channel(dest, channel);
  
 
@@ -571,9 +550,9 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destinat
   if(!start.has_value())
     {
       auto statvar = get_status(dest, channel);
-      dcstatus stat = std::get<dcstatus>(statvar);
+      unsigned position = std::visit([] (auto& v) { return v.position;}, statvar);
       
-      tgt_dist = std::abs((int)target - (int)stat.position);
+      tgt_dist = std::abs((int)target - (int)position);
     }
   else
     {
@@ -755,6 +734,31 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
     return {out, recv_opcode};
 
 }
+
+
+template<ThorlabsMotorStatus S>
+S _copy_data_to_status(std::vector<unsigned char>& in)
+{
+  S out;
+  std::copy(in.begin(), in.end(), reinterpret_cast<unsigned char*>(&out));
+  return out;
+}
+
+
+allstatus foxtrot::devices::APT::extract_status_from_data(std::vector<unsigned char>& data)
+{
+  switch(_traits.status_request_code)
+    {
+    case(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE):
+      return _copy_data_to_status<dcstatus>(data);
+    case(bsc203_opcodes::MGMSG_MOT_REQ_STATUSUPDATE):
+      return _copy_data_to_status<channel_status>(data);
+    default:
+      throw std::logic_error("APT Traits class does not have valid status request code");
+
+    }
+}
+
 
 
 

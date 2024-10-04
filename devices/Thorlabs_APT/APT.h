@@ -96,6 +96,7 @@ namespace foxtrot {
     virtual allstatus get_status(destination dest, motor_channel_idents channel);
 
 
+
     void stop_move(destination dest, motor_channel_idents channel, bool immediate);
 
     void absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target);
@@ -197,17 +198,28 @@ namespace foxtrot {
     private:
       std::tuple<apt_reply, unsigned short> receive_sync_common(destination expected_source, optional<milliseconds> timeout=std::nullopt, bool throw_on_errors=true);
 
-      template<int Size>
+      allstatus extract_status_from_data(std::vector<unsigned char>& data);
+      
+
+      template<int Size = 32>
       bool extract_status_bit(const allstatus& stat, int bit)
       {
-	return std::visit([bit] (auto& v)
+	auto bits = extract_status_bits<Size>(stat);
+	return bits[bit];
+      }
+
+      template<int Size = 32>
+      std::bitset<Size> extract_status_bits(const allstatus& stat)
+      {
+	return std::visit([] (auto& v)
 	{
 	  auto statusbits = v.statusbits;
 	  std::bitset<Size> bits(statusbits);
-	  return bits[bit];
+	  return bits;
 	}, stat);
-
       }
+
+      
 
 
     };

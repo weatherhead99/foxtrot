@@ -235,6 +235,7 @@ namespace foxtrot {
 
 #pragma pack(pop)
     
-
+      template<typename S> concept ThorlabsMotorStatus = std::is_same_v<dcstatus, S> || std::is_same_v<channel_status, S>;
+      
     }
 }
