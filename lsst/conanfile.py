@@ -37,9 +37,6 @@ class FoxtrotLSST(ConanFile):
 
     def requirements(self):
         super().requirements()
-        self.requires("zlib/1.2.13", override=True)
-        self.requires("grpc/1.54.3", override=True)
-
         if self.options.magis_chiller:
             self.requires("foxtrot_magis/[^0.0.1-a1,include_prerelease=True]")
 

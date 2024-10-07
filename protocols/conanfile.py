@@ -14,19 +14,20 @@ class FoxtrotProtocolsConan(ConanFile):
     exports_sources= ("CMakeLists.txt", "cmake/*.in", "src/*.cpp", "include/foxtrot/protocols/*.h",
                       "include/foxtrot/protocols/*.hh", "devprogs/CMakeLists.txt",
                       "devprogs/*.cpp")
-    requires = ("libusb/[^1.0.26]",
-                "libcurl/[^7.88.1]")
-
     options = {"use_asio_impls" : [True, False]}
     default_options = {"*/*:shared" : True,
                        "use_asio_impls" : True}
-
-    
 
     package_type = "shared-library"
     ft_package_requires = "core",
     cmake_package_name = "foxtrotProtocols"
 
+    def requirements(self):
+        super().requirements()
+        self.requires("libusb/[^1.0.26]", headers=True, libs=True, transitive_libs=True)
+        self.requires("libcurl/[^7.88.1]", headers=True, libs=True, transitive_libs=True)
+
+    
     def generate(self):
         buildenv = VirtualBuildEnv(self)
         buildenv.generate()
@@ -41,8 +42,3 @@ class FoxtrotProtocolsConan(ConanFile):
 
         tc.generate()
 
-    def validate_build(self):
-        if not valid_min_cppstd(self, 20):
-            self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
-            self.output.error("failed check requiring minimum of c++20")
-            raise ConanInvalidConfiguration("foxtrot modules require at least c++20 standard to build")

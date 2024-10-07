@@ -22,7 +22,7 @@ target_link_libraries(foxtrot_server PUBLIC RTTR::Core foxtrot::foxtrot_core fox
 add_executable(exptserve ${exptserve_srcs})
 target_include_directories(exptserve PRIVATE ${CMAKE_SOURCE_DIR}/include/exptserve/)
 
-target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core ${dl} foxtrot_server gRPC::grpc++ Boost::program_options)
+target_link_libraries(exptserve PUBLIC foxtrot::foxtrot_core foxtrot_server gRPC::grpc++ Boost::program_options)
 
 coro_logic(exptserve)
 
