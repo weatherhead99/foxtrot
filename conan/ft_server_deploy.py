@@ -1,4 +1,4 @@
-from conan.internal.deploy import runtime_deploy
+from conan.internal.deploy import full_deploy
 from conan.tools.files import copy
 from shutil import copy as shcopy
 import os
@@ -54,7 +54,7 @@ def copy_setups(conanfile, output_folder):
 
 def deploy(graph, output_folder, **kwargs):
     #first, run a full deploy
-    runtime_deploy(graph, output_folder)
+    full_deploy(graph, output_folder)
     print("------FOXTROT SERVER DEPLOYER-------")
     allsetups = []
     for req, cfile in graph.root.conanfile.dependencies.items():
