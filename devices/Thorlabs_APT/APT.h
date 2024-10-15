@@ -103,7 +103,7 @@ namespace foxtrot {
 
     void relative_move_blocking(destination dest, motor_channel_idents channel, int target);
 
-      void home_move_blocking(destination dest, motor_channel_idents channel);
+    void home_move_blocking(destination dest, motor_channel_idents channel);
 
     void set_velocity_params (destination dest, const velocity_params& velpar);
       velocity_params get_velocity_params(destination dest, motor_channel_idents channel);

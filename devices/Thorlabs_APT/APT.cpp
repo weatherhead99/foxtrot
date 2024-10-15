@@ -22,12 +22,12 @@ using std::endl;
 using namespace foxtrot::devices;
 
 const std::set<foxtrot::devices::bsc203_opcodes> motor_finish_messages =
-    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED};
 
 const std::set<foxtrot::devices::bsc203_opcodes> motor_status_messages =
-    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED, 
+    {foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_MOVE_STOPPED,
      foxtrot::devices::bsc203_opcodes::MGMSG_MOT_GET_STATUSUPDATE};
@@ -59,7 +59,7 @@ foxtrot::devices::AptUpdateMessageScopeGuard::AptUpdateMessageScopeGuard(APT* ob
 {
   if(immediate)
     start();
-  
+
   lg.strm(sl::debug) << "entering update message scope guard";
 };
 
@@ -86,7 +86,7 @@ foxtrot::devices::AptUpdateMessageScopeGuard::~AptUpdateMessageScopeGuard()
 }
 
 
-foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto) 
+foxtrot::devices::APT::APT(std::shared_ptr< foxtrot::protocols::SerialPort > proto)
 : foxtrot::Device(proto),  _lg("APT"), _serport(proto)
 {
   _serport->Init(&bsc203_class_params);
@@ -114,23 +114,23 @@ void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode, unsigned cha
 {
   auto optpr = reinterpret_cast<unsigned char*>(&opcode);
   std::array<unsigned char, 6> header{ optpr[0], optpr[1], p1, p2, static_cast<unsigned char>(dest) ,static_cast<unsigned char>(src)};
-  
+
   _lg.Trace("writing to serial port...");
   _serport->write(std::string(header.begin(), header.end()));
 
 
   std::this_thread::sleep_for(std::chrono::milliseconds(50));
-  
+
 }
 
 void foxtrot::devices::APT::transmit_message(bsc203_opcodes opcode,
-                                             destination dest, motor_channel_idents chan,
-                                             destination src)
+					     destination dest, motor_channel_idents chan,
+					     destination src)
 {
       transmit_message(opcode,
-                     static_cast<unsigned short>(chan),
-                     0, dest, src);
-    
+		     static_cast<unsigned short>(chan),
+		     0, dest, src);
+
 }
 
 
@@ -138,13 +138,13 @@ bool foxtrot::devices::APT::check_status_bits(const allstatus& status, bool chec
 {
     auto bits = extract_status_bits(status);
     _lg.strm(sl::trace) << "statusbits: " << bits;
-    
+
     if(check_limitswitch and (bits[0] or bits[1] or bits[2] or bits[3]))
-        return false;
-    
+	return false;
+
     if(require_moving and  not (bits[4] or bits[5] or bits[6] or bits[7]))
-        return false;
-        
+	return false;
+
     return true;
 }
 
@@ -154,9 +154,9 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 
     auto [aptreply, opcode] = receive_sync_common(expected_source);
 
-    
+
     if (received_opcode != nullptr)
-        *received_opcode = opcode;
+	*received_opcode = opcode;
 
     if(opcode != static_cast<decltype(opcode)>(expected_opcode))
     {
@@ -164,7 +164,7 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 
       _lg.strm(errtp) << "got opcode: 0x" << std::hex << opcode;
       _lg.strm(errtp) << "but expected: 0x"<< std::hex <<  static_cast<decltype(opcode)>(expected_opcode);
-        
+
       if (check_opcode)
 	throw DeviceError("received unexpected opcode");
     }
@@ -174,12 +174,12 @@ foxtrot::devices::bsc203_reply foxtrot::devices::APT::receive_message_sync(bsc20
 
     if(aptreply.data.has_value())
       out.data = std::move(*aptreply.data);
-    
+
     out.p1 = aptreply.p1;
     out.p2 = aptreply.p2;
-    
+
     return out;
-    
+
 }
 
 
@@ -211,9 +211,9 @@ int foxtrot::devices::APT::get_position_counter(destination dest, motor_channel_
       bsc203_opcodes::MGMSG_MOT_REQ_POSCOUNTER,
       bsc203_opcodes::MGMSG_MOT_GET_POSCOUNTER,
       dest, 0, 0);
-  
+
   return repl.position_counter_value;
-  
+
 }
 
 void foxtrot::devices::APT::set_position_counter(destination dest, motor_channel_idents channel, int val)
@@ -237,9 +237,9 @@ foxtrot::devices::homeparams foxtrot::devices::APT::get_homeparams(destination d
 }
 
 void foxtrot::devices::APT::set_homeparams(destination dest,
-                                           const homeparams& params)
+					   const homeparams& params)
 {
-    auto dat = copy_struct_to_array(params);    
+    auto dat = copy_struct_to_array(params);
     transmit_message(bsc203_opcodes::MGMSG_MOT_SET_HOMEPARAMS, dat, dest);
 
 }
@@ -247,17 +247,17 @@ void foxtrot::devices::APT::set_homeparams(destination dest,
 limitswitchparams foxtrot::devices::APT::get_limitswitchparams(destination dest, motor_channel_idents channel)
 {
     auto out = request_response_struct<limitswitchparams>(bsc203_opcodes::MGMSG_MOT_REQ_LIMSWITCHPARAMS, bsc203_opcodes::MGMSG_MOT_GET_LIMSWITCHPARAMS, dest, static_cast<unsigned short>(channel), 0);
-    
+
     return out;
 }
 
 void foxtrot::devices::APT::set_limitswitchparams(destination dest,
-                                                  const limitswitchparams& params)
+						  const limitswitchparams& params)
 {
-    
+
     auto dat = copy_struct_to_array(params);
     transmit_message(bsc203_opcodes::MGMSG_MOT_SET_LIMSWITCHPARAMS,
-                     dat, dest);
+		     dat, dest);
 }
 
 
@@ -269,9 +269,9 @@ bool foxtrot::devices::APT::get_channelenable(destination dest, motor_channel_id
 
     auto ret = receive_message_sync_check(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE, dest);
     //    auto ret = receive_message_sync(bsc203_opcodes::MGMSG_MOD_GET_CHANENABLESTATE,dest);
-    
+
     bool onoff = (ret.p2 == 0x01) ? true : false;
-    
+
     return onoff;
 }
 
@@ -280,15 +280,15 @@ void foxtrot::devices::APT::set_channelenable(destination dest, motor_channel_id
     unsigned char enable_disable = onoff? 0x01 : 0x02;
 
     transmit_message(bsc203_opcodes::MGMSG_MOD_SET_CHANENABLESTATE,static_cast<unsigned char>(channel),enable_disable, dest);
-    
+
 }
 
 
 hwinfo foxtrot::devices::APT::get_hwinfo(destination dest,
 							   std::optional<destination> expd_src)
-{   
+{
     auto out = request_response_struct<hwinfo>(bsc203_opcodes::MGMSG_MOD_REQ_HWINFO,
-                                               bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00,
+					       bsc203_opcodes::MGMSG_MOD_GET_HWINFO, dest,0x00, 0x00,
 					       expd_src);
 
     return out;
@@ -302,11 +302,11 @@ allstatus foxtrot::devices::APT::get_status(destination dest, motor_channel_iden
   _lg.strm(sl::debug) << "in APT::get_status";
 
   AptUpdateMessageScopeGuard guard(this, dest, false);
-  
+
   if(_traits.require_enable_updates_for_status)
     guard.start();
 
-  
+
   switch(_traits.status_request_code)
     {
     case(bsc203_opcodes::MGMSG_MOT_REQ_DCSTATUSUPDATE):
@@ -322,12 +322,12 @@ allstatus foxtrot::devices::APT::get_status(destination dest, motor_channel_iden
       break;
     default:
       throw std::logic_error("APT traits class does not have valid status request code");
-      
+
     }
-  
-    
+
+
   return out;
-    
+
 }
 
 
@@ -343,7 +343,7 @@ void foxtrot::devices::APT::start_relative_move(destination dest, motor_channel_
     auto msgdata = get_move_request_header_data(movedist, chan);
     transmit_message(bsc203_opcodes::MGMSG_MOT_MOVE_RELATIVE, msgdata, dest);
 }
-                                        
+
 void foxtrot::devices::APT::stop_move(destination dest, motor_channel_idents channel, bool immediate)
 {
     unsigned short stopmode = immediate? 0x01 : 0x02;
@@ -353,20 +353,20 @@ void foxtrot::devices::APT::stop_move(destination dest, motor_channel_idents cha
 
 void foxtrot::devices::APT::absolute_move_blocking(destination dest, motor_channel_idents channel, unsigned int target)
 {
-  
+
   auto tm = estimate_abs_move_time(dest, channel, target);
   _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
 
 
   auto limstate = is_limited(dest, channel);
-  
+
   start_absolute_move(dest, channel, target);
-  
+
   wait_blocking_move(_traits.status_get_code,
-                     _traits.complete_success_code,
-                     dest, channel, std::chrono::milliseconds(1000),
-                     tm, limstate);
-  
+		     _traits.complete_success_code,
+		     dest, channel, std::chrono::milliseconds(1000),
+		     tm, limstate);
+
 }
 
 bool foxtrot::devices::APT::is_limited(destination dest, motor_channel_idents channel)
@@ -375,22 +375,22 @@ bool foxtrot::devices::APT::is_limited(destination dest, motor_channel_idents ch
   auto stat = get_status(dest, channel);
   _lg.strm(sl::trace) << "got status";
 
-  auto statusbits = extract_status_bits<32>(stat);  
+  auto statusbits = extract_status_bits<32>(stat);
   return statusbits[0] or statusbits[1] or statusbits[2] or statusbits[3];
 
 }
 
 
 void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode,
-                                               bsc203_opcodes completionexpectedopcode,
-                                               destination dest, motor_channel_idents chan,
-                                               std::chrono::milliseconds update_timeout,
-                                               std::chrono::milliseconds total_move_timeout, bool init_limit_state
-                                              )
+					       bsc203_opcodes completionexpectedopcode,
+					       destination dest, motor_channel_idents chan,
+					       std::chrono::milliseconds update_timeout,
+					       std::chrono::milliseconds total_move_timeout, bool init_limit_state
+					      )
 {
   AptUpdateMessageScopeGuard msgguard(this, dest);
-  
-  
+
+
     _lg.strm(sl::debug) << "waiting for motion complete message";
 
     auto starttime = std::chrono::steady_clock::now();
@@ -398,25 +398,25 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 
 
     int fail_status_retries = 0;
-    
+
     while(true)
     {
-        auto [repl, opcode] = receive_message_sync_check(_traits.motor_status_messages.begin(), 
-                                                         _traits.motor_status_messages.end(), dest, update_timeout);
-        
-        if(opcode == static_cast<decltype(opcode)>(statusupdateopcode))
-        {
-            _lg.strm(sl::trace) << "received motor status update msg";
-            //NOTE: this should always have a data field, no need to check unless
-            // we see things going really wrong
+	auto [repl, opcode] = receive_message_sync_check(_traits.motor_status_messages.begin(),
+							 _traits.motor_status_messages.end(), dest, update_timeout);
+
+	if(opcode == static_cast<decltype(opcode)>(statusupdateopcode))
+	{
+	    _lg.strm(sl::trace) << "received motor status update msg";
+	    //NOTE: this should always have a data field, no need to check unless
+	    // we see things going really wrong
 	    auto stat = extract_status_from_data(*repl.data);
 	    auto bits = extract_status_bits(stat);
 	    
 	    auto thischeck = check_status_bits(stat, true, true);
-            if(!thischeck)
+	    if(!thischeck)
 	      {
 		//check if the motor thinks it's homing
-		bool is_homing = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));	      
+		bool is_homing = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));
 		if(is_homing)
 		  {
 		    _lg.strm(sl::info) << "motor status failed, but reports still homing";
@@ -425,11 +425,11 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		    if(fail_status_retries++ >= _traits.n_ignore_failed_motor_msgs)
 		      {
 			_lg.strm(sl::error) << "motor status checks failed " << fail_status_retries << " times, likely motor has stalled or crashed!";
-		    
+
 			stop_move(dest, chan, true);
 			throw DeviceError("motor status check failed. Motor crash suspected. Emergency stop issued. If this is not a crash, maybe retry number needs adjusting!");
-		      }		    
-		    
+		      }
+
 		    continue;
 		  }
 		else if( (bits[0] or bits[1] or bits[2] or bits[3]) and init_limit_state)
@@ -446,16 +446,16 @@ void foxtrot::devices::APT::wait_blocking_move(bsc203_opcodes statusupdateopcode
 		throw ThorlabsMotorError("motor status check failed! (Maybe a limit switch has been engaged)");
 
 	      }
-	    
-        }
-        else
-        {
-            _lg.strm(sl::debug) << "received move completion message!";
-            if(opcode != static_cast<decltype(opcode)>(completionexpectedopcode))
-                throw ThorlabsMotorError("got unexpected type of completion message!");
-            break;
-            
-        }
+
+	}
+	else
+	{
+	    _lg.strm(sl::debug) << "received move completion message!";
+	    if(opcode != static_cast<decltype(opcode)>(completionexpectedopcode))
+		throw ThorlabsMotorError("got unexpected type of completion message!");
+	    break;
+
+	}
     }
     _serport->flush();
 }
@@ -468,7 +468,7 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
 
   auto stat = get_status(dest, channel);
   bool is_homing_already = extract_status_bit<32>(stat, static_cast<unsigned char>(status_bit_indices::is_homing));
-  
+
   if(is_homing_already)
     _lg.strm(sl::info) << "the stage is already homing, FYI...";
 
@@ -485,21 +485,21 @@ void foxtrot::devices::APT::home_move_blocking(destination dest, motor_channel_i
     }
 
   start_home_channel(dest, channel);
- 
 
- 
+
+
   wait_blocking_move(_traits.status_get_code,
-                     bsc203_opcodes::MGMSG_MOT_MOVE_HOMED, 
-                     dest, channel, std::chrono::milliseconds(2000), 
-                     //WARNING: this one is not used for now 
-                     std::chrono::milliseconds(1000), limitstate);
+		     bsc203_opcodes::MGMSG_MOT_MOVE_HOMED,
+		     dest, channel, std::chrono::milliseconds(2000),
+		     //WARNING: this one is not used for now
+		     std::chrono::milliseconds(1000), limitstate);
 
 }
 
 
 void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_channel_idents channel, int target)
 {
-    
+
     auto tm = estimate_rel_move_time(dest, channel, target);
     _lg.strm(sl::debug) << "estimated move time(ms): "<< tm.count() ;
 
@@ -507,11 +507,11 @@ void foxtrot::devices::APT::relative_move_blocking(destination dest, motor_chann
     auto limitstate = is_limited(dest, channel);
     start_relative_move(dest, channel, target);
     wait_blocking_move(_traits.status_get_code,
-                       bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
-                       dest, channel, std::chrono::milliseconds(1000),
-                       tm, limitstate);
-    
-    
+		       bsc203_opcodes::MGMSG_MOT_MOVE_COMPLETED,
+		       dest, channel, std::chrono::milliseconds(1000),
+		       tm, limitstate);
+
+
 }
 
 
@@ -528,7 +528,7 @@ foxtrot::devices::velocity_params foxtrot::devices::APT::get_velocity_params(fox
 void foxtrot::devices::APT::set_velocity_params (foxtrot::devices::destination dest, const foxtrot::devices::velocity_params& velpar)
 {
 
-  auto data = copy_struct_to_array(velpar);  
+  auto data = copy_struct_to_array(velpar);
   transmit_message(bsc203_opcodes::MGMSG_MOT_SET_VELPARAMS, data, dest);
 
 }
@@ -551,14 +551,14 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_abs_move_time(destinat
     {
       auto statvar = get_status(dest, channel);
       unsigned position = std::visit([] (auto& v) { return v.position;}, statvar);
-      
+
       tgt_dist = std::abs((int)target - (int)position);
     }
   else
     {
       tgt_dist = std::abs((int)target - (int)(*start));
     }
-  
+
   return estimate_rel_move_time(dest, channel, tgt_dist);
 }
 
@@ -573,13 +573,13 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
   //this cast is to prevent a core dump floating point exception
   //when it happens to be 0
   auto accel = static_cast<double>(velparams.acceleration);
-  
+
   //t1 is the "triangle" area of the vel/ time graph
   //NOTE: the over 16 I think is to do with the trinamics/non-trinamics thing
   double t1  = velparams.maxvel / accel / 16;
   double dist1 = velparams.acceleration * t1 * t1;
 
-  
+
   _lg.strm(sl::debug) << "target distance for move: " << tgt_dist ;
 
   //in this case the acceleration periods will be truncated. To be safe, estimate
@@ -591,24 +591,24 @@ std::chrono::milliseconds foxtrot::devices::APT::estimate_rel_move_time(destinat
       _lg.strm(sl::trace) << "t3: " << t3;
       unsigned ms = std::ceil(t3*1000);
       return std::chrono::milliseconds(ms);
-      
-      
+
+
     }
- 
+
   double remdist = tgt_dist - 2*dist1;
   double remtime = remdist / velparams.acceleration;
 
   _lg.strm(sl::debug) << "extra time: " << remtime;
 
   unsigned ms = std::ceil(remtime * 1000 );
-  return std::chrono::milliseconds(ms);  
+  return std::chrono::milliseconds(ms);
 
 }
 
 foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bsc203_opcodes expected_opcode, destination expected_source, optional<milliseconds> timeout, bool discard_motor_status)
 {
 
-  
+
   auto [out, recvd_opcode ] = receive_sync_common(expected_source, timeout);
 
 
@@ -629,13 +629,13 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 	    }
 
 	}
-      
+
       _lg.strm(sl::error) << "expected opcode:  0x" << std::hex << static_cast<unsigned short>(expected_opcode);
       _lg.strm(sl::error) << "but received : 0x" << std::hex << recvd_opcode;
       throw DeviceError("unexpected opcode received in message!");
-      
+
     }
-  
+
   return out;
 }
 
@@ -666,18 +666,18 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
 
   unsigned short recv_opcode = ( static_cast<unsigned>(headerstr[1]) <<8 ) | static_cast<unsigned>(headerstr[0] & 0xFF);
 
-  
+
   if (headerstr[4] == 0)
     {
       _lg.strm(sl::error) << "headerstr is (hex): " << std::hex << headerstr << std::dec;            _lg.Error("null destination");
       _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
       _lg.Info("flushing serial port");
       _serport->flush();
-        throw DeviceError("received null destination");
+	throw DeviceError("received null destination");
     }
 
 
-  if( (recv_opcode == static_cast<unsigned short>(bsc203_opcodes::MGMSG_HW_RESPONSE)) and throw_on_errors) 
+  if( (recv_opcode == static_cast<unsigned short>(bsc203_opcodes::MGMSG_HW_RESPONSE)) and throw_on_errors)
     {
       _lg.strm(sl::error) << "got MGMSG_HW_RESPONSE message,usually an error!";
 
@@ -700,37 +700,37 @@ std::tuple<foxtrot::devices::apt_reply, unsigned short> foxtrot::devices::APT::r
       oss << std::hex;
       for(auto c : headerstr)
 	oss <<  static_cast<unsigned int>(c) << ",";
-      _lg.strm(sl::error) << "header str (hex) is: " << oss.str();	    
+      _lg.strm(sl::error) << "header str (hex) is: " << oss.str();
       _lg.strm(sl::error) << "header str is of length: " << headerstr.size();
 
       _lg.Info("flushing serial port");
       _serport->flush();
       _lg.Error("unexpected source: " + std::to_string(src) + ", expected: " +  std::to_string(static_cast<decltype(src)>(expected_source)));
-        throw DeviceError("received unexpected source");
+	throw DeviceError("received unexpected source");
 
     }
 
 
-    //check if data packet present 
+    //check if data packet present
     if( (headerstr[4] & 0x80) == 0x80)
     {
-        //WARNING: IS THE DLEN MSB OR LSB?
+	//WARNING: IS THE DLEN MSB OR LSB?
       _lg.strm(sl::trace) << "headerstr[3]: " << (int) headerstr[3] << " headerstr[2]: " << (int) headerstr[2];
-      unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);  
-      
+      unsigned short dlen = (static_cast<unsigned short>(headerstr[3]) << 8) | static_cast<unsigned short>(headerstr[2]);
+
       _lg.Trace("data packet present, length: " + std::to_string(dlen));
 
       auto datatimeout = _serport->calc_minimum_transfer_time(dlen);
       _lg.strm(sl::trace) << "data transfer exp'd transfer time:" << datatimeout.count();
       auto data = _serport->read_definite(dlen, std::chrono::seconds(1));
-      
+
       out.data = std::vector<unsigned char>(data.begin(),data.end());
 
     }
-    
+
     out.p1 = headerstr[2];
     out.p2 = headerstr[3];
-    
+
     return {out, recv_opcode};
 
 }
@@ -767,7 +767,7 @@ RTTR_REGISTRATION{
     using foxtrot::devices::APT;
     registration::class_<APT>("foxtrot::devices::APT")
 
-      
+
     .method("get_channelenable", &APT::get_channelenable)
     (parameter_names("dest", "channel"))
       .method("set_channelenable", &APT::set_channelenable)
@@ -789,9 +789,9 @@ RTTR_REGISTRATION{
     .method("get_velocity_params", &APT::get_velocity_params)
       (parameter_names("destination", "channel"))
       .method("get_position_counter", &APT::get_position_counter)
-              (parameter_names("dest", "channel"))
+	      (parameter_names("dest", "channel"))
      .method("set_position_counter", &APT::set_position_counter)
-             (parameter_names("dest", "channel", "val"))
+	     (parameter_names("dest", "channel", "val"))
       .method("get_homeparams", &APT::get_homeparams)
       (parameter_names("dest", "channel"))
       .method("set_homeparams", &APT::set_homeparams)
@@ -801,14 +801,14 @@ RTTR_REGISTRATION{
       .method("set_limitswitchparams", &APT::set_limitswitchparams)
       (parameter_names("dest", "params"))
       .method("attempt_error_recover", &APT::attempt_error_recover)
-      
-      
+
+
       ;
 
 //     .method("home_channel", &APT::home_channel)
 //     (parameter_names("destination", "channel"));
-//     
-    
+//
+
     //Custom structs
     using foxtrot::devices::bsc203_reply;
     registration::class_<bsc203_reply>("foxtrot::devices::bsc203_reply")
@@ -816,7 +816,7 @@ RTTR_REGISTRATION{
     .property("p1", &bsc203_reply::p1)
     .property("p2", &bsc203_reply::p2)
     .property("data", &bsc203_reply::data);
-    
+
     using foxtrot::devices::hwinfo;
     registration::class_<hwinfo>("foxtrot::devices::hwinfo")
     .constructor()(policy::ctor::as_object)
@@ -829,7 +829,7 @@ RTTR_REGISTRATION{
     .property("HWvers", &hwinfo::HWvers)
     .property("modstate", &hwinfo::modstate)
     .property("nchans", &hwinfo::nchans);
-    
+
     using foxtrot::devices::channel_status;
     registration::class_<channel_status>("foxtrot::devices::channel_status")
     .constructor()(policy::ctor::as_object)
@@ -837,7 +837,7 @@ RTTR_REGISTRATION{
     .property("position", &channel_status::position)
     .property("enccount", &channel_status::enccount)
     .property("statusbits", &channel_status::statusbits);
-    
+
     using foxtrot::devices::velocity_params;
     registration::class_<velocity_params>("foxtrot::devices::velocity_params")
     .constructor()(policy::ctor::as_object)
@@ -845,7 +845,7 @@ RTTR_REGISTRATION{
     .property("minvel", &velocity_params::minvel)
     .property("acceleration", &velocity_params::acceleration)
     .property("maxvel", &velocity_params::maxvel);
-    
+
     using foxtrot::devices::homeparams;
     registration::class_<homeparams>("foxtrot::devices::homeparams")
     .constructor()(policy::ctor::as_object)
@@ -854,7 +854,7 @@ RTTR_REGISTRATION{
     .property("limitSwitch", &homeparams::limitSwitch)
     .property("homeVelocity", &homeparams::homeVelocity)
     .property("offsetDistance", &homeparams::offsetDistance);
-    
+
     using foxtrot::devices::limitswitchparams;
     registration::class_<limitswitchparams>("foxtrot::devices::limitswitchparams")
     .constructor()(policy::ctor::as_object)
@@ -873,8 +873,8 @@ RTTR_REGISTRATION{
       .property("velocity", &dcstatus::velocity)
       .property("motorcurrent", &dcstatus::motorcurrent)
       .property("statusbits", &dcstatus::statusbits);
-      
-    
+
+
     //Custom enums
     using foxtrot::devices::destination;
     registration::enumeration<destination>("foxtrot::devices::destination")
@@ -884,7 +884,7 @@ RTTR_REGISTRATION{
      value("bay1", destination::bay1),
      value("bay2", destination::bay2),
      value("bay3", destination::bay3));
-    
+
     using foxtrot::devices::motor_channel_idents;
     registration::enumeration<motor_channel_idents>("foxtrot::devices::motor_channel_idents")
     (value("channel_1", motor_channel_idents::channel_1),
@@ -892,6 +892,3 @@ RTTR_REGISTRATION{
      value("channel_3", motor_channel_idents::channel_3),
      value("channel_4", motor_channel_idents::channel_4));
 }
-
-
-
