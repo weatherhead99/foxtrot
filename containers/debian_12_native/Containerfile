@@ -1,0 +1,5 @@
+FROM debian:12
+
+#install build dependencies
+RUN apt-get -y update; apt-get -y install libboost1.81-all-dev libprotobuf-dev librttr-dev libgrpc++-dev protobuf-compiler-grpc libudev-dev libusb-1.0-0-dev libcurl4-openssl-dev rapidjson-dev libsodium-dev
+
