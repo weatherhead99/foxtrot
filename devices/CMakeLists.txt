@@ -126,7 +126,7 @@ install(EXPORT foxtrot_devices
         NAMESPACE foxtrot::
         COMPONENT devel)
 
-install(FILES cmake/Findrapidxml.cmake cmake/FindDWF.cmake 
+install(FILES cmake/FindDWF.cmake 
  DESTINATION ${ft_cmakedir})
         
 set(ft_devices_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
@@ -144,13 +144,6 @@ if("idscamera" IN_LIST device_targets)
   string(APPEND ft_devices_dep_str
     "
 find_dependency(ueye REQUIRED)
-")
-endif()
-
-if("webswitch_plus" IN_LIST device_targets)
-  string(APPEND ft_devices_dep_str
-    "
-find_dependency(rapidxml REQUIRED)
 ")
 endif()
 

@@ -67,8 +67,10 @@ int main(int argc, char** argv)
     bool forceauth;
     
     std::string bindstr;
+#ifdef FTAUTH
     auto servercreds = foxtrot::get_config_file_path("FOXTROT_CREDS", "server_creds.json");
     int cred_validity_hours;
+#endif
     
     foxtrot::Logging lg("exptserve");
     
@@ -97,8 +99,10 @@ int main(int argc, char** argv)
      "default title for pushbullet notifications")
     ("pushbullet_default_channel", po::value<std::string>()->default_value(""), 
      "default channel for pushbullet notifications")
+#ifdef FTAUTH
     ("servercreds,S", po::value<std::string>(&servercreds), "authentication credentials (JSON) file")
     ("credvalid,v", po::value<int>(&cred_validity_hours)->default_value(24), "length of credential validity (hours)")
+#endif
     ("help","display usage information");
     
     po::positional_options_description pdesc;
@@ -199,7 +203,8 @@ int main(int argc, char** argv)
                                  vm["pushbullet_default_channel"].as<std::string>());
     }
     
-    
+
+#ifdef FTAUTH
     lg.Info("trying to load credentials for authentication");
     if(!std::filesystem::exists(servercreds))
     {
@@ -210,6 +215,8 @@ int main(int argc, char** argv)
         lg.Info("setting up authentication system");
         serv.setup_auth(servercreds, cred_validity_hours);
     }
+#endif
+    
     
     if(nthreads > 1)
     {

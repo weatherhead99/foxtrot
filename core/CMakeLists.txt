@@ -1,5 +1,5 @@
 project(foxtrot_core C CXX)
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD 20)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -38,7 +38,7 @@ find_package(Boost REQUIRED COMPONENTS log program_options thread)
 else()
 find_package(Boost REQUIRED COMPONENTS log program_options)
 endif()
-find_package(Protobuf REQUIRED )
+find_package(Protobuf REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 find_package(gRPC REQUIRED)
 
@@ -51,7 +51,7 @@ add_subdirectory(proto)
 
 
 #configure building of udev support
-if(${BUILD_UDEV_SUPPORT} AND NOT ${libudev_FOUND})
+if(${BUILD_UDEV_SUPPORT} AND NOT TARGET libudev::libudev)
   message(WARNING "udev support requested but could not find libudev so disabled it")
 
 elseif(${BUILD_UDEV_SUPPORT})

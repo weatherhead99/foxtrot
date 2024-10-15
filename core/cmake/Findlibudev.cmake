@@ -1,7 +1,7 @@
-include(FindPkgConfig)
 include(FindPackageHandleStandardArgs)
 
 
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(libudev REQUIRED libudev IMPORTED_TARGET)
 
 if(${libudev_FOUND})
@@ -16,5 +16,6 @@ endif()
 
 
 
-find_package_handle_standard_args(libudev DEFAULT_MSG libudev_INCLUDE_DIRS libudev_LIBRARIES)
+find_package_handle_standard_args(libudev REQUIRED_VARS libudev_FOUND
+VERSION_VAR libudev_VERSION)
 

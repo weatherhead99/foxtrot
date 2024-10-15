@@ -21,9 +21,13 @@
 #include <foxtrot/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/DeviceHarness.h>
-#include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/FlagMap.hh>
+
+#ifdef FTAUTH
+#include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/server/auth_layer/AuthBase.hh>
+#endif
+
 
 #include "HandlerBase.h"
 
@@ -156,8 +160,10 @@ private:
     
         
     Logging _lg;
+  #ifdef FTAUTH
     std::shared_ptr<AuthHandler> _auth_api = nullptr;
     std::shared_ptr<UserAuthInterface> _auth_iface = nullptr;
+  #endif
     
 };
 

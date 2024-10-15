@@ -5,7 +5,11 @@
 #include <iostream>
 #include <typeinfo>
 
+#ifdef FTAUTH
 #include <foxtrot/server/AuthHandler.h>
+#include "AuthRequestImpl.h"
+#include "AuthRespondImpl.h"
+#endif
 
 //these should be included via the buildsystem
 #include "ServerImplLegacy.h"
@@ -14,8 +18,7 @@
 #include "FetchDataImpl.h"
 #include "ServerFlagsImpl.h"
 #include "BroadcastNotificationImpl.h"
-#include "AuthRequestImpl.h"
-#include "AuthRespondImpl.h"
+
 #include "StartSessionImpl.hh"
 #include "CloseSessionImpl.hh"
 #include "ListSessionsImpl.hh"
@@ -49,6 +52,7 @@ ServerImplLegacy::ServerImplLegacy(const string& servcomment, std::shared_ptr<De
 }
 
 
+#ifdef FTAUTH
 void foxtrot::ServerImplLegacy::setup_auth(const std::string& credsfile, int creds_validity_hours)
 {
     _lg.strm(sl::debug) << "credsfile: " << credsfile;
@@ -67,7 +71,7 @@ void foxtrot::ServerImplLegacy::setup_auth(const std::string& credsfile, int cre
     
     auth_enabled = true;
 }
-
+#endif
 
 
 

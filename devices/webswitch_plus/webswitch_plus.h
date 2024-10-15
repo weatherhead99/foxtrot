@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include <rttr/registration>
-#include <rapidxml.hpp>
+#include <boost/property_tree/detail/rapidxml.hpp>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/Device.h>
@@ -11,6 +11,8 @@
 #include <foxtrot/protocols/curlRequest.h>
 
 using foxtrot::protocols::CurlRequest;
+
+namespace rapidxml = boost::property_tree::detail::rapidxml;
 
 namespace foxtrot{
     namespace devices {

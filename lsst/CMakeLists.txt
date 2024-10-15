@@ -8,7 +8,7 @@ find_package(foxtrotCore REQUIRED CONFIG)
 find_package(foxtrotClient REQUIRED CONFIG)
 find_package(foxtrotProtocols REQUIRED CONFIG)
 find_package(foxtrotDevices REQUIRED CONFIG)
-find_package(Boost REQUIRED COMPONENTS program_options date_time)
+find_package(Boost REQUIRED COMPONENTS program_options date_time system)
 
 option(MAGIS_CHILLER "include chiller setup for MAGIS experiments" OFF)
 
@@ -37,8 +37,7 @@ endif()
 
 #TODO: fix this, side effect of new conan build!
 target_include_directories(lsst_testbench PUBLIC ${CONAN_FOXTROT_DEVICES_ROOT}/include)
-find_package(rapidxml REQUIRED)
-target_link_libraries(lsst_testbench rapidxml::rapidxml)
+target_link_libraries(lsst_testbench Boost::system)
 
 
 option(BUILD_VCPLAY "build vacuum pump test program" OFF)

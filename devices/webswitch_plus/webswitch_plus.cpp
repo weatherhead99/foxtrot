@@ -2,7 +2,7 @@
 #include <foxtrot/DeviceError.h>
 #include "webswitch_plus.h"
 
-using namespace rapidxml;
+
 
 
 foxtrot::devices::webswitch_plus::webswitch_plus(std::shared_ptr<CurlRequest>& proto, const std::string& url)

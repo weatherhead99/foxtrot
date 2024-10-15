@@ -2,6 +2,7 @@ project(foxtrot_server C CXX)
 cmake_minimum_required(VERSION 3.12)
 
 option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
+option(BUILD_FTAUTH "build the (deprecated) custom ftauth modules" OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
@@ -18,6 +19,7 @@ set(packname "server")
 
 
 find_package(rttr 0.9.6 REQUIRED)
+message("rttr version: ${rttr_VERSION}")
 find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 
@@ -38,16 +40,15 @@ endfunction()
 
 
 
-
 #NOTE: the below is to get around gRPC "infinite loop" bugs in their initialization
 #if we are using asio-grpc directly from upstream this should work
 if(${USE_CORO_IMPLEMENTATIONS})
   
   set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
-  find_package(Boost REQUIRED COMPONENTS program_options asio filesystem coroutine)
+  find_package(Boost REQUIRED COMPONENTS program_options system filesystem coroutine)
   find_package(asio-grpc)
 else()
-  find_package(Boost REQUIRED COMPONENTS program_options asio filesystem)
+  find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
 endif()
 
 #however, if we're using the conan package, then the above is currently not supported.
@@ -59,19 +60,24 @@ if(TARGET asio-grpc_DEPS_TARGET)
 endif()
 
 
-message("rttr version: ${rttr_VERSION}")
-
-
-get_target_property(rttr_incl RTTR::Core INTERFACE_SYSTEM_INCLUDE_DIRECTORIES)
-message(STATUS "rttr_incl: ${rttr_incl}")
-
-
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 
-
 find_package(RapidJSON REQUIRED)
+#on some systems, tehre is a RapidJSON cmake file, but it doesn't export targets, just
+#variables
+if(${RapidJSON_FOUND} AND NOT TARGET RapidJSON::RapidJSON)
+  message(STATUS "manually adding rapidjson target since config file did not...")
+  add_library(RapidJSON::RapidJSON INTERFACE IMPORTED GLOBAL)
+  set_target_properties(RapidJSON::RapidJSON PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES ${RAPIDJSON_INCLUDE_DIRS})
+endif()
+
+
+#NOTE: for now, even if FTAUTH isn't built, we still need libsodium for the
+# session management API which uses pub/priv keypair
 find_package(libsodium REQUIRED)
+
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -97,12 +103,10 @@ add_subdirectory(src)
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 
 
+
 install(TARGETS exptserve
        EXPORT foxtrot_server
        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
-install(TARGETS ftauth
-           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 
 install(TARGETS foxtrot_server
@@ -121,7 +125,7 @@ install(DIRECTORY include/foxtrot
        COMPONENT devel)
      
 
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findsodium.cmake DESTINATION ${ft_cmakedir})
+install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibsodium.cmake DESTINATION ${ft_cmakedir})
 
 set(ft_server_dep_str
 "
