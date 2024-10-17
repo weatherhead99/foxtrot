@@ -1,4 +1,4 @@
-add_library(Thorlabs_APT BSC203.cpp TIM101.cpp APT.cpp)
+add_library(Thorlabs_APT OBJECT BSC203.cpp TIM101.cpp APT.cpp)
 target_sources(Thorlabs_APT PUBLIC FILE_SET HEADERS FILES BSC203.h TIM101.h APT.h APT_defs.hh)
 
 ft_device_lib_configure(Thorlabs_APT)

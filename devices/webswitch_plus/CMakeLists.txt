@@ -1,4 +1,4 @@
-add_library(webswitch_plus webswitch_plus.cpp)
+add_library(webswitch_plus OBJECT webswitch_plus.cpp)
 target_sources(webswitch_plus PUBLIC FILE_SET HEADERS FILES webswitch_plus.h)
 
 target_link_libraries(webswitch_plus PUBLIC Boost::headers)
