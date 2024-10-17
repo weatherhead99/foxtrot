@@ -19,7 +19,7 @@ target_link_libraries(plugin_play Boost::headers)
 add_library(plugin_example SHARED plugin_example.cpp)
 
 
-if(TARGET libudev::libudev)
+if(BUILD_UDEV_SUPPORT)
   add_executable(udev_play udev_play.cpp)
   target_link_libraries(udev_play foxtrot_core)
 

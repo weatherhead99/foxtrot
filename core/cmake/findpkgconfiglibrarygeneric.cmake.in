@@ -1,0 +1,26 @@
+include(FindPackageHandleStandardArgs)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(@PC_MODULE_NAME@ REQUIRED @PC_MODULE_NAME@ IMPORTED_TARGET)
+
+if(@PC_MODULE_NAME@_FOUND)
+  message(STATUS "found @PC_MODULE_NAME@, include directory: ${@PC_MODULE_NAME@_INCLUDE_DIRS}")
+  message(STATUS "libraries: ${@PC_MODULE_NAME@_LIBRARIES}")
+
+  if(@NO_DEFAULT_ALIAS@)
+  else()
+    add_library(@PC_MODULE_NAME@::@PC_MODULE_NAME@ ALIAS PkgConfig::@PC_MODULE_NAME@)
+  endif()
+  
+  
+  foreach(alias_tgt @TARGET_ALIASES@)
+    if(NOT TARGET ${alias_tgt})
+      add_library(${alias_tgt} ALIAS PkgConfig::@PC_MODULE_NAME@)
+    endif()
+  endforeach()
+
+endif()
+
+find_package_handle_standard_args(@PC_MODULE_NAME@ REQUIRED_VARS @PC_MODULE_NAME@_FOUND
+  VERSION_VAR @PC_MODULE_NAME@_VERSION)
+

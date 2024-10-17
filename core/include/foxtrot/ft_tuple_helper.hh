@@ -1,6 +1,6 @@
 #pragma once
 #include <rttr/registration>
-#include <foxtrot/ft_types.pb.h>
+#include <ft_types.pb.h>
 
 namespace foxtrot
 {

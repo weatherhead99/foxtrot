@@ -2,7 +2,7 @@
 #include <rttr/registration>
 #include <rttr/type>
 #include <variant>
-#include <foxtrot/ft_types.pb.h>
+#include <ft_types.pb.h>
 
 namespace foxtrot
 {

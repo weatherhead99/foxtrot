@@ -1,7 +1,7 @@
 #pragma once
 
 #include <rttr/type>
-#include <foxtrot/ft_types.pb.h>
+#include <ft_types.pb.h>
 #include <utility>
 #include <foxtrot/foxtrot_core_export.h>
 #include <vector>

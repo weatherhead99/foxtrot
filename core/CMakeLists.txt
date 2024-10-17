@@ -1,28 +1,18 @@
-project(foxtrot_core C CXX)
 cmake_minimum_required(VERSION 3.25)
+project(foxtrot_core C CXX)
+
 set(CMAKE_CXX_STANDARD 20)
 #in case of building static libs
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/)
 
 #import other cmake functionality we need later
-include(GenerateExportHeader)
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 include(FoxtrotCommonSetup)
-
-#fix GRPC windows building issues
-if(WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0A00)
-endif()
-
+include(GitVersion)
 
 option(BUILD_UDEV_SUPPORT "Build UDEV support library (requires libudev)" ON)
+option(BUILD_AVAHI_SUPPORT "Build Avahi support library (requires avahi-client)" ON)
 
-
-
-#setup conan build if necessary
-include(GitVersion)
 
 set(packname "core")
 configure_file(${CMAKE_SOURCE_DIR}/share/version.cpp.in
@@ -34,38 +24,49 @@ message("foxtrot core version: ${VERSION}")
 
 if(WIN32)
 #need boost::thread on windows
-find_package(Boost REQUIRED COMPONENTS log program_options thread)
+find_package(Boost REQUIRED COMPONENTS log program_options thread NO_MODULE)
 else()
-find_package(Boost REQUIRED COMPONENTS log program_options)
+find_package(Boost REQUIRED COMPONENTS log program_options NO_MODULE)
 endif()
 find_package(Protobuf REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
 find_package(gRPC REQUIRED)
 
-#configure udev
-find_package(libudev)
-
-#build foxtrot core library (errors and logging)
-file(GLOB srcs CONFIGURE_DEPENDS src/*.cpp src/*.cc)
+#firs we will build the protobuf generated stuff
 add_subdirectory(proto)
 
 
-#configure building of udev support
-if(${BUILD_UDEV_SUPPORT} AND NOT TARGET libudev::libudev)
-  message(WARNING "udev support requested but could not find libudev so disabled it")
+#our generated cmake find files will be here, just for this build
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_BINARY_DIR})
 
-elseif(${BUILD_UDEV_SUPPORT})
+set(srcs "")
+add_library(foxtrot_core)
+
+
+#configure optional dependencies, generating cmake find modules if necessary
+if(BUILD_UDEV_SUPPORT)
+  foxtrot_generate_pkg_config_find_module(${packname} libudev)
+  find_package(libudev REQUIRED)
+  #extra sources for udev
   file(GLOB udev_srcs CONFIGURE_DEPENDS src/udev/*.cpp src/udev/*.cc)
-  list(APPEND srcs ${udev_srcs})
+  message(STATUS "udev_srcs: ${udev_srcs}")
+  target_sources(foxtrot_core PRIVATE ${udev_srcs})
+  target_link_libraries(foxtrot_core PUBLIC libudev::libudev)
+endif()
+if(BUILD_AVAHI_SUPPORT)
+  foxtrot_generate_pkg_config_find_module(${packname} avahi-client)
+  find_package(avahi-client REQUIRED)
 endif()
 
-add_library(foxtrot_core ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
-target_compile_definitions(foxtrot_core PUBLIC -DBOOST_LOG_DYN_LINK)
+#build foxtrot core library (errors and logging)
+file(GLOB srcs CONFIGURE_DEPENDS src/*.cpp src/*.cc)
+file(GLOB hdrs CONFIGURE_DEPENDS include/foxtrot/*.h include/foxtrot/*.hpp include/foxtrot/*.hh)
+
+target_sources(foxtrot_core PUBLIC FILE_SET HEADERS FILES ${hdrs} BASE_DIRS include)
+target_sources(foxtrot_core PRIVATE ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
 
 
-add_dependencies(foxtrot_core copy_protos)
-
-foxtrot_standard_include_dirs(foxtrot_core)
+#foxtrot_standard_include_dirs(foxtrot_core)
 foxtrot_generate_export_header(${packname} foxtrot_core)
 target_include_directories(foxtrot_core PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
@@ -74,21 +75,18 @@ target_link_libraries(foxtrot_core PUBLIC foxtrot_protos Boost::log Boost::progr
   Boost::filesystem protobuf::libprotobuf
   RTTR::Core)
 
-if(TARGET libudev::libudev)
-  message(STATUS "adding libudev to foxtrot_core library dependencies")
-  target_link_libraries(foxtrot_core PUBLIC libudev::libudev)
-
-endif()
 add_subdirectory(devprogs)
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotCore/)
-set(ft_core_sourcedir ${CMAKE_CURRENT_SOURCE_DIR})
-set(ft_core_binarydir ${CMAKE_CURRENT_BINARY_DIR})
 
-install(TARGETS foxtrot_core foxtrot_protos
-    EXPORT foxtrot_core
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
+install(TARGETS foxtrot_core
+  EXPORT foxtrot_core
+  PUBLIC_HEADER
+  COMPONENT devel
+  FILE_SET HEADERS
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
