@@ -7,7 +7,7 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type")
 include(GNUInstallDirs)
 
 function(foxtrot_generate_pkg_config_find_module FT_PACKNAME PC_MODULE_NAME)
-  cmake_parse_arguments(FT_PC "" "" TARGET_ALIASES)
+  cmake_parse_arguments(FT_PC "" "" TARGET_ALIASES ${ARGN})
 
   message(STATUS "generating find module for pkg-config module name: ${PC_MODULE_NAME}")
   find_file(TEMPLATE_IN findpkgconfiglibrarygeneric.cmake.in ${CMAKE_CURRENT_FUNCTION_LIST_DIR})

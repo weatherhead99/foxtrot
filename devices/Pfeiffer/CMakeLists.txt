@@ -1,7 +1,9 @@
-add_device_object_lib(NAME TPG362 
-                        SRCS TPG362.cpp Pfeiffer.cpp TC110.cpp
-                        INCLUDES TPG362.h Pfeiffer.h TC110.h)
-
+add_library(Pfeiffer OBJECT TPG362.cpp Pfeiffer.cpp TC110.cpp)
+file(GLOB pfeiffer_includes *.h)
+target_sources(Pfeiffer PUBLIC FILE_SET HEADERS FILES ${pfeiffer_includes})
+ft_device_lib_configure(Pfeiffer)
+		      
+		      
 
 # add_executable(checksumtest test_checksum.cpp)
 # add_executable(tpgtest TPG362_play.cpp)

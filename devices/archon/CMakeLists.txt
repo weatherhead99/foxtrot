@@ -1,15 +1,12 @@
-set(archon_srcs archon.cpp archon_modules.cpp archon_module_heaterx.cpp archon_autoupdate.cpp archon_module_generic_bias.cpp archon_module_lvxbias.cpp archon_module_hvxbias.cpp archon_module_AD.cpp archon_module_driver.cpp archon_module_xvbias.cpp archon_GPIO.cpp archonraw.cpp
-)
+file(GLOB archon_srcs CONFIGURE_DEPENDS *.cpp)
+file(GLOB archon_includes CONFIGURE_DEPENDS *.h)
 
-set(archon_includes archon.h archon_modules.h archon_module_heaterx.h archon_autoupdate.h archon_module_generic_bias.h archon_module_lvxbias.h archon_module_hvxbias.h archon_module_AD.h archon_module_driver.h archon_module_xvbias.h archon_GPIO.h archonraw.h)
-
-add_device_object_lib(NAME archon 
-    SRCS ${archon_srcs} INCLUDES ${archon_includes} LINKLIBS Boost::date_time)
-
-# target_link_libraries(archon PRIVATE ${RTTR_TARGET})
-# target_link_libraries(archon PUBLIC ${Boost_DATE_TIME_LIBRARY})
+add_library(archon OBJECT ${archon_srcs})
+target_sources(archon PUBLIC FILE_SET HEADERS FILES ${archon_includes})
+target_link_libraries(archon PUBLIC Boost::date_time RTTR::Core)
 target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
 
+ft_device_lib_configure(archon)
 
 # add_executable(archon_test archon_test.cpp)
 # target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )

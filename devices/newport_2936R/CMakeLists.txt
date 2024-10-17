@@ -1,4 +1,7 @@
-add_device_object_lib(NAME newport2936R SRCS newport2936R.cpp INCLUDES newport2936R.h)
+add_library(newport2936R OBJECT newport2936R.cpp)
+target_sources(newport2936R PUBLIC FILE_SET HEADERS FILES newport2936R.h)
+
+ft_device_lib_configure(newport2936R)
 
 
 #target_compile_definitions(newport2936R PUBLIC -DNEW_RTTR_API)
