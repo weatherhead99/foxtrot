@@ -1,5 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
 project(foxtrot_protocols C CXX)
-cmake_minimum_required(VERSION 3.20)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -9,20 +10,9 @@ include(FoxtrotCommonSetup)
 
 set(packname "protocols")
 
-set(srcs "src/ProtocolUtilities.cpp;src/CommunicationProtocol.cpp")
-set(protos "")
-
 
 option(USE_ASIO "use ASIO implementations rather than polling" ON)
 
-
-macro(foxtrot_build_protocol protoname)
-    option(BUILD_${protoname} "build ${protoname} protocol" ON)    
-    if(BUILD_${protoname})
-        list(APPEND srcs src/${protoname}.cpp)
-        list(APPEND protos ${protoname})
-    endif()
-endmacro()
 
 add_library(foxtrot_protocols)
 set(ft_protocols_deps_script
@@ -111,6 +101,6 @@ install(TARGETS foxtrot_protocols
 add_subdirectory(devprogs)
 
 
-foxtrot_setup_cmake_package(foxtrotProtocols foxtrot_protocols protocols ${ft_protocols_deps_script})
+foxtrot_standard_setup_cmake_package(protocols ${ft_protocols_deps_script})
 
 

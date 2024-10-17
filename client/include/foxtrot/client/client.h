@@ -9,11 +9,11 @@
 #include <variant>
 #include <grpc++/grpc++.h>
 
-#include <foxtrot/foxtrot.grpc.pb.h>
-#include <foxtrot/ft_capability.grpc.pb.h>
-#include <foxtrot/ft_capability.pb.h>
-#include <foxtrot/ft_flags.pb.h>
-#include <foxtrot/ft_flags.grpc.pb.h>
+#include <foxtrot.grpc.pb.h>
+#include <ft_capability.grpc.pb.h>
+#include <ft_capability.pb.h>
+#include <ft_flags.pb.h>
+#include <ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/DeviceError.h>

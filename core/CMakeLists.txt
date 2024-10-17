@@ -111,7 +111,8 @@ if(TARGET libudev::libudev)
 
 endif()
 
-foxtrot_setup_cmake_package(foxtrotCore foxtrot_core core ${ft_core_deps_script})
+foxtrot_standard_setup_cmake_package(core ${ft_core_deps_script})
+
 
 #install cmake macro files
 file(GLOB cmake_scripts cmake/*.cmake cmake/*.cmake.in)

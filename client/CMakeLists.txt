@@ -1,6 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
 project(foxtrot_client C CXX)
-cmake_minimum_required(VERSION 3.20)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "client")
@@ -9,8 +10,6 @@ set(packname "client")
 find_package(foxtrotCore REQUIRED CONFIG)
 find_package(gRPC REQUIRED)
 include(FoxtrotCommonSetup)
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
 
 add_library(foxtrot_client src/client.cpp)
 target_include_directories(foxtrot_client PUBLIC 
@@ -32,11 +31,6 @@ install(TARGETS foxtrot_client
 install(DIRECTORY include/foxtrot
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         COMPONENT devel)
-
-install(EXPORT foxtrot_client
-        DESTINATION ${ft_cmakedir}
-        COMPONENT devel
-        NAMESPACE foxtrot::)
 
 set(ft_client_deps_script "
 find_dependency(foxtrotCore REQUIRED)
