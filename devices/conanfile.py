@@ -11,7 +11,7 @@ class FoxtrotDevicesConan(ConanFile):
     src_folder="devices"
     description="device drivers for foxtrot"
 
-    exports_sources = ("*/CMakeLists.txt", "cmake/*.in",
+    exports_sources = ("*CMakeLists.txt", "cmake/*.in",
                        "*/*.cpp", "*/*.h", "*/*.hh", "cmake/Find*.cmake")
 
     requires =  ("libusb/[^1.0.26]")
