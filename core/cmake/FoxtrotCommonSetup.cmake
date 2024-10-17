@@ -1,17 +1,30 @@
-#setup conan build if necessary
-# message(STATUS "checking for conan build...")
-# if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#     message(WARNING "conanbuildinfo detected, building using
-#     conan dependencies")
-#     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-#     set(FOXTROT_CORE_CONAN_BUILD TRUE)
-#     conan_basic_setup()
-# endif()
+#cmake policy settings in the modern era
 
 
 #set shared library build by default
 set(BUILD_SHARED_LIBS ON CACHE BOOL "build shared libraries")
 set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "build type")
+include(GNUInstallDirs)
+
+function(foxtrot_generate_pkg_config_find_module FT_PACKNAME PC_MODULE_NAME)
+  cmake_parse_arguments(FT_PC "" "" TARGET_ALIASES)
+
+  message(STATUS "generating find module for pkg-config module name: ${PC_MODULE_NAME}")
+  find_file(TEMPLATE_IN findpkgconfiglibrarygeneric.cmake.in ${CMAKE_CURRENT_FUNCTION_LIST_DIR})
+
+  foxtrot_packname_to_cmake_package_name(${FT_PACKNAME} CMAKE_PACKNAME)
+  
+  
+  set(CMAKE_DEST ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/${CMAKE_PACKNAME})
+  
+  set(outfname Find${PC_MODULE_NAME}.cmake)
+  configure_file(${TEMPLATE_IN} ${CMAKE_CURRENT_BINARY_DIR}/${outfname} @ONLY)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
+    DESTINATION ${CMAKE_DEST} COMPONENT devel)
+
+  
+endfunction()
+
 
 
 macro(foxtrot_generate_export_header packname tgtname)
@@ -21,7 +34,8 @@ macro(foxtrot_generate_export_header packname tgtname)
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
             COMPONENT devel)
-endmacro()
+	  
+	endmacro()
 
 function(foxtrot_standard_include_dirs tgt)
     target_include_directories(${tgt} PUBLIC
@@ -31,31 +45,6 @@ function(foxtrot_standard_include_dirs tgt)
     install(DIRECTORY include/foxtrot
             DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
             COMPONENT devel)
-endfunction()
-
-function(foxtrot_create_package_config infile destdir path_vars)
-    include(CMakePackageConfigHelpers)
-    get_filename_component(outfname_withpath ${infile} NAME_WE)
-    get_filename_component(outfname ${outfname_withpath} NAME)
-    
-    configure_package_config_file(${infile} ${outfname}.cmake
-                        INSTALL_DESTINATION ${destdir}
-                        PATH_VARS ${path_vars}
-                        INSTALL_PREFIX ${CMAKE_SOURCE_DIR})
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/installtree/${outfname}.cmake
-            DESTINATION ${destdir}
-            COMPONENT devel)
-endfunction()
-
-function(foxtrot_add_to_package_registry exportname packagename)
-    message("writing temporary CMake export file to build tree")
-    export(EXPORT ${exportname} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packagename}exports.cmake
-      NAMESPACE foxtrot::)
-    if(FT_EXPORT_TO_PACKAGE_REGISTRY)
-        message("exporting to package registry")
-        export(PACKAGE ${packagename})
-    endif()
 endfunction()
 
 function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_script)
@@ -81,6 +70,14 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
     INSTALL_DESTINATION ${CMAKE_DEST}
   PATH_VARS CMAKE_DEST SOURCEDIR_PATH)
 
+  set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/${packname})
+  install(EXPORT ${target_name}
+    DESTINATION ${ft_cmakedir}
+    COMPONENT devel
+    NAMESPACE foxtrot::)
+  
+
+
   export(EXPORT ${target_name} FILE ${CMAKE_CURRENT_BINARY_DIR}/${packname}exports.cmake NAMESPACE foxtrot::)
 
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
@@ -91,14 +88,19 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
 endfunction()
 
 
-function(foxtrot_standard_setup_cmake_package sourcedir_name deps_script)
-  string(SUBSTRING ${sourcedir_name} 0 1  FIRST_LETTER) 
+function(foxtrot_packname_to_cmake_package_name packname out_var)
+  string(SUBSTRING ${packname} 0 1 FIRST_LETTER)
   string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
-
-  string(SUBSTRING ${sourcedir_name} 1 -1 REST)
+  string(SUBSTRING ${packname} 1 -1 REST)
   string(CONCAT name_capitalized ${FIRST_LETTER} ${REST})
-  
-  set(PACKNAME "foxtrot${name_capitalized}")
+  set(${out_var} "foxtrot${name_capitalized}")
+  return(PROPAGATE ${out_var})
+endfunction()
+
+
+function(foxtrot_standard_setup_cmake_package sourcedir_name deps_script)
+
+  foxtrot_packname_to_cmake_package_name(${sourcedir_name} PACKNAME)
   set(TARGETNAME "foxtrot_${sourcedir_name}")
 
   message(STATUS "packagename: ${PACKNAME}")

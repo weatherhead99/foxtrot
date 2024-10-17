@@ -45,22 +45,31 @@ add_library(foxtrot_core)
 
 #configure optional dependencies, generating cmake find modules if necessary
 if(BUILD_UDEV_SUPPORT)
+  message(STATUS "requested udev support...")
   foxtrot_generate_pkg_config_find_module(${packname} libudev)
   find_package(libudev REQUIRED)
+  message(NOTICE "libudev found, udev enabled!")
   #extra sources for udev
   file(GLOB udev_srcs CONFIGURE_DEPENDS src/udev/*.cpp src/udev/*.cc)
+  file(GLOB udev_hdrs CONFIGURE_DEPENDS include/foxtrot/udev/*.hh)
   message(STATUS "udev_srcs: ${udev_srcs}")
+  message(STATUS "udev_hdrs: ${udev_hdrs}")
   target_sources(foxtrot_core PRIVATE ${udev_srcs})
+  target_sources(foxtrot_core PUBLIC FILE_SET HEADERS FILES ${udev_hdrs} BASE_DIRS include)
   target_link_libraries(foxtrot_core PUBLIC libudev::libudev)
 endif()
 if(BUILD_AVAHI_SUPPORT)
+  message(STATUS "requested avahi support...")
   foxtrot_generate_pkg_config_find_module(${packname} avahi-client)
   find_package(avahi-client REQUIRED)
+  message(NOTICE "avahi-client found, avahi enabled!")
 endif()
 
 #build foxtrot core library (errors and logging)
 file(GLOB srcs CONFIGURE_DEPENDS src/*.cpp src/*.cc)
 file(GLOB hdrs CONFIGURE_DEPENDS include/foxtrot/*.h include/foxtrot/*.hpp include/foxtrot/*.hh)
+
+message(DEBUG "headers: ${hdrs}")
 
 target_sources(foxtrot_core PUBLIC FILE_SET HEADERS FILES ${hdrs} BASE_DIRS include)
 target_sources(foxtrot_core PRIVATE ${srcs} ${CMAKE_CURRENT_BINARY_DIR}/version.cpp)
@@ -83,31 +92,14 @@ install(TARGETS foxtrot_core
   EXPORT foxtrot_core
   PUBLIC_HEADER
   COMPONENT devel
-  FILE_SET HEADERS
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
-
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
-        COMPONENT devel)
-
-install(EXPORT foxtrot_core
-        DESTINATION ${ft_cmakedir}
-        COMPONENT devel
-        NAMESPACE foxtrot::)
+  FILE_SET HEADERS)
 
 set(ft_core_deps_script
-"include(CMakeFindDependencyMacro)
- find_dependency(Boost REQUIRED COMPONENTS system log program_options filesystem thread date_time)
+"
+find_dependency(Boost REQUIRED COMPONENTS system log program_options filesystem thread date_time)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)
-
-#WARNING: hack to make it work on windows
-if(WIN32)
-    add_definitions(-D_WIN32_WINNT=0x0A00)
-endif()
 "
 )
 
@@ -122,16 +114,10 @@ endif()
 foxtrot_setup_cmake_package(foxtrotCore foxtrot_core core ${ft_core_deps_script})
 
 #install cmake macro files
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/FoxtrotCommonSetup.cmake
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/GitVersion.cmake
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/GetGitRevisionDescription.cmake.in
-        ${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibusb.cmake
-	${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibudev.cmake
-        DESTINATION ${ft_cmakedir})
+file(GLOB cmake_scripts cmake/*.cmake cmake/*.cmake.in)
 
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/foxtrotGenericConfig.cmake.in
-	DESTINATION ${ft_cmakedir}
-	COMPONENT devel)
+install(FILES ${cmake_scripts}
+  DESTINATION ${ft_cmakedir}
+  COMPONENT devel)
 
 
