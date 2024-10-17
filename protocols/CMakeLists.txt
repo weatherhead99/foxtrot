@@ -14,7 +14,7 @@ set(packname "protocols")
 option(USE_ASIO "use ASIO implementations rather than polling" ON)
 
 
-add_library(foxtrot_protocols)
+add_library(foxtrot_protocols src/CommunicationProtocol.cpp src/ProtocolUtilities.cpp)
 set(ft_protocols_deps_script
   "
 find_dependency(foxtrotCore REQUIRED)
@@ -22,8 +22,9 @@ find_dependency(CURL REQUIRED)
 ")
 
 #the basic sources
-target_sources(foxtrot_protocols PRIVATE src/CommunicationProtocol.cpp
-  src/ProtocolUtilities.cpp)
+target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES
+  include/foxtrot/protocols/ProtocolUtilities.h include/foxtrot/protocols/CommunicationProtocol.h
+BASE_DIRS include)
 
 
 find_package(libusb)
