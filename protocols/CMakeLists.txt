@@ -24,6 +24,7 @@ find_dependency(CURL REQUIRED)
 #the basic sources
 target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES
   include/foxtrot/protocols/ProtocolUtilities.h include/foxtrot/protocols/CommunicationProtocol.h
+  include/foxtrot/protocols/SerialProtocol.h
 BASE_DIRS include)
 
 
