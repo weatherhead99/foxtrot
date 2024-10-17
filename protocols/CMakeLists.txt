@@ -34,7 +34,7 @@ else()
   target_sources(foxtrot_protocols PRIVATE src/BulkUSB.cpp src/libUsbProtocol.cpp)
   target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES
     include/foxtrot/protocols/BulkUSB.h
-    include/foxtrot/protocols/libUsbProtocol.hh)
+    include/foxtrot/protocols/libUsbProtocol.hh BASE_DIRS include)
   list(APPEND protos "BulkUSB")
   list(APPEND protoos "libUsbProtocol")
   target_link_libraries(foxtrot_protocols PUBLIC libusb::libusb)
@@ -49,14 +49,14 @@ endif()
 #may change once Direct is useful
 find_package(CURL REQUIRED)
 target_sources(foxtrot_protocols PRIVATE src/curlRequest.cpp)
-target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/curlRequest.h)
+target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/curlRequest.h BASE_DIRS include)
 list(APPEND protos "curlRequest")
 
 #add stuff that needs no dependencies
 #NOTE serialport depends on Boost, but we must have had that to build foxtrotCore anyway
 target_sources(foxtrot_protocols PRIVATE src/characterdevice.cpp src/simpleTCP.cpp src/SerialPort.cpp)
 target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/characterdevice.h
-  include/foxtrot/protocols/simpleTCP.h include/foxtrot/protocols/SerialPort.h)
+  include/foxtrot/protocols/simpleTCP.h include/foxtrot/protocols/SerialPort.h BASE_DIRS include)
 
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -64,7 +64,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(EXISTS ${sg_include})
     message(NOTICE "found scsiserial dependencies")
     target_sources(foxtrot_protocols PRIVATE src/scsiserial.cpp)
-    target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/scsiserial.h)
+    target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/scsiserial.h BASE_DIRS include)
 
   endif()
 endif()
@@ -86,7 +86,6 @@ message("protocols enabled for build: ${protos}")
 
 
 #add_library(foxtrot_protocols ${srcs})
-target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core CURL::libcurl)
 
 if(USE_ASIO)
