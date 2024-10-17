@@ -5,9 +5,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(foxtrotCore REQUIRED)
-
 include(FoxtrotCommonSetup)
-include(GNUInstallDirs)
 
 set(packname "protocols")
 
@@ -18,7 +16,6 @@ set(protos "")
 option(USE_ASIO "use ASIO implementations rather than polling" ON)
 
 
-
 macro(foxtrot_build_protocol protoname)
     option(BUILD_${protoname} "build ${protoname} protocol" ON)    
     if(BUILD_${protoname})
@@ -27,46 +24,58 @@ macro(foxtrot_build_protocol protoname)
     endif()
 endmacro()
 
+add_library(foxtrot_protocols)
+set(ft_protocols_deps_script
+  "
+find_dependency(foxtrotCore REQUIRED)
+find_dependency(CURL REQUIRED)
+")
+
+#the basic sources
+target_sources(foxtrot_protocols PRIVATE src/CommunicationProtocol.cpp
+  src/ProtocolUtilities.cpp)
 
 
-#BulkUSB setup and check
-find_package(libusb REQUIRED)
-if(${libusb_FOUND})
-  message(STATUS "BulkUSB dependencies found")
-  option(BUILD_BulkUSB "build BulkUSB protocol" ON)
-  list(APPEND srcs src/BulkUSB.cpp src/libUsbProtocol.cpp)
+find_package(libusb)
+if(NOT libusb_FOUND)
+  message(WARNING "libusb not found, will not build libusb based protocols!")
+else()
+  message(NOTICE "found libusb, building libusb based protocols")
+  target_sources(foxtrot_protocols PRIVATE src/BulkUSB.cpp src/libUsbProtocol.cpp)
+  target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES
+    include/foxtrot/protocols/BulkUSB.h
+    include/foxtrot/protocols/libUsbProtocol.hh)
   list(APPEND protos "BulkUSB")
+  list(APPEND protoos "libUsbProtocol")
+  target_link_libraries(foxtrot_protocols PUBLIC libusb::libusb)
+
+    set(ft_protocols_deps_script "${ft_protocols_deps_script}
+     find_dependency(libusb REQUIRED)"
+    )
 endif()
 
 
 #this is required on all platforms, otherwise we can't build server
 #may change once Direct is useful
 find_package(CURL REQUIRED)
-foxtrot_build_protocol(curlRequest)
+target_sources(foxtrot_protocols PRIVATE src/curlRequest.cpp)
+target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/curlRequest.h)
+list(APPEND protos "curlRequest")
 
+#add stuff that needs no dependencies
+#NOTE serialport depends on Boost, but we must have had that to build foxtrotCore anyway
+target_sources(foxtrot_protocols PRIVATE src/characterdevice.cpp src/simpleTCP.cpp src/SerialPort.cpp)
+target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/characterdevice.h
+  include/foxtrot/protocols/simpleTCP.h include/foxtrot/protocols/SerialPort.h)
 
-#character device has no dependencies
-#largely only useful on unix though
-foxtrot_build_protocol(characterdevice)
-
-#simpleTCP only needs sockets 
-#TODO: needs fully porting to windows!!
-foxtrot_build_protocol(simpleTCP)
-
-message(STATUS "finding dependencies for serial port")
-find_package(Boost REQUIRED)
-if(Boost_FOUND)
-  message(STATUS "found serial port dependencies")
-  foxtrot_build_protocol(SerialPort)
-endif()
-
-#some protocols only work on linux
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   find_file(sg_include scsi/sg.h)
   if(EXISTS ${sg_include})
-    message(STATUS "found scsiserial dependencies")
-    foxtrot_build_protocol(scsiserial)
+    message(NOTICE "found scsiserial dependencies")
+    target_sources(foxtrot_protocols PRIVATE src/scsiserial.cpp)
+    target_sources(foxtrot_protocols PUBLIC FILE_SET HEADERS FILES include/foxtrot/protocols/scsiserial.h)
+
   endif()
 endif()
 #
@@ -81,13 +90,12 @@ endif()
 
 message("protocols enabled for build: ${protos}")
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #NOTE: conan fix for system installed rapidjson package
 #find_package(RapidJSON REQUIRED MODULE)
 
 
-add_library(foxtrot_protocols ${srcs})
+#add_library(foxtrot_protocols ${srcs})
 target_include_directories(foxtrot_protocols PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>)
 target_link_libraries(foxtrot_protocols PUBLIC foxtrot::foxtrot_core CURL::libcurl)
 
@@ -95,45 +103,9 @@ if(USE_ASIO)
   target_compile_definitions(foxtrot_protocols PRIVATE FT_USE_ASIO_IMPLS=1)
 endif()
 
-
-
-
-
-if("BulkUSB" IN_LIST protos)
-    message(STATUS "linking in libusb")
-    target_link_libraries(foxtrot_protocols PUBLIC libusb::libusb)
-endif()
-
-install(DIRECTORY include/foxtrot
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  COMPONENT devel)
-
-
 install(TARGETS foxtrot_protocols
-        EXPORT foxtrot_protocols
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
-
-set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotProtocols/)
-
-install(EXPORT foxtrot_protocols
-        DESTINATION ${ft_cmakedir}
-        NAMESPACE foxtrot::
-        COMPONENT devel)
-
-set(ft_protocols_sourcedir ${CMAKE_SOURCE_DIR})
-
-set(ft_protocols_deps_script
-  "
-find_dependency(foxtrotCore REQUIRED)
-find_dependency(CURL REQUIRED)
-")
-
-if("BulkUSB" IN_LIST protos)
-  set(ft_protocols_deps_script "${ft_protocols_deps_script}
-find_dependency(libusb REQUIRED)"
-)
-endif()
+  EXPORT foxtrot_protocols
+  PUBLIC_HEADER COMPONENT devel FILE_SET HEADERS)
 
 
 add_subdirectory(devprogs)

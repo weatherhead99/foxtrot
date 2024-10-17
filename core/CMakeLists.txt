@@ -96,7 +96,7 @@ install(TARGETS foxtrot_core
 
 set(ft_core_deps_script
 "
-find_dependency(Boost REQUIRED COMPONENTS system log program_options filesystem thread date_time)
+find_dependency(Boost REQUIRED COMPONENTS system log program_options filesystem thread date_time NO_MODULE)
 find_dependency(Protobuf REQUIRED)
 find_dependency(gRPC REQUIRED)
 find_dependency(rttr 0.9.6 REQUIRED)

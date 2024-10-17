@@ -12,6 +12,9 @@ include (CMakeFindDependencyMacro)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/@PACKNAME@exports.cmake)
   message(WARNING "foxtrot package: @PACKNAME@ is configuring from BUILD TREE! Make sure this is what you want!")
   set(@PACKNAME@_BUILD_TREE TRUE)
+
+  #this one find auto-generated cmake find modules in build tree
+  list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
   if(EXISTS @SOURCEDIR_PATH@/cmake)
     message(STATUS "including cmake directory from source dir in module path...")	
     list(APPEND CMAKE_MODULE_PATH @SOURCEDIR_PATH@/cmake)
