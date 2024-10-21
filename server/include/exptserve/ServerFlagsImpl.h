@@ -5,7 +5,7 @@
 
 #include <variant>
 
-#include <foxtrot/ft_flags.grpc.pb.h>
+#include <proto/ft_flags.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/FlagMap.hh>
 #include "Logic_defs.hh"

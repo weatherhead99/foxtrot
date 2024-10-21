@@ -1,7 +1,7 @@
 #include <chrono>
 #include <mutex>
 
-#include <foxtrot/foxtrot.pb.h>
+
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
 

@@ -13,7 +13,7 @@
 
 
 #include <foxtrot/Logging.h>
-#include <foxtrot/foxtrot.grpc.pb.h>
+#include <proto/foxtrot.grpc.pb.h>
 #include <agrpc/asio_grpc.hpp>
 
 

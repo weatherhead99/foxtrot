@@ -31,6 +31,18 @@ def add_grpc_options(configs):
 
     return configs
 
+def ft_require(conanfile, packname):
+    own_version: str = Version(conanfile.version)
+    fmt_version: str = f".".join(str(_) for _ in (own_version.major, own_version.minor, own_version.patch))
+    
+    full_require: str = f"foxtrot_{packname}/[~{fmt_version},include_prerelease]"
+    
+    
+    conanfile.requires(full_require, libs=True, headers=True, transitive_libs=True,
+                       transitive_headers=True)
+    
+
+
 class FoxtrotCppPackage:
     default_user = "weatherill"
     default_channel = "stable"
@@ -120,11 +132,6 @@ class FoxtrotCppPackage:
 
         tc = self._setup_cmake_tc()
         tc.generate()
-
-    def fix_cmake_def_names(self, cmakename: str):
-        self.cpp_info.names["cmake_find_package"] = cmakename
-        self.cpp_info.names["cmake_find_package_multi"] = cmakename
-        self.cpp_info.builddirs.append("lib/cmake/%s" % cmakename)
 
     def conan2_fix_cmake_names(self, cmakename: str):
         self.cpp_info.builddirs.append(f"lib/cmake/{cmakename}")

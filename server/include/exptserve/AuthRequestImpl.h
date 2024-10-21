@@ -1,5 +1,5 @@
 #pragma once
-#include <foxtrot/ft_auth.grpc.pb.h>
+#include <proto/ft_auth.grpc.pb.h>
 #include "HandlerBase.h"
 #include <foxtrot/server/AuthHandler.h>
 #include <foxtrot/Logging.h>

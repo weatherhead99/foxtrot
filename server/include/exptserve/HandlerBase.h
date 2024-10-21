@@ -3,7 +3,7 @@
 #include <type_traits>
 #include <grpc++/grpc++.h>
 
-#include <foxtrot/foxtrot.grpc.pb.h>
+#include <proto/foxtrot.grpc.pb.h>
 #include <foxtrot/Logging.h>
 #include <foxtrot/server/ServerUtil.h>
 

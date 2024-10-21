@@ -1,7 +1,7 @@
 #pragma once
 #include <map>
 
-#include <foxtrot/ft_capability.grpc.pb.h>
+#include <proto/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include <foxtrot/DeviceHarness.h>

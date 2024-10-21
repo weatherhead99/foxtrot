@@ -1,6 +1,5 @@
 #include "ServerDescribeImpl.h"
 #include <iostream>
-#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/typeUtil.h>
 
 

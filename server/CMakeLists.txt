@@ -1,5 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
 project(foxtrot_server C CXX)
-cmake_minimum_required(VERSION 3.12)
+
 
 option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
 option(BUILD_FTAUTH "build the (deprecated) custom ftauth modules" OFF)
@@ -142,19 +143,19 @@ find_dependency(asio-grpc)
 #however, if we're using the conan package, then the above is currently not supported.
 #we can do the below ugly hack to mess around with the deps in that case
 if(TARGET asio-grpc_DEPS_TARGET)
-  message(WARNING "CONAN BUILD hack: patching asio-grpc deps...")
+  message(WARNING 'CONAN BUILD hack: patching asio-grpc deps...')
   set_target_properties(asio-grpc_DEPS_TARGET PROPERTIES INTERFACE_LINK_LIBRARIES
-  "$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:Boost::headers>")
+  '$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:>;$<$<CONFIG:Release>:Boost::headers>')
 
 endif()
 
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} STREQUAL 'Linux')
     find_library(dl dl)
-    message(STATUS "libdl: ${dl}")
+    message(STATUS 'libdl: ${dl}')
 else()
-    message(STATUS "windows build, don't need libdl")
-    set(dl "")
+    message(STATUS 'windows build, don't need libdl')
+    set(dl '')
 endif()
 ")
 

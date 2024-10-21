@@ -1,6 +1,6 @@
 #pragma once
 
-#include <foxtrot/ft_sessions.grpc.pb.h>
+#include <proto/ft_sessions.grpc.pb.h>
 #include <foxtrot/server/SessionManager.hh>
 
 namespace foxtrot 

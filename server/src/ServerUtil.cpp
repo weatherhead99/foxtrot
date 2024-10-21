@@ -7,7 +7,7 @@
 
 #include <foxtrot/server/ServerUtil.h>
 #include <foxtrot/typeUtil.h>
-#include <foxtrot/foxtrot.pb.h>
+#include <proto/foxtrot.pb.h>
 #include <foxtrot/ReflectionError.h>
 
 using namespace foxtrot;

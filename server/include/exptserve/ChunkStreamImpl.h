@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-#include <foxtrot/ft_capability.grpc.pb.h>
+#include <proto/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
 
 #include "HandlerBase.h"

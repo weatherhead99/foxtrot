@@ -2,7 +2,7 @@
 
 #include "Logic_defs.hh"
 #include <foxtrot/server/SessionManager.hh>
-#include <foxtrot/ft_sessions.grpc.pb.h>
+#include <proto/ft_sessions.grpc.pb.h>
 
 
 namespace foxtrot
