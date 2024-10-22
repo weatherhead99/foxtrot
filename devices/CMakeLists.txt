@@ -21,15 +21,15 @@ function(ft_device_lib_configure tgtname)
     message(DEBUG "omitting standard link libraries")
   else()
     target_link_libraries(${tgtname} PUBLIC RTTR::Core foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
+  endif()
     target_link_libraries(foxtrot_devices PRIVATE ${tgtname})
+    target_include_directories(foxtrot_devices PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
     install(TARGETS ${tgtname}
       EXPORT foxtrot_devices
       PUBLIC_HEADER
       COMPONENT devel
       FILE_SET HEADERS
       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices)
-  endif()
-  
 endfunction()
 
 set(ft_devices_dep_str "
@@ -40,6 +40,7 @@ find_dependency(rttr 0.9.6 REQUIRED)
   )
 
 add_library(foxtrot_devices)
+target_include_directories(foxtrot_devices PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices>)  
 
 add_subdirectory(archon)
 add_subdirectory(cornerstone_260)
@@ -50,6 +51,15 @@ add_subdirectory(Pfeiffer)
 add_subdirectory(DM3068)
 add_subdirectory(coldvision-ls)
 add_subdirectory(ssc_chiller)
+add_subdirectory(arroyo_peltier)
+
+
+message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
+
+add_subdirectory(aravis_camera)
+
+message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
+
 if(BUILD_I2C)
   add_subdirectory(BME280)
 endif()
@@ -78,6 +88,8 @@ install(TARGETS foxtrot_devices
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotDevices)
 install(FILES cmake/FindDWF.cmake 
  DESTINATION ${ft_cmakedir})
+
+message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
 
 foxtrot_standard_setup_cmake_package(devices ${ft_devices_dep_str})
 

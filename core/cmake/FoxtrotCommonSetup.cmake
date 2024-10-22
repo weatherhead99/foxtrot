@@ -18,13 +18,38 @@ function(foxtrot_generate_pkg_config_find_module FT_PACKNAME PC_MODULE_NAME)
   set(CMAKE_DEST ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/${CMAKE_PACKNAME})
   
   set(outfname Find${PC_MODULE_NAME}.cmake)
-  configure_file(${TEMPLATE_IN} ${CMAKE_CURRENT_BINARY_DIR}/${outfname} @ONLY)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${outfname}
+  #NOTE: always install to top level binary dir, for compatibility with
+  #subdirectory find package generation (i.e. currently aravis_camera)
+  configure_file(${TEMPLATE_IN} ${CMAKE_BINARY_DIR}/${outfname} @ONLY)
+  install(FILES ${CMAKE_BINARY_DIR}/${outfname}
     DESTINATION ${CMAKE_DEST} COMPONENT devel)
 
   
 endfunction()
 
+
+function(foxtrot_build_setup_file fname)
+  cmake_parse_arguments(PARSE_ARGV 1 arg "" "TARGET_NAME" "")
+
+  
+  if(DEFINED arg_TARGET_NAME)
+    set(tgtname ${arg_TARGET_NAME})
+  else()
+    message(DEBUG "no target name passed, using filename...")
+    get_filename_component(tgtname ${fname} NAME_WE)
+   endif()
+
+  message(DEBUG "target name: ${tgtname}")
+
+  add_library(${tgtname} MODULE ${fname})
+  target_link_libraries(${tgtname} PUBLIC foxtrot::foxtrot_core foxtrot::foxtrot_protocols foxtrot::foxtrot_devices)
+  set_target_properties(${tgtname} PROPERTIES PREFIX "")
+
+  install(TARGETS ${tgtname}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/ft_setups/)
+  
+
+endfunction()
 
 
 macro(foxtrot_generate_export_header packname tgtname)

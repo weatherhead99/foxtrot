@@ -1,6 +1,6 @@
 #pragma once
 
-#include <foxtrot/devices/APT.h>
+#include <APT.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <memory>
 #include <rttr/registration>

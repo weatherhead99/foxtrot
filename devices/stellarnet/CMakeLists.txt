@@ -6,6 +6,7 @@ if(libusb_FOUND)
   add_library(stellarnet OBJECT stellarnet.cpp)
   target_sources(stellarnet PUBLIC FILE_SET HEADERS FILES stellarnet.h)
   target_link_libraries(stellarnet PUBLIC libusb::libusb)
+  target_link_libraries(foxtrot_devices INTERFACE libusb::libusb)
   ft_device_lib_configure(stellarnet)
   
 else()
