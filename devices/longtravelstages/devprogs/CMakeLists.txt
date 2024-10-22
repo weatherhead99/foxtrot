@@ -1,0 +1,2 @@
+add_executable(m30x_stage_play m30x_stage_play.cpp)
+target_link_libraries(m30x_stage_play foxtrot::foxtrot_devices LTS300)
