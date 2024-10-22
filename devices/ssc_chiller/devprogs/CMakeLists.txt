@@ -1,0 +1,5 @@
+add_executable(chiller_play chiller_play.cpp)
+target_link_libraries(chiller_play PUBLIC ssc_chiller)
+
+add_executable(chiller_edge_play chiller_edge_play.cpp)
+target_link_libraries(chiller_edge_play PUBLIC ssc_chiller)
