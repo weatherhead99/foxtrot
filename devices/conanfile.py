@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMakeDeps
 from conan.tools.build import valid_min_cppstd
+from conan.tools.gnu import PkgConfigDeps
 
 class FoxtrotDevicesConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.0]"
@@ -16,6 +17,10 @@ class FoxtrotDevicesConan(ConanFile):
 
     requires =  ("libusb/[^1.0.26]")
 
+    package_type = "shared-library"
+    default_options = {"*/*:shared" : True}
+    ft_package_requires = ("protocols")
+    cmake_package_name = "foxtrotDevices"
 
     def requirements(self):
         super().requirements()
@@ -24,16 +29,18 @@ class FoxtrotDevicesConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
+        #need libaravis
+        self.requires("aravis/0.8.33")
+        #override, conflict aravis with avahi
+        self.requires("glib/2.78.3", override=True)
+        
 
-    def validate_build(self):
-        if not valid_min_cppstd(self, 20):
-            self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
-            self.output.error("failed check requiring minimum of c++20")
-            raise ConanInvalidConfiguration("foxtrot modules require at least c++20 standard to build")
+    def generate(self):
+        #do all the cmake toolchain stuff etc
+        super().generate()
 
-
-    package_type = "shared-library"
-    default_options = {"*/*:shared" : True}
-    ft_package_requires = ("protocols")
-    cmake_package_name = "foxtrotDevices"
+        #manually set up pkgconfig file for aravis,
+        #that's how we find it generally
+        pcdeps = PkgConfigDeps(self)
+        pcdeps.generate()
 
