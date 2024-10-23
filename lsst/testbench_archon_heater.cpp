@@ -6,33 +6,33 @@
 
 #include <foxtrot/DeviceHarness.h>
 
-#include <foxtrot/devices/archon.h>
-#include <foxtrot/devices/archon_modules.h>
-#include <foxtrot/devices/archon_module_heaterx.h>
-#include <foxtrot/devices/archon_module_hvxbias.h>
-#include <foxtrot/devices/archon_module_driver.h>
-#include <foxtrot/devices/archon_module_AD.h>
-#include <foxtrot/devices/archon_module_xvbias.h>
-#include <foxtrot/devices/archonraw.h>
-#include <foxtrot/devices/webswitch_plus.h>
-#include <foxtrot/devices/TPG362.h>
-#include <foxtrot/devices/newport2936R.h>
-#include <foxtrot/devices/cornerstone260.h>
-#include <foxtrot/devices/stellarnet.h>
+#include <archon.h>
+#include <archon_modules.h>
+#include <archon_module_heaterx.h>
+#include <archon_module_hvxbias.h>
+#include <archon_module_driver.h>
+#include <archon_module_AD.h>
+#include <archon_module_xvbias.h>
+#include <archonraw.h>
+#include <webswitch_plus.h>
+#include <TPG362.h>
+#include <newport2936R.h>
+#include <cornerstone260.h>
+#include <stellarnet.h>
 #ifdef linux
-#include <foxtrot/devices/Q250.h>
+#include <Q250.h>
 #endif
 
-#include <foxtrot/devices/BSC203.h>
-#include <foxtrot/devices/DLP_IOR4.hh>
-#include <foxtrot/devices/TC110.h>
+#include <BSC203.h>
+#include <DLP_IOR4.hh>
+#include <TC110.h>
 
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <foxtrot/protocols/BulkUSB.h>
 #include <foxtrot/protocols/curlRequest.h>
 
-#include <foxtrot/devices/RLY_8.hh>
+#include <RLY_8.hh>
 
 #include "chiller_setup_funcs.hh"
 

@@ -1,12 +1,12 @@
 #include <foxtrot/DeviceHarness.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <map>
-#include <foxtrot/devices/BSC203.h>
-#include <foxtrot/devices/TIM101.h>
+#include <BSC203.h>
+#include <TIM101.h>
 
 
 #ifdef IDS_CAMERA_ENABLED
-#include <foxtrot/devices/idscamera.h>
+#include <idscamera.h>
 #endif
 
 

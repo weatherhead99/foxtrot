@@ -2,6 +2,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMakeDeps
 from conan.tools.env import VirtualBuildEnv
 from conan.tools.build import valid_min_cppstd
+from conan.tools.gnu import PkgConfigDeps
 
 class FoxtrotLSST(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4.1]"
@@ -16,38 +17,17 @@ class FoxtrotLSST(ConanFile):
                        "fsmd/*.cpp", "fsmd/include/*.hh", 
                        "motor_test_setup.cpp")
     src_folder = "lsst"
-    ft_package_requires = ("client" , "devices", "server")
+    ft_package_requires = ("client", "devices", "server")
 
-    options = {"magis_chiller" : [True, False]}
-    default_options = {"*/*:shared" : True,
-                       "magis_chiller" : False}
+    default_options = {"*/*:shared" : True}
 
     deploy_setups = ("lsst_testbench.so",)
 
     def generate(self):
-        buildenv = VirtualBuildEnv(self)
-        buildenv.generate()
+        super().generate()
+        pcdeps = PkgConfigDeps(self)
+        pcdeps.generate()
 
-        deps = CMakeDeps(self)
-        deps.generate()
-
-        tc = self._setup_cmake_tc()
-        tc.variables["MAGIS_CHILLER"] = self.options.magis_chiller
-        tc.generate()
-
-    def requirements(self):
-        super().requirements()
-        if self.options.magis_chiller:
-            self.requires("foxtrot_magis/[^0.0.1-a1,include_prerelease=True]")
-
-
-    def validate_build(self):
-        if not valid_min_cppstd(self, 20):
-            self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
-            self.output.error("failed check requiring minimum of c++20")
-            raise ConanInvalidConfiguration("foxtrot modules require at least c++20 standard to build")
-
-            
     def deploy(self):
         self.copy_deps("*exptserve")
         self.copy_deps("*dummy_setup.so")

@@ -30,7 +30,8 @@ class FoxtrotDevicesConan(ConanFile):
                       transitive_libs=True)
 
         #need libaravis
-        self.requires("aravis/0.8.33")
+        self.requires("aravis/0.8.33", transitive_headers=True,
+                      transitive_libs=True)
         #override, conflict aravis with avahi
         self.requires("glib/2.78.3", override=True)
         

@@ -2,7 +2,7 @@
 
 #include <map>
 #include <foxtrot/DeviceHarness.h>
-#include <foxtrot/devices/archon_modules.h>
+#include <archon_modules.h>
 
 
 
