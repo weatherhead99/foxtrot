@@ -1,6 +1,7 @@
 #pragma once
 #include <concepts>
 #include <libudev.h>
+#include <pthread.h>
 #include <utility>
 #include <string_view>
 #include <iterator>
@@ -90,7 +91,6 @@ namespace foxtrot
     private:
       T* _ctxt_ptr;
     };
-    
 
   }
 
@@ -153,6 +153,7 @@ namespace foxtrot
   public:
     udev_enum(udev_context& ctxt);
     udev_enum& match_subsystem(const string& expr);
+    udev_enum& match_property(const string& propname, const string& propvalue);
 
     udev_list scan_devices();
 
@@ -166,17 +167,56 @@ namespace foxtrot
   using udev_device_rc = detail::ExternalRefCountInterface<udev_device, detail::noop<udev_device>,
 							   udev_device_ref, udev_device_unref>;
 
+
+
+  //forward declare
+  namespace detail {
+    struct _udev_map_read_interface_proxy;
+  }
+
+  
   class udev_device
   {
   public:
     udev_device(udev_context& ctxt, const std::string& syspath);
     udev_list properties();
 
+    detail::_udev_map_read_interface_proxy property();
+    
+
+    friend struct detail::_udev_map_read_interface_proxy;
 
   private:
     udev_device_rc _dev;
 
   };
+
+  namespace detail {
+    using _udev_lookup_funptr = const char* (*) (::udev_device*, const char*);
+    
+    struct _udev_map_read_interface_proxy
+    {
+    private:
+      _udev_lookup_funptr _lookup_fun = nullptr;
+      foxtrot::udev_device& _dev;
+
+    public:
+      std::string operator[](const std::string& k)
+      {
+	return _lookup_fun(_dev._dev.get(), k.c_str());
+      }
+
+      _udev_map_read_interface_proxy(auto lookup_fun, foxtrot::udev_device& dev)
+	: _lookup_fun(lookup_fun), _dev(dev)
+      {
+      }
+
+
+      
+    };
+  }
+    
+
   
   
 }

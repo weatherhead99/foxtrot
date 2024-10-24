@@ -23,4 +23,7 @@ if(BUILD_UDEV_SUPPORT)
   add_executable(udev_play udev_play.cpp)
   target_link_libraries(udev_play foxtrot_core)
 
+  add_executable(m30x_stage_discover_play m30x_stage_discover_play.cpp)
+  target_link_libraries(m30x_stage_discover_play foxtrot_core)
+  
 endif()

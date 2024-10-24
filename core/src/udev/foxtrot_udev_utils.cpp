@@ -24,6 +24,14 @@ udev_enum& udev_enum::match_subsystem(const string& expr)
   return *this;
 };
 
+udev_enum& udev_enum::match_property(const string& propname, const string& propvalue)
+{
+  auto ret = udev_enumerate_add_match_property(_udev_enum_rc.get(), propname.c_str(),
+					      propvalue.c_str());
+  check_throw_udev_return(ret);
+  return *this;
+}
+
 
 udev_list udev_enum::scan_devices()
 {
@@ -119,4 +127,9 @@ udev_list foxtrot::udev_device::properties()
   out._start_ptr = udev_device_get_properties_list_entry(_dev.get());
   
   return out;
+}
+
+foxtrot::detail::_udev_map_read_interface_proxy foxtrot::udev_device::property()
+{
+  return foxtrot::detail::_udev_map_read_interface_proxy(udev_device_get_property_value, *this);
 }

@@ -11,7 +11,7 @@ using std::endl;
 int main()
 {
   foxtrot::udev_context ctxt;
-  auto qry = foxtrot::udev_enum(ctxt).match_subsystem("block");
+  auto qry = foxtrot::udev_enum(ctxt).match_subsystem("tty");
 
   cout << "scanning devices" << endl;
   for(const auto& [name, val]: qry.scan_devices())
