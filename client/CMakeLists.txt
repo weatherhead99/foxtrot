@@ -23,9 +23,9 @@ $<TARGET_PROPERTY:foxtrot::foxtrot_core,INTERFACE_INCLUDE_DIRECTORIES>)
 
 set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotClient/)
 
-install(TARGETS foxtrot_client 
+install(TARGETS foxtrot_client
         EXPORT foxtrot_client
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 install(DIRECTORY include/foxtrot

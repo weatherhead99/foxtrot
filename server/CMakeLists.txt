@@ -7,23 +7,14 @@ option(BUILD_FTAUTH "build the (deprecated) custom ftauth modules" OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
-if(USE_CORO_IMPLEMENTATIONS)
-  set(CMAKE_CXX_STANDARD 20)
-else()
-  set(CMAKE_CXX_STANDARD 17)
-endif()
-
-
-set(CONAN_CMAKE_SILENT_OUTPUT ON)
-
 set(packname "server")
 
 
 find_package(rttr 0.9.6 REQUIRED)
 message("rttr version: ${rttr_VERSION}")
 find_package(foxtrotCore REQUIRED)
+include(FoxtrotCommonSetup)
 find_package(foxtrotProtocols REQUIRED)
-
 
 
 function(coro_logic target)
@@ -77,6 +68,7 @@ endif()
 
 #NOTE: for now, even if FTAUTH isn't built, we still need libsodium for the
 # session management API which uses pub/priv keypair
+foxtrot_generate_pkg_config_find_module(server libsodium)
 find_package(libsodium REQUIRED)
 
 
@@ -90,18 +82,7 @@ else()
 endif()
 
 
-include(GenerateExportHeader)
-include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
-message("module dir: ${CMAKE_MODULE_PATH}")
-include(FoxtrotCommonSetup)
-
-
 add_subdirectory(src)
-
-
-set(ft_cmakedir ${CMAKE_INSTALL_LIBDIR}/cmake/foxtrotServer/)
 
 
 
@@ -112,21 +93,9 @@ install(TARGETS exptserve
 
 install(TARGETS foxtrot_server
        EXPORT foxtrot_server
-       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
-
-install(EXPORT foxtrot_server
-       DESTINATION ${ft_cmakedir}
-       COMPONENT devel
-       NAMESPACE foxtrot::)
-
-install(DIRECTORY include/foxtrot
-       DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-       COMPONENT devel)
-     
-
-install(FILES ${CMAKE_CURRENT_LIST_DIR}/cmake/Findlibsodium.cmake DESTINATION ${ft_cmakedir})
 
 set(ft_server_dep_str
 "
@@ -159,11 +128,10 @@ else()
 endif()
 ")
 
-foxtrot_standard_setup_cmake_package(server ${ft_server_dep_str})
-
-
 add_subdirectory(devprogs)
 
 #build the dummy device
 add_subdirectory(devices)
 add_subdirectory(setups)
+
+foxtrot_standard_setup_cmake_package(server ${ft_server_dep_str})

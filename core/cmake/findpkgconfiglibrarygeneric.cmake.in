@@ -9,7 +9,9 @@ if(@PC_MODULE_NAME@_FOUND)
 
   if(@NO_DEFAULT_ALIAS@)
   else()
-    add_library(@PC_MODULE_NAME@::@PC_MODULE_NAME@ ALIAS PkgConfig::@PC_MODULE_NAME@)
+    if(NOT TARGET @PC_MODULE_NAME@::@PC_MODULE_NAME@)
+      add_library(@PC_MODULE_NAME@::@PC_MODULE_NAME@ ALIAS PkgConfig::@PC_MODULE_NAME@)
+    endif()
   endif()
   
   

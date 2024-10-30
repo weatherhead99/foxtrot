@@ -5,8 +5,9 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   apt-get -y update; \
   apt-get -y install libboost1.81-all-dev libprotobuf-dev librttr-dev \
   libgrpc++-dev protobuf-compiler-grpc libudev-dev libusb-1.0-0-dev \
-  libcurl4-openssl-dev rapidjson-dev libsodium-dev cmake ninja-build
+  libcurl4-openssl-dev rapidjson-dev libsodium-dev cmake ninja-build \
+  libavahi-client-dev libc-ares-dev libaravis-dev git
 
 COPY containers/debian_12_native/build_foxtrot.sh /
-RUN --mount=type=bind,target=/foxtrot_source --mount=type=cache,target=/foxtrot_build,sharing=locked /bin/bash /build_foxtrot.sh  
+#RUN --mount=type=bind,target=/foxtrot_source --mount=type=cache,target=/foxtrot_build,sharing=locked /bin/bash /build_foxtrot.sh  
 

@@ -53,24 +53,41 @@ endfunction()
 
 
 macro(foxtrot_generate_export_header packname tgtname)
-    include(GenerateExportHeader)
-    generate_export_header(${tgtname}
-        EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
-            COMPONENT devel)
-	  
-	endmacro()
+  include(GenerateExportHeader)
+  generate_export_header(${tgtname}
+    EXPORT_FILE_NAME ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/foxtrot/foxtrot_${packname}_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/
+    COMPONENT devel)
+  
+endmacro()
 
+
+#NOTE: this one I don't think is used ANYWHERE anymore
 function(foxtrot_standard_include_dirs tgt)
-    target_include_directories(${tgt} PUBLIC
-                        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-                        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-    target_include_directories(${tgt} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-    install(DIRECTORY include/foxtrot
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            COMPONENT devel)
+  target_include_directories(${tgt} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  target_include_directories(${tgt} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+  install(DIRECTORY include/foxtrot
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    COMPONENT devel)
 endfunction()
+
+
+
+function(foxtrot_standard_tgt_install tgtname packname)
+
+  foxtrot_packname_to_cmake_export_name(packname)
+  install(TARGETS ${tgtname}
+    EXPORT ${packname}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+endfunction()
+
+	
 
 function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_script)
 #  message(STATUS "include path: ${CMAKE_INCLUDE_PATH}")
@@ -110,6 +127,12 @@ function(foxtrot_setup_cmake_package packname target_name sourcedir_name deps_sc
 
   export(PACKAGE ${packname})
 
+  include(CPack)
+  set(CPACK_PACKAGE_NAME "foxtrot_${sourcedir_name}")
+  set(CPACK_PACKAGE_VENDOR "OPMD")
+  set(CPACK_PACKAGE_CONTACT "Dan Weatherill <daniel.weatherill@physics.ox.ac.uk>")
+  
+
 endfunction()
 
 
@@ -117,8 +140,13 @@ function(foxtrot_packname_to_cmake_package_name packname out_var)
   string(SUBSTRING ${packname} 0 1 FIRST_LETTER)
   string(TOUPPER ${FIRST_LETTER} FIRST_LETTER)
   string(SUBSTRING ${packname} 1 -1 REST)
-  string(CONCAT name_capitalized ${FIRST_LETTER} ${REST})
+  string(CONCAT name_capitalized ${FIRST_LETTER} ${REST}) 
   set(${out_var} "foxtrot${name_capitalized}")
+  return(PROPAGATE ${out_var})
+endfunction()
+
+function(foxtrot_packname_to_cmake_export_name packname out_var)
+  set(${out_var} "foxtrot_${packname}")
   return(PROPAGATE ${out_var})
 endfunction()
 

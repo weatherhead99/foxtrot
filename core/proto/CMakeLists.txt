@@ -28,7 +28,8 @@ target_sources(foxtrot_protos PRIVATE ${GEN_SRCS})
 
 #add_library(foxtrot_protos OBJECT ${ASIO_PROTO_HDRS})
 target_link_libraries(foxtrot_protos PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc)
-target_include_directories(foxtrot_protos PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+target_include_directories(foxtrot_protos PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+$<INSTALL_INTERFACE:include/foxtrot>)
 
 #install both the protobuf definitions and the target itself
 install(FILES ${proto_files} DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/foxtrot/proto/)
