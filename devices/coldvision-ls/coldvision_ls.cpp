@@ -3,6 +3,7 @@
 #include <boost/math/special_functions/detail/fp_traits.hpp>
 #include <boost/math/special_functions/math_fwd.hpp>
 #include <foxtrot/DeviceError.h>
+#include <foxtrot/ProtocolError.h>
 #include <foxtrot/protocols/SerialPort.h>
 #include <string>
 #include <cctype>
@@ -516,7 +517,30 @@ void ColdVisionLS::set_fanSpeedSetPoint(int setpoint)
   set_helper("&gs", setpoint);
 }
 
-  
+
+bool ColdVisionLS::Reconnect()
+{
+
+  auto serport = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_proto);
+  if(serport == nullptr)
+    {
+      _lg.strm(sl::error) << "this isn't a serial port, can't reconnect. Maybe a logic error in ColdVisionLS";
+      return false;
+    }
+
+  _lg.strm(sl::info) << "attempting reconnect of serial port...";
+  try{
+    serport->reconnect(std::nullopt);
+    return true;
+  }
+      catch(foxtrot::ProtocolError& err)
+    {
+      _lg.strm(sl::error) << "error when reconnecting serial port: " << err.what();
+      return false;
+    }
+
+}
+
 
   
 

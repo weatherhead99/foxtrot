@@ -134,7 +134,9 @@ namespace foxtrot
 
       int get_fanSpeedSetPoint();
       void set_fanSpeedSetPoint(int setpoint);
-            
+
+      bool Reconnect() override;
+
 
       private:
 

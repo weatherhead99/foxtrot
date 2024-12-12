@@ -124,6 +124,8 @@ namespace foxtrot {
 
       void attempt_error_recover();
 
+      bool Reconnect() override;
+
     protected:
       APT(std::shared_ptr< protocols::SerialPort > proto);
 

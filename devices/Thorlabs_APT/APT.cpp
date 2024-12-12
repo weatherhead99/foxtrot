@@ -643,7 +643,7 @@ foxtrot::devices::apt_reply foxtrot::devices::APT::receive_message_sync_check(bs
 void foxtrot::devices::APT::attempt_error_recover()
 {
   _lg.strm(sl::info) << "attempting reset of serial port";
-  _serport->reconnect();
+  _serport->reconnect(std::nullopt);
 
   _lg.strm(sl::info) << "attempting error recovery...";
   _lg.strm(sl::info) << "flusing serial port...";
@@ -651,6 +651,22 @@ void foxtrot::devices::APT::attempt_error_recover()
 
 
 };
+
+bool foxtrot::devices::APT::Reconnect()
+{
+  _lg.strm(sl::info) << "attempting reconnect to serial port";
+  try{
+    _serport->reconnect(std::nullopt);
+    return true;
+  }
+  catch(foxtrot::ProtocolError& err)
+    {
+      _lg.strm(sl::error) << "error when reconnecting serial port: " << err.what();
+
+      return false;
+    }
+
+}
 
 
 
