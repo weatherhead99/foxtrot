@@ -348,28 +348,28 @@ void foxtrot::Device::load_capability_map(bool force_reload)
     if(!_registry_is_loaded or force_reload)
     {
       lg_.strm(sl::trace) << "in capability map load loop";
-      
+
         _cap_registry.clear();
         _cap_string_registry.clear();
         unsigned short idx = 0;
         auto reflecttp = rttr::type::get(*this);
 
 	lg_.strm(sl::debug) << "reflecttp name is: " << reflecttp.get_name();
-	
+
+	auto add_cap = [this, &idx] (auto& pm) {
+	  lg_.strm(sl::trace) << "name: " << pm.get_name();
+	  auto cap = GetCapability(pm);
+	  _cap_registry.insert({idx, cap});
+            auto [it, inserted] = _cap_string_registry.insert({cap.CapabilityName, idx++});
+	    if(inserted)
+	      lg_.strm(sl::warning) << "WARNING: duplicate capability name found";  
+	};
+
         for(auto& prop : reflecttp.get_properties())
-        {
-	  lg_.strm(sl::trace) << "prop: " << prop.get_name();
-	   auto cap = GetCapability(prop);
-            _cap_registry.insert({idx, cap});
-            _cap_string_registry.insert({cap.CapabilityName, idx++});
-        }
+	  add_cap(prop);  
         for(auto& meth : reflecttp.get_methods())
-        {
-	  lg_.strm(sl::trace) << "meth: " << meth.get_name();
-	  auto cap = GetCapability(meth);
-            _cap_registry.insert({idx, cap});
-            _cap_string_registry.insert({cap.CapabilityName, idx++});
-        }
+	  add_cap(meth);
+
     }
 }
 

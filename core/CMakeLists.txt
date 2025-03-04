@@ -28,9 +28,11 @@ find_package(Boost REQUIRED COMPONENTS log program_options thread NO_MODULE)
 else()
 find_package(Boost REQUIRED COMPONENTS log program_options NO_MODULE)
 endif()
+
+find_package(gRPC REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(rttr 0.9.6 REQUIRED)
-find_package(gRPC REQUIRED)
+
 
 #firs we will build the protobuf generated stuff
 add_subdirectory(proto)

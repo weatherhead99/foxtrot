@@ -130,5 +130,11 @@ RTTR_REGISTRATION
   using namespace rttr;
   using foxtrot::devices::M30X;
 
-  registration::class_<M30X>("foxtrot::devices::M30X");
+  registration::class_<M30X>("foxtrot::devices::M30X")
+    .method("safe_home_move", &M30X::safe_home_move)
+    (parameter_names("home_left", "velocity"))
+    .method("set_soft_limits", &M30X::set_soft_limits)
+    (parameter_names("CW_limit", "CCW_limit"));
+    
+  
 }

@@ -180,7 +180,7 @@ namespace foxtrot
     foxtrot::Logging lg_;
     std::map<unsigned short,Capability> _cap_registry;
     bool _registry_is_loaded = false;
-    std::map<std::string, unsigned short> _cap_string_registry;
+    std::map<std::string, std::variant<unsigned short, std::vector<unsigned short>>> _cap_string_registry;
     
   };
 
