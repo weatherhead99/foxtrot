@@ -365,7 +365,7 @@ void foxtrot::Device::load_capability_map(bool force_reload)
         }
         for(auto& meth : reflecttp.get_methods())
         {
-	  lg_.strm(sl::trace) << "meth: " << meth.get_name();
+	  lg_.strm(sl::trace) << "meth: " << meth.get_name() << " signature:" << meth.get_signature();
 	  auto cap = GetCapability(meth);
             _cap_registry.insert({idx, cap});
             _cap_string_registry.insert({cap.CapabilityName, idx++});
