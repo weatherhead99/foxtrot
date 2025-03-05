@@ -69,8 +69,11 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
     try {
     //TODO: error handling here
+      _lg.strm(sl::trace) << "locking device now.";
         auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
+	_lg.strm(sl::trace) << "doing invocation call";
         auto ftretval = dev->Invoke(cap, vargs.cbegin(), vargs.cend());
+
         set_retval_from_variant(ftretval, repl, &_lg);
 
         respond.Finish(repl,grpc::Status::OK,tag);

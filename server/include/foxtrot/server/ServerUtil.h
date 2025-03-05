@@ -200,8 +200,9 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 	{
 	  	//this is the legacy case now no capid supplied, do it the old way via looking up names
 	      lg.strm(sl::warning) << "request without a capability ID. Deprecated behaviour, please update client";
-	      repl.mutable_err()->set_warnstring("request without a capability ID. Deprecated behaviour, please update client");
-	      repl.mutable_err()->set_warntp(foxtrot::ft_DeprecationWarning);
+	      auto replerr = repl.mutable_err();
+	      replerr->set_warnstring("request without a capability ID. Deprecated behaviour, please update client");
+	      replerr->set_warntp(foxtrot::ft_DeprecationWarning);
 	      lg.Debug("capability requested is: " + req.capname() );
 	      auto possible_capids = devptr->GetCapabilityIds(req.capname());
 	      if(possible_capids.size() > 1)
