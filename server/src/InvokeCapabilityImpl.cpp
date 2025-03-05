@@ -41,7 +41,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
       }
     catch(...)
       {
-	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg, tag);
+	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, _lg, tag);
 	_lg.Trace("returned from error handling on capid");
 	return true;
       }
@@ -86,6 +86,8 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
       _lg.strm(sl::trace) << "locking device now.";
         auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
 	_lg.strm(sl::trace) << "doing invocation call";
+	if(dev == nullptr)
+	  throw std::logic_error("nullptr device this should NEVER HAPPEN!");
         auto ftretval = dev->Invoke(cap, vargs.cbegin(), vargs.cend());
 
         set_retval_from_variant(ftretval, repl, &_lg);

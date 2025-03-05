@@ -26,7 +26,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
       }
     catch(...)
       {
-	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg, tag);
+	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, _lg, tag);
 	return true;
       }
     

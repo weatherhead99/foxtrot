@@ -12,7 +12,7 @@ if(ueye_FOUND)
   target_link_libraries(idscamera PUBLIC ueye::api)
   ft_device_lib_configure(idscamera)
 
-  add_executable(idscamera_play idscamera/idscamera_play.cpp)
+  add_executable(idscamera_play idscamera_play.cpp)
   target_link_libraries(idscamera_play PUBLIC idscamera)
   string(APPEND ft_devices_dep_str
     "
