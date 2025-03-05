@@ -31,7 +31,8 @@ class FoxtrotCoreConan(ConanFile):
                        "glib/*:with_mount" : False,
                        "glib/*:with_selinux" : False,
                        "with_udev" : True,
-                       "with_avahi" : True
+                       "with_avahi" : True,
+                       "grpc/*:secure" : True
                        }
 
     src_folder = "core"
@@ -93,7 +94,7 @@ class FoxtrotCoreConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared
-        envvars = VirtualRunEnv(self).vars()
+        envvars = VirtualBuildEnv(self).vars()
 
         cmake.configure()
         with envvars.apply():

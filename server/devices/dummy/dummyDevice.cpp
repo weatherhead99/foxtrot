@@ -335,58 +335,51 @@ RTTR_REGISTRATION
  using namespace rttr;
  using foxtrot::devices::dummyDevice;
  registration::class_<dummyDevice>("foxtrot::devices::dummyDevice")
- .property_readonly("getCounter", &dummyDevice::getCounter)
- .property_readonly("getRandomDouble", &dummyDevice::getRandomDouble)
- .method("resetCounter", &dummyDevice::resetCounter)
- .method("add", &dummyDevice::add)
- (
-     parameter_names("a1","a2")
-     )
- .method("brokenMethod",&dummyDevice::brokenMethod)
-   .property_readonly("remoteBindTypeAny", &dummyDevice::remoteBindTypeAny)
-   .method("remoteBindTypePointer", &dummyDevice::remoteBindTypePointer)
- .method("getCountStream",&dummyDevice::getCountStream)
- (
-   parameter_names("n"),
-  metadata("streamdata",true)
-   )
- .method("getRandomVector",&dummyDevice::getRandomVector)
- (
-     parameter_names("n"),
-     metadata("streamdata",true)
-     )
- .method("longdurationmethod",&dummyDevice::longdurationmethod)
- ( parameter_names("n_sec")
- )
- .property("Int",&dummyDevice::getInt, &dummyDevice::setInt)
- (parameter_names("a"))
- .method("setWomble",&dummyDevice::setWomble)
- (parameter_names("val"))
- .method("getWomble", &dummyDevice::getWomble)
- .method("takes_custom_enum", &dummyDevice::takes_custom_enum)
- .method("returns_custom_enum", &dummyDevice::returns_custom_enum)
- .method("doNothing", &dummyDevice::doNothing)
- .method("returns_custom_struct", &dummyDevice::returns_custom_struct)
- .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
- .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
- .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
- .method("returns_pair", &dummyDevice::returns_pair)
- .method("returns_unregistered_tuple", &dummyDevice::returns_unregistered_tuple)
- .method("returns_std_array", &dummyDevice::returns_std_array)
- .method("returns_struct_std_array", &dummyDevice::returns_struct_std_array)
- .method("returns_std_int_array", &dummyDevice::returns_std_int_array)
- .method("takes_remote_obj", &dummyDevice::takes_remote_obj)
-   .method("returns_variant", &dummyDevice::returns_variant)(parameter_names("n"))
-   .method("returns_unregistered_variant", &dummyDevice::returns_unregistered_variant)
-   .method("takes_variant", &dummyDevice::takes_variant)(parameter_names("var"))
-   .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"))
-   .property_readonly("last_supplied_optional_value", &dummyDevice::get_last_supplied_optional_value)
+     .property_readonly("getCounter", &dummyDevice::getCounter)
+     .property_readonly("getRandomDouble", &dummyDevice::getRandomDouble)
+     .method("resetCounter", &dummyDevice::resetCounter)
+     .method("add", &dummyDevice::add)(parameter_names("a1", "a2"))
+     .method("brokenMethod", &dummyDevice::brokenMethod)
+     .property_readonly("remoteBindTypeAny", &dummyDevice::remoteBindTypeAny)
+     .method("remoteBindTypePointer", &dummyDevice::remoteBindTypePointer)
+     .method("getCountStream", &dummyDevice::getCountStream)(
+         parameter_names("n"), metadata("streamdata", true))
+     .method("getRandomVector", &dummyDevice::getRandomVector)(
+         parameter_names("n"), metadata("streamdata", true))
+     .method("longdurationmethod",
+             &dummyDevice::longdurationmethod)(parameter_names("n_sec"))
+     .property("Int", &dummyDevice::getInt,
+               &dummyDevice::setInt)(parameter_names("a"))
+     .method("setWomble", &dummyDevice::setWomble)(parameter_names("val"))
+     .method("getWomble", &dummyDevice::getWomble)
+     .method("takes_custom_enum", &dummyDevice::takes_custom_enum)
+     .method("returns_custom_enum", &dummyDevice::returns_custom_enum)
+     .method("doNothing", &dummyDevice::doNothing)
+     .method("returns_custom_struct", &dummyDevice::returns_custom_struct)
+     .method("takes_pointer_type", &dummyDevice::takes_pointer_type)
+     .method("takes_custom_struct", &dummyDevice::takes_custom_struct)
+     .method("returns_int_str_tuple", &dummyDevice::returns_int_str_tuple)
+     .method("returns_pair", &dummyDevice::returns_pair)
+     .method("returns_unregistered_tuple",
+             &dummyDevice::returns_unregistered_tuple)
+     .method("returns_std_array", &dummyDevice::returns_std_array)
+     .method("returns_struct_std_array", &dummyDevice::returns_struct_std_array)
+     .method("returns_std_int_array", &dummyDevice::returns_std_int_array)
+     .method("takes_remote_obj", &dummyDevice::takes_remote_obj)
+     .method("returns_variant",
+             &dummyDevice::returns_variant)(parameter_names("n"))
+     .method("returns_unregistered_variant",
+             &dummyDevice::returns_unregistered_variant)
+     .method("takes_variant",
+             &dummyDevice::takes_variant)(parameter_names("var"))
+     .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"))
+     .property_readonly("last_supplied_optional_value", &dummyDevice::get_last_supplied_optional_value)
    .method("takes_optional", &dummyDevice::takes_optional)(parameter_names("opt"))
    .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"))
    .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
    .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector)
    .method("methodNamedSomethingSilly", select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
-   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly));
+   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))parameter_names("arg");
    
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
