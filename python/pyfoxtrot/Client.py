@@ -21,9 +21,11 @@ from .protos.foxtrot_pb2 import  broadcast_notification
 from .protos.ft_capability_pb2 import capability_request, capability_argument, VALUE_READONLY, VALUE_READWRITE, ACTION, STREAM
 from .protos.ft_types_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
 from .protos.ft_capability_pb2 import chunk_request
-from .protos.ft_types_pb2 import ENUM_TYPE
+from .protos.ft_types_pb2 import ENUM_TYPE, variant_descriptor
 from .EnumCreator import define_enum
-
+from warnings import warn
+from dataclasses import dataclass, field
+from functools import cache
 
 DEFAULT_CHUNKSIZE = 1000
 
@@ -144,27 +146,19 @@ class Client:
         return FlagProxy(self)
 
 
-
 class Device:
-    def __init__(self, devid, devtp, caps, comment, client):
+    def __init__(self, devid: int, devtp, caps, comment: str, client: Client):
         self._devid = devid
         self._devtp = devtp
         self._comment = comment
-        self._cl = client
+        self._cl: Client = client
 
         self._caps = []
         self._props = {}
         for cap in caps:
-            self._caps.append(Capability(cap.tp, cap.capname, cap.argnames,
-                                         cap.argtypes, cap.rettp, devid, client))
+            newcap = Capability.from_proto(cap, client, self)
+            newcap._attach(self)
 
-        for cap in self._caps:
-            setattr(self, cap._capname, cap)
-            if(cap._captp == VALUE_READONLY or cap._captp == VALUE_READWRITE):
-                propname = "value_%s" % cap._capname
-                fget = lambda s: getattr(s,propname)()
-                fset = lambda s, val: getattr(s,propname)(val)
-                self._props[propname] = property(fget, fset)
 
     def __repr__(self):
         if self._comment:
@@ -174,74 +168,105 @@ class Device:
 
 
 
+#don't really need equality comparison,
+#enabling it breaks pretty printing, so
+@dataclass(eq=False)
 class Capability:
-    def __init__(self, captp, capname, argnames, argtypes, rettp, devid, client):
-        self._captp = captp
-        self._capname = capname
-        self._argnames = argnames
-        self._argtypes = argtypes
-        self._rettp = rettp
-        self._msgid = 0
-        self.chunksize = DEFAULT_CHUNKSIZE
-        self._devid = devid
-        self._cl = client
+    captp: list
+    capname: str
+    capid: int
+    argnames: list
+    argtypes: list
+    rettp: variant_descriptor
+    device: Device
+    client: Client
+
+    @classmethod
+    def from_proto(cls, protomsg, client: Client, device: Device):
+        out = cls(captp = protomsg.tp,
+                  capname = protomsg.capname,
+                  capid = protomsg.capid,
+                  argnames = protomsg.argnames,
+                  argtypes = protomsg.argtypes,
+                  rettp = protomsg.rettp,
+                  device = device,
+                  client = client)
+        return out
+    
+    def __post_init__(self):
+        #just for compatibility
+        self._cl = self.client
+
+        self._msgid: int = 0
+        
         self._enum_return_type = None
-        self._enum_arg_types = [None] * len(argtypes)
+        self._enum_arg_types = [None] * len(self.argtypes)
 
-        for tp in chain([rettp], argtypes):
+        for tp in chain([self.rettp], self.argtypes):
             if tp.variant_type == ENUM_TYPE:
-                client._add_enum_type(tp.enum_desc)
+                self.client._add_enum_type(tp.enum_desc)
 
-        if rettp.variant_type == ENUM_TYPE:
-            self._enum_return_type = client._lookup_enum_type(rettp.enum_desc)
+        if self.rettp.variant_type == ENUM_TYPE:
+            self._enum_return_type = self.client._lookup_enum_type(self.rettp.enum_desc)
 
-        for idx,var in enumerate(argtypes):
+        for idx,var in enumerate(self.argtypes):
             if var.variant_type == ENUM_TYPE:
-                self._enum_arg_types[idx] = client._lookup_enum_type(var.enum_desc)
+                self._enum_arg_types[idx] = self.client._lookup_enum_type(var.enum_desc)
 
+    @cache
     def __repr__(self):
-        if self._captp == VALUE_READONLY:
+        if self.captp == VALUE_READONLY:
             infostr = "readonly value"
-        elif self._captp == VALUE_READWRITE:
+        elif self.captp == VALUE_READWRITE:
             infostr = "read/write value"
-        elif self._captp == ACTION:
+        elif self.captp == ACTION:
             infostr = "action"
         else:
             infostr = "data stream"
 
-        argnamestrs = map(lambda s : "unknown" if not s else s , self._argnames)
-        argtypestrs = [string_describe_ft_variant(_) for _ in self._argtypes]
-        rettypestr = string_describe_ft_variant(self._rettp)
+        argnamestrs = map(lambda s : "unknown" if not s else s , self.argnames)
+        argtypestrs = [string_describe_ft_variant(_) for _ in self.argtypes]
+        rettypestr = string_describe_ft_variant(self.rettp)
 
-        argnametypestrs = ["%s:%s" % (n,t) for n,t in zip(argnamestrs,argtypestrs)]
-
-        displaystr = "%s (%s) -> %s, [%s]" % (self._capname, 
-                      ", ".join(argnametypestrs),
-                      rettypestr,
-                      infostr)
-
-
+        argnametypestrs = [f"{n}:{t}" for n,t in zip(argnamestrs,argtypestrs)]
+        argnametypestr: str = ", ".join(argnametypestrs)
+        
+        displaystr = f"{self.capname} ({argnametypestr}) -> {rettypestr}, [{infostr}]"
         return displaystr
 
-    def get_enum_type(self, argpos):
+    def _attach(self, tgt: Device) -> None:
+        #simple, original case: single function with this name
+        if not hasattr(tgt, self.capname):
+            setattr(tgt, self.capname, self)
+            if self.captp == VALUE_READONLY or self.captp == VALUE_READWRITE:
+                propname: str = f"value_{self.capname}"
+                fget = lambda s : getattr(s, propname)
+                fset = lambda s : getattr(s, propname)(val)
+                #not sure exactly how this is supposed to function...
+                tgt._props[propname] = property(fget, fset)
+        else:
+            warn("device already has capability with this name, not overriding")
+
+
+    def get_enum_type(self, argpos: int | str):
         if isinstance(argpos, int):
             return self._enum_arg_types[argpos]
         elif isinstance(argpos, str):
-            idx = self._argnames.index(argpos)
+            idx = self.argnames.index(argpos)
             return self._enum_arg_types[idx]
 
-    def get_enum(self, argpos, *args, **kwargs):
+    def get_enum(self, argpos: int | str, *args, **kwargs):
         tp = self.get_enum_type(argpos)
         return tp(*args, **kwargs)
 
     def _construct_args(self, *args, **kwargs):
-        rawargs = [None] * len(self._argnames)
+        rawargs = [None] * len(self.argnames)
         for name, val in kwargs.items():
-            if name not in self._argnames:
+            if name not in self.argnames:
                 raise ValueError("no such argument with name: %s in capability"
                                  % name)
-            pos = self._argnames.index(name)
-            argdesc = self._argtypes[pos]
+            pos = self.argnames.index(name)
+            argdesc = self.argtypes[pos]
             rawargs[pos] = capability_argument(
                 pos=pos,
                 value=ft_variant_from_value(val, argdesc))
@@ -252,7 +277,7 @@ class Capability:
         for idx, val in enumerate(args):
             if rawargs[idx] is not None:
                 raise IndexError("conflicting positional and keyword arguments")
-            desc = self._argtypes[idx]
+            desc = self.argtypes[idx]
             rawargs[idx] = capability_argument(position=idx,
                                                value=ft_variant_from_value(val, desc))
 
@@ -262,7 +287,7 @@ class Capability:
         return rawargs
 
     def _process_sync_response(self, repl):
-        if self._captp == STREAM:
+        if self.captp == STREAM:
             rawbytes = bytearray()
 
             for chunk in repl:
@@ -289,26 +314,26 @@ class Capability:
         return out
 
     def construct_request(self, *args, **kwargs):
-        if self._captp != VALUE_READWRITE:
+        if self.captp != VALUE_READWRITE:
             capargs = self._construct_args(*args, **kwargs)
         elif len(args) > 0 or len(kwargs) > 0:
             capargs = self._construct_args(*args, **kwargs)
         else:
             capargs = []
 
-        reqtp = chunk_request if self._captp == STREAM else capability_request
+        reqtp = chunk_request if self.captp == STREAM else capability_request
 
-        req = reqtp(msgid=self._msgid, devid=self._devid,
-                    capname=self._capname, args=capargs)
+        req = reqtp(msgid=self._msgid, devid=self.device._devid,
+                    capname=self.capname, args=capargs, capid=self.capid)
         self._msgid += 1
 
-        if self._captp == STREAM:
+        if self.captp == STREAM:
             req.chunksize = self.chunksize
 
         return req
 
     def call_cap_sync(self, client, *args, **kwargs):
-        stubfun = client._stub.FetchData if self._captp == STREAM else client._stub.InvokeCapability
+        stubfun = client._stub.FetchData if self.captp == STREAM else client._stub.InvokeCapability
         req = self.construct_request(*args, **kwargs)
         if client._active_session is None:
             ret = stubfun(req)

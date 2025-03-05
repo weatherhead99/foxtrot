@@ -21,8 +21,8 @@ enum warning_types
 
 message errstatus
 {
-    error_types tp =1;
-    string msg = 2;
+    optional error_types tp =1;
+    optional string msg = 2;
   optional warning_types warntp = 4;
   optional string warnstring = 5;
 
