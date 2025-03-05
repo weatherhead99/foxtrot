@@ -30,9 +30,23 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 {
     _lg.Debug("processing invoke capability request" );
 
-    foxtrot::Device* dev;
+    foxtrot::Device* dev = nullptr;
     //validity of devid and capid gets checked in here
-    auto cap = foxtrot::capability_id_name_handler(req, repl, *_harness, _lg, dev);
+
+    foxtrot::Capability cap;
+    
+    try
+      {
+      cap = foxtrot::capability_id_name_handler(req, repl, *_harness, _lg, dev);
+      }
+    catch(...)
+      {
+	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg, tag);
+	_lg.Trace("returned from error handling on capid");
+	return true;
+      }
+	  
+	  
 
     if(cap.type == CapabilityType::STREAM)
     {

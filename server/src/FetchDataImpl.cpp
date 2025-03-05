@@ -17,7 +17,19 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     foxtrot::Device* dev;
     repl = init_chunk<foxtrot::datachunk>(req);
-    auto cap = capability_id_name_handler(req, repl, *_harness, _lg, dev);
+
+    foxtrot::Capability cap;
+
+    try
+      {
+	 cap = capability_id_name_handler(req, repl, *_harness, _lg, dev);
+      }
+    catch(...)
+      {
+	foxtrot_rpc_error_handling(std::current_exception(), repl, respond, lg, tag);
+	return true;
+      }
+    
     if(cap.type != CapabilityType::STREAM)
     {
         foxtrot_server_specific_error("tried to FetchData on a non streaming method: " + req.capname(),
