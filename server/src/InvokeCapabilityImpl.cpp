@@ -37,7 +37,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     
     try
       {
-      cap = foxtrot::capability_id_name_handler(req, repl, *_harness, _lg, dev);
+      cap = foxtrot::capability_id_name_handler(req, repl, *_harness, _lg, &dev);
       }
     catch(...)
       {
@@ -46,7 +46,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
 	return true;
       }
 	  
-	  
+
 
     if(cap.type == CapabilityType::STREAM)
     {

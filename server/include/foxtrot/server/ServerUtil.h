@@ -178,17 +178,18 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 
   template<typename Req, typename Repl>
   foxtrot::Capability capability_id_name_handler(const Req& req, Repl& repl, foxtrot::DeviceHarness& harness,
-						       foxtrot::Logging& lg, foxtrot::Device* devptr=nullptr)
+						       foxtrot::Logging& lg, foxtrot::Device** devptr=nullptr)
     {
       repl.set_msgid(req.msgid());
       repl.set_devid(req.devid());
 
       //this will throw std::out_of_range if device not found!
       try {
-	devptr = harness.GetDevice(req.devid());
+	*devptr = harness.GetDevice(req.devid());
       }
       catch(std::out_of_range& err)
 	{
+	  lg.strm(sl::error) << "caught device out of range exception";
 	  throw foxtrot::ServerError("invalid device ID supplied!");
 	}
 
@@ -204,7 +205,7 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 	      replerr->set_warnstring("request without a capability ID. Deprecated behaviour, please update client");
 	      replerr->set_warntp(foxtrot::ft_DeprecationWarning);
 	      lg.Debug("capability requested is: " + req.capname() );
-	      auto possible_capids = devptr->GetCapabilityIds(req.capname());
+	      auto possible_capids = (*devptr)->GetCapabilityIds(req.capname());
 	      if(possible_capids.size() > 1)
 		  throw foxtrot::ServerError("ambiguous capability request, multiple matching names!");
 	      else if(possible_capids.size() == 0)
@@ -218,8 +219,11 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 
       //ok, dealt with both cases where we didn't have a capid.
       //check that the capid is valid. The below will throw if it isn't
-      auto cap = devptr->GetCapability(capid);
+      repl.set_capid(capid);
+      auto cap = (*devptr)->GetCapability(capid);
 
+      lg.strm(sl::debug) << "capid is: " << capid ;
+      
       if(req.has_capname())
 	{
 	  //if a name was supplied, we need to check that it matches

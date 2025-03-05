@@ -22,7 +22,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
 
     try
       {
-	 cap = capability_id_name_handler(req, repl, *_harness, _lg, dev);
+	 cap = capability_id_name_handler(req, repl, *_harness, _lg, &dev);
       }
     catch(...)
       {
