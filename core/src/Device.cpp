@@ -420,7 +420,10 @@ void foxtrot::Device::load_capability_map(bool force_reload)
         for(auto& meth : reflecttp.get_methods())
 	  add_cap(meth);
 
+	_registry_is_loaded = true;
     }
+
+    
 }
 
 
