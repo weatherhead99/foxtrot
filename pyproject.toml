@@ -9,7 +9,12 @@ packages = [ {include  = "pyfoxtrot", from="python"}
 
 dynamic = ["version"]
 
-dependencies = ["protobuf", "grpcio"]
+#specify protobuf version directly,
+#we use grpcio-tools in build deps,
+#so needs to match to avoid warning`
+
+dependencies = ["protobuf ~= 5.29.0",
+	     "grpcio"]
 requires-python=">=3.9"
 
 [tool.hatch.build]

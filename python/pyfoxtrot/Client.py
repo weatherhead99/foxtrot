@@ -250,14 +250,12 @@ class Capability:
             print(f"overload set logic for name {self.capname}")
             existing_attr = getattr(tgt, self.capname)
             if isinstance(existing_attr, type(self)):
-                print("new overload set")
                 #this is a capability which needs to be replaced with an overload set
                 newoset = CapabilityOverloadSet(self.capname)
                 newoset.add_cap(existing_attr)
                 newoset.add_cap(self)
                 setattr(tgt, self.capname, newoset)
             elif isinstance(existing_attr, CapabilityOverloadSet):
-                print("existing overload set")
                 #simply add to the existing overload set
                 existing_attr.add_cap(self)
             else:
