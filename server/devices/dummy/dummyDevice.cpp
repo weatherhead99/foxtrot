@@ -379,7 +379,7 @@ RTTR_REGISTRATION
    .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
    .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector)
    .method("methodNamedSomethingSilly", select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
-   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))parameter_names("arg");
+   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))(parameter_names("arg"));
    
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
