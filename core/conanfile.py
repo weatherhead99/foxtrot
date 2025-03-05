@@ -36,12 +36,13 @@ class FoxtrotCoreConan(ConanFile):
 
     src_folder = "core"
 
-    CMake
 
+    def build_requirements(self):
+        self.tool_requires("protobuf/<host_version>")
+    
     def requirements(self):
         super().requirements()
         protobuf_req: str = "protobuf/[^5.27.0]"
-        self.tool_requires(protobuf_req)
 
         self.requires("grpc/[^1.65.0]", headers=True, libs=True,
                       transitive_headers=True,

@@ -35,13 +35,9 @@ namespace foxtrot
         {
             if constexpr(has_devid<R>::value)
             {
-                lg.strm(sl::debug) << "has devid!";
-                
-                auto cap = harness.GetDevice(req.devid())->GetCapability(req.capname());
-                
+                lg.strm(sl::debug) << "has devid!";       
+		//                auto cap = harness.GetDevice(req.devid())->GetCapability(req.capname());
                 //disable this for now, think about how to make this work in future
-                
-                
 //                 //capability is readonly, doesn't affect other user to read it
 //                 if(cap.type == CapabilityType::VALUE_READONLY)
 //                     return false;

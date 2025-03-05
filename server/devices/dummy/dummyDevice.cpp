@@ -322,6 +322,14 @@ int foxtrot::devices::dummyDevice::get_last_supplied_optional_value() const
 }
 
 
+bool foxtrot::devices::dummyDevice::methodNamedSomethingSilly()
+{ return true;}
+
+bool foxtrot::devices::dummyDevice::methodNamedSomethingSilly(bool arg)
+{ return arg;}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
@@ -376,7 +384,10 @@ RTTR_REGISTRATION
    .method("takes_optional", &dummyDevice::takes_optional)(parameter_names("opt"))
    .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"))
    .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
-   .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector);
+   .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector)
+   .method("methodNamedSomethingSilly", select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
+   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly));
+   
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
 

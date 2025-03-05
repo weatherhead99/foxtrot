@@ -17,19 +17,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     
     foxtrot::Device* dev;
     repl = init_chunk<foxtrot::datachunk>(req);
-    
-    
-    try
-    {
-     dev = _harness->GetDevice(req.devid());   
-    }
-    catch(std::out_of_range& err)
-    {
-      foxtrot_server_specific_error("invalid device", repl,respond, _lg,tag,error_types::out_of_range);
-        return true;
-    }
-    
-    auto cap = dev->GetCapability(req.capname());
+    auto cap = capability_id_name_handler(req, repl, *_harness, _lg, dev);
     if(cap.type != CapabilityType::STREAM)
     {
         foxtrot_server_specific_error("tried to FetchData on a non streaming method: " + req.capname(),
@@ -37,7 +25,9 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
         return true;
     }
     
-    
+
+
+    //TODO: this looks like it can be merged with InvokeCapability logic as well
     std::vector<rttr::variant> vargs;
     vargs.reserve(req.args().size());
     
@@ -61,7 +51,7 @@ bool foxtrot::FetchDataLogic::initial_request(reqtp& req, repltp& repl, responde
     }
     
     auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
-    auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
+    auto ftretval = dev->Invoke(cap, vargs.cbegin(), vargs.cend());
     
     if(!ftretval.is_sequential_container())
     {

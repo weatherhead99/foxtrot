@@ -99,32 +99,30 @@ bool foxtrot::ServerDescribeLogic::HandleRequest(reqtp& req, repltp& repl, respo
       
       auto outdevmap = repl.mutable_devs_attached();
       
-      for(auto& devpair : devmap)
+      for(auto [devid, dev] : devmap)
       {
-          auto devid = devpair.first;
-          
+	if(!dev)
+	  throw std::logic_error("device pointer not present in harness! Should never happen");
+	
           devdescribe desc;
           desc.set_devid(devid);
-          desc.set_devtype(devpair.second->getDeviceTypeName());
-          desc.set_devcomment(devpair.second->getDeviceComment());
+          desc.set_devtype(dev->getDeviceTypeName());
+          desc.set_devcomment(dev->getDeviceComment());
           
           //enumerate capabilities
           
-          
-          //WARNING: SLOOOOW
-          auto capnames = devpair.second->GetCapabilityNames();
-          for(const auto& capname : capnames)
+          for(auto [capid, cap]  : dev->Registry())
           {
-              _lg.strm(sl::debug) << "adding capability: " << capname ;
-	      auto* dev = _harness->GetDevice(devid);
-	      if(!dev)
-		throw std::logic_error("device pointer not present in harness! Should never happen");
-	      auto cap = dev->GetCapability(capname);
-	      *(desc.add_caps()) = GetDeviceCapability(cap, &_lg);
+	    _lg.strm(sl::debug) << "adding capability: " << capid << " named: " << cap.CapabilityName ;
+	    auto tempcap = GetDeviceCapability(cap, &_lg);
+
+	    //for now, manually add the ID in here. MAKE SURE message carries the capabiility ID
+	    tempcap.set_capid(capid);
+	    *(desc.add_caps()) = tempcap;
           }
           
           (*outdevmap)[devid] = desc;    
-          
+
       };
         
      respond.Finish(repl,grpc::Status::OK,tag);

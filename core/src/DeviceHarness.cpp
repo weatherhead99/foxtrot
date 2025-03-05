@@ -141,88 +141,11 @@ std::vector<std::string> foxtrot::DeviceHarness::GetCapabilityNames(int devid)
     std::vector<std::string> out;
     
     _lg.strm(sl::trace) << "getting device...";
-    auto dev = GetDevice(devid);
+    auto dev = GetDevice(devid);    
     return dev->GetCapabilityNames();
 
 }
 
-#if 0
-
-foxtrot::devcapability foxtrot::DeviceHarness::GetDeviceCapability(int devid, const std::string& capname)
-{
-    auto dev = GetDevice(devid);
-    
-    _lg.strm(sl::trace) << "getting capability from device";
-    foxtrot::Capability cap = dev->GetCapability(capname);
-    foxtrot::devcapability out;
-    out.set_capname(cap.CapabilityName);
-    
-    _lg.strm(sl::trace) << "setting capability type...";
-    switch(cap.type)
-    {
-        case(CapabilityType::VALUE_READONLY): out.set_tp(capability_types::VALUE_READONLY); break;
-        case(CapabilityType::VALUE_READWRITE): out.set_tp(capability_types::VALUE_READWRITE); break;
-        case(CapabilityType::ACTION): out.set_tp(capability_types::ACTION); break;
-        case(CapabilityType::STREAM): out.set_tp(capability_types::STREAM); break;
-    }
-    
-    if(cap.type == CapabilityType::STREAM)
-    {
-        if(! cap.Returntype.is_template_instantiation())
-        {
-            throw std::logic_error("stream return type is not a template instantiation. Don't know how to deal with this");
-        }
-        auto tempargs = cap.Returntype.get_template_arguments();
-        auto value_type = *tempargs.begin();
-        
-        if(value_type == type::get<unsigned char>())
-            out.set_vecrettp(byte_data_types::UCHAR_TYPE);
-	else if(value_type == type::get<char>())
-	    out.set_vecrettp(byte_data_types::CHAR_TYPE);
-        else if(value_type == type::get<unsigned short>())
-            out.set_vecrettp(byte_data_types::USHORT_TYPE);
-        else if(value_type == type::get<unsigned>())
-            out.set_vecrettp(byte_data_types::UINT_TYPE);
-        else if(value_type == type::get<unsigned long>())
-            out.set_vecrettp(byte_data_types::ULONG_TYPE);
-        else if(value_type == type::get<short>())
-            out.set_vecrettp(byte_data_types::SHORT_TYPE);
-        else if(value_type == type::get<int>())
-            out.set_vecrettp(byte_data_types::IINT_TYPE);
-        else if(value_type == type::get<long>())
-            out.set_vecrettp(byte_data_types::LONG_TYPE);
-        else if(value_type == type::get<float>())
-            out.set_vecrettp(byte_data_types::BFLOAT_TYPE);
-        else if(value_type == type::get<double>())
-            out.set_vecrettp(byte_data_types::BDOUBLE_TYPE);
-        else
-            throw std::out_of_range("invalid value type for stream: " + std::string(value_type.get_name()));
-        
-    }
-    else
-    {
-        _lg.strm(sl::debug) << "action type, describing  return type:" << cap.Returntype.get_name().to_string();
-        auto retdesc = out.mutable_rettp();
-        *retdesc = describe_type(cap.Returntype, &_lg);
-    }
-    
-    for(auto& name: cap.Argnames)
-        out.add_argnames(name);
-    
-    for(auto& type: cap.Argtypes)
-    {
-        _lg.strm(sl::debug) << "describing argument with type: " <<type.get_name().to_string();
-        
-        auto typedesc = out.add_argtypes();
-        *typedesc = describe_type(type);
-    }
-
-    return out;
-
-}
-
-
-#endif
 
 std::unique_lock< std::timed_mutex > DeviceHarness::lock_device_contentious(int devid, unsigned int contention_timeout_ms)
 {

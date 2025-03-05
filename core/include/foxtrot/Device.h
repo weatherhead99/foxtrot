@@ -7,10 +7,12 @@
 #include <mutex>
 #include <optional>
 #include <variant>
-#include <map>
+#include <unordered_map>
 #include <type_traits>
 
 
+using std::vector;
+using std::string;
 
 #define THIS_TYPE std::remove_reference<decltype(*this)>::type
 
@@ -34,7 +36,7 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
 
 namespace foxtrot
 {
-    using rarg_cit = std::vector<rttr::variant>::const_iterator;
+    using rarg_cit = vector<rttr::variant>::const_iterator;
     using Lock = std::unique_lock<std::timed_mutex>;
 
 
@@ -65,9 +67,10 @@ namespace foxtrot
   struct Capability
   {
       CapabilityType type;
-      std::string CapabilityName;
-      std::vector<std::string> Argnames;
-      std::vector<rttr::type> Argtypes;
+      string CapabilityName;
+      std::optional<unsigned short> id = std::nullopt;
+      vector<string> Argnames;
+      vector<rttr::type> Argtypes;
       rttr::type Returntype = rttr::type::get<void>();
 
       bool operator==(const Capability& other);
@@ -93,13 +96,14 @@ namespace foxtrot
     
     RTTR_ENABLE()
   public:
-    Device(std::shared_ptr<CommunicationProtocol> proto, const std::string& comment = "", bool load_capabilities=true);
+    Device(std::shared_ptr<CommunicationProtocol> proto, const string& comment = "", bool load_capabilities=true);
     
-    virtual const std::string getDeviceTypeName() const;
-    const std::string getDeviceComment() const;
-    void setDeviceComment(const std::string& comment);
-    virtual std::vector<std::string> GetCapabilityNames() const;
-    virtual rttr::variant Invoke(const std::string& capname, rarg_cit beginargs, rarg_cit endargs);
+    virtual const string getDeviceTypeName() const;
+    const string getDeviceComment() const;
+    void setDeviceComment(const string& comment);
+
+    [[deprecated]] virtual std::vector<string> GetCapabilityNames() const;
+    [[deprecated]] virtual rttr::variant Invoke(const string& capname, rarg_cit beginargs, rarg_cit endargs);
     virtual rttr::variant Invoke(const Capability& cap,
                                  rarg_cit beginargs, rarg_cit endargs);
 
@@ -108,7 +112,10 @@ namespace foxtrot
 
     virtual rttr::variant Invoke(unsigned short capid, rarg_cit beginargs, rarg_cit endargs);
 
-    virtual Capability GetCapability(const std::string& capname) const;
+    [[deprecated]] virtual Capability GetCapability(const string& capname) const;
+    virtual Capability GetCapability(short unsigned capid) const;
+    virtual vector<unsigned short> GetCapabilityIds(const string& capnmae);
+    virtual vector<Capability> GetCapabilities(const string& capname);
 
     virtual std::optional<Lock> obtain_lock(const Capability& cap);
     virtual bool hasLockImplementation() const;
@@ -117,11 +124,13 @@ namespace foxtrot
     virtual bool Reset();
 
     virtual ~Device();
+
+    const std::unordered_map<unsigned short, Capability>& Registry() const;
     
     
   protected:
     std::shared_ptr<CommunicationProtocol> _proto;
-    std::string _devcomment;
+    string _devcomment;
 
     void load_capability_map(bool force_reload=false);
 
@@ -130,7 +139,7 @@ namespace foxtrot
     Capability GetCapability(PropMeth&& pm) const
     {
         Capability out;
-        out.CapabilityName = std::string{pm.get_name()};
+        out.CapabilityName = string{pm.get_name()};
         out.invokable = pm;
 
 
@@ -146,7 +155,7 @@ namespace foxtrot
             else
             {
                 out.type = CapabilityType::VALUE_READWRITE;
-                out.Argnames.push_back(std::string{out.Returntype.get_name()});
+                out.Argnames.push_back(string{out.Returntype.get_name()});
                 out.Argtypes.push_back(out.Returntype);
             }
         }
@@ -165,7 +174,7 @@ namespace foxtrot
 
             for(auto& arg: args)
             {
-                out.Argnames.push_back(std::string{arg.get_name()});
+                out.Argnames.push_back(string{arg.get_name()});
                 out.Argtypes.push_back(arg.get_type());
             }
         }
@@ -178,9 +187,9 @@ namespace foxtrot
 
   private:
     foxtrot::Logging lg_;
-    std::map<unsigned short,Capability> _cap_registry;
+    std::unordered_map<unsigned short,Capability> _cap_registry;
     bool _registry_is_loaded = false;
-    std::map<std::string, std::variant<unsigned short, std::vector<unsigned short>>> _cap_string_registry;
+    std::unordered_multimap<string, unsigned short> _cap_string_registry;
     
   };
 

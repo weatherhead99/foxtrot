@@ -3,7 +3,6 @@
 #include <chrono>
 #include <string>
 #include <boost/asio/serial_port.hpp>
-#include <boost/asio/io_service.hpp>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/protocols/SerialProtocol.h>

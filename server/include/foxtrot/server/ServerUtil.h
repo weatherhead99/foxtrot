@@ -10,6 +10,8 @@
 #include <foxtrot/ProtocolError.h>
 #include <foxtrot/ContentionError.h>
 #include <foxtrot/ServerError.h>
+#include <foxtrot/DeviceHarness.h>
+#include <optional>
 
 
 namespace rttr
@@ -173,4 +175,59 @@ template<typename T> bool is_ft_call_streaming ( const T& propmeth )
     return false;
 };
 
+
+  template<typename Req, typename Repl>
+  foxtrot::Capability capability_id_name_handler(const Req& req, Repl& repl, foxtrot::DeviceHarness& harness,
+						       foxtrot::Logging& lg, foxtrot::Device* devptr=nullptr)
+    {
+      repl.set_msgid(req.msgid());
+      repl.set_devid(req.devid());
+
+      //this will throw std::out_of_range if device not found!
+      try {
+	devptr = harness.GetDevice(req.devid());
+      }
+      catch(std::out_of_range& err)
+	{
+	  throw foxtrot::ServerError("invalid device ID supplied!");
+	}
+
+      unsigned short capid;
+
+      if(not (req.has_capname() or req.has_capid()))
+	throw foxtrot::ServerError("must supply either capname or capid!");
+      else if(req.has_capname() and not req.has_capid())
+	{
+	  	//this is the legacy case now no capid supplied, do it the old way via looking up names
+	      lg.strm(sl::warning) << "request without a capability ID. Deprecated behaviour, please update client";
+	      repl.mutable_err()->set_warnstring("request without a capability ID. Deprecated behaviour, please update client");
+	      repl.mutable_err()->set_warntp(foxtrot::ft_DeprecationWarning);
+	      lg.Debug("capability requested is: " + req.capname() );
+	      auto possible_capids = devptr->GetCapabilityIds(req.capname());
+	      if(possible_capids.size() > 1)
+		  throw foxtrot::ServerError("ambiguous capability request, multiple matching names!");
+	      else if(possible_capids.size() == 0)
+		throw foxtrot::ServerError("no matching capability to name supplied!");
+	      capid = possible_capids[0];
+	}
+      else
+	{
+	  capid = req.capid();
+	}
+
+      //ok, dealt with both cases where we didn't have a capid.
+      //check that the capid is valid. The below will throw if it isn't
+      auto cap = devptr->GetCapability(capid);
+
+      if(req.has_capname())
+	{
+	  //if a name was supplied, we need to check that it matches
+	  if(req.capname() != cap.CapabilityName)
+	    throw foxtrot::ServerError("request capability name and capability ID do not match!");
+	}
+
+      return cap;
+      
+
+    }
 }

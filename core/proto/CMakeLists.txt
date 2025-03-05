@@ -27,7 +27,7 @@ target_sources(foxtrot_protos PUBLIC FILE_SET HEADERS FILES ${GEN_HDRS} BASE_DIR
 target_sources(foxtrot_protos PRIVATE ${GEN_SRCS})
 
 #add_library(foxtrot_protos OBJECT ${ASIO_PROTO_HDRS})
-target_link_libraries(foxtrot_protos PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc)
+target_link_libraries(foxtrot_protos PRIVATE protobuf::libprotobuf gRPC::grpc++)
 target_include_directories(foxtrot_protos PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 $<INSTALL_INTERFACE:include/foxtrot>)
 
@@ -39,4 +39,5 @@ install(TARGETS foxtrot_protos
   PUBLIC_HEADER
   COMPONENT devel
   FILE_SET HEADERS
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/proto)
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/proto
+)

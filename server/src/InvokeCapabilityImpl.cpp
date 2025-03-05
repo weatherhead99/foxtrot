@@ -14,6 +14,7 @@ using std::endl;
 
 using namespace foxtrot;
 
+
 foxtrot::InvokeCapabilityLogic::InvokeCapabilityLogic(std::shared_ptr<DeviceHarness> harness)
 : _harness(harness), _lg("InvokeCapabilityLogic")
 {
@@ -28,27 +29,11 @@ void voidfun()
 bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, respondertp& respond, HandlerTag* tag)
 {
     _lg.Debug("processing invoke capability request" );
-    
-    auto devid = req.devid();
-    
-    repl.set_msgid(req.msgid());
-    repl.set_devid(req.devid());
-    repl.set_capname(req.capname());
-    
+
     foxtrot::Device* dev;
-    _lg.Debug("capability requested is: " + req.capname() );
-    
-    try{
-        dev = _harness->GetDevice(devid);    
-    }
-    catch(std::out_of_range& err)
-    {
-      foxtrot_server_specific_error(
-	"invalid device id supplied", repl,respond,_lg,tag, error_types::out_of_range);
-      return true;
-    };
-    
-    auto cap = dev->GetCapability(req.capname());
+    //validity of devid and capid gets checked in here
+    auto cap = foxtrot::capability_id_name_handler(req, repl, *_harness, _lg, dev);
+
     if(cap.type == CapabilityType::STREAM)
     {
         foxtrot_server_specific_error("tried to call Invoke on a streaming method: " + req.capname(), repl, respond, _lg, tag, error_types::ft_ServerError);
@@ -85,7 +70,7 @@ bool foxtrot::InvokeCapabilityLogic::HandleRequest(reqtp& req, repltp& repl, res
     try {
     //TODO: error handling here
         auto lock = _harness->lock_device_contentious(req.devid(),req.contention_timeout());
-        auto ftretval = dev->Invoke(req.capname(), vargs.cbegin(), vargs.cend());
+        auto ftretval = dev->Invoke(cap, vargs.cbegin(), vargs.cend());
         set_retval_from_variant(ftretval, repl, &_lg);
 
         respond.Finish(repl,grpc::Status::OK,tag);

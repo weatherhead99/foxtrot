@@ -58,11 +58,21 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 find_package(RapidJSON REQUIRED)
 #on some systems, tehre is a RapidJSON cmake file, but it doesn't export targets, just
 #variables
-if(${RapidJSON_FOUND} AND NOT TARGET RapidJSON::RapidJSON)
+if(${RapidJSON_FOUND} AND NOT TARGET RapidJSON::RapidJSON AND NOT TARGET rapidjson)
   message(STATUS "manually adding rapidjson target since config file did not...")
   add_library(RapidJSON::RapidJSON INTERFACE IMPORTED GLOBAL)
-  set_target_properties(RapidJSON::RapidJSON PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${RAPIDJSON_INCLUDE_DIRS})
+
+  if(DEFINED RAPIDJSON_INCLUDE_DIRS)
+    set(rjinc ${RAPIDJSON_INCLUDE_DIRS})
+  elseif(DEFINED RapidJSON_INCLUDE_DIRS)
+    set(rjinc ${RapidJSON_INCLUDE_DIRS})
+  else()
+    message(ERROR "could not determine variable for rapidjson include path")
+  endif()
+  set_target_properties(RapidJSON::RapidJSON PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${rjinc})
+elseif(TARGET rapidjson)
+  message(STATUS "odd name for rapidJSON target, we'll add an alias")
+  add_library(RapidJSON::RapidJSON ALIAS rapidjson)
 endif()
 
 

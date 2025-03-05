@@ -106,7 +106,11 @@ namespace foxtrot
       int get_last_supplied_optional_value() const;
       std::optional<int> returns_optional(int val, bool ret);
 
-      
+
+      //test methods for repeated names
+      bool methodNamedSomethingSilly();
+      bool methodNamedSomethingSilly(bool arg);
+
     protected:
         
         

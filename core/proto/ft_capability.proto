@@ -44,8 +44,8 @@ message capability_request
 {
     uint32 msgid = 1;
     uint32 devid = 2;
-    string capname = 3;
-    uint32 capid = 6;
+    optional string capname = 3;
+    optional uint32 capid = 6;
     repeated capability_argument args = 4; 
     uint32 contention_timeout = 5;
 }
@@ -54,8 +54,8 @@ message capability_response
 {
     uint32 msgid = 1;
     uint32 devid = 2;
-    string capname = 3;
-    uint32 capid = 7;
+    optional string capname = 3;
+    optional uint32 capid = 7;
     ft_variant returnval = 4;
     errstatus err = 5;
     google.protobuf.Timestamp tstamp = 6;
@@ -66,8 +66,8 @@ message chunk_request
 { 
     uint32 msgid = 1;
     uint32 devid = 2;
-    string capname = 3;
-    uint32 capid = 8;
+    optional string capname = 3;
+    optional uint32 capid = 8;
     repeated capability_argument args = 4;
     uint32 chunksize = 6;
     uint32 contention_timeout = 7;

@@ -640,7 +640,7 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp,
         throw std::runtime_error("conversion is possible, but failed for some reason");
     }
     
-    return out;
+   return out;
 };
 
 

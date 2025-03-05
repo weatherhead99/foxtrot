@@ -95,7 +95,7 @@ void M30X::safe_home_move(bool home_left, long velocity)
   _lg.strm(sl::debug) << "Homing with direction " << (home_left ? "left" : "right") << " and velocity " << velocity;
 
   // Execute the home move
-  M30X::home_move_blocking(destination::bay1, motor_channel_idents::channel_1);
+  M30X::home_move_blocking(motor_channel_idents::channel_1);
 
   _lg.strm(sl::debug) << "Home move completed.";
 }

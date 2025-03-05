@@ -13,9 +13,17 @@ enum error_types
     ft_AuthError = 7;
 }
 
+enum warning_types
+{
+  ft_DeprecationWarning = 0;
+  
+}
+
 message errstatus
 {
     error_types tp =1;
     string msg = 2;
+  optional warning_types warntp = 4;
+  optional string warnstring = 5;
 
 }

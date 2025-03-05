@@ -6,6 +6,7 @@
 
 #include <foxtrot/Device.h>
 #include <foxtrot/ReflectionError.h>
+#include <variant>
 
 
 //NOTE: copied (probably missing edge cases!) from boost::hash_combine
@@ -154,7 +155,7 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
     auto meths = tp.get_methods();
     
     out.reserve(props.size() + meths.size());
-    
+
         for(auto& prop : props)
     {
      out.push_back(std::string{prop.get_name()});
@@ -169,13 +170,23 @@ std::vector<std::string> foxtrot::Device::GetCapabilityNames() const
     
 }
 
+const std::unordered_map<unsigned short, foxtrot::Capability>& foxtrot::Device::Registry() const
+{
+  return _cap_registry;
+}
+
+
 rttr::variant foxtrot::Device::Invoke(const Capability& cap, foxtrot::rarg_cit argbegin,
                                       foxtrot::rarg_cit argend)
 {
     if(cap.invokable.has_value())
         return Invoke(*(cap.invokable), argbegin, argend);
     else
+      {
+	lg_.strm(sl::warning) << "capability doesn't have filled invokable, likely a coding error, using deprecated invoke function";
         return Invoke(cap.CapabilityName, argbegin, argend);
+
+      }
 
 }
 
@@ -271,9 +282,15 @@ rttr::variant foxtrot::Device::Invoke(const std::string& capname, foxtrot::rarg_
                                       foxtrot::rarg_cit argend)
 {
     lg_.strm(sl::trace) << "cap string registry size is: "<< _cap_string_registry.size();
-    auto capid = _cap_string_registry.at(capname);
-    lg_.strm(sl::debug) << "found capid: " << capid;
-    return Invoke(capid, argbegin, argend);
+    auto capidit = _cap_string_registry.find(capname);
+
+    if(capidit == _cap_string_registry.end())
+      throw std::out_of_range("no capability found matching name");
+    else if(_cap_string_registry.count(capname) > 1)
+      throw std::logic_error("multiple poossible capabilities found with this name!");
+
+    return Invoke(capidit->second, argbegin, argend);
+
 }
 
 rttr::variant foxtrot::Device::Invoke(unsigned short capid, foxtrot::rarg_cit beginargs,
@@ -288,6 +305,14 @@ rttr::variant foxtrot::Device::Invoke(unsigned short capid, foxtrot::rarg_cit be
     return Invoke(*pm, beginargs, endargs);
 }
 
+
+foxtrot::Capability foxtrot::Device::GetCapability(short unsigned capid) const
+{
+  return _cap_registry.at(capid);
+}
+
+
+//this one is deprecated...
 foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) const
 {
     auto reflecttp = rttr::type::get(*this);
@@ -313,6 +338,33 @@ foxtrot::Capability foxtrot::Device::GetCapability(const std::string& capname) c
     return out;
     
 }
+
+vector<unsigned short> foxtrot::Device::GetCapabilityIds(const string& capname)
+{
+  load_capability_map();
+
+  vector<unsigned short> out;
+  auto [begin, end] = _cap_string_registry.equal_range(capname);
+  out.reserve(std::distance(begin, end));
+  while(begin != end)
+    out.push_back((begin++)->second);
+
+  return out;
+  
+}
+
+vector<foxtrot::Capability> foxtrot::Device::GetCapabilities(const string& capname)
+{
+  auto capids = GetCapabilityIds(capname);
+  vector<Capability> out;
+  out.reserve(_cap_registry.size());
+  
+  for(auto cid: capids)
+    out.push_back(_cap_registry.at(cid));
+
+  return out;
+}
+
 
 
 std::optional<foxtrot::Lock> foxtrot::Device::obtain_lock(const foxtrot::Capability& cap)
@@ -360,9 +412,7 @@ void foxtrot::Device::load_capability_map(bool force_reload)
 	  lg_.strm(sl::trace) << "name: " << pm.get_name();
 	  auto cap = GetCapability(pm);
 	  _cap_registry.insert({idx, cap});
-            auto [it, inserted] = _cap_string_registry.insert({cap.CapabilityName, idx++});
-	    if(inserted)
-	      lg_.strm(sl::warning) << "WARNING: duplicate capability name found";  
+          _cap_string_registry.insert({cap.CapabilityName, idx++});
 	};
 
         for(auto& prop : reflecttp.get_properties())
