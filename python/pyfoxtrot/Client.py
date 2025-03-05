@@ -13,6 +13,7 @@ from .protos.foxtrot_pb2_grpc import exptserveStub
 from .protos.ft_capability_pb2_grpc import capabilityStub
 from .protos.ft_flags_pb2_grpc import flagsStub
 from .common import _check_repl_err
+from .capability_overload import CapabilityOverloadSet
 from .server_flags import ServerFlag, FlagProxy
 from .TypeConversion import ft_variant_from_value, value_from_ft_variant
 from .TypeConversion import string_describe_ft_variant
@@ -26,6 +27,7 @@ from .EnumCreator import define_enum
 from warnings import warn
 from dataclasses import dataclass, field
 from functools import cache
+from typing import Optional
 
 DEFAULT_CHUNKSIZE = 1000
 
@@ -82,7 +84,7 @@ class Client:
         for attrname in self._custom_attr_set:
             delattr(self, attrname)
         self._custom_attr_set.clear()
-        
+
         self._servdescribe = _check_repl_err(self._stub.DescribeServer(empty()))
         self._comment = self._servdescribe.servcomment
         self._setup_device_tree()
@@ -230,7 +232,7 @@ class Capability:
 
         argnametypestrs = [f"{n}:{t}" for n,t in zip(argnamestrs,argtypestrs)]
         argnametypestr: str = ", ".join(argnametypestrs)
-        
+
         displaystr = f"{self.capname} ({argnametypestr}) -> {rettypestr}, [{infostr}]"
         return displaystr
 
@@ -245,8 +247,21 @@ class Capability:
                 #not sure exactly how this is supposed to function...
                 tgt._props[propname] = property(fget, fset)
         else:
-            warn("device already has capability with this name, not overriding")
-
+            print(f"overload set logic for name {self.capname}")
+            existing_attr = getattr(tgt, self.capname)
+            if isinstance(existing_attr, type(self)):
+                print("new overload set")
+                #this is a capability which needs to be replaced with an overload set
+                newoset = CapabilityOverloadSet(self.capname)
+                newoset.add_cap(existing_attr)
+                newoset.add_cap(self)
+                setattr(tgt, self.capname, newoset)
+            elif isinstance(existing_attr, CapabilityOverloadSet):
+                print("existing overload set")
+                #simply add to the existing overload set
+                existing_attr.add_cap(self)
+            else:
+                raise TypeError(f"don't know how to handle overloading on a capability of type {type(existing_attr)}")
 
     def get_enum_type(self, argpos: int | str):
         if isinstance(argpos, int):
