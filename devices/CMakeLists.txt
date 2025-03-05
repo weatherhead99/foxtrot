@@ -66,18 +66,8 @@ endif()
 add_subdirectory(stellarnet)
 add_subdirectory(webswitch_plus)
 add_subdirectory(digitaldiscovery)
+add_subdirectory(idscamera)
 
-find_package(ueye)
-
-if(ueye_FOUND)
-  add_subdirectory(idscamera)
-  add_executable(idscamera_play idscamera/idscamera_play.cpp)
-  target_link_libraries(idscamera_play PUBLIC foxtrot_devices)
-  string(APPEND ft_devices_dep_str
-    "
-      find_dependency(ueye REQUIRED)
-    ")
-endif()
   
 add_subdirectory(DLP-IOR4)
 add_subdirectory(RLY-8)
