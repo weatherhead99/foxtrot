@@ -8,6 +8,9 @@ message(DEBUG "proto files: ${proto_files}")
 get_target_property(PROTOC_EXE protobuf::protoc LOCATION)
 message(STATUS "protoc compiler: ${PROTOC_EXE}")
 
+get_target_property(PLUGIN_EXE gRPC::grpc_cpp_plugin LOCATION)
+message("grpc plugin: ${PLUGIN_EXE}")
+
 
 protobuf_generate(OUT_VAR PROTO_GEN LANGUAGE cpp PROTOS ${proto_files})
 protobuf_generate(OUT_VAR GRPC_GEN LANGUAGE grpc PROTOS ${proto_files} PLUGIN protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin> GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc PROTOC_OUT_DIR)

@@ -29,8 +29,11 @@ else()
 find_package(Boost REQUIRED COMPONENTS log program_options NO_MODULE)
 endif()
 
+
+message("grpc c++ plugin: ${GRPC_CPP_PLUGIN_PROGRAM}")
 find_package(gRPC REQUIRED)
-find_package(Protobuf REQUIRED CONFIG)
+message("grpc c++ plugin: ${GRPC_CPP_PLUGIN_PROGRAM}")
+#find_package(Protobuf REQUIRED CONFIG)
 find_package(rttr 0.9.6 REQUIRED)
 
 
