@@ -37,7 +37,6 @@ class FoxtrotCoreConan(ConanFile):
 
     src_folder = "core"
 
-
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
 

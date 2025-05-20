@@ -16,7 +16,8 @@ namespace foxtrot
     
 namespace devices
 {
-    
+
+
     enum class archon_module_types : short unsigned
     {
         None  = 0,
@@ -34,7 +35,18 @@ namespace devices
 	HeaterX = 11,
 	XVBias = 12
     };
-    
+
+  template<int Upper, int Lower=1>
+  struct ArchonChannelBoundsChecker
+  {
+    inline constexpr void checkChannel(int channel)
+    {
+      if(channel < Lower or channel > Upper)
+	throw std::out_of_range("invalid channel number");
+    }
+
+  };
+  
     
     class ArchonModule : public Device
     {
@@ -48,7 +60,8 @@ namespace devices
       virtual const std::string getTypeName() const = 0;
             
       void writeConfigKey(const string& key, const string& val);
-      void writeConfigKey(const string& key, const auto& val)
+      template<detail::ArchonNumeric T>
+      void writeConfigKey(const string& key, T& val)
       {
 	writeConfigKey(key, std::to_string(val));
       }
@@ -63,6 +76,8 @@ namespace devices
 	  return std::stoi(keystr);
 	else if constexpr(std::is_same_v<Ret, double>)
 	  return std::stod(keystr);
+	else if constexpr(std::is_same_v<Ret, bool>)
+	  return std::stoi(keystr);
 	else
 	  throw std::logic_error("unknown type supplied to readKeyValue");
       }

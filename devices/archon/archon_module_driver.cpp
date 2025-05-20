@@ -1,116 +1,50 @@
 #include "archon_module_driver.h"
+#include "archon.h"
+#include <rttr/detail/registration/registration_impl.h>
 
 using foxtrot::devices::ArchonModule ;
 using foxtrot::devices::ArchonDriverBase;
+using foxtrot::devices::ArchonDriver;
+using foxtrot::devices::ArchonDriverX;
+using foxtrot::devices::archon;
 
-//old implementations.... stub out as we go
+ArchonDriver::ArchonDriver(archon &arch, short unsigned modpos)
+  : ArchonDriverBase<detail::eight_t>(arch, modpos) {}
 
-/**
-double foxtrot::devices::ArchonDriver::getFastSlewRate(int channel)
+ArchonDriverX::ArchonDriverX(archon &arch, short unsigned modpos)
+  : ArchonDriverBase<detail::twelve_t>(arch, modpos) {}
+
+
+template <typename T> void add_shared_base_meths(auto &&binder) {
+  using namespace rttr;
+    binder.method("setLabel", &T::setLabel)(parameter_names("channel", "label"))
+        .method("getLabel", &T::getLabel)(parameter_names("channel"))
+        .method("setSlowSlewRate",
+                &T::setSlowSlewRate)(parameter_names("channel", "val"))
+        .method("getSlowSlewRate",
+                &T::getSlowSlewRate)(parameter_names("channel"))
+        .method("getFastSlewRate",
+                &T::getFastSlewRate)(parameter_names("channel"))
+        .method("setFastSlewRate",
+                &T::setFastSlewRate)(parameter_names("channel", "val"))
+        .method("setEnable", &T::setEnable)(parameter_names("channel", "onoff"))
+        .method("getEnable", &T::getEnable)(parameter_names("channel"));
+  }
+
+
+RTTR_REGISTRATION
 {
-    checkChannel(channel);
-    _oss.str("");
-    _oss << "FASTSLEWRATE" << channel;
-
-    auto slewrate = readConfigKey(_oss.str());
-    return std::stod(slewrate);
-}
+  using namespace rttr;
+  using foxtrot::devices::ArchonDriverBase;
+  using foxtrot::devices::ArchonDriver;
+  using foxtrot::devices::ArchonDriverX;
 
 
-std::string foxtrot::devices::ArchonDriver::getLabel(int channel)
-{
-    checkChannel(channel);
-    _oss.str("");
-    _oss << "LABEL" << channel;
+  add_shared_base_meths<ArchonDriver>(registration::class_<ArchonDriver>("foxtrot::devices::ArchonDriver"));
 
-    auto lab = readConfigKey(_oss.str());
-    return lab;
-
-}
-
-double foxtrot::devices::ArchonDriver::getSlowSlewRate(int channel)
-{
-    checkChannel(channel);
-    _oss.str("");
-    _oss << "SLOWSLEWRATE" << channel;
-
-    auto slewrate = readConfigKey(_oss.str());
-    return std::stod(slewrate);
-}
-
-
-
-void foxtrot::devices::ArchonDriver::setFastSlewRate(int channel, double val)
-{
-    checkChannel(channel);
-    _oss.str("");
-    _oss << "FASTSLEWRATE" << channel;
-
-    if(val < 0.001 || val > 1000)
-    {
-        throw std::out_of_range("invalid slew rate value");
-    }
-
-    writeConfigKey(_oss.str(),std::to_string(val));
-
-}
-
-
-
-void foxtrot::devices::ArchonDriver::setLabel(int channel, const std::string&
-val)
-{
-    checkChannel(channel);
-    _oss.str("");
-    _oss << "LABEL" << channel;
-
-    writeConfigKey(_oss.str(),val);
-
-}
-
-*/
-
-void foxtrot::devices::ArchonDriver::setSlowSlewRate(int channel, double val)
-{
-    checkChannel(channel);
-    
-    _oss.str("");
-    _oss << "SLOWSLEWRATE" << channel;
-    if(val < 0.001 || val > 1000)
-    {
-        throw std::out_of_range("invalid slew rate value");
-    }
-    
-    writeConfigKey(_oss.str(), std::to_string(val));
-    
-}
-
-void foxtrot::devices::ArchonDriver::update_variables()
-{
-    
-}
-
-const string foxtrot::devices::ArchonDriver::getTypeName() const
-{
-    return "Driver";
-}
-
-void devices::ArchonDriver::setEnable(int channel, bool onoff)
-{
-  checkChannel(channel);
-  _oss.str("");
-  _oss << "ENABLE" << channel;
+  add_shared_base_meths<ArchonDriverX>(
+				       registration::class_<ArchonDriverX>("foxtrot::devices::ArchonDriverX"));
   
-  writeConfigKey(_oss.str(), std::to_string((int) onoff));
-
-}
-
-bool devices::ArchonDriver::getEnable(int channel)
-{
-  checkChannel(channel);
-  _oss.str("");
-  _oss << "ENABLE" << channel;
-  return std::stoi(readConfigKey(_oss.str()));
 }
 
 

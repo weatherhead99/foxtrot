@@ -39,11 +39,21 @@ namespace foxtrot {
   
   namespace devices
   {
+
+    namespace detail {
+      template<typename T>
+      concept ArchonNumeric = std::is_integral_v<T> || std::is_floating_point_v<T>;
+
+    }
+
+  
+
+    
     //fwd declares
    class ArchonModule;
    enum class archon_module_types : short unsigned;
    
-
+   
   class archon : public CmdDevice
   {
       RTTR_ENABLE(CmdDevice)
@@ -68,7 +78,8 @@ namespace foxtrot {
     
     void writeKeyValue(const std::string& key, const std::string& val);
 
-    void writeKeyValue(const std::string& key, const auto& val)
+    template<detail::ArchonNumeric T>
+    void writeKeyValue(const std::string& key, T&& val)
     {
       writeKeyValue(key, std::to_string(val));
     }
