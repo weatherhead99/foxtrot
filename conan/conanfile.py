@@ -75,7 +75,7 @@ class FoxtrotCppPackage:
     def validate_build(self):
         if not valid_min_cppstd(self, 20):
             self.output.error(f"current cpp standard setting is: {self.settings.compiler.cppstd}")
-            self.output.error("failed check requiring minimum of c++17")
+            self.output.error("failed check requiring minimum of c++20")
             raise ConanInvalidConfiguration("foxtrot modules require at least c++17 standard to build")
 
     def set_version(self):

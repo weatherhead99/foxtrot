@@ -40,12 +40,12 @@ class FoxtrotCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
-        self.tool_requires("protobuf/<host_version>", override=True)
+        self.tool_requires("protobuf/<host_version>")
 
     def requirements(self):
         super().requirements()
 
-        self.requires("grpc/[1.69.0]", headers=True, libs=True,
+        self.requires("grpc/1.71.0", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
