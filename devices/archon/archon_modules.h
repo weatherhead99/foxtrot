@@ -16,8 +16,6 @@ namespace foxtrot
     
 namespace devices
 {
-
-
     enum class archon_module_types : short unsigned
     {
         None  = 0,
@@ -26,14 +24,15 @@ namespace devices
         LVBias = 3,
         HVBias = 4,
         Heater = 5,
-	//WRONG!
-//         HeaterX  = 6,
         HS = 7,
         HVXBias = 8,
         LVXBias = 9,
         LVDS = 10,
 	HeaterX = 11,
-	XVBias = 12
+	XVBias = 12,
+	ADF = 13,
+	ADX = 14,
+	ADLN = 15
     };
 
   template<int Upper, int Lower=1>

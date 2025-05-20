@@ -28,7 +28,10 @@ const std::map<archon_module_types, std::string> module_type_names = {
   {archon_module_types::LVXBias, "LVXBias"},
   {archon_module_types::LVDS, "LVDS"},
   {archon_module_types::HeaterX, "HeaterX"},
-  {archon_module_types::XVBias, "XVBias"}
+  {archon_module_types::XVBias, "XVBias"},
+  {archon_module_types::ADF, "ADF"},
+  {archon_module_types::ADX, "ADX"},
+  {archon_module_types::ADLN, "ADLN"}
 };
 
 
