@@ -40,7 +40,6 @@ class FoxtrotCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
-        self.tool_requires("protobuf/<host_version>")
 
     def requirements(self):
         super().requirements()
