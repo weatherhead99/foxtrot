@@ -42,17 +42,32 @@ namespace devices
       RTTR_ENABLE(Device);
     public:
       
-            const string& getID() const;
-            const std::array<char,3>& getVersion() const;
-            short unsigned getRev() const;
-	    virtual const std::string getTypeName() const = 0;
+      const string& getID() const;
+      const std::array<char,3>& getVersion() const;
+      short unsigned getRev() const;
+      virtual const std::string getTypeName() const = 0;
             
-	    void writeConfigKey(const string& key, const string& val);
-	    string readConfigKey(const string& key);
+      void writeConfigKey(const string& key, const string& val);
+      void writeConfigKey(const string& key, const auto& val)
+      {
+	writeConfigKey(key, std::to_string(val));
+      }
+            
+      
+      string readConfigKey(const string& key);
+      template<typename Ret>
+      Ret readConfigKey(const string& key)
+      {
+	auto keystr = readConfigKey(key);
+	if constexpr(std::is_same_v<Ret, int>)
+	  return std::stoi(keystr);
+	else if constexpr(std::is_same_v<Ret, double>)
+	  return std::stod(keystr);
+	else
+	  throw std::logic_error("unknown type supplied to readKeyValue");
+      }
 	    
 	    double getTemp();
-	    
-	    
 	    void apply();
 	    
 	    

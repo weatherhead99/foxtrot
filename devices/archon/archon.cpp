@@ -31,6 +31,13 @@
 
 #define READ_SIZE 1024
 
+using foxtrot::devices::archon;
+using foxtrot::devices::ArchonStreamHelper;
+
+ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
+
+
+
 const string devices::archon::getDeviceTypeName() const
 {
   return "archon";

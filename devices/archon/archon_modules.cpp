@@ -188,15 +188,23 @@ RTTR_REGISTRATION
  .property_readonly("getID",&ArchonModule::getID)
  .property_readonly("getRev",&ArchonModule::getRev)
  .property_readonly("getVersion",&ArchonModule::getVersion)
- .method("writeConfigKey",&ArchonModule::writeConfigKey)
- (
-     parameter_names("key","val")
+
+   .property_readonly("ID", &ArchonModule::getID)
+   .property_readonly("Rev", &ArchonModule::getRev)
+   .property_readonly("Version", &ArchonModule::getVersion)
+   .property_readonly("modpos", &ArchonModule::getmodpos)
+   .property_readonly("Temp", &ArchonModule::getTemp)
+
+   
+ // .method("writeConfigKey",&ArchonModule::writeConfigKey)
+ // (
+ //     parameter_names("key","val")
      
- )
- .method("readConfigKey",&ArchonModule::readConfigKey)
- (
-     parameter_names("key")
-     )
+ // )
+ // .method("readConfigKey",&ArchonModule::readConfigKey)
+ // (
+ //     parameter_names("key")
+ //     )
  .method("apply",&ArchonModule::apply)
  ;
     

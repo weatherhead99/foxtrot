@@ -43,7 +43,7 @@ namespace foxtrot {
    class ArchonModule;
    enum class archon_module_types : short unsigned;
    
-   
+
   class archon : public CmdDevice
   {
       RTTR_ENABLE(CmdDevice)
@@ -67,7 +67,25 @@ namespace foxtrot {
     
     
     void writeKeyValue(const std::string& key, const std::string& val);
+
+    void writeKeyValue(const std::string& key, const auto& val)
+    {
+      writeKeyValue(key, std::to_string(val));
+    }
+
     std::string readKeyValue(const std::string& key);
+
+    template<typename Ret>
+    Ret readKeyValue(const std::string& key)
+    {
+      auto keystr = readKeyValue(key);
+      if constexpr(std::is_same_v<Ret, int>)
+	return std::stoi(keystr);
+      else if constexpr(std::is_same_v<Ret, double>)
+	return std::stod(keystr);
+      else
+	throw std::logic_error("unknown type supplied to readKeyValue");
+    }
     
     
     void update_state();
@@ -205,9 +223,9 @@ namespace foxtrot {
       
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
+
       
-      
-      void read_parse_existing_config();
+    void read_parse_existing_config();
     
     short unsigned _order;
     
@@ -236,6 +254,41 @@ namespace foxtrot {
     
     
   };
+
+
+      class ArchonStreamHelper
+  {
+  public:
+    ArchonStreamHelper(archon& dev);
+    ArchonStreamHelper& operator<<(auto& right)
+    {
+      _oss << right;
+      return *this;
+    }
+
+    template<typename Ret>
+    Ret read() {
+      auto retstr =  _dev.readKeyValue(_oss.str());
+
+      using Ret2 = std::decay_t<Ret>;
+      
+      if constexpr(std::is_same_v<Ret2, double>) { return std::stod(retstr);}
+      else if constexpr(std::is_same_v<Ret2, int>) {return std::stoi(retstr);}
+      else
+	throw std::logic_error("unknown type in archon stream helper");	
+    };
+
+    void write(auto& val) {
+      _dev.writeKeyValue(_oss.str(), std::to_string(val)); }
+
+  private:
+    archon& _dev;
+    std::ostringstream _oss;
+
+    
+  };
+
+
   
 };
 };

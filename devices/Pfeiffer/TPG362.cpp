@@ -11,6 +11,7 @@
 #include <foxtrot/DeviceError.h>
 
 #include <foxtrot/protocols/SerialPort.h>
+#include <foxtrot/protocols/simpleTCP.h>
 
 #include "TPG362.h"
 
@@ -18,18 +19,23 @@
 foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > proto)
   : PfeifferDevice(proto, "TPG362")
 {
-  
-  auto specproto = std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
-  if(specproto != nullptr)
+
+
+  if(typeid(_serproto) == typeid(foxtrot::protocols::SerialPort))
   {
     _lg.Info("using serial connected gauge controller");
     _serproto->Init(nullptr);
+    auto specproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
     specproto->flush();
     _lg.Info("gauge controller initialization done...");
   }
+  else if(typeid(_serproto) == typeid(foxtrot::protocols::simpleTCP))
+    {
+    throw foxtrot::DeviceError("ethernet not supported... yet");
+    }
   else
   {
-    throw foxtrot::DeviceError("ethernet not supported... yet");
+    throw std::logic_error("got unexpected serial interface type!");
   };
   
 }
