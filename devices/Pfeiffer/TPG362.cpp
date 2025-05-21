@@ -20,8 +20,10 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
   : PfeifferDevice(proto, "TPG362")
 {
 
+  const auto& tpinfo = typeid(*(proto.get()));
+  _lg.strm(sl::trace) << "name of protocol type: " << tpinfo.name() ;
 
-  if(typeid(_serproto) == typeid(foxtrot::protocols::SerialPort))
+  if(tpinfo == typeid(foxtrot::protocols::SerialPort))
   {
     _lg.Info("using serial connected gauge controller");
     _serproto->Init(nullptr);
@@ -29,9 +31,11 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
     specproto->flush();
     _lg.Info("gauge controller initialization done...");
   }
-  else if(typeid(_serproto) == typeid(foxtrot::protocols::simpleTCP))
+  else if(tpinfo == typeid(foxtrot::protocols::simpleTCP))
     {
-    throw foxtrot::DeviceError("ethernet not supported... yet");
+      _lg.strm(sl::info) << "using ethernet/LAN connected gauge controller";
+      _serproto->Init(nullptr);
+      _lg.strm(sl::info) << "gauge controller initialization done...";
     }
   else
   {
