@@ -48,20 +48,20 @@ int main()
 
   
   cout << "calling repeatedly_request" << endl;
-  agrpc::repeatedly_request(&foxtrot::exptserve::AsyncService::RequestGetServerInfo,
-			    service,
-			    asio::bind_executor(ctxt,
-			    [] (auto& sctxt, auto& request, auto& responder) -> asio::awaitable<void>
-			    {
-			      foxtrot::server_info sinfo;
-			      sinfo.set_rpc_version(12);
-			      co_await agrpc::finish(responder, sinfo, grpc::Status::OK,
-						     asio::use_awaitable);
 
-			      co_return;
-			    })
-			  
-			    );
+  using RPCT = agrpc::ServerRPC<&foxtrot::exptserve::AsyncService::RequestGetServerInfo>;
+  agrpc::register_awaitable_rpc_handler<RPCT>(ctxt, service,
+					      [] (RPCT& rpc, RPCT::Request& req) -> asio::awaitable<void>
+					      {
+						foxtrot::server_info sinfo;
+						sinfo.set_rpc_version(12);
+						co_await rpc.finish(sinfo, grpc::Status::OK);
+
+						co_return;
+					      }, asio::detached);
+						
+
+  
 
   ctxt.run();
 

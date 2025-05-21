@@ -58,17 +58,12 @@ class FoxtrotServerConan(ConanFile):
             if gcc_version <= 11:
                 self.requires("asio-grpc/[<2.7]")
             else:
-                self.requires("asio-grpc/[^2.9.2]")
+                self.requires("asio-grpc/3.4.1")
 
-                self.requires("grpc/1.71.0", override=False,
+                self.requires("grpc/1.71.0", override=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
-        self.requires("boost/1.86.0", override=True)
-
-        # #fixing for upstream grpc package bug?
-        # self.requires("abseil/20240116.2", libs=True,
-        #               transitive_libs=True)
 
 
 
