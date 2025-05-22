@@ -65,7 +65,11 @@ class FoxtrotServerConan(ConanFile):
                       transitive_libs=True)
 
 
-
+    def layout(self):
+        #NOTE: need extra build dir in editable mode since libfoxtrot_server.so
+        #ends up in a subdirectory
+        super().layout()
+        self.cpp.build.builddirs.append("src")
 
     def generate(self):
         #NOTE: need to alter target name of rapidJSON which differs from

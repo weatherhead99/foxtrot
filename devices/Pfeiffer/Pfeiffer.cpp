@@ -14,6 +14,17 @@ PfeifferDevice::PfeifferDevice(shared_ptr<foxtrot::SerialProtocol> proto,
     const string& logname)
 : CmdDevice(proto), _serproto(proto), _lg(logname) 
 {
+  //check if it's actually a serial port
+  if(std::dynamic_pointer_cast<foxtrot::protocols::SerialPort>(_serproto) != nullptr)
+    {
+      _lg.strm(sl::trace) << "cast to serial port succeeded";
+      _is_serial_port = true;
+    }
+  else {
+    _lg.strm(sl::trace) << "cast to serial port failed...";
+    _is_serial_port = false;
+      }
+  
     
 }
 
@@ -24,9 +35,9 @@ string PfeifferDevice::cmd(const string& request)
     _cmdoss << request << calculate_checksum(request) << '\r';
 
     //HACK: this will be a problem if you use another protocol
-    auto serproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
-    if(serproto)
+    if(_is_serial_port)
       {
+	auto serproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
 	try
 	  {
 	    serproto->flush();
@@ -39,9 +50,6 @@ string PfeifferDevice::cmd(const string& request)
 	serproto->setDrain(true);
 	serproto->setWait(100);
       }
-      
-    else
-      throw std::logic_error("failed to cast protocol to serial port. This is an error in the TPG362 driver code");
 
     _lg.strm(sl::debug) << "writing to serial port...";
     _serproto->write(_cmdoss.str());
@@ -49,19 +57,20 @@ string PfeifferDevice::cmd(const string& request)
 
     _lg.strm(sl::debug) << "reading from serial port...";
     auto repl = _serproto->read_until_endl('\r');
+    _lg.strm(sl::trace) << "serial port read size: " << repl.size() ;
     return repl;
     
 }
 
 string PfeifferDevice::calculate_checksum(const string_view message)
 {
-    auto checksum = std::accumulate(message.cbegin(), message.cend(), 0,
+    int checksum = std::accumulate(message.cbegin(), message.cend(), 0,
                                      [] (const char& c1, const char& c2)
                                      {
                                          return static_cast<int>(c1) + static_cast<int>(c2);
                                      });
     _lg.strm(sl::trace) << "length of message: " << message.size() ;
-    _lg.strm(sl::trace) << "numeric calculated checksum: " << checksum;
+    _lg.strm(sl::trace) << "numeric calculated checksum: " << (int) checksum;
     
     return str_from_number(checksum % 256, 3);
 };
@@ -70,6 +79,10 @@ string PfeifferDevice::semantic_command(unsigned short address, unsigned short p
                                     pfeiffer_action readwrite, optional<string_view> data)
 {
     _semanticoss.str("");
+
+    
+
+    
     _semanticoss << str_from_number(address,3) <<
                     str_from_number(static_cast<short unsigned>(readwrite),2) <<
                     str_from_number(parameter,3);
@@ -120,6 +133,7 @@ void PfeifferDevice::validate_response_telegram_parameters(unsigned short addres
 
 std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const string& response)
 {
+  _lg.strm(sl::trace) << "size of response: " << response.size();
   auto csum_calc = calculate_checksum(response.substr(0,response.size()-4));
     auto csumstr = response.substr(response.size() -4, 3);
     
@@ -129,6 +143,7 @@ std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const s
         _lg.strm(sl::error) << "calculated checksum is: " << csum_calc;
         _lg.strm(sl::error) << "received checksum: " << csumstr;
 	_lg.strm(sl::error) << "full response: " << response;
+	_lg.strm(sl::error) << "full response (hex): {" << std::hex <<  response << "}";
         throw DeviceError("got invalid checksum");
     }
     

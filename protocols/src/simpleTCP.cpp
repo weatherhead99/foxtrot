@@ -54,7 +54,6 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   extract_parameter_value(_port,_params,"port");
   extract_parameter_value(_addr,_params,"addr");
   
-  //TODO: logging here
   
   
   //open TCP socket
@@ -166,8 +165,9 @@ std::string simpleTCP::read_until_endl(char endlchar)
   {
     ret += read(_chunk_size);
   };
-  
-  return ret;
+
+  //remove excess... NOTE BREAKING CHANGE
+  return ret.substr(0, ret.find(endlchar, 0)+1);
 
 }
 

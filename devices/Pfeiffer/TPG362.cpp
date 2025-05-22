@@ -22,11 +22,11 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
 
   const auto& tpinfo = typeid(*(proto.get()));
   _lg.strm(sl::trace) << "name of protocol type: " << tpinfo.name() ;
-
+  _serproto->Init(nullptr);
+  
   if(tpinfo == typeid(foxtrot::protocols::SerialPort))
   {
     _lg.Info("using serial connected gauge controller");
-    _serproto->Init(nullptr);
     auto specproto = std::static_pointer_cast<foxtrot::protocols::SerialPort>(_serproto);
     specproto->flush();
     _lg.Info("gauge controller initialization done...");
@@ -34,50 +34,99 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
   else if(tpinfo == typeid(foxtrot::protocols::simpleTCP))
     {
       _lg.strm(sl::info) << "using ethernet/LAN connected gauge controller";
-      _serproto->Init(nullptr);
       _lg.strm(sl::info) << "gauge controller initialization done...";
     }
   else
   {
     throw std::logic_error("got unexpected serial interface type!");
   };
+
+  //determine number of gauge channels (by looking at device name)
+  auto devname = getDeviceName(0);
+
+  _lg.strm(sl::info) << "device type is: " << devname;
+  _lg.strm(sl::trace) << "length of devname: " << devname.size();
+  char chancar = devname[devname.size()-1];
+  _lg.strm(sl::trace) << "chancar: " << (int) chancar;
+    _devchannels = (int) (chancar - '0');
+  _lg.strm(sl::debug) << "number of channels: " << _devchannels;
+  
+
   
 }
 
 double foxtrot::devices::TPG362::getPressure(short unsigned int channel)
 {
+  checkChannel(channel);
   auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::Pressure);
   return pfeiffer_interpret_u_expo_raw(interpret);
 }
 
 string foxtrot::devices::TPG362::getDeviceName(short unsigned int channel)
 {
+  checkChannel(channel);
   return read_cmd_helper(channel + _address, TPG_parameter_no::DeviceName);
 }
 
 bool foxtrot::devices::TPG362::getGaugeOnOff(short unsigned int channel)
 {
+  checkChannel(channel);
   auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::sensEnable);   
   return static_cast<bool>(std::stoi(interpret));
 }
 
 void foxtrot::devices::TPG362::setGaugeOnOff(unsigned short channel, bool onoff)
 {
+    checkChannel(channel);
     write_cmd_helper(channel + _address, TPG_parameter_no::sensEnable, onoff, pfeiffer_data_types::positive_integer_short);
 }
 
 bool foxtrot::devices::TPG362::getDegass(unsigned short channel)
 {
+    checkChannel(channel);
     auto interpret = read_cmd_helper(channel + _address, TPG_parameter_no::degas);
     return static_cast<bool>(std::stoi(interpret));
 }
 
 void foxtrot::devices::TPG362::setDegass(unsigned short channel, bool onoff)
     {
+        checkChannel(channel);
     write_cmd_helper(channel + _address, TPG_parameter_no::degas, onoff, pfeiffer_data_types::new_boolean);
 }
 
 
+std::string foxtrot::devices::TPG362::SerialNumber()
+{
+  return read_cmd_helper(_address, TPG_parameter_no::SerialNumber);
+}
+
+std::string foxtrot::devices::TPG362::OrderNumber()
+{
+  return read_cmd_helper(_address, TPG_parameter_no::OrderNumber);
+}
+
+std::string foxtrot::devices::TPG362::HWVersion()
+{
+ return read_cmd_helper(_address, TPG_parameter_no::HWVersion);
+}
+
+std::string foxtrot::devices::TPG362::FWVersion()
+{
+  return read_cmd_helper(_address, TPG_parameter_no::FWVersion);
+}
+
+unsigned foxtrot::devices::TPG362::OperatingHours()
+{
+  auto itp = read_cmd_helper(_address, TPG_parameter_no::OperatHours);
+  return static_cast<unsigned>(std::stoi(itp));
+}
+
+std::string foxtrot::devices::TPG362::Error(short unsigned channel)
+{
+  checkChannel(channel);
+  return read_cmd_helper(_address + channel, TPG_parameter_no::ErrorCode);
+
+}
 
 const string foxtrot::devices::TPG362::getDeviceTypeName() const
 {

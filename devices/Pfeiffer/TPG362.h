@@ -32,6 +32,8 @@ namespace foxtrot {
      OperatHours = 314,
      DeviceName = 349,
      HWVersion = 354,
+     SerialNumber = 355,
+     OrderNumber = 388,
      SWOnThrs = 730,
      SwOffThrs = 732,
      Pressure = 740,
@@ -53,13 +55,29 @@ namespace foxtrot {
     
     bool getDegass(short unsigned channel = 1);
     void setDegass(short unsigned channel, bool onoff);
+
+
+     int DeviceChannels() const;
     
     virtual const string getDeviceTypeName() const override;
-   
+
+     std::string SerialNumber();
+     std::string HWVersion();
+     std::string OrderNumber();
+     unsigned OperatingHours();
+     std::string FWVersion();
+     std::string Error(short unsigned channel);
     
    private:
      //address range 1-24, default is 1, shift left by one digit ( last digit is for gauge subaddr)
-     short unsigned _address = 10; 
+     short unsigned _address = 10;
+     int _devchannels;
+
+     inline void checkChannel(int channel)
+     {
+       if(channel < 0 or channel > _devchannels)
+	 throw std::out_of_range("channel number is not valid");
+     }
 
    };
    

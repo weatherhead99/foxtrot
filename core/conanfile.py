@@ -82,7 +82,7 @@ class FoxtrotCoreConan(ConanFile):
             deps.set_property("avahi", "cmake_file_name", "avahi-client")
             deps.set_property("avahi::client", "cmake_target_name", "avahi-client::avahi_client")
 
-            
+
         deps.generate()
 
         tc = self._setup_cmake_tc()

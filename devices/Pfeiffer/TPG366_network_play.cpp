@@ -14,7 +14,7 @@ using std::endl;
 
 foxtrot::parameterset tcp_params {
   {"port", 8000},
-  {"addr", "131.214.200.34"}
+  {"addr", "131.215.200.34"}
 };
 
 int main(int argc, char** argv)
@@ -30,5 +30,11 @@ int main(int argc, char** argv)
 
   cout << "vacuum gauge ready" << endl;
 
+  auto HWVersion = vacuumgauge.HWVersion();
 
+  cout << "vacuum gauge hardware version: " << HWVersion << endl;
+  cout << "serial number: " << vacuumgauge.SerialNumber() << endl;
+  cout << "Device Name: " << vacuumgauge.getDeviceName(0) << endl;
+  cout << "Sensor name: " << vacuumgauge.getDeviceName(1) << endl;
+  cout << "invalid!" << vacuumgauge.getDeviceName(7) << endl;
 }

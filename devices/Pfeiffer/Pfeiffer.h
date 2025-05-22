@@ -147,6 +147,7 @@ namespace devices
         
         std::ostringstream _cmdoss;
         std::ostringstream _semanticoss;
+      bool _is_serial_port;
         
     };
     

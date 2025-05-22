@@ -34,7 +34,7 @@ class FoxtrotDevicesConan(ConanFile):
                       transitive_libs=True)
         #override, conflict aravis with avahi
         self.requires("glib/2.78.3", override=True)
-        
+
 
     def generate(self):
         #do all the cmake toolchain stuff etc

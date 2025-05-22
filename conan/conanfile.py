@@ -34,13 +34,11 @@ def add_grpc_options(configs):
 def ft_require(conanfile, packname):
     own_version: str = Version(conanfile.version)
     fmt_version: str = f".".join(str(_) for _ in (own_version.major, own_version.minor, own_version.patch))
-    
     full_require: str = f"foxtrot_{packname}/[~{fmt_version},include_prerelease]"
-    
-    
+
     conanfile.requires(full_require, libs=True, headers=True, transitive_libs=True,
                        transitive_headers=True)
-    
+
 
 
 class FoxtrotCppPackage:
@@ -140,8 +138,6 @@ class FoxtrotCppPackage:
 
         #we provide our own configuration files and as such disable CMakeDeps for ourselves
         self.cpp_info.set_property("cmake_find_mode", "none")
-        
-        
 
     def layout(self):
         cmake_layout(self, build_folder="conanbuild")
