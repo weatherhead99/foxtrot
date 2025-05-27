@@ -4,7 +4,7 @@ from conan.tools.scm import Version
 from conan.tools.build import check_min_cppstd
 
 class FoxtrotServerConan(ConanFile):
-    python_requires = "foxtrotbuildutils/[^0.4.1]"
+    python_requires = "foxtrotbuildutils/[^0.4.4]"
     python_requires_extend = "foxtrotbuildutils.FoxtrotCppPackage"
     name="foxtrot_server"
     description="foxtrot server components"
@@ -31,8 +31,6 @@ class FoxtrotServerConan(ConanFile):
                        "boost/*:shared" : True,
                        "use_coro": True}
     src_folder= "server"
-
-    ft_package_requires = ( "core", "protocols")
     cmake_package_name = "foxtrotServer"
     package_type = "application"
 
@@ -52,6 +50,8 @@ class FoxtrotServerConan(ConanFile):
 
     def requirements(self):
         super().requirements()
+        self.ft_require("core", run=True)
+        self.ft_require("protocols", run=True)
 
         gcc_version = int(self.settings.compiler.version.value)
         if self.options.use_coro:

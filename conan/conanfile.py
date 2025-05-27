@@ -17,7 +17,7 @@ def libudev_cmake_setup(cfg: CMakeDeps) -> None:
 
 class FoxtrotBuildUtils(ConanFile):
     name = "foxtrotbuildutils"
-    version = "0.4.3"
+    version = "0.4.4"
     default_user = "weatherill"
     default_channel = "stable"
     package_type = "python-require"
@@ -31,13 +31,17 @@ def add_grpc_options(configs):
 
     return configs
 
-def ft_require(conanfile, packname):
+def ft_require(conanfile, packname, **reqargs):
     own_version: str = Version(conanfile.version)
     fmt_version: str = f".".join(str(_) for _ in (own_version.major, own_version.minor, own_version.patch))
     full_require: str = f"foxtrot_{packname}/[~{fmt_version},include_prerelease]"
 
-    conanfile.requires(full_require, libs=True, headers=True, transitive_libs=True,
-                       transitive_headers=True)
+    reqargs_default: dict[str, bool] = {"libs" : True,
+                                        "headers" : True,
+                                        "transitive_libs" : True,
+                                        "transitive_headers" : True}
+    reqargs_default |= reqargs
+    conanfile.requires(full_require, **reqargs_default)
 
 
 
@@ -104,6 +108,10 @@ class FoxtrotCppPackage:
         if hasattr(self, "cmake_package_name"):
             self.conan2_fix_cmake_names(self.cmake_package_name)
 
+    def ft_require(self, pack, **kwargs):
+        #convenience / shim method needed by some downstream setups
+        ft_require(self, pack, **kwargs)
+            
     def requirements(self):
         if hasattr(self, "ft_package_requires"):
             if isinstance(self.ft_package_requires, str):
