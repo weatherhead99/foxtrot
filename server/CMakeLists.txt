@@ -103,7 +103,7 @@ install(TARGETS exptserve
 
 install(TARGETS foxtrot_server
        EXPORT foxtrot_server
-       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/
        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/foxtrot/)
 
 

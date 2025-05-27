@@ -63,7 +63,6 @@ class FoxtrotServerConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-
     def layout(self):
         #NOTE: need extra build dir in editable mode since libfoxtrot_server.so
         #ends up in a subdirectory
