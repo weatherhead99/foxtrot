@@ -32,7 +32,6 @@ class FoxtrotServerConan(ConanFile):
                        "use_coro": True}
     src_folder= "server"
     cmake_package_name = "foxtrotServer"
-    package_type = "application"
 
     def config_options(self):
         if self.settings.compiler == "gcc":
