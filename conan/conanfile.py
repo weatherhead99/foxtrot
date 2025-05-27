@@ -101,9 +101,9 @@ class FoxtrotCppPackage:
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = collect_libs(self)
-        self.cpp_info.libdirs = ["lib/foxtrot"]
+        self.cpp_info.libdirs = ["lib/foxtrot", "lib"]
         self.cpp_info.builddirs.append("lib")
+        self.cpp_info.libs = collect_libs(self)
 
         if hasattr(self, "cmake_package_name"):
             self.conan2_fix_cmake_names(self.cmake_package_name)
