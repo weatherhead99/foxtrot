@@ -45,11 +45,12 @@ namespace foxtrot
 	    
 	    
         protected:
+            Logging _lg; 
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
             ArchonLVX(archon& arch, short unsigned int modpos);
 	    
-            Logging _lg;
+
             
         private:
 	    std::array<bool,8> _GPIO;

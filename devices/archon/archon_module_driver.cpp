@@ -11,8 +11,35 @@ using foxtrot::devices::archon;
 ArchonDriver::ArchonDriver(archon &arch, short unsigned modpos)
   : ArchonDriverBase<detail::eight_t>(arch, modpos) {}
 
+ArchonDriver::~ArchonDriver() {}
+
+const string ArchonDriver::getTypeName() const
+{
+  return "Driver";
+}
+
+std::unique_ptr<ArchonModule> ArchonDriver::constructModule(archon& arch, int modpos)
+{
+  return std::make_unique<ArchonDriver>(arch, modpos);
+}
+
+std::unique_ptr<ArchonModule> ArchonDriverX::constructModule(archon& arch, int modpos)
+{
+  return std::make_unique<ArchonDriverX>(arch, modpos);
+}
+
+
+
+
 ArchonDriverX::ArchonDriverX(archon &arch, short unsigned modpos)
   : ArchonDriverBase<detail::twelve_t>(arch, modpos) {}
+
+ArchonDriverX::~ArchonDriverX() {}
+
+const string ArchonDriverX::getTypeName() const
+{
+  return "DriverX";
+}
 
 
 template <typename T> void add_shared_base_meths(auto &&binder) {

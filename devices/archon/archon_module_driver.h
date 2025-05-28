@@ -49,6 +49,7 @@ namespace foxtrot
      RTTR_ENABLE(ArchonDriverBase<detail::eight_t>)
    public:
      ArchonDriver(archon& arch, short unsigned int modpos);
+     ~ArchonDriver();
      const string getTypeName() const override;
      static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
    };
@@ -56,6 +57,7 @@ namespace foxtrot
    class ArchonDriverX : public ArchonDriverBase<detail::twelve_t> {
      RTTR_ENABLE(ArchonDriverBase<detail::twelve_t>)
    public:
+     ~ArchonDriverX();
      ArchonDriverX(archon& arch, short unsigned int modpos);
      const string getTypeName() const override;
      static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);

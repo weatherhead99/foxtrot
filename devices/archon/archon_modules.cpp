@@ -9,6 +9,7 @@
 #include <map>
 #include <rttr/registration>
 
+
 using namespace foxtrot::devices;
 
 
@@ -17,29 +18,9 @@ using foxtrot::devices::archon_module_types;
 using foxtrot::devices::archon_hex_stream_configure;
 
 
-const std::map<archon_module_types, std::string> module_type_names = {
-  {archon_module_types::Driver, "Driver"},
-  {archon_module_types::AD, "AD"},
-  {archon_module_types::LVBias, "LVBias"},
-  {archon_module_types::HVBias, "HVBias"},
-  {archon_module_types::Heater, "Heater"},
-  {archon_module_types::HS, "HS"},
-  {archon_module_types::HVXBias, "HVXBias"},
-  {archon_module_types::LVXBias, "LVXBias"},
-  {archon_module_types::LVDS, "LVDS"},
-  {archon_module_types::HeaterX, "HeaterX"},
-  {archon_module_types::XVBias, "XVBias"},
-  {archon_module_types::ADF, "ADF"},
-  {archon_module_types::ADX, "ADX"},
-  {archon_module_types::ADLN, "ADLN"}
-};
-
-
-
-
 
 ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
-: _arch(arch), _modpos(modpos), foxtrot::Device(nullptr)
+  : foxtrot::Device(nullptr),  _modpos(modpos), _arch(arch)
 {
   
   

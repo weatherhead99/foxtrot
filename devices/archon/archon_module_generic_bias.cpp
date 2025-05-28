@@ -9,7 +9,7 @@ using std::string;
 
 devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod, const string& nmemonic, 
 					      int numchans, double lowlimit, double highlimit, Logging& lg)
-: _mod(mod), _biasnmemonic(nmemonic), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit), _lg(lg)
+  : _mod(mod), _biasnmemonic(nmemonic), _lg(lg), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit)
 {
 
 }

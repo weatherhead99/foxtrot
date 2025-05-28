@@ -11,7 +11,6 @@ namespace foxtrot
     class ArchonAD: public ArchonModule
     {
       RTTR_ENABLE(ArchonModule)
-      
     public:
       static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
       

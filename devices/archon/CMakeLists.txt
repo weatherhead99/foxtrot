@@ -5,6 +5,8 @@ add_library(archon OBJECT ${archon_srcs})
 target_sources(archon PUBLIC FILE_SET HEADERS FILES ${archon_includes})
 target_link_libraries(archon PUBLIC Boost::date_time RTTR::Core)
 target_compile_definitions(archon PRIVATE -DNEW_RTTR_API)
+target_compile_options(archon PRIVATE -Wall)
+
 
 ft_device_lib_configure(archon)
 

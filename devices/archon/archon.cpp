@@ -26,7 +26,7 @@
 #include "archon_module_xvbias.h"
 #include "archon_module_driver.h"
 
-
+#include "archon_module_mapper.hh"
 
 
 #define READ_SIZE 1024
@@ -46,7 +46,7 @@ const string devices::archon::getDeviceTypeName() const
 
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
-    _order(0), _lg("archon")
+    _lg("archon"), _order(0)
 {
   proto->Init(nullptr);
   
@@ -75,57 +75,22 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    bool mod_present = ((1 <<i) &  modules_installed) >> i;
    if(mod_present)
    {
-//      std::cout << "module present at: " << i+1 << std::endl;
     archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<short unsigned>(i,"TYPE",getSystem(),'_'));
     
-//     std::cout << "modtype: "  << static_cast<short unsigned>(modtype) << std::endl;
-    
-    std::unique_ptr<ArchonModule> ptr(nullptr);
-    switch(modtype)
-    {
-        case(archon_module_types::HeaterX):
-	  _lg.Info("HeaterX module detected at position " + std::to_string(i+1));
-        ptr = ArchonHeaterX::constructModule(*this,i);
-        break;
-	  
-	  
-	case(archon_module_types::LVXBias):
-	  _lg.Info("LVXBias module detected at position " + std::to_string(i+1));
-	  ptr = ArchonLVX::constructModule(*this,i);
-	  break;
-	
-	case(archon_module_types::HVXBias):
-	  _lg.Info("HVXBias module detected at position " + std::to_string(i+1));
-	  ptr = ArchonHVX::constructModule(*this,i);
-	  break;
-	  
-	case(archon_module_types::AD):
-	  _lg.Info("A/D module detected at position " + std::to_string(i+1));
-	  ptr = ArchonAD::constructModule(*this,i);
-	  break;
-      
-    case(archon_module_types::XVBias):
-        _lg.Info("XVBias module detected at position " + std::to_string(i+1));
-        ptr = ArchonXV::constructModule(*this,i);
-        break;
-        
-    case(archon_module_types::Driver):
-        _lg.Info("Driver module detected at position " + std::to_string(i+1));
-        ptr =  ArchonDriver::constructModule(*this,i);
-        break;
-	  
-	default:
-	  _lg.Info("support for module at position " + std::to_string(i+1)  + " isn't implemented yet");
-	    
-    };
-    
-    
+
+    _lg.strm(sl::info) << "module found at position: " << (i+1);
+    _lg.strm(sl::info) << "module type is: " << get_module_name(modtype);
+       
+    auto ptr = make_module(*this, i, modtype);
     if(ptr)
     {
-        _modules.insert(std::make_pair(i,std::move(ptr)));
+      _lg.strm(sl::info) << "module initialised" ;
+      _modules.insert(std::make_pair(i,std::move(ptr)));
     }
-    
-    
+    else {
+      _lg.strm(sl::info) << "module failed to initialize (maybe unimplemented)";
+	}
+
    }
    else
    {

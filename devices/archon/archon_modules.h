@@ -10,30 +10,14 @@
 
 #include <foxtrot/Device.h>
 #include "archon.h"
+#include "archon_module_mapper.hh"
 
 namespace foxtrot
 {
     
 namespace devices
 {
-    enum class archon_module_types : short unsigned
-    {
-        None  = 0,
-        Driver = 1,
-        AD = 2,
-        LVBias = 3,
-        HVBias = 4,
-        Heater = 5,
-        HS = 7,
-        HVXBias = 8,
-        LVXBias = 9,
-        LVDS = 10,
-	HeaterX = 11,
-	XVBias = 12,
-	ADF = 13,
-	ADX = 14,
-	ADLN = 15
-    };
+
 
   template<int Upper, int Lower=1>
   struct ArchonChannelBoundsChecker
@@ -87,7 +71,13 @@ namespace devices
 	    
 	    const archon& getArchon();
 	    short unsigned getmodpos();
-	    
+
+      template<typename T>
+      static std::unique_ptr<T> constructModule(archon& arch, int modpos)
+      {
+	return std::make_unique<T>(arch, modpos);
+      }
+      
 	    
     protected:
             short unsigned _modpos;
@@ -105,7 +95,19 @@ namespace devices
 	    virtual void update_variables() = 0 ;
             
     };
-    
+
+
+  template<typename T> concept ArchonModuleType = std::is_base_of_v<ArchonModule, T>;
+
+  template<ArchonModuleType Module>
+  std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos)
+  {
+    return std::make_unique<Module>(arch, modpos);
+  }
+
+
+  std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos, archon_module_types tp);
+  
     
     string get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim='/');
     
