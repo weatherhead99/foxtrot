@@ -34,7 +34,7 @@ simpleTCP::~simpleTCP()
 {
   
 #ifdef linux  
-  close(_sockfd);
+  close();
 #else
 	_lg.Error("destructor is a stub on windows");
 #endif
@@ -75,9 +75,12 @@ void simpleTCP::Init(const parameterset* const class_parameters)
     throw ProtocolError(std::string("error setting linger: " ) + gai_strerror(err));
   };
   
-   
-  //bind to server;
-  
+  this->open();  
+#endif
+}
+
+void simpleTCP::open()
+{
   addrinfo hints;  
   hints.ai_socktype = SOCK_STREAM; 
   hints.ai_family = AF_UNSPEC;
@@ -87,25 +90,28 @@ void simpleTCP::Init(const parameterset* const class_parameters)
   addrinfo* host;
   //unique_ptr to make sure freeaddrinfo gets called
   
-  auto hosterr = getaddrinfo(_addr.c_str(),std::to_string(_port).c_str(),&hints,&host);
+  auto hosterr = getaddrinfo(_addr.c_str(), std::to_string(_port).c_str(),&hints,&host);
   std::unique_ptr<addrinfo, void(*)(addrinfo*)> addrp(host,freeaddrinfo);
-  
+
   if(hosterr < 0)
-  {
     throw ProtocolError(std::string("host resolution error: " ) + gai_strerror(hosterr));
-  };
   
   _lg.Debug("ai_flags output: " + std::to_string(host->ai_flags));
   
   auto conerr = connect(_sockfd, host->ai_addr,host->ai_addrlen);
   if( conerr < 0)
-  {
     throw ProtocolError(std::string("couldn't connect to host. Error was: " ) + strerror(errno));
-  };
-  
-#endif
+
+}
+
+void simpleTCP::close()
+{
   
 }
+
+
+
+
 
 
 std::string simpleTCP::read(unsigned int len, unsigned* actlen)

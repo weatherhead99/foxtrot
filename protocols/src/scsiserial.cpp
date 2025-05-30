@@ -23,7 +23,7 @@ foxtrot::protocols::scsiserial::scsiserial(const foxtrot::parameterset*const ins
 
 foxtrot::protocols::scsiserial::~scsiserial()
 {
-  close(_fd);
+  ::close(_fd);
 
 }
 
@@ -39,7 +39,7 @@ void foxtrot::protocols::scsiserial::Init(const foxtrot::parameterset*const clas
     
     extract_parameter_value(_LBA,_params,"LBA");    
     
-    _fd = open(_devnode.c_str(),O_RDWR);
+    _fd = ::open(_devnode.c_str(),O_RDWR);
     
     if(_fd < 0) 
     {
@@ -106,9 +106,6 @@ void foxtrot::protocols::scsiserial::write(const std::string& data)
   
   scsi_write10(datavec,_LBA,num_lbas);
 }
-
-
-
 
 
 void foxtrot::protocols::scsiserial::perform_ioctl(sg_io_hdr_t& req)

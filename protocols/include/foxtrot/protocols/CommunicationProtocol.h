@@ -1,7 +1,7 @@
 #pragma once 
 
 #include <foxtrot/parameter_defs.hh>
-
+#include <foxtrot/Logging.h>
 #include <utility>
 
 namespace foxtrot
@@ -20,7 +20,10 @@ namespace foxtrot
     CommunicationProtocol(const parameterset* const instance_parameters);
     virtual ~CommunicationProtocol(); 
     virtual void Init(const parameterset * const class_parameters);
-    
+
+    virtual void open();
+    virtual void close();
+
     static bool verify_instance_parameters(const parameterset& instance_parameters);
     static bool verify_class_parameters(const parameterset& class_parameters);
     
@@ -28,6 +31,8 @@ namespace foxtrot
     
   protected:
     parameterset _params;
+  private:
+    foxtrot::Logging lg;
   };
   
   

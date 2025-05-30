@@ -1,5 +1,6 @@
 #include <foxtrot/protocols/CommunicationProtocol.h>
 #include <foxtrot/protocols/SerialProtocol.h>
+#include <foxtrot/Logging.h>
 #include <stdexcept>
 
 foxtrot::SerialProtocol::SerialProtocol(const foxtrot::parameterset* const instance_parameters)
@@ -15,7 +16,8 @@ string foxtrot::SerialProtocol::read_definite(unsigned, foxtrot::opttimeout)
 }
 
 
-foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters) 
+foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterset* const instance_parameters)
+  : lg("CommunicationProtocol")
 {
   
   if(instance_parameters != nullptr)
@@ -26,6 +28,16 @@ foxtrot::CommunicationProtocol::CommunicationProtocol(const foxtrot::parameterse
 foxtrot::CommunicationProtocol::~CommunicationProtocol()
 {
 
+}
+
+void foxtrot::CommunicationProtocol::open()
+{
+  lg.strm(sl::warning) << "unimplemented open() method called in communication protocol";
+}
+
+void foxtrot::CommunicationProtocol::close()
+{
+  lg.strm(sl::warning) << "unimplemented close() method called in communication protocol";
 }
 
 void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters)

@@ -23,7 +23,10 @@ public:
     void Init(const parameterset*const class_parameters) override;
     void Init(const unsigned port, const std::string& addr);
     
-    
+    virtual void open() override;
+    virtual void close() override;
+
+  
     std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     void write(const std::string& data) override;
     
