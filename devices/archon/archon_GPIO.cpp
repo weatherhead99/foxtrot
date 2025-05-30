@@ -1,12 +1,13 @@
 #include "archon_GPIO.h"
 #include <stdexcept>
+#include <string>
 #include "archon.h"
 
 
 using std::string;
 
-foxtrot::devices::archonGPIO::archonGPIO(foxtrot::devices::archon& arch, int modpos)
-: _arch_gpio(arch), _modpos_gpio(modpos)
+foxtrot::devices::archonGPIO::archonGPIO(foxtrot::devices::archon& arch, int modpos, bool pairwise_direction)
+  : _arch_gpio(arch), _modpos_gpio(modpos), _pairwise_direction(pairwise_direction)
 {
     
 }
@@ -17,18 +18,36 @@ bool foxtrot::devices::archonGPIO::getDIOPower()
     return std::stoi(val);
 }
 
+
+string foxtrot::devices::archonGPIO::get_dirstring(int pairorchannel)
+{
+  std::string out;
+  if(_pairwise_direction)
+    {
+          switch(pairorchannel)
+	    {
+	    case(1) : out = "12" ; break;
+	    case(2) : out = "34" ; break;
+	    case(3) : out = "56" ; break;
+	    case(4) : out = "78" ; break;
+	    default:
+	      throw std::out_of_range("invalid value for pair in getDirection");
+	    }
+    }
+  else
+    out = std::to_string(pairorchannel);
+  return out;
+
+}
+
+
+
+								
+
+								
 bool foxtrot::devices::archonGPIO::getDirection(int pair)
 {
-    std::string pairstr;
-    switch(pair)
-    {
-        case(1) : pairstr = "12" ; break;
-        case(2) : pairstr = "34" ; break;
-        case(3) : pairstr = "56" ; break;
-        case(4) : pairstr = "78" ; break;
-        default:
-            throw std::out_of_range("invalid value for pair in getDirection");
-    }
+  std::string pairstr = get_dirstring(pair);
     
     _oss.str("");
     _oss << "DIO_DIR" << pairstr; 
@@ -38,6 +57,7 @@ bool foxtrot::devices::archonGPIO::getDirection(int pair)
     
 }
 
+								
 string foxtrot::devices::archonGPIO::getLabel(int ch)
 {
     _oss.str("");
@@ -63,16 +83,7 @@ void foxtrot::devices::archonGPIO::setDIOPower(bool onoff)
 
 void foxtrot::devices::archonGPIO::setDirection(int pair, bool inout)
 {
-    std::string pairstr;
-    switch(pair)
-    {
-        case(1) : pairstr = "12" ; break;
-        case(2) : pairstr = "34" ; break;
-        case(3) : pairstr = "56" ; break;
-        case(4) : pairstr = "78" ; break;
-        default:
-            throw std::out_of_range("invalid value for pair in getDirection");
-    }
+  std::string pairstr = get_dirstring(pair);
     
     _oss.str("");
     _oss << "DIO_DIR" << pairstr; 
@@ -140,10 +151,21 @@ RTTR_REGISTRATION
 {
  using namespace rttr;
  using foxtrot::devices::archonGPIO;
+ using foxtrot::devices::gpio_source;
  
  type::register_converter_func(int_to_source);
  type::register_converter_func(source_to_int);
- 
+
+
+ registration::enumeration<gpio_source>("foxtrot::devices::gpio_source")
+   (
+    value("low", gpio_source::low),
+    value("high", gpio_source::high),
+    value("clocked", gpio_source::clocked),
+    value("VCPU", gpio_source::VCPU)
+    );
+
+
  registration::class_<archonGPIO>("foxtrot::devices::archonGPIO")
  .method("setLabel",&archonGPIO::setLabel)
  (parameter_names("ch","label"))

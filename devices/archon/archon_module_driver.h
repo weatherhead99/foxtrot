@@ -51,7 +51,6 @@ namespace foxtrot
      ArchonDriver(archon& arch, short unsigned int modpos);
      ~ArchonDriver();
      const string getTypeName() const override;
-     static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
    };
    
    class ArchonDriverX : public ArchonDriverBase<detail::twelve_t> {
@@ -60,7 +59,6 @@ namespace foxtrot
      ~ArchonDriverX();
      ArchonDriverX(archon& arch, short unsigned int modpos);
      const string getTypeName() const override;
-     static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
 
    };
 

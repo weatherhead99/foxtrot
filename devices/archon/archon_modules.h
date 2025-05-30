@@ -75,7 +75,8 @@ namespace devices
       template<typename T>
       static std::unique_ptr<T> constructModule(archon& arch, int modpos)
       {
-	return std::make_unique<T>(arch, modpos);
+	std::unique_ptr<T> out(new T(arch, modpos));
+	return out;
       }
       
 	    

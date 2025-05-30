@@ -1,21 +1,10 @@
 #include "archon_module_AD.h"
 
-std::unique_ptr< devices::ArchonModule > devices::ArchonAD::constructModule(devices::archon& arch, int modpos)
-{
-  std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonAD(arch,modpos));
-  
-  return out;
-  
-
-}
-
-
 devices::ArchonAD::ArchonAD(devices::archon& arch, short unsigned int modpos)
 : ArchonModule(arch, modpos)
 {
 
 }
-
 
 void devices::ArchonAD::update_variables()
 {
@@ -70,13 +59,18 @@ void devices::ArchonAD::setClamp(int channel, double val)
   }
   
   writeConfigKey(_oss.str(), std::to_string(val));
-
 }
+
+devices::ArchonADM::ArchonADM(archon &arch, short unsigned int modpos)
+  : ArchonModule(arch, modpos) {}
+
+const string devices::ArchonADM::getTypeName() const { return "ADM";}
 
 RTTR_REGISTRATION
 {
  using namespace rttr;
  using foxtrot::devices::ArchonAD;
+ using foxtrot::devices::ArchonADM;
  
  registration::class_<ArchonAD>("foxtrot::devices::ArchonAD")
  .method("setClamp",&ArchonAD::setClamp)
@@ -87,6 +81,10 @@ RTTR_REGISTRATION
  (parameter_names("hgain"))
  .property_readonly("getPreampGain",&ArchonAD::getPreampGain)
  ;
+
+ registration::class_<ArchonADM>("foxtrot::devices::ArchonADM")
+   ;
+ 
      
     
 }

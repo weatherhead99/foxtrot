@@ -10,9 +10,9 @@ namespace foxtrot
     
     class ArchonAD: public ArchonModule
     {
+      friend class ArchonModule;
       RTTR_ENABLE(ArchonModule)
     public:
-      static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
       
       virtual const string getTypeName() const override;
       virtual void update_variables() override;
@@ -36,6 +36,17 @@ namespace foxtrot
 	
       };
       
+      
+    };
+
+    class ArchonADM : public ArchonModule
+    {
+      //I _think_ ADM module has no configuration options at all!
+      friend class ArchonModule;
+      RTTR_ENABLE(ArchonModule)
+    public:
+      virtual const string getTypeName() const override;
+      ArchonADM(archon& arch, short unsigned int modpos);
       
     };
     

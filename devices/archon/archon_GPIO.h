@@ -24,7 +24,7 @@ namespace foxtrot
      {
          RTTR_ENABLE();
      public:
-         void setLabel(int ch, const std::string& label);
+       void setLabel(int ch, const std::string& label);
          std::string getLabel(int ch);
          
          bool getDIOPower();
@@ -38,13 +38,17 @@ namespace foxtrot
          
          
      protected:
-         archonGPIO(archon& arch, int modpos);
+       archonGPIO(archon& arch, int modpos, bool pairwise_direction=true);
          
          
      private:
+
+       string get_dirstring(int pairorchannel);
+       
          archon& _arch_gpio;
          int _modpos_gpio;
          std::ostringstream _oss;
+       bool _pairwise_direction;
          
          void writeConfigKey_gpio(const string& key, const string& val);
 	    string readConfigKey_gpio(const string& key);

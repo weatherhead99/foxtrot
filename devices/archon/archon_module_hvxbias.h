@@ -16,8 +16,7 @@ namespace foxtrot
       RTTR_ENABLE(ArchonLVX)
       
     public:
-      static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
-      
+      friend class ArchonModule;
     const string getTypeName() const override;
     void update_variables() override;
     const string getDeviceTypeName() const override;

@@ -14,10 +14,10 @@ namespace foxtrot
         
         class ArchonLVX : public ArchonModule, public archonGPIO
         {
+	  friend class ArchonModule;
         RTTR_ENABLE(ArchonModule,archonGPIO)
         public:
 	    
-	    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
 	    
 	    const string getTypeName() const override;
 	    const string getDeviceTypeName() const override;

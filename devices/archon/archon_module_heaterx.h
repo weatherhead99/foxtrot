@@ -35,13 +35,14 @@ namespace devices
      
     class ArchonHeaterX : public ArchonModule, public archonGPIO
     {
+      
     RTTR_ENABLE(ArchonModule,archonGPIO)
       friend class archon;
+      friend class ArchonModule;
 
     const string getDeviceTypeName() const override;
       
     public:
-    static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
         
     double getHeaterAOutput() const;
     double getHeaterBOutput() const;

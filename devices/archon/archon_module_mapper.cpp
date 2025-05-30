@@ -85,7 +85,7 @@ unique_ptr<ArchonModule> foxtrot::devices::make_module(archon& arch, int modpos,
     if(static_cast<short unsigned>(modtp) == key)
       {
 	//found a match!
-	modptr = ModType::constructModule(arch, modpos);
+	modptr = ArchonModule::constructModule<ModType>(arch, modpos);
       }
 
        });

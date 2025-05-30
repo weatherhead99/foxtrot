@@ -13,6 +13,7 @@ namespace foxtrot
         
         class ArchonXV : public ArchonLVX
         {
+	  friend class ArchonModule;
           RTTR_ENABLE(ArchonLVX)
         public:
             static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);

@@ -148,14 +148,6 @@ void devices::ArchonHeaterX::update_variables()
     
 }
 
-std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonHeaterX::constructModule
-(foxtrot::devices::archon& arch, int modpos)
-{
-  
- std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonHeaterX(arch,modpos));
- 
- return out;
-}
 
 void ArchonHeaterX::setSensorType(HeaterXSensors sensor, HeaterXSensorTypes type) 
 {

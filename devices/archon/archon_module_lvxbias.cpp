@@ -11,15 +11,6 @@ _hcbias(*this, "LVHC", 6, -14.0,14.0,_lg)
 }
 
 
-std::unique_ptr< devices::ArchonModule > devices::ArchonLVX::constructModule(devices::archon& arch, int modpos)
-{
-  std::unique_ptr<foxtrot::devices::ArchonModule> out(new ArchonLVX(arch,modpos));
-  
-  return out;
-
-}
-
-
 const string devices::ArchonLVX::getTypeName() const
 {
   

@@ -18,19 +18,6 @@ const string ArchonDriver::getTypeName() const
   return "Driver";
 }
 
-std::unique_ptr<ArchonModule> ArchonDriver::constructModule(archon& arch, int modpos)
-{
-  return std::make_unique<ArchonDriver>(arch, modpos);
-}
-
-std::unique_ptr<ArchonModule> ArchonDriverX::constructModule(archon& arch, int modpos)
-{
-  return std::make_unique<ArchonDriverX>(arch, modpos);
-}
-
-
-
-
 ArchonDriverX::ArchonDriverX(archon &arch, short unsigned modpos)
   : ArchonDriverBase<detail::twelve_t>(arch, modpos) {}
 
