@@ -1,8 +1,10 @@
 #pragma once
 
+#include "SerialProtocol.h"
 #include <string>
 #include <foxtrot/Logging.h>
 #include <foxtrot/protocols/SerialProtocol.h>
+#include <boost/asio/any_io_executor.hpp>
 
 
 using namespace foxtrot;
@@ -12,13 +14,13 @@ namespace foxtrot {
   namespace protocols
   {
 
-class  simpleTCP : public SerialProtocol
+class  simpleTCPLegacy : public SerialProtocol
 {
 public:
   
-    simpleTCP(const parameterset*const instance_parameters);
+    simpleTCPLegacy(const parameterset*const instance_parameters);
     
-    virtual ~simpleTCP();
+    virtual ~simpleTCPLegacy();
     
     void Init(const parameterset*const class_parameters) override;
     void Init(const unsigned port, const std::string& addr);
@@ -50,7 +52,41 @@ private:
     foxtrot::Logging _lg;
     
 }; 
-  
+
+    namespace detail
+    {
+      class simpleTCPasioImpl; 
+    }
+    
+    class simpleTCPasio : public SerialProtocol
+    {
+    public:
+      simpleTCPasio(const parameterset* const instance_parameters);
+      simpleTCPasio(const parameterset* const instance_parameters, boost::asio::any_io_executor exec)
+      virtual ~simpleTCPasio();
+
+      void Init(const parameterset* const class_parameters) override;
+      void Init(const unsigned port, const std::string& addr);
+
+      void open() override;
+      void close() override;
+
+      //blocking interface (traditional)
+      std::string read(unsigned int len, unsigned* actlen=nullptr) override;
+      void write(const std::string& data) override;
+
+      std::string read_until_endl(char endlchar = '\n') override;
+      unsigned bytes_available();
+    private:
+      std::unique_ptr<detail::simpleTCPasioImpl> pimpl;
+
+    };
+
+    
+
+    using simpleTCP = simpleTCPLegacy;
+
+    
 }; //namespace protocols
 
 }//namespace foxtrot

@@ -22,15 +22,17 @@
 
 
 using namespace foxtrot::protocols;
+using simpleTCP = foxtrot::protocols::simpleTCPLegacy;
+using foxtrot::protocols::simpleTCPasio;
 
 
-simpleTCP::simpleTCP(const parameterset*const instance_parameters)
+simpleTCP::simpleTCPLegacy(const parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters), _lg("simpleTCP")
 {
 
 }
 
-simpleTCP::~simpleTCP()
+simpleTCP::~simpleTCPLegacy()
 {
   
 #ifdef linux  
@@ -207,3 +209,36 @@ void simpleTCP::setchunk_size(unsigned int chunk)
   _chunk_size = chunk;
 }
 
+class foxtrot::protocols::detail::simpleTCPasioImpl
+{
+
+};
+
+
+
+
+simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters)
+  : SerialProtocol(instance_parameters)
+{
+
+}
+
+simpleTCPasio::~simpleTCPasio() {}
+
+void simpleTCPasio::Init(const parameterset *const instance_parameters) {}
+
+void simpleTCPasio::Init(const unsigned port, const std::string& addr) {}
+
+
+
+void simpleTCPasio::close() {}
+
+void simpleTCPasio::open() {}
+
+std::string simpleTCPasio::read(unsigned len, unsigned *actlen) { return ""; }
+
+void simpleTCPasio::write(const std::string& data) {}
+
+std::string simpleTCPasio::read_until_endl(char endlchar) { return ""; }
+
+unsigned simpleTCPasio::bytes_available() {return 0u;}
