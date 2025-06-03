@@ -1,6 +1,8 @@
 #include <boost/asio.hpp>
+#include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/experimental/cancellation_condition.hpp>
+#include <boost/system/system_error.hpp>
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -18,6 +20,7 @@
 
 #include <foxtrot/StubError.h>
 #include <foxtrot/ProtocolError.h>
+#include <foxtrot/ProtocolTimeoutError.h>
 
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/protocols/ProtocolUtilities.h>
@@ -306,11 +309,65 @@ void simpleTCPasio::Init()
 }
 
 
+struct timeout_manager
+{
+  foxtrot::Logging* lg = nullptr;
+  opttimeout timeout = std::nullopt;
+  boost::asio::any_io_executor exec;
+  
+  template <typename T, typename E>
+  boost::asio::awaitable<std::optional<T>, E> wrap_coro_timeout(boost::asio::awaitable<T,E>&& coro_in)
+  {
+    if(timeout.has_value())
+      {
+	boost::asio::system_timer tmr(exec);
+	tmr.expires_after(*timeout);
+
+	auto res = co_await (tmr.async_wait(boost::asio::use_awaitable)  || std::move(coro_in));
+	if(res.index() == 0)
+	  {
+	    //timer returned first, timeout;
+	    if(lg)
+	      lg->strm(sl::debug) << "asio operation timed out before completion...";
+	    co_return std::nullopt;
+	  }
+	if(lg)
+	  lg->strm(sl::debug) << "asio operation completed before timeout...";
+	co_return std::get<1>(res);
+      }
+    else
+      {
+	if(lg)
+	  lg->strm(sl::debug) << "no timeout set, timeout wrapper is a nop";
+	co_return (co_await std::move(coro_in));
+      }
+    
+  }
+};
+
+
+
 
 void simpleTCPasio::close() {
-  
-  
+  if(pimpl->sock != nullptr)
+    {
+      pimpl->lg.strm(sl::debug) << "shutting down and closing open socket";
+      try {
+	pimpl->sock->shutdown(boost::asio::socket_base::shutdown_type::shutdown_both);
+	pimpl->sock->close();
+	//reset unique_ptr
+	pimpl->sock.reset(nullptr);
+      }
+      catch(boost::system::system_error& err)
+	{
+	  pimpl->lg.strm(sl::error) << "error closing the socket: " << err.what();
+	  throw foxtrot::ProtocolError("error closing TCP socket, see log for details");
+	} 
+    }
 }
+
+
+
 
 void simpleTCPasio::open()
 {
@@ -338,20 +395,22 @@ void simpleTCPasio::open()
 						     resolve_results.end(),
 						     boost::asio::use_awaitable);
 
-	if(pimpl->timeout.has_value())
+
+	timeout_manager tman;
+	tman.timeout = pimpl->timeout;
+	tman.exec = pimpl->exec_;
+	tman.lg = &(pimpl->lg);
+	auto res = co_await tman.wrap_coro_timeout(std::move(conn_coro));
+
+	if(!res.has_value())
 	  {
-	    auto ddl_timer = boost::asio::system_timer(pimpl->exec_);
-	    ddl_timer.expires_after(*pimpl->timeout);
-	    auto res = co_await (std::move(conn_coro) || ddl_timer.async_wait(boost::asio::use_awaitable));
-
-	    
-	    
+	    pimpl->lg.strm(sl::error) << "connection timed out!";
+	    throw foxtrot::ProtocolTimeoutError("connection timed out!");
 	  }
-
-	
-	
-	pimpl->lg.strm(sl::debug) << "connected";
-      
+	else
+	  {
+	    pimpl->lg.strm(sl::debug) << "connected";
+	  }
       
       }
       catch (...)
@@ -375,15 +434,80 @@ void simpleTCPasio::open()
   
 }
 
-std::string simpleTCPasio::read(unsigned len, unsigned *actlen) { return ""; }
+std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
+  if(pimpl->sock ==nullptr)
+    {
+      pimpl->lg.strm(sl::info) << "socket was closed, read request re-open";
+      open();
+    }
+
+  std::vector<unsigned char> out;
+  out.resize(len);
+  
+  auto readfun = [this, &out, &actlen] () -> boost::asio::awaitable<std::exception_ptr>
+    {
+      try{
+	auto read_coro = boost::asio::async_read(*(pimpl->sock), boost::asio::buffer(out),
+						 boost::asio::use_awaitable);
+
+	timeout_manager tman;
+	tman.lg = &(pimpl->lg);
+	tman.timeout = pimpl->timeout;
+	tman.exec = pimpl->exec_;
+
+	auto res = co_await tman.wrap_coro_timeout(std::move(read_coro));
+
+	if(!res.has_value())
+	  {
+	    throw foxtrot::ProtocolTimeoutError("read timed out!");
+	  }
+	else
+	  {
+	    pimpl->lg.strm(sl::debug) << "actual bytes transferred: " << *res;
+	    *actlen = *res;
+	  }
+      }
+      catch(...)
+	{
+	  co_return std::current_exception();
+	}
+      co_return nullptr;
+
+    };
+
+
+  auto res = boost::asio::co_spawn(pimpl->exec_, readfun(), boost::asio::use_future);
+  pimpl->ensure_exec_run();
+  auto err = res.get();
+  if(err)
+    std::rethrow_exception(err);
+
+
+  string outstr;
+  std::copy(out.begin(), out.end(), outstr.begin());
+  return outstr;
+
+}
 
 void simpleTCPasio::write(const std::string &data) {
 
+  if(pimpl->sock == nullptr)
+    {
+      pimpl->lg.strm(sl::info) << "socket was closed, write request re-open";
+      open();
+    }
+
   auto writefun = [this, &data] () -> boost::asio::awaitable<std::exception_ptr>
     {
+      try {
       co_await boost::asio::async_write(*(pimpl->sock),
 					boost::asio::buffer(data),
 					boost::asio::use_awaitable);
+      }
+      catch(...)
+	{
+	  co_return std::current_exception();
+	}
       
       co_return nullptr;
     };
@@ -396,6 +520,53 @@ void simpleTCPasio::write(const std::string &data) {
   
 }
 
-std::string simpleTCPasio::read_until_endl(char endlchar) { return ""; }
+std::string simpleTCPasio::read_until_endl(char endlchar) {
+  if(pimpl->sock == nullptr)
+    {
+      pimpl->lg.strm(sl::info) << "socket was closed, write request re-open";
+      open();
+    }
+
+  unsigned len_read;
+  boost::asio::streambuf buf;
+  auto ruefun = [this, &buf, endlchar, &len_read] () -> boost::asio::awaitable<std::exception_ptr>
+    {
+      try {
+	auto ruecoro =  boost::asio::async_read_until(*(pimpl->sock),
+						      buf, endlchar,
+						      boost::asio::use_awaitable);
+
+	timeout_manager tman;
+	tman.exec = pimpl->exec_;
+	tman.timeout = pimpl->timeout;
+	tman.lg = &(pimpl->lg);
+
+	auto res = co_await tman.wrap_coro_timeout(std::move(ruecoro));
+	if(!res.has_value())
+	  throw foxtrot::ProtocolTimeoutError("read_until_endl timed out");
+
+	pimpl->lg.strm(sl::debug) << "read_until_endl actlen: " << *res;
+	len_read = *res;
+
+      }
+      catch(...)
+	{
+	  co_return std::current_exception();
+	}
+      co_return nullptr;
+    };
+
+  auto res = boost::asio::co_spawn(pimpl->exec_, ruefun(), boost::asio::use_future);
+  pimpl->ensure_exec_run();
+  auto  err = res.get();
+  if(err)
+    std::rethrow_exception(err);
+
+  std::istream iss(&buf);
+  std::string out;
+  std::getline(iss, out, endlchar);
+
+  return out;  
+ }
 
 unsigned simpleTCPasio::bytes_available() {return 0u;}

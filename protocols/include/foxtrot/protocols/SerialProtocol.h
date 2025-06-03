@@ -5,6 +5,7 @@
 #include <atomic>
 #include <optional>
 #include <chrono>
+#include <tuple>
 
 using std::chrono::milliseconds;
 using std::nullopt;
@@ -30,6 +31,7 @@ namespace foxtrot
    virtual string read_definite(unsigned len, opttimeout wait=nullopt);
 
    virtual string read(unsigned len, unsigned* actlen=nullptr) = 0;
+    virtual std::tuple<string, unsigned> read_with_actlen(unsigned len); 
    virtual string read_until_endl( char endlchar = '\n') = 0;
 
    

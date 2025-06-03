@@ -62,3 +62,11 @@ const foxtrot::parameterset& foxtrot::CommunicationProtocol::GetParameters() con
   return _params;
 
 }
+
+
+std::tuple<string, unsigned> foxtrot::SerialProtocol::read_with_actlen(unsigned len)
+{
+  unsigned actlen;
+  auto dat = read(len, &actlen);
+  return {dat, actlen};
+}
