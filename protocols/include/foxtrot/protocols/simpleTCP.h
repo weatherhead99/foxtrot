@@ -5,7 +5,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/protocols/SerialProtocol.h>
 #include <boost/asio/any_io_executor.hpp>
-
+#include <optional>
 
 using namespace foxtrot;
 
@@ -13,6 +13,8 @@ namespace foxtrot {
   
   namespace protocols
   {
+    using std::optional;
+    using std::nullopt;
 
 class  simpleTCPLegacy : public SerialProtocol
 {
@@ -55,18 +57,22 @@ private:
 
     namespace detail
     {
-      class simpleTCPasioImpl; 
+      struct simpleTCPasioImpl; 
     }
-    
+
     class simpleTCPasio : public SerialProtocol
     {
     public:
-      simpleTCPasio(const parameterset* const instance_parameters);
-      simpleTCPasio(const parameterset* const instance_parameters, boost::asio::any_io_executor exec)
+      simpleTCPasio(const parameterset* const instance_parameters, optional<boost::asio::any_io_executor> exec=nullopt);
+      simpleTCPasio(const string*  addr=nullptr, optional<unsigned> port=nullopt,
+		    opttimeout timeout=nullopt,
+		    optional<boost::asio::any_io_executor> exec=nullopt);
       virtual ~simpleTCPasio();
 
       void Init(const parameterset* const class_parameters) override;
-      void Init(const unsigned port, const std::string& addr);
+      void Init(const string* const addr, optional<unsigned> port=nullopt,
+		opttimeout timeout=nullopt);
+      void Init();
 
       void open() override;
       void close() override;
@@ -82,7 +88,7 @@ private:
 
     };
 
-    
+
 
     using simpleTCP = simpleTCPLegacy;
 

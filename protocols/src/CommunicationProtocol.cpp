@@ -42,7 +42,6 @@ void foxtrot::CommunicationProtocol::close()
 
 void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters)
 {
-  
 
   if(class_parameters != nullptr)    
   {
@@ -51,7 +50,6 @@ void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const cla
   
     newparams.insert(_params.begin(), _params.end());
     std::swap(_params,newparams);
-
 
   }
 

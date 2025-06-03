@@ -21,6 +21,10 @@ namespace foxtrot
    
  public:
     SerialProtocol(const parameterset*const instance_parameters);
+
+    template<typename... Ts>
+    SerialProtocol(Ts&& ...pargs)
+      : CommunicationProtocol(std::forward<Ts>(pargs)...) {};
    
    virtual void write(const string& data) = 0;
    virtual string read_definite(unsigned len, opttimeout wait=nullopt);

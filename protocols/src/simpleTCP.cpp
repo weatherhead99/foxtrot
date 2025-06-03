@@ -1,3 +1,6 @@
+#include <boost/asio.hpp>
+#include <boost/asio/experimental/awaitable_operators.hpp>
+#include <boost/asio/experimental/cancellation_condition.hpp>
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -12,7 +15,6 @@
 #include <unistd.h>
 #endif
 
-#include <boost/variant.hpp>
 
 #include <foxtrot/StubError.h>
 #include <foxtrot/ProtocolError.h>
@@ -20,11 +22,11 @@
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/protocols/ProtocolUtilities.h>
 
-
+using namespace std::literals;
 using namespace foxtrot::protocols;
 using simpleTCP = foxtrot::protocols::simpleTCPLegacy;
 using foxtrot::protocols::simpleTCPasio;
-
+using namespace boost::asio::experimental::awaitable_operators;
 
 simpleTCP::simpleTCPLegacy(const parameterset*const instance_parameters)
 : SerialProtocol(instance_parameters), _lg("simpleTCP")
@@ -209,35 +211,190 @@ void simpleTCP::setchunk_size(unsigned int chunk)
   _chunk_size = chunk;
 }
 
-class foxtrot::protocols::detail::simpleTCPasioImpl
+struct foxtrot::protocols::detail::simpleTCPasioImpl
 {
+  simpleTCPasioImpl() : lg("simpleTCPasio") {};
+  
+  boost::asio::any_io_executor exec_;
+  foxtrot::Logging lg;
+
+  std::string addr;
+  unsigned port;
+
+  std::unique_ptr<boost::asio::io_context> ioptr = nullptr;
+  opttimeout timeout;
+  std::unique_ptr<boost::asio::ip::tcp::socket> sock = nullptr;
+
+  bool use_internal_blocking_loop = false;
+  
+  void setup_executor(optional<boost::asio::any_io_executor> exec)
+  {
+    if(exec.has_value())
+      {
+       exec_ = *exec;
+      }
+    else
+      {
+	lg.strm(sl::warning) << "using default executor. Maybe breakage...";
+	ioptr = std::make_unique<boost::asio::io_context>();
+	exec_ = ioptr->get_executor();
+	use_internal_blocking_loop = true;
+      }
+  }
+
+  void ensure_exec_run()
+  {
+    if(use_internal_blocking_loop)
+      ioptr->run();
+  }
 
 };
 
+using namespace foxtrot::protocols;
 
 
-
-simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters)
+simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters,
+			     optional<boost::asio::any_io_executor> exec)
   : SerialProtocol(instance_parameters)
 {
+  pimpl = std::make_unique<detail::simpleTCPasioImpl>();
+  pimpl->setup_executor(exec);
+}
+
+simpleTCPasio::simpleTCPasio(const string* addr, optional<unsigned> port,
+			     opttimeout timeout,
+			     optional<boost::asio::any_io_executor> exec)
+  : SerialProtocol( std::make_pair("port", port.value_or(0u)),
+		    std::make_pair("addr", (addr == nullptr) ? ""s : *addr))
+{
+  pimpl = std::make_unique<detail::simpleTCPasioImpl>();
+  pimpl->setup_executor(exec);
+  pimpl->timeout = timeout;
 
 }
 
 simpleTCPasio::~simpleTCPasio() {}
 
-void simpleTCPasio::Init(const parameterset *const instance_parameters) {}
+void simpleTCPasio::Init(const parameterset *const class_parameters)
+{
+  foxtrot::CommunicationProtocol::Init(class_parameters);
+  extract_parameter_value(pimpl->port, _params, "port");
+  extract_parameter_value(pimpl->addr, _params, "addr");
 
-void simpleTCPasio::Init(const unsigned port, const std::string& addr) {}
+  //TODO: open  socket here!
+  open();
+}
+
+void simpleTCPasio::Init(const std::string* addr, std::optional<unsigned> port,
+			 opttimeout timeout)
+{
+  if(port.has_value())
+    pimpl->port = *port;
+  if(addr != nullptr)
+    pimpl->addr = *addr;
+
+  pimpl->timeout = timeout;
+  open();
+}
+
+void simpleTCPasio::Init()
+{
+  extract_parameter_value(pimpl->port, _params, "port");
+  extract_parameter_value(pimpl->addr, _params, "addr");
+
+  open();
+}
 
 
 
-void simpleTCPasio::close() {}
+void simpleTCPasio::close() {
+  
+  
+}
 
-void simpleTCPasio::open() {}
+void simpleTCPasio::open()
+{
+  boost::asio::ip::tcp::resolver resolver(pimpl->exec_);
+  if(pimpl->sock == nullptr)
+    {
+      pimpl->lg.strm(sl::debug) << "new socket object";
+      pimpl->sock = std::make_unique<boost::asio::ip::tcp::socket>(pimpl->exec_);
+    }
+
+    pimpl->lg.strm(sl::debug) << "resolving and opening socket";
+    auto connfun = [&resolver, this] () ->boost::asio::awaitable<std::exception_ptr> {
+
+      pimpl->lg.strm(sl::trace) << "dispatching async_resolve...";
+      try{
+	pimpl->lg.strm(sl::trace) << "port string: " << std::to_string(pimpl->port);
+	pimpl->lg.strm(sl::trace) << "addr string: " << pimpl->addr;	
+
+	auto resolve_results = co_await resolver.async_resolve(pimpl->addr, std::to_string(pimpl->port),
+							   boost::asio::use_awaitable);
+	pimpl->lg.strm(sl::debug) << "resolved: " << resolve_results.size() << " possible results";
+
+	auto conn_coro =  boost::asio::async_connect(*(pimpl->sock),
+						     resolve_results.begin(),
+						     resolve_results.end(),
+						     boost::asio::use_awaitable);
+
+	if(pimpl->timeout.has_value())
+	  {
+	    auto ddl_timer = boost::asio::system_timer(pimpl->exec_);
+	    ddl_timer.expires_after(*pimpl->timeout);
+	    auto res = co_await (std::move(conn_coro) || ddl_timer.async_wait(boost::asio::use_awaitable));
+
+	    
+	    
+	  }
+
+	
+	
+	pimpl->lg.strm(sl::debug) << "connected";
+      
+      
+      }
+      catch (...)
+	{
+	  co_return std::current_exception();
+	}
+
+      co_return nullptr;
+  };
+
+  //this function is synchronous
+  auto res = boost::asio::co_spawn(pimpl->exec_, connfun(), boost::asio::use_future);
+  pimpl->lg.strm(sl::trace) << "coroutine posted";
+  pimpl->ensure_exec_run();
+
+  pimpl->lg.strm(sl::trace) << "waiting on std::future...";  
+
+  auto err = res.get();
+  if(err)
+    std::rethrow_exception(err);
+  
+}
 
 std::string simpleTCPasio::read(unsigned len, unsigned *actlen) { return ""; }
 
-void simpleTCPasio::write(const std::string& data) {}
+void simpleTCPasio::write(const std::string &data) {
+
+  auto writefun = [this, &data] () -> boost::asio::awaitable<std::exception_ptr>
+    {
+      co_await boost::asio::async_write(*(pimpl->sock),
+					boost::asio::buffer(data),
+					boost::asio::use_awaitable);
+      
+      co_return nullptr;
+    };
+
+  auto  res = boost::asio::co_spawn(pimpl->exec_, writefun(), boost::asio::use_future);
+  pimpl->ensure_exec_run();
+  auto err = res.get();
+  if(err)
+    std::rethrow_exception(err);
+  
+}
 
 std::string simpleTCPasio::read_until_endl(char endlchar) { return ""; }
 
