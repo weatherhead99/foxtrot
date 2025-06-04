@@ -31,8 +31,14 @@ using simpleTCP = foxtrot::protocols::simpleTCPLegacy;
 using foxtrot::protocols::simpleTCPasio;
 using namespace boost::asio::experimental::awaitable_operators;
 
+
+foxtrot::protocols::simpleTCPBase::simpleTCPBase(
+    const parameterset *const instance_parameters)
+  : SerialProtocol(instance_parameters) {};    
+
+
 simpleTCP::simpleTCPLegacy(const parameterset*const instance_parameters)
-: SerialProtocol(instance_parameters), _lg("simpleTCP")
+: simpleTCPBase(instance_parameters), _lg("simpleTCP")
 {
 
 }
@@ -266,7 +272,7 @@ using namespace foxtrot::protocols;
 
 simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters,
 			     optional<boost::asio::any_io_executor> exec)
-  : SerialProtocol(instance_parameters)
+  : simpleTCPBase(instance_parameters)
 {
   pimpl = std::make_unique<detail::simpleTCPasioImpl>();
   pimpl->setup_executor(exec);
@@ -275,7 +281,7 @@ simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters,
 simpleTCPasio::simpleTCPasio(const string* addr, optional<unsigned> port,
 			     opttimeout timeout,
 			     optional<boost::asio::any_io_executor> exec)
-  : SerialProtocol( std::make_pair("port", port.value_or(0u)),
+  : simpleTCPBase( std::make_pair("port", port.value_or(0u)),
 		    std::make_pair("addr", (addr == nullptr) ? ""s : *addr))
 {
   pimpl = std::make_unique<detail::simpleTCPasioImpl>();

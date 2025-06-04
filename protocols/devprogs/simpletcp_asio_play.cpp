@@ -3,6 +3,7 @@
 #include <foxtrot/Logging.h>
 #include <memory>
 #include <chrono>
+#include <thread>
 
 using std::cout;
 using std::endl;
@@ -16,6 +17,19 @@ const string addr = "192.168.6.60";
 const unsigned port = 4242u;
 const std::chrono::milliseconds timeout=20ms;
 
+void get_archon_status(auto proto, foxtrot::Logging& lg)
+{
+   lg.strm(sl::info) << "writing status request";
+  proto->write(">01STATUS\n");
+
+  auto response = proto->read_until_endl();
+
+  cout << "response: " << response << endl;
+  
+  
+}
+
+
 
 int main(int argc, char** argv)
 {
@@ -26,11 +40,15 @@ int main(int argc, char** argv)
   auto prot = std::make_shared<foxtrot::protocols::simpleTCPasio>(&addr, port, timeout);
   prot->Init();
 
-  lg.strm(sl::info) << "writing status request";
-  prot->write(">01STATUS\n");
+  get_archon_status(prot, lg);
 
-  auto response = prot->read_until_endl();
+  cout << "closing port..." << endl;
+  prot->close();
 
-  cout << "response: " << response << endl;
+  std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+  cout << "another status request" << endl;
+
+  get_archon_status(prot, lg);
 
 }

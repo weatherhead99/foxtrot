@@ -15,52 +15,65 @@ namespace foxtrot {
   {
     using std::optional;
     using std::nullopt;
+    
+    class simpleTCPBase : public SerialProtocol
+    {
+    public:
+      virtual unsigned bytes_available() = 0;
+      simpleTCPBase(const parameterset* const instance_parameters);
+      template<typename... Ts>
+      simpleTCPBase(Ts&& ...pargs)
+	: SerialProtocol(std::forward<Ts>(pargs)...) {};
+      
 
-class  simpleTCPLegacy : public SerialProtocol
-{
-public:
-  
-    simpleTCPLegacy(const parameterset*const instance_parameters);
+    };
+
     
-    virtual ~simpleTCPLegacy();
+    class  simpleTCPLegacy : public simpleTCPBase
+    {
+    public:
+      
+      simpleTCPLegacy(const parameterset*const instance_parameters);
     
-    void Init(const parameterset*const class_parameters) override;
-    void Init(const unsigned port, const std::string& addr);
+      virtual ~simpleTCPLegacy();
     
-    virtual void open() override;
-    virtual void close() override;
+      void Init(const parameterset*const class_parameters) override;
+      void Init(const unsigned port, const std::string& addr);
+    
+      virtual void open() override;
+      virtual void close() override;
 
   
-    std::string read(unsigned int len, unsigned* actlen = nullptr) override;
-    void write(const std::string& data) override;
+      std::string read(unsigned int len, unsigned* actlen = nullptr) override;
+      void write(const std::string& data) override;
     
-    std::string read_until_endl(char endlchar = '\n') override;
+      std::string read_until_endl(char endlchar = '\n') override;
+      
+      void setchunk_size(unsigned chunk);
+      unsigned getchunk_size();
     
-    void setchunk_size(unsigned chunk);
-    unsigned getchunk_size();
+      unsigned bytes_available() override;
     
-    unsigned bytes_available();
+      static bool verify_instance_parameters(const parameterset& instance_parameters);
+      static bool verify_class_parameters(const parameterset& class_parameters);
     
-    static bool verify_instance_parameters(const parameterset& instance_parameters);
-    static bool verify_class_parameters(const parameterset& class_parameters);
+    private:
+      int _chunk_size = 1024;
+      int _port;
+      std::string _addr;
     
-private:
-    int _chunk_size = 1024;
-    int _port;
-    std::string _addr;
+      int _sockfd;
     
-    int _sockfd;
+      foxtrot::Logging _lg;
     
-    foxtrot::Logging _lg;
-    
-}; 
+    }; 
 
     namespace detail
     {
       struct simpleTCPasioImpl; 
     }
 
-    class simpleTCPasio : public SerialProtocol
+    class simpleTCPasio : public simpleTCPBase
     {
     public:
       simpleTCPasio(const parameterset* const instance_parameters, optional<boost::asio::any_io_executor> exec=nullopt);
@@ -82,12 +95,11 @@ private:
       void write(const std::string& data) override;
 
       std::string read_until_endl(char endlchar = '\n') override;
-      unsigned bytes_available();
+      unsigned bytes_available() override;
     private:
       std::unique_ptr<detail::simpleTCPasioImpl> pimpl;
 
     };
-
 
 
     using simpleTCP = simpleTCPLegacy;
