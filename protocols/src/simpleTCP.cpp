@@ -248,7 +248,15 @@ struct foxtrot::protocols::detail::simpleTCPasioImpl
   void ensure_exec_run()
   {
     if(use_internal_blocking_loop)
-      ioptr->run();
+      {
+	if(ioptr->stopped())
+	  {
+	    lg.strm(sl::debug) << "restarting internal io_context";
+	    ioptr->restart();
+	  }
+	ioptr->run();
+
+      }
   }
 
 };
@@ -418,6 +426,7 @@ void simpleTCPasio::open()
 	  co_return std::current_exception();
 	}
 
+      pimpl->lg.strm(sl::trace) << "returning no error condition";
       co_return nullptr;
   };
 
@@ -512,8 +521,10 @@ void simpleTCPasio::write(const std::string &data) {
       co_return nullptr;
     };
 
+
   auto  res = boost::asio::co_spawn(pimpl->exec_, writefun(), boost::asio::use_future);
   pimpl->ensure_exec_run();
+  pimpl->lg.strm(sl::trace) << "write() waiting for std::future";
   auto err = res.get();
   if(err)
     std::rethrow_exception(err);

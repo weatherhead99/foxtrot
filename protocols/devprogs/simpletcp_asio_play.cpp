@@ -29,7 +29,8 @@ int main(int argc, char** argv)
   lg.strm(sl::info) << "writing status request";
   prot->write(">01STATUS\n");
 
-  
-  
+  auto response = prot->read_until_endl();
+
+  cout << "response: " << response << endl;
 
 }
