@@ -1,14 +1,14 @@
 from .protos.ft_types_pb2 import ft_variant, ft_simplevariant, ft_enum, ft_struct, ft_homog_array
 from .protos.ft_types_pb2 import simplevalue_types, variant_types
 from .protos.ft_types_pb2 import variant_descriptor, struct_descriptor, enum_descriptor, homog_array_descriptor
-from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple
-from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE, HOMOG_ARRAY_TYPE
+from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple, mapping_descriptor, ft_mapping
+from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE, HOMOG_ARRAY_TYPE, MAPPING_TYPE
 from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
 from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE
 import struct
 import warnings
-from typing import Iterable
+from typing import Iterable, Any
 
 
 def get_struct_string(dtp, length: int) -> str:
@@ -46,6 +46,8 @@ def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
         out = ft_union_from_value(val, descriptor)
     elif vartype == TUPLE_TYPE:
         out.tupleval.CopyFrom(ft_tuple_from_value(val, descriptor.tuple_desc))
+    elif vartype == MAPPING_TYPE:
+        out.mappingval.CopyFrom(ft_mapping_from_value(val, descriptor.mapping_desc))
     else:
         raise RuntimeError("couldn't determine type from descriptor")
     return out
@@ -148,6 +150,17 @@ def ft_union_from_value(val,
         raise RuntimeError("failed to convert union value!")
 
 
+def ft_mapping_from_value(val: dict[Any, Any],
+                          descriptor: mapping_descriptor) -> ft_mapping:
+    out = ft_mapping()
+    #check if all the types of the dictionary keys and values are equal
+    for ind,(k,v) in enumerate(val.items()):
+        outk = ft_variant_from_value(k, descriptor.key_type)
+        outv = ft_variant_from_value(v, descriptor.value_type)
+        out.keys.append(outk)
+        out.value[ind] = outv
+    return out
+
 
 def value_from_ft_variant(variant):
     whichattr = variant.WhichOneof("value")
@@ -161,9 +174,15 @@ def value_from_ft_variant(variant):
         return value_from_ft_tuple(variant.tupleval)
     elif whichattr == "arrayval":
         return value_from_ft_array(variant.arrayval)
+    elif whichattr == "mappingval":
+        return value_from_ft_mapping(variant.mappingval)
     else:
         raise ValueError("couldn't determine variant type")
 
+def value_from_ft_mapping(variant: ft_variant) -> dict:
+    vfv = value_from_ft_variant
+    out = {vfv(ki) : vfv(variant.values[ind]) for ind, ki in enumerate(variant.keys)}
+    return out
 
 def value_from_ft_array(variant: ft_homog_array):
     whichattr = variant.WhichOneof("array")
@@ -241,6 +260,10 @@ def string_describe_ft_variant(descriptor: variant_descriptor):
     elif descriptor.variant_type == HOMOG_ARRAY_TYPE:
         descstr = string_describe_ft_variant(descriptor.homog_array_desc.value_type)
         return "array[%s]" % descstr
+    elif descriptor.variant_type == MAPPING_TYPE:
+        keystr = string_describe_ft_variant(descriptor.mapping_desc.key_type)
+        valstr = string_describe_ft_variant(descriptor.mapping_desc.value_type)
+        return f"mapping[{keystr}, {valstr}]"
     else:
         warnings.warn("encountered unknown variant type when trying to describe")
         return f"cpptype[{descriptor.cpp_type_name}]"

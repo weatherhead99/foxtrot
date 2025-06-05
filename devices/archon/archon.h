@@ -182,6 +182,7 @@ namespace foxtrot {
     
     void settapline(int n, const std::string& tapline);
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset);
+    void setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset);
     
     void settrigoutpower(bool onoff);
     bool gettrigoutpower();
@@ -254,6 +255,7 @@ namespace foxtrot {
     std::map<std::string,int> _constantmap;
     
     std::map<unsigned char, unsigned char> _ADtaplinemap;
+    std::optional<bool> _using_AM_taps = std::nullopt;
     
     int _config_lines =0;
     int _taplines = 0;

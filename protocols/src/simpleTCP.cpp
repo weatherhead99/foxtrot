@@ -586,4 +586,13 @@ std::string simpleTCPasio::read_until_endl(char endlchar) {
   return out;  
  }
 
-unsigned simpleTCPasio::bytes_available() {return 0u;}
+ unsigned simpleTCPasio::bytes_available() {
+   if(pimpl->sock == nullptr)
+     {
+       pimpl->lg.strm(sl::warning) << "asked for bytes_available of a closed socket!";
+       return 0u;
+     }
+
+   return pimpl->sock->available();
+
+ }

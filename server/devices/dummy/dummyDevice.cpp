@@ -328,6 +328,38 @@ bool foxtrot::devices::dummyDevice::methodNamedSomethingSilly()
 bool foxtrot::devices::dummyDevice::methodNamedSomethingSilly(bool arg)
 { return arg;}
 
+std::map<string, int> foxtrot::devices::dummyDevice::returns_strintmap() const
+{
+  std::map<string, int> out{
+    {"one", 1},
+    {"two", 2},
+    {"three", 3}
+  } ;
+  return out;
+}
+
+std::map<int, string> foxtrot::devices::dummyDevice::returns_intstrmap() const
+{
+  std::map<int, string> out{
+    {1, "one"},
+    {2, "two"},
+    {3, "three"}
+  };
+
+  return out;
+}
+
+std::unordered_map<string, string> foxtrot::devices::dummyDevice::returns_unorderedmap() const
+{
+  std::unordered_map<string, string> out {
+    {"true", "vrai"},
+    {"false", "faux"},
+    {"take the bins out", "sortir les poubelles"}
+  };
+
+  return out;
+}
+
 
 
 RTTR_REGISTRATION
@@ -379,7 +411,12 @@ RTTR_REGISTRATION
    .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
    .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector)
    .method("methodNamedSomethingSilly", select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
-   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))(parameter_names("arg"));
+   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))(parameter_names("arg"))
+   .method("returns_strintmap", &dummyDevice::returns_strintmap)
+   .method("returns_intstrmap", &dummyDevice::returns_intstrmap)
+   .method("returns_unorderedmap", &dummyDevice::returns_unorderedmap)
+
+   ;
    
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
@@ -413,6 +450,11 @@ RTTR_REGISTRATION
      value("dummy_1", dummyEnum::dummy_1),
      value("dummy_2", dummyEnum::dummy_2)
      );
- 
+
+registration::class_<std::unordered_map<string, string>>(
+    "std::unordered_map<std::string,std::string>")
+  .constructor()(policy::ctor::as_object); 
  
 }
+    
+

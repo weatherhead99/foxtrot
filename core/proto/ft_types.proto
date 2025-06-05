@@ -49,6 +49,7 @@ enum variant_types
     HOMOG_ARRAY_TYPE=4;
     UNION_TYPE = 5;
     DYNAMIC_TYPE=6;
+    MAPPING_TYPE = 7;
 }
 
 message variant_descriptor
@@ -64,6 +65,15 @@ message variant_descriptor
   //new in 0.3.0
     string cpp_type_name = 8;
     bool is_nullable = 10;
+
+  //new mapping type
+    mapping_descriptor mapping_desc = 11;
+}
+
+message mapping_descriptor
+{
+  variant_descriptor key_type =1;
+  variant_descriptor value_type = 2;
 }
 
 message struct_descriptor
@@ -106,6 +116,8 @@ message ft_variant {
 
 	//0.3.0 new types
 	ft_homog_array arrayval = 5;
+
+	ft_mapping mappingval = 6;
     }
 
   //0.3.0 new values
@@ -125,6 +137,15 @@ message ft_simplevariant {
     bool is_void = 7;
 }
 
+
+message ft_mapping {
+  //a message type cannot be the key of a protobuf map,
+  //thererfore to transport a generic map (e.g. std::map or
+  //std::unordered_map), we send two maps, with a common
+  //scalar being the connective
+  repeated ft_variant keys = 1;
+  map<uint32, ft_variant> values = 2;
+}
 
 message ft_struct {
     string struct_name = 1;

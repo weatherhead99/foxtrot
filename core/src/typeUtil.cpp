@@ -587,6 +587,23 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
             lg->strm(sl::trace) << "wrote output array definition";
    
     }
+    else if(tp.is_associative_container())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "type is an associative container...";
+
+	auto view = var.create_associative_view();
+	if(view.is_key_only_type())
+	  throw std::logic_error("can't deal with key-only associative containers yet!");
+
+	auto keytp = view.get_key_type();
+
+	//NOTE: one day, specialize string key type into ft_struct, it's likely faster
+	if(lg)
+	  lg->strm(sl::trace) << "type is an associative container with general key type.";
+	ft_mapping* outmap = out.mutable_mappingval();
+	*outmap = get_mapping_wire_type(var, lg);
+      }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() && is_POD_struct(tp))
     {
         if(lg)
@@ -616,9 +633,52 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
         ft_simplevariant* simplevarval = out.mutable_simplevar();
         *simplevarval = get_simple_variant_wire_type(var, lg, unwrap);
     }
-
     return out;
 };
+
+
+// NOTE: weirdly missing get_union_wire_type?? Maybe not needed I guess
+
+foxtrot::ft_mapping foxtrot::get_mapping_wire_type(const rttr::variant& var, Logging* lg)
+{
+  ft_mapping out;
+  auto view = var.create_associative_view();
+
+  if(! view.is_valid())
+    throw std::logic_error("received type that is not a mapping");
+
+
+  auto out_valuemap = out.mutable_values();
+  int idx = 0;
+
+  //TODO: should special case when a mapping is just a struct (i.e. key type is string)
+  
+  for(auto& item: view)
+    {
+      rttr::variant key;
+      if(item.first.get_type().is_wrapper())
+	key = item.first.extract_wrapped_value();
+      else
+	key = item.first;
+
+      ft_variant* outkey = out.add_keys();
+      *outkey = get_variant_wire_type(key, lg);
+
+      rttr::variant val;
+      if(item.second.get_type().is_wrapper())
+	val = item.second.extract_wrapped_value();
+      else
+	val = item.second;
+
+      
+      auto outval = out.mutable_values();
+      outval->operator[](idx++) = get_variant_wire_type(val, lg);
+
+    }
+
+  return out;
+}
+
 
 
 rttr::variant foxtrot::wire_type_to_variant(const ft_enum& wiretp, 
@@ -939,7 +999,15 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
 	auto* arraydesc = out.mutable_homog_array_desc();
 	*arraydesc = describe_array(tp, lg);
 
-      }    
+      }
+    else if(tp.is_associative_container())
+      {
+	if(lg)
+	  lg->strm(sl::trace) << "type is associative container";
+	out.set_variant_type(variant_types::MAPPING_TYPE);
+	auto* desc = out.mutable_mapping_desc();
+	*desc = describe_mapping(tp, lg);
+      }
     else if(tp.is_class() && tp != rttr::type::get<std::string>() 
             && is_POD_struct(tp))
     {
@@ -1044,8 +1112,70 @@ homog_array_descriptor foxtrot::describe_array(const rttr::type& tp,
 
   *(out.mutable_value_type()) = describe_type(valuetp, lg);
   //for now, all arrays are "encoded"
-  
+
   return out;
+}
+
+foxtrot::mapping_descriptor foxtrot::describe_mapping(const rttr::type& tp, Logging* lg)
+{
+  foxtrot::mapping_descriptor out;
+  auto emptyvar = tp.create();
+
+  rttr::type keytp = rttr::type::get<void>();
+  rttr::type valtp = rttr::type::get<void>();
+
+  if(!emptyvar.is_valid())
+    {
+      if(lg)
+	lg->strm(sl::debug) << "creating empty type failed";
+
+      //attempt with  template values
+      if(lg)
+	lg->strm(sl::debug) << "attempting value via template types";
+      if(!tp.is_template_instantiation())
+	{
+	  if(lg)
+	    lg->strm(sl::error) << "key and value type deduction failed";
+	  throw std::logic_error("key and value type deduction failed");
+	}
+
+      auto templargs = tp.get_template_arguments();
+      if(templargs.size() < 2)
+	{
+	  if(lg)
+	    {
+	      lg->strm(sl::error) << "size of template arguments is: " << templargs.size();
+	      for(const auto& tplarg : templargs)
+		lg->strm(sl::error) << "template argument name: " << tplarg.get_name();
+	    }
+	  
+	throw std::logic_error("can't deduce associative type witthout 2 template arguments");
+	}
+
+      auto templiter = templargs.cbegin();
+      keytp = *templiter;
+      valtp = *(++templiter);
+    }
+  else
+    {
+      if(lg)
+	lg->strm(sl::debug) << "managed to create empty type";
+      auto assocview = emptyvar.create_associative_view();
+      if(!assocview.is_valid())
+	throw std::logic_error("created invalid associative view!");
+
+     keytp = assocview.get_key_type();
+     valtp = assocview.get_value_type();
+
+    }
+
+  variant_descriptor* keytpdesc = out.mutable_key_type();
+  *keytpdesc = describe_type(keytp);
+
+  variant_descriptor* valtpdesc = out.mutable_value_type();
+  *valtpdesc = describe_type(valtp);
+     return out;
+ 
 }
 
 

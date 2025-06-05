@@ -3,15 +3,10 @@
 #include <foxtrot/parameter_defs.hh>
 #include <foxtrot/Logging.h>
 #include <utility>
+#include <optional>
 
 namespace foxtrot
 {
-
-
-
-  // class parameter_visit : public std::static_visitor<>
-  // {
-  // };
 
 
   class  CommunicationProtocol
@@ -32,6 +27,8 @@ namespace foxtrot
 
     virtual void open();
     virtual void close();
+
+    virtual std::optional<bool> is_open();
 
     static bool verify_instance_parameters(const parameterset& instance_parameters);
     static bool verify_class_parameters(const parameterset& class_parameters);

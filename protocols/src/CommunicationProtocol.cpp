@@ -40,6 +40,13 @@ void foxtrot::CommunicationProtocol::close()
   lg.strm(sl::warning) << "unimplemented close() method called in communication protocol";
 }
 
+std::optional<bool> foxtrot::CommunicationProtocol::is_open()
+{
+  lg.strm(sl::warning) << "unimplemented is_open() method in communication protocol";
+  return std::nullopt;
+}
+
+
 void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters)
 {
 

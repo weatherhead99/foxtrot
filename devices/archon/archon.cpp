@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <stdexcept>
 #include <thread>
 #include <chrono>
 #include <locale>
@@ -756,26 +757,59 @@ void devices::archon::settapline(int n, const string& tapline)
   
 }
 
+std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
+{
+  char LRchar = LR ? 'R' : 'L';
+  auto taplinestr = std::format("{}{},{},{}", defn, LRchar, gain, offset);
+  return taplinestr;
+
+}
+			     
+
 void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, unsigned short offset)
 {
-        char LRchar = LR ? 'R' : 'L';
-        std::ostringstream oss;
-        oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
+        // char LRchar = LR ? 'R' : 'L';
+        // std::ostringstream oss;
+        // oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
         
         //WARNING: all sorts of edge cases that could blow up later here
-        
-        try 
-        {
-            int tline = _ADtaplinemap.at(AD);
-            settapline(tline,oss.str());
-        }
-        catch(std::out_of_range& err)
-        {
-            _ADtaplinemap[AD] = _taplines;
-            settapline(_taplines,oss.str());
-                
-        }
-        
+        //UPDATE (2025!!!).... yep, past me present me etc etc
+  if(_using_AM_taps.value_or(false) == true)
+    throw std::runtime_error("attempting to set an AD tap on an Archon already configured with AM taps!");
+
+  auto taplinestr = assemble_tapline("AD", AD, LR, gain, offset);
+
+	if(_ADtaplinemap.contains(AD))
+	  {
+	    int tline = _ADtaplinemap.at(AD);
+	    settapline(tline, taplinestr);
+	  }
+	else {
+	  _ADtaplinemap[AD] = _taplines;
+	  settapline(_taplines, taplinestr);
+	    }
+	_using_AM_taps = false;
+	
+}
+
+void foxtrot::devices::archon::setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset)
+{
+  if(_using_AM_taps.value_or(true) == false)
+    throw std::runtime_error("attempting to set an AM tap on an Archon already using AD taps!");
+  auto taplinestr = assemble_tapline("AM",  AD,  LR, gain, offset);
+
+  if(_ADtaplinemap.contains(AD))
+    {
+      int tline = _ADtaplinemap.at(AD);
+      settapline(tline, taplinestr);
+    }
+  else {
+    _ADtaplinemap[AD] = _taplines;
+    settapline(_taplines, taplinestr);
+      }
+
+  _using_AM_taps = true;
+
 }
 
 

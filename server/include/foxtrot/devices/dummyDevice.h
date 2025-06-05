@@ -7,6 +7,8 @@
 #include <any>
 #include <variant>
 #include <optional>
+#include <map>
+#include <unordered_map>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
@@ -110,6 +112,13 @@ namespace foxtrot
       //test methods for repeated names
       bool methodNamedSomethingSilly();
       bool methodNamedSomethingSilly(bool arg);
+
+
+      //test methods for returning dictionaries/maps
+      std::map<string, int> returns_strintmap() const;
+      std::map<int, string> returns_intstrmap() const;
+
+      std::unordered_map<string, string> returns_unorderedmap() const;
 
     protected:
         
