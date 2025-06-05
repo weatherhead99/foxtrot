@@ -34,6 +34,7 @@ namespace devices
     class ArchonModule : public Device
     {
       friend class foxtrot::devices::archon;
+      friend class foxtrot::devices::archon_legacy;
       RTTR_ENABLE(Device);
     public:
       
@@ -41,7 +42,6 @@ namespace devices
       const std::array<char,3>& getVersion() const;
       short unsigned getRev() const;
       virtual const std::string getTypeName() const = 0;
-            
       void writeConfigKey(const string& key, const string& val);
       template<detail::ArchonNumeric T>
       void writeConfigKey(const string& key, T& val)
@@ -69,7 +69,7 @@ namespace devices
 	    void apply();
 	    
 	    
-	    const archon& getArchon();
+	    archon& getArchon();
 	    short unsigned getmodpos();
 
       template<typename T>

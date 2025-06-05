@@ -1,9 +1,11 @@
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <map>
 #include <vector>
+#include <optional>
 #include <mutex>
 
 #include <boost/iterator/iterator_concepts.hpp>
@@ -15,10 +17,12 @@
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/Logging.h>
 
-
+#include "archon_module_mapper.hh"
 
 
 using std::string;
+using std::optional;
+using std::vector;
 typedef std::map<std::string,std::string> ssmap;
 
 
@@ -46,13 +50,115 @@ namespace foxtrot {
 
     }
 
-  
+    using HRTimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+    enum class archon_buffer_mode : short unsigned
+      {
+	top = 0,
+	bottom = 1,
+	split = 2
+      };
+
+    enum class archon_sample_mode : short unsigned
+      {
+	bit16 = 0,
+	bit32 = 1
+      };
 
     
+    struct archon_buffer_info
+    {
+      archon_sample_mode sampmode;
+      bool complete;
+      archon_buffer_mode bufmode;
+      unsigned long offsetaddr;
+      unsigned frame_number;
+      unsigned width;
+      unsigned height;
+      unsigned pixel_progress;
+      unsigned line_progress;
+      unsigned raw_blocks;
+      unsigned raw_lines;
+      unsigned long raw_offset;
+      HRTimePoint timestamp;
+      HRTimePoint REtimestamp;
+      HRTimePoint FEtimestamp;
+      HRTimePoint REAtimestamp;
+      HRTimePoint FEAtimestamp;
+      HRTimePoint REBtimestamp;
+      HRTimePoint FEBtimestamp;
+    };
+
+
+    struct archon_frame_info
+    {
+      HRTimePoint current_time;
+      unsigned short rbuf;
+      unsigned short wbuf;
+      std::array<archon_buffer_info, 3> buffer_infos;
+    };
+
+    struct archon_module_info
+    {
+      unsigned position;
+      archon_module_types type;
+      unsigned revision;
+      string version;
+      unsigned module_id;
+    };
+    
+    struct archon_system_info
+    {
+      unsigned backplane_type;
+      unsigned backplane_rev;
+      string backplane_version;
+      unsigned backplane_id;
+      std::vector<archon_module_info> modules;
+    };
+
+
+
+    enum class archon_power_status : short unsigned
+      {
+	unknown = 0,
+	not_configured = 1,
+	off = 2,
+	intermediate = 3,
+	on = 4,
+	standby = 5
+      };
+
+    //NOTE not implementing heater for now (not needed for DEIMOS)
+    struct archon_module_status
+    {
+      double temp;
+      optional<unsigned> dinput_status;
+      optional<vector<double>> HC_Vs;
+      optional<vector<double>> HC_Is;
+      optional<vector<double>> LC_Vs;
+      optional<vector<double>> LC_Is;
+
+    };
+
+    
+    struct archon_status
+    {
+      bool valid;
+      unsigned count;
+      short unsigned nlogs;
+      archon_power_status powerstatus;
+      bool powergood;
+      bool overheat;
+      double backplane_temp;
+
+      std::map<int, double> PSU_Vmap;
+      std::map<int, double> PSU_Imap;
+      std::optional<unsigned> fanspeed = std::nullopt;
+      std::vector<archon_module_status> module_statuses;
+    };
+
     //fwd declares
    class ArchonModule;
-   enum class archon_module_types : short unsigned;
-   
+
    
   class archon : public CmdDevice
   {
@@ -62,9 +168,13 @@ namespace foxtrot {
   public:
     archon(std::shared_ptr<simpleTCP> proto);
     ~archon();
-    const ssmap& getStatus() const;
-    const ssmap& getSystem() const;
-    const ssmap& getFrame() const;
+    ssmap getStatus();
+    ssmap getSystem();
+    ssmap getFrame();
+
+    archon_status status();
+    archon_frame_info frameinfo();
+    archon_system_info system();
     
     void clear_config();
     
@@ -98,24 +208,11 @@ namespace foxtrot {
 	throw std::logic_error("unknown type supplied to readKeyValue");
     }
     
-    
-    void update_state();
+   
     void applyall();
 
     std::vector<unsigned int> fetch_buffer(int buf);
     std::vector<unsigned short> fetch_raw_buffer(int buf);
-    
-    int get_frameno(int buf);
-    int get_width(int buf);
-    int get_height(int buf);
-    int get_mode(int buf);
-    bool get_32bit(int buf);
-    int get_pixels(int buf);
-    std::string get_tstamp(int buf);
-    
-
-    int get_rawlines(int buf);
-    int get_rawblocks(int buf);
     
     
     void set_tap_pixels(short unsigned npixels);
@@ -154,7 +251,7 @@ namespace foxtrot {
     void lockbuffer(int buf);
     void unlockbuffers();
     
-    bool isbuffercomplete(int buf);
+
     
     void holdTiming();
     void releaseTiming();
@@ -169,6 +266,7 @@ namespace foxtrot {
     void apply_param(const std::string& name);
     void apply_all_params();
     
+
     
     void sync_archon_timer();
     
@@ -231,6 +329,10 @@ namespace foxtrot {
     
     std::shared_ptr<simpleTCP> _specproto;
     foxtrot::Logging _lg;
+    std::map<int, std::unique_ptr<ArchonModule>> _modules;
+    unsigned long long _arch_tmr;
+    boost::posix_time::ptime _sys_tmr;
+    
   private:
       
       template<typename T, typename Tdiff=T>
@@ -238,15 +340,8 @@ namespace foxtrot {
 
       
     void read_parse_existing_config();
-    
     short unsigned _order;
-    
-    ssmap _system;
-    ssmap _status;
-    ssmap _frame;
-    
-    std::map<unsigned char, framemeta> _framedata;
-    std::map<int, std::unique_ptr<ArchonModule>> _modules;
+
     
     std::map<std::string, int> _configlinemap;
      
@@ -261,8 +356,6 @@ namespace foxtrot {
     int _taplines = 0;
     int _states = 0;
     
-    unsigned long long _arch_tmr;
-    boost::posix_time::ptime _sys_tmr;
     
     
     
@@ -301,6 +394,37 @@ namespace foxtrot {
     
   };
 
+
+    class archon_legacy : public archon
+    {
+    public:
+      virtual const string getDeviceTypeName() const override;
+      archon_legacy(std::shared_ptr<simpleTCP> proto);
+      ~archon_legacy();
+
+      void update_state();
+
+      int get_rawlines(int buf);
+      int get_rawblocks(int buf);
+    
+      
+
+      
+      int get_frameno(int buf);
+      int get_width(int buf);
+      int get_height(int buf);
+      int get_mode(int buf);
+      bool get_32bit(int buf);
+      int get_pixels(int buf);
+      std::string get_tstamp(int buf);
+   
+      bool isbuffercomplete(int buf);
+    private:
+      ssmap _system;
+      ssmap _status;
+      ssmap _frame;
+      
+    };
 
   
 };

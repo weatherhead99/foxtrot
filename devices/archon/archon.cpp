@@ -34,6 +34,7 @@
 
 using foxtrot::devices::archon;
 using foxtrot::devices::ArchonStreamHelper;
+using foxtrot::devices::archon_legacy;
 
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
 
@@ -56,19 +57,9 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
   
 //   read_parse_existing_config();
   clear_config();
-  
-
-  //update the stateful dictionaries
-  update_state();
-  
+    
   sync_archon_timer();
-  
-  //update the modules vector;
-//   _modules = new std::map<int,std::unique_ptr<ArchonModule>>();
-  
-  //get the modules_installed string value
-  int modules_installed = std::stoi(_system.at("MOD_PRESENT"),0,16);
-//   std::cout << "modules_installed: " << modules_installed << std::endl;
+  int modules_installed = system().modules.size();
   
   
    for(int i = 0; i < 12; i++)
@@ -101,10 +92,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
    
    
   }
-  
-  
 
-  
 }
 
 devices::archon::~archon()
@@ -118,35 +106,27 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
 {
   std::unique_lock<std::mutex> lck(_cmdmut);
   if(_order == 0xFE)
-  {
     _order = 0;
-  }
   
   auto thisorder = _order;
   
   std::ostringstream oss;
   oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
-  
-  
-  _specproto->write(oss.str());
-    
+
+  _specproto->write(oss.str());    
   auto ret = _specproto->read_until_endl();
-  
   lck.unlock();
-    
+
   //sanitize response
   ret.erase(std::remove_if(ret.begin(),ret.end(),[] (char c) { return !std::isprint(c); }),ret.end());
-  
-  
-  
+
   if(ret[0] != '<' )
   {
-   
+
     _lg.Error("got RET: " + ret);
     _lg.Error("request was: " + request);
     if(ret[0] == '?')
-    {
-      
+    {      
      throw DeviceError("archon threw an error message! Check the logs..."); 
     }
     
@@ -185,7 +165,6 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
     };
     
     std::string key(item.begin(), eqpos);
-    
     //tidy up strings
 //     std::cout << "key before:" << key << "\t length:" << key.size() << std::endl;
     key.erase(std::remove_if(key.begin(),key.end(),[](char c) {return !std::isprint(c); }),key.end());
@@ -193,9 +172,8 @@ ssmap devices::archon::parse_parameter_response(const std::string& response)
 //     std::cout << "keey after: " << key <<  "\t length:" << key.size() << std::endl;
     std::string val(eqpos + 1, item.end());
     val.erase(std::remove_if(key.begin(),key.end(),[](char c) {return !std::isprint(c); }),key.end());
-    
     out[key] = val;
-    
+
   };
   return out;
 
@@ -234,42 +212,42 @@ std::vector<unsigned char> foxtrot::devices::archon::parse_binary_response(const
 
 
 
-const ssmap& devices::archon::getStatus() const
+ssmap devices::archon::getStatus()
 {
-  return _status;
-
+  return parse_parameter_response(cmd("STATUS"));
 }
 
-const ssmap& devices::archon::getSystem() const
+ssmap devices::archon::getSystem()
 {
-  return _system;
+  return parse_parameter_response(cmd("SYSTEM"));
 }
 
-const ssmap & foxtrot::devices::archon::getFrame() const
+ssmap foxtrot::devices::archon::getFrame()
 {
-    return _frame;
+  return parse_parameter_response("FRAME");
+}
+
+//WARNIUNG: STUB METHOD WON'T WORK YET!
+foxtrot::devices::archon_status archon::status()
+{
+  archon_status out;
+  return out;
+}
+
+foxtrot::devices::archon_frame_info archon::frameinfo()
+{
+  archon_frame_info out;
+  return out;
+}
+
+foxtrot::devices::archon_system_info archon::system()
+{
+  archon_system_info out;
+  return out;
 }
 
 
-void devices::archon::update_state()
-{
-  
-  _lg.Trace("system..");
-  _system = parse_parameter_response(cmd("SYSTEM"));
-  _lg.Trace("status..");
-  _status = parse_parameter_response(cmd("STATUS"));
-  _lg.Trace("frame..");
-  _frame = parse_parameter_response(cmd("FRAME"));
-  
-  for(auto& mod: _modules)
-  {
-    if(mod.second != nullptr)
-    {
-     mod.second->update_variables(); 
-    }
-  }
-  
-}
+
 
 // WARNING: VERY BAD CODE HERE!
 const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::getAllModules() const
@@ -287,7 +265,6 @@ const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::g
 void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
-  _framedata.clear();
   _config_lines = 0;
   _configlinemap.clear();
   _statenames.clear();
@@ -374,10 +351,8 @@ std::string devices::archon::fetch_log()
 
 std::vector< string > devices::archon::fetch_all_logs()
 {
-  update_state();
   auto statmap = getStatus();
   int nLogs = std::stoi(statmap.at("LOG"));
-  
   std::vector<std::string> out;
   out.reserve(nLogs);
   for(int i=0; i < nLogs; i++)
@@ -665,12 +640,9 @@ unsigned int devices::archon::getParam(const string& name)
     
     std::ostringstream oss;
     oss << "PARAMETER" << confnum;
-    
     auto paramline = readKeyValue(oss.str());
-    
     auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
     auto quotepos = std::find(eqpos, paramline.end(),'\"');
-    
     //TODO: this will fail at runtime
     return std::stoul(std::string(eqpos+1,quotepos));
 
@@ -839,104 +811,7 @@ void foxtrot::devices::archon::sync_archon_timer()
 }
 
 
-int devices::archon::get_frameno(int buf)
-{
-    std::ostringstream oss ;
-  oss << "BUF" << buf << "FRAME";
-  return std::stoi(_frame.at(oss.str()));
 
-
-}
-
-int devices::archon::get_height(int buf)
-{
-    std::ostringstream oss ;
-  oss << "BUF" << buf << "HEIGHT";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-int devices::archon::get_pixels(int buf)
-{
-      std::ostringstream oss ;
-  oss << "BUF" << buf << "PIXELS";
-    return std::stoi(_frame.at(oss.str()));
-        
-};
-
-
-string devices::archon::get_tstamp(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "TIEMSTAMP";
-  auto tstamp = std::stoul(_frame.at(oss.str()),0,16);
-  
-  auto archontdiff = tstamp - _arch_tmr;
-  
-  //one tick of counter is 10ns
-  auto frametime = _sys_tmr + boost::posix_time::microseconds(archontdiff / 10);
-  
-  return boost::posix_time::to_iso_extended_string(_sys_tmr);
-}
-
-
-
-int devices::archon::get_rawlines(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "RAWLINES";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-
-int devices::archon::get_rawblocks(int buf)
-{
-   std::ostringstream oss;
-  oss << "BUF" << buf << "RAWBLOCKS";
-  return std::stoi(_frame.at(oss.str()));
-}
-
-
-
-int devices::archon::get_width(int buf)
-{
-  std::ostringstream oss ;
-  oss << "BUF" << buf << "WIDTH";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-bool devices::archon::isbuffercomplete(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "COMPLETE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-}
-
-int devices::archon::get_mode(int buf)
-{
-    std::ostringstream oss;
-  oss << "BUF" << buf << "MODE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-}
-
-bool devices::archon::get_32bit(int buf)
-{
-      std::ostringstream oss;
-  oss << "BUF" << buf << "SAMPLE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-
-}
 
 void devices::archon::set_tap_pixels(short unsigned npixels)
 {
@@ -1106,80 +981,54 @@ std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, un
 std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
 {
   std::vector<unsigned int> out;
-  
-  //need to update state or width/height might actually be wrong
-  update_state();
-  
-  if(!isbuffercomplete(buf))
+
+  if(buf < 1 or buf > 3)
+    throw std::out_of_range("buffer index supplied is not valid!");
+  auto frameinfo = this->frameinfo();
+  auto bufinfo = frameinfo.buffer_infos[buf -1];
+
+  if(!bufinfo.complete)
   {
     throw DeviceError("buffer not complete for reading!");
   }
+
   lockbuffer(buf);
-  
-  auto pixels = get_width(buf) * get_height(buf);
-  
-  
-  std::ostringstream oss;
-  oss << "BUF" << buf << "BASE";
-  //WARNING: baseaddr is NOT HEXADECIMAL IN FRAME DICT.... WTF...
-  //WARNING: but FETCH command requires baseaddr in hex
-  auto baseaddr = std::stoul(_frame.at(oss.str()));
- 
-  bool is32 = get_32bit(buf);
+  auto pixels = bufinfo.width * bufinfo.height;
+  bool is32 = bufinfo.sampmode == foxtrot::devices::archon_sample_mode::bit32;
   unsigned num_bytes = is32 ? pixels * 4 : pixels * 2;
-  
   auto num_blocks = num_bytes / 1024  + (num_bytes % 1024 !=0) ;
   
   _lg.Debug("num_blocks: " + std::to_string(num_blocks));
   
   
   if(is32)
-  {
-      out = read_back_buffer<unsigned>(num_blocks,100,baseaddr);
-  }
+      out = read_back_buffer<unsigned>(num_blocks,100,bufinfo.offsetaddr);
   else
-  {
-      out = read_back_buffer<unsigned, short unsigned>(num_blocks,100,baseaddr);
-  }
-  
+      out = read_back_buffer<unsigned, short unsigned>(num_blocks,100,bufinfo.offsetaddr + bufinfo.raw_offset);
   //drop extra bytes off the end
   out.resize(pixels);
-  
-  
   return out;
 }
 
 std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
 {
     std::vector<unsigned short> out;
-    update_state();
+    if(buf < 1 or buf > 3)
+      throw std::out_of_range("buffer index supplied is not valid!");
+    auto frameinfo = this->frameinfo();
+    auto bufinfo = frameinfo.buffer_infos[buf -1];    
     
-    if(!isbuffercomplete(buf))
-    {
+    if(!bufinfo.complete)
         throw DeviceError("buffer not complete for reading!");
-    }
     lockbuffer(buf);
     
     //auto rawsamp = getrawsamples();
-    auto rawsamp = get_rawblocks(buf);
-    _lg.Debug("raw samples per line: " + std::to_string(rawsamp));
-
-
-    auto rawlines = get_rawlines(buf);
+    auto rawsamp = bufinfo.raw_blocks;
+    _lg.strm(sl::debug) << "raw blocks per line: " << rawsamp;
+    auto rawlines = bufinfo.raw_lines;
     auto total_blocks = rawsamp  * rawlines ;
-    _lg.Debug("total blocks: " + std::to_string(total_blocks));
-
-    std::ostringstream oss;
-    oss << "BUF" << buf << "BASE";
-    auto baseaddr = std::stoul(_frame.at(oss.str()));
-    
-    oss.str("");
-    
-    oss << "BUF" << buf << "RAWOFFSET";
-    auto offset = std::stoul(_frame.at(oss.str()));
-    oss.str("");
-    
-    out = read_back_buffer<unsigned short>(total_blocks,100,baseaddr + offset);
+    _lg.strm(sl::debug) << "total blocks: " << total_blocks;
+    out = read_back_buffer<unsigned short>(total_blocks,100, bufinfo.offsetaddr + bufinfo.raw_offset);
     
     return out;
     
@@ -1294,17 +1143,158 @@ void devices::archon::load_timing()
 }
 
 
+// --------------------ARCHON LEGACY CODE  STARTS HERER
+// ---------------------------
+
+archon_legacy::archon_legacy(std::shared_ptr<simpleTCP> proto)
+  : archon(proto) {}
+
+archon_legacy::~archon_legacy() {}
+
+void devices::archon_legacy::update_state()
+{
+  
+  _lg.Trace("system..");
+  _system = getSystem();
+  _lg.Trace("status..");
+  _status = getStatus();
+  _lg.Trace("frame..");
+  _frame = getFrame();
+  
+  for(auto& mod: _modules)
+  {
+    if(mod.second != nullptr)
+    {
+     mod.second->update_variables(); 
+    }
+  }
+  
+}
+
+
+
+
+bool devices::archon_legacy::isbuffercomplete(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "COMPLETE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+int devices::archon_legacy::get_frameno(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "FRAME";
+  return std::stoi(_frame.at(oss.str()));
+
+
+}
+
+int devices::archon_legacy::get_height(int buf)
+{
+    std::ostringstream oss ;
+  oss << "BUF" << buf << "HEIGHT";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+int devices::archon_legacy::get_pixels(int buf)
+{
+      std::ostringstream oss ;
+  oss << "BUF" << buf << "PIXELS";
+    return std::stoi(_frame.at(oss.str()));
+        
+};
+
+
+string devices::archon_legacy::get_tstamp(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "TIMESTAMP";
+  auto tstamp = std::stoul(_frame.at(oss.str()),0,16);
+  
+  auto archontdiff = tstamp - _arch_tmr;
+  
+  //one tick of counter is 10ns
+  auto frametime = _sys_tmr + boost::posix_time::microseconds(archontdiff / 10);
+  return boost::posix_time::to_iso_extended_string(frametime);
+}
+
+
+
+int devices::archon_legacy::get_rawlines(int buf)
+{
+  std::ostringstream oss;
+  oss << "BUF" << buf << "RAWLINES";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+
+int devices::archon_legacy::get_rawblocks(int buf)
+{
+   std::ostringstream oss;
+  oss << "BUF" << buf << "RAWBLOCKS";
+  return std::stoi(_frame.at(oss.str()));
+}
+
+
+
+int devices::archon_legacy::get_width(int buf)
+{
+  std::ostringstream oss ;
+  oss << "BUF" << buf << "WIDTH";
+  return std::stoi(_frame.at(oss.str()));
+
+}
+
+
+int devices::archon_legacy::get_mode(int buf)
+{
+    std::ostringstream oss;
+  oss << "BUF" << buf << "MODE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+}
+
+bool devices::archon_legacy::get_32bit(int buf)
+{
+      std::ostringstream oss;
+  oss << "BUF" << buf << "SAMPLE";
+  auto complete = _frame.at(oss.str());
+  
+  return std::stoi(complete);
+
+
+}
+
+
+
 RTTR_REGISTRATION
 {
  using namespace rttr;
  using foxtrot::devices::archon;
+ using foxtrot::devices::archon_legacy;
  
  //TODO: fetch all logs
  
  registration::class_<archon>("foxtrot::devices::archon")
+   .method("getStatus", &archon::getStatus)
+   .method("getSystem", &archon::getSystem)
+   .method("getFrame", &archon::getFrame)
  .method("clear_config",&archon::clear_config)
  .property_readonly("fetch_log",&archon::fetch_log)
- .method("update_state",&archon::update_state)
+   .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
+
+   .method("readConfigLine", &archon::readConfigLine)
+   (parameter_names("num", "override_existing"))
+   .method("readKeyValue", select_overload<std::string(const std::string&), archon>(&archon::readKeyValue))
+   (parameter_names("key"))
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
@@ -1342,21 +1332,11 @@ RTTR_REGISTRATION
  (
    parameter_names("name", "state")
    )
- .method("get_frameno", &archon::get_frameno)
- (parameter_names("buf"))
- .method("get_width", &archon::get_width)
- (parameter_names("buf"))
- .method("get_height",&archon::get_height)
- (parameter_names("buf"))
- .method("get_mode",&archon::get_mode)
- (parameter_names("buf"))
- .method("get_32bit",&archon::get_32bit)
  (parameter_names("buf"))
  .method("fetch_buffer",&archon::fetch_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
  .method("fetch_raw_buffer",&archon::fetch_raw_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
- .method("isbuffercomplete",&archon::isbuffercomplete)
  (parameter_names("buf"))
  .property_readonly("getreset_start",&archon::getreset_start)
  .property_readonly("getreset_end",&archon::getreset_end)
@@ -1402,16 +1382,33 @@ RTTR_REGISTRATION
    .method("set_tap_lines",&archon::set_tap_lines)
    (parameter_names("lines"))
    .property_readonly("get_tap_linues",&archon::get_tap_lines)
-   .method("get_pixels",&archon::get_pixels)
-   (parameter_names("buf"))
+
   .method("load_timing", &archon::load_timing)
-   .method("get_rawlines", &archon::get_rawlines)
-   (parameter_names("buf"))
-   .method("get_rawblocks", &archon::get_rawblocks)
-   (parameter_names("buf"))
+
  ;
+
+ registration::class_<std::map<std::string, std::string>>("std::map<std::string, std::string>")
+   .constructor()(policy::ctor::as_object);
     
- 
-    
+
+
+ registration::class_<archon_legacy>("foxtrot::devices::archon_legacy")
+   .method("update_state",&archon_legacy::update_state)
+   .method("isbuffercomplete",&archon_legacy::isbuffercomplete)
+    .method("get_frameno", &archon_legacy::get_frameno)
+   (parameter_names("buf"))
+   .method("get_width", &archon_legacy::get_width)
+   (parameter_names("buf"))
+   .method("get_height",&archon_legacy::get_height)
+   (parameter_names("buf"))
+   .method("get_mode",&archon_legacy::get_mode)
+   (parameter_names("buf"))
+   .method("get_32bit",&archon_legacy::get_32bit)
+   .method("get_pixels",&archon_legacy::get_pixels)
+   (parameter_names("buf"))
+   .method("get_rawlines", &archon_legacy::get_rawlines)
+   (parameter_names("buf"))
+   .method("get_rawblocks", &archon_legacy::get_rawblocks)
+   (parameter_names("buf"));
 }
 

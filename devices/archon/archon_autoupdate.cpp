@@ -3,7 +3,7 @@
 
 
 foxtrot::devices::archon_autoupdate::archon_autoupdate(std::shared_ptr<simpleTCP> proto, int ms_update)
-: archon(proto), _ms_update(ms_update)
+: archon_legacy(proto), _ms_update(ms_update)
 {
     
     auto embedded_call = [this] () {timer_process();};

@@ -99,7 +99,7 @@ double ArchonModule::getTemp()
 }
 
 
-const archon& ArchonModule::getArchon()
+archon& ArchonModule::getArchon()
 {
   return _arch;
 

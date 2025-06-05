@@ -396,6 +396,7 @@ void foxtrot::Device::load_capability_map(bool force_reload)
 {
 
   lg_.strm(sl::debug) << "loading capability map...";
+  lg_.strm(sl::debug) << "device type name says: " << this->getDeviceTypeName();
   
     if(!_registry_is_loaded or force_reload)
     {

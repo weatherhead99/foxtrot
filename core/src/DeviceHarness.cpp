@@ -37,52 +37,64 @@ std::shared_ptr<foxtrot::DeviceHarness> foxtrot::DeviceHarness::ptr()
 
 foxtrot::DeviceHarness::DeviceHarness() : _lg("DeviceHarness")
 {
-    
-    
 }
 
-
-int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> dev)
-{
+  //needed just on pretty ancient compiler I think
+// int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device, void(*)(Device*)> dev)
+// {
     
-    auto thisid = _id++;
+//     auto thisid = _id++;
 
-    if(!dev->hasLockImplementation())
-    {
-        _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
-    }
+//     if(!dev->hasLockImplementation())
+//     {
+//         _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
+//     }
 
 
-    //NOTE: call this in case devices haven't in their constructor (a bit messy)
-    dev->load_capability_map(true);
+//     //NOTE: call this in case devices haven't in their constructor (a bit messy)
+//     dev->load_capability_map(true);
     
-    _devvec.push_back(std::move(dev));
-
-    
-    
+//     _devvec.push_back(std::move(dev));
 
     
-    return thisid;
     
-}
+
+    
+//     return thisid;
+    
+// }
 
 int foxtrot::DeviceHarness::AddDevice(std::unique_ptr<Device> dev)
 {
-    
-    auto raw_ptr = dev.release();
-
-    if(raw_ptr == nullptr)
-      throw std::logic_error("raw_ptr is nullptr");
-    
-    //TODO: some way of doing this with std::default_delete
-    auto newptr = std::unique_ptr<Device,void(*)(Device*)>
-    (raw_ptr,[](Device* dev) {delete dev;});
-    
-   
-//     (raw_ptr,[](Device* dev) {});
-    
-    return AddDevice(std::move(newptr));
+  auto thisid = _device_add_common(dev.get());
+  _devvec.push_back(std::move(dev));
+  return thisid;  
 }
+
+int foxtrot::DeviceHarness::AddSharedDevice(std::shared_ptr<Device> dev)
+{
+  auto thisid = _device_add_common(dev.get());
+  _devvec.push_back(dev);
+  return thisid;
+}
+
+
+int foxtrot::DeviceHarness::_device_add_common(Device* dev)
+{
+  auto thisid = _id++;
+
+  _lg.strm(sl::debug) << "has lock implementation? " << dev->hasLockImplementation();
+  _lg.strm(sl::debug) << "devicetypename: " << dev->getDeviceTypeName();
+	  
+  if(!dev->hasLockImplementation())
+    _devmutexes.emplace(std::piecewise_construct, std::make_tuple(thisid), std::make_tuple());
+
+  dev->load_capability_map();
+  return thisid;
+
+}
+
+
 
 void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
 {
@@ -105,9 +117,11 @@ void foxtrot::DeviceHarness::ClearDevices(unsigned contention_timeout_ms)
 void foxtrot::DeviceHarness::RemoveDevice(int id)
 {
 
+  //TODO: look at this, I think it's the wrong way round!
   _lg.strm(sl::debug) << "size of device vector: " << _devvec.size();
+  bool haslock = std::visit( [] (auto&& arg) { return arg->hasLockImplementation();}, _devvec[id]);
   
-  if( !_devvec[id]->hasLockImplementation())
+  if( !haslock)
     {
       _devvec.erase(_devvec.begin() + id);
       _devmutexes.erase(id);
@@ -128,8 +142,8 @@ Device* const foxtrot::DeviceHarness::GetDevice(int id)
 {
 //     auto& devptr = _devmap.at(id);
     auto& devptr = _devvec.at(id);
-    return devptr.get();
-    
+    Device* dev = std::visit( [] (auto&& arg) { return arg.get();}, devptr);
+    return dev;
 }
 
 
@@ -201,9 +215,10 @@ const std::map<int, const Device *>  foxtrot::DeviceHarness::GetDevMap() const
     int i =0;
     for(auto& dev : _devvec)
     {
-        out.insert(std::pair<int,const Device*>(i++, dev.get()));
+      Device* devptr = std::visit( [] (auto&& arg) { return arg.get();}, dev);
+      out.insert(std::pair<int,const Device*>(i++, devptr));
     }
-    
+
     return out;
     
 }

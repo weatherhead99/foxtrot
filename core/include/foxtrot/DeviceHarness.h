@@ -8,14 +8,18 @@
 #include <variant>
 
 #include <foxtrot/Device.h>
-//#include <foxtrot/ft_capability.grpc.pb.h>
 #include <foxtrot/Logging.h>
+
+using std::shared_ptr;
+using std::variant;
+using std::unique_ptr;
 
 using prop_or_meth = std::variant<rttr::property, rttr::method>;
 
 
 namespace foxtrot
 {
+  using devptrunion = variant<shared_ptr<Device>, unique_ptr<Device>>;
     
   class DeviceHarness : public std::enable_shared_from_this<DeviceHarness>
     {
@@ -23,8 +27,10 @@ namespace foxtrot
       [[nodiscard]] static std::shared_ptr<DeviceHarness> create();
       
       std::shared_ptr<DeviceHarness> ptr();
-        int AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
+      //I think this was just for a pretty ancient compiler
+      //int AddDevice(std::unique_ptr<Device,void(*)(Device*)> dev);
         int AddDevice(std::unique_ptr<Device> dev);
+        int AddSharedDevice(std::shared_ptr<Device> dev);
         
         Device* const GetDevice(int id);
         
@@ -45,12 +51,12 @@ namespace foxtrot
         DeviceHarness();      
         int _id = 0;
         foxtrot::Logging _lg;
-//         std::map<int,std::unique_ptr<Device,void(*)(Device*)>> _devmap;
-        std::vector<std::unique_ptr<Device,void(*)(Device*)>> _devvec;
-//         std::deque<std::timed_mutex> _devmutexes;
+        std::vector<devptrunion> _devvec;
+      // std::vector<std::unique_ptr<Device,void(*)(Device*)>> _devvec;
         
         std::map<int, std::timed_mutex> _devmutexes;
-        
+
+       int _device_add_common(Device* dev);      
     };
     
     

@@ -96,7 +96,7 @@ namespace foxtrot
     
     RTTR_ENABLE()
   public:
-    Device(std::shared_ptr<CommunicationProtocol> proto, const string& comment = "", bool load_capabilities=true);
+    Device(std::shared_ptr<CommunicationProtocol> proto, const string& comment = "", bool load_capabilities=false);
     
     virtual const string getDeviceTypeName() const;
     const string getDeviceComment() const;

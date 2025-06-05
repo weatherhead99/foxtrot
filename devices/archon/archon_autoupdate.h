@@ -10,7 +10,7 @@ namespace foxtrot
     namespace devices
     {
         
-        class archon_autoupdate : public archon
+        class archon_autoupdate : public archon_legacy
         {
             RTTR_ENABLE()
         public:

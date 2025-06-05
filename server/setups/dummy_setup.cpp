@@ -46,6 +46,8 @@ int setup(std::shared_ptr<foxtrot::DeviceHarness> harness, const mapofparameters
     auto devptr2 = std::make_unique<foxtrot::devices::dummyDevice>("dummy2");  
     
     lg.Debug("adding to harness..");
+
+    lg.strm(sl::debug) << "has lock implementation before entry? " << devptr->hasLockImplementation() ;
     harness->AddDevice(std::move(devptr));
     harness->AddDevice(std::move(devptr2));
 
@@ -98,16 +100,9 @@ int setup(foxtrot::DeviceHarness& harness, const mapofparametersets* const param
     
   lg.Debug("setting up dummy device..");
   
-  auto devfun = [] (foxtrot::Device* dev) { delete dev;};
-  
-  
-    auto devptr = std::unique_ptr<foxtrot::devices::dummyDevice,void(*)(Device*)>(
-        new foxtrot::devices::dummyDevice("dummy1"),devfun);
-    
-    auto devptr2 = std::unique_ptr<foxtrot::devices::dummyDevice,void(*)(Device*)>(
-	new foxtrot::devices::dummyDevice("dummy2"),devfun);
-    
-    
+   auto devptr = std::make_unique<foxtrot::devices::dummyDevice>("dummy1");
+   auto devptr2 = std::make_unique<foxtrot::devices::dummyDevice>("dummy2");
+      
     lg.Debug("adding to harness..");
     harness.AddDevice(std::move(devptr));
     harness.AddDevice(std::move(devptr2));
