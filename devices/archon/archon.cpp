@@ -231,18 +231,88 @@ ssmap foxtrot::devices::archon::getFrame()
 foxtrot::devices::archon_status archon::status()
 {
   archon_status out;
+  //this is a string to string map
+  auto statmap = getStatus();
+
+  out.valid = std::stoi(statmap.at("VALID"));
+  out.count = std::stoi(statmap.at("COUNT"));
+  out.nlogs = std::stoi(statmap.at("LOG"));
+  out.powerstatus = static_cast<archon_power_status>(std::stoul(statmap.at("POWER")));
+  out.powergood = std::stoi(statmap.at("POWERGOOD"));
+  out.overheat = std::stoi(statmap.at("OVERHEAT"));
+  out.backplane_temp = std::stod(statmap.at("BACKPLANE_TEMP"));
+
+  std::array<string,10> voltagestrs = {"P2V5", "P5", "P6", "N6", "P17", "N17", "P35", "N35", "P100", "N100"};
+
+
+  for(auto vstr: voltagestrs)
+    {
+      out.PSU_Vmap.emplace(vstr, std::stod(statmap.at(std::format("{}_V",vstr))));
+      out.PSU_Imap.emplace(vstr, std::stod(statmap.at(std::format("{}_I",vstr))));
+    }
+
+  out.user_I = std::stod(statmap.at("USER_I"));
+  out.user_V = std::stod(statmap.at("USER_V"));
+  out.heater_I = std::stod(statmap.at("HEATER_I"));
+  out.heater_V = std::stod(statmap.at("HEATER_V"));
+
+  if(statmap.contains("FANTACH"))
+    out.fanspeed = std::stoul(statmap.at("FANTACH"));
+
+  out.module_statuses.reserve(_modules.size());
+  for(auto& [pos, mod] : _modules)
+      out.module_statuses.push_back(mod->status());
   return out;
 }
 
 foxtrot::devices::archon_frame_info archon::frameinfo()
 {
   archon_frame_info out;
+  auto framemap = getFrame();
+  out.rbuf = std::stoul(framemap.at("RBUF"));
+  out.wbuf = std::stoul(framemap.at("WBUF"));
+  
   return out;
 }
 
 foxtrot::devices::archon_system_info archon::system()
 {
   archon_system_info out;
+
+  auto sysmap = getSystem();
+  out.backplane_type = std::stoul(sysmap.at("BACKPLANE_TYPE"));
+  out.backplane_rev = std::stoul(sysmap.at("BACKPLANE_REV"));
+  out.backplane_version = sysmap.at("BACKPLANE_VERSION");
+  out.backplane_id = std::stoul(sysmap.at("BACKPLANE_ID"), nullptr, 16);
+  out.power_id = std::stoul(sysmap.at("POWER_ID"), nullptr, 16);
+  std::vector<unsigned short> mod_positions;
+
+  auto mod_positions_setup = [&mod_positions, &sysmap] <int N> () {
+      std::bitset<N> modpos = std::stoul(sysmap.at("MOD_PRESENT"),nullptr, 16);
+      auto nmods = modpos.count();
+      mod_positions.reserve(nmods);
+      for(int i=0; i< N; i++)
+	{
+	  if(modpos.test(i))
+	    mod_positions.push_back(i+1);
+	}
+  };
+
+  if(out.backplane_type == 1)
+    mod_positions_setup.template operator()<12>();
+  else if(out.backplane_type == 2)
+    mod_positions_setup.template operator()<16>();
+
+  out.modules.reserve(mod_positions.size());
+  for(auto pos : mod_positions)
+    {
+      archon_module_info& modinfo = out.modules.emplace_back();
+      modinfo.module_id = std::stoul(sysmap.at(std::format("MOD{}_ID", pos)), nullptr, 16);
+      modinfo.position = pos;
+      modinfo.version = sysmap.at(std::format("MOD{}_VERSION", pos));
+      modinfo.revision = std::stoul(sysmap.at(std::format("MOD{}_REVISION", pos)));
+    }
+
   return out;
 }
 
@@ -351,8 +421,7 @@ std::string devices::archon::fetch_log()
 
 std::vector< string > devices::archon::fetch_all_logs()
 {
-  auto statmap = getStatus();
-  int nLogs = std::stoi(statmap.at("LOG"));
+  int nLogs = status().nlogs;
   std::vector<std::string> out;
   out.reserve(nLogs);
   for(int i=0; i < nLogs; i++)

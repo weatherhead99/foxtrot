@@ -7,6 +7,7 @@
 #include <vector>
 #include <optional>
 #include <mutex>
+#include <unordered_map>
 
 #include <boost/iterator/iterator_concepts.hpp>
 #include <boost/date_time.hpp>
@@ -112,6 +113,7 @@ namespace foxtrot {
       unsigned backplane_rev;
       string backplane_version;
       unsigned backplane_id;
+      unsigned power_id;
       std::vector<archon_module_info> modules;
     };
 
@@ -150,8 +152,13 @@ namespace foxtrot {
       bool overheat;
       double backplane_temp;
 
-      std::map<int, double> PSU_Vmap;
-      std::map<int, double> PSU_Imap;
+      std::unordered_map<string, double> PSU_Vmap;
+      std::unordered_map<string, double> PSU_Imap;
+      double user_I;
+      double user_V;
+      double heater_V;
+      double heater_I;
+      
       std::optional<unsigned> fanspeed = std::nullopt;
       std::vector<archon_module_status> module_statuses;
     };
@@ -220,9 +227,7 @@ namespace foxtrot {
 
     void set_tap_lines(short unsigned lines);
     short unsigned get_tap_lines();
-    
- 
-    
+      
     const std::map<int,ArchonModule&> getAllModules() const;
     
     

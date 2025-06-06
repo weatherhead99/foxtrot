@@ -1,4 +1,5 @@
 #include "archon_modules.h"
+#include "archon_module_mapper.hh"
 #include <sstream>
 
 #include <iomanip>
@@ -66,6 +67,18 @@ ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
     
 }
 
+
+archon_module_status ArchonModule::status()
+{
+  archon_module_status out;
+  return out;
+}
+
+archon_module_info ArchonModule::info()
+{
+  archon_module_info out;
+  return out;
+}
 
 
 
@@ -175,7 +188,6 @@ void ArchonModule::apply()
   //TODO: should find a way round this not needing to be a friend!
   _arch.cmd(oss.str());
   
-
 }
 
 

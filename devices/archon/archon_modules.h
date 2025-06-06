@@ -48,7 +48,9 @@ namespace devices
       {
 	writeConfigKey(key, std::to_string(val));
       }
-            
+
+      virtual archon_module_status status();
+      virtual archon_module_info info();
       
       string readConfigKey(const string& key);
       template<typename Ret>
