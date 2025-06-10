@@ -3,6 +3,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <map>
+#include <optional>
 
 #include <foxtrot/Logging.h>
 #include <foxtrot/ProtocolError.h>
@@ -23,19 +24,38 @@ std::string get_variant_held_typename(V&& var)
 
 namespace foxtrot {
 
-  
+  namespace detail
+  {
+    template<typename T>
+    constexpr bool is_optional(const T&) { return false;};
+
+    template<typename T>
+    constexpr bool is_optional(const std::optional<T>&){return true;};
+      
+
+  }
 
 template <typename T> bool extract_parameter_value(T& param_out, const parameterset& params,
 						   const std::string& paramname, bool required=true)
 {
+
+  foxtrot::Logging lg("extract_parameter_value");
   try
   {
-    param_out = std::get<T>(params.at(paramname));
+    if constexpr(detail::is_optional(param_out))
+      {
+	if(required)
+	  lg.strm(sl::warning) << "passed required=True but the output type is a std::optional. Likely a bug";
+	*param_out = std::get<typename T::value_type>(params.at(paramname));
+      }
+    else
+      {
+	param_out = std::get<T>(params.at(paramname));
+      }
       //TODO: logging here!
   }
   catch(std::bad_variant_access)
   {
-    foxtrot::Logging lg("extract_parameter_value");
     auto type_held = get_variant_held_typename(params.at(paramname));
     lg.Error("type held by variant: " + type_held);
     lg.Error(std::string("type expected: ") + typeid(T).name());

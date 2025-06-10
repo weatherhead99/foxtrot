@@ -34,6 +34,9 @@ namespace foxtrot
     virtual std::tuple<string, unsigned> read_with_actlen(unsigned len); 
    virtual string read_until_endl( char endlchar = '\n') = 0;
 
+    virtual optional<bool> try_connect() noexcept;
+    
+    
    
  };
   

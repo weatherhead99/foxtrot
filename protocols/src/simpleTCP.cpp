@@ -2,7 +2,9 @@
 #include <boost/asio/any_io_executor.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/experimental/cancellation_condition.hpp>
+#include <boost/system/detail/errc.hpp>
 #include <boost/system/system_error.hpp>
+#include <chrono>
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -37,13 +39,13 @@ foxtrot::protocols::simpleTCPBase::simpleTCPBase(
   : SerialProtocol(instance_parameters) {};    
 
 
-simpleTCP::simpleTCPLegacy(const parameterset*const instance_parameters)
+simpleTCPLegacy::simpleTCPLegacy(const parameterset*const instance_parameters)
 : simpleTCPBase(instance_parameters), _lg("simpleTCP")
 {
 
 }
 
-simpleTCP::~simpleTCPLegacy()
+simpleTCPLegacy::~simpleTCPLegacy()
 {
   
 #ifdef linux  
@@ -55,7 +57,7 @@ simpleTCP::~simpleTCPLegacy()
 }
 
 
-void simpleTCP::Init(const parameterset* const class_parameters)
+void simpleTCPLegacy::Init(const parameterset* const class_parameters)
 {
 #ifndef linux
 	throw StubError("simpleTCP::Init is a stub on windows!");
@@ -92,7 +94,7 @@ void simpleTCP::Init(const parameterset* const class_parameters)
 #endif
 }
 
-void simpleTCP::open()
+void simpleTCPLegacy::open()
 {
   addrinfo hints;  
   hints.ai_socktype = SOCK_STREAM; 
@@ -117,7 +119,7 @@ void simpleTCP::open()
 
 }
 
-void simpleTCP::close()
+void simpleTCPLegacy::close()
 {
   
 }
@@ -127,7 +129,7 @@ void simpleTCP::close()
 
 
 
-std::string simpleTCP::read(unsigned int len, unsigned* actlen)
+std::string simpleTCPLegacy::read(unsigned int len, unsigned* actlen)
 {
 #ifndef linux
 
@@ -157,7 +159,7 @@ std::string simpleTCP::read(unsigned int len, unsigned* actlen)
 
 
 
-void simpleTCP::write(const std::string& data)
+void simpleTCPLegacy::write(const std::string& data)
 {
 #ifndef linux
 	throw StubError("simpleTCP::write is a stub on windows!");
@@ -174,7 +176,7 @@ void simpleTCP::write(const std::string& data)
   
 }
 
-std::string simpleTCP::read_until_endl(char endlchar)
+std::string simpleTCPLegacy::read_until_endl(char endlchar)
 {
   unsigned actlen;
   auto ret = this->read(_chunk_size, &actlen);
@@ -190,7 +192,7 @@ std::string simpleTCP::read_until_endl(char endlchar)
 
 }
 
-unsigned int simpleTCP::bytes_available()
+unsigned int simpleTCPLegacy::bytes_available()
 {
 	#ifndef linux
 	throw StubError("simpleTCP::bytes_available() is a stub on windows!");
@@ -210,12 +212,12 @@ unsigned int simpleTCP::bytes_available()
 }
 
 
-unsigned int simpleTCP::getchunk_size()
+unsigned int simpleTCPLegacy::getchunk_size()
 {
   return _chunk_size;
 }
 
-void simpleTCP::setchunk_size(unsigned int chunk)
+void simpleTCPLegacy::setchunk_size(unsigned int chunk)
 {
   _chunk_size = chunk;
 }
@@ -233,7 +235,7 @@ struct foxtrot::protocols::detail::simpleTCPasioImpl
   std::unique_ptr<boost::asio::io_context> ioptr = nullptr;
   opttimeout timeout;
   std::unique_ptr<boost::asio::ip::tcp::socket> sock = nullptr;
-
+  
   bool use_internal_blocking_loop = false;
   
   void setup_executor(optional<boost::asio::any_io_executor> exec)
@@ -276,6 +278,7 @@ simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters,
 {
   pimpl = std::make_unique<detail::simpleTCPasioImpl>();
   pimpl->setup_executor(exec);
+
 }
 
 simpleTCPasio::simpleTCPasio(const string* addr, optional<unsigned> port,
@@ -297,6 +300,10 @@ void simpleTCPasio::Init(const parameterset *const class_parameters)
   foxtrot::CommunicationProtocol::Init(class_parameters);
   extract_parameter_value(pimpl->port, _params, "port");
   extract_parameter_value(pimpl->addr, _params, "addr");
+
+  unsigned timeout_ms;
+  extract_parameter_value(timeout_ms, _params, "timeout");
+  pimpl->timeout = std::chrono::milliseconds(timeout_ms);
 
   //TODO: open  socket here!
   open();
@@ -320,6 +327,44 @@ void simpleTCPasio::Init()
   extract_parameter_value(pimpl->addr, _params, "addr");
 
   open();
+}
+
+optional<bool> simpleTCPasio::try_connect() noexcept
+{
+  if(is_open())
+    return true;
+
+  bool timeout_hasval = pimpl->timeout.has_value();
+  bool success = false;
+  //if there's no looser timeout specified, need a reasonably short one here
+  if(not timeout_hasval)
+    pimpl->timeout = std::chrono::milliseconds(500);
+  try{
+    open();
+    close();
+    success = true;
+  }
+  catch(...)
+    {
+      pimpl->lg.strm(sl::info) << "caught error whilst in try_connect. Swallowing...";
+    }
+
+  if(not timeout_hasval)
+    pimpl->timeout = std::nullopt;
+
+  return success;
+}
+
+optional<bool> simpleTCPasio::is_open()
+{
+  //NOTE: just currently returns is_open on the actual socket,
+  //which isn't enough to check whether the connection is valid.
+  //should e.g. do a 0 length read to check that.
+  if(pimpl->sock == nullptr)
+    return false;
+  else
+    return pimpl->sock->is_open();
+
 }
 
 
@@ -486,6 +531,9 @@ std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
 	{
 	  co_return std::current_exception();
 	}
+
+
+      
       co_return nullptr;
 
     };

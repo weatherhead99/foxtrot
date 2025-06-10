@@ -7,9 +7,13 @@
 #include "archon_module_driver.h"
 #include "archon_module_AD.h"
 #include "archon_module_lvxbias.h"
+#include "archon_module_LVDS.hh"
 #include "archon_module_hvxbias.h"
 #include "archon_module_heaterx.h"
 #include "archon_module_xvbias.h"
+
+#include <rttr/registration>
+
 
 using foxtrot::devices::archon_module_types;
 using std::unique_ptr;
@@ -60,7 +64,7 @@ auto modtpmap = h::make_map(
 			    //HS: unimplemented!
 			    h::make_pair(h::int_c<amtval(amt::HVXBias)>, h::type_c<ArchonHVX>),
 			    h::make_pair(h::int_c<amtval(amt::LVXBias)>, h::type_c<ArchonLVX>),
-			    //LVDS: unimplemented!
+			    h::make_pair(h::int_c<amtval(amt::LVDS)>, h::type_c<ArchonLVDS>),
 			    h::make_pair(h::int_c<amtval(amt::HeaterX)>, h::type_c<ArchonHeaterX>),
 			    h::make_pair(h::int_c<amtval(amt::XVBias)>, h::type_c<ArchonXV>),
 			    //ADF: unimplemented!
@@ -90,7 +94,6 @@ unique_ptr<ArchonModule> foxtrot::devices::make_module(archon& arch, int modpos,
 
        });
 
-
   return modptr;
 }
 
@@ -98,4 +101,31 @@ unique_ptr<ArchonModule> foxtrot::devices::make_module(archon& arch, int modpos,
 std::string foxtrot::devices::get_module_name(archon_module_types modtp)
 {
   return module_type_names.at(modtp);
+}
+
+RTTR_REGISTRATION{
+
+  using namespace rttr;
+  using foxtrot::devices::archon_module_types;
+
+  registration::enumeration<archon_module_types>("foxtrot::devices::archon_module_types")
+    (value("None", archon_module_types::None),
+     value("Driver", archon_module_types::Driver),
+     value("AD", archon_module_types::AD),
+     value("LVBias", archon_module_types::LVBias),
+     value("HVBias", archon_module_types::HVBias),
+     value("Heater", archon_module_types::Heater),
+     value("HS", archon_module_types::HS),
+     value("HVXBias", archon_module_types::HVXBias),
+     value("LVXBias", archon_module_types::LVXBias),
+     value("LVDS", archon_module_types::LVDS),
+     value("HeaterX", archon_module_types::HeaterX),
+     value("XVBias", archon_module_types::XVBias),
+     value("ADF", archon_module_types::ADF),
+     value("ADX", archon_module_types::ADX),
+     value("ADLN", archon_module_types::ADLN),
+     value("DriverX",  archon_module_types::DriverX),
+     value("ADM", archon_module_types::ADM));
+     
+
 }

@@ -95,7 +95,7 @@ namespace devices
             short unsigned _rev;
             
             archon_module_types _modtype;
-	    virtual void update_variables() = 0 ;
+	    virtual void update_variables();
             
     };
 

@@ -8,8 +8,11 @@ using foxtrot::devices::ArchonLVDS;
 
 
 ArchonLVDS::ArchonLVDS(archon &arch, short unsigned int modpos)
-  : ArchonModule(arch, modpos), archonGPIO(arch, modpos, false)
-{}
+    : ArchonModule(arch, modpos), archonGPIO(arch, modpos, false) {}
+
+ArchonLVDS::~ArchonLVDS()
+{
+}
 
 void ArchonLVDS::setLVDSLabel(int channel, const string& val)
 {
@@ -21,4 +24,9 @@ string ArchonLVDS::getLVDSLabel(int channel)
 {
   checkChannel(channel);
   return readConfigKey(std::format("LVDS_LABEL{}", channel));
+}
+
+const string ArchonLVDS::getTypeName() const
+{
+  return get_module_name(archon_module_types::LVDS);
 }

@@ -46,7 +46,7 @@ const string devices::archon::getDeviceTypeName() const
 }
 
 
-foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP > proto)
+foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPBase > proto)
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
     _lg("archon"), _order(0)
 {
@@ -95,7 +95,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCP 
 
 }
 
-devices::archon::~archon()
+foxtrot::devices::archon::~archon()
 {
   
 }
@@ -1215,12 +1215,19 @@ void devices::archon::load_timing()
 // --------------------ARCHON LEGACY CODE  STARTS HERER
 // ---------------------------
 
-archon_legacy::archon_legacy(std::shared_ptr<simpleTCP> proto)
+foxtrot::devices::archon_legacy::archon_legacy(std::shared_ptr<simpleTCPBase> proto)
   : archon(proto) {}
 
-archon_legacy::~archon_legacy() {}
+foxtrot::devices::archon_legacy::~archon_legacy() {}
 
-void devices::archon_legacy::update_state()
+const string foxtrot::devices::archon_legacy::getDeviceTypeName() const
+{
+  return "archon";
+}
+
+
+
+void foxtrot::devices::archon_legacy::update_state()
 {
   
   _lg.Trace("system..");
@@ -1243,7 +1250,7 @@ void devices::archon_legacy::update_state()
 
 
 
-bool devices::archon_legacy::isbuffercomplete(int buf)
+bool foxtrot::devices::archon_legacy::isbuffercomplete(int buf)
 {
   std::ostringstream oss;
   oss << "BUF" << buf << "COMPLETE";
@@ -1253,7 +1260,7 @@ bool devices::archon_legacy::isbuffercomplete(int buf)
 
 }
 
-int devices::archon_legacy::get_frameno(int buf)
+int foxtrot::devices::archon_legacy::get_frameno(int buf)
 {
     std::ostringstream oss ;
   oss << "BUF" << buf << "FRAME";
@@ -1262,7 +1269,7 @@ int devices::archon_legacy::get_frameno(int buf)
 
 }
 
-int devices::archon_legacy::get_height(int buf)
+int foxtrot::devices::archon_legacy::get_height(int buf)
 {
     std::ostringstream oss ;
   oss << "BUF" << buf << "HEIGHT";
@@ -1270,7 +1277,7 @@ int devices::archon_legacy::get_height(int buf)
 
 }
 
-int devices::archon_legacy::get_pixels(int buf)
+int foxtrot::devices::archon_legacy::get_pixels(int buf)
 {
       std::ostringstream oss ;
   oss << "BUF" << buf << "PIXELS";
@@ -1279,7 +1286,7 @@ int devices::archon_legacy::get_pixels(int buf)
 };
 
 
-string devices::archon_legacy::get_tstamp(int buf)
+string foxtrot::devices::archon_legacy::get_tstamp(int buf)
 {
   std::ostringstream oss;
   oss << "BUF" << buf << "TIMESTAMP";
@@ -1294,7 +1301,7 @@ string devices::archon_legacy::get_tstamp(int buf)
 
 
 
-int devices::archon_legacy::get_rawlines(int buf)
+int foxtrot::devices::archon_legacy::get_rawlines(int buf)
 {
   std::ostringstream oss;
   oss << "BUF" << buf << "RAWLINES";
@@ -1303,7 +1310,7 @@ int devices::archon_legacy::get_rawlines(int buf)
 }
 
 
-int devices::archon_legacy::get_rawblocks(int buf)
+int foxtrot::devices::archon_legacy::get_rawblocks(int buf)
 {
    std::ostringstream oss;
   oss << "BUF" << buf << "RAWBLOCKS";
@@ -1312,7 +1319,7 @@ int devices::archon_legacy::get_rawblocks(int buf)
 
 
 
-int devices::archon_legacy::get_width(int buf)
+int foxtrot::devices::archon_legacy::get_width(int buf)
 {
   std::ostringstream oss ;
   oss << "BUF" << buf << "WIDTH";
@@ -1321,7 +1328,7 @@ int devices::archon_legacy::get_width(int buf)
 }
 
 
-int devices::archon_legacy::get_mode(int buf)
+int foxtrot::devices::archon_legacy::get_mode(int buf)
 {
     std::ostringstream oss;
   oss << "BUF" << buf << "MODE";
@@ -1331,7 +1338,7 @@ int devices::archon_legacy::get_mode(int buf)
 
 }
 
-bool devices::archon_legacy::get_32bit(int buf)
+bool foxtrot::devices::archon_legacy::get_32bit(int buf)
 {
       std::ostringstream oss;
   oss << "BUF" << buf << "SAMPLE";
@@ -1349,14 +1356,121 @@ RTTR_REGISTRATION
  using namespace rttr;
  using foxtrot::devices::archon;
  using foxtrot::devices::archon_legacy;
+
+
+ using foxtrot::devices::archon_status;
+ using foxtrot::devices::archon_frame_info;
+ using foxtrot::devices::archon_system_info;
+ using foxtrot::devices::archon_power_status;
+ using foxtrot::devices::archon_module_status;
+ using foxtrot::devices::archon_module_types;
+ using foxtrot::devices::archon_module_info;
+ using foxtrot::devices::archon_buffer_info;
+ using foxtrot::devices::archon_sample_mode;
+ using foxtrot::devices::archon_buffer_mode;
  
- //TODO: fetch all logs
+
+ registration::enumeration<archon_buffer_mode>("foxtrot::devices::archon_buffer_mode")
+   (value("top", archon_buffer_mode::top),
+    value("bottom", archon_buffer_mode::bottom),
+    value("split", archon_buffer_mode::split));
+
+ registration::enumeration<archon_sample_mode>
+   ("foxtrot::devices::archon_sample_mode")
+   (value("bit16", archon_sample_mode::bit16),
+    value("bit32", archon_sample_mode::bit32));
+
+ registration::class_<archon_buffer_info>("foxtrot::devices::archon_buffer_info")
+   .constructor()(policy::ctor::as_object)
+   .property("samppode", &archon_buffer_info::sampmode)
+   .property("complete", &archon_buffer_info::complete)
+   .property("bufmode", &archon_buffer_info::bufmode)
+   .property("offsetaddr", &archon_buffer_info::offsetaddr)
+   .property("frame_number", &archon_buffer_info::frame_number)
+   .property("width", &archon_buffer_info::width)
+   .property("height", &archon_buffer_info::height)
+   .property("pixel_progress", &archon_buffer_info::pixel_progress)
+   .property("line_progress", &archon_buffer_info::line_progress)
+   .property("raw_blocks", &archon_buffer_info::raw_blocks)
+   .property("raw_lines", &archon_buffer_info::raw_lines)
+   .property("raw_offset", &archon_buffer_info::raw_offset)
+   .property("timestamp", &archon_buffer_info::timestamp)
+   .property("REtimestamp", &archon_buffer_info::REtimestamp)
+   .property("FEtimestamp", &archon_buffer_info::FEtimestamp)
+   .property("REAtimestamp", &archon_buffer_info::REAtimestamp)
+   .property("FEAtimestamp", &archon_buffer_info::FEAtimestamp)
+   .property("REBtimestamp", &archon_buffer_info::REBtimestamp)
+   .property("FEBtimestamp", &archon_buffer_info::FEBtimestamp);
+
+ registration::class_<archon_frame_info>("foxtrot::devices::archon_frame_info")
+     .constructor()(policy::ctor::as_object)
+   .property("current_Time", &archon_frame_info::current_time)
+   .property("rbuf", &archon_frame_info::rbuf)
+   .property("wbuf", &archon_frame_info::wbuf)
+   .property("buffer_infos", &archon_frame_info::buffer_infos);
+
+ registration::class_<archon_module_info>("foxtrot::devices::archon_module_info")
+   .constructor()(policy::ctor::as_object)
+   .property("position", &archon_module_info::position)
+   .property("type", &archon_module_info::type)
+   .property("revision", &archon_module_info::revision)
+   .property("version", &archon_module_info::version)
+   .property("module_id", &archon_module_info::module_id);
+
+
+ registration::class_<archon_system_info>("foxtrot::devices::archon_system_info")
+   .constructor()(policy::ctor::as_object)
+   .property("backplane_type", &archon_system_info::backplane_type)
+   .property("backplane_rev", &archon_system_info::backplane_rev)
+   .property("backplane_version", &archon_system_info::backplane_version)
+   .property("backplane_id", &archon_system_info::backplane_id)
+   .property("power_id", &archon_system_info::power_id)
+   .property("modules", &archon_system_info::modules);
+
+
+ registration::enumeration<archon_power_status>("foxtrot::devices::archon_power_status")
+   (value("unknown", archon_power_status::unknown),
+    value("not_configured", archon_power_status::not_configured),
+    value("off", archon_power_status::off),
+    value("intermediate", archon_power_status::intermediate),
+    value("on", archon_power_status::on),
+    value("standby", archon_power_status::standby));
+
+ registration::class_<archon_module_status>("foxtrot::devices::archon_module_status")
+   .constructor()(policy::ctor::as_object)
+   .property("temp", &archon_module_status::temp)
+   .property("dinput_status", &archon_module_status::dinput_status)
+   .property("HC_Vs", &archon_module_status::HC_Vs)
+   .property("HC_Is", &archon_module_status::HC_Is)
+   .property("LC_Vs", &archon_module_status::LC_Vs)
+   .property("LC_Is", &archon_module_status::LC_Is);
+
+
+ registration::class_<archon_status>("foxtrot::devices::archon_status")
+   .constructor()(policy::ctor::as_object)
+   .property("valid", &archon_status::valid)
+   .property("count", &archon_status::count)
+   .property("nlogs", &archon_status::nlogs)
+   .property("powerstatus", &archon_status::powerstatus)
+   .property("powergood", &archon_status::powergood)
+   .property("overheat", &archon_status::overheat)
+   .property("backplane_temp", &archon_status::backplane_temp)
+   .property("PSU_Vmap", &archon_status::PSU_Vmap)
+   .property("PSU_Imap", &archon_status::PSU_Imap)
+   .property("user_I", &archon_status::user_I)
+   .property("user_V", &archon_status::user_V)
+   .property("heater_V", &archon_status::heater_V)
+   .property("heater_I", &archon_status::heater_I);
+ 
  
  registration::class_<archon>("foxtrot::devices::archon")
    .method("getStatus", &archon::getStatus)
    .method("getSystem", &archon::getSystem)
    .method("getFrame", &archon::getFrame)
  .method("clear_config",&archon::clear_config)
+   .property_readonly("status", &archon::status)
+   .property_readonly("frameinfo", &archon::frameinfo)
+   .property_readonly("system", &archon::system)
  .property_readonly("fetch_log",&archon::fetch_log)
    .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
 
@@ -1461,7 +1575,7 @@ RTTR_REGISTRATION
     
 
 
- registration::class_<archon_legacy>("foxtrot::devices::archon_legacy")
+ registration::class_<foxtrot::devices::archon_legacy>("foxtrot::devices::archon_legacy")
    .method("update_state",&archon_legacy::update_state)
    .method("isbuffercomplete",&archon_legacy::isbuffercomplete)
     .method("get_frameno", &archon_legacy::get_frameno)

@@ -46,6 +46,10 @@ class FoxtrotServerConan(ConanFile):
         if self.options.get_safe("use_coro"):
             check_min_cppstd(self, 20)
 
+    def layout(self):
+        super().layout()
+        #add exptserve for the case when this package is in editable mode
+        self.cpp.build.bindirs.append("src")
 
     def requirements(self):
         super().requirements()
@@ -67,7 +71,7 @@ class FoxtrotServerConan(ConanFile):
         #NOTE: need extra build dir in editable mode since libfoxtrot_server.so
         #ends up in a subdirectory
         super().layout()
-        self.cpp.build.builddirs.append("src")
+        self.cpp.build.bindirs.append("src")
 
     def generate(self):
         #NOTE: need to alter target name of rapidJSON which differs from

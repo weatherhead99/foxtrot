@@ -129,7 +129,7 @@ short unsigned int ArchonModule::getmodpos()
 
 void ArchonModule::update_variables()
 {
-  throw std::logic_error("called unimplemented function base update_variables");
+  _arch._lg.strm(sl::debug) << "module  called empty update_variables()";
 }
 
 

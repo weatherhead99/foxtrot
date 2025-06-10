@@ -19,6 +19,7 @@ namespace foxtrot
 
       void setLVDSLabel(int channel, const string& val);
       string getLVDSLabel(int channel);
+      ~ArchonLVDS();
 
     protected:
       ArchonLVDS(archon& arch, short unsigned int modpos);

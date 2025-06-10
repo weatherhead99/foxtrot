@@ -30,6 +30,7 @@ typedef std::map<std::string,std::string> ssmap;
 namespace foxtrot {
   
   using namespace protocols;
+  using foxtrot::protocols::simpleTCPBase;
   
   struct framemeta
   {
@@ -173,7 +174,7 @@ namespace foxtrot {
     friend class foxtrot::devices::ArchonModule;
     virtual const string getDeviceTypeName() const override;
   public:
-    archon(std::shared_ptr<simpleTCP> proto);
+    archon(std::shared_ptr<foxtrot::protocols::simpleTCPBase> proto);
     ~archon();
     ssmap getStatus();
     ssmap getSystem();
@@ -332,7 +333,7 @@ namespace foxtrot {
     //NOTE: should this be a timed mutex?
     std::mutex _cmdmut;
     
-    std::shared_ptr<simpleTCP> _specproto;
+    std::shared_ptr<foxtrot::protocols::simpleTCPBase> _specproto;
     foxtrot::Logging _lg;
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     unsigned long long _arch_tmr;
@@ -402,19 +403,18 @@ namespace foxtrot {
 
     class archon_legacy : public archon
     {
+      RTTR_ENABLE(archon)
+      
     public:
+      
       virtual const string getDeviceTypeName() const override;
-      archon_legacy(std::shared_ptr<simpleTCP> proto);
+      archon_legacy(std::shared_ptr<simpleTCPBase> proto);
       ~archon_legacy();
 
       void update_state();
 
       int get_rawlines(int buf);
       int get_rawblocks(int buf);
-    
-      
-
-      
       int get_frameno(int buf);
       int get_width(int buf);
       int get_height(int buf);

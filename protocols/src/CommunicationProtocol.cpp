@@ -77,3 +77,8 @@ std::tuple<string, unsigned> foxtrot::SerialProtocol::read_with_actlen(unsigned 
   auto dat = read(len, &actlen);
   return {dat, actlen};
 }
+
+optional<bool> foxtrot::SerialProtocol::try_connect() noexcept
+{
+  return std::nullopt;
+}

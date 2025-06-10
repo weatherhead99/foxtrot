@@ -96,6 +96,10 @@ namespace foxtrot {
 
       std::string read_until_endl(char endlchar = '\n') override;
       unsigned bytes_available() override;
+
+      optional<bool> try_connect() noexcept override ;
+      optional<bool> is_open() override;
+      
     private:
       std::unique_ptr<detail::simpleTCPasioImpl> pimpl;
 
