@@ -29,37 +29,38 @@ foxtrot::protocols::scsiserial::~scsiserial()
 
 
 
-void foxtrot::protocols::scsiserial::Init(const foxtrot::parameterset*const class_parameters)
+void foxtrot::protocols::scsiserial::Init(const foxtrot::parameterset*const class_parameters, bool open_immediate)
 {
     //call base class to merge parameter sets
-    foxtrot::CommunicationProtocol::Init(class_parameters);
+  foxtrot::CommunicationProtocol::Init(class_parameters, open_immediate);
     
     extract_parameter_value(_devnode,_params,"devnode");
     extract_parameter_value(_timeout,_params,"timeout");
     
     extract_parameter_value(_LBA,_params,"LBA");    
+
+
+    if(open_immediate)
+      {
+	_fd = ::open(_devnode.c_str(),O_RDWR);
     
-    _fd = ::open(_devnode.c_str(),O_RDWR);
+	if(_fd < 0) 
+	  throw ProtocolError(std::string("couldn't open devnode: ") + _devnode + std::string(" ") + strerror(errno));
     
-    if(_fd < 0) 
-    {
-      throw ProtocolError(std::string("couldn't open devnode: ") + _devnode + std::string(" ") + strerror(errno));
-    };
+	int ret;
     
-    int ret;
-    
-    //test scsi IOCTL
-    int vers = 0;
-    ret = ioctl(_fd, SG_GET_VERSION_NUM, &vers);
-    if(ret < 0)
-    {
-      throw ProtocolError(std::string("ioctl failed: ") + strerror(ret));
-    };
+	//test scsi IOCTL
+	int vers = 0;
+	ret = ioctl(_fd, SG_GET_VERSION_NUM, &vers);
+	if(ret < 0)
+	  throw ProtocolError(std::string("ioctl failed: ") + strerror(ret));
     
     
-    //get blen from device
-    auto cap = scsi_read_capacity10();
-    _blen = cap.second;
+	//get blen from device
+	auto cap = scsi_read_capacity10();
+	_blen = cap.second;
+      }
+
         
 }
 

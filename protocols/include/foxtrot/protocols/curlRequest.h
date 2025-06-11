@@ -34,7 +34,7 @@ public:
     CurlRequest();
     virtual ~CurlRequest();
 
-    void Init ( const parameterset* const ) override;
+  void Init ( const parameterset* const, bool open_immediate=true ) override;
     std::string blocking_get_request ( const string& path,
                                        const vector<string>* header = nullptr );
     std::string blocking_post_request ( const string& path,

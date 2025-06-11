@@ -23,8 +23,7 @@ using foxtrot::devices::archon_hex_stream_configure;
 ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
   : foxtrot::Device(nullptr),  _modpos(modpos), _arch(arch)
 {
-  
-  
+    
     auto statmap = _arch.getSystem();
     
     std::ostringstream oss;

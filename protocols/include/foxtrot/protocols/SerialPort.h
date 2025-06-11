@@ -27,7 +27,7 @@ public:
     SerialPort ( const parameterset*const instance_parameters,
 		 shared_ptr<io_context> ctxt);
     ~SerialPort();
-    virtual void Init ( const parameterset*const class_parameters ) override;
+  virtual void Init ( const parameterset*const class_parameters, bool open_immediate=true) override;
 
     //this read is the one we just deprecated!
     virtual std::string read ( unsigned int len, unsigned* actlen= nullptr) override;

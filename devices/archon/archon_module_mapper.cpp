@@ -100,6 +100,8 @@ unique_ptr<ArchonModule> foxtrot::devices::make_module(archon& arch, int modpos,
 
 std::string foxtrot::devices::get_module_name(archon_module_types modtp)
 {
+  if(not module_type_names.contains(modtp))
+    return std::format("unknown module, type number: {}", static_cast<short unsigned>(modtp));
   return module_type_names.at(modtp);
 }
 

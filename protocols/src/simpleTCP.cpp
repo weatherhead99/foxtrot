@@ -48,8 +48,19 @@ simpleTCPLegacy::simpleTCPLegacy(const parameterset*const instance_parameters)
 simpleTCPLegacy::~simpleTCPLegacy()
 {
   
-#ifdef linux  
-  close();
+#ifdef linux
+  try
+    {
+    close();
+    }
+  catch(ProtocolError& err)
+    {
+      _lg.strm(sl::warning) << "caught exception closing socket FD, error was: "<< err.what();
+    }
+  catch(...)
+    {
+      _lg.strm(sl::warning) << "caught exception closing socket FD, unknown content";
+    }
 #else
 	_lg.Error("destructor is a stub on windows");
 #endif
@@ -57,19 +68,17 @@ simpleTCPLegacy::~simpleTCPLegacy()
 }
 
 
-void simpleTCPLegacy::Init(const parameterset* const class_parameters)
+void simpleTCPLegacy::Init(const parameterset* const class_parameters, bool open_immediate)
 {
 #ifndef linux
 	throw StubError("simpleTCP::Init is a stub on windows!");
 #else
 	
   //call base class to merge parameterset
-  CommunicationProtocol::Init(class_parameters);
+	CommunicationProtocol::Init(class_parameters, open_immediate);
   
   extract_parameter_value(_port,_params,"port");
   extract_parameter_value(_addr,_params,"addr");
-  
-  
   
   //open TCP socket
   _sockfd = socket(AF_INET, SOCK_STREAM, 0); //6 - TCP 
@@ -89,8 +98,13 @@ void simpleTCPLegacy::Init(const parameterset* const class_parameters)
   {
     throw ProtocolError(std::string("error setting linger: " ) + gai_strerror(err));
   };
+
+  if(open_immediate)
+    this->open();
+  else
+    _lg.strm(sl::info) << "open_immediate was false, leaving socket unconnected for now";
+
   
-  this->open();  
 #endif
 }
 
@@ -121,7 +135,9 @@ void simpleTCPLegacy::open()
 
 void simpleTCPLegacy::close()
 {
-  
+  auto err = shutdown(_sockfd, SHUT_RDWR);
+  if(err != 0)
+    throw ProtocolError(std::string("couldn't close socket, Error was: " ) + strerror(err));
 }
 
 
@@ -279,6 +295,8 @@ simpleTCPasio::simpleTCPasio(const parameterset *const instance_parameters,
   pimpl = std::make_unique<detail::simpleTCPasioImpl>();
   pimpl->setup_executor(exec);
 
+  Init(nullptr, false);
+
 }
 
 simpleTCPasio::simpleTCPasio(const string* addr, optional<unsigned> port,
@@ -291,26 +309,36 @@ simpleTCPasio::simpleTCPasio(const string* addr, optional<unsigned> port,
   pimpl->setup_executor(exec);
   pimpl->timeout = timeout;
 
+  if(addr != nullptr)
+    pimpl->addr = *addr;
+  if(port.has_value())
+    pimpl->port = *port ;
+
 }
 
 simpleTCPasio::~simpleTCPasio() {}
 
-void simpleTCPasio::Init(const parameterset *const class_parameters)
+void simpleTCPasio::Init(const parameterset *const class_parameters, bool open_immediate)
 {
-  foxtrot::CommunicationProtocol::Init(class_parameters);
+  foxtrot::CommunicationProtocol::Init(class_parameters, open_immediate);
   extract_parameter_value(pimpl->port, _params, "port");
   extract_parameter_value(pimpl->addr, _params, "addr");
 
   unsigned timeout_ms;
-  extract_parameter_value(timeout_ms, _params, "timeout");
+  extract_parameter_value(timeout_ms, _params, "timeout", false);
   pimpl->timeout = std::chrono::milliseconds(timeout_ms);
 
   //TODO: open  socket here!
-  open();
+  if(open_immediate)
+    open();
+  else
+    {
+      pimpl->lg.strm(sl::info) << "open_immediate was false. Deferring opening of socket";
+    }
 }
 
 void simpleTCPasio::Init(const std::string* addr, std::optional<unsigned> port,
-			 opttimeout timeout)
+			 opttimeout timeout, bool open_immediate)
 {
   if(port.has_value())
     pimpl->port = *port;
@@ -318,7 +346,13 @@ void simpleTCPasio::Init(const std::string* addr, std::optional<unsigned> port,
     pimpl->addr = *addr;
 
   pimpl->timeout = timeout;
-  open();
+
+  if(open_immediate)
+    open();
+  else
+    {
+      pimpl->lg.strm(sl::info) << "open_immediate was false. Deferring opening of socket";
+    }
 }
 
 void simpleTCPasio::Init()
@@ -331,8 +365,11 @@ void simpleTCPasio::Init()
 
 optional<bool> simpleTCPasio::try_connect() noexcept
 {
-  if(is_open())
-    return true;
+  if(is_open().value_or(false))
+    {
+      pimpl->lg.strm(sl::debug) << "try_connect: socket already open";
+      return true;
+    }
 
   bool timeout_hasval = pimpl->timeout.has_value();
   bool success = false;

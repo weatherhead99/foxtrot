@@ -78,16 +78,12 @@ slistuptr CurlRequest::common_curl_setup(CurlInstance inst, const string& path, 
   return std::move(headerptr);
 
 }
-		  
 
 
-
-void CurlRequest::Init(const parameterset *const)
+void CurlRequest::Init(const parameterset *const, bool)
 {
 
 }
-
-
 
 
 string CurlRequest::blocking_get_request(const string& path,

@@ -107,10 +107,11 @@ foxtrot::protocols::SerialPort::~SerialPort()
 }
 
 
-void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const class_parameters)
+void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const class_parameters,
+					  bool open_immediate)
 {
   //call base class to merge parameters together
-  CommunicationProtocol::Init(class_parameters);
+  CommunicationProtocol::Init(class_parameters, open_immediate);
   
   extract_parameter_value(_port,_params,"port");
   extract_parameter_value(_baudrate,_params,"baudrate");
@@ -122,18 +123,23 @@ void foxtrot::protocols::SerialPort::Init(const foxtrot::parameterset*const clas
   
   
   boost::system::error_code ec;
+
+  if(open_immediate)
+    {
+      _sport->open(_port,ec);
+      if(ec)
+	{
+	  throw ProtocolError(std::string("can't open serial port: ") + ec.message().c_str());
+	}
   
-  _sport->open(_port,ec);
-  if(ec)
-  {
-    throw ProtocolError(std::string("can't open serial port: ") + ec.message().c_str());
-  }
   
-  
-  _sport->set_option(serial_port_base::baud_rate(_baudrate));
-  _sport->set_option(serial_port_base::parity(_parity));
-  _sport->set_option(serial_port_base::stop_bits(_stopbits));
-  _sport->set_option(serial_port_base::character_size(_bits));
+      _sport->set_option(serial_port_base::baud_rate(_baudrate));
+      _sport->set_option(serial_port_base::parity(_parity));
+      _sport->set_option(serial_port_base::stop_bits(_stopbits));
+      _sport->set_option(serial_port_base::character_size(_bits));
+    }
+  else
+    _lg.strm(sl::info) << "open_immediate was false, deferring serial port opening";
   
 };
 

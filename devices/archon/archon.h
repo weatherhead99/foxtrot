@@ -24,7 +24,7 @@
 using std::string;
 using std::optional;
 using std::vector;
-typedef std::map<std::string,std::string> ssmap;
+typedef std::unordered_map<std::string,std::string> ssmap;
 
 
 namespace foxtrot {

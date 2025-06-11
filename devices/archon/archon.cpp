@@ -59,39 +59,26 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
   clear_config();
     
   sync_archon_timer();
-  int modules_installed = system().modules.size();
-  
-  
-   for(int i = 0; i < 12; i++)
-  {
-   bool mod_present = ((1 <<i) &  modules_installed) >> i;
-   if(mod_present)
-   {
-    archon_module_types modtype = static_cast<archon_module_types>(extract_module_variable<short unsigned>(i,"TYPE",getSystem(),'_'));
-    
 
-    _lg.strm(sl::info) << "module found at position: " << (i+1);
-    _lg.strm(sl::info) << "module type is: " << get_module_name(modtype);
-       
-    auto ptr = make_module(*this, i, modtype);
-    if(ptr)
+  auto sys = system();
+  int modules_installed = sys.modules.size();
+  _lg.strm(sl::debug) << "modules installed: " << modules_installed;
+  
+  for(auto mod : sys.modules)
     {
-      _lg.strm(sl::info) << "module initialised" ;
-      _modules.insert(std::make_pair(i,std::move(ptr)));
-    }
-    else {
-      _lg.strm(sl::info) << "module failed to initialize (maybe unimplemented)";
+      _lg.strm(sl::info) << "module found at position: " << mod.position;
+      _lg.strm(sl::info) << "module  type is: " <<  get_module_name(mod.type);
+      auto ptr = make_module(*this, mod.position, mod.type);
+      if(ptr)
+	{
+	  _lg.strm(sl::info) << "module initialized";
+	  _modules.insert(std::make_pair(mod.position, std::move(ptr)));
 	}
+      else
+	_lg.strm(sl::warning) << "module failed to initialize (perhaps unimplemented)";
+    }
 
-   }
-   else
-   {
-     _lg.Info("module not present at position " + std::to_string(i+1));
-   };
-   
-   
-   
-  }
+  
 
 }
 
@@ -280,15 +267,29 @@ foxtrot::devices::archon_system_info archon::system()
   archon_system_info out;
 
   auto sysmap = getSystem();
-  out.backplane_type = std::stoul(sysmap.at("BACKPLANE_TYPE"));
+
+  _lg.strm(sl::trace) << "printing system map:";
+  for(const auto& [k, v] : sysmap)
+    {
+      _lg.strm(sl::trace) << k << ": " << v ;
+    }
+  
+   _lg.strm(sl::trace) << "backplane type...";
+   out.backplane_type = std::stoul(sysmap.at("BACKPLANE_TYPE"));
+   _lg.strm(sl::trace) << "type is: " << out.backplane_type;
+  _lg.strm(sl::trace) << "backplane rev...";
   out.backplane_rev = std::stoul(sysmap.at("BACKPLANE_REV"));
+  _lg.strm(sl::trace) << "rev is: " << out.backplane_rev;
   out.backplane_version = sysmap.at("BACKPLANE_VERSION");
+  _lg.strm(sl::trace) << "backplane version is: " << out.backplane_version;
   out.backplane_id = std::stoul(sysmap.at("BACKPLANE_ID"), nullptr, 16);
   out.power_id = std::stoul(sysmap.at("POWER_ID"), nullptr, 16);
   std::vector<unsigned short> mod_positions;
 
-  auto mod_positions_setup = [&mod_positions, &sysmap] <int N> () {
-      std::bitset<N> modpos = std::stoul(sysmap.at("MOD_PRESENT"),nullptr, 16);
+  auto mod_positions_setup = [&mod_positions, &sysmap, this] <int N> () {
+    unsigned modflagmap = std::stoul(sysmap.at("MOD_PRESENT"), nullptr, 16);
+    _lg.strm(sl::trace) << "modflagmap: " << modflagmap;
+      std::bitset<N> modpos = modflagmap;
       auto nmods = modpos.count();
       mod_positions.reserve(nmods);
       for(int i=0; i< N; i++)
@@ -297,7 +298,7 @@ foxtrot::devices::archon_system_info archon::system()
 	    mod_positions.push_back(i+1);
 	}
   };
-
+  
   if(out.backplane_type == 1)
     mod_positions_setup.template operator()<12>();
   else if(out.backplane_type == 2)
@@ -306,11 +307,18 @@ foxtrot::devices::archon_system_info archon::system()
   out.modules.reserve(mod_positions.size());
   for(auto pos : mod_positions)
     {
+      _lg.strm(sl::trace) << "looking for module info at position: " << pos;
       archon_module_info& modinfo = out.modules.emplace_back();
-      modinfo.module_id = std::stoul(sysmap.at(std::format("MOD{}_ID", pos)), nullptr, 16);
+      auto modidstr = std::format("MOD{}_ID", pos);
+      _lg.strm(sl::trace) << "modidstr: " << modidstr;
+      modinfo.module_id = std::stoul(sysmap.at(modidstr), nullptr, 16);
+      _lg.strm(sl::trace) << "module id: " << modinfo.module_id;
       modinfo.position = pos;
       modinfo.version = sysmap.at(std::format("MOD{}_VERSION", pos));
-      modinfo.revision = std::stoul(sysmap.at(std::format("MOD{}_REVISION", pos)));
+      _lg.strm(sl::trace) << "module version: " << modinfo.version;
+      modinfo.revision = std::stoul(sysmap.at(std::format("MOD{}_REV", pos)));
+      _lg.strm(sl::trace) << "module revision: " << modinfo.revision;
+      modinfo.type = static_cast<archon_module_types>(std::stoul(sysmap.at(std::format("MOD{}_TYPE", pos))));
     }
 
   return out;
@@ -877,6 +885,7 @@ void foxtrot::devices::archon::sync_archon_timer()
     
     _arch_tmr = std::stoull(count);
     _sys_tmr = boost::posix_time::microsec_clock::universal_time();
+    
 }
 
 

@@ -372,10 +372,10 @@ libUsbProtocol::libUsbProtocol(const parameterset *const instance_parameters)
 
 
 
-void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters)
+void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters, bool open_immediate)
 {
   //call base class to merge parameters
-    foxtrot::CommunicationProtocol::Init(class_parameters);
+  foxtrot::CommunicationProtocol::Init(class_parameters, open_immediate);
 
     extract_parameter_value(_vid,_params,"vid");
     extract_parameter_value(_pid,_params,"pid");
@@ -392,14 +392,19 @@ void libUsbProtocol::Init(const foxtrot::parameterset*const class_parameters)
 
     try
       {
-	_lg.strm(sl::debug) << "opening device...";
-	(*found_dev).open();
-	_lg.strm(sl::debug) << "resetting device..";
-	(*found_dev).reset();
-	_lg.strm(sl::debug) << "setting configuration...";
-	(*found_dev).set_configuration(1);
-	_lg.strm(sl::debug) << "claiming interface...";
-	(*found_dev).claim_interface(0);
+	if(open_immediate)
+	  {
+	    _lg.strm(sl::debug) << "opening device...";
+	    (*found_dev).open();
+	    _lg.strm(sl::debug) << "resetting device..";
+	    (*found_dev).reset();
+	    _lg.strm(sl::debug) << "setting configuration...";
+	    (*found_dev).set_configuration(1);
+	    _lg.strm(sl::debug) << "claiming interface...";
+	    (*found_dev).claim_interface(0);
+	  }
+	else
+	  _lg.strm(sl::info) << "open_immediate was false, not opening device in Init";
       }
     catch(foxtrot::protocols::LibUsbError& err)
       {

@@ -23,7 +23,8 @@ namespace foxtrot
     }; 
 
     virtual ~CommunicationProtocol(); 
-    virtual void Init(const parameterset * const class_parameters);
+    virtual void Init(const parameterset * const class_parameters,
+		      bool open_immediate=true);
 
     virtual void open();
     virtual void close();

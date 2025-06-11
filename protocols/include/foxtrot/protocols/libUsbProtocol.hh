@@ -168,7 +168,7 @@ namespace foxtrot
     {
     public:
       libUsbProtocol(const parameterset* const instance_parameters);
-      virtual void Init(const parameterset*const class_parameters) override;
+      virtual void Init(const parameterset*const class_parameters, bool open_immediate=true) override;
 
       void set_read_timeout(int timeout_ms);
       int get_read_timeout() const;

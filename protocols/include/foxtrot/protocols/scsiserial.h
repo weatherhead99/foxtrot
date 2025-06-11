@@ -34,7 +34,7 @@ namespace foxtrot
     public:
     scsiserial(const parameterset*const instance_parameters);
     virtual ~scsiserial();
-    virtual void Init(const parameterset*const class_parameters) override;
+      virtual void Init(const parameterset*const class_parameters, bool open_immediate=true) override;
     
     virtual std::string read(unsigned int len, unsigned* actlen = nullptr) override;
     virtual void write(const std::string& data) override;

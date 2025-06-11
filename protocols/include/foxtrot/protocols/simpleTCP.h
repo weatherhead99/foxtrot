@@ -37,7 +37,7 @@ namespace foxtrot {
     
       virtual ~simpleTCPLegacy();
     
-      void Init(const parameterset*const class_parameters) override;
+      void Init(const parameterset*const class_parameters, bool open_immediate) override;
       void Init(const unsigned port, const std::string& addr);
     
       virtual void open() override;
@@ -82,9 +82,9 @@ namespace foxtrot {
 		    optional<boost::asio::any_io_executor> exec=nullopt);
       virtual ~simpleTCPasio();
 
-      void Init(const parameterset* const class_parameters) override;
+      void Init(const parameterset* const class_parameters, bool open_immediate=true) override;
       void Init(const string* const addr, optional<unsigned> port=nullopt,
-		opttimeout timeout=nullopt);
+		opttimeout timeout=nullopt, bool open_immediate=true);
       void Init();
 
       void open() override;

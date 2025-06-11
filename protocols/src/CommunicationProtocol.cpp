@@ -47,7 +47,8 @@ std::optional<bool> foxtrot::CommunicationProtocol::is_open()
 }
 
 
-void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters)
+void foxtrot::CommunicationProtocol::Init(const foxtrot::parameterset* const class_parameters,
+					  bool)
 {
 
   if(class_parameters != nullptr)    
