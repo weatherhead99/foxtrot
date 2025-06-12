@@ -58,7 +58,7 @@ namespace devices
     double getTempA() const;
     double getTempB() const;
     double getTempC() const;
-    std::array<bool,8> getGPIO() const;  
+    [[deprecated]] std::array<bool,8> getGPIO() const;  
     
     void setSensorType(HeaterXSensors sensor, HeaterXSensorTypes type) ;
     HeaterXSensorTypes getSensorType(HeaterXSensors sensor);
@@ -122,9 +122,8 @@ namespace devices
     const string getTypeName() const override;	
     
     private:
-    virtual void update_variables() override;
-    ArchonHeaterX(archon& arch, short unsigned int modpos);
-    
+    [[deprecated]] void update_variables();
+      ArchonHeaterX(std::weak_ptr<archon>& arch, const archon_module_info& modinfo);
     
     //read values
     double _heaterAOutput;
@@ -152,11 +151,15 @@ namespace devices
     int _heaterAPset;
     int _heaterAIset;
     int _heaterADset;
-    
-    
-    
-    
+        
     };
+
+
+  class ArchonHeaterXLegacy : public ArchonHeaterX
+  {
+
+
+  };
     
     
     

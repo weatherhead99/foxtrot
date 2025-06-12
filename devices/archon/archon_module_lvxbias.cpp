@@ -1,12 +1,12 @@
 #include "archon_module_lvxbias.h"
 #include "archon_modules.h"
 
-foxtrot::devices::ArchonLVX::ArchonLVX(foxtrot::devices::archon& arch, unsigned short modpos)
-: foxtrot::devices::ArchonModule(arch,modpos), 
-foxtrot::devices::archonGPIO(arch,modpos),
+foxtrot::devices::ArchonLVX::ArchonLVX(std::weak_ptr<archon>& arch, const archon_module_info& modinf)
+  : foxtrot::devices::ArchonModule(arch,modinf), 
+foxtrot::devices::archonGPIO(arch,modinf),
 _lg("ArchonLVX"),
-_lcbias(*this, "LVLC", 24, -14.0, 14.0,_lg),
-_hcbias(*this, "LVHC", 6, -14.0,14.0,_lg)
+    _lcbias(*this, "LVLC", 24, -14.0, 14.0,_lg),
+    _hcbias(*this, "LVHC", 6, -14.0,14.0,_lg)
 {
 }
 
@@ -22,16 +22,6 @@ const string devices::ArchonLVX::getDeviceTypeName() const
 {
     return "ArchonLVX";
 }
-
-
-void devices::ArchonLVX::update_variables()
-{
-  
-  //TODO: update this!
-  
-
-}
-
 
 
 void foxtrot::devices::ArchonLVX::setLabel(bool HC, int channel, const std::string& label)

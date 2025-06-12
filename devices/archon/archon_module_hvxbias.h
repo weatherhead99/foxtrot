@@ -18,12 +18,11 @@ namespace foxtrot
     public:
       friend class ArchonModule;
     const string getTypeName() const override;
-    void update_variables() override;
     const string getDeviceTypeName() const override;
       
     
     private:
-      ArchonHVX(archon& arch, short unsigned int modpos);
+      ArchonHVX(std::weak_ptr<archon>& arch, const archon_module_info& modinf);
       
       
     };

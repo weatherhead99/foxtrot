@@ -1,24 +1,19 @@
 #include "archon_module_AD.h"
+#include "archon_module_mapper.hh"
 
-devices::ArchonAD::ArchonAD(devices::archon& arch, short unsigned int modpos)
-: ArchonModule(arch, modpos)
+devices::ArchonAD::ArchonAD(std::weak_ptr<archon>& arch, const archon_module_info& modinf)
+: ArchonModule(arch, modinf)
 {
 
 }
-
-void devices::ArchonAD::update_variables()
-{
-
-}
-
 
 double devices::ArchonAD::getClamp(int channel)
 {
-  
+
   checkChannelNum(channel);
   _oss.str("");
   _oss << "CLAMP" << channel;
-  
+
   auto clampstr = readConfigKey(_oss.str());
   return std::stod(clampstr);
 
@@ -36,7 +31,6 @@ void foxtrot::devices::ArchonAD::setPreampGain(bool hgain)
 bool devices::ArchonAD::getPreampGain()
 {
   auto str = readConfigKey("PREAMPGAIN");
-  
   return std::stoi(str);
   
 }
@@ -61,8 +55,8 @@ void devices::ArchonAD::setClamp(int channel, double val)
   writeConfigKey(_oss.str(), std::to_string(val));
 }
 
-devices::ArchonADM::ArchonADM(archon &arch, short unsigned int modpos)
-  : ArchonModule(arch, modpos) {}
+devices::ArchonADM::ArchonADM(std::weak_ptr<archon> &arch, const archon_module_info& modinf)
+  : ArchonModule(arch, modinf) {}
 
 const string devices::ArchonADM::getTypeName() const { return "ADM";}
 

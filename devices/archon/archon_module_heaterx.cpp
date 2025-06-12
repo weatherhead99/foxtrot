@@ -27,8 +27,8 @@ const string devices::ArchonHeaterX::getDeviceTypeName() const
 
 
 
-devices::ArchonHeaterX::ArchonHeaterX(devices::archon& arch, short unsigned int modpos): ArchonModule(arch, modpos),
-archonGPIO(arch,modpos)
+devices::ArchonHeaterX::ArchonHeaterX(std::weak_ptr<archon>& arch, const archon_module_info& modinfo): ArchonModule(arch, modinfo),
+archonGPIO(arch, modinfo)
 {
   update_variables();
   
@@ -114,37 +114,44 @@ std::array< bool, int(8) > devices::ArchonHeaterX::getGPIO() const
 
 void devices::ArchonHeaterX::update_variables()
 {
+
+  //WARNING: this method is terribly inefficient, do better!
+  if(auto archptr = _arch.lock())
+    {
+
+      auto statmap = archptr->getStatus();
+
+      auto _modpos = _info.position;
   
+      _heaterAOutput = extract_module_variable<decltype(_heaterAOutput)>(_modpos,"HEATERAOUTPUT",statmap);
+      _heaterBOutput = extract_module_variable<decltype(_heaterBOutput)>(_modpos,"HEATERBOUTPUT",statmap);
+      
+      _TempA = extract_module_variable<decltype(_TempA)>(_modpos,"TEMPA",statmap);
+      _TempB = extract_module_variable<decltype(_TempB)>(_modpos,"TEMPB",statmap);
+      _TempC = extract_module_variable<decltype(_TempC)>(_modpos,"TEMPC",statmap);
   
-  auto statmap = _arch.getStatus();
-//   try{
+      _heaterAP = extract_module_variable<decltype(_heaterAP)>(_modpos,"HEATERAP",statmap);
+      _heaterAI = extract_module_variable<decltype(_heaterAI)>(_modpos,"HEATERAI",statmap);
+      _heaterAD = extract_module_variable<decltype(_heaterAD)>(_modpos,"HEATERAD",statmap);
   
-  _heaterAOutput = extract_module_variable<decltype(_heaterAOutput)>(_modpos,"HEATERAOUTPUT",statmap);
-  _heaterBOutput = extract_module_variable<decltype(_heaterBOutput)>(_modpos,"HEATERBOUTPUT",statmap);
-  
-  _TempA = extract_module_variable<decltype(_TempA)>(_modpos,"TEMPA",statmap);
-  _TempB = extract_module_variable<decltype(_TempB)>(_modpos,"TEMPB",statmap);
-  _TempC = extract_module_variable<decltype(_TempC)>(_modpos,"TEMPC",statmap);
-  
-  _heaterAP = extract_module_variable<decltype(_heaterAP)>(_modpos,"HEATERAP",statmap);
-  _heaterAI = extract_module_variable<decltype(_heaterAI)>(_modpos,"HEATERAI",statmap);
-  _heaterAD = extract_module_variable<decltype(_heaterAD)>(_modpos,"HEATERAD",statmap);
-  
-  _heaterBP = extract_module_variable<decltype(_heaterBP)>(_modpos,"HEATERBP",statmap);
-  _heaterBI = extract_module_variable<decltype(_heaterBI)>(_modpos,"HEATERBI",statmap);
-  _heaterBD = extract_module_variable<decltype(_heaterBD)>(_modpos,"HEATERBD",statmap);
+      _heaterBP = extract_module_variable<decltype(_heaterBP)>(_modpos,"HEATERBP",statmap);
+      _heaterBI = extract_module_variable<decltype(_heaterBI)>(_modpos,"HEATERBI",statmap);
+      _heaterBD = extract_module_variable<decltype(_heaterBD)>(_modpos,"HEATERBD",statmap);
   
 //   std::cout << "modpos:" << _modpos << std::endl;
-  auto gpiostr = get_module_variable_string(_modpos,"DINPUTS",statmap);
-  std::istringstream iss(gpiostr);
-  std::ostringstream oss;
+      auto gpiostr = get_module_variable_string(_modpos,"DINPUTS",statmap);
+      std::istringstream iss(gpiostr);
+      std::ostringstream oss;
   
-  for(auto& b : _GPIO)
-  {
-   oss << iss.get();
-   b = static_cast<bool>(std::stoi(oss.str()));
-   oss.str("");
-  }
+      for(auto& b : _GPIO)
+	{
+	  oss << iss.get();
+	  b = static_cast<bool>(std::stoi(oss.str()));
+	  oss.str("");
+	}
+    }
+  else
+    throw foxtrot::DeviceError("couldn't lock archon pointer");
     
 }
 

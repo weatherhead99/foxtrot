@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <string>
 
 namespace foxtrot
 {
@@ -9,6 +10,8 @@ namespace foxtrot
     class archon;
     class ArchonModule;
 
+    using std::string;
+    
     
     enum class archon_module_types : short unsigned
     {
@@ -30,8 +33,17 @@ namespace foxtrot
 	DriverX = 16,
 	ADM = 17
     };
+    
+    struct archon_module_info
+    {
+      unsigned position;
+      archon_module_types type;
+      unsigned revision;
+      string version;
+      unsigned module_id;
+    };
 
-    std::unique_ptr<ArchonModule> make_module(archon& arch, int modpos, archon_module_types modtp);
+    std::unique_ptr<ArchonModule> make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf);
 
     std::string get_module_name(archon_module_types modtp);
 

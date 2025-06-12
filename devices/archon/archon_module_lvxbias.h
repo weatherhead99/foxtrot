@@ -21,8 +21,6 @@ namespace foxtrot
 	    
 	    const string getTypeName() const override;
 	    const string getDeviceTypeName() const override;
-	    
-	    void update_variables() override;
 	  
             void setLabel(bool HC, int channel, const std::string& label);
             std::string getLabel(bool HC, int channel);
@@ -48,7 +46,7 @@ namespace foxtrot
             Logging _lg; 
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
-            ArchonLVX(archon& arch, short unsigned int modpos);
+            ArchonLVX(std::weak_ptr<archon>& arch, const archon_module_info& modinfo);
 	    
 
             

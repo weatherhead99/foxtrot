@@ -1,6 +1,6 @@
 #include "archon_module_xvbias.h"
 
-foxtrot::devices::ArchonXV::ArchonXV(foxtrot::devices::archon& arch, int modpos)
+foxtrot::devices::ArchonXV::ArchonXV(std::weak_ptr<archon>& arch, const archon_module_info& modpos)
 : foxtrot::devices::ArchonLVX(arch,modpos)
 {
   _lg = Logging("ArchonXV");
@@ -14,20 +14,6 @@ const string devices::ArchonXV::getDeviceTypeName() const
   return "ArchonXV";
 }
 
-
-
-std::unique_ptr<foxtrot::devices::ArchonModule> foxtrot::devices::ArchonXV::constructModule(foxtrot::devices::archon& arch, int modpos)
-{
-    std::unique_ptr<foxtrot::devices::ArchonModule> out(new 
-    ArchonXV(arch,modpos));
-    
-    return out;
-}
-
-void foxtrot::devices::ArchonXV::update_variables()
-{
-    
-}
 
 const std::string foxtrot::devices::ArchonXV::getTypeName() const
 {

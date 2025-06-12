@@ -35,6 +35,7 @@
 using foxtrot::devices::archon;
 using foxtrot::devices::ArchonStreamHelper;
 using foxtrot::devices::archon_legacy;
+using foxtrot::protocols::simpleTCPBase;
 
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
 
@@ -44,6 +45,12 @@ const string devices::archon::getDeviceTypeName() const
 {
   return "archon";
 }
+
+std::shared_ptr<archon> foxtrot::devices::archon::create(std::shared_ptr<simpleTCPBase>&&  proto)
+{
+  std::shared_ptr<archon> out(new archon(proto));
+  return out;
+};
 
 
 foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPBase > proto)
@@ -68,7 +75,9 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
     {
       _lg.strm(sl::info) << "module found at position: " << mod.position;
       _lg.strm(sl::info) << "module  type is: " <<  get_module_name(mod.type);
-      auto ptr = make_module(*this, mod.position, mod.type);
+
+      auto thisptr = std::static_pointer_cast<archon>(shared_from_this());
+      auto ptr = make_module(thisptr, mod);
       if(ptr)
 	{
 	  _lg.strm(sl::info) << "module initialized";
@@ -248,7 +257,8 @@ foxtrot::devices::archon_status archon::status()
 
   out.module_statuses.reserve(_modules.size());
   for(auto& [pos, mod] : _modules)
-      out.module_statuses.push_back(mod->status());
+    out.module_statuses.push_back(mod->status(statmap));
+  
   return out;
 }
 
@@ -1224,6 +1234,13 @@ void devices::archon::load_timing()
 // --------------------ARCHON LEGACY CODE  STARTS HERER
 // ---------------------------
 
+std::shared_ptr<archon_legacy> foxtrot::devices::archon_legacy::create(std::shared_ptr<simpleTCPBase>&& proto)
+{
+  std::shared_ptr<archon_legacy> out(new archon_legacy(proto));
+  return out;
+}
+
+
 foxtrot::devices::archon_legacy::archon_legacy(std::shared_ptr<simpleTCPBase> proto)
   : archon(proto) {}
 
@@ -1245,15 +1262,17 @@ void foxtrot::devices::archon_legacy::update_state()
   _status = getStatus();
   _lg.Trace("frame..");
   _frame = getFrame();
+
+  //NOTE: need a replacement for this!
   
-  for(auto& mod: _modules)
-  {
-    if(mod.second != nullptr)
-    {
-     mod.second->update_variables(); 
-    }
-  }
-  
+  // for(auto& mod: _modules)
+  // {
+  //   if(mod.second != nullptr)
+  //   {
+  //    mod.second->update_variables(); 
+  //   }
+  // }
+
 }
 
 

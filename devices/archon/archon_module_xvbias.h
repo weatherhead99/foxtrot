@@ -15,17 +15,13 @@ namespace foxtrot
         {
 	  friend class ArchonModule;
           RTTR_ENABLE(ArchonLVX)
-        public:
-            static std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos);
-            
-            const std::string getTypeName() const override;
-	    void update_variables() override;
-	    
-	    const string getDeviceTypeName() const override;
+        public: 
+	  const std::string getTypeName() const override;
+	  const string getDeviceTypeName() const override;
                         
             
         private:
-            ArchonXV(archon& arch, int modpos);
+	  ArchonXV(std::weak_ptr<archon>& arch, const archon_module_info& modpos);
             
             
             

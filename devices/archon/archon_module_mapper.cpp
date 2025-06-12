@@ -70,26 +70,25 @@ auto modtpmap = h::make_map(
 			    //ADF: unimplemented!
 			    //ADX: unimplemented!
 			    //ADLN: unimplemented!
-			    h::make_pair(h::int_c<amtval(amt::DriverX)>, h::type_c<ArchonDriverX>)
-			    //ADM: unimplemented!
+			    h::make_pair(h::int_c<amtval(amt::DriverX)>, h::type_c<ArchonDriverX>),
+			    h::make_pair(h::int_c<amtval(amt::ADM)>, h::type_c<ArchonADM>)
 			    );
 
 
 
 
-unique_ptr<ArchonModule> foxtrot::devices::make_module(archon& arch, int modpos, archon_module_types modtp)
+unique_ptr<ArchonModule> foxtrot::devices::make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf)
 {
   std::unique_ptr<ArchonModule> modptr = nullptr;
-  h::for_each(modtpmap, [&arch, modpos, modtp, &modptr] (auto v)
+  h::for_each(modtpmap, [&arch, &inf,  &modptr] (auto v)
   {
     using ModType = typename decltype(+h::second(v))::type;
     const short unsigned key = h::value(h::first(v));
     if(modptr != nullptr)
       return;
-    if(static_cast<short unsigned>(modtp) == key)
+    if(static_cast<short unsigned>(inf.type) == key)
       {
-	//found a match!
-	modptr = ArchonModule::constructModule<ModType>(arch, modpos);
+	modptr = ArchonModule::constructModule<ModType>(arch, inf);
       }
 
        });

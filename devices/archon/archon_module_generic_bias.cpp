@@ -1,17 +1,39 @@
 #include <sstream>
 #include <foxtrot/Logging.h>
+#include "archon.h"
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
 
 
+using foxtrot::devices::archon_module_status;
+
 using namespace foxtrot;
 using std::string;
 
-devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod, const string& nmemonic, 
-					      int numchans, double lowlimit, double highlimit, Logging& lg)
-  : _mod(mod), _biasnmemonic(nmemonic), _lg(lg), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit)
-{
+using statptr = optional<vector<double>> archon_module_status::*;
+const std::map<string, std::pair<statptr, statptr>> nmemonic_map =
+  {
+  {"HC",  {&archon_module_status::HC_Vs, &archon_module_status::HC_Is}},
+  {"LC",  {&archon_module_status::LC_Vs, &archon_module_status::LC_Is}},
+  {"XVP", {&archon_module_status::XVP_Vs, &archon_module_status::XVP_Is}},
+  {"XVN", {&archon_module_status::XVN_Vs, &archon_module_status::XVN_Is}}};
 
+devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod,
+					      const string& nmemonic,
+					      int numchans, double lowlimit, double highlimit, Logging& lg)
+  : _mod(mod), _lg(lg),  _biasnmemonic(nmemonic), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit)
+{
+  for( auto& [k, v] : nmemonic_map)
+    {
+      if(nmemonic.find(k) != std::string::npos)
+	{
+	  lg.strm(sl::debug) << "found matching nmemonic";
+	  statV = v.first;
+	  statI = v.second;
+	}
+    }
+  if(statV == nullptr)
+    throw std::logic_error("couldn't find appropriate bias nmemonic");
 }
 
 
@@ -20,7 +42,6 @@ void devices::ArchonGenericBias::setLabel(int channel, const string& label)
   check_channel_number(channel);
  std::ostringstream oss;
  oss << _biasnmemonic << "_LABEL" << channel;
-   
  _mod.writeConfigKey(oss.str(),label); 
 }
 
@@ -37,19 +58,12 @@ string devices::ArchonGenericBias::getLabel(int channel)
 void devices::ArchonGenericBias::setOrder(int channel, int sequence)
 {
   check_channel_number(channel);
-  std::ostringstream oss;
- oss << _biasnmemonic << "_ORDER" << channel;
- 
+  auto cmdstr = std::format("{}_ORDER{}", _biasnmemonic, channel);
+  
  if(sequence < 0)
- {
    throw std::out_of_range("invalid sequence number < 1");
- }
- /*else if(sequence > _numchans)
- {
-   throw std::out_of_range("invalid sequence number > numchans");
- }
- */  
- _mod.writeConfigKey(oss.str(),std::to_string(sequence));
+
+ _mod.writeConfigKey(cmdstr,std::to_string(sequence));
   
 }
 
@@ -105,15 +119,20 @@ bool devices::ArchonGenericBias::getEnable(int channel)
 double devices::ArchonGenericBias::measureI(int channel)
 {
   check_channel_number(channel);
-  auto modpos = _mod.getmodpos() + 1;
-  
+  auto modpos = _mod.info().position;
+
   std::ostringstream oss;
   oss << "MOD" << modpos << "/" << _biasnmemonic << "_I" << channel;
-  
+
   _lg.Debug("measureI request: " + oss.str());
-  
-  auto str = _mod.getArchon().getStatus().at(oss.str());
-  return std::stod(str);
+
+  if(auto ptr = _mod._arch.lock())
+    {
+      auto str = ptr->getStatus().at(oss.str());
+      return std::stod(str);
+    }
+  else
+    throw std::logic_error("couldn't lock archon pointer");
 
 }
 
@@ -121,14 +140,16 @@ double devices::ArchonGenericBias::measureI(int channel)
 double devices::ArchonGenericBias::measureV(int channel)
 {
   check_channel_number(channel);
-  auto modpos = _mod.getmodpos() + 1;
-  std::ostringstream oss;
-  oss << "MOD" << modpos << "/" << _biasnmemonic << "_V" << channel;
-  
-  _lg.Debug("measureV request: " + oss.str());
-  
-  auto str = _mod.getArchon().getStatus().at(oss.str());
-  return std::stod(str);
+  auto modpos = _mod.info().position;
+  auto cmdstr = std::format("MOD{}/{}_V{}", modpos, _biasnmemonic, channel);
+  _lg.Debug("measureV request: " + cmdstr);
+  if(auto ptr = _mod._arch.lock())
+    {
+      auto str = ptr->getStatus().at(cmdstr);
+      return std::stod(str);
+    }
+  else
+    throw std::logic_error("failed to lock archon pointer");
 
 }
 

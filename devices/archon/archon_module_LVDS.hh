@@ -22,7 +22,7 @@ namespace foxtrot
       ~ArchonLVDS();
 
     protected:
-      ArchonLVDS(archon& arch, short unsigned int modpos);
+      ArchonLVDS(std::weak_ptr<archon>& arch, const archon_module_info& modinf);
       
 
     };

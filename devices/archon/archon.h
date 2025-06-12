@@ -21,9 +21,10 @@
 #include "archon_module_mapper.hh"
 
 
-using std::string;
 using std::optional;
+using std::string;
 using std::vector;
+using std::unordered_map;
 typedef std::unordered_map<std::string,std::string> ssmap;
 
 
@@ -99,15 +100,6 @@ namespace foxtrot {
       std::array<archon_buffer_info, 3> buffer_infos;
     };
 
-    struct archon_module_info
-    {
-      unsigned position;
-      archon_module_types type;
-      unsigned revision;
-      string version;
-      unsigned module_id;
-    };
-    
     struct archon_system_info
     {
       unsigned backplane_type;
@@ -139,6 +131,11 @@ namespace foxtrot {
       optional<vector<double>> HC_Is;
       optional<vector<double>> LC_Vs;
       optional<vector<double>> LC_Is;
+      optional<vector<double>> XVN_Vs;
+      optional<vector<double>> XVP_Vs;
+      optional<vector<double>> XVN_Is;
+      optional<vector<double>> XVP_Is;
+      optional<vector<unsigned>> vcpu_outreg;
 
     };
 
@@ -167,14 +164,19 @@ namespace foxtrot {
     //fwd declares
    class ArchonModule;
 
+
    
+
+    
   class archon : public CmdDevice
   {
       RTTR_ENABLE(CmdDevice)
     friend class foxtrot::devices::ArchonModule;
     virtual const string getDeviceTypeName() const override;
   public:
-    archon(std::shared_ptr<foxtrot::protocols::simpleTCPBase> proto);
+
+    static std::shared_ptr<archon> create(std::shared_ptr<simpleTCPBase>&& proto);
+
     ~archon();
     ssmap getStatus();
     ssmap getSystem();
@@ -325,6 +327,10 @@ namespace foxtrot {
     
     
   protected:
+    //NOTE: archon constructor is private, archon must only exist as a shared_ptr
+    //(it is shared with its modules etc)
+     archon(std::shared_ptr<foxtrot::protocols::simpleTCPBase> proto);
+
     virtual std::string cmd(const std::string& request) override;
     ssmap parse_parameter_response(const std::string& response);
     
@@ -340,6 +346,7 @@ namespace foxtrot {
     boost::posix_time::ptime _sys_tmr;
     
   private:
+    
       
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
@@ -364,11 +371,14 @@ namespace foxtrot {
     
     
     
-    
   };
 
 
-      class ArchonStreamHelper
+
+
+    
+
+  class ArchonStreamHelper
   {
   public:
     ArchonStreamHelper(archon& dev);
@@ -403,12 +413,17 @@ namespace foxtrot {
 
     class archon_legacy : public archon
     {
+      //this class is not intended to be c++ compatible with the old archon class
+      //it just retains all the declared public methods so that the client side can be
+      //the same for a foxtrot server that instantiates archon_legacy. Setup file will still
+      //need to be source-changed slightly (e.g. because this new class can only be created
+      //as a shared_ptr)
+      
       RTTR_ENABLE(archon)
       
     public:
-      
+      static std::shared_ptr<archon_legacy> create(std::shared_ptr<simpleTCPBase>&& proto);
       virtual const string getDeviceTypeName() const override;
-      archon_legacy(std::shared_ptr<simpleTCPBase> proto);
       ~archon_legacy();
 
       void update_state();
@@ -424,6 +439,8 @@ namespace foxtrot {
       std::string get_tstamp(int buf);
    
       bool isbuffercomplete(int buf);
+    protected:
+      archon_legacy(std::shared_ptr<simpleTCPBase> proto);
     private:
       ssmap _system;
       ssmap _status;

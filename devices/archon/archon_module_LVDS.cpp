@@ -7,8 +7,8 @@ using namespace foxtrot::devices;
 using foxtrot::devices::ArchonLVDS;
 
 
-ArchonLVDS::ArchonLVDS(archon &arch, short unsigned int modpos)
-    : ArchonModule(arch, modpos), archonGPIO(arch, modpos, false) {}
+ArchonLVDS::ArchonLVDS(std::weak_ptr<archon> &arch, const archon_module_info&  modinf)
+    : ArchonModule(arch, modinf), archonGPIO(arch, modinf, false) {}
 
 ArchonLVDS::~ArchonLVDS()
 {

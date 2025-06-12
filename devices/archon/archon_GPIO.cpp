@@ -6,8 +6,8 @@
 
 using std::string;
 
-foxtrot::devices::archonGPIO::archonGPIO(foxtrot::devices::archon& arch, int modpos, bool pairwise_direction)
-  : _arch_gpio(arch), _modpos_gpio(modpos), _pairwise_direction(pairwise_direction)
+foxtrot::devices::archonGPIO::archonGPIO(std::weak_ptr<archon>& arch, const archon_module_info& inf, bool pairwise_direction)
+  : _arch_gpio(arch), _inf(inf), _pairwise_direction(pairwise_direction)
 {
     
 }
@@ -131,19 +131,25 @@ foxtrot::devices::gpio_source int_to_source(int source, bool& ok)
 string foxtrot::devices::archonGPIO::readConfigKey_gpio(const string& subkey)
 {
   std::ostringstream oss;
-  oss << "MOD" << (_modpos_gpio+1) << "/" << subkey;
-  
-  return _arch_gpio.readKeyValue(oss.str());
-  
+  auto modpos_gpio = _inf.position;
+  oss << "MOD" << (modpos_gpio) << "/" << subkey;
+
+  if(auto ptr = _arch_gpio.lock())
+    return ptr->readKeyValue(oss.str());
+  else
+    throw std::logic_error("archon object destroyed, cannot use a submodule of it!");
 }
 
 void foxtrot::devices::archonGPIO::writeConfigKey_gpio(const string& key, const string& val)
 {
   std::ostringstream oss;
-  oss << "MOD" <<  (_modpos_gpio+1) << "/" << key ;
-  
-  _arch_gpio.writeKeyValue(oss.str(),val);
+  auto modpos_gpio = _inf.position;
+  oss << "MOD" <<  (modpos_gpio) << "/" << key ;
 
+  if(auto ptr = _arch_gpio.lock())
+    ptr->writeKeyValue(oss.str(), val);
+  else
+    throw std::logic_error("archon object destroyed, cannot use a submodule of it!");
 }
 
 

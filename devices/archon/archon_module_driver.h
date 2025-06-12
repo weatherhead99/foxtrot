@@ -24,7 +24,6 @@ namespace foxtrot
     
   public:
       virtual const string getTypeName() const override;
-      virtual void update_variables() override;
       
       void setLabel(int channel, const std::string& val);
       std::string getLabel(int channel);
@@ -39,7 +38,7 @@ namespace foxtrot
       bool getEnable(int channel);
       
   protected:
-      ArchonDriverBase(archon& arch, short unsigned int modpos);      
+    ArchonDriverBase(std::weak_ptr<archon>& arch, const archon_module_info& modpos);      
       
   };
 
@@ -48,7 +47,7 @@ namespace foxtrot
    class ArchonDriver : public ArchonDriverBase<detail::eight_t> {
      RTTR_ENABLE(ArchonDriverBase<detail::eight_t>)
    public:
-     ArchonDriver(archon& arch, short unsigned int modpos);
+     ArchonDriver(std::weak_ptr<archon>& arch, const archon_module_info& modpos);
      ~ArchonDriver();
      const string getTypeName() const override;
    };
@@ -57,17 +56,16 @@ namespace foxtrot
      RTTR_ENABLE(ArchonDriverBase<detail::twelve_t>)
    public:
      ~ArchonDriverX();
-     ArchonDriverX(archon& arch, short unsigned int modpos);
+     ArchonDriverX(std::weak_ptr<archon>& arch, const archon_module_info&  modinfo);
      const string getTypeName() const override;
 
    };
 
 
    template<typename NChannels>
-   ArchonDriverBase<NChannels>::ArchonDriverBase(foxtrot::devices::archon& arch, unsigned short modpos)
-     : ArchonModule(arch,modpos)
+   ArchonDriverBase<NChannels>::ArchonDriverBase(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
+     : ArchonModule(arch, modinfo)
    {
-     
    }
 
    template<typename NChannels>
@@ -114,9 +112,6 @@ namespace foxtrot
      this->checkChannel(channel);
      writeConfigKey(std::format("SLOWSLEWRATE{}",channel), val);
    }
-
-   template<typename NChannels>
-   void ArchonDriverBase<NChannels>::update_variables() {}
 
    template<typename  NChannels>
    void ArchonDriverBase<NChannels>::setEnable(int channel, bool onoff)

@@ -1,5 +1,6 @@
 #include "archon_modules.h"
 #include "archon_module_mapper.hh"
+#include <boost/token_functions.hpp>
 #include <sstream>
 
 #include <iomanip>
@@ -9,7 +10,8 @@
 #include <iostream>
 #include <map>
 #include <rttr/registration>
-
+#include <foxtrot/DeviceError.h>
+#include <stdexcept>
 
 using namespace foxtrot::devices;
 
@@ -17,93 +19,73 @@ using namespace foxtrot::devices;
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
 using foxtrot::devices::archon_hex_stream_configure;
+using foxtrot::devices::ArchonModuleLegacy;
 
 
-
-ArchonModule::ArchonModule(archon& arch, short unsigned modpos)
-  : foxtrot::Device(nullptr),  _modpos(modpos), _arch(arch)
+ArchonModule::ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
+  : foxtrot::Device(nullptr),  _info(modinfo), _arch(arch)
 {
     
-    auto statmap = _arch.getSystem();
-    
-    std::ostringstream oss;
-    
-    
-    oss << "MOD" << _modpos << "_TYPE";
-
-    
-    _modtype = static_cast<archon_module_types>(std::stoi(statmap.at(oss.str())));
-
-    oss.str("");
-    oss.clear();
-    
-    oss << "MOD" << _modpos << "_REV";
-    
-    _rev = static_cast<short unsigned>(std::stoi(statmap.at(oss.str())));
-
-    oss.str("");
-    oss.clear();
-    
-    oss << "MOD" << _modpos << "_VERSION";
-    std::istringstream iss(statmap.at(oss.str()));
-    oss.str("");
-    oss.clear();
-    
-    
+    std::istringstream iss(_info.version);
     for(auto& n : _version)
     {
       std::string verspart;
       std::getline(iss,verspart,'.');
       n = std::stoi(verspart);
     };
-    
-    
-    oss << "MOD" << _modpos << "_ID" ;
-    _id = statmap.at(oss.str());
-    
-    arch._lg.Info("id: " + _id);
-   
-    
+
 }
 
-
-archon_module_status ArchonModule::status()
+archon_module_status ArchonModule::status(const ssmap& statusmap) const
 {
+  auto findstr = std::format("MOD{}/TEMP", _info.position);
   archon_module_status out;
+  out.temp = std::stod(statusmap.at(findstr));
   return out;
 }
 
-archon_module_info ArchonModule::info()
+archon_module_status ArchonModule::status() const
 {
-  archon_module_info out;
-  return out;
+  if(auto ptr = _arch.lock())
+    {
+      auto smap = ptr->getStatus();
+      return this->status(smap);
+    }
+  else
+    throw std::logic_error("couldn't lock archon pointer");
+}
+
+const archon_module_info& ArchonModule::info() const
+{
+  return _info;
 }
 
 
 
-const std::string& ArchonModule::getID() const
+std::string ArchonModuleLegacy::getID() const
 {
-    return _id;
+  std::ostringstream oss;
+  oss << std::hex << std::uppercase << std::setfill('0') << std::setw(16)  << _info.module_id;
+  return oss.str();
 }
 
-const std::array<char, 3>& ArchonModule::getVersion() const
-{
+const std::array<char, 3>& ArchonModuleLegacy::getVersion() const
+{  
     return _version;
 }
 
-unsigned short ArchonModule::getRev() const
+unsigned short ArchonModuleLegacy::getRev() const
 {
-    return _rev;
+    return _info.revision;
 }
 
-double ArchonModule::getTemp()
+double ArchonModuleLegacy::getTemp()
 {
-  
-  
+
   std::ostringstream oss;
-  oss << "MOD" << (_modpos+1) << "/" << "TEMP";
+  oss << "MOD" << (_info.position) << "/" << "TEMP";
   
-  auto statmap = _arch.getStatus();
+  auto statmap = getArchon().getStatus();
   auto tempstr = statmap.at(oss.str());
   
   return std::stod(tempstr);
@@ -111,24 +93,19 @@ double ArchonModule::getTemp()
 }
 
 
-archon& ArchonModule::getArchon()
+archon& ArchonModuleLegacy::getArchon()
 {
-  return _arch;
-
+  if(auto arch = _arch.lock())
+    return *(arch.get());
+  else
+    throw foxtrot::DeviceError("parent archon has been deleted, cannot acquire pointer");
 }
 
 
-short unsigned int ArchonModule::getmodpos()
+short unsigned int ArchonModuleLegacy::getmodpos()
 {
-  return _modpos;
+  return _info.position;
 
-}
-
-
-
-void ArchonModule::update_variables()
-{
-  _arch._lg.strm(sl::debug) << "module  called empty update_variables()";
 }
 
 
@@ -159,20 +136,22 @@ string foxtrot::devices::get_module_variable_string(int modpos, const string& na
 
 string ArchonModule::readConfigKey(const string& subkey)
 {
-  std::ostringstream oss;
-  oss << "MOD" << (_modpos+1) << "/" << subkey;
-  
-  return _arch.readKeyValue(oss.str());
-  
+  auto cmdstr = std::format("MOD{}/{}", _info.position, subkey);
+  if(auto ptr = _arch.lock())
+    return ptr->readKeyValue(cmdstr);
+  else
+    throw std::logic_error("couldn't lock archon pointer from submodule");
 }
 
 void ArchonModule::writeConfigKey(const string& key, const string& val)
 {
   std::ostringstream oss;
-  oss << "MOD" <<  (_modpos+1) << "/" << key ;
+  auto cmdstr = std::format("MOD{}/{}", _info.position, key);
+  if(auto ptr = _arch.lock())
+    ptr->writeKeyValue(cmdstr,val);
+  else
+    throw std::logic_error("couldn't lock archon pointer from submodule");
   
-  _arch.writeKeyValue(oss.str(),val);
-
 }
 
 
@@ -182,10 +161,14 @@ void ArchonModule::apply()
   
   oss << "APPLYMOD" ;
 //   archon_hex_stream_configure(oss);
-  oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase  << (_modpos );
+  oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase  << (_info.position);
 
   //TODO: should find a way round this not needing to be a friend!
-  _arch.cmd(oss.str());
+  if(auto ptr = _arch.lock())
+    ptr->cmd(oss.str());
+
+  else
+    throw std::logic_error("archon device object destroyed, can't access from submodule");
   
 }
 
@@ -199,28 +182,22 @@ RTTR_REGISTRATION
  //TODO get version
  
  registration::class_<ArchonModule>("foxtrot::devices::ArchonModule")
- .property_readonly("getID",&ArchonModule::getID)
- .property_readonly("getRev",&ArchonModule::getRev)
- .property_readonly("getVersion",&ArchonModule::getVersion)
+   .method("apply",&ArchonModule::apply)
+ ;
 
-   .property_readonly("ID", &ArchonModule::getID)
-   .property_readonly("Rev", &ArchonModule::getRev)
-   .property_readonly("Version", &ArchonModule::getVersion)
-   .property_readonly("modpos", &ArchonModule::getmodpos)
-   .property_readonly("Temp", &ArchonModule::getTemp)
+ registration::class_<ArchonModuleLegacy>("foxtrot::devices::ArchonModuleLegacy")
+   .property_readonly("getID",&ArchonModuleLegacy::getID)
+ .property_readonly("getRev",&ArchonModuleLegacy::getRev)
+ .property_readonly("getVersion",&ArchonModuleLegacy::getVersion)
+
+   .property_readonly("ID", &ArchonModuleLegacy::getID)
+   .property_readonly("Rev", &ArchonModuleLegacy::getRev)
+   .property_readonly("Version", &ArchonModuleLegacy::getVersion)
+   .property_readonly("modpos", &ArchonModuleLegacy::getmodpos)
+   .property_readonly("Temp", &ArchonModuleLegacy::getTemp);
 
    
- // .method("writeConfigKey",&ArchonModule::writeConfigKey)
- // (
- //     parameter_names("key","val")
-     
- // )
- // .method("readConfigKey",&ArchonModule::readConfigKey)
- // (
- //     parameter_names("key")
- //     )
- .method("apply",&ArchonModule::apply)
- ;
+   
     
     
 }

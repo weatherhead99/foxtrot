@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <rttr/type>
+#include "archon_module_mapper.hh"
 
 using std::string;
 
@@ -38,15 +39,16 @@ namespace foxtrot
          
          
      protected:
-       archonGPIO(archon& arch, int modpos, bool pairwise_direction=true);
+       archonGPIO(std::weak_ptr<archon>& arch, const archon_module_info& inf, bool pairwise_direction=true);
          
          
      private:
 
        string get_dirstring(int pairorchannel);
        
-         archon& _arch_gpio;
-         int _modpos_gpio;
+       std::weak_ptr<archon> _arch_gpio;
+       archon_module_info _inf;
+       
          std::ostringstream _oss;
        bool _pairwise_direction;
          

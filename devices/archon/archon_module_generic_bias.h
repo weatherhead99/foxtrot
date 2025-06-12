@@ -4,6 +4,9 @@
 #include <memory>
 #include <string>
 #include <tuple>
+#include <vector>
+#include "archon_module_mapper.hh"
+#include <optional>
 
 namespace foxtrot
 {
@@ -12,10 +15,14 @@ namespace foxtrot
 namespace devices
 {
   class ArchonModule;
-    
+  using std::optional;
+  using std::vector;
+
   class ArchonGenericBias 
   {
-      
+
+    using statptr = optional<vector<double>> archon_module_status::*;
+    
       friend class ArchonLVX;
       friend class ArchonHVX;
       friend class ArchonXV;
@@ -34,26 +41,28 @@ namespace devices
     void setEnable(int channel, bool onoff);
     bool getEnable(int channel);
     
-    double measureV(int channel);
-    double measureI(int channel);
+    [[deprecated]] double measureV(int channel);
+    [[deprecated]] double measureI(int channel);
     
     void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
   
   protected:
-    ArchonGenericBias(ArchonModule& mod, const std::string& nmemonic,
+    ArchonGenericBias(ArchonModule& mod, const string& biasnmemonic,
       int numchans, double lowlimit, double highlimit, Logging& lg) ;
     
   private:
     void check_channel_number(int channel);
     void check_limits(double val);
-    
     ArchonModule& _mod;
-    std::string _biasnmemonic;
     Logging& _lg; 
-    
+
+    string _biasnmemonic;    
     int _numchans;
     double _lowlimit;
     double _highlimit;
+
+    statptr statV = nullptr;
+    statptr statI = nullptr;
     
     
     

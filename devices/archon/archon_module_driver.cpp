@@ -8,8 +8,8 @@ using foxtrot::devices::ArchonDriver;
 using foxtrot::devices::ArchonDriverX;
 using foxtrot::devices::archon;
 
-ArchonDriver::ArchonDriver(archon &arch, short unsigned modpos)
-  : ArchonDriverBase<detail::eight_t>(arch, modpos) {}
+ArchonDriver::ArchonDriver(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
+  : ArchonDriverBase<detail::eight_t>(arch, modinfo) {}
 
 ArchonDriver::~ArchonDriver() {}
 
@@ -18,8 +18,8 @@ const string ArchonDriver::getTypeName() const
   return "Driver";
 }
 
-ArchonDriverX::ArchonDriverX(archon &arch, short unsigned modpos)
-  : ArchonDriverBase<detail::twelve_t>(arch, modpos) {}
+ArchonDriverX::ArchonDriverX(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
+  : ArchonDriverBase<detail::twelve_t>(arch, modinfo) {}
 
 ArchonDriverX::~ArchonDriverX() {}
 

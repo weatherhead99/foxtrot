@@ -1,4 +1,5 @@
 #pragma once
+#include "archon_module_mapper.hh"
 #include "archon_modules.h"
 #include <sstream>
 
@@ -15,8 +16,7 @@ namespace foxtrot
     public:
       
       virtual const string getTypeName() const override;
-      virtual void update_variables() override;
-      
+
       void setClamp(int channel, double val);
       double getClamp(int channel);
       
@@ -24,7 +24,7 @@ namespace foxtrot
       bool getPreampGain();
       
     private:
-      ArchonAD(archon& arch, short unsigned int modpos);
+      ArchonAD(std::weak_ptr<archon>& arch, const archon_module_info& modinf);
       std::ostringstream _oss;
       
       inline static void checkChannelNum(int channel)
@@ -46,7 +46,7 @@ namespace foxtrot
       RTTR_ENABLE(ArchonModule)
     public:
       virtual const string getTypeName() const override;
-      ArchonADM(archon& arch, short unsigned int modpos);
+      ArchonADM(std::weak_ptr<archon>& arch, const archon_module_info& modinf);
       
     };
     

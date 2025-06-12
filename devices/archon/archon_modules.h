@@ -10,6 +10,7 @@
 
 #include <foxtrot/Device.h>
 #include "archon.h"
+#include "archon_module_generic_bias.h"
 #include "archon_module_mapper.hh"
 
 namespace foxtrot
@@ -35,12 +36,11 @@ namespace devices
     {
       friend class foxtrot::devices::archon;
       friend class foxtrot::devices::archon_legacy;
+      friend class foxtrot::devices::ArchonGenericBias;
       RTTR_ENABLE(Device);
     public:
+      	void apply();
       
-      const string& getID() const;
-      const std::array<char,3>& getVersion() const;
-      short unsigned getRev() const;
       virtual const std::string getTypeName() const = 0;
       void writeConfigKey(const string& key, const string& val);
       template<detail::ArchonNumeric T>
@@ -49,8 +49,9 @@ namespace devices
 	writeConfigKey(key, std::to_string(val));
       }
 
-      virtual archon_module_status status();
-      virtual archon_module_info info();
+      virtual archon_module_status status(const ssmap& statusmap) const;
+      archon_module_status status() const;
+      const archon_module_info& info() const;
       
       string readConfigKey(const string& key);
       template<typename Ret>
@@ -67,45 +68,46 @@ namespace devices
 	  throw std::logic_error("unknown type supplied to readKeyValue");
       }
 	    
-	    double getTemp();
-	    void apply();
-	    
-	    
-	    archon& getArchon();
-	    short unsigned getmodpos();
+
 
       template<typename T>
-      static std::unique_ptr<T> constructModule(archon& arch, int modpos)
+      static std::unique_ptr<T> constructModule(std::weak_ptr<archon>& arch, const archon_module_info& inf)
       {
-	std::unique_ptr<T> out(new T(arch, modpos));
+	std::unique_ptr<T> out(new T(arch, inf));
 	return out;
       }
       
 	    
     protected:
-            short unsigned _modpos;
-            archon& _arch;
-            ArchonModule(archon& arch, short unsigned modpos);
-	    
-    private:
-            
-            //WARNING: is the lifetime of this guaranteed?
-            string _id;
+      archon_module_info _info;
+      std::weak_ptr<archon> _arch;
+      ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info& info);
+    protected:
             std::array<char,3> _version;
-            short unsigned _rev;
-            
-            archon_module_types _modtype;
-	    virtual void update_variables();
-            
     };
+
+
+      class ArchonModuleLegacy : public ArchonModule
+      {
+	RTTR_ENABLE(ArchonModule)
+	public:
+	string getID() const;
+	const std::array<char,3>& getVersion() const;
+	short unsigned getRev() const;
+
+	double getTemp();
+	[[deprecated]] archon& getArchon();
+	short unsigned getmodpos();
+       
+      };
 
 
   template<typename T> concept ArchonModuleType = std::is_base_of_v<ArchonModule, T>;
 
   template<ArchonModuleType Module>
-  std::unique_ptr<ArchonModule> constructModule(archon& arch, int modpos)
+  std::unique_ptr<ArchonModule> constructModule(std::weak_ptr<archon>& arch, const archon_module_info& info)
   {
-    return std::make_unique<Module>(arch, modpos);
+    return std::make_unique<Module>(arch, info);
   }
 
 
@@ -133,6 +135,9 @@ namespace devices
     {
       stream << std::setw(width) << std::setfill('0') << std::hex << std::uppercase ;
     }
+
+
+      
     
     
 };
