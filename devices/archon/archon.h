@@ -345,6 +345,8 @@ namespace foxtrot {
     unsigned long long _arch_tmr;
     boost::posix_time::ptime _sys_tmr;
     void setup_modules();
+
+    HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;
     
   private:
     

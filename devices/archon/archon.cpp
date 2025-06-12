@@ -249,6 +249,12 @@ foxtrot::devices::archon_frame_info archon::frameinfo()
   auto framemap = getFrame();
   out.rbuf = std::stoul(framemap.at("RBUF"));
   out.wbuf = std::stoul(framemap.at("WBUF"));
+
+  auto bufit = out.buffer_infos.begin();
+  for(int i=1; i<=3; i++)
+    {
+      
+    }
   
   return out;
 }
@@ -876,7 +882,6 @@ void foxtrot::devices::archon::sync_archon_timer()
     
     _arch_tmr = std::stoull(count);
     _sys_tmr = boost::posix_time::microsec_clock::universal_time();
-    
 }
 
 
@@ -1236,6 +1241,13 @@ void devices::archon::setup_modules()
     }
 
 }
+
+foxtrot::devices::HRTimePoint devices::archon::archon_time_to_real_time(long unsigned archon_time) const
+{
+  HRTimePoint out;
+  auto ndiff_archon_ticks = archon_time - _arch_tmr;
+  
+};
 
 
 // --------------------ARCHON LEGACY CODE  STARTS HERER
