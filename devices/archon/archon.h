@@ -344,6 +344,7 @@ namespace foxtrot {
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     unsigned long long _arch_tmr;
     boost::posix_time::ptime _sys_tmr;
+    void setup_modules();
     
   private:
     
@@ -351,7 +352,7 @@ namespace foxtrot {
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
 
-      
+
     void read_parse_existing_config();
     short unsigned _order;
 

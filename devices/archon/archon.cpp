@@ -49,6 +49,7 @@ const string devices::archon::getDeviceTypeName() const
 std::shared_ptr<archon> foxtrot::devices::archon::create(std::shared_ptr<simpleTCPBase>&&  proto)
 {
   std::shared_ptr<archon> out(new archon(proto));
+  out->setup_modules();
   return out;
 };
 
@@ -67,27 +68,6 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
     
   sync_archon_timer();
 
-  auto sys = system();
-  int modules_installed = sys.modules.size();
-  _lg.strm(sl::debug) << "modules installed: " << modules_installed;
-  
-  for(auto mod : sys.modules)
-    {
-      _lg.strm(sl::info) << "module found at position: " << mod.position;
-      _lg.strm(sl::info) << "module  type is: " <<  get_module_name(mod.type);
-
-      auto thisptr = std::static_pointer_cast<archon>(shared_from_this());
-      auto ptr = make_module(thisptr, mod);
-      if(ptr)
-	{
-	  _lg.strm(sl::info) << "module initialized";
-	  _modules.insert(std::make_pair(mod.position, std::move(ptr)));
-	}
-      else
-	_lg.strm(sl::warning) << "module failed to initialize (perhaps unimplemented)";
-    }
-
-  
 
 }
 
@@ -223,13 +203,13 @@ ssmap foxtrot::devices::archon::getFrame()
   return parse_parameter_response("FRAME");
 }
 
-//WARNIUNG: STUB METHOD WON'T WORK YET!
 foxtrot::devices::archon_status archon::status()
 {
   archon_status out;
   //this is a string to string map
   auto statmap = getStatus();
 
+  _lg.strm(sl::trace) << "parsing basic system things...";
   out.valid = std::stoi(statmap.at("VALID"));
   out.count = std::stoi(statmap.at("COUNT"));
   out.nlogs = std::stoi(statmap.at("LOG"));
@@ -238,8 +218,8 @@ foxtrot::devices::archon_status archon::status()
   out.overheat = std::stoi(statmap.at("OVERHEAT"));
   out.backplane_temp = std::stod(statmap.at("BACKPLANE_TEMP"));
 
-  std::array<string,10> voltagestrs = {"P2V5", "P5", "P6", "N6", "P17", "N17", "P35", "N35", "P100", "N100"};
-
+  _lg.strm(sl::trace) << "parsing PSU voltages and currents...";
+  std::array<string,10> voltagestrs = {"P2V5", "P5V", "P6V", "N6V", "P17V", "N17V", "P35V", "N35V", "P100V", "N100V"};
 
   for(auto vstr: voltagestrs)
     {
@@ -255,6 +235,7 @@ foxtrot::devices::archon_status archon::status()
   if(statmap.contains("FANTACH"))
     out.fanspeed = std::stoul(statmap.at("FANTACH"));
 
+  _lg.strm(sl::trace) << "calling status() for each module";
   out.module_statuses.reserve(_modules.size());
   for(auto& [pos, mod] : _modules)
     out.module_statuses.push_back(mod->status(statmap));
@@ -1231,12 +1212,39 @@ void devices::archon::load_timing()
 }
 
 
+
+void devices::archon::setup_modules()
+{
+    auto sys = system();
+  int modules_installed = sys.modules.size();
+  _lg.strm(sl::debug) << "modules installed: " << modules_installed;
+  
+  for(auto mod : sys.modules)
+    {
+      _lg.strm(sl::info) << "module found at position: " << mod.position;
+      _lg.strm(sl::info) << "module  type is: " <<  get_module_name(mod.type);
+
+      auto thisptr = std::static_pointer_cast<archon>(shared_from_this());
+      auto ptr = make_module(thisptr, mod);
+      if(ptr)
+	{
+	  _lg.strm(sl::info) << "module initialized";
+	  _modules.insert(std::make_pair(mod.position, std::move(ptr)));
+	}
+      else
+	_lg.strm(sl::warning) << "module failed to initialize (perhaps unimplemented)";
+    }
+
+}
+
+
 // --------------------ARCHON LEGACY CODE  STARTS HERER
 // ---------------------------
 
 std::shared_ptr<archon_legacy> foxtrot::devices::archon_legacy::create(std::shared_ptr<simpleTCPBase>&& proto)
 {
   std::shared_ptr<archon_legacy> out(new archon_legacy(proto));
+  out->setup_modules();
   return out;
 }
 
