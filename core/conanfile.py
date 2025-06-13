@@ -39,7 +39,14 @@ class FoxtrotCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
+        self.tool_requires("protobuf/<host_version>")
 
+    def config_options(self):
+        #no libudev or avahi on windows, and grpc must not be shared
+        if self.settings.os == "Windows":
+            self.options.rm_safe("with_udev")
+            self.options.rm_safe("with_avahi")
+        
     def requirements(self):
         super().requirements()
 
@@ -59,11 +66,11 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_headers=True,
                       transitive_libs=True)
 
-        if self.options.with_udev:
+        if self.options.get_safe("with_udev"):
             self.requires("libudev/system", headers=True, libs=True,
                           transitive_libs=True)
 
-        if self.options.with_avahi:
+        if self.options.get_safe("with_avahi"):
             self.requires("avahi/0.8", headers=True, libs=True,
                           transitive_libs=True)
             #introduces a conflict... somehow
@@ -74,18 +81,24 @@ class FoxtrotCoreConan(ConanFile):
         buildenv.generate()
 
         deps = CMakeDeps(self)
+        tc = self._setup_cmake_tc()
 
-        if self.options.with_udev:
+        if self.options.get_safe("with_udev"):
             deps.set_property("libudev", "cmake_target_aliases", ["PkgConfig::libudev"])
+            tc.cache_variables["BUILD_UDEV_SUPPORT"] = True
+        else:
+            tc.cache_variables["BUILD_UDEV_SUPPORT"] = False
 
-        if self.options.with_avahi:
+        if self.options.get_safe("with_avahi"):
             deps.set_property("avahi", "cmake_file_name", "avahi-client")
             deps.set_property("avahi::client", "cmake_target_name", "avahi-client::avahi_client")
+            tc.cache_variables["BUILD_AVAHI_SUPPORT"] = True
+        else:
+            tc.cache_variables["BUILD_AVAHI_SUPPORT"] = False
 
 
         deps.generate()
 
-        tc = self._setup_cmake_tc()
         tc.generate()
 
 
@@ -93,6 +106,7 @@ class FoxtrotCoreConan(ConanFile):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared
         envvars = VirtualBuildEnv(self).vars()
+
 
         cmake.configure()
         with envvars.apply():
