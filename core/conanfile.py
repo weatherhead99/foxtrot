@@ -74,7 +74,6 @@ class FoxtrotCoreConan(ConanFile):
             self.requires("avahi/0.8", headers=True, libs=True,
                           transitive_libs=True)
             #introduces a conflict... somehow
-            self.requires("expat/2.6.3", override=True)
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
