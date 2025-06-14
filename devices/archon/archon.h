@@ -105,8 +105,8 @@ namespace foxtrot {
       unsigned backplane_type;
       unsigned backplane_rev;
       string backplane_version;
-      unsigned backplane_id;
-      unsigned power_id;
+      unsigned long long backplane_id;
+      unsigned long long power_id;
       std::vector<archon_module_info> modules;
     };
 

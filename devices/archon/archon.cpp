@@ -279,8 +279,8 @@ foxtrot::devices::archon_system_info archon::system()
   _lg.strm(sl::trace) << "rev is: " << out.backplane_rev;
   out.backplane_version = sysmap.at("BACKPLANE_VERSION");
   _lg.strm(sl::trace) << "backplane version is: " << out.backplane_version;
-  out.backplane_id = std::stoul(sysmap.at("BACKPLANE_ID"), nullptr, 16);
-  out.power_id = std::stoul(sysmap.at("POWER_ID"), nullptr, 16);
+  out.backplane_id = std::stoull(sysmap.at("BACKPLANE_ID"), nullptr, 16);
+  out.power_id = std::stoull(sysmap.at("POWER_ID"), nullptr, 16);
   std::vector<unsigned short> mod_positions;
 
   auto mod_positions_setup = [&mod_positions, &sysmap, this] <int N> () {
@@ -308,7 +308,7 @@ foxtrot::devices::archon_system_info archon::system()
       archon_module_info& modinfo = out.modules.emplace_back();
       auto modidstr = std::format("MOD{}_ID", pos);
       _lg.strm(sl::trace) << "modidstr: " << modidstr;
-      modinfo.module_id = std::stoul(sysmap.at(modidstr), nullptr, 16);
+      modinfo.module_id = std::stoull(sysmap.at(modidstr), nullptr, 16);
       _lg.strm(sl::trace) << "module id: " << modinfo.module_id;
       modinfo.position = pos;
       modinfo.version = sysmap.at(std::format("MOD{}_VERSION", pos));
@@ -1242,7 +1242,7 @@ void devices::archon::setup_modules()
 
 }
 
-foxtrot::devices::HRTimePoint devices::archon::archon_time_to_real_time(long unsigned archon_time) const
+foxtrot::devices::HRTimePoint devices::archon::archon_time_to_real_time(long long unsigned archon_time) const
 {
   HRTimePoint out;
   auto ndiff_archon_ticks = archon_time - _arch_tmr;

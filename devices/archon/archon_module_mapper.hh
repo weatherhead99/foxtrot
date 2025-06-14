@@ -40,7 +40,7 @@ namespace foxtrot
       archon_module_types type;
       unsigned revision;
       string version;
-      unsigned module_id;
+      unsigned long long module_id;
     };
 
     std::unique_ptr<ArchonModule> make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf);
