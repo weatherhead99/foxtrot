@@ -39,7 +39,7 @@ class FoxtrotCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
-        self.tool_requires("protobuf/<host_version>")
+#        self.tool_requires("protobuf/<host_version>")
 
     def config_options(self):
         #no libudev or avahi on windows, and grpc must not be shared

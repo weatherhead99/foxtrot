@@ -150,12 +150,7 @@ namespace foxtrot {
       bool overheat;
       double backplane_temp;
 
-      std::unordered_map<string, double> PSU_Vmap;
-      std::unordered_map<string, double> PSU_Imap;
-      double user_I;
-      double user_V;
-      double heater_V;
-      double heater_I;
+      std::unordered_map<string, std::pair<double,double>> PSU_map;
       
       std::optional<unsigned> fanspeed = std::nullopt;
       std::vector<archon_module_status> module_statuses;
@@ -343,7 +338,7 @@ namespace foxtrot {
     foxtrot::Logging _lg;
     std::map<int, std::unique_ptr<ArchonModule>> _modules;
     unsigned long long _arch_tmr;
-    boost::posix_time::ptime _sys_tmr;
+    HRTimePoint _sys_tmr;
     void setup_modules();
 
     HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;

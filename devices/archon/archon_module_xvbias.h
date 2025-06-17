@@ -10,7 +10,7 @@ namespace foxtrot
     namespace devices
     {
         class archon;
-        
+
         class ArchonXV : public ArchonLVX
         {
 	  friend class ArchonModule;
@@ -18,14 +18,9 @@ namespace foxtrot
         public: 
 	  const std::string getTypeName() const override;
 	  const string getDeviceTypeName() const override;
-                        
-            
         private:
 	  ArchonXV(std::weak_ptr<archon>& arch, const archon_module_info& modpos);
-            
-            
-            
-            
+
         };
 
 

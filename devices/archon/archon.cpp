@@ -9,9 +9,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/date_time/gregorian/gregorian_io.hpp>
-
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
 
@@ -223,15 +220,20 @@ foxtrot::devices::archon_status archon::status()
 
   for(auto vstr: voltagestrs)
     {
-      out.PSU_Vmap.emplace(vstr, std::stod(statmap.at(std::format("{}_V",vstr))));
-      out.PSU_Imap.emplace(vstr, std::stod(statmap.at(std::format("{}_I",vstr))));
+      double V = std::stod(statmap.at(std::format("{}_V",vstr)));
+      double I = std::stod(statmap.at(std::format("{}_I", vstr)));
+      out.PSU_map.emplace(vstr, std::make_pair(V, I));
     }
 
-  out.user_I = std::stod(statmap.at("USER_I"));
-  out.user_V = std::stod(statmap.at("USER_V"));
-  out.heater_I = std::stod(statmap.at("HEATER_I"));
-  out.heater_V = std::stod(statmap.at("HEATER_V"));
+  
+  double user_I = std::stod(statmap.at("USER_I"));
+  double user_V = std::stod(statmap.at("USER_V"));
+  double heater_I = std::stod(statmap.at("HEATER_I"));
+  double heater_V = std::stod(statmap.at("HEATER_V"));
 
+  out.PSU_map.emplace("USER", std::make_pair(user_V, user_I));
+  out.PSU_map.emplace("HEATER", std::make_pair(heater_V, heater_I));
+  
   if(statmap.contains("FANTACH"))
     out.fanspeed = std::stoul(statmap.at("FANTACH"));
 
@@ -881,7 +883,7 @@ void foxtrot::devices::archon::sync_archon_timer()
     _lg.strm(sl::debug) << "timerstr: '" << count << "'";
     
     _arch_tmr = std::stoull(count);
-    _sys_tmr = boost::posix_time::microsec_clock::universal_time();
+    _sys_tmr = std::chrono::high_resolution_clock::now();
 }
 
 
@@ -1244,9 +1246,9 @@ void devices::archon::setup_modules()
 
 foxtrot::devices::HRTimePoint devices::archon::archon_time_to_real_time(long long unsigned archon_time) const
 {
-  HRTimePoint out;
+  HRTimePoint out = _sys_tmr;
   auto ndiff_archon_ticks = archon_time - _arch_tmr;
-  
+  return out + (ndiff_archon_ticks * std::chrono::nanoseconds(10));
 };
 
 
@@ -1330,7 +1332,7 @@ int foxtrot::devices::archon_legacy::get_pixels(int buf)
       std::ostringstream oss ;
   oss << "BUF" << buf << "PIXELS";
     return std::stoi(_frame.at(oss.str()));
-        
+
 };
 
 
@@ -1339,12 +1341,11 @@ string foxtrot::devices::archon_legacy::get_tstamp(int buf)
   std::ostringstream oss;
   oss << "BUF" << buf << "TIMESTAMP";
   auto tstamp = std::stoul(_frame.at(oss.str()),0,16);
-  
+
   auto archontdiff = tstamp - _arch_tmr;
-  
   //one tick of counter is 10ns
-  auto frametime = _sys_tmr + boost::posix_time::microseconds(archontdiff / 10);
-  return boost::posix_time::to_iso_extended_string(frametime);
+  auto frametime = _sys_tmr + std::chrono::nanoseconds(archontdiff * 10);
+  return std::format("{:%FT%T}", frametime);
 }
 
 
@@ -1503,12 +1504,8 @@ RTTR_REGISTRATION
    .property("powergood", &archon_status::powergood)
    .property("overheat", &archon_status::overheat)
    .property("backplane_temp", &archon_status::backplane_temp)
-   .property("PSU_Vmap", &archon_status::PSU_Vmap)
-   .property("PSU_Imap", &archon_status::PSU_Imap)
-   .property("user_I", &archon_status::user_I)
-   .property("user_V", &archon_status::user_V)
-   .property("heater_V", &archon_status::heater_V)
-   .property("heater_I", &archon_status::heater_I);
+   .property("PSU_map", &archon_status::PSU_map);
+
  
  
  registration::class_<archon>("foxtrot::devices::archon")
