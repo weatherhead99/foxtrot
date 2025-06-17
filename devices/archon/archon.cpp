@@ -197,7 +197,7 @@ ssmap devices::archon::getSystem()
 
 ssmap foxtrot::devices::archon::getFrame()
 {
-  return parse_parameter_response("FRAME");
+  return parse_parameter_response(cmd("FRAME"));
 }
 
 foxtrot::devices::archon_status archon::status()
@@ -255,7 +255,34 @@ foxtrot::devices::archon_frame_info archon::frameinfo()
   auto bufit = out.buffer_infos.begin();
   for(int i=1; i<=3; i++)
     {
+      auto gs = [&framemap, i, this](const string& txt)
+      {
+	string req = std::format("BUF{}{}", i, txt);
+	_lg.strm(sl::trace) << "key formatted:  " << req;
+	return framemap.at(req);
+      };
       
+      bufit->sampmode = static_cast<archon_sample_mode>(std::stoi(gs("SAMPLE")));
+      bufit->complete = std::stoi(gs("COMPLETE"));
+      bufit->bufmode = static_cast<archon_buffer_mode>(std::stoi(gs("MODE")));
+      bufit->offsetaddr = std::stoul(gs("BASE"));
+      bufit->frame_number = std::stoul(gs("FRAME"));
+      bufit->width = std::stoul(gs("WIDTH"));
+      bufit->height = std::stoul(gs("HEIGHT"));
+      bufit->pixel_progress = std::stoul(gs("PIXELS"));
+      bufit->line_progress = std::stoul(gs("LINES"));
+      bufit->raw_blocks = std::stoul(gs("RAWBLOCKS"));
+      bufit->raw_lines = std::stoul(gs("RAWLINES"));
+      bufit->raw_offset = std::stoul(gs("RAWOFFSET"));
+      bufit->timestamp = archon_time_to_real_time(std::stoull(gs("TIMESTAMP"), nullptr, 16));
+      bufit->REtimestamp = archon_time_to_real_time(std::stoull(gs("RETIMESTAMP"), nullptr, 16));
+      bufit->FEtimestamp = archon_time_to_real_time(std::stoull(gs("FETIMESTAMP"), nullptr, 16));
+      bufit->REAtimestamp = archon_time_to_real_time(std::stoull(gs("REATIMESTAMP"), nullptr, 16));
+      bufit->FEAtimestamp = archon_time_to_real_time(std::stoull(gs("FEATIMESTAMP"), nullptr, 16));
+      bufit->REBtimestamp = archon_time_to_real_time(std::stoull(gs("REBTIMESTAMP"), nullptr, 16));
+      bufit->FEBtimestamp = archon_time_to_real_time(std::stoull(gs("FEBTIMESTAMP"), nullptr, 16));
+
+      ++bufit;
     }
   
   return out;
