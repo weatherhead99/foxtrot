@@ -50,6 +50,7 @@ namespace foxtrot {
     namespace detail {
       template<typename T>
       concept ArchonNumeric = std::is_integral_v<T> || std::is_floating_point_v<T>;
+      struct archonimpl;
 
     }
 
@@ -344,7 +345,7 @@ namespace foxtrot {
     HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;
     
   private:
-    
+    std::unique_ptr<detail::archonimpl> _impl;    
       
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
@@ -353,8 +354,7 @@ namespace foxtrot {
     void read_parse_existing_config();
     short unsigned _order;
 
-    
-    std::map<std::string, int> _configlinemap;
+    std::unordered_map<std::string, int> _configlinemap;
      
     std::vector<std::string> _statenames;
     std::map<std::string,int> _parammap;

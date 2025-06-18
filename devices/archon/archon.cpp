@@ -11,6 +11,8 @@
 
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
+#include <foxtrot/ft_tuple_helper.hh>
+
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
@@ -37,6 +39,14 @@ using foxtrot::protocols::simpleTCPBase;
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
 
 
+struct foxtrot::devices::detail::archonimpl
+{
+  std::unordered_map<std::string, std::pair<std::string, int>> parammap;
+  std::unordered_map<std::string, std::pair<std::string, int>> constvals;
+
+};
+
+
 
 const string devices::archon::getDeviceTypeName() const
 {
@@ -55,6 +65,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
     _lg("archon"), _order(0)
 {
+  _impl = std::make_unique<detail::archonimpl>();
   proto->Init(nullptr);
   
   //NOTE: this used to clear existing config
@@ -405,7 +416,6 @@ int devices::archon::writeConfigLine(const string& line,int num)
   {
     //if the value -1 is passed in, add a new line
     num = _config_lines++;
-    
   }
   else if(num > _config_lines)
   {
@@ -415,7 +425,7 @@ int devices::archon::writeConfigLine(const string& line,int num)
   std::ostringstream oss;
   oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase<<  std::hex << num << line;
   cmd(oss.str());
-  
+
   return num;
 
 }
@@ -431,7 +441,8 @@ std::string devices::archon::readConfigLine(int num, bool override_existing)
   std::ostringstream oss;
   oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase << std::hex << num ;
   auto repl = cmd(oss.str());
-  
+
+
   return repl;
 
 }
@@ -504,7 +515,6 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
     //this is a new key 
     auto linenum = writeConfigLine(oss.str());
     _configlinemap.insert({key,linenum});
-  
   }
   else
   {
@@ -1645,7 +1655,7 @@ RTTR_REGISTRATION
  registration::class_<std::map<std::string, std::string>>("std::map<std::string, std::string>")
    .constructor()(policy::ctor::as_object);
     
-
+ foxtrot::register_tuple<std::pair<double, double>>();
 
  registration::class_<foxtrot::devices::archon_legacy>("foxtrot::devices::archon_legacy")
    .method("update_state",&archon_legacy::update_state)
