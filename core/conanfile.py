@@ -3,7 +3,7 @@ from conan import ConanFile
 from conan.tools.cmake import CMake, CMakeDeps
 from conan.tools.env import VirtualRunEnv, VirtualBuildEnv
 from conan.tools.files import collect_libs
-
+from conan.tools.scm import Version
 
 class FoxtrotCoreConan(ConanFile):
     python_requires = "foxtrotbuildutils/[^0.4]"
@@ -39,25 +39,29 @@ class FoxtrotCoreConan(ConanFile):
 
     def build_requirements(self):
         self.tool_requires("grpc/<host_version>")
-#        self.tool_requires("protobuf/<host_version>")
+        #note original RTTR fails to build with cmake > 4
+        #(will not be patched upstream any time soon)
+
+    def validate_build(self):
+        cvers = Version(self.settings.compiler.version)
+        if cvers >= 15:
+            raise ConanInvalidConfiguration("cannot build with gcc > 15 yet")
 
     def config_options(self):
         #no libudev or avahi on windows, and grpc must not be shared
         if self.settings.os == "Windows":
             self.options.rm_safe("with_udev")
             self.options.rm_safe("with_avahi")
-        
+
     def requirements(self):
         super().requirements()
 
-        self.requires("grpc/1.71.0", headers=True, libs=True,
+        self.requires("grpc/1.72.0", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
-
-        self.requires("protobuf/5.27.0", headers=True, libs=True,
-                      transitive_headers=True,
-                      transitive_libs=True)
-
+        #Note: using protobuf or grpc shared appears to need this
+        self.requires("protobuf/5.27.0", force=True, transitive_libs=True)
+        
         self.requires("boost/1.86.0", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
@@ -73,7 +77,6 @@ class FoxtrotCoreConan(ConanFile):
         if self.options.get_safe("with_avahi"):
             self.requires("avahi/0.8", headers=True, libs=True,
                           transitive_libs=True)
-            #introduces a conflict... somehow
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)

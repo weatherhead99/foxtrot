@@ -12,11 +12,13 @@ add_executable(union_play union_play.cpp)
 target_link_libraries(union_play PUBLIC foxtrot_core)
 
 add_executable(timestamp_play timestamp_play.cpp)
-target_link_libraries(timestamp_play foxtrot_core)
+target_link_libraries(timestamp_play PUBLIC foxtrot_core)
 
 add_executable(plugin_play plugin_play.cpp)
 target_link_libraries(plugin_play Boost::headers)
 add_library(plugin_example SHARED plugin_example.cpp)
+
+message(STATUS "protobuf libs: ${PROTOBUF_LIBRARIES}")
 
 
 if(BUILD_UDEV_SUPPORT)

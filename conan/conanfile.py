@@ -53,7 +53,7 @@ class FoxtrotCppPackage:
     author = "Dan Weatherill (daniel.weatherill@physics.ox.ac.uk)"
     settings = "os", "compiler", "build_type", "arch"
     license = "UNLICENSED"
-    tool_requires = "cmake/[>=3.25.0]"
+    tool_requires = "cmake/[>=3.25.0 <4.0]"
     revision_mode = "scm_folder"
 
 #    def compatibility(self):
@@ -111,7 +111,7 @@ class FoxtrotCppPackage:
     def ft_require(self, pack, **kwargs):
         #convenience / shim method needed by some downstream setups
         ft_require(self, pack, **kwargs)
-            
+
     def requirements(self):
         if hasattr(self, "ft_package_requires"):
             if isinstance(self.ft_package_requires, str):

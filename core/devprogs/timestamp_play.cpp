@@ -25,6 +25,8 @@ int main()
   auto diff = std::chrono::duration_cast<std::chrono::nanoseconds>(now - nowcpy);
   
   std::cout << "converted diff (nanoseconds): " << diff.count() << std::endl;
+
+  std::cout << "converted back: " << nowcpy << std::endl;
   
 
 }
