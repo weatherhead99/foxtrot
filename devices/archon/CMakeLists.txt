@@ -1,5 +1,6 @@
 file(GLOB archon_srcs CONFIGURE_DEPENDS *.cpp)
-file(GLOB archon_includes CONFIGURE_DEPENDS *.h)
+file(GLOB archon_includes CONFIGURE_DEPENDS *.h *.hh)
+
 
 add_library(archon OBJECT ${archon_srcs})
 target_sources(archon PUBLIC FILE_SET HEADERS FILES ${archon_includes})
