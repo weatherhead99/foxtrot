@@ -19,7 +19,7 @@ using namespace foxtrot::devices;
 using foxtrot::devices::ArchonModule;
 using foxtrot::devices::archon_module_types;
 using foxtrot::devices::archon_hex_stream_configure;
-using foxtrot::devices::ArchonModuleLegacy;
+
 
 
 ArchonModule::ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
@@ -61,52 +61,6 @@ const archon_module_info& ArchonModule::info() const
 }
 
 
-
-std::string ArchonModuleLegacy::getID() const
-{
-  std::ostringstream oss;
-  oss << std::hex << std::uppercase << std::setfill('0') << std::setw(16)  << _info.module_id;
-  return oss.str();
-}
-
-const std::array<char, 3>& ArchonModuleLegacy::getVersion() const
-{  
-    return _version;
-}
-
-unsigned short ArchonModuleLegacy::getRev() const
-{
-    return _info.revision;
-}
-
-double ArchonModuleLegacy::getTemp()
-{
-
-  std::ostringstream oss;
-  oss << "MOD" << (_info.position) << "/" << "TEMP";
-  
-  auto statmap = getArchon().getStatus();
-  auto tempstr = statmap.at(oss.str());
-  
-  return std::stod(tempstr);
-  
-}
-
-
-archon& ArchonModuleLegacy::getArchon()
-{
-  if(auto arch = _arch.lock())
-    return *(arch.get());
-  else
-    throw foxtrot::DeviceError("parent archon has been deleted, cannot acquire pointer");
-}
-
-
-short unsigned int ArchonModuleLegacy::getmodpos()
-{
-  return _info.position;
-
-}
 
 
 string foxtrot::devices::get_module_variable_string(int modpos, const string& name, const ssmap& map, char delim)
@@ -185,18 +139,6 @@ RTTR_REGISTRATION
    .method("apply",&ArchonModule::apply)
  ;
 
- registration::class_<ArchonModuleLegacy>("foxtrot::devices::ArchonModuleLegacy")
-   .property_readonly("getID",&ArchonModuleLegacy::getID)
- .property_readonly("getRev",&ArchonModuleLegacy::getRev)
- .property_readonly("getVersion",&ArchonModuleLegacy::getVersion)
-
-   .property_readonly("ID", &ArchonModuleLegacy::getID)
-   .property_readonly("Rev", &ArchonModuleLegacy::getRev)
-   .property_readonly("Version", &ArchonModuleLegacy::getVersion)
-   .property_readonly("modpos", &ArchonModuleLegacy::getmodpos)
-   .property_readonly("Temp", &ArchonModuleLegacy::getTemp);
-
-   
    
     
     

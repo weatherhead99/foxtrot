@@ -35,7 +35,6 @@ namespace devices
     class ArchonModule : public Device
     {
       friend class foxtrot::devices::archon;
-      friend class foxtrot::devices::archon_legacy;
       friend class foxtrot::devices::ArchonGenericBias;
       RTTR_ENABLE(Device);
     public:
@@ -87,19 +86,6 @@ namespace devices
     };
 
 
-      class ArchonModuleLegacy : public ArchonModule
-      {
-	RTTR_ENABLE(ArchonModule)
-	public:
-	string getID() const;
-	const std::array<char,3>& getVersion() const;
-	short unsigned getRev() const;
-
-	double getTemp();
-	[[deprecated]] archon& getArchon();
-	short unsigned getmodpos();
-       
-      };
 
 
   template<typename T> concept ArchonModuleType = std::is_base_of_v<ArchonModule, T>;

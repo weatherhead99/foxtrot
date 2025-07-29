@@ -35,7 +35,6 @@
 
 using foxtrot::devices::archon;
 using foxtrot::devices::ArchonStreamHelper;
-using foxtrot::devices::archon_legacy;
 using foxtrot::protocols::simpleTCPBase;
 
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
@@ -380,21 +379,20 @@ void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
   _configlinemap.clear();
-  _statenames.clear();
-  _parammap.clear();
-  _constantmap.clear();
+  _configmap.clear();
+  //_statenames.clear();
+  //_parammap.clear();
+  //_constantmap.clear();
   
   _ADtaplinemap.clear();
-  _taplines = 0;
-  _states=  0;
-  
-    //setup lines, timing lines etc...
-  set_timing_lines(0);
-  set_states(0);
-  set_parameters(0); 
-  set_constants(0);
+  //  _taplines = 0;
+  //  _states=  0;  
+  //setup lines, timing lines etc...
+  //  set_timing_lines(0);
+  //set_states(0);
+  //set_parameters(0); 
+  //set_constants(0);
   writeKeyValue("TAPLINES","0");
-  
 }
 
 
@@ -429,13 +427,13 @@ int devices::archon::writeConfigLine(const string& line,int num)
 }
 
 
-std::string devices::archon::readConfigLine(int num, bool override_existing)
+std::string devices::archon::readConfigLine(unsigned num, bool override_existing)
 {
   if( num >= _configlinemap.size() && !override_existing)
   {
     throw std::logic_error("tried to read an archon config line that we don't think exists...");
   };
-  
+
   std::ostringstream oss;
   oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase << std::hex << num ;
   auto repl = cmd(oss.str());
@@ -519,63 +517,48 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
 }
 
 
-void devices::archon::set_timing_lines(int n)
-{
-  writeKeyValue("LINES",std::to_string(n));
+// void devices::archon::set_timing_lines(int n)
+// {
+//   writeKeyValue("LINES",std::to_string(n));
 
-}
+// }
 
-int devices::archon::get_timing_lines()
-{
-  return std::stoi(readKeyValue("LINES"));
+// int devices::archon::get_timing_lines()
+// {
+//   return std::stoi(readKeyValue("LINES"));
 
-}
+// }
 
-int devices::archon::get_states()
-{
-  return std::stoi(readKeyValue("STATES"));
+// int devices::archon::get_states()
+// {
+//   return std::stoi(readKeyValue("STATES"));
 
-}
+// }
 
-void devices::archon::set_states(int n)
-{
-  writeKeyValue("STATES",std::to_string(n));
-}
+// void devices::archon::set_states(int n)
+// {
+//   writeKeyValue("STATES",std::to_string(n));
+// }
 
-int devices::archon::get_constants()
-{
-  return std::stoi(readKeyValue("CONSTANTS"));
-}
+// int devices::archon::get_constants()
+// {
+//   return std::stoi(readKeyValue("CONSTANTS"));
+// }
 
-void devices::archon::set_constants(int n)
-{
-  writeKeyValue("CONSTANTS",std::to_string(n));
-}
+// void devices::archon::set_constants(int n)
+// {
+//   writeKeyValue("CONSTANTS",std::to_string(n));
+// }
 
-int devices::archon::get_parameters()
-{
-  return std::stoi(readKeyValue("PARAMETERS"));
+// int devices::archon::get_parameters()
+// {
+//   return std::stoi(readKeyValue("PARAMETERS"));
+// }
 
-}
-
-void devices::archon::set_parameters(int n)
-{
-  writeKeyValue("PARAMETERS",std::to_string(n));
-}
-
-
-std::unordered_map<string, int> devices::archon::parameters()
-{
-  std::unordered_map<string, int> out;
-  auto n_params = get_parameters();
-  for(int i=0; i< n_params; i++)
-    {
-      
-
-    }
-  return out;
-}
-
+// void devices::archon::set_parameters(int n)
+// {
+//   writeKeyValue("PARAMETERS",std::to_string(n));
+// }
 
 void foxtrot::devices::archon::set_power(bool onoff)
 {
@@ -586,31 +569,14 @@ void foxtrot::devices::archon::set_power(bool onoff)
     else
     {
         cmd("POWEROFF");
-    }
-    
+    }    
 }
 
-bool devices::archon::get_power()
+foxtrot::devices::archon_power_status devices::archon::get_power()
 {
   auto power = std::stoi(getStatus().at("POWER"));
-  switch(power)
-  {
-    case(0): _lg.Error("unknown power state");
-    throw DeviceError("unknown power state");
-    case(1): _lg.Error("no configuration applied");
-    throw DeviceError("no configuration applied");
-    case(2): return false;
-    case(3): _lg.Error("intermediate power");
-    throw DeviceError("intermediate power state");
-    case(4): return true;
-    case(5): return false;
-  }
-  
-  _lg.strm(sl::error) << "unrecognized power state: " << power;
-  throw std::logic_error("unknown power state in reply");
-
+  return static_cast<archon_power_status>(power);
 }
-
 
 
 void foxtrot::devices::archon::load_timing_script(const std::string& script)
@@ -627,8 +593,8 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
        auto line = to;
        writeKeyValue(configkey,line);
     };
-    
-    set_timing_lines(i);
+    writeKeyValue("LINES",std::to_string(i+1));
+    //    set_timing_lines(i);
     
 }
 
@@ -645,6 +611,11 @@ void foxtrot::devices::archon::lockbuffer(int buf)
     cmd("LOCK" + std::to_string(buf));
 }
 
+const std::unordered_map<std::string, std::string>& devices::archon::config() const
+{
+  return _configmap;
+}
+
 
 void foxtrot::devices::archon::unlockbuffers()
 {
@@ -658,6 +629,7 @@ void foxtrot::devices::archon::read_parse_existing_config()
   if(stat.powerstatus == foxtrot::devices::archon_power_status::not_configured)
     throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
   _configlinemap.clear();
+  _configmap.clear();
   int i;
   for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
     {
@@ -674,6 +646,7 @@ void foxtrot::devices::archon::read_parse_existing_config()
         auto key = string(confline.begin(),eqpos);
         auto val = string(eqpos+1,confline.end());
         _configlinemap.insert({key,i});
+	_configmap.insert({key, val});
     }
     
     
@@ -696,152 +669,144 @@ void foxtrot::devices::archon::resetTiming()
     cmd("RESETTIMING");
 }
 
-double devices::archon::getConstant(const string& name)
+std::pair<std::string, std::string> splitconfline(const std::string& confline)
 {
-   int confnum;
-    try{
-        confnum = _constantmap.at(name);
-    }
-    catch(std::out_of_range& err)
-    {
-        throw DeviceError("parameter not known to this archon");
-    }
-    
-    std::ostringstream oss;
-    oss << "CONSTANT" << confnum;
-    auto paramline = readKeyValue(oss.str());
-    
-    auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
-    auto quotepos = std::find(eqpos, paramline.end(),'\"');
-    
-    //TODO: this will fail at runtime
-    return std::stod(std::string(eqpos+1,quotepos));
-
-  
+  auto eqpos = std::find(confline.begin(), confline.end(), '=');
+  auto quotepos = std::find(eqpos, confline.end(), '\"');
+  auto key = std::string(confline.begin(), eqpos);
+  auto val = std::string(eqpos+1, quotepos);
+  return {key, val};
 }
 
-void devices::archon::setConstant(const string& name, double val)
-{
-    int confnum;
-    try{
-        confnum = _constantmap.at(name);
-    }
-    catch(std::out_of_range& err)
-    {   
-        confnum = get_constants();
-        _constantmap[name] = confnum;
-        set_constants(confnum +1);
-    }
+// double devices::archon::getConstant(const string& name)
+// {
+//    int confnum;
+//     try{
+//         confnum = _constantmap.at(name);
+//     }
+//     catch(std::out_of_range& err)
+//     {
+//         throw DeviceError("parameter not known to this archon");
+//     }
+//     auto paramline = readKeyValue(std::format("CONSTANT{}",confnum));
+//     auto [k, v] = splitconfline(paramline);
+//     return std::stod(v);
+
+// }
+
+// void devices::archon::setConstant(const string& name, double val)
+// {
+//     int confnum;
+//     try{
+//         confnum = _constantmap.at(name);
+//     }
+//     catch(std::out_of_range& err)
+//     {   
+//         confnum = get_constants();
+//         _constantmap[name] = confnum;
+//         set_constants(confnum +1);
+//     }
     
-    std::ostringstream osskey;
-    osskey << "CONSTANT" << confnum;
+//     std::ostringstream osskey;
+//     osskey << "CONSTANT" << confnum;
     
-    std::ostringstream ossval;
-    ossval << name << '=' << val ;
+//     std::ostringstream ossval;
+//     ossval << name << '=' << val ;
     
-  writeKeyValue(osskey.str(),ossval.str());
-}
+//   writeKeyValue(osskey.str(),ossval.str());
+// }
 
 
-unsigned int devices::archon::getParam(const string& name)
-{
-    int confnum;
-    try{
-        confnum = _parammap.at(name);
-    }
-    catch(std::out_of_range& err)
-    {
-        throw DeviceError("parameter not known to this archon");
-    }
+// unsigned int devices::archon::getParam(const string& name)
+// {
+//     int confnum;
+//     try{
+//         confnum = _parammap.at(name);
+//     }
+//     catch(std::out_of_range& err)
+//     {
+//         throw DeviceError("parameter not known to this archon");
+//     }
     
-    std::ostringstream oss;
-    oss << "PARAMETER" << confnum;
-    auto paramline = readKeyValue(oss.str());
-    auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
-    auto quotepos = std::find(eqpos, paramline.end(),'\"');
-    //TODO: this will fail at runtime
-    return std::stoul(std::string(eqpos+1,quotepos));
+//     std::ostringstream oss;
+//     oss << "PARAMETER" << confnum;
+//     auto paramline = readKeyValue(oss.str());
+//     auto eqpos = std::find(paramline.begin(),paramline.end(),'=');
+//     auto quotepos = std::find(eqpos, paramline.end(),'\"');
+//     //TODO: this will fail at runtime
+//     return std::stoul(std::string(eqpos+1,quotepos));
 
-}
+// }
 
 
-void devices::archon::setParam(const string& name, unsigned int val)
-{
-    int confnum;
-    try{
-        confnum = _parammap.at(name);
-    }
-    catch(std::out_of_range& err)
-    {   
-        confnum = get_parameters();
-        _parammap[name] = confnum;
-        set_parameters(confnum +1);
-    }
+// void devices::archon::setParam(const string& name, unsigned int val)
+// {
+//     int confnum;
+//     try{
+//         confnum = _parammap.at(name);
+//     }
+//     catch(std::out_of_range& err)
+//     {   
+//         confnum = get_parameters();
+//         _parammap[name] = confnum;
+//         set_parameters(confnum +1);
+//     }
     
-    std::ostringstream osskey;
-    osskey << "PARAMETER" << confnum;
+//     std::ostringstream osskey;
+//     osskey << "PARAMETER" << confnum;
     
-    std::ostringstream ossval;
-    ossval << name << '=' << val ;
+//     std::ostringstream ossval;
+//     ossval << name << '=' << val ;
     
-  writeKeyValue(osskey.str(),ossval.str());
-}
+//   writeKeyValue(osskey.str(),ossval.str());
+// }
 
-void devices::archon::write_timing_state(string name, const string& state)
-{
-  std::stringstream ss(state);
-  std::string to;
-  auto findstate = std::find(_statenames.begin(),_statenames.end(),name);
-  auto state_idx = std::distance(_statenames.begin(),findstate);
+// void devices::archon::write_timing_state(string name, const string& state)
+// {
+//   std::stringstream ss(state);
+//   std::string to;
+//   auto findstate = std::find(_statenames.begin(),_statenames.end(),name);
+//   auto state_idx = std::distance(_statenames.begin(),findstate);
   
-  bool newstate = ( findstate  == _statenames.end() );
+//   bool newstate = ( findstate  == _statenames.end() );
   
   
-  while(std::getline(ss,to,'\n'))
-  {
-     auto eqpos = std::find(to.begin(),to.end(),'=');
-     if(eqpos == to.end())
-     {
-       throw std::runtime_error("malformed timing state line: " + to);
-     }
+//   while(std::getline(ss,to,'\n'))
+//   {
+//      auto eqpos = std::find(to.begin(),to.end(),'=');
+//      if(eqpos == to.end())
+//      {
+//        throw std::runtime_error("malformed timing state line: " + to);
+//      }
      
-     std::string configkey(to.begin(),eqpos);
-     configkey = "STATE" + std::to_string(state_idx) + "/" + configkey; 
-     std::string val(eqpos + 1, to.end());
+//      std::string configkey(to.begin(),eqpos);
+//      configkey = "STATE" + std::to_string(state_idx) + "/" + configkey; 
+//      std::string val(eqpos + 1, to.end());
      
-     writeKeyValue(configkey, val);
-  }
+//      writeKeyValue(configkey, val);
+//   }
   
-  //NOTE: do this now in case of exceptions
-  if(newstate)
-  {
-    set_states(_statenames.size());
-   _statenames.insert(_statenames.end(),name);
-  }
+//   //NOTE: do this now in case of exceptions
+//   if(newstate)
+//   {
+//     set_states(_statenames.size());
+//    _statenames.insert(_statenames.end(),name);
+//   }
    
    
 
-}
-
-
+// }
 
 void devices::archon::settapline(int n, const string& tapline)
 {
-  if(n > _taplines )
+  if(n >= _ADtaplinemap.size() )
   {
     throw DeviceError("invalid TAP line number");
   }
-  
   std::ostringstream oss;
   oss << "TAPLINE" << n;
-  
   writeKeyValue(oss.str(),tapline);
-  
-  if(n == _taplines)
-  {
-    _taplines++;
-    writeKeyValue("TAPLINES", std::to_string(_taplines ));
-  };
+  writeKeyValue("TAPLINES", std::to_string(_ADtaplinemap.size()));
 }
 
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
@@ -872,11 +837,11 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, un
 	    settapline(tline, taplinestr);
 	  }
 	else {
-	  _ADtaplinemap[AD] = _taplines;
-	  settapline(_taplines, taplinestr);
+	  _ADtaplinemap[AD] = _ADtaplinemap.size();
+	  settapline(_ADtaplinemap.size(), taplinestr);
 	    }
 	_using_AM_taps = false;
-	
+
 }
 
 void foxtrot::devices::archon::setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset)
@@ -891,8 +856,8 @@ void foxtrot::devices::archon::setAMtap(unsigned char AD, bool LR, double gain, 
       settapline(tline, taplinestr);
     }
   else {
-    _ADtaplinemap[AD] = _taplines;
-    settapline(_taplines, taplinestr);
+    _ADtaplinemap[AD] = _ADtaplinemap.size();
+    settapline(_ADtaplinemap.size(), taplinestr);
       }
 
   _using_AM_taps = true;
@@ -939,6 +904,12 @@ devices::archon_tap_info devices::archon::tapinfo()
   out.pixels = std::stoul(readKeyValue("PIXELCOUNT"));
   out.framemode = static_cast<archon_buffer_mode>(std::stoul(readKeyValue("FRAMEMODE")));
   out.samplemode = static_cast<archon_sample_mode>(std::stoul(readKeyValue("SAMPLEMODE")));
+
+  out.CDSTiming[0] = std::stoul(readKeyValue("SHP1"));
+  out.CDSTiming[1] = std::stoul(readKeyValue("SHP2"));
+  out.CDSTiming[2] = std::stoul(readKeyValue("SHD1"));
+  out.CDSTiming[3] = std::stoul(readKeyValue("SHD2"));
+
   return out;
 }
 
@@ -954,7 +925,12 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
   writeKeyValue("RAWENABLE", std::to_string(tapinfo.rawenable));
   writeKeyValue("FRAMEMODE", std::to_string(static_cast<int>(tapinfo.framemode)));
   writeKeyValue("SAMPLEMODE", std::to_string(static_cast<int>(tapinfo.samplemode)));
-		
+
+  writeKeyValue("SHP1", std::to_string(tapinfo.CDSTiming[0]));
+  writeKeyValue("SHP2", std::to_string(tapinfo.CDSTiming[1]));
+  writeKeyValue("SHD1", std::to_string(tapinfo.CDSTiming[2]));
+  writeKeyValue("SHD2", std::to_string(tapinfo.CDSTiming[3]));
+
   cmd("APPLYCDS");
 }
 
@@ -1076,28 +1052,6 @@ std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
 }
 
 
-
-
-void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end)
-{
-    writeKeyValue("SHP1",std::to_string(reset_start));
-    writeKeyValue("SHP2",std::to_string(reset_end));
-    writeKeyValue("SHD1", std::to_string(signal_start));
-    writeKeyValue("SHD2", std::to_string(signal_end));
-    
-    cmd("APPLYCDS");
-}
-std::array<int, 4> devices::archon::getCDSTiming()
-{
-  std::array<int, 4> out;
-  out[0] = std::stoi(readKeyValue("SHP1"));
-  out[1] = std::stoi(readKeyValue("SHP2"));
-  out[2] = std::stoi(readKeyValue("SHD1"));
-  out[3] = std::stoi(readKeyValue("SHD2"));
-
-  return out;
-}
-
 void devices::archon::settrigoutinvert(bool invert)
 {
   writeKeyValue("TRIGOUTINVERT",std::to_string((int) invert));
@@ -1190,159 +1144,13 @@ foxtrot::devices::HRTimePoint devices::archon::archon_time_to_real_time(long lon
 };
 
 
-// --------------------ARCHON LEGACY CODE  STARTS HERER
-// ---------------------------
-
-std::shared_ptr<archon_legacy> foxtrot::devices::archon_legacy::create(std::shared_ptr<simpleTCPBase>&& proto)
-{
-  std::shared_ptr<archon_legacy> out(new archon_legacy(proto));
-  out->setup_modules();
-  return out;
-}
-
-
-foxtrot::devices::archon_legacy::archon_legacy(std::shared_ptr<simpleTCPBase> proto)
-  : archon(proto) {}
-
-foxtrot::devices::archon_legacy::~archon_legacy() {}
-
-const string foxtrot::devices::archon_legacy::getDeviceTypeName() const
-{
-  return "archon";
-}
-
-
-
-void foxtrot::devices::archon_legacy::update_state()
-{
-  
-  _lg.Trace("system..");
-  _system = getSystem();
-  _lg.Trace("status..");
-  _status = getStatus();
-  _lg.Trace("frame..");
-  _frame = getFrame();
-
-  //NOTE: need a replacement for this!
-  
-  // for(auto& mod: _modules)
-  // {
-  //   if(mod.second != nullptr)
-  //   {
-  //    mod.second->update_variables(); 
-  //   }
-  // }
-
-}
-
-
-
-
-bool foxtrot::devices::archon_legacy::isbuffercomplete(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "COMPLETE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-}
-
-int foxtrot::devices::archon_legacy::get_frameno(int buf)
-{
-    std::ostringstream oss ;
-  oss << "BUF" << buf << "FRAME";
-  return std::stoi(_frame.at(oss.str()));
-
-
-}
-
-int foxtrot::devices::archon_legacy::get_height(int buf)
-{
-    std::ostringstream oss ;
-  oss << "BUF" << buf << "HEIGHT";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-int foxtrot::devices::archon_legacy::get_pixels(int buf)
-{
-      std::ostringstream oss ;
-  oss << "BUF" << buf << "PIXELS";
-    return std::stoi(_frame.at(oss.str()));
-
-};
-
-
-string foxtrot::devices::archon_legacy::get_tstamp(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "TIMESTAMP";
-  auto tstamp = std::stoul(_frame.at(oss.str()),0,16);
-
-  auto archontdiff = tstamp - _arch_tmr;
-  //one tick of counter is 10ns
-  auto frametime = _sys_tmr + std::chrono::nanoseconds(archontdiff * 10);
-  return std::format("{:%FT%T}", frametime);
-}
-
-
-
-int foxtrot::devices::archon_legacy::get_rawlines(int buf)
-{
-  std::ostringstream oss;
-  oss << "BUF" << buf << "RAWLINES";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-
-int foxtrot::devices::archon_legacy::get_rawblocks(int buf)
-{
-   std::ostringstream oss;
-  oss << "BUF" << buf << "RAWBLOCKS";
-  return std::stoi(_frame.at(oss.str()));
-}
-
-
-
-int foxtrot::devices::archon_legacy::get_width(int buf)
-{
-  std::ostringstream oss ;
-  oss << "BUF" << buf << "WIDTH";
-  return std::stoi(_frame.at(oss.str()));
-
-}
-
-
-int foxtrot::devices::archon_legacy::get_mode(int buf)
-{
-    std::ostringstream oss;
-  oss << "BUF" << buf << "MODE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-}
-
-bool foxtrot::devices::archon_legacy::get_32bit(int buf)
-{
-      std::ostringstream oss;
-  oss << "BUF" << buf << "SAMPLE";
-  auto complete = _frame.at(oss.str());
-  
-  return std::stoi(complete);
-
-
-}
 
 
 
 RTTR_REGISTRATION
 {
  using namespace rttr;
- using foxtrot::devices::archon;
- using foxtrot::devices::archon_legacy;
+ using foxtrot::devices::archon;;
 
 
  using foxtrot::devices::archon_status;
@@ -1454,8 +1262,11 @@ RTTR_REGISTRATION
    .property("rawstartline", &archon_tap_info::rawstartline)
    .property("rawendline", &archon_tap_info::rawendline)
    .property("rawstartpixel", &archon_tap_info::rawstartpixel)
-   .property("rawsamples", &archon_tap_info::rawsamples);
- 
+   .property("rawsamples", &archon_tap_info::rawsamples)
+   .property("framemode", &archon_tap_info::framemode)
+   .property("samplemode", &archon_tap_info::samplemode)
+   .property("CDSTiming", &archon_tap_info::CDSTiming);
+
  registration::class_<archon>("foxtrot::devices::archon")
  .method("clear_config",&archon::clear_config)
    .property_readonly("status", &archon::status)
@@ -1463,6 +1274,7 @@ RTTR_REGISTRATION
    .property_readonly("system", &archon::system)
  .property_readonly("fetch_log",&archon::fetch_log)
    .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
+   .property_readonly("config", &archon::config)
 
    .method("readConfigLine", &archon::readConfigLine)
    (parameter_names("num", "override_existing"))
@@ -1471,20 +1283,20 @@ RTTR_REGISTRATION
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
-  .method("getParam", &archon::getParam)
-   (parameter_names("name"))
- .method("setParam",&archon::setParam)
- (
-   parameter_names("name","val")
-   )
- .method("getConstant",&archon::getConstant)
- (
-   parameter_names("name")
-   )
- .method("setConstant", &archon::setConstant)
- (
-   parameter_names("name","val")
-   )
+   //   .method("getParam", select_overload<unsigned(const std::string&), archon>(&archon::getParam))
+   //   (parameter_names("name"))
+ // .method("setParam",&archon::setParam)
+ // (
+ //   parameter_names("name","val")
+ //   )
+ // .method("getConstant",&archon::getConstant)
+ // (
+ //   parameter_names("name")
+ //   )
+ // .method("setConstant", &archon::setConstant)
+ // (
+ //   parameter_names("name","val")
+ //   )
 
  .method("apply_param", &archon::apply_param)
  (
@@ -1499,24 +1311,19 @@ RTTR_REGISTRATION
    parameter_names("buf")
    )
  .method("unlockbuffers",&archon::unlockbuffers)
- .method("write_timing_state",&archon::write_timing_state)
- (
-   parameter_names("name", "state")
-   )
- (parameter_names("buf"))
+ // .method("write_timing_state",&archon::write_timing_state)
+ // (
+ //   parameter_names("name", "state")
+ //   )
+ // (parameter_names("buf"))
  .method("fetch_buffer",&archon::fetch_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
  .method("fetch_raw_buffer",&archon::fetch_raw_buffer)
  (parameter_names("buf"), metadata("streamdata",true))
  (parameter_names("buf"))
- .property_readonly("getreset_start",&archon::getreset_start)
- .property_readonly("getreset_end",&archon::getreset_end)
- .property_readonly("getsignal_start",&archon::getsignal_start)
- .property_readonly("getsignal_end",&archon::getsignal_end)
- .method("setCDSTiming",&archon::setCDSTiming)
  (parameter_names("reset_start","reset_end","signal_start","signal_end"))
- .method("settapline", &archon::settapline)
- (parameter_names("n","tapline"))
+   //.method("settapline", &archon::settapline)
+   //(parameter_names("n","tapline"))
  .property("trigoutinvert", &archon::gettrigoutinvert, &archon::settrigoutinvert)
  (parameter_names("invert"))
  .property("trigoutpower", &archon::gettrigoutpower, &archon::settrigoutpower)
@@ -1527,11 +1334,11 @@ RTTR_REGISTRATION
  (parameter_names("onoff"))
  .property("trigoutforce", &archon::gettrigoutforce, &archon::settrigoutforce)
  (parameter_names("onoff"))
- .property_readonly("get_timing_lines",&archon::get_timing_lines)
- .property_readonly("get_states",&archon::get_states)
- .property_readonly("get_constants",&archon::get_constants)
+   //.property_readonly("get_timing_lines",&archon::get_timing_lines)
+   // .property_readonly("get_states",&archon::get_states)
+   // .property_readonly("get_constants",&archon::get_constants)
  .property_readonly("get_power",&archon::get_power)
- .property_readonly("get_parameters",&archon::get_parameters)
+   //.property_readonly("get_parameters",&archon::get_parameters)
  .method("settap", &archon::settap)
    (parameter_names("AD","LR","gain","offset"))
   .method("load_timing", &archon::load_timing)
@@ -1540,26 +1347,12 @@ RTTR_REGISTRATION
 
  registration::class_<std::map<std::string, std::string>>("std::map<std::string, std::string>")
    .constructor()(policy::ctor::as_object);
-    
+
+ registration::class_<std::unordered_map<std::string, std::string>>("std::unordered_map<std::string, std::string>>")
+   .constructor()(policy::ctor::as_object);
+
  foxtrot::register_tuple<std::pair<double, double>>();
 
- registration::class_<foxtrot::devices::archon_legacy>("foxtrot::devices::archon_legacy")
-   .method("update_state",&archon_legacy::update_state)
-   .method("isbuffercomplete",&archon_legacy::isbuffercomplete)
-    .method("get_frameno", &archon_legacy::get_frameno)
-   (parameter_names("buf"))
-   .method("get_width", &archon_legacy::get_width)
-   (parameter_names("buf"))
-   .method("get_height",&archon_legacy::get_height)
-   (parameter_names("buf"))
-   .method("get_mode",&archon_legacy::get_mode)
-   (parameter_names("buf"))
-   .method("get_32bit",&archon_legacy::get_32bit)
-   .method("get_pixels",&archon_legacy::get_pixels)
-   (parameter_names("buf"))
-   .method("get_rawlines", &archon_legacy::get_rawlines)
-   (parameter_names("buf"))
-   .method("get_rawblocks", &archon_legacy::get_rawblocks)
-   (parameter_names("buf"));
+
 }
 

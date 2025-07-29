@@ -123,6 +123,7 @@ namespace foxtrot {
       unsigned rawsamples;
       archon_buffer_mode framemode;
       archon_sample_mode samplemode;
+      std::array<short unsigned, 4> CDSTiming;
     };
 
     enum class archon_power_status : short unsigned
@@ -173,9 +174,6 @@ namespace foxtrot {
    class ArchonModule;
 
 
-   
-
-    
   class archon : public CmdDevice
   {
       RTTR_ENABLE(CmdDevice)
@@ -234,46 +232,44 @@ namespace foxtrot {
     const std::map<int,ArchonModule&> getAllModules() const;
     
     
-    void set_timing_lines(int n);
-    int get_timing_lines();
+    //void set_timing_lines(int n);
+    //int get_timing_lines();
     
-    void set_states(int n);
-    int get_states();
+    //void set_states(int n);
+    //int get_states();
     
-    void set_parameters(int n);
-    int get_parameters();
+    //void set_parameters(int n);
+    //int get_parameters();
 
-    std::unordered_map<string, int> parameters();
+    const std::unordered_map<std::string, std::string>& config() const;
     
-    void set_constants(int n);
-    int get_constants();
+    //void set_constants(int n);
+    //int get_constants();
     
     void set_power(bool onoff);
-    bool get_power();
+    archon_power_status get_power();
     
     void load_timing_script(const std::string& script);
     void load_timing();
     
-    void write_timing_state(std::string name, const std::string& state);
-    
-    
+    //void write_timing_state(std::string name, const std::string& state);
     
     void lockbuffer(int buf);
     void unlockbuffers();
     
-    std::string readConfigLine(int num,bool override_existing=false);
+    std::string readConfigLine(unsigned num,bool override_existing=false);
 
     
     void holdTiming();
     void releaseTiming();
     void resetTiming();
     
-    void setParam(const std::string& name, unsigned val);
-    unsigned getParam(const std::string& name);
-    unsigned getParam(int loc);
+    //void setParam(const std::string& name, unsigned val);
+    //unsigned getParam(const std::string& name);
+    //unsigned getParam(int loc);
     
-    void setConstant(const std::string& name, double val);
-    double getConstant(const std::string& name);
+    //void setConstant(const std::string& name, double val);
+    //double getConstant(const std::string& name);
     
     void apply_param(const std::string& name);
     void apply_all_params();
@@ -283,13 +279,7 @@ namespace foxtrot {
     void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
 
     std::array<int,4> getCDSTiming();
-    
-    int getreset_start();
-    int getreset_end();
-    int getsignal_start();
-    int getsignal_end();
-    
-    
+
     void settapline(int n, const std::string& tapline);
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset);
     void setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset);
@@ -305,25 +295,6 @@ namespace foxtrot {
     
     void settrigoutforce(bool onoff);
     bool gettrigoutforce();
-    
-    
-    void setrawenable(bool onoff);
-    bool getrawenable();
-    
-    void setrawchannel(int ch);
-    int getrawchannel();
-    
-    void setrawstartline(int line);
-    int getrawstartline();
-    
-    void setrawendline(int line);
-    int getrawendline();
-    
-    void setrawstartpixel(int pix);
-    int getrawstartpixel();
-    
-    void setrawsamples(int n);
-    int getrawsamples();
     
         
   protected:
@@ -361,21 +332,14 @@ namespace foxtrot {
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
 
-
     void read_parse_existing_config();
     short unsigned _order;
 
-    std::map<std::string, int> _configlinemap;
-     
+    std::unordered_map<std::string, int> _configlinemap;
+    std::unordered_map<std::string, std::string> _configmap;
     std::vector<std::string> _statenames;
-    std::map<std::string,int> _parammap;
-    std::map<std::string,int> _constantmap;
-    
     std::map<unsigned char, unsigned char> _ADtaplinemap;
     std::optional<bool> _using_AM_taps = std::nullopt;
-    
-    int _taplines = 0;
-    int _states = 0;    
     
   };
 
@@ -417,42 +381,6 @@ namespace foxtrot {
   };
 
 
-    class archon_legacy : public archon
-    {
-      //this class is not intended to be c++ compatible with the old archon class
-      //it just retains all the declared public methods so that the client side can be
-      //the same for a foxtrot server that instantiates archon_legacy. Setup file will still
-      //need to be source-changed slightly (e.g. because this new class can only be created
-      //as a shared_ptr)
-      
-      RTTR_ENABLE(archon)
-      
-    public:
-      static std::shared_ptr<archon_legacy> create(std::shared_ptr<simpleTCPBase>&& proto);
-      virtual const string getDeviceTypeName() const override;
-      ~archon_legacy();
-
-      void update_state();
-
-      int get_rawlines(int buf);
-      int get_rawblocks(int buf);
-      int get_frameno(int buf);
-      int get_width(int buf);
-      int get_height(int buf);
-      int get_mode(int buf);
-      bool get_32bit(int buf);
-      int get_pixels(int buf);
-      std::string get_tstamp(int buf);
-   
-      bool isbuffercomplete(int buf);
-    protected:
-      archon_legacy(std::shared_ptr<simpleTCPBase> proto);
-    private:
-      ssmap _system;
-      ssmap _status;
-      ssmap _frame;
-      
-    };
 
   
 };

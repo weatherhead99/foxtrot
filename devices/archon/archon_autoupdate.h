@@ -1,6 +1,6 @@
 #pragma once
 
-#include "archon.h"
+#include "archon_legacy.h"
 
 #include <chrono>
 #include <future>
