@@ -61,7 +61,7 @@ class FoxtrotCoreConan(ConanFile):
                       transitive_libs=True)
         #Note: using protobuf or grpc shared appears to need this
         self.requires("protobuf/5.27.0", force=True, transitive_libs=True)
-        
+
         self.requires("boost/1.86.0", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
@@ -80,7 +80,9 @@ class FoxtrotCoreConan(ConanFile):
 
     def generate(self):
         buildenv = VirtualBuildEnv(self)
+        runenv = VirtualRunEnv(self)
         buildenv.generate()
+        runenv.generate()
 
         deps = CMakeDeps(self)
         tc = self._setup_cmake_tc()
@@ -107,11 +109,10 @@ class FoxtrotCoreConan(ConanFile):
     def build(self):
         cmake = CMake(self)
         #need this e.g. to use grpc plugin if protoc is shared
-        envvars = VirtualBuildEnv(self).vars()
-
+        envvars_run = VirtualRunEnv(self).vars()
 
         cmake.configure()
-        with envvars.apply():
+        with envvars_run.apply() :
             cmake.build()
 
     def package_info(self):
