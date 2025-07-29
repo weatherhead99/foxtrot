@@ -842,7 +842,6 @@ void devices::archon::settapline(int n, const string& tapline)
     _taplines++;
     writeKeyValue("TAPLINES", std::to_string(_taplines ));
   };
-  
 }
 
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
@@ -1549,9 +1548,10 @@ RTTR_REGISTRATION
  
  
  registration::class_<archon>("foxtrot::devices::archon")
-   .method("getStatus", &archon::getStatus)
-   .method("getSystem", &archon::getSystem)
-   .method("getFrame", &archon::getFrame)
+   //these shouldn't be needed from client code
+   //.method("getStatus", &archon::getStatus)
+   //.method("getSystem", &archon::getSystem)
+   //.method("getFrame", &archon::getFrame)
  .method("clear_config",&archon::clear_config)
    .property_readonly("status", &archon::status)
    .property_readonly("frameinfo", &archon::frameinfo)
