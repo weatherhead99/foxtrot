@@ -1,6 +1,8 @@
 #pragma once
 #include <google/protobuf/timestamp.pb.h>
 #include <chrono>
+#include <foxtrot/Logging.h>
+
 
 namespace foxtrot
 {
@@ -23,6 +25,8 @@ google::protobuf::Timestamp foxtrot::to_protobuf_timestamp(const std::chrono::ti
   using std::chrono::duration_cast;
   using std::chrono::seconds;
   using std::chrono::nanoseconds;
+
+  //foxtrot::Logging lg("to_protobuf_timestamp");
   
   Timestamp out;
   
@@ -30,13 +34,16 @@ google::protobuf::Timestamp foxtrot::to_protobuf_timestamp(const std::chrono::ti
 
   auto since_epoch = tpt.time_since_epoch();
   auto seconds_part = duration_cast<seconds>(since_epoch);
-
+  //lg.strm(sl::trace) << "seconds: " << seconds_part;
+  //  lg.strm(sl::trace) << "seconds count: " << seconds_part.count();
   out.set_seconds(seconds_part.count());
 
   auto frac_part = since_epoch - seconds_part;
   auto nanos = duration_cast<nanoseconds>(frac_part);
-
+  //lg.strm(sl::trace) << "nanoseconds: " << nanos;
+  
   out.set_nanos(nanos.count());
+  //lg.strm(sl::trace) << "debugstring: " << out.DebugString();
 
   return out;
 

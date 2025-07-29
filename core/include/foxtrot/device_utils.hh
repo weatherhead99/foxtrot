@@ -50,7 +50,6 @@ namespace foxtrot
      
         StdVariant out;
         bool done;
-        
         boost::hana::for_each(ft_simplevar_types, 
                               [&out, &var, &done] (auto v) {
                                   using Type = typename decltype(+v)::type;
@@ -70,9 +69,6 @@ namespace foxtrot
         if(!done)
             throw std::logic_error("failed to convert rttr variant to std::variant");
         return out;
-    }
-                                             
-    
-    
+    }    
     
 };

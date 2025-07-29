@@ -254,6 +254,46 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
     }
     out.set_is_void(false);
 
+    //NOTE:bad place to do this but only option at the moment
+    if(tp.get_metadata("timestampmeta"))
+      {
+	if(lg)
+	  lg->strm(sl::debug) << "timestampmeta found, using timestamp logic";
+
+	auto tstampmeth = tp.get_method("to_protobuf_timestamp");
+	if(!tstampmeth.is_valid())
+	  throw std::logic_error("no valid to_protobuf_timestamp method on a type that is supposed to be a timestamp");
+	auto pb_tstamp = tstampmeth.invoke(rttr::instance(), var);
+
+	auto rettp = pb_tstamp.get_type();
+	if(!pb_tstamp.is_valid())
+	  {
+	    throw std::logic_error("returned invalid variant from timestamp conversion method!");
+	  }
+	if(rettp != rttr::type::get<google::protobuf::Timestamp>())
+	  {
+	    if(lg)
+	      {
+	      lg->strm(sl::error) << "return type is: " << rettp.get_name();
+	      lg->strm(sl::error) << "return type id: " << rettp.get_id();
+	      lg->strm(sl::error) << "expected name is: " << rttr::type::get<google::protobuf::Timestamp>().get_name();
+	      }
+	    throw std::logic_error("return type is not a protobuf timestamp! This is a foxtrot programming error!");
+	  }
+
+	google::protobuf::Timestamp tstamp = pb_tstamp.get_value<google::protobuf::Timestamp>();
+	if(lg)
+	  {
+	    lg->strm(sl::trace) << "seconds: " << tstamp.seconds();
+	    lg->strm(sl::trace) << "nanoseconds: " << tstamp.nanos();
+	  }
+	
+	auto* out_tstamp = out.mutable_tstampval();
+	*out_tstamp = tstamp;
+	
+	return out;
+      }
+    
     
     auto stdvariant = rttr_to_std_variant_converter(var, lg);
     if(stdvariant.index() == std::variant_npos)
@@ -551,6 +591,16 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 	      return get_variant_wire_type(inner_var, lg, unwrap);
 	    }
 	    break;
+	  case(variant_types::SIMPLEVAR_TYPE):
+	    {
+	      if(lg)
+		lg->strm(sl::trace) <<"simple variant logic";
+
+	      ft_simplevariant* simplevarval = out.mutable_simplevar();
+	      *simplevarval = get_simple_variant_wire_type(var, lg, unwrap);
+	      return out;
+	      break;
+	    }
 	  default:
 	    if(lg)
 	      lg->strm(sl::warning) << "have ft_type metadata but no associated fast path logic, performing slow type logic...";
@@ -1221,7 +1271,8 @@ std::pair<simplevalue_types,unsigned char> foxtrot::describe_simple_type(const r
             out =  simplevalue_types::STRING_TYPE;
 	else if(tp == rttr::type::get<std::any>() or tp.is_wrapper() or tp.is_pointer())
 	  out = simplevalue_types::REMOTE_HANDLE_TYPE;
-
+	else if(tp.get_metadata("timestampmeta"))
+	  out = simplevalue_types::DATETIME_TYPE;
     }
     else
     {

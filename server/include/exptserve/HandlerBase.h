@@ -12,25 +12,6 @@
 using std::cout;
 using std::endl;
 
-namespace detail
-{
-    template<int> struct int_helper {
-        
-        };
-    
-    template <> struct int_helper<4> {
-        typedef unsigned long type;
-    };
-    
-    template<> struct int_helper<8> {
-        typedef unsigned long long type;
-    };
-    
-    typedef typename int_helper<sizeof(void*)>::type pointer_print_type;
-    
-    
-}
-
 namespace foxtrot
 {
     
@@ -70,7 +51,7 @@ namespace foxtrot
                 }
                 else if(_status == status::PROCESS)
                 {
-                    _lg.strm(sl::trace) << "request id is: " << reinterpret_cast<detail::pointer_print_type>(this);
+		  _lg.strm(sl::trace) << "request id is: " << static_cast<void*>(this);
                     
                     _lg.strm(sl::debug) << "request peer string: " << _ctxt.peer();
                     
