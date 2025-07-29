@@ -440,7 +440,6 @@ std::string devices::archon::readConfigLine(int num, bool override_existing)
   oss << "RCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase << std::hex << num ;
   auto repl = cmd(oss.str());
 
-
   return repl;
 
 }
@@ -572,8 +571,9 @@ std::unordered_map<string, int> devices::archon::parameters()
   for(int i=0; i< n_params; i++)
     {
       
-      out.emplace_back({
+
     }
+  return out;
 }
 
 
@@ -657,9 +657,9 @@ void foxtrot::devices::archon::read_parse_existing_config()
   auto stat = status();
   if(stat.powerstatus == foxtrot::devices::archon_power_status::not_configured)
     throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
-    _configlinemap.clear();
-    int i;
-    for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
+  _configlinemap.clear();
+  int i;
+  for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
     {
         auto confline = readConfigLine(i,true);
         if(confline.size() == 0)
@@ -926,111 +926,37 @@ void foxtrot::devices::archon::sync_archon_timer()
 }
 
 
-
-
-void devices::archon::set_tap_pixels(short unsigned npixels)
+devices::archon_tap_info devices::archon::tapinfo()
 {
-  writeKeyValue("PIXELCOUNT", std::to_string(npixels));
+  archon_tap_info out;
+  out.rawstartpixel = std::stoul(readKeyValue("RAWSTARTPIXEL"));
+  out.rawstartline = std::stoul(readKeyValue("RAWSTARTLINE"));
+  out.rawendline = std::stoul(readKeyValue("RAWENDLINE"));
+  out.rawsamples = std::stoul(readKeyValue("RAWSAMPLES"));
+  out.rawenable = std::stoul(readKeyValue("RAWENABLE"));
+  out.rawchannel = std::stoul(readKeyValue("RAWSEL"));
+  out.lines = std::stoul(readKeyValue("LINECOUNT"));
+  out.pixels = std::stoul(readKeyValue("PIXELCOUNT"));
+  out.framemode = static_cast<archon_buffer_mode>(std::stoul(readKeyValue("FRAMEMODE")));
+  out.samplemode = static_cast<archon_sample_mode>(std::stoul(readKeyValue("SAMPLEMODE")));
+  return out;
+}
+
+void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
+{
+  writeKeyValue("RAWSTARTPIXEL", std::to_string(tapinfo.rawstartpixel));
+  writeKeyValue("RAWSAMPLES", std::to_string(tapinfo.rawsamples));
+  writeKeyValue("RAWSTARTLINE", std::to_string(tapinfo.rawstartline));
+  writeKeyValue("RAWENDLINE", std::to_string(tapinfo.rawendline));
+  writeKeyValue("PIXELCOUNT", std::to_string(tapinfo.pixels));
+  writeKeyValue("LINECOUNT", std::to_string(tapinfo.lines));
+  writeKeyValue("RAWSEL", std::to_string(tapinfo.rawchannel));
+  writeKeyValue("RAWENABLE", std::to_string(tapinfo.rawenable));
+  writeKeyValue("FRAMEMODE", std::to_string(static_cast<int>(tapinfo.framemode)));
+  writeKeyValue("SAMPLEMODE", std::to_string(static_cast<int>(tapinfo.samplemode)));
+		
   cmd("APPLYCDS");
 }
-
-short unsigned devices::archon::get_tap_pixels()
-{
-
-  return std::stoi(readKeyValue("PIXELCOUNT"));
-}
-
-void devices::archon::set_tap_lines(short unsigned lines)
-{
-  writeKeyValue("LINECOUNT",std::to_string(lines));
-  cmd("APPLYCDS");
-
-}
-
-short unsigned devices::archon::get_tap_lines()
-{
-  return std::stoi(readKeyValue("LINECOUNT"));
-
-}
-
-
-void devices::archon::setrawchannel(int ch)
-{
-  writeKeyValue("RAWSEL",std::to_string(ch));
-  cmd("APPLYCDS");
-}
-
-int foxtrot::devices::archon::getrawchannel()
-{
-    return std::stoi(readKeyValue("RAWSEL"));
-}
-
-
-
-void devices::archon::setrawenable(bool onoff)
-{
-  writeKeyValue("RAWENABLE",std::to_string((int) onoff));
-  cmd("APPLYCDS");
-}
-
-bool foxtrot::devices::archon::getrawenable()
-{
-    return std::stoi(readKeyValue("RAWENABLE"));
-}
-
-
-
-void devices::archon::setrawendline(int line)
-{
-  writeKeyValue("RAWENDLINE", std::to_string(line));
-  cmd("APPLYCDS");
-}
-
-
-int foxtrot::devices::archon::getrawendline()
-{
-    return std::stoi(readKeyValue("RAWENDLINE"));
-}
-
-
-void devices::archon::setrawsamples(int n)
-{
-  writeKeyValue("RAWSAMPLES", std::to_string(n));
-  cmd("APPLYCDS");
-}
-
-int foxtrot::devices::archon::getrawsamples()
-{
-    return std::stoi(readKeyValue("RAWSAMPLES"));
-}
-
-
-
-void devices::archon::setrawstartline(int line)
-{
-  writeKeyValue("RAWSTARTLINE",std::to_string(line));
-  cmd("APPLYCDS");
-}
-
-int foxtrot::devices::archon::getrawstartline()
-{
-    return std::stoi(readKeyValue("RAWSTARTLINE"));
-}
-
-
-
-void devices::archon::setrawstartpixel(int pix)
-{
-  writeKeyValue("RAWSTARTPIXEL",std::to_string(pix));
-  cmd("APPLYCDS");
-}
-
-
-int foxtrot::devices::archon::getrawstartpixel()
-{
-    return std::stoi(readKeyValue("RAWSTARTPIXEL"));
-}
-
 
 
 template<typename T, typename Tdiff>
@@ -1160,33 +1086,17 @@ void foxtrot::devices::archon::setCDSTiming(int reset_start, int reset_end, int 
     writeKeyValue("SHD2", std::to_string(signal_end));
     
     cmd("APPLYCDS");
-    
 }
-
-int foxtrot::devices::archon::getreset_start()
+std::array<int, 4> devices::archon::getCDSTiming()
 {
-    auto val = readKeyValue("SHP1");
-    return std::stoi(val);
-}
+  std::array<int, 4> out;
+  out[0] = std::stoi(readKeyValue("SHP1"));
+  out[1] = std::stoi(readKeyValue("SHP2"));
+  out[2] = std::stoi(readKeyValue("SHD1"));
+  out[3] = std::stoi(readKeyValue("SHD2"));
 
-int foxtrot::devices::archon::getreset_end()
-{
-    auto val = readKeyValue("SHP2");
-    return std::stoi(val);
+  return out;
 }
-
-int foxtrot::devices::archon::getsignal_start()
-{
-    auto val = readKeyValue("SHD1");
-    return std::stoi(val);
-}
-
-int foxtrot::devices::archon::getsignal_end()
-{
-    auto val = readKeyValue("SHD2");
-    return std::stoi(val);
-}
-
 
 void devices::archon::settrigoutinvert(bool invert)
 {
@@ -1239,17 +1149,6 @@ bool devices::archon::gettrigoutlevel()
 
 
 
-
-void devices::archon::setframemode(int mode)
-{
-  writeKeyValue("FRAMEMODE", std::to_string(mode));
-  cmd("APPLYCDS");
-}
-
-int foxtrot::devices::archon::getframemode()
-{
-    return std::stoi(readKeyValue("FRAMEMODE"));
-}
 
 
 void devices::archon::load_timing()
@@ -1545,13 +1444,19 @@ RTTR_REGISTRATION
    .property("backplane_temp", &archon_status::backplane_temp)
    .property("PSU_map", &archon_status::PSU_map);
 
- 
+ using foxtrot::devices::archon_tap_info;
+ registration::class_<archon_tap_info>("foxtrot::devices::archon_tap_info")
+   .constructor()(policy::ctor::as_object)
+   .property("pixels", &archon_tap_info::pixels)
+   .property("lines", &archon_tap_info::lines)
+   .property("rawchannel", &archon_tap_info::rawchannel)
+   .property("rawenable", &archon_tap_info::rawenable)
+   .property("rawstartline", &archon_tap_info::rawstartline)
+   .property("rawendline", &archon_tap_info::rawendline)
+   .property("rawstartpixel", &archon_tap_info::rawstartpixel)
+   .property("rawsamples", &archon_tap_info::rawsamples);
  
  registration::class_<archon>("foxtrot::devices::archon")
-   //these shouldn't be needed from client code
-   //.method("getStatus", &archon::getStatus)
-   //.method("getSystem", &archon::getSystem)
-   //.method("getFrame", &archon::getFrame)
  .method("clear_config",&archon::clear_config)
    .property_readonly("status", &archon::status)
    .property_readonly("frameinfo", &archon::frameinfo)
@@ -1566,10 +1471,8 @@ RTTR_REGISTRATION
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
- .method("getParam", &archon::getParam)
- (
-   parameter_names("name")
- )
+  .method("getParam", &archon::getParam)
+   (parameter_names("name"))
  .method("setParam",&archon::setParam)
  (
    parameter_names("name","val")
@@ -1617,26 +1520,13 @@ RTTR_REGISTRATION
  .property("trigoutinvert", &archon::gettrigoutinvert, &archon::settrigoutinvert)
  (parameter_names("invert"))
  .property("trigoutpower", &archon::gettrigoutpower, &archon::settrigoutpower)
- .property("rawenable", &archon::getrawenable, &archon::setrawenable)
- (parameter_names("onoff"))
+   .property_readonly("tapinfo", &archon::tapinfo)
+   .method("set_tapinfo", &archon::set_tapinfo)
+   (parameter_names("tapinfo"))
  .property("trigoutlevel", &archon::gettrigoutlevel, &archon::settrigoutlevel)
  (parameter_names("onoff"))
  .property("trigoutforce", &archon::gettrigoutforce, &archon::settrigoutforce)
  (parameter_names("onoff"))
- .property("rawchannel",&archon::getrawchannel,&archon::setrawchannel)
- (parameter_names("ch"))
- .property("rawstartline", &archon::getrawstartline, &archon::setrawstartline)
- (parameter_names("line"))
- .property("rawendline", &archon::getrawendline, &archon::setrawendline)
- (parameter_names("line"))
- .property("rawstartpixel", &archon::getrawstartpixel, &archon::setrawstartpixel)
- (parameter_names("pix"))
- .property("rawsamples", &archon::getrawsamples, &archon::setrawsamples)
- (parameter_names("n"))
- 
- .method("setframemode", &archon::setframemode)
- (parameter_names("mode"))
- .property_readonly("getframemode",&archon::getframemode)
  .property_readonly("get_timing_lines",&archon::get_timing_lines)
  .property_readonly("get_states",&archon::get_states)
  .property_readonly("get_constants",&archon::get_constants)
@@ -1644,13 +1534,6 @@ RTTR_REGISTRATION
  .property_readonly("get_parameters",&archon::get_parameters)
  .method("settap", &archon::settap)
    (parameter_names("AD","LR","gain","offset"))
-   .method("set_tap_pixels", &archon::set_tap_pixels)
-   (parameter_names("npixels"))
-   .property_readonly("get_tap_pixels",&archon::get_tap_pixels)
-   .method("set_tap_lines",&archon::set_tap_lines)
-   (parameter_names("lines"))
-   .property_readonly("get_tap_linues",&archon::get_tap_lines)
-
   .method("load_timing", &archon::load_timing)
 
  ;

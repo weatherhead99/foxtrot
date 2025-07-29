@@ -111,7 +111,19 @@ namespace foxtrot {
       std::vector<archon_module_info> modules;
     };
 
-
+    struct archon_tap_info
+    {
+      short unsigned pixels;
+      short unsigned lines;
+      short unsigned rawchannel;
+      bool rawenable;
+      short unsigned rawstartline;
+      short unsigned rawendline;
+      unsigned rawstartpixel;
+      unsigned rawsamples;
+      archon_buffer_mode framemode;
+      archon_sample_mode samplemode;
+    };
 
     enum class archon_power_status : short unsigned
       {
@@ -211,19 +223,14 @@ namespace foxtrot {
 	throw std::logic_error("unknown type supplied to readKeyValue");
     }
     
-   
     void applyall();
 
     std::vector<unsigned int> fetch_buffer(int buf);
     std::vector<unsigned short> fetch_raw_buffer(int buf);
     
+    archon_tap_info tapinfo();
+    void set_tapinfo(const archon_tap_info& tapinfo);
     
-    void set_tap_pixels(short unsigned npixels);
-    short unsigned get_tap_pixels();
-
-    void set_tap_lines(short unsigned lines);
-    short unsigned get_tap_lines();
-      
     const std::map<int,ArchonModule&> getAllModules() const;
     
     
@@ -254,6 +261,7 @@ namespace foxtrot {
     void lockbuffer(int buf);
     void unlockbuffers();
     
+    std::string readConfigLine(int num,bool override_existing=false);
 
     
     void holdTiming();
@@ -273,6 +281,8 @@ namespace foxtrot {
     void sync_archon_timer();
     
     void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
+
+    std::array<int,4> getCDSTiming();
     
     int getreset_start();
     int getreset_end();
@@ -315,11 +325,7 @@ namespace foxtrot {
     void setrawsamples(int n);
     int getrawsamples();
     
-    
-    void setframemode(int mode);
-    int getframemode();
-    
-    
+        
   protected:
     //NOTE: archon constructor is private, archon must only exist as a shared_ptr
     //(it is shared with its modules etc)
@@ -347,7 +353,6 @@ namespace foxtrot {
     //to call because they cause the config line map
     //to get out of sync!
     int writeConfigLine(const std::string& line, int num=-1);
-    std::string readConfigLine(int num,bool override_existing=false);
 
     
     

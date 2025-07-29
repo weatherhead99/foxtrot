@@ -40,7 +40,6 @@ const auto bdt_map = make_map(
 template<typename T>
 using Sizeof = std::integral_constant<unsigned char, sizeof(T)>;
 
-    
 
 std::vector<unsigned char> foxtrot::variant_to_bytes(const rttr::variant& var, bool check, Logging* lg)
 {
