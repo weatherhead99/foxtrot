@@ -26,11 +26,18 @@ namespace foxtrot {
 
   namespace detail
   {
-    template<typename T>
-    constexpr bool is_optional(const T&) { return false;};
+    template <typename T>
+    concept is_optional = requires(const T& t)
+    {
+      { t.has_value()};
+      { t.operator*()};
+    };
+    
+    // template<typename T>
+    // constexpr bool is_optional(const T&) { return false;};
 
-    template<typename T>
-    constexpr bool is_optional(const std::optional<T>&){return true;};
+    // template<typename T>
+    // constexpr bool is_optional(const std::optional<T>&){return true;};
       
 
   }
@@ -42,7 +49,7 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   foxtrot::Logging lg("extract_parameter_value");
   try
   {
-    if constexpr(detail::is_optional(param_out))
+    if constexpr(detail::is_optional<T>)
       {
 	if(required)
 	  lg.strm(sl::warning) << "passed required=True but the output type is a std::optional. Likely a bug";
