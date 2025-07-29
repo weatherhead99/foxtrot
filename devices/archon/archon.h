@@ -171,7 +171,7 @@ namespace foxtrot {
     virtual const string getDeviceTypeName() const override;
   public:
 
-    static std::shared_ptr<archon> create(std::shared_ptr<simpleTCPBase>&& proto);
+    static std::shared_ptr<archon> create(std::shared_ptr<simpleTCPBase>&& proto, bool clear_config=true);
 
     ~archon();
     ssmap getStatus();
@@ -187,10 +187,7 @@ namespace foxtrot {
     std::string fetch_log();
     std::vector<std::string> fetch_all_logs();
     
-    
-    int writeConfigLine(const std::string& line, int num=-1);
-    std::string readConfigLine(int num,bool override_existing=false);
-    
+       
     
     void writeKeyValue(const std::string& key, const std::string& val);
 
@@ -238,6 +235,8 @@ namespace foxtrot {
     
     void set_parameters(int n);
     int get_parameters();
+
+    std::unordered_map<string, int> parameters();
     
     void set_constants(int n);
     int get_constants();
@@ -263,14 +262,13 @@ namespace foxtrot {
     
     void setParam(const std::string& name, unsigned val);
     unsigned getParam(const std::string& name);
+    unsigned getParam(int loc);
     
     void setConstant(const std::string& name, double val);
     double getConstant(const std::string& name);
     
     void apply_param(const std::string& name);
     void apply_all_params();
-    
-
     
     void sync_archon_timer();
     
@@ -345,6 +343,14 @@ namespace foxtrot {
     HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;
     
   private:
+    //NOTE: readConfigLine and writeConfigLine are unsafe
+    //to call because they cause the config line map
+    //to get out of sync!
+    int writeConfigLine(const std::string& line, int num=-1);
+    std::string readConfigLine(int num,bool override_existing=false);
+
+    
+    
     std::unique_ptr<detail::archonimpl> _impl;    
       
       template<typename T, typename Tdiff=T>
@@ -354,7 +360,7 @@ namespace foxtrot {
     void read_parse_existing_config();
     short unsigned _order;
 
-    std::unordered_map<std::string, int> _configlinemap;
+    std::map<std::string, int> _configlinemap;
      
     std::vector<std::string> _statenames;
     std::map<std::string,int> _parammap;
@@ -363,11 +369,8 @@ namespace foxtrot {
     std::map<unsigned char, unsigned char> _ADtaplinemap;
     std::optional<bool> _using_AM_taps = std::nullopt;
     
-    int _config_lines =0;
     int _taplines = 0;
-    int _states = 0;
-    
-    
+    int _states = 0;    
     
   };
 
