@@ -60,7 +60,7 @@ std::shared_ptr<archon> foxtrot::devices::archon::create(std::shared_ptr<simpleT
   if(clear_config)
     out->clear_config();
   else
-    out->read_parse_existing_config();
+    out->read_parse_existing_config(true);
   out->setup_modules();
 
   return out;
@@ -622,12 +622,19 @@ void foxtrot::devices::archon::unlockbuffers()
     cmd("LOCK0");
 }
 
-void foxtrot::devices::archon::read_parse_existing_config()
+void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
 {
     //NOTE: need to write at least one config line because reading empty config results in infinite loop
   auto stat = status();
   if(stat.powerstatus == foxtrot::devices::archon_power_status::not_configured)
-    throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
+    {
+      if(not allow_empty)
+	throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
+      
+      _configlinemap.clear();
+      _configmap.clear();
+      return;
+    }
   _configlinemap.clear();
   _configmap.clear();
   int i;
