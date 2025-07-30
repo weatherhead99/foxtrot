@@ -5,10 +5,12 @@ from .protos.ft_types_pb2 import tuple_descriptor, ft_tuple, mapping_descriptor,
 from .protos.ft_types_pb2 import ENUM_TYPE, STRUCT_TYPE, SIMPLEVAR_TYPE, TUPLE_TYPE, UNION_TYPE, HOMOG_ARRAY_TYPE, MAPPING_TYPE
 from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE, VOID_TYPE, FLOAT_TYPE
 
-from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE
+from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE, DATETIME_TYPE
 import struct
 import warnings
 from typing import Iterable, Any
+from datetime import datetime, timedelta
+from google.protobuf.timestamp_pb2 import Timestamp
 
 
 def get_struct_string(dtp, length: int) -> str:
@@ -199,10 +201,22 @@ def value_from_ft_array(variant: ft_homog_array):
 
 def value_from_ft_simplevar(variant: ft_simplevariant):
     whichattr = variant.WhichOneof("value")
-    if whichattr is not None:
+    if whichattr == "tstampval":
+        return date_time_from_pb_tstamp(variant.tstampval)
+    elif whichattr is not None:
         return getattr(variant, whichattr)
     else:
         return None
+
+#NOTE: just keep microseconds from now
+#have some config to allow getting the nanoseconds
+def date_time_from_pb_tstamp(val: Timestamp) -> tuple[datetime,int]:
+    #start with the seconds bit, easy
+    dt = datetime.fromtimestamp(val.seconds)
+    extra_usec = val.nanos // 1000
+    dt += timedelta(microseconds=extra_usec)
+    extra_nsec = val.nanos % 1000
+    return dt, extra_nsec
 
 
 def value_from_ft_struct(variant: ft_struct):

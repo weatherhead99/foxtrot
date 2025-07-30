@@ -9,6 +9,7 @@
 #include <optional>
 #include <map>
 #include <unordered_map>
+#include <chrono>
 
 #include <foxtrot/Device.h>
 #include <foxtrot/server/DeviceLocks.hh>
@@ -119,6 +120,8 @@ namespace foxtrot
       std::map<int, string> returns_intstrmap() const;
 
       std::unordered_map<string, string> returns_unorderedmap() const;
+
+      std::chrono::time_point<std::chrono::system_clock> returns_current_time() const;
 
     protected:
         

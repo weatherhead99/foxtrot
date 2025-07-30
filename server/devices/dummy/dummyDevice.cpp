@@ -14,7 +14,7 @@
 #include <foxtrot/devices/dummyDevice.h>
 #include <foxtrot/ft_tuple_helper.hh>
 #include <foxtrot/ft_union_helper.hh>
-
+#include <foxtrot/ft_timestamp_helper.hh>
 #include <foxtrot/ft_optional_helper.hh>
 
 // dummyDevice::dummyDevice() : Device(nullptr)
@@ -360,6 +360,11 @@ std::unordered_map<string, string> foxtrot::devices::dummyDevice::returns_unorde
   return out;
 }
 
+std::chrono::time_point<std::chrono::system_clock> foxtrot::devices::dummyDevice::returns_current_time() const
+{
+  return std::chrono::system_clock::now();
+}
+
 
 
 RTTR_REGISTRATION
@@ -415,6 +420,7 @@ RTTR_REGISTRATION
    .method("returns_strintmap", &dummyDevice::returns_strintmap)
    .method("returns_intstrmap", &dummyDevice::returns_intstrmap)
    .method("returns_unorderedmap", &dummyDevice::returns_unorderedmap)
+   .method("returns_current_time", &dummyDevice::returns_current_time)
 
    ;
    
@@ -427,6 +433,8 @@ RTTR_REGISTRATION
  foxtrot::register_tuple<std::pair<int,double>>();
  foxtrot::register_tuple<std::tuple<int,std::string>>();
  foxtrot::register_tuple<std::tuple<int, double ,std::string>>();
+
+ foxtrot::register_timestamp<std::chrono::time_point<std::chrono::system_clock>>();
  
  using foxtrot::devices::dummyEnum;
  using foxtrot::devices::dummyStruct;
