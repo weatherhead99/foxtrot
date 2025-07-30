@@ -292,7 +292,7 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
 	
 	return out;
       }
-    
+
     
     auto stdvariant = rttr_to_std_variant_converter(var, lg);
     if(stdvariant.index() == std::variant_npos)
@@ -320,7 +320,8 @@ ft_simplevariant foxtrot::get_simple_variant_wire_type(const rttr::variant& var,
         const auto uintval_types = hana::make_set(hana::type_c<unsigned>,
                                                     hana::type_c<unsigned short>,
                                                     hana::type_c<unsigned char>,
-                                                    hana::type_c<unsigned long>);
+						  hana::type_c<unsigned long>,
+						  hana::type_c<unsigned long long>);
         
     
         //NOTE: the std::decay_t thing here is CRUCIALLY important!
@@ -517,9 +518,8 @@ ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
     catch(std::logic_error& err)
     {
         if(lg)
-            lg->strm(sl::error) << "contained type was not a simple variant when trying to map array!";
+            lg->strm(sl::debug) << "contained type was not a simple variant when trying to map array!";
     }
-    
     
     if(lg)
       lg->strm(sl::debug) << "constructing heavy array";
@@ -631,7 +631,7 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
             lg->strm(sl::trace) << "array logic";
         auto* arrayval = out.mutable_arrayval();
         *arrayval = get_array_wire_type(var, lg);
-        
+
         if(lg)
             lg->strm(sl::trace) << "wrote output array definition";
    

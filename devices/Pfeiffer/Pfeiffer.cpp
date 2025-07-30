@@ -57,9 +57,13 @@ string PfeifferDevice::cmd(const string& request)
 
     _lg.strm(sl::debug) << "reading from serial port...";
     auto repl = _serproto->read_until_endl('\r');
+
+    //seems to be inconsistency between serial port and TCP implementations
+    if(repl.back() == '\r')
+      repl.pop_back();
     _lg.strm(sl::trace) << "serial port read size: " << repl.size() ;
     return repl;
-    
+
 }
 
 string PfeifferDevice::calculate_checksum(const string_view message)
@@ -134,14 +138,14 @@ void PfeifferDevice::validate_response_telegram_parameters(unsigned short addres
 std::tuple<int, int, string> PfeifferDevice::interpret_response_telegram(const string& response)
 {
   _lg.strm(sl::trace) << "size of response: " << response.size();
-  auto csum_calc = calculate_checksum(response.substr(0,response.size()-4));
-    auto csumstr = response.substr(response.size() -4, 3);
+  auto csum_calc = calculate_checksum(response.substr(0,response.size()-3));
+    auto csumstr = response.substr(response.size() -3, 3);
     
-    if(response.compare(response.size()-4,3,csum_calc) != 0)
+    if(response.compare(response.size()-3,3,csum_calc) != 0)
     {
         _lg.strm(sl::error) << "mismatched checksum error";
-        _lg.strm(sl::error) << "calculated checksum is: " << csum_calc;
-        _lg.strm(sl::error) << "received checksum: " << csumstr;
+        _lg.strm(sl::error) << "calculated checksum is (hex): " << std::hex << csum_calc;
+        _lg.strm(sl::error) << "received checksum (hex): " << std::hex << csumstr;
 	_lg.strm(sl::error) << "full response: " << response;
 	_lg.strm(sl::error) << "full response (hex): {" << std::hex <<  response << "}";
         throw DeviceError("got invalid checksum");

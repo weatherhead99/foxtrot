@@ -263,6 +263,8 @@ class Capability:
 
     def get_enum_type(self, argpos: int | str):
         if isinstance(argpos, int):
+            if argpos == -1:
+                return self._enum_return_type
             return self._enum_arg_types[argpos]
         elif isinstance(argpos, str):
             idx = self.argnames.index(argpos)

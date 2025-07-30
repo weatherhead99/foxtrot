@@ -12,7 +12,7 @@
 #include <foxtrot/DeviceError.h>
 #include <foxtrot/ProtocolError.h>
 #include <foxtrot/ft_tuple_helper.hh>
-
+#include <foxtrot/ft_timestamp_helper.hh>
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
@@ -648,10 +648,7 @@ void foxtrot::devices::archon::read_parse_existing_config()
         _configlinemap.insert({key,i});
 	_configmap.insert({key, val});
     }
-    
-    
-    
-    
+
 }
 
 void foxtrot::devices::archon::holdTiming()
@@ -1267,6 +1264,9 @@ RTTR_REGISTRATION
    .property("samplemode", &archon_tap_info::samplemode)
    .property("CDSTiming", &archon_tap_info::CDSTiming);
 
+
+ foxtrot::register_timestamp<foxtrot::devices::HRTimePoint>();
+ 
  registration::class_<archon>("foxtrot::devices::archon")
  .method("clear_config",&archon::clear_config)
    .property_readonly("status", &archon::status)

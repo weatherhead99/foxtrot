@@ -31,7 +31,7 @@ foxtrot::devices::TPG362::TPG362(std::shared_ptr< foxtrot::SerialProtocol > prot
     specproto->flush();
     _lg.Info("gauge controller initialization done...");
   }
-  else if(tpinfo == typeid(foxtrot::protocols::simpleTCP))
+  else if(nullptr != dynamic_pointer_cast<foxtrot::protocols::simpleTCPBase>(proto))
     {
       _lg.strm(sl::info) << "using ethernet/LAN connected gauge controller";
       _lg.strm(sl::info) << "gauge controller initialization done...";
