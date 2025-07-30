@@ -63,9 +63,9 @@ class FoxtrotServerConan(ConanFile):
             else:
                 self.requires("asio-grpc/3.4.1")
 
-                self.requires("grpc/1.71.0", override=True,
-                      transitive_headers=True,
-                      transitive_libs=True)
+                self.requires("grpc/1.72.0", override=True,
+                       transitive_headers=True,
+                       transitive_libs=True)
 
     def layout(self):
         #NOTE: need extra build dir in editable mode since libfoxtrot_server.so
