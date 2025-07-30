@@ -275,7 +275,7 @@ namespace foxtrot {
     void apply_all_params();
     
     void sync_archon_timer();
-    
+    HRTimePoint get_archon_time();
     void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
 
     std::array<int,4> getCDSTiming();
@@ -295,7 +295,8 @@ namespace foxtrot {
     
     void settrigoutforce(bool onoff);
     bool gettrigoutforce();
-    
+
+    void read_parse_existing_config(bool allow_empty=false);
         
   protected:
     //NOTE: archon constructor is private, archon must only exist as a shared_ptr
@@ -332,7 +333,7 @@ namespace foxtrot {
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
 
-    void read_parse_existing_config();
+
     short unsigned _order;
 
     std::unordered_map<std::string, int> _configlinemap;

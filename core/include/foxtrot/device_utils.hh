@@ -38,8 +38,7 @@ namespace foxtrot
     constexpr auto ft_simplevar_types = boost::hana::make_set(
         hana::type_c<bool>, hana::type_c<unsigned char>, hana::type_c<char>,
         hana::type_c<unsigned short>, hana::type_c<short>, hana::type_c<unsigned>,
-        hana::type_c<int>, hana::type_c<unsigned long>, hana::type_c<long>,
-        hana::type_c<float>, hana::type_c<double>, hana::type_c<string>);
+        hana::type_c<int>, hana::type_c<unsigned long>, hana::type_c<unsigned long long>,  hana::type_c<long>, hana::type_c<float>, hana::type_c<double>, hana::type_c<string>);
     
     
     using ft_simplevar_std_variant = typename detail::to_std_variant<std::decay_t<decltype(ft_simplevar_types)>>::type;
