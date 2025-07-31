@@ -207,7 +207,7 @@ namespace foxtrot {
       writeKeyValue(key, std::to_string(val));
     }
 
-    std::string readKeyValue(const std::string& key);
+    const std::string& readKeyValue(const std::string& key);
 
     template<typename Ret>
     Ret readKeyValue(const std::string& key)
@@ -242,6 +242,9 @@ namespace foxtrot {
     //int get_parameters();
 
     const std::unordered_map<std::string, std::string>& config() const;
+    std::vector<std::pair<std::string, std::string>> ordered_config() const;
+
+    std::unordered_map<std::string, int> params();
     
     //void set_constants(int n);
     //int get_constants();
@@ -263,6 +266,7 @@ namespace foxtrot {
     void holdTiming();
     void releaseTiming();
     void resetTiming();
+
     
     //void setParam(const std::string& name, unsigned val);
     //unsigned getParam(const std::string& name);
@@ -321,6 +325,9 @@ namespace foxtrot {
     HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;
     
   private:
+    std::optional<int> find_config_line_from_key(const std::string& key);
+    
+    
     //NOTE: readConfigLine and writeConfigLine are unsafe
     //to call because they cause the config line map
     //to get out of sync!
@@ -328,15 +335,15 @@ namespace foxtrot {
 
     
     
-    std::unique_ptr<detail::archonimpl> _impl;    
-      
+    std::unique_ptr<detail::archonimpl> impl;   
+     
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
 
 
     short unsigned _order;
 
-    std::unordered_map<std::string, int> _configlinemap;
+    //std::unordered_map<std::string, int> _configlinemap;
     std::unordered_map<std::string, std::string> _configmap;
     std::vector<std::string> _statenames;
     std::map<unsigned char, unsigned char> _ADtaplinemap;

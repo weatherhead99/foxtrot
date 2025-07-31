@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <stdexcept>
+#include <system_error>
 #include <thread>
 #include <chrono>
 #include <locale>
@@ -45,6 +46,8 @@ struct foxtrot::devices::detail::archonimpl
   std::unordered_map<std::string, std::pair<std::string, int>> parammap;
   std::unordered_map<std::string, std::pair<std::string, int>> constvals;
 
+  std::vector<std::string> configindex;
+  bool mapvalid;
 };
 
 
@@ -71,7 +74,7 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
   : CmdDevice(std::static_pointer_cast<foxtrot::CommunicationProtocol>(proto)), _specproto(proto),
     _lg("archon"), _order(0)
 {
-  _impl = std::make_unique<detail::archonimpl>();
+  impl = std::make_unique<detail::archonimpl>();
   proto->Init(nullptr);
   
   sync_archon_timer();
@@ -233,7 +236,6 @@ foxtrot::devices::archon_status archon::status()
       double I = std::stod(statmap.at(std::format("{}_I", vstr)));
       out.PSU_map.emplace(vstr, std::make_pair(V, I));
     }
-
   
   double user_I = std::stod(statmap.at("USER_I"));
   double user_V = std::stod(statmap.at("USER_V"));
@@ -378,8 +380,10 @@ const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::g
 void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
-  _configlinemap.clear();
+  //  _configlinemap.clear();
   _configmap.clear();
+  impl->configindex.clear();
+  impl->mapvalid = false;
   //_statenames.clear();
   //_parammap.clear();
   //_constantmap.clear();
@@ -399,7 +403,7 @@ void devices::archon::clear_config()
 int devices::archon::writeConfigLine(const string& line,int num)
 {
   //check if possible
-  if(_configlinemap.size() >= ARCHON_MAX_CONFIG_LINES)
+  if(impl->configindex.size() >= ARCHON_MAX_CONFIG_LINES)
   {
    throw foxtrot::DeviceError("tried to write too many config lines to archon");
   }
@@ -411,13 +415,12 @@ int devices::archon::writeConfigLine(const string& line,int num)
   if(num <0)
   {
     //if the value -1 is passed in, add a new line
-    num = _configlinemap.size();
+    num = impl->configindex.size();
   }
-  else if(num > _configlinemap.size())
+  else if(num > impl->configindex.size())
   {
     throw std::logic_error("trying to overwrite a config line " + std::to_string(num) + " that doesn't exist yet");
   };
-  
   std::ostringstream oss;
   oss << "WCONFIG" << std::setw(4) << std::setfill('0') << std::uppercase<<  std::hex << num << line;
   cmd(oss.str());
@@ -429,7 +432,7 @@ int devices::archon::writeConfigLine(const string& line,int num)
 
 std::string devices::archon::readConfigLine(unsigned num, bool override_existing)
 {
-  if( num >= _configlinemap.size() && !override_existing)
+  if( num >= impl->configindex.size() && !override_existing)
   {
     throw std::logic_error("tried to read an archon config line that we don't think exists...");
   };
@@ -472,48 +475,46 @@ std::vector< string > devices::archon::fetch_all_logs()
   return out;
 }
 
-string devices::archon::readKeyValue(const string& key)
+std::optional<int> devices::archon::find_config_line_from_key(const std::string& key)
 {
-  auto linenumit = _configlinemap.find(key);
-  if(linenumit == _configlinemap.end())
-  {
-    throw std::runtime_error("the key " + key + " is not registered with this archon handler");
-  };
-  
-  auto line = readConfigLine(linenumit->second);
-  
-  //fine equals sign
-  auto eqpos = std::find(line.begin(), line.end(),'=');
-  if(eqpos == line.end())
-  {
-    throw DeviceError("malformed config line returned from archon");
-    
-  };
-  
-  auto val = string(eqpos+1,line.end());
-  
-  return val;
-  
+  auto linumit = std::find(impl->configindex.begin(),
+			   impl->configindex.end(), key);
+  if(linumit == impl->configindex.end())
+    {
+      return std::nullopt;
+    }
+
+  return std::distance(impl->configindex.begin(), linumit);
+  //NOTE: do we need an off by one here?
+}
+
+
+const std::string& devices::archon::readKeyValue(const string& key)
+{
+  //NOTE: bounds checked by the .at call
+  return _configmap.at(key);
 }
 
 void devices::archon::writeKeyValue(const string& key, const string& val)
 {
-  auto linenumit = _configlinemap.find(key);
-  
-  std::ostringstream oss; 
-  oss << key << "=" << val;
-  
-  if(linenumit == _configlinemap.end())
-  {
+  auto linestr = std::format("{}={}",key,val);
+  auto linum = find_config_line_from_key(key);
+  if(not linum.has_value())
+    {
     //this is a new key 
-    auto linenum = writeConfigLine(oss.str());
-    _configlinemap.insert({key,linenum});
-  }
+      auto linenum = writeConfigLine(linestr);
+      impl->configindex.push_back(key);
+      _configmap.insert({key, val});
+    }
   else
-  {
-    auto linenum = _configlinemap.at(key);
-    writeConfigLine(oss.str(),linenum);
-  };
+    {
+      writeConfigLine(linestr,*linum);
+      _configmap.at(key) = val;
+    }
+
+  impl->mapvalid = false;
+  //NOTE: is this exception safe?
+  //update the mappings etc
 }
 
 
@@ -563,13 +564,9 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
 void foxtrot::devices::archon::set_power(bool onoff)
 {
     if(onoff)
-    {
-        cmd("POWERON");
-    }
+      cmd("POWERON");
     else
-    {
-        cmd("POWEROFF");
-    }    
+      cmd("POWEROFF");   
 }
 
 foxtrot::devices::archon_power_status devices::archon::get_power()
@@ -594,26 +591,80 @@ void foxtrot::devices::archon::load_timing_script(const std::string& script)
        writeKeyValue(configkey,line);
     };
     writeKeyValue("LINES",std::to_string(i+1));
-    //    set_timing_lines(i);
     
 }
-
-
 
 
 void foxtrot::devices::archon::lockbuffer(int buf)
 {
     if(buf < 1 || buf > 3)
-    {
-        throw std::out_of_range("invalid buffer, must be 1 :3 ");
-    }
-    
+      throw std::out_of_range("invalid buffer, must be 1 :3 ");
+
     cmd("LOCK" + std::to_string(buf));
 }
 
 const std::unordered_map<std::string, std::string>& devices::archon::config() const
 {
   return _configmap;
+}
+
+std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config() const
+{
+  std::vector<std::pair<std::string,std::string>> out;
+
+  out.reserve(impl->configindex.size());
+  for(std::size_t i=0; i < impl->configindex.size(); i++)
+    {
+      auto& k = impl->configindex[i];
+      auto& v = _configmap.at(k);
+      out.push_back({k, v});
+    }
+  return out;
+}
+
+std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
+{
+  auto eqpos = std::find(in.begin(), in.end(),'=');
+  auto k = std::string_view(in.begin(), eqpos);
+  auto v = std::string_view(eqpos+1, in.end());
+  return {k, v};
+}
+
+
+std::unordered_map<std::string, int> devices::archon::params()
+{
+  int n_params = std::stoi(readKeyValue("PARAMETERS"));
+  std::unordered_map<string, int> out;
+  if(impl->mapvalid == false)
+    {
+      impl->parammap.clear();
+      for(unsigned i=0; i < n_params; i++)
+	{
+	  auto key = std::format("PARAMETER{}", i);
+	  auto val = readKeyValue(key);
+
+	  auto [paramk, paramv] = spliteq(val);
+	  
+	  //	  auto eqpos = std::find(val.begin(), val.end(), '=');
+	  //auto paramk = std::string(val.begin(), eqpos);
+	  //auto paramv = std::string(eqpos + 1, val.end());
+	  int param;
+	  auto res = std::from_chars(paramv.data(), paramv.data()+ paramv.size(), param);
+	  if(res.ec == std::errc::invalid_argument)
+	    _lg.strm(sl::error) << "bad value when converting parameter from string";
+	  out.emplace(paramk, param);
+	  impl->parammap.emplace(paramk, std::make_pair(paramv, i));
+	}
+      impl->mapvalid = true;
+    }
+  else
+    {
+      for(auto [k,v] : impl->parammap)
+	{
+	  out.emplace(k, std::stoi(v.first));
+	}
+    }
+    return out;
 }
 
 
@@ -631,13 +682,14 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
       if(not allow_empty)
 	throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
       
-      _configlinemap.clear();
       _configmap.clear();
+      impl->configindex.clear();
       return;
     }
-  _configlinemap.clear();
   _configmap.clear();
+  impl->configindex.clear();
   int i;
+  impl->configindex.reserve(ARCHON_MAX_CONFIG_LINES);
   for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
     {
         auto confline = readConfigLine(i,true);
@@ -652,8 +704,8 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
         };
         auto key = string(confline.begin(),eqpos);
         auto val = string(eqpos+1,confline.end());
-        _configlinemap.insert({key,i});
 	_configmap.insert({key, val});
+	impl->configindex.push_back(key);
     }
 
 }
@@ -1359,6 +1411,7 @@ RTTR_REGISTRATION
    .constructor()(policy::ctor::as_object);
 
  foxtrot::register_tuple<std::pair<double, double>>();
+ foxtrot::register_tuple<std::pair<std::string,std::string>>();
 
 
 }

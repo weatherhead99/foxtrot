@@ -10,7 +10,6 @@ _lg("ArchonLVX"),
 {
 }
 
-
 const string devices::ArchonLVX::getTypeName() const
 {
   

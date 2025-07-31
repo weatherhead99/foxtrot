@@ -188,8 +188,6 @@ void devices::ArchonGenericBias::reconfigure(const string& nmemonic, int numchan
   _numchans = numchans;
   _lowlimit = lowlimit;
   _highlimit = highlimit;
-  
-
 }
 
 
