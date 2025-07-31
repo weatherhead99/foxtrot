@@ -415,6 +415,11 @@ ft_struct foxtrot::get_struct_wire_type(const rttr::variant& var, Logging* lg)
     ft_struct out;
     
     auto tp = var.get_type();
+
+    //AARGH: duplicate logic here if type is a wrapper (e.g. we passed a const ref or something)
+    if(tp.is_wrapper)
+      tp = tp.get_wrapped_type();
+
     out.set_struct_name(tp.get_name().to_string());
     
     auto prop_map = out.mutable_value();
