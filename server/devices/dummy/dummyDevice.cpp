@@ -290,6 +290,11 @@ std::vector<std::string> foxtrot::devices::dummyDevice::returns_nonstream_string
   return { "red", "yellow" , "green"};
 }
 
+int foxtrot::devices::dummyDevice::select_from_vector(const std::vector<int>& in, int idx)
+{
+  return in.at(idx);
+}
+
 
 std::variant<int, double, std::string> foxtrot::devices::dummyDevice::takes_tuple(const std::tuple<int, double, std::string>& in)
 {
@@ -421,6 +426,7 @@ RTTR_REGISTRATION
    .method("returns_intstrmap", &dummyDevice::returns_intstrmap)
    .method("returns_unorderedmap", &dummyDevice::returns_unorderedmap)
    .method("returns_current_time", &dummyDevice::returns_current_time)
+   .method("select_from_vector", &dummyDevice::select_from_vector)(parameter_names("in","idx"))
 
    ;
    

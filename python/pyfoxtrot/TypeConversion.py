@@ -8,7 +8,7 @@ from .protos.ft_types_pb2 import INT_TYPE, UNSIGNED_TYPE, BOOL_TYPE, STRING_TYPE
 from .protos.ft_types_pb2 import UCHAR_TYPE, CHAR_TYPE, USHORT_TYPE, UINT_TYPE, ULONG_TYPE, SHORT_TYPE, IINT_TYPE, LONG_TYPE, BFLOAT_TYPE, BDOUBLE_TYPE, DATETIME_TYPE
 import struct
 import warnings
-from typing import Iterable, Any
+from typing import Iterable, Any, Sequence
 from datetime import datetime, timedelta
 from google.protobuf.timestamp_pb2 import Timestamp
 
@@ -46,6 +46,8 @@ def ft_variant_from_value(val, descriptor: variant_descriptor) -> ft_variant:
         out.enumval.CopyFrom(ft_enum_from_value(val, descriptor))
     elif vartype == UNION_TYPE:
         out = ft_union_from_value(val, descriptor)
+    elif vartype == HOMOG_ARRAY_TYPE:
+        out.arrayval.CopyFrom(ft_homog_array_from_value(val, descriptor.homog_array_desc))
     elif vartype == TUPLE_TYPE:
         out.tupleval.CopyFrom(ft_tuple_from_value(val, descriptor.tuple_desc))
     elif vartype == MAPPING_TYPE:
@@ -151,6 +153,21 @@ def ft_union_from_value(val,
     else:
         raise RuntimeError("failed to convert union value!")
 
+def ft_homog_array_from_value(val: Sequence, descriptor: homog_array_descriptor) -> ft_homog_array:
+    out = ft_homog_array()
+    if(getattr(descriptor,"has_fixed_size",False)):
+        if(len(val) != descriptor.fixed_size):
+            raise ValueError(f"passed value doesn't have required fixed size {descriptor.fixed_size}")
+        #NOTE pass all arrays as heavy for now, should pas
+        #in dtp from the descriptor on the other side
+    #check homogeneity
+    outtp = descriptor.value_type
+    arrprep = [ft_variant_from_value(_, outtp) for _ in val]
+    out.arr_heavy.data.extend(arrprep)
+    return out
+        
+    
+    
 
 def ft_mapping_from_value(val: dict[Any, Any],
                           descriptor: mapping_descriptor) -> ft_mapping:

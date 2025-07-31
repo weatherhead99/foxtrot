@@ -196,9 +196,7 @@ namespace foxtrot {
     
     std::string fetch_log();
     std::vector<std::string> fetch_all_logs();
-    
-       
-    
+
     void writeKeyValue(const std::string& key, const std::string& val);
 
     template<detail::ArchonNumeric T>
@@ -245,6 +243,7 @@ namespace foxtrot {
     std::vector<std::pair<std::string, std::string>> ordered_config() const;
 
     std::unordered_map<std::string, int> params();
+    void set_param(const std::string& name, int val, bool apply_immediate=true, bool allow_new=false);
     
     //void set_constants(int n);
     //int get_constants();
@@ -301,7 +300,9 @@ namespace foxtrot {
     bool gettrigoutforce();
 
     void read_parse_existing_config(bool allow_empty=false);
-        
+    
+    
+    
   protected:
     //NOTE: archon constructor is private, archon must only exist as a shared_ptr
     //(it is shared with its modules etc)
@@ -323,6 +324,8 @@ namespace foxtrot {
     void setup_modules();
 
     HRTimePoint archon_time_to_real_time(long long unsigned archon_time) const;
+
+    
     
   private:
     std::optional<int> find_config_line_from_key(const std::string& key);
@@ -343,18 +346,12 @@ namespace foxtrot {
 
     short unsigned _order;
 
-    //std::unordered_map<std::string, int> _configlinemap;
     std::unordered_map<std::string, std::string> _configmap;
     std::vector<std::string> _statenames;
     std::map<unsigned char, unsigned char> _ADtaplinemap;
     std::optional<bool> _using_AM_taps = std::nullopt;
     
   };
-
-
-
-
-    
 
   class ArchonStreamHelper
   {

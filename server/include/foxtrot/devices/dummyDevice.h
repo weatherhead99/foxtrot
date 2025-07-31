@@ -92,6 +92,8 @@ namespace foxtrot
 
       std::vector<double> returns_nonstream_double_vector();
       std::vector<std::string> returns_nonstream_string_vector();
+
+      int select_from_vector(const std::vector<int>& in, int idx);
       
     std::array<unsigned char, 5> returns_std_array();
     std::array<int,3 > returns_std_int_array();

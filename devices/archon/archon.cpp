@@ -648,10 +648,10 @@ std::unordered_map<std::string, int> devices::archon::params()
 	  //	  auto eqpos = std::find(val.begin(), val.end(), '=');
 	  //auto paramk = std::string(val.begin(), eqpos);
 	  //auto paramv = std::string(eqpos + 1, val.end());
-	  int param;
+	  int param = 0;
 	  auto res = std::from_chars(paramv.data(), paramv.data()+ paramv.size(), param);
 	  if(res.ec == std::errc::invalid_argument)
-	    _lg.strm(sl::error) << "bad value when converting parameter from string";
+	    throw std::logic_error("bad value when converting parameter from string");
 	  out.emplace(paramk, param);
 	  impl->parammap.emplace(paramk, std::make_pair(paramv, i));
 	}
@@ -665,6 +665,43 @@ std::unordered_map<std::string, int> devices::archon::params()
 	}
     }
     return out;
+}
+
+void foxtrot::devices::archon::set_param(const std::string& name, int val, bool apply_immediate, bool allow_new)
+{
+  //reload parameter map
+  if(impl->mapvalid == false)
+    //side effect of this is to force update
+    auto parammap_temp = params();
+
+  //if not already this will throw
+  int paramnum;
+  try {
+    auto [paramval, paramidx] = impl->parammap.at(name);
+    paramnum = paramidx;
+  }
+  catch(std::out_of_range& err)
+    {
+      if(not allow_new)
+	{
+	  _lg.strm(sl::error) << "parameter: " << name << "not in registry";
+	  throw foxtrot::DeviceError("tried to set unknown parameter");
+	}
+      //case for new parameter with allow_new
+      auto next_param_num = impl->parammap.size();
+      writeKeyValue(std::format("PARAMETER{}",next_param_num),std::to_string(val));
+      writeKeyValue("PARAMETERS",impl->parammap.size() +1);
+      impl->mapvalid = false;
+      return;
+    }
+
+  //this case is a known parameter, changing value
+  writeKeyValue(std::format("PARAMETER{}",paramnum), std::to_string(val));
+  //keyword "PARAMETERS" doesn't need to change
+
+  if(apply_immediate)
+    cmd(std::format("LOADPARAM {}", name));
+
 }
 
 
@@ -694,14 +731,10 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
     {
         auto confline = readConfigLine(i,true);
         if(confline.size() == 0)
-        {
             break;
-        }
         auto eqpos = std::find(confline.begin(), confline.end(),'=');
         if(eqpos == confline.end())
-        {
-            throw DeviceError("malformed config line returned from archon");    
-        };
+	  throw DeviceError("malformed config line returned from archon");    
         auto key = string(confline.begin(),eqpos);
         auto val = string(eqpos+1,confline.end());
 	_configmap.insert({key, val});
@@ -924,13 +957,11 @@ void foxtrot::devices::archon::setAMtap(unsigned char AD, bool LR, double gain, 
 void devices::archon::apply_all_params()
 {
   cmd("LOADPARAMS");
-
 }
 
 void devices::archon::apply_param(const string& name)
 {
   cmd("LOADPARAM " + name);
-
 }
 
 void foxtrot::devices::archon::sync_archon_timer()
