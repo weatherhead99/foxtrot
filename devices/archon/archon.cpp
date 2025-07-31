@@ -1334,6 +1334,7 @@ RTTR_REGISTRATION
  .property_readonly("fetch_log",&archon::fetch_log)
    .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
    .property_readonly("config", &archon::config)
+   .property_readonly("ordered_config", &archon::ordered_config)
 
    .method("readConfigLine", &archon::readConfigLine)
    (parameter_names("num", "override_existing"))
