@@ -12,6 +12,7 @@
 #include "archon.h"
 #include "archon_module_generic_bias.h"
 #include "archon_module_mapper.hh"
+#include "../device_utils/stringconv_utils.hh"
 
 namespace foxtrot
 {
@@ -48,23 +49,28 @@ namespace devices
 	writeConfigKey(key, std::to_string(val));
       }
 
-      virtual archon_module_status status(const ssmap& statusmap) const;
+      virtual void status(archon_module_status& out, const ssmap& statusmap) const;
+      archon_module_status status(const ssmap& statusmap) const;
       archon_module_status status() const;
       const archon_module_info& info() const;
-      
-      string readConfigKey(const string& key);
-      template<typename Ret>
-      Ret readConfigKey(const string& key)
+
+      std::optional<string> readConfigKeyOpt(const string& key) const;
+
+      template<typename Ret, int Base=10>
+      std::optional<Ret> readConfigKeyOpt(const string& key) const
       {
-	auto keystr = readConfigKey(key);
-	if constexpr(std::is_same_v<Ret, int>)
-	  return std::stoi(keystr);
-	else if constexpr(std::is_same_v<Ret, double>)
-	  return std::stod(keystr);
-	else if constexpr(std::is_same_v<Ret, bool>)
-	  return std::stoi(keystr);
-	else
-	  throw std::logic_error("unknown type supplied to readKeyValue");
+	auto valstr = readConfigKeyOpt(key);
+	if(valstr.has_value())
+	  return number_from_string<Ret, Base>(valstr);
+	
+      }
+      
+      string readConfigKey(const string& key) const;
+      template<typename Ret, int Base=10>
+      Ret readConfigKey(const string& key) const
+      {
+	auto valstr = readConfigKey(key);
+	return number_from_string<Ret, Base>(valstr);
       }
 	    
 

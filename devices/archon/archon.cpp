@@ -271,7 +271,7 @@ foxtrot::devices::archon_status archon::status()
   out.module_statuses.reserve(_modules.size());
   for(auto& [pos, mod] : _modules)
     out.module_statuses.push_back(mod->status(statmap));
-  
+
   return out;
 }
 
@@ -513,6 +513,14 @@ const std::string& devices::archon::readKeyValue(const string& key)
   //NOTE: bounds checked by the .at call
   return _configmap.at(key);
 }
+
+const std::string* const devices::archon::readKeyValueOpt(const string& key)
+{
+  if(!_configmap.contains(key))
+    return nullptr;
+  return &_configmap.at(key);
+}
+
 
 void devices::archon::writeKeyValue(const string& key, const string& val)
 {
@@ -1375,7 +1383,9 @@ RTTR_REGISTRATION
    .property("powergood", &archon_status::powergood)
    .property("overheat", &archon_status::overheat)
    .property("backplane_temp", &archon_status::backplane_temp)
-   .property("PSU_map", &archon_status::PSU_map);
+   .property("PSU_map", &archon_status::PSU_map)
+   .property("fanspeed", &archon_status::fanspeed)
+   .property("module_statuses", &archon_status::module_statuses);
 
  using foxtrot::devices::archon_tap_info;
  registration::class_<archon_tap_info>("foxtrot::devices::archon_tap_info")

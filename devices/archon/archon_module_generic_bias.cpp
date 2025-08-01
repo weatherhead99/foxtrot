@@ -3,7 +3,7 @@
 #include "archon.h"
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
-
+#include <rttr/registration>
 
 using foxtrot::devices::archon_module_status;
 
@@ -11,12 +11,22 @@ using namespace foxtrot;
 using std::string;
 
 using statptr = optional<vector<double>> archon_module_status::*;
-const std::map<string, std::pair<statptr, statptr>> nmemonic_map =
+const std::unordered_map<string, std::pair<statptr, statptr>> nmemonic_map =
   {
   {"HC",  {&archon_module_status::HC_Vs, &archon_module_status::HC_Is}},
   {"LC",  {&archon_module_status::LC_Vs, &archon_module_status::LC_Is}},
   {"XVP", {&archon_module_status::XVP_Vs, &archon_module_status::XVP_Is}},
   {"XVN", {&archon_module_status::XVN_Vs, &archon_module_status::XVN_Is}}};
+
+
+// tuple here first item is can it be enabled/disabled, second item is can it be current set
+const std::unordered_map<string, std::tuple<bool,bool>> bias_traits_map =
+  {
+    {"HC", {true, true}},
+    {"LC", {false, false}},
+    {"XVP", {true, false}},
+    {"XVN", {true, false}}};
+   
 
 devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod,
 					      const string& nmemonic,
@@ -30,12 +40,78 @@ devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod,
 	  lg.strm(sl::debug) << "found matching nmemonic";
 	  statV = v.first;
 	  statI = v.second;
+
+	  //obtain the relevant traits as well;
+	  auto [can_enable, can_currentlimit] = bias_traits_map.at(k);
+	  _hascurrentlimits = can_currentlimit;
+	  _hasenables = can_enable;	  
+	  break;
 	}
     }
   if(statV == nullptr)
     throw std::logic_error("couldn't find appropriate bias nmemonic");
 }
 
+void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& statusmap) const
+{
+  auto modpos = _mod.info().position;
+
+  std::vector<double> outV;
+  std::vector<double> outI;
+  outV.reserve(_numchans);
+  outI.reserve(_numchans);
+  
+  for(unsigned channel = 0; channel < _numchans; channel++)
+    {
+      auto Vcmdstr = std::format("MOD{}/{}_V{}", modpos, _biasnmemonic, channel);
+      auto Icmdstr = std::format("MOD{}/{}_U{}", modpos, _biasnmemonic, channel);
+      outV.push_back(std::stod(statusmap.at(Vcmdstr)));
+      outI.push_back(std::stod(statusmap.at(Icmdstr)));
+    }
+
+  out.*statV = outV;
+  out.*statI = outI;
+}
+
+std::vector<foxtrot::devices::biasprop> devices::ArchonGenericBias::biases(const ssmap& statusmap) const
+{
+  std::vector<biasprop> out;
+  out.reserve(_numchans);
+
+  auto modpos = _mod.info().position;
+  
+  for(unsigned i =0; i < _numchans; i++)
+    {
+      biasprop prop;
+      auto Vmeasstr = std::format("MOD{}/{}_V{}", modpos,_biasnmemonic, i);
+      prop.Vmeas = std::stod(statusmap.at(Vmeasstr));
+
+      auto Imeasstr = std::format("MOD{}/{}_I{}", modpos, _biasnmemonic, i);
+      prop.Imeas = std::stod(statusmap.at(Imeasstr));
+      auto Vsetstr = std::format("{}_V{}",_biasnmemonic, i);
+
+      prop.Vset = _mod.readConfigKey<double>(Vsetstr);
+      if(_hascurrentlimits)
+	{
+	  auto Isetstr = std::format("{}_IL{}", _biasnmemonic, i);
+	  prop.Iset = _mod.readConfigKey<double>(Isetstr);
+	}
+
+      if(_hasenables)
+	{
+	  auto Enablestr = std::format("{}_ENABLE{}", _biasnmemonic, i);
+	  prop.enable = _mod.readConfigKey<bool>(Enablestr);
+	}
+
+      prop.name = std::format("MOD{}/{}{}", modpos, _biasnmemonic, i);
+      auto labelstr = std::format("{}_LABEL{}", _biasnmemonic, i);
+
+      prop.Iset = _mod.readConfigKey<double>(labelstr);
+      
+      out.push_back(prop);
+    } 
+  return out;
+}
 
 void devices::ArchonGenericBias::setLabel(int channel, const string& label)
 {
@@ -190,4 +266,22 @@ void devices::ArchonGenericBias::reconfigure(const string& nmemonic, int numchan
   _highlimit = highlimit;
 }
 
+
+RTTR_REGISTRATION
+{
+  using namespace rttr;
+  using foxtrot::devices::biasprop;
+  registration::class_<biasprop>
+    ("foxtrot::devices::biasprop")
+    .constructor()(policy::ctor::as_object)
+    .property("Vset", &biasprop::Vset)
+    .property("label", &biasprop::label)
+    .property("name", &biasprop::name)
+    .property("Iset", &biasprop::Iset)
+    .property("enable", &biasprop::enable)
+    .property("Imeas", &biasprop::Imeas)
+    .property("Vmeas", &biasprop::Vmeas)
+    .property("order", &biasprop::order);
+    
+}
 

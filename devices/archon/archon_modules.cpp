@@ -36,11 +36,18 @@ ArchonModule::ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info
 
 }
 
+void ArchonModule::status(archon_module_status& out, const ssmap& statusmap) const
+{
+   auto findstr = std::format("MOD{}/TEMP", _info.position);
+   out.temp = std::stod(statusmap.at(findstr));
+}
+
+
 archon_module_status ArchonModule::status(const ssmap& statusmap) const
 {
-  auto findstr = std::format("MOD{}/TEMP", _info.position);
+ 
   archon_module_status out;
-  out.temp = std::stod(statusmap.at(findstr));
+  status(out, statusmap);
   return out;
 }
 
@@ -88,7 +95,18 @@ string foxtrot::devices::get_module_variable_string(int modpos, const string& na
       return val;
 }
 
-string ArchonModule::readConfigKey(const string& subkey)
+
+std::optional<string> ArchonModule::readConfigKeyOpt(const string& subkey) const
+{
+  std::optional<string> out = std::nullopt;
+
+  
+  
+  return out;
+
+}
+
+string ArchonModule::readConfigKey(const string& subkey) const
 {
   auto cmdstr = std::format("MOD{}/{}", _info.position, subkey);
   if(auto ptr = _arch.lock())

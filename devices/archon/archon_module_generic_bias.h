@@ -8,12 +8,27 @@
 #include "archon_module_mapper.hh"
 #include <optional>
 
+
 namespace foxtrot
 {
   class Logging;
   
 namespace devices
 {
+  struct biasprop
+{
+  double Vset;
+  std::string label;
+  std::string name;
+  std::optional<double> Iset = std::nullopt;
+  std::optional<bool> enable = std::nullopt;
+  double Imeas;
+  double Vmeas;
+  unsigned order;
+};
+
+
+  
   class ArchonModule;
   using std::optional;
   using std::vector;
@@ -43,9 +58,11 @@ namespace devices
     
     [[deprecated]] double measureV(int channel);
     [[deprecated]] double measureI(int channel);
-    
+
     void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
-  
+
+    void status(archon_module_status& out, const ssmap& statusmap) const;
+    std::vector<biasprop> biases(const ssmap& statusmap) const;
   protected:
     ArchonGenericBias(ArchonModule& mod, const string& biasnmemonic,
       int numchans, double lowlimit, double highlimit, Logging& lg) ;
@@ -60,6 +77,9 @@ namespace devices
     int _numchans;
     double _lowlimit;
     double _highlimit;
+
+    bool _hasenables;
+    bool _hascurrentlimits;
 
     statptr statV = nullptr;
     statptr statI = nullptr;

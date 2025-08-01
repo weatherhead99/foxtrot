@@ -17,6 +17,7 @@
 #include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/Logging.h>
+#include "../device_utils/stringconv_utils.hh"
 
 #include "archon_module_mapper.hh"
 
@@ -163,9 +164,7 @@ namespace foxtrot {
       bool powergood;
       bool overheat;
       double backplane_temp;
-
       std::unordered_map<string, std::pair<double,double>> PSU_map;
-      
       std::optional<unsigned> fanspeed = std::nullopt;
       std::vector<archon_module_status> module_statuses;
     };
@@ -206,17 +205,13 @@ namespace foxtrot {
     }
 
     const std::string& readKeyValue(const std::string& key);
+    const std::string* const readKeyValueOpt(const std::string& key);
 
     template<typename Ret>
     Ret readKeyValue(const std::string& key)
     {
-      auto keystr = readKeyValue(key);
-      if constexpr(std::is_same_v<Ret, int>)
-	return std::stoi(keystr);
-      else if constexpr(std::is_same_v<Ret, double>)
-	return std::stod(keystr);
-      else
-	throw std::logic_error("unknown type supplied to readKeyValue");
+      const auto& val = readKeyValue(key);
+      return number_from_string<Ret>(val);
     }
     
     void applyall();
