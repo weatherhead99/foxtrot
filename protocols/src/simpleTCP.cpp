@@ -227,9 +227,9 @@ unsigned int simpleTCPLegacy::bytes_available()
   #endif
 }
 
-foxtrot::opttimeout simpleTCPLegacy::get_timeout()
+opttimeout simpleTCPLegacy::get_timeout()
 {
-  _lg.strm(sl::warning) << "tried to get timeout on simpleTCPLegay which does not support timeouts";
+  _lg.strm(sl::warning) << "tried to get timeout on simpleTCPLegacy which does not support timeouts";
   return std::nullopt;
 }
 
@@ -262,7 +262,7 @@ struct foxtrot::protocols::detail::simpleTCPasioImpl
   unsigned port;
 
   std::unique_ptr<boost::asio::io_context> ioptr = nullptr;
-  opttimeout timeout;
+  opttimeout timeout = std::nullopt;
   std::unique_ptr<boost::asio::ip::tcp::socket> sock = nullptr;
   
   bool use_internal_blocking_loop = false;
@@ -372,7 +372,7 @@ void simpleTCPasio::Init()
 {
   extract_parameter_value(pimpl->port, _params, "port");
   extract_parameter_value(pimpl->addr, _params, "addr");
-
+  
   open();
 }
 
@@ -695,12 +695,14 @@ std::string simpleTCPasio::read_until_endl(char endlchar) {
 
  }
 
-foxtrot::opttimeout simpleTCPasio::get_timeout()
+opttimeout simpleTCPasio::get_timeout()
 {
   return pimpl->timeout;
 }
 
 void simpleTCPasio::set_timeout(foxtrot::opttimeout tm)
 {
+    pimpl->lg.strm(sl::trace) << "setting timeout in simpleTCPasio";
   pimpl->timeout = tm;
+  pimpl->lg.strm(sl::trace) << "set timeout in simpleTCPasio";
 }

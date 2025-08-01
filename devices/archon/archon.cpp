@@ -75,7 +75,11 @@ foxtrot::devices::archon::archon(std::shared_ptr< foxtrot::protocols::simpleTCPB
     _lg("archon"), _order(0)
 {
   impl = std::make_unique<detail::archonimpl>();
+
+  proto->get_timeout();
+  _lg.strm(sl::info) << "got to here!!!!!!";
   proto->Init(nullptr);
+
   
   sync_archon_timer();
 }
@@ -98,6 +102,8 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   std::ostringstream oss;
   oss << ">" <<std::uppercase << std::hex << std::setw(2)<< std::setfill('0') << _order++ << request << "\n";
 
+
+  
   _specproto->write(oss.str());    
   auto ret = _specproto->read_until_endl();
   lck.unlock();
@@ -579,9 +585,13 @@ void foxtrot::devices::archon::set_power(bool onoff)
     if(onoff)
       {
 	//note, can take a long time, so setup timeout appropriately (20 seconds)
+	_lg.strm(sl::trace) << "getting existing timeout";
 	auto tm_bef = _specproto->get_timeout();
-	_specproto->set_timeout(std::chrono::milliseconds(20000));
+
+	_lg.strm(sl::trace) << "setting a long timeout...";
+        _specproto->set_timeout(std::chrono::milliseconds(20000));
 	try {
+	  _lg.strm(sl::trace) << "running comand...";
 	  cmd("POWERON");
 	}
 	catch(foxtrot::ProtocolError& err)
@@ -590,6 +600,8 @@ void foxtrot::devices::archon::set_power(bool onoff)
 	    _specproto->set_timeout(tm_bef);
 	    throw err;
 	  }
+	_lg.strm(sl::trace) << "restore original timeout";
+	_specproto->set_timeout(tm_bef);
       }
     else
       cmd("POWEROFF");   

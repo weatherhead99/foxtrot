@@ -27,6 +27,7 @@ namespace foxtrot {
 
       virtual opttimeout get_timeout() = 0;
       virtual void set_timeout(opttimeout tm) = 0;
+
     };
 
     
@@ -58,9 +59,11 @@ namespace foxtrot {
       static bool verify_instance_parameters(const parameterset& instance_parameters);
       static bool verify_class_parameters(const parameterset& class_parameters);
 
-      virtual opttimeout get_timeout() override;
+      opttimeout get_timeout() override;
       void set_timeout(opttimeout tm) override;
-      
+
+    protected:
+      foxtrot::Logging _lg;
     private:
       int _chunk_size = 1024;
       int _port;
@@ -68,7 +71,7 @@ namespace foxtrot {
     
       int _sockfd;
     
-      foxtrot::Logging _lg;
+
     
     }; 
 
