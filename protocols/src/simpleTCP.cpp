@@ -227,6 +227,19 @@ unsigned int simpleTCPLegacy::bytes_available()
   #endif
 }
 
+foxtrot::opttimeout simpleTCPLegacy::get_timeout()
+{
+  _lg.strm(sl::warning) << "tried to get timeout on simpleTCPLegay which does not support timeouts";
+  return std::nullopt;
+}
+
+void simpleTCPLegacy::set_timeout(opttimeout tm)
+{
+  _lg.strm(sl::warning) << "tried to set timeout on simpleTCPLegacy which does not support timeouts";
+  
+}
+
+
 
 unsigned int simpleTCPLegacy::getchunk_size()
 {
@@ -681,3 +694,13 @@ std::string simpleTCPasio::read_until_endl(char endlchar) {
    return pimpl->sock->available();
 
  }
+
+foxtrot::opttimeout simpleTCPasio::get_timeout()
+{
+  return pimpl->timeout;
+}
+
+void simpleTCPasio::set_timeout(foxtrot::opttimeout tm)
+{
+  pimpl->timeout = tm;
+}

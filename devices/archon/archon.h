@@ -239,6 +239,8 @@ namespace foxtrot {
     //void set_parameters(int n);
     //int get_parameters();
 
+    void load_config(const std::string& cfg);
+    
     const std::unordered_map<std::string, std::string>& config() const;
     std::vector<std::pair<std::string, std::string>> ordered_config() const;
 

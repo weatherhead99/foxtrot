@@ -196,6 +196,19 @@ std::vector<unsigned char> foxtrot::devices::archon::parse_binary_response(const
 }
 
 
+void devices::archon::load_config(const std::string& cfg)
+{
+  clear_config();
+  std::istringstream iss(cfg);
+  std::string line;
+  int i=0;
+  while(std::getline(iss, line))
+    {
+      writeConfigLine(line, i++);
+    };
+
+  read_parse_existing_config();
+};
 
 ssmap devices::archon::getStatus()
 {
@@ -564,7 +577,20 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
 void foxtrot::devices::archon::set_power(bool onoff)
 {
     if(onoff)
-      cmd("POWERON");
+      {
+	//note, can take a long time, so setup timeout appropriately (20 seconds)
+	auto tm_bef = _specproto->get_timeout();
+	_specproto->set_timeout(std::chrono::milliseconds(20000));
+	try {
+	  cmd("POWERON");
+	}
+	catch(foxtrot::ProtocolError& err)
+	  {
+	    _lg.strm(sl::error) << "resetting timeout...";
+	    _specproto->set_timeout(tm_bef);
+	    throw err;
+	  }
+      }
     else
       cmd("POWEROFF");   
 }
@@ -1374,6 +1400,8 @@ RTTR_REGISTRATION
  .method("applyall",&archon::applyall)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
+   .method("set_param", &archon::set_param)
+   (parameter_names("name", "val", "apply_immediate", "allow_new"))
    //   .method("getParam", select_overload<unsigned(const std::string&), archon>(&archon::getParam))
    //   (parameter_names("name"))
  // .method("setParam",&archon::setParam)
@@ -1394,6 +1422,7 @@ RTTR_REGISTRATION
    parameter_names("name")
    )
  .method("apply_all_params", &archon::apply_all_params)
+ .method("params", &archon::params)  
  .method("holdTiming", &archon::holdTiming)
  .method("releaseTiming",&archon::releaseTiming)
  .method("resetTiming", &archon::resetTiming)

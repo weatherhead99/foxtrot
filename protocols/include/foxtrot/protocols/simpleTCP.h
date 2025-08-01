@@ -24,8 +24,9 @@ namespace foxtrot {
       template<typename... Ts>
       simpleTCPBase(Ts&& ...pargs)
 	: SerialProtocol(std::forward<Ts>(pargs)...) {};
-      
 
+      virtual opttimeout get_timeout() = 0;
+      virtual void set_timeout(opttimeout tm) = 0;
     };
 
     
@@ -56,7 +57,10 @@ namespace foxtrot {
     
       static bool verify_instance_parameters(const parameterset& instance_parameters);
       static bool verify_class_parameters(const parameterset& class_parameters);
-    
+
+      virtual opttimeout get_timeout() override;
+      void set_timeout(opttimeout tm) override;
+      
     private:
       int _chunk_size = 1024;
       int _port;
@@ -99,6 +103,9 @@ namespace foxtrot {
 
       optional<bool> try_connect() noexcept override ;
       optional<bool> is_open() override;
+
+      virtual opttimeout get_timeout() override;
+      void set_timeout(opttimeout tm) override;
       
     private:
       std::unique_ptr<detail::simpleTCPasioImpl> pimpl;
