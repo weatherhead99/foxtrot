@@ -23,7 +23,7 @@ from .protos.ft_capability_pb2 import capability_request, capability_argument, V
 from .protos.ft_types_pb2 import UCHAR_TYPE, USHORT_TYPE, UINT_TYPE, BDOUBLE_TYPE, IINT_TYPE
 from .protos.ft_capability_pb2 import chunk_request
 from .protos.ft_types_pb2 import ENUM_TYPE, variant_descriptor
-from .EnumCreator import define_enum
+from .EnumCreator import define_enum, get_enum_type
 from warnings import warn
 from dataclasses import dataclass, field
 from functools import cache
@@ -55,7 +55,7 @@ class Client:
     def _add_enum_type(self, enumdesc) -> None:
         if enumdesc not in self._enum_descs:
             self._enum_descs.append(enumdesc)
-            self._enum_types.append(define_enum(enumdesc))
+            self._enum_types.append(get_enum_type(enumdesc))
 
     def _lookup_enum_type(self, enumdesc):
         if enumdesc in self._enum_descs:
