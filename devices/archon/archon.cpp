@@ -1420,6 +1420,8 @@ RTTR_REGISTRATION
    .method("readKeyValue", select_overload<std::string(const std::string&), archon>(&archon::readKeyValue))
    (parameter_names("key"))
  .method("applyall",&archon::applyall)
+   .method("load_config", &archon::load_config)
+   (parameter_names("cfg"))
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
    .method("set_param", &archon::set_param)
