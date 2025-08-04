@@ -12,6 +12,7 @@ from typing import Iterable, Any, Sequence
 from datetime import datetime, timedelta
 from google.protobuf.timestamp_pb2 import Timestamp
 from .EnumCreator import get_enum_type
+from enum import IntEnum
 
 def get_struct_string(dtp, length: int) -> str:
     if dtp == UCHAR_TYPE:
@@ -240,7 +241,7 @@ def value_from_ft_struct(variant: ft_struct):
     return {k: value_from_ft_variant(v) for k, v in variant.value.items()}
 
 def value_from_ft_enum(variant: ft_enum) -> IntEnum:
-    enumtp = get_enum_type(variant.desc.enum_name)
+    enumtp = get_enum_type(variant.desc)
     return enumtp(variant.enum_value)
 
 def value_from_ft_tuple(variant: ft_tuple):

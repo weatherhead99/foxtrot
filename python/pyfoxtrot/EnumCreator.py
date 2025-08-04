@@ -19,6 +19,8 @@ def define_enum(desc: enum_descriptor):
 
 def get_enum_type(desc: enum_descriptor) -> type[IntEnum]:
     global _ENUM_REGISTRY
-    if desc.enum_name not in _ENUM_REGISTRY:
+    enumname: str = desc.enum_name
+    
+    if enumname not in _ENUM_REGISTRY:
         _ENUM_REGISTRY[desc.enum_name] = define_enum(desc)
     return _ENUM_REGISTRY[desc.enum_name]
