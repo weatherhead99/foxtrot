@@ -18,6 +18,8 @@
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
 
+#include <foxtrot/ft_optional_helper.hh>
+
 #include "archon.h"
 #include "archon_modules.h"
 #include "archon_module_heaterx.h"
@@ -275,13 +277,31 @@ foxtrot::devices::archon_status archon::status()
   return out;
 }
 
+unsigned long long archon::timer()
+{
+      auto str = cmd("TIMER");
+    auto eqpos = std::find(str.begin(), str.end(),'=');
+    std::string count(eqpos+1,str.end());
+    
+    _lg.strm(sl::debug) << "timerstr: '" << count << "'";
+    
+    return std::stoull(count, nullptr, 16);
+}
+
+foxtrot::devices::HRTimePoint archon::current_time()
+{
+  auto tmr = timer();
+  return archon_time_to_real_time(tmr);
+}
+
 foxtrot::devices::archon_frame_info archon::frameinfo()
 {
   archon_frame_info out;
   auto framemap = getFrame();
   out.rbuf = std::stoul(framemap.at("RBUF"));
   out.wbuf = std::stoul(framemap.at("WBUF"));
-
+  out.current_time = current_time();
+  
   auto bufit = out.buffer_infos.begin();
   for(int i=1; i<=3; i++)
     {
@@ -688,6 +708,7 @@ std::unordered_map<std::string, int> devices::archon::params()
 	{
 	  auto key = std::format("PARAMETER{}", i);
 	  auto val = readKeyValue(key);
+	  _lg.strm(sl::debug) << "value string is: " << val;
 
 	  auto [paramk, paramv] = spliteq(val);
 	  
@@ -697,7 +718,11 @@ std::unordered_map<std::string, int> devices::archon::params()
 	  int param = 0;
 	  auto res = std::from_chars(paramv.data(), paramv.data()+ paramv.size(), param);
 	  if(res.ec == std::errc::invalid_argument)
-	    throw std::logic_error("bad value when converting parameter from string");
+	    {
+	      _lg.strm(sl::error) << "offending paramk: {" << paramk << "}";
+	      _lg.strm(sl::error) << "offending paramv: {" << paramv << "}"; 
+	      throw std::logic_error("bad value when converting parameter from string");
+	    }
 	  out.emplace(paramk, param);
 	  impl->parammap.emplace(paramk, std::make_pair(paramv, i));
 	}
@@ -722,6 +747,8 @@ void foxtrot::devices::archon::set_param(const std::string& name, int val, bool 
 
   //if not already this will throw
   int paramnum;
+  auto writestr = std::format("{}={}", name, val);
+  
   try {
     auto [paramval, paramidx] = impl->parammap.at(name);
     paramnum = paramidx;
@@ -735,14 +762,14 @@ void foxtrot::devices::archon::set_param(const std::string& name, int val, bool 
 	}
       //case for new parameter with allow_new
       auto next_param_num = impl->parammap.size();
-      writeKeyValue(std::format("PARAMETER{}",next_param_num),std::to_string(val));
+      writeKeyValue(std::format("PARAMETER{}",next_param_num),writestr);
       writeKeyValue("PARAMETERS",impl->parammap.size() +1);
       impl->mapvalid = false;
       return;
     }
 
   //this case is a known parameter, changing value
-  writeKeyValue(std::format("PARAMETER{}",paramnum), std::to_string(val));
+  writeKeyValue(std::format("PARAMETER{}",paramnum), writestr);
   //keyword "PARAMETERS" doesn't need to change
 
   if(apply_immediate)
@@ -1013,13 +1040,7 @@ void devices::archon::apply_param(const string& name)
 void foxtrot::devices::archon::sync_archon_timer()
 {
     _lg.Info("syncing timer");
-    auto str = cmd("TIMER");
-    auto eqpos = std::find(str.begin(), str.end(),'=');
-    std::string count(eqpos+1,str.end());
-    
-    _lg.strm(sl::debug) << "timerstr: '" << count << "'";
-    
-    _arch_tmr = std::stoull(count);
+    _arch_tmr = timer();
     _sys_tmr = std::chrono::high_resolution_clock::now();
 }
 
@@ -1332,7 +1353,7 @@ RTTR_REGISTRATION
 
  registration::class_<archon_frame_info>("foxtrot::devices::archon_frame_info")
      .constructor()(policy::ctor::as_object)
-   .property("current_Time", &archon_frame_info::current_time)
+   .property("current_time", &archon_frame_info::current_time)
    .property("rbuf", &archon_frame_info::rbuf)
    .property("wbuf", &archon_frame_info::wbuf)
    .property("buffer_infos", &archon_frame_info::buffer_infos);
@@ -1414,7 +1435,7 @@ RTTR_REGISTRATION
    .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
    .property_readonly("config", &archon::config)
    .property_readonly("ordered_config", &archon::ordered_config)
-
+   .property_readonly("timer", &archon::timer)
    .method("readConfigLine", &archon::readConfigLine)
    (parameter_names("num", "override_existing"))
    .method("readKeyValue", select_overload<std::string(const std::string&), archon>(&archon::readKeyValue))
@@ -1422,6 +1443,7 @@ RTTR_REGISTRATION
  .method("applyall",&archon::applyall)
    .method("load_config", &archon::load_config)
    (parameter_names("cfg"))
+   .method("read_parse_existing_config", &archon::read_parse_existing_config)
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
    .method("set_param", &archon::set_param)

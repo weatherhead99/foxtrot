@@ -192,6 +192,9 @@ namespace foxtrot {
     archon_system_info system();
     
     void clear_config();
+
+    unsigned long long timer();
+    HRTimePoint current_time();
     
     std::string fetch_log();
     std::vector<std::string> fetch_all_logs();
