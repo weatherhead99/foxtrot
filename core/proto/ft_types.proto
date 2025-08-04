@@ -50,6 +50,7 @@ enum variant_types
     UNION_TYPE = 5;
     DYNAMIC_TYPE=6;
     MAPPING_TYPE = 7;
+    NULLABLE_TYPE = 8;
 }
 
 message variant_descriptor
@@ -104,8 +105,8 @@ message homog_array_descriptor
 message union_descriptor
 {
   repeated variant_descriptor possible_types = 1;
-
 }
+
 
 message ft_variant {
     oneof value {
@@ -118,8 +119,9 @@ message ft_variant {
 	ft_homog_array arrayval = 5;
 
 	ft_mapping mappingval = 6;
-    }
 
+    }
+  bool null  = 7;
   //0.3.0 new values
 }
 
@@ -254,6 +256,4 @@ message ft_double_arr
 {
   repeated double values = 1;
 }
-
-
 

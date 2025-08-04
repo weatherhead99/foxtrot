@@ -183,6 +183,8 @@ def ft_mapping_from_value(val: dict[Any, Any],
 
 
 def value_from_ft_variant(variant):
+    if(variant.null):
+        return None
     whichattr = variant.WhichOneof("value")
     if whichattr == "simplevar":
         return value_from_ft_simplevar(variant.simplevar)

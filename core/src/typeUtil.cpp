@@ -2,6 +2,7 @@
 #include <foxtrot/Logging.h>
 #include <foxtrot/ft_tuple_helper.hh>
 #include <foxtrot/ft_union_helper.hh>
+#include <foxtrot/ft_optional_helper.hh>
 #include <foxtrot/ReflectionError.h>
 #include <foxtrot/HandleManager.hh>
 
@@ -545,6 +546,29 @@ ft_homog_array foxtrot::get_array_wire_type(const rttr::variant& var,
     return out;
 }
 
+ft_variant foxtrot::get_nullable_wire_type(const rttr::variant& var,
+					   Logging* lg, bool unwrap)
+{
+  ft_variant out;
+  if(!foxtrot::optional_has_value(var))
+    {
+      if(lg)
+	lg->strm(sl::debug) << "optional doesn't have value";
+      out.set_null(true);
+      return  out;
+    }
+  else
+    out.set_null(false);
+
+  if(lg)
+    lg->strm(sl::debug) << "getting inner value...";
+  auto inner_val = foxtrot::optional_get(var);
+  if(lg)
+    lg->strm(sl::debug) << "inner var type name:" << inner_val.get_type().get_name();
+  return  get_variant_wire_type(inner_val, lg, unwrap);
+
+}
+
 
 ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
                                           Logging* lg, bool unwrap)
@@ -603,6 +627,17 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 	      ft_simplevariant* simplevarval = out.mutable_simplevar();
 	      *simplevarval = get_simple_variant_wire_type(var, lg, unwrap);
 	      return out;
+	      break;
+	    }
+	  case(variant_types::NULLABLE_TYPE):
+	    {
+	      if(lg)
+		{
+		  lg->strm(sl::trace) << "nullable variant logic";
+		  lg->strm(sl::debug) << "nullable type name: " << var.get_type().get_name();
+		}
+	      
+	      return get_nullable_wire_type(var, lg, unwrap);
 	      break;
 	    }
 	  default:
@@ -865,8 +900,19 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_simplevariant& wiretp,
 
     if(check)
       {
-	if(!out.can_convert(target_tp))
+	bool convcheck;
+	if(target_tp.is_wrapper())
+	  {
+	    if(lg)
+	      lg->strm(sl::debug) << "target type is wrapper, comparing underlying";
+	    convcheck = out.can_convert(target_tp.get_wrapped_type()); 
+	  }
+	else
+	  convcheck  = out.can_convert(target_tp);
+	
+	if(!convcheck)
 	  throw std::runtime_error("cannot convert wire type received: " + out.get_type().get_name().to_string() + " to target type: " + target_tp.get_name().to_string());
+
 
 	bool success = out.convert(target_tp);
 	if(!success)
@@ -892,8 +938,6 @@ rttr::variant foxtrot::wire_type_to_variant(const ft_variant& wiretp,
 	  lg->strm(sl::trace) << "target type is union, invoking other logic";
 	unioncheck=false;
       }
-
-    
     
     rttr::variant out;
 
@@ -1025,6 +1069,17 @@ variant_descriptor foxtrot::describe_type(const rttr::type& tp, foxtrot::Logging
 	      auto* desc = out.mutable_union_desc();
 	      *desc = describe_union(tp, lg);
 	      return out;
+	    }
+	  case variant_types::NULLABLE_TYPE:
+	    {
+	      auto inner_tp = foxtrot::optional_held_type(tp);
+	      if(lg)
+		lg->strm(sl::debug) << "optional inner type:" << inner_tp.get_name() << "description";
+
+	      out = describe_type(inner_tp, lg);
+	      out.set_is_nullable(true);
+	      return out;
+		  
 	    }
 
 	  default:

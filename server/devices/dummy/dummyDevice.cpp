@@ -429,7 +429,10 @@ RTTR_REGISTRATION
    .method("select_from_vector", &dummyDevice::select_from_vector)(parameter_names("in","idx"))
 
    ;
-   
+
+
+ foxtrot::register_optional<std::optional<int>>();
+ 
  
  foxtrot::register_tuple<std::tuple<int, double, std::string>>;
 

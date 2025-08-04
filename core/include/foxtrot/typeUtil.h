@@ -27,6 +27,8 @@ namespace foxtrot{
     FOXTROT_CORE_EXPORT ft_enum get_enum_wire_type(const rttr::variant& var, Logging* lg=nullptr);
     FOXTROT_CORE_EXPORT ft_tuple get_tuple_wire_type(const rttr::variant& var, Logging* lg = nullptr);
     FOXTROT_CORE_EXPORT ft_homog_array get_array_wire_type(const rttr::variant& var, Logging* lg=nullptr);
+  FOXTROT_CORE_EXPORT ft_variant get_nullable_wire_type(const rttr::variant& var, Logging* lg=nullptr, bool unwrap=false);
+  
     
     FOXTROT_CORE_EXPORT ft_variant get_variant_wire_type(const rttr::variant& var,
                                                          Logging* lg=nullptr, bool unwrap=false);    
@@ -37,6 +39,7 @@ namespace foxtrot{
   FOXTROT_CORE_EXPORT ft_mapping get_mapping_wire_type(const rttr::variant& var,
 							Logging* lg=nullptr);
 
+  
     FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_variant& wiretp, 
 							   const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
     
@@ -53,6 +56,7 @@ namespace foxtrot{
   FOXTROT_CORE_EXPORT rttr::variant wire_type_to_array(const ft_homog_array& wiretp, const rttr::type& target_tp, Logging* lg=nullptr, bool check=true);
 
   FOXTROT_CORE_EXPORT rttr::variant wire_type_to_variant(const ft_mapping& wiretp, const rttr::type& target_tp, Logging* lg = nullptr, bool check=true);
+
     
     FOXTROT_CORE_EXPORT variant_descriptor describe_type(const rttr::type& tp, Logging* lg=nullptr);
     
@@ -67,7 +71,6 @@ namespace foxtrot{
 
   FOXTROT_CORE_EXPORT union_descriptor describe_union(const rttr::type& tp, Logging* lg = nullptr);
   FOXTROT_CORE_EXPORT mapping_descriptor describe_mapping(const rttr::type& tp, Logging* lg = nullptr);
-
 
   FOXTROT_CORE_EXPORT std::optional<variant_types> get_variant_type_from_metadata(const rttr::type& tp,
 										  Logging* lg = nullptr);

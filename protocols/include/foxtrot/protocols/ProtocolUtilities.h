@@ -9,7 +9,7 @@
 #include <foxtrot/ProtocolError.h>
 
 #include <foxtrot/protocols/SerialProtocol.h>
-
+#include <foxtrot/concepts.hh>
 
 template<typename V>
 std::string get_variant_held_typename(V&& var)
@@ -26,12 +26,6 @@ namespace foxtrot {
 
   namespace detail
   {
-    template <typename T>
-    concept is_optional = requires(const T& t)
-    {
-      { t.has_value()};
-      { t.operator*()};
-    };
     
     // template<typename T>
     // constexpr bool is_optional(const T&) { return false;};
@@ -49,7 +43,7 @@ template <typename T> bool extract_parameter_value(T& param_out, const parameter
   foxtrot::Logging lg("extract_parameter_value");
   try
   {
-    if constexpr(detail::is_optional<T>)
+    if constexpr(Optional<T>)
       {
 	if(required)
 	  lg.strm(sl::warning) << "passed required=True but the output type is a std::optional. Likely a bug";

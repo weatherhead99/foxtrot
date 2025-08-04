@@ -104,6 +104,8 @@ std::vector<foxtrot::devices::biasprop> devices::ArchonGenericBias::biases(const
 	}
 
       prop.name = std::format("MOD{}/{}{}", modpos, _biasnmemonic, i);
+
+      
       auto labelstr = std::format("{}_LABEL{}", _biasnmemonic, i);
 
       prop.Iset = _mod.readConfigKey<double>(labelstr);
