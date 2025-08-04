@@ -1520,6 +1520,14 @@ RTTR_REGISTRATION
  foxtrot::register_tuple<std::pair<double, double>>();
  foxtrot::register_tuple<std::pair<std::string,std::string>>();
 
+ foxtrot::register_optional<std::optional<unsigned>>();
+ foxtrot::register_optional<std::optional<vector<double>>>();
+
+ foxtrot::register_optional<std::optional<vector<unsigned>>>();
+
+ foxtrot::register_optional<std::optional<int>>();
+ foxtrot::register_optional<std::optional<bool>>();
+ 
 
 }
 

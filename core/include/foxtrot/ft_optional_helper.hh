@@ -32,6 +32,7 @@ namespace rttr
 
   };
 
+  
 }
 
 namespace foxtrot
@@ -75,7 +76,7 @@ namespace foxtrot
     rttr::registration::class_<T> reg(nm);
 
     reg(rttr::metadata("ft_type", variant_types::NULLABLE_TYPE))
-      .constructor(rttr::policy::ctor::as_object)
+      .constructor()(rttr::policy::ctor::as_object)
       .method("has_value", &detail::has_value<T>)
       .method("get", &detail::optional_get<T>)
       .property_readonly("held_type", &detail::optional_held_type<T>)
