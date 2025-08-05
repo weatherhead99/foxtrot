@@ -777,6 +777,23 @@ void foxtrot::devices::archon::set_param(const std::string& name, int val, bool 
 
 }
 
+using foxtrot::devices::ArchonModuleProp;
+
+std::map<int, std::vector<ArchonModuleProp>>
+foxtrot::devices::archon::moduleprops()
+{
+  std::map<int, std::vector<ArchonModuleProp>> out;
+  auto statmap = this->getStatus();
+  
+  for(auto& [ind, mptr] : _modules)
+    {
+      auto thisprop = mptr->props(statmap);
+      out[ind] = std::move(thisprop);
+    }
+
+  return out;
+}
+
 
 void foxtrot::devices::archon::unlockbuffers()
 {
@@ -1508,6 +1525,7 @@ RTTR_REGISTRATION
  .method("settap", &archon::settap)
    (parameter_names("AD","LR","gain","offset"))
   .method("load_timing", &archon::load_timing)
+   .property_readonly("moduleprops", &archon::moduleprops)
 
  ;
 

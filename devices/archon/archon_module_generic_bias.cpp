@@ -61,7 +61,7 @@ void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& 
   outV.reserve(_numchans);
   outI.reserve(_numchans);
   
-  for(unsigned channel = 0; channel < _numchans; channel++)
+  for(int channel = 0; channel < _numchans; channel++)
     {
       auto Vcmdstr = std::format("MOD{}/{}_V{}", modpos, _biasnmemonic, channel);
       auto Icmdstr = std::format("MOD{}/{}_U{}", modpos, _biasnmemonic, channel);
@@ -80,7 +80,7 @@ std::vector<foxtrot::devices::archon_biasprop> devices::ArchonGenericBias::biase
 
   auto modpos = _mod.info().position;
   
-  for(unsigned i =0; i < _numchans; i++)
+  for(decltype(_numchans) i =0; i < _numchans; i++)
     {
       archon_biasprop prop;
       auto Vmeasstr = std::format("MOD{}/{}_V{}", modpos,_biasnmemonic, i);

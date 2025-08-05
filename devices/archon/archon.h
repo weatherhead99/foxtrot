@@ -20,7 +20,7 @@
 #include "../device_utils/stringconv_utils.hh"
 
 #include "archon_module_mapper.hh"
-
+#include "archon_defs.hh"
 
 using std::optional;
 using std::string;
@@ -244,6 +244,8 @@ namespace foxtrot {
 
     std::unordered_map<std::string, int> params();
     void set_param(const std::string& name, int val, bool apply_immediate=true, bool allow_new=false);
+
+    std::map<int, std::vector<ArchonModuleProp>> moduleprops();
     
     //void set_constants(int n);
     //int get_constants();
