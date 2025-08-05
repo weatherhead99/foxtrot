@@ -794,7 +794,14 @@ std::map<int, std::vector<ArchonModuleProp>>
 foxtrot::devices::archon::moduleprops()
 {
   std::map<int, std::vector<ArchonModuleProp>> out;
+  if(get_power() == archon_power_status::not_configured)
+    {
+      _lg.strm(sl::warning) << "no configuration loaded, returning empty module props";
+      return out;
+    }
+  
   auto statmap = this->getStatus();
+
   
   for(auto& [ind, mptr] : _modules)
     {

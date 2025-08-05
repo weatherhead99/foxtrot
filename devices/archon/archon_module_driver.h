@@ -142,6 +142,13 @@ namespace foxtrot
      if(auto ptr = _arch.lock())
        {
 	 auto smap = ptr->getStatus();
+
+	 if(ptr->get_power() == archon_power_status::not_configured)
+	   {
+	     lg.strm(sl::warning) << "no config, not doing status lookup";
+	     return std::vector<archon_driverprop>{};
+	   }
+	   
 	 return this->clocks(smap);	 
        }
      throw std::logic_error("unable to lock archon pointer!");
@@ -153,27 +160,29 @@ namespace foxtrot
    ArchonDriverBase<NChannels>::clocks(const ssmap& statusmap) const
    {
      std::vector<archon_driverprop> out;
+     
+
+     
      out.reserve(n_clocks());
 
-     auto modpos = this->info().position;
-     for(unsigned i=0; i <n_clocks(); i++)
+     for(unsigned i=1; i <= n_clocks(); i++)
        {
 	 archon_driverprop thisprop;
-	 auto findstr = std::format("MOD{}/ENABLE{}",modpos, i);
+	 auto findstr = std::format("ENABLE{}", i);
 	 thisprop.enable = readConfigKey<bool>(findstr);
 	 
-	 findstr = std::format("MOD{}/LABEL{}", modpos, i);
+	 findstr = std::format("LABEL{}",  i);
 	 thisprop.label = readConfigKeyOpt(findstr);
 
-	 findstr = std::format("MOD{}/SLOWSLEWRATE{}", modpos, i);
+	 findstr = std::format("SLOWSLEWRATE{}", i);
 	 thisprop.slew_slow = readConfigKey<double>(findstr);
 
-	 findstr = std::format("MOD{}/FASTSLEWRATE{}", modpos, i);
+	 findstr = std::format("FASTSLEWRATE{}",  i);
 	 thisprop.slew_fast = readConfigKey<double>(findstr);
 
 	 thisprop.chan = i;
 
-	 findstr = std::format("MOD{}/SOURCE{}", modpos, i);
+	 findstr = std::format("SOURCE{}", i);
 	 thisprop.source = readConfigKey<unsigned>(findstr);
 	 
 	 out.push_back(thisprop);  
