@@ -212,7 +212,8 @@ void devices::archon::load_config(const std::string& cfg)
   int i=0;
   while(std::getline(iss, line))
     {
-      writeConfigLine(line, i++);
+      //NOTE: -1 here for new line
+      writeConfigLine(line, -1);
     };
 
   read_parse_existing_config();
@@ -446,7 +447,6 @@ void devices::archon::clear_config()
   //set_states(0);
   //set_parameters(0); 
   //set_constants(0);
-  writeKeyValue("TAPLINES","0");
 }
 
 
@@ -1483,6 +1483,7 @@ RTTR_REGISTRATION
    .method("load_config", &archon::load_config)
    (parameter_names("cfg"))
    .method("read_parse_existing_config", &archon::read_parse_existing_config)
+   (parameter_names("allow_empty"))
  .method("set_power",&archon::set_power)
  .method("load_timing_script", &archon::load_timing_script)
    .method("set_param", &archon::set_param)
