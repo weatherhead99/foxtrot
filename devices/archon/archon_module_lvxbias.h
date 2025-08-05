@@ -31,7 +31,7 @@ namespace foxtrot
 	  
             void setLabel(bool HC, int channel, const std::string& label);
             std::string getLabel(bool HC, int channel);
-            
+	  
             void setOrder(bool HC, int channel, int sequence);
             int getOrder(bool HC, int channel);
             
@@ -54,11 +54,12 @@ namespace foxtrot
             ArchonGenericBias _lcbias;
             ArchonGenericBias _hcbias;
             ArchonLVX(std::weak_ptr<archon>& arch, const archon_module_info& modinfo);
-	    
+	  bool _hasgpio = false;
 
             
         private:
 	    std::array<bool,8> _GPIO;
+
             
         };
         

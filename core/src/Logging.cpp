@@ -167,7 +167,7 @@ void foxtrot::Logging::Fatal(const std::string& message)
 }
 
 
-void foxtrot::Logging::Log(const std::string& message, sl level)
+void foxtrot::Logging::Log(const std::string& message, sl level) const
 {
     GeneralStreamRecord(message, level);
 }

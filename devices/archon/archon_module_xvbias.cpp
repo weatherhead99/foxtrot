@@ -6,7 +6,7 @@ foxtrot::devices::ArchonXV::ArchonXV(std::weak_ptr<archon>& arch, const archon_m
   _lg = Logging("ArchonXV");
   _lcbias.reconfigure("XVN",4,-95.0,0.);
   _hcbias.reconfigure("XVP",4,0,90.0);
-    
+  _hasgpio = false;
 }
 
 const string devices::ArchonXV::getDeviceTypeName() const

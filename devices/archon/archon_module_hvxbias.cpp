@@ -20,7 +20,7 @@ devices::ArchonHVX::ArchonHVX(std::weak_ptr<archon>& arch, const archon_module_i
   _lg = Logging("ArchonHVX");
   _lcbias.reconfigure("HVLC",24,0,31.0);
   _hcbias.reconfigure("HVHC",5,0,31.0);
-  
+  _hasgpio = false;
 }
 
 

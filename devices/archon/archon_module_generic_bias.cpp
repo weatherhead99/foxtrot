@@ -33,11 +33,16 @@ devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod,
 					      int numchans, double lowlimit, double highlimit, Logging& lg)
   : _mod(mod), _lg(lg),  _biasnmemonic(nmemonic), _numchans(numchans), _lowlimit(lowlimit), _highlimit(highlimit)
 {
-  for( auto& [k, v] : nmemonic_map)
+  update_traits();
+}
+
+void devices::ArchonGenericBias::update_traits()
+{
+    for( auto& [k, v] : nmemonic_map)
     {
-      if(nmemonic.find(k) != std::string::npos)
+      if(_biasnmemonic.find(k) != std::string::npos)
 	{
-	  lg.strm(sl::debug) << "found matching nmemonic";
+	  _lg.strm(sl::debug) << "found matching nmemonic";
 	  statV = v.first;
 	  statI = v.second;
 
@@ -50,6 +55,10 @@ devices::ArchonGenericBias::ArchonGenericBias(devices::ArchonModule& mod,
     }
   if(statV == nullptr)
     throw std::logic_error("couldn't find appropriate bias nmemonic");
+
+  _lg.strm(sl::info) << "bias nmemonic is: " << _biasnmemonic;
+  _lg.strm(sl::info) << "numchans is: "<< _numchans;
+
 }
 
 void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& statusmap) const
@@ -61,12 +70,18 @@ void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& 
   outV.reserve(_numchans);
   outI.reserve(_numchans);
   
-  for(int channel = 0; channel < _numchans; channel++)
+  for(int channel = 1; channel <= _numchans; channel++)
     {
+      _lg.strm(sl::trace) << "channel: " << channel;
       auto Vcmdstr = std::format("MOD{}/{}_V{}", modpos, _biasnmemonic, channel);
-      auto Icmdstr = std::format("MOD{}/{}_U{}", modpos, _biasnmemonic, channel);
+      auto Icmdstr = std::format("MOD{}/{}_I{}", modpos, _biasnmemonic, channel);
+
+      _lg.strm(sl::trace) << "Vcmdstr: " << Vcmdstr;
       outV.push_back(std::stod(statusmap.at(Vcmdstr)));
+      _lg.strm(sl::trace) << "Icmdstr: " << Icmdstr;
       outI.push_back(std::stod(statusmap.at(Icmdstr)));
+      _lg.strm(sl::trace) << "looked up both strings";
+
     }
 
   out.*statV = outV;
@@ -75,37 +90,47 @@ void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& 
 
 std::vector<foxtrot::devices::archon_biasprop> devices::ArchonGenericBias::biases(const ssmap& statusmap) const
 {
+  _lg.strm(sl::trace) << "reading biases from generic bias module";
   std::vector<archon_biasprop> out;
   out.reserve(_numchans);
 
   auto modpos = _mod.info().position;
+  _lg.strm(sl::trace) << "modpos: " << modpos;
   
-  for(decltype(_numchans) i =0; i < _numchans; i++)
+  for(decltype(_numchans) i =1; i <= _numchans; i++)
     {
       archon_biasprop prop;
+      _lg.strm(sl::trace) << "reading Vmeas";
       auto Vmeasstr = std::format("MOD{}/{}_V{}", modpos,_biasnmemonic, i);
       prop.Vmeas = std::stod(statusmap.at(Vmeasstr));
 
+
+      _lg.strm(sl::trace) << "reading Imeas";
       auto Imeasstr = std::format("MOD{}/{}_I{}", modpos, _biasnmemonic, i);
       prop.Imeas = std::stod(statusmap.at(Imeasstr));
+
+      _lg.strm(sl::trace) << "reading Vset";
       auto Vsetstr = std::format("{}_V{}",_biasnmemonic, i);
 
       prop.Vset = _mod.readConfigKey<double>(Vsetstr);
+      
       if(_hascurrentlimits)
 	{
+	  _lg.strm(sl::trace) << "reading Iset";
 	  auto Isetstr = std::format("{}_IL{}", _biasnmemonic, i);
 	  prop.Iset = _mod.readConfigKey<double>(Isetstr);
 	}
 
       if(_hasenables)
 	{
+	  _lg.strm(sl::trace) << "reading Enable";
 	  auto Enablestr = std::format("{}_ENABLE{}", _biasnmemonic, i);
 	  prop.enable = _mod.readConfigKey<bool>(Enablestr);
 	}
 
-      prop.name = std::format("MOD{}/{}{}", modpos, _biasnmemonic, i);
+      prop.name = std::format("{}{}", modpos, _biasnmemonic, i);
 
-      
+      _lg.strm(sl::trace) << "reading label";
       auto labelstr = std::format("{}_LABEL{}", _biasnmemonic, i);
 
       prop.label = _mod.readConfigKeyOpt(labelstr);
@@ -265,6 +290,8 @@ void devices::ArchonGenericBias::reconfigure(const string& nmemonic, int numchan
   _numchans = numchans;
   _lowlimit = lowlimit;
   _highlimit = highlimit;
+
+  update_traits();
 }
 
 

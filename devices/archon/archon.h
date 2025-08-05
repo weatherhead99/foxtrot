@@ -140,6 +140,7 @@ namespace foxtrot {
     //NOTE not implementing heater for now (not needed for DEIMOS)
     struct archon_module_status
     {
+      unsigned position;
       double temp;
       optional<unsigned char> dinput_status;
       optional<vector<double>> HC_Vs;

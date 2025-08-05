@@ -56,7 +56,7 @@ namespace foxtrot
         
         void setLogChannel(const std::string& chan);
         
-        void Log(const std::string& message, sl level);
+        void Log(const std::string& message, sl level) const;
         
         template<typename T>
         void logAndThrow(const std::string& message, sl level = sl::error);
@@ -99,7 +99,7 @@ namespace foxtrot
     streamThrowLogging<T> strmthrow(sl level);
 	
     private:
-        inline void GeneralStreamRecord(const std::string& message, boost::log::trivial::severity_level sev)
+        inline void GeneralStreamRecord(const std::string& message, boost::log::trivial::severity_level sev) const
         {
             logtp lg(logging::keywords::channel=_channelname, 
                          logging::keywords::severity = sev);

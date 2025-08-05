@@ -272,7 +272,18 @@ foxtrot::devices::archon_status archon::status()
   _lg.strm(sl::trace) << "calling status() for each module";
   out.module_statuses.reserve(_modules.size());
   for(auto& [pos, mod] : _modules)
-    out.module_statuses.push_back(mod->status(statmap));
+    {
+      auto inf = mod->info();
+      _lg.strm(sl::debug) << "module position at: " << inf.position << " of type: " << mod->getTypeName();
+      try
+	{
+	  out.module_statuses.push_back(mod->status(statmap));
+	}
+      catch(std::out_of_range& err)
+	{
+	  _lg.strm(sl::error) << "got an error, returning what we have anyway";
+	}
+    }
 
   return out;
 }
@@ -1407,6 +1418,7 @@ RTTR_REGISTRATION
 
  registration::class_<archon_module_status>("foxtrot::devices::archon_module_status")
    .constructor()(policy::ctor::as_object)
+   .property("position", &archon_module_status::position)
    .property("temp", &archon_module_status::temp)
    .property("dinput_status", &archon_module_status::dinput_status)
    .property("HC_Vs", &archon_module_status::HC_Vs)

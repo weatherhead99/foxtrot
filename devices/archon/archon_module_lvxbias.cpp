@@ -3,12 +3,18 @@
 #include "archon_module_generic_bias.h"
 #include "archon_modules.h"
 
+#include <iostream>
+
 foxtrot::devices::ArchonLVX::ArchonLVX(std::weak_ptr<archon> &arch,
                                        const archon_module_info &modinf)
     : foxtrot::devices::ArchonModule(arch, modinf),
       foxtrot::devices::archonGPIO(arch, modinf), _lg("ArchonLVX"),
       _lcbias(*this, "LVLC", 24, -14.0, 14.0, _lg),
-      _hcbias(*this, "LVHC", 6, -14.0, 14.0, _lg) {}
+      _hcbias(*this, "LVHC", 6, -14.0, 14.0, _lg) {
+  _hasgpio = true;
+
+  
+}
 
 
 const string devices::ArchonLVX::getTypeName() const
@@ -27,10 +33,13 @@ using foxtrot::devices::archon_biasprop;
 
 void devices::ArchonLVX::status(archon_module_status& out, const ssmap& statusmap) const
 {
+
   ArchonModule::status(out, statusmap);
   _lcbias.status(out, statusmap);
   _hcbias.status(out, statusmap);
-  archonGPIO::status(out, statusmap);
+
+  if(_hasgpio)
+    archonGPIO::status(out, statusmap);
 }
 
 std::vector<archon_biasprop> foxtrot::devices::ArchonLVX::biases(const ssmap& statusmap) const {

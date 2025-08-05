@@ -49,6 +49,7 @@ namespace devices
     [[deprecated]] double measureI(int channel);
 
     void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
+    void update_traits();
 
     void status(archon_module_status& out, const ssmap& statusmap) const;
     std::vector<archon_biasprop> biases(const ssmap& statusmap) const;
