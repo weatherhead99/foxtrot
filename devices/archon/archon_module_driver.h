@@ -23,7 +23,6 @@ namespace foxtrot
     RTTR_ENABLE(ArchonModule)
     
   public:
-      virtual const string getTypeName() const override;
 
       std::vector<archon_driverprop> clocks(const ssmap& statusmap) const;
     std::vector<archon_driverprop> clocks();
@@ -33,7 +32,7 @@ namespace foxtrot
       void setLabel(int channel, const std::string& val);
       std::string getLabel(int channel);
     
-      consteval unsigned n_clocks() const { return N::value;};
+      consteval static unsigned n_clocks() { return N::value;};
       void setSlowSlewRate(int channel, double val);
       double getSlowSlewRate(int channel);
       
@@ -45,11 +44,13 @@ namespace foxtrot
       
   protected:
     ArchonDriverBase(std::weak_ptr<archon>& arch, const archon_module_info& modpos);      
-      
+
+  private:
+    foxtrot::Logging lg;
+    
   };
 
 
-   
    class ArchonDriver : public ArchonDriverBase<detail::eight_t> {
      RTTR_ENABLE(ArchonDriverBase<detail::eight_t>)
    public:
@@ -70,7 +71,7 @@ namespace foxtrot
 
    template<typename NChannels>
    ArchonDriverBase<NChannels>::ArchonDriverBase(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
-     : ArchonModule(arch, modinfo)
+     : ArchonModule(arch, modinfo), lg("ArchonDriverBase")
    {
    }
 
@@ -133,6 +134,20 @@ namespace foxtrot
      return readConfigKey<int>(std::format("ENABLE{}", channel));
    }
 
+
+   template<typename NChannels>
+   std::vector<foxtrot::devices::archon_driverprop>
+   ArchonDriverBase<NChannels>::clocks()
+   {
+     if(auto ptr = _arch.lock())
+       {
+	 auto smap = ptr->getStatus();
+	 return this->clocks(smap);	 
+       }
+     throw std::logic_error("unable to lock archon pointer!");
+     
+   }
+   
    template<typename NChannels>
    std::vector<foxtrot::devices::archon_driverprop>
    ArchonDriverBase<NChannels>::clocks(const ssmap& statusmap) const
@@ -145,20 +160,21 @@ namespace foxtrot
        {
 	 archon_driverprop thisprop;
 	 auto findstr = std::format("MOD{}/ENABLE{}",modpos, i);
-	 thisprop.enable = std::stoul(statusmap.at(findstr));
+	 thisprop.enable = readConfigKey<bool>(findstr);
+	 
 	 findstr = std::format("MOD{}/LABEL{}", modpos, i);
-	 thisprop.enable = std::stoul(statusmap.at(findstr));
+	 thisprop.label = readConfigKeyOpt(findstr);
 
 	 findstr = std::format("MOD{}/SLOWSLEWRATE{}", modpos, i);
-	 thisprop.slew_slow = std::stod(statusmap.at(findstr));
+	 thisprop.slew_slow = readConfigKey<double>(findstr);
 
 	 findstr = std::format("MOD{}/FASTSLEWRATE{}", modpos, i);
-	 thisprop.slew_fast = std::stod(statusmap.at(findstr));
+	 thisprop.slew_fast = readConfigKey<double>(findstr);
 
 	 thisprop.chan = i;
 
 	 findstr = std::format("MOD{}/SOURCE{}", modpos, i);
-	 thisprop.source = std::stoul(statusmap.at(findstr));
+	 thisprop.source = readConfigKey<unsigned>(findstr);
 	 
 	 out.push_back(thisprop);  
        }

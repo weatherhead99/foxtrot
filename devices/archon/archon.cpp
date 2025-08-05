@@ -787,6 +787,9 @@ foxtrot::devices::archon::moduleprops()
   
   for(auto& [ind, mptr] : _modules)
     {
+      auto modinf = mptr->info();
+      _lg.strm(sl::debug) << "processing props for module at position: " << modinf.position << "of type: " << mptr->getTypeName();
+      
       auto thisprop = mptr->props(statmap);
       out[ind] = std::move(thisprop);
     }

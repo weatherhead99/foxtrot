@@ -10,6 +10,9 @@ namespace foxtrot
   {
     struct archon_driverprop
    {
+     auto operator<=>(const archon_driverprop& other) const = default;
+     bool operator<(const archon_driverprop& other) const = default;
+
      unsigned chan;
      std::optional<std::string> label = std::nullopt;
      double slew_slow;
@@ -19,6 +22,8 @@ namespace foxtrot
    };
 
    struct archon_biasprop {
+     auto operator<=>(const archon_biasprop& other) const = default;
+     bool operator<(const archon_biasprop& other) const = default;
      double Vset;
      std::optional<std::string> label = std::nullopt;
      std::string name;
@@ -49,5 +54,7 @@ namespace foxtrot
     
 
     using ArchonModuleProp = std::variant<archon_biasprop,archon_driverprop>;
+
+    
   }
 }
