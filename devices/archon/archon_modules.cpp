@@ -2,6 +2,7 @@
 #include "archon_module_mapper.hh"
 #include <boost/token_functions.hpp>
 #include <sstream>
+#include <foxtrot/ft_union_helper.hh>
 
 #include <iomanip>
 
@@ -123,7 +124,24 @@ void ArchonModule::writeConfigKey(const string& key, const string& val)
     ptr->writeKeyValue(cmdstr,val);
   else
     throw std::logic_error("couldn't lock archon pointer from submodule");
-  
+}
+
+std::vector<ArchonModuleProp> ArchonModule::props(const ssmap& statusmap) const
+{
+  std::vector<ArchonModuleProp> out;
+  return out;
+}
+
+std::vector<ArchonModuleProp> ArchonModule::props()
+{
+  if(auto ptr = _arch.lock())
+    {
+      auto smap = ptr->getStatus();
+      return this->props(smap);
+    }
+  else {
+    throw std::logic_error("couldn't lock archon pointer");
+      }
 }
 
 
@@ -154,12 +172,15 @@ RTTR_REGISTRATION
  //TODO get version
  
  registration::class_<ArchonModule>("foxtrot::devices::ArchonModule")
+
    .method("apply",&ArchonModule::apply)
+   .method("status",
+	   rttr::select_overload<archon_module_status() const>(&ArchonModule::status))
+   .property_readonly("props",
+	     rttr::select_overload<std::vector<ArchonModuleProp>()>(&ArchonModule::props))
  ;
 
-   
-    
-    
+ 
 }
 
 

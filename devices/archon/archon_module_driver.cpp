@@ -31,6 +31,7 @@ const string ArchonDriverX::getTypeName() const
 
 template <typename T> void add_shared_base_meths(auto &&binder) {
   using namespace rttr;
+  using foxtrot::devices::archon_driverprop;
     binder.method("setLabel", &T::setLabel)(parameter_names("channel", "label"))
         .method("getLabel", &T::getLabel)(parameter_names("channel"))
         .method("setSlowSlewRate",
@@ -42,7 +43,8 @@ template <typename T> void add_shared_base_meths(auto &&binder) {
         .method("setFastSlewRate",
                 &T::setFastSlewRate)(parameter_names("channel", "val"))
         .method("setEnable", &T::setEnable)(parameter_names("channel", "onoff"))
-        .method("getEnable", &T::getEnable)(parameter_names("channel"));
+        .method("getEnable", &T::getEnable)(parameter_names("channel"))
+      .method("clocks", rttr::select_overload<std::vector<archon_driverprop>()>(&T::clocks));
   }
 
 

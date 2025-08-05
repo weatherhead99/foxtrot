@@ -73,16 +73,16 @@ void devices::ArchonGenericBias::status(archon_module_status& out, const ssmap& 
   out.*statI = outI;
 }
 
-std::vector<foxtrot::devices::biasprop> devices::ArchonGenericBias::biases(const ssmap& statusmap) const
+std::vector<foxtrot::devices::archon_biasprop> devices::ArchonGenericBias::biases(const ssmap& statusmap) const
 {
-  std::vector<biasprop> out;
+  std::vector<archon_biasprop> out;
   out.reserve(_numchans);
 
   auto modpos = _mod.info().position;
   
   for(unsigned i =0; i < _numchans; i++)
     {
-      biasprop prop;
+      archon_biasprop prop;
       auto Vmeasstr = std::format("MOD{}/{}_V{}", modpos,_biasnmemonic, i);
       prop.Vmeas = std::stod(statusmap.at(Vmeasstr));
 
@@ -108,8 +108,7 @@ std::vector<foxtrot::devices::biasprop> devices::ArchonGenericBias::biases(const
       
       auto labelstr = std::format("{}_LABEL{}", _biasnmemonic, i);
 
-      prop.Iset = _mod.readConfigKey<double>(labelstr);
-      
+      prop.label = _mod.readConfigKeyOpt(labelstr);
       out.push_back(prop);
     } 
   return out;
@@ -268,22 +267,4 @@ void devices::ArchonGenericBias::reconfigure(const string& nmemonic, int numchan
   _highlimit = highlimit;
 }
 
-
-RTTR_REGISTRATION
-{
-  using namespace rttr;
-  using foxtrot::devices::biasprop;
-  registration::class_<biasprop>
-    ("foxtrot::devices::biasprop")
-    .constructor()(policy::ctor::as_object)
-    .property("Vset", &biasprop::Vset)
-    .property("label", &biasprop::label)
-    .property("name", &biasprop::name)
-    .property("Iset", &biasprop::Iset)
-    .property("enable", &biasprop::enable)
-    .property("Imeas", &biasprop::Imeas)
-    .property("Vmeas", &biasprop::Vmeas)
-    .property("order", &biasprop::order);
-    
-}
 

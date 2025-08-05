@@ -19,6 +19,9 @@ namespace foxtrot
       friend class ArchonModule;
     const string getTypeName() const override;
     const string getDeviceTypeName() const override;
+
+      
+      
       
     
     private:

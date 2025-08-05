@@ -141,7 +141,7 @@ namespace foxtrot {
     struct archon_module_status
     {
       double temp;
-      optional<unsigned> dinput_status;
+      optional<unsigned char> dinput_status;
       optional<vector<double>> HC_Vs;
       optional<vector<double>> HC_Is;
       optional<vector<double>> LC_Vs;

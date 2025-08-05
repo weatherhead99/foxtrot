@@ -2,6 +2,7 @@
 #include <rttr/registration>
 #include <foxtrot/Logging.h>
 
+#include "archon_defs.hh"
 #include "archon_modules.h"
 #include "archon_module_generic_bias.h"
 #include "archon_GPIO.h"
@@ -17,7 +18,13 @@ namespace foxtrot
 	  friend class ArchonModule;
         RTTR_ENABLE(ArchonModule,archonGPIO)
         public:
-	    
+
+	std::vector<archon_biasprop> biases(const ssmap& statusmap) const;
+          std::vector<archon_biasprop> biases();
+
+	  std::vector<ArchonModuleProp> props(const ssmap& statusmap) const override;
+	  
+	  void status(archon_module_status& out, const ssmap& statusmap) const override;
 	    
 	    const string getTypeName() const override;
 	    const string getDeviceTypeName() const override;

@@ -1,18 +1,18 @@
 #include "archon_module_lvxbias.h"
+#include "archon.h"
+#include "archon_module_generic_bias.h"
 #include "archon_modules.h"
 
-foxtrot::devices::ArchonLVX::ArchonLVX(std::weak_ptr<archon>& arch, const archon_module_info& modinf)
-  : foxtrot::devices::ArchonModule(arch,modinf), 
-foxtrot::devices::archonGPIO(arch,modinf),
-_lg("ArchonLVX"),
-    _lcbias(*this, "LVLC", 24, -14.0, 14.0,_lg),
-    _hcbias(*this, "LVHC", 6, -14.0,14.0,_lg)
-{
-}
+foxtrot::devices::ArchonLVX::ArchonLVX(std::weak_ptr<archon> &arch,
+                                       const archon_module_info &modinf)
+    : foxtrot::devices::ArchonModule(arch, modinf),
+      foxtrot::devices::archonGPIO(arch, modinf), _lg("ArchonLVX"),
+      _lcbias(*this, "LVLC", 24, -14.0, 14.0, _lg),
+      _hcbias(*this, "LVHC", 6, -14.0, 14.0, _lg) {}
+
 
 const string devices::ArchonLVX::getTypeName() const
 {
-  
   return string("LVX");
 
 }
@@ -21,6 +21,59 @@ const string devices::ArchonLVX::getDeviceTypeName() const
 {
     return "ArchonLVX";
 }
+
+using foxtrot::devices::archon_module_status;
+using foxtrot::devices::archon_biasprop;
+
+void devices::ArchonLVX::status(archon_module_status& out, const ssmap& statusmap) const
+{
+  ArchonModule::status(out, statusmap);
+  _lcbias.status(out, statusmap);
+  _hcbias.status(out, statusmap);
+  archonGPIO::status(out, statusmap);
+}
+
+std::vector<archon_biasprop> foxtrot::devices::ArchonLVX::biases(const ssmap& statusmap) const {
+  std::vector<archon_biasprop> out;
+
+  //most any archon bias module has at present
+  out.reserve(30);
+
+  auto chunk = _lcbias.biases(statusmap);
+  out.insert(out.end(), chunk.begin(), chunk.end());
+  chunk = _hcbias.biases(statusmap);
+  out.insert(out.end(), chunk.begin(), chunk.end());
+
+  return out;
+}
+
+std::vector<archon_biasprop> foxtrot::devices::ArchonLVX::biases()
+{
+  if(auto ptr = _arch.lock())
+    {
+      auto smap = ptr->getStatus();
+      return this->biases(smap);
+    }
+  else {
+    throw std::logic_error("couldn't lock archon pointer");
+      }
+}
+
+using foxtrot::devices::ArchonModuleProp;
+
+std::vector<ArchonModuleProp> foxtrot::devices::ArchonLVX::props(const ssmap& statusmap) const
+{
+  std::vector<ArchonModuleProp> out;
+  auto biasvec = this->biases(statusmap);
+  //TODO: put in GPIOs here!
+
+  out.reserve(biasvec.size());
+  out.insert(out.end(), biasvec.begin(), biasvec.end());
+  return out;
+  
+}
+
+
 
 
 void foxtrot::devices::ArchonLVX::setLabel(bool HC, int channel, const std::string& label)
@@ -200,6 +253,7 @@ RTTR_REGISTRATION
  (parameter_names("HC","channel"))
  .method("measureV",&ArchonLVX::measureV)
  (parameter_names("HC","channel"))
+
  ;
   
   

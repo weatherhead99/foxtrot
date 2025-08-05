@@ -1,6 +1,7 @@
 #pragma once
 #include "archon.h"
 #include "archon_modules.h"
+#include "archon_defs.hh"
 #include <format>
 
 namespace foxtrot
@@ -8,7 +9,6 @@ namespace foxtrot
  namespace devices
  {
      class archon;
-
 
    //ugly hack because RTTR doesn't handle NTTI stuff apparently
    namespace detail
@@ -24,10 +24,16 @@ namespace foxtrot
     
   public:
       virtual const string getTypeName() const override;
-      
+
+      std::vector<archon_driverprop> clocks(const ssmap& statusmap) const;
+    std::vector<archon_driverprop> clocks();
+
+    virtual std::vector<ArchonModuleProp> props(const ssmap& statusmap) const override;
+    
       void setLabel(int channel, const std::string& val);
       std::string getLabel(int channel);
-
+    
+      consteval unsigned n_clocks() const { return N::value;};
       void setSlowSlewRate(int channel, double val);
       double getSlowSlewRate(int channel);
       
@@ -127,6 +133,49 @@ namespace foxtrot
      return readConfigKey<int>(std::format("ENABLE{}", channel));
    }
 
+   template<typename NChannels>
+   std::vector<foxtrot::devices::archon_driverprop>
+   ArchonDriverBase<NChannels>::clocks(const ssmap& statusmap) const
+   {
+     std::vector<archon_driverprop> out;
+     out.reserve(n_clocks());
+
+     auto modpos = this->info().position;
+     for(unsigned i=0; i <n_clocks(); i++)
+       {
+	 archon_driverprop thisprop;
+	 auto findstr = std::format("MOD{}/ENABLE{}",modpos, i);
+	 thisprop.enable = std::stoul(statusmap.at(findstr));
+	 findstr = std::format("MOD{}/LABEL{}", modpos, i);
+	 thisprop.enable = std::stoul(statusmap.at(findstr));
+
+	 findstr = std::format("MOD{}/SLOWSLEWRATE{}", modpos, i);
+	 thisprop.slew_slow = std::stod(statusmap.at(findstr));
+
+	 findstr = std::format("MOD{}/FASTSLEWRATE{}", modpos, i);
+	 thisprop.slew_fast = std::stod(statusmap.at(findstr));
+
+	 thisprop.chan = i;
+
+	 findstr = std::format("MOD{}/SOURCE{}", modpos, i);
+	 thisprop.source = std::stoul(statusmap.at(findstr));
+	 
+	 out.push_back(thisprop);  
+       }
+     return out;
+   }
+   
+   template<typename NChannels>
+   std::vector<ArchonModuleProp>
+   ArchonDriverBase<NChannels>::props(const ssmap& statusmap) const
+   {
+     std::vector<ArchonModuleProp> out;
+     auto clockvec = this->clocks(statusmap);
+     out.reserve(clockvec.size());
+     out.insert(out.end(), clockvec.begin(), clockvec.end());
+     return out;
+   }
+   
  }
 
 }

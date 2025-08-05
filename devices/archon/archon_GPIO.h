@@ -2,7 +2,9 @@
 #include <string>
 #include <sstream>
 #include <rttr/type>
+#include "archon.h"
 #include "archon_module_mapper.hh"
+#include "archon_defs.hh"
 
 using std::string;
 
@@ -11,16 +13,8 @@ namespace foxtrot
     namespace devices
     {
         class archon;
-        
-        
-        enum class gpio_source : short unsigned
-        {
-            low = 0,
-            high = 1,
-            clocked = 2,
-            VCPU = 3,
-        };
-        
+
+              
      class archonGPIO 
      {
          RTTR_ENABLE();
@@ -34,9 +28,14 @@ namespace foxtrot
          void setDirection(int pair, bool inout);
          bool getDirection(int pair);
          
-         void setSource(int ch, gpio_source source);
-         gpio_source getSource(int ch);
-         
+         void setSource(int ch, archon_gpio_source source);
+         archon_gpio_source getSource(int ch);
+
+       void status(archon_module_status& out, const ssmap& statusmap) const;
+
+       //TODO:
+       // std::vector<archon_gpioprop> gpios() const;
+       // constexpr unsigned n_gpios();
          
      protected:
        archonGPIO(std::weak_ptr<archon>& arch, const archon_module_info& inf, bool pairwise_direction=true);

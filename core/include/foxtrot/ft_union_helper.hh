@@ -59,6 +59,8 @@ namespace foxtrot
       std::vector<rttr::type> out;
       out.reserve(std::variant_size_v<Variant>);
 
+      namespace detail = foxtrot::detail;
+
       detail::variant_possible_types_helper<Variant>::build_type_vector(out);
       return out;
       
@@ -109,6 +111,7 @@ namespace foxtrot
   template<typename T>
   void register_union()
   {
+    namespace detail = foxtrot::detail;
     
     auto tp = rttr::type::get<T>();
     static auto nm = tp.get_name().to_string();

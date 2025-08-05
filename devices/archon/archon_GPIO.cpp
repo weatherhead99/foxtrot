@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <string>
 #include "archon.h"
+#include "archon_modules.h"
 
 
 using std::string;
@@ -66,13 +67,13 @@ string foxtrot::devices::archonGPIO::getLabel(int ch)
     
 }
 
-foxtrot::devices::gpio_source foxtrot::devices::archonGPIO::getSource(int ch)
+foxtrot::devices::archon_gpio_source foxtrot::devices::archonGPIO::getSource(int ch)
 {
     _oss.str("");
     _oss << "DIO_SOURCE" << ch;
     auto val = readConfigKey_gpio(_oss.str());
     
-    return static_cast<foxtrot::devices::gpio_source>(std::stoi(val));
+    return static_cast<foxtrot::devices::archon_gpio_source>(std::stoi(val));
     
 }
 
@@ -99,7 +100,7 @@ void foxtrot::devices::archonGPIO::setLabel(int ch, const std::string& label)
     writeConfigKey_gpio(_oss.str(),label);
 }
 
-void foxtrot::devices::archonGPIO::setSource(int ch, foxtrot::devices::gpio_source source)
+void foxtrot::devices::archonGPIO::setSource(int ch, foxtrot::devices::archon_gpio_source source)
 {
     _oss.str("");
     _oss << "DIO_SOURCE" << ch;
@@ -107,23 +108,23 @@ void foxtrot::devices::archonGPIO::setSource(int ch, foxtrot::devices::gpio_sour
     
 }
 
-int source_to_int(foxtrot::devices::gpio_source source, bool& ok)
+int source_to_int(foxtrot::devices::archon_gpio_source source, bool& ok)
 {
   ok = true;
     return static_cast<int>(source);
     
 };
 
-foxtrot::devices::gpio_source int_to_source(int source, bool& ok)
+foxtrot::devices::archon_gpio_source int_to_source(int source, bool& ok)
 {
     if(source < 0 || source > 3)
     {
         ok = false;
-        return foxtrot::devices::gpio_source::low;
+        return foxtrot::devices::archon_gpio_source::low;
     }
   
   ok = true;  
-  return static_cast<foxtrot::devices::gpio_source>(source);
+  return static_cast<foxtrot::devices::archon_gpio_source>(source);
     
 };
 
@@ -152,31 +153,35 @@ void foxtrot::devices::archonGPIO::writeConfigKey_gpio(const string& key, const 
     throw std::logic_error("archon object destroyed, cannot use a submodule of it!");
 }
 
+void foxtrot::devices::archonGPIO::status(foxtrot::devices::archon_module_status& out, const ssmap& statusmap) const
+{
+  auto findstr = std::format("MOD{}/DINPUTS", _inf.position);
+  out.dinput_status = std::stoul(statusmap.at(findstr), nullptr,  2);
+
+}
+
+using foxtrot::devices::archon_gpioprop;
+using std::vector;
+using foxtrot::devices::archonGPIO;
+
+
 
 RTTR_REGISTRATION
 {
  using namespace rttr;
  using foxtrot::devices::archonGPIO;
- using foxtrot::devices::gpio_source;
+ using foxtrot::devices::archon_gpio_source;
  
  type::register_converter_func(int_to_source);
  type::register_converter_func(source_to_int);
-
-
- registration::enumeration<gpio_source>("foxtrot::devices::gpio_source")
-   (
-    value("low", gpio_source::low),
-    value("high", gpio_source::high),
-    value("clocked", gpio_source::clocked),
-    value("VCPU", gpio_source::VCPU)
-    );
-
 
  registration::class_<archonGPIO>("foxtrot::devices::archonGPIO")
  .method("setLabel",&archonGPIO::setLabel)
  (parameter_names("ch","label"))
  .method("getLabel",&archonGPIO::getLabel)
  (parameter_names("ch"))
+   .property("DIOPower", &archonGPIO::getDIOPower,
+	     &archonGPIO::setDIOPower)
  .property_readonly("getDIOPower", &archonGPIO::getDIOPower)
  .method("setDIOPower", &archonGPIO::setDIOPower)
  (parameter_names("onoff"))

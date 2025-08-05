@@ -13,6 +13,9 @@
 #include "archon_module_generic_bias.h"
 #include "archon_module_mapper.hh"
 #include "../device_utils/stringconv_utils.hh"
+#include "archon_defs.hh"
+
+
 
 namespace foxtrot
 {
@@ -54,6 +57,9 @@ namespace devices
       archon_module_status status() const;
       const archon_module_info& info() const;
 
+      virtual std::vector<ArchonModuleProp> props(const ssmap& statusmap) const;
+      std::vector<ArchonModuleProp> props();
+
       std::optional<string> readConfigKeyOpt(const string& key) const;
 
       template<typename Ret, int Base=10>
@@ -61,7 +67,7 @@ namespace devices
       {
 	auto valstr = readConfigKeyOpt(key);
 	if(valstr.has_value())
-	  return number_from_string<Ret, Base>(valstr);
+	  return number_from_string<Ret, Base>(*valstr);
 	
       }
       
@@ -81,8 +87,7 @@ namespace devices
 	std::unique_ptr<T> out(new T(arch, inf));
 	return out;
       }
-      
-	    
+
     protected:
       archon_module_info _info;
       std::weak_ptr<archon> _arch;

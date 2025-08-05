@@ -456,7 +456,7 @@ int devices::archon::writeConfigLine(const string& line,int num)
     //if the value -1 is passed in, add a new line
     num = impl->configindex.size();
   }
-  else if(num > impl->configindex.size())
+  else if(static_cast<unsigned>(num) > impl->configindex.size())
   {
     throw std::logic_error("trying to overwrite a config line " + std::to_string(num) + " that doesn't exist yet");
   };
@@ -549,7 +549,7 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
   if(not linum.has_value())
     {
     //this is a new key 
-      auto linenum = writeConfigLine(linestr);
+      writeConfigLine(linestr);
       impl->configindex.push_back(key);
       _configmap.insert({key, val});
     }
@@ -699,7 +699,7 @@ std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
 
 std::unordered_map<std::string, int> devices::archon::params()
 {
-  int n_params = std::stoi(readKeyValue("PARAMETERS"));
+  unsigned n_params = std::stoul(readKeyValue("PARAMETERS"));
   std::unordered_map<string, int> out;
   if(impl->mapvalid == false)
     {
@@ -961,7 +961,7 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 
 void devices::archon::settapline(int n, const string& tapline)
 {
-  if(n >= _ADtaplinemap.size() )
+  if(static_cast<unsigned>(n) >= _ADtaplinemap.size() )
   {
     throw DeviceError("invalid TAP line number");
   }
@@ -1521,6 +1521,7 @@ RTTR_REGISTRATION
  foxtrot::register_tuple<std::pair<std::string,std::string>>();
 
  foxtrot::register_optional<std::optional<unsigned>>();
+ foxtrot::register_optional<std::optional<unsigned char>>();
  foxtrot::register_optional<std::optional<vector<double>>>();
 
  foxtrot::register_optional<std::optional<vector<unsigned>>>();

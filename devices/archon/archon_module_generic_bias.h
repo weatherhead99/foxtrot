@@ -7,7 +7,7 @@
 #include <vector>
 #include "archon_module_mapper.hh"
 #include <optional>
-
+#include "archon_defs.hh"
 
 namespace foxtrot
 {
@@ -15,17 +15,6 @@ namespace foxtrot
   
 namespace devices
 {
-  struct biasprop
-{
-  double Vset;
-  std::string label;
-  std::string name;
-  std::optional<double> Iset = std::nullopt;
-  std::optional<bool> enable = std::nullopt;
-  double Imeas;
-  double Vmeas;
-  unsigned order;
-};
 
 
   
@@ -62,7 +51,7 @@ namespace devices
     void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
 
     void status(archon_module_status& out, const ssmap& statusmap) const;
-    std::vector<biasprop> biases(const ssmap& statusmap) const;
+    std::vector<archon_biasprop> biases(const ssmap& statusmap) const;
   protected:
     ArchonGenericBias(ArchonModule& mod, const string& biasnmemonic,
       int numchans, double lowlimit, double highlimit, Logging& lg) ;
