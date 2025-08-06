@@ -28,12 +28,14 @@ namespace foxtrot
 	    
 	    const string getTypeName() const override;
 	    const string getDeviceTypeName() const override;
-	  
+
             void setLabel(bool HC, int channel, const std::string& label);
             std::string getLabel(bool HC, int channel);
 	  
             void setOrder(bool HC, int channel, int sequence);
             int getOrder(bool HC, int channel);
+
+	  void setV(const std::string& nmemonic, int channel, double V);
             
             void setV(bool HC, int channel, double V);
             double getV(bool HC, int channel);

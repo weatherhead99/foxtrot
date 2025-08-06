@@ -28,6 +28,8 @@ const string devices::ArchonLVX::getDeviceTypeName() const
     return "ArchonLVX";
 }
 
+
+
 using foxtrot::devices::archon_module_status;
 using foxtrot::devices::archon_biasprop;
 
@@ -142,7 +144,19 @@ void foxtrot::devices::ArchonLVX::setV(bool HC, int channel, double V)
     {
         _lcbias.setV(channel, V);
     }
-    
+}
+
+void foxtrot::devices::ArchonLVX::setV(const std::string& nmemonic, int channel, double V)
+{
+  if(nmemonic == _hcbias.nmemonic())
+    _hcbias.setV(channel, V);
+
+  else if(nmemonic == _lcbias.nmemonic())
+    _lcbias.setV(channel, V);
+
+  else
+    throw std::out_of_range("couldn't match nmemonic for this bias module");
+      
 }
 
 double foxtrot::devices::ArchonLVX::getV(bool HC, int channel)
@@ -247,8 +261,10 @@ RTTR_REGISTRATION
  (parameter_names("HC","channel","sequence"))
  .method("getOrder", &ArchonLVX::getOrder)
  (parameter_names("HC","channel"))
- .method("setV", &ArchonLVX::setV)
+   .method("setV", rttr::select_overload<void(bool, int, double)>(&ArchonLVX::setV))
  (parameter_names("HC","channel","V"))
+   .method("setV", rttr::select_overload<void(const std::string&, int, double)>(&ArchonLVX::setV))
+   (parameter_names("nmemonic", "channel", "V"))
  .method("getV",&ArchonLVX::getV)
  (parameter_names("HC","channel"))
  .method("setEnable",&ArchonLVX::setEnable)

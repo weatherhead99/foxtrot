@@ -14,7 +14,7 @@
 #include "archon_module_mapper.hh"
 #include "../device_utils/stringconv_utils.hh"
 #include "archon_defs.hh"
-
+#include <foxtrot/Logging.h>
 
 
 namespace foxtrot
@@ -68,13 +68,21 @@ namespace devices
 	auto valstr = readConfigKeyOpt(key);
 	if(valstr.has_value())
 	  return number_from_string<Ret, Base>(*valstr);
+	return std::nullopt;
 	
       }
       
       string readConfigKey(const string& key) const;
       template<typename Ret, int Base=10>
-      Ret readConfigKey(const string& key) const
+      Ret readConfigKey(const string& key, std::optional<Ret> dflt=std::nullopt) const
       {
+	if(dflt.has_value())
+	  {
+	    auto valstr = readConfigKeyOpt<Ret,Base>(key);
+	    if(!valstr.has_value())
+	      return *dflt;
+	  }
+
 	auto valstr = readConfigKey(key);
 	return number_from_string<Ret, Base>(valstr);
       }
@@ -82,9 +90,9 @@ namespace devices
 
 
       template<typename T>
-      static std::unique_ptr<T> constructModule(std::weak_ptr<archon>& arch, const archon_module_info& inf)
+      static std::shared_ptr<T> constructModule(std::weak_ptr<archon>& arch, const archon_module_info& inf)
       {
-	std::unique_ptr<T> out(new T(arch, inf));
+	std::shared_ptr<T> out(new T(arch, inf));
 	return out;
       }
 
@@ -92,8 +100,9 @@ namespace devices
       archon_module_info _info;
       std::weak_ptr<archon> _arch;
       ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info& info);
-    protected:
-            std::array<char,3> _version;
+      std::array<char,3> _version;
+    private:
+      foxtrot::Logging lg;
     };
 
 

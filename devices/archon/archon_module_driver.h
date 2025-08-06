@@ -4,6 +4,8 @@
 #include "archon_defs.hh"
 #include <format>
 
+#include <iostream>
+
 namespace foxtrot
 {
  namespace devices
@@ -159,17 +161,20 @@ namespace foxtrot
    std::vector<foxtrot::devices::archon_driverprop>
    ArchonDriverBase<NChannels>::clocks(const ssmap& statusmap) const
    {
-     std::vector<archon_driverprop> out;
-     
 
+     std::cout << "in clocks() " << std::endl;
+     std::vector<archon_driverprop> out;
      
      out.reserve(n_clocks());
 
      for(unsigned i=1; i <= n_clocks(); i++)
        {
+
 	 archon_driverprop thisprop;
+
+	 //this seems to be optional and defaults to false
 	 auto findstr = std::format("ENABLE{}", i);
-	 thisprop.enable = readConfigKey<bool>(findstr);
+	 thisprop.enable = readConfigKey<bool>(findstr, false);
 	 
 	 findstr = std::format("LABEL{}",  i);
 	 thisprop.label = readConfigKeyOpt(findstr);
@@ -183,7 +188,8 @@ namespace foxtrot
 	 thisprop.chan = i;
 
 	 findstr = std::format("SOURCE{}", i);
-	 thisprop.source = readConfigKey<unsigned>(findstr);
+	 //note if not filled in this defaults to itself as source
+	 thisprop.source = readConfigKey<unsigned>(findstr, i);
 	 
 	 out.push_back(thisprop);  
        }

@@ -77,9 +77,9 @@ auto modtpmap = h::make_map(
 
 
 
-unique_ptr<ArchonModule> foxtrot::devices::make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf)
+std::shared_ptr<ArchonModule> foxtrot::devices::make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf)
 {
-  std::unique_ptr<ArchonModule> modptr = nullptr;
+  std::shared_ptr<ArchonModule> modptr = nullptr;
   h::for_each(modtpmap, [&arch, &inf,  &modptr] (auto v)
   {
     using ModType = typename decltype(+h::second(v))::type;

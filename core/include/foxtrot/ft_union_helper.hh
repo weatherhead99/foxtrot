@@ -3,6 +3,7 @@
 #include <rttr/type>
 #include <variant>
 #include <ft_types.pb.h>
+#include <iostream>
 
 namespace foxtrot
 {
@@ -13,7 +14,10 @@ namespace foxtrot
     rttr::variant union_get(T& in)
     {
       auto outer_var = std::visit([] (auto& arg) {
-	return rttr::variant(arg);
+	rttr::variant ret(arg);
+	std::cout << "ARG TYPE:" << typeid(arg).name();
+	std::cout << "UNION INNER TYPE:" << ret.get_type().get_name();
+	return ret;
 	}, in);
       return outer_var;
     }
@@ -119,12 +123,14 @@ namespace foxtrot
 
     reg(rttr::metadata("unionmeta", true),
 	rttr::metadata("ft_type", variant_types::UNION_TYPE))
-      .constructor()
+      .constructor()(rttr::policy::ctor::as_object)
       .method("get", &detail::union_get<T>)
       .method("held_type", &detail::union_held_type<T>);
       //      .method("possible_types", &detail::union_possible_types<T>);
 
     detail::variant_converter_reg<T>::reg();
+
+    rttr::registration::class_<std::monostate>("std::monostate");
   }
 
 

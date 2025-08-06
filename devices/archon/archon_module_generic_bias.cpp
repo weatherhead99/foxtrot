@@ -128,15 +128,26 @@ std::vector<foxtrot::devices::archon_biasprop> devices::ArchonGenericBias::biase
 	  prop.enable = _mod.readConfigKey<bool>(Enablestr);
 	}
 
-      prop.name = std::format("{}{}", modpos, _biasnmemonic, i);
+      prop.name = std::format("{}{}", _biasnmemonic, i);
 
       _lg.strm(sl::trace) << "reading label";
       auto labelstr = std::format("{}_LABEL{}", _biasnmemonic, i);
 
       prop.label = _mod.readConfigKeyOpt(labelstr);
+
+      auto orderstr = std::format("{}_ORDER{}", _biasnmemonic, i);
+      //order is 0 by default I _think_
+      prop.order = _mod.readConfigKey<unsigned>(orderstr, 0u);
+
       out.push_back(prop);
+      
     } 
   return out;
+}
+
+const std::string& devices::ArchonGenericBias::nmemonic() const
+{
+  return _biasnmemonic;
 }
 
 void devices::ArchonGenericBias::setLabel(int channel, const string& label)

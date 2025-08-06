@@ -53,7 +53,7 @@ namespace foxtrot
     };
     
 
-    using ArchonModuleProp = std::variant<archon_biasprop,archon_driverprop>;
+    using ArchonModuleProp = std::variant<archon_biasprop,archon_driverprop, std::monostate>;
 
     
   }

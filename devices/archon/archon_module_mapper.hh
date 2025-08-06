@@ -43,7 +43,7 @@ namespace foxtrot
       unsigned long long module_id;
     };
 
-    std::unique_ptr<ArchonModule> make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf);
+    std::shared_ptr<ArchonModule> make_module(std::weak_ptr<archon>&& arch, const archon_module_info& inf);
 
     std::string get_module_name(archon_module_types modtp);
 

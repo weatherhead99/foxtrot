@@ -616,6 +616,9 @@ ft_variant foxtrot::get_variant_wire_type(const rttr::variant& var,
 		lg->strm(sl::trace) << "union logic";
 
 	      rttr::variant inner_var = foxtrot::union_get(var);
+	      if(lg)
+		lg->strm(sl::info) << "inner var is valid?: " << (int) inner_var.is_valid();
+	      
 	      return get_variant_wire_type(inner_var, lg, unwrap);
 	    }
 	    break;
@@ -736,7 +739,7 @@ foxtrot::ft_mapping foxtrot::get_mapping_wire_type(const rttr::variant& var, Log
   if(! view.is_valid())
     throw std::logic_error("received type that is not a mapping");
 
-
+  
   auto out_valuemap = out.mutable_values();
   int idx = 0;
 

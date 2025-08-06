@@ -24,7 +24,7 @@ using foxtrot::devices::archon_hex_stream_configure;
 
 
 ArchonModule::ArchonModule(std::weak_ptr<archon>& arch, const archon_module_info& modinfo)
-  : foxtrot::Device(nullptr),  _info(modinfo), _arch(arch)
+  : foxtrot::Device(nullptr),  _info(modinfo), _arch(arch), lg("ArchonModule")
 {
     
     std::istringstream iss(_info.version);
@@ -101,6 +101,16 @@ std::optional<string> ArchonModule::readConfigKeyOpt(const string& subkey) const
 {
   std::optional<string> out = std::nullopt;
 
+  auto cmdstr = std::format("MOD{}/{}", _info.position, subkey);
+  if(auto ptr = _arch.lock())
+    {
+      //TODO: more efficient way of doing this
+      auto* val = ptr->readKeyValueOpt(cmdstr);
+      if(val == nullptr)
+	return std::nullopt;
+      return *val;
+    }
+  throw std::logic_error("couldn't lock archon pointer from submodule!");
   
   
   return out;
@@ -109,11 +119,14 @@ std::optional<string> ArchonModule::readConfigKeyOpt(const string& subkey) const
 
 string ArchonModule::readConfigKey(const string& subkey) const
 {
-  auto cmdstr = std::format("MOD{}/{}", _info.position, subkey);
-  if(auto ptr = _arch.lock())
-    return ptr->readKeyValue(cmdstr);
-  else
-    throw std::logic_error("couldn't lock archon pointer from submodule");
+  auto out = readConfigKeyOpt(subkey);
+  if(not out.has_value())
+    {
+      auto outstr = std::format("subkey: {} not found in archon config", subkey);
+      throw std::out_of_range(outstr);
+      }
+
+  return *out;
 }
 
 void ArchonModule::writeConfigKey(const string& key, const string& val)

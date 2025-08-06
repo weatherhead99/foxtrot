@@ -42,6 +42,16 @@ using foxtrot::protocols::simpleTCPBase;
 
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
 
+std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
+{
+  auto eqpos = std::find(in.begin(), in.end(),'=');
+  auto k = std::string_view(in.begin(), eqpos);
+  auto v = std::string_view(eqpos+1, in.end());
+  return {k, v};
+}
+
+
+
 
 struct foxtrot::devices::detail::archonimpl
 {
@@ -213,10 +223,16 @@ void devices::archon::load_config(const std::string& cfg)
   while(std::getline(iss, line))
     {
       //NOTE: -1 here for new line
-      writeConfigLine(line, -1);
+      _lg.strm(sl::trace) << "writing config line: {" << line << "}";
+      auto [kview, vview] = spliteq(line);
+      std::string k(kview.begin(), kview.end());
+      std::string v(vview.begin(), vview.end());
+      writeKeyValue(k, v);
+      
+      i++;
     };
+  _lg.strm(sl::info) << "wrote: " << i << "config lines";
 
-  read_parse_existing_config();
 };
 
 ssmap devices::archon::getStatus()
@@ -428,6 +444,14 @@ const std::map<int, foxtrot::devices::ArchonModule&> foxtrot::devices::archon::g
     return out;
 }
 
+using foxtrot::devices::ArchonModule;
+
+std::shared_ptr<ArchonModule> foxtrot::devices::archon::getModulePtr(int position)
+{
+  auto outptr = _modules.at(position);
+  return outptr;
+}
+
 void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
@@ -560,7 +584,7 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
   if(not linum.has_value())
     {
     //this is a new key 
-      writeConfigLine(linestr);
+      writeConfigLine(linestr, -1);
       impl->configindex.push_back(key);
       _configmap.insert({key, val});
     }
@@ -699,14 +723,6 @@ std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config
   return out;
 }
 
-std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
-{
-  auto eqpos = std::find(in.begin(), in.end(),'=');
-  auto k = std::string_view(in.begin(), eqpos);
-  auto v = std::string_view(eqpos+1, in.end());
-  return {k, v};
-}
-
 
 std::unordered_map<std::string, int> devices::archon::params()
 {
@@ -809,7 +825,9 @@ foxtrot::devices::archon::moduleprops()
       _lg.strm(sl::debug) << "processing props for module at position: " << modinf.position << "of type: " << mptr->getTypeName();
       
       auto thisprop = mptr->props(statmap);
-      out[ind] = std::move(thisprop);
+      _lg.strm(sl::debug) << "size of props: " << thisprop.size();
+      if(thisprop.size() > 0)
+	out[ind] = std::move(thisprop);
     }
 
   return out;
@@ -1488,6 +1506,7 @@ RTTR_REGISTRATION
  .method("load_timing_script", &archon::load_timing_script)
    .method("set_param", &archon::set_param)
    (parameter_names("name", "val", "apply_immediate", "allow_new"))
+
    //   .method("getParam", select_overload<unsigned(const std::string&), archon>(&archon::getParam))
    //   (parameter_names("name"))
  // .method("setParam",&archon::setParam)

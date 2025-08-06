@@ -48,6 +48,8 @@ namespace devices
     [[deprecated]] double measureV(int channel);
     [[deprecated]] double measureI(int channel);
 
+    const std::string& nmemonic() const;
+    
     void reconfigure(const std::string& nmemonic, int numchans, double lowlimit, double highlimit);
     void update_traits();
 

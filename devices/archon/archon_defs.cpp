@@ -2,6 +2,7 @@
 #include <rttr/registration>
 #include <sys/types.h>
 #include <foxtrot/ft_union_helper.hh>
+#include <foxtrot/ft_optional_helper.hh>
 
 RTTR_REGISTRATION
 {
@@ -41,5 +42,10 @@ RTTR_REGISTRATION
 
    using foxtrot::devices::ArchonModuleProp;
    foxtrot::register_union<ArchonModuleProp>();
+
+
+   foxtrot::register_optional<std::optional<std::string>>();
+   foxtrot::register_optional<std::optional<double>>();
+   foxtrot::register_optional<std::optional<bool>>();
    
 }

@@ -227,6 +227,8 @@ namespace foxtrot {
     void set_tapinfo(const archon_tap_info& tapinfo);
     
     const std::map<int,ArchonModule&> getAllModules() const;
+
+    std::shared_ptr<ArchonModule> getModulePtr(int position);
     
     
     //void set_timing_lines(int n);
@@ -321,7 +323,7 @@ namespace foxtrot {
     
     std::shared_ptr<foxtrot::protocols::simpleTCPBase> _specproto;
     foxtrot::Logging _lg;
-    std::map<int, std::unique_ptr<ArchonModule>> _modules;
+    std::map<int, std::shared_ptr<ArchonModule>> _modules;
     unsigned long long _arch_tmr;
     HRTimePoint _sys_tmr;
     void setup_modules();
