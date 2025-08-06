@@ -28,6 +28,7 @@ from warnings import warn
 from dataclasses import dataclass, field
 from functools import cache
 from typing import Optional
+from .argument_utils import construct_args
 
 DEFAULT_CHUNKSIZE = 1000
 
@@ -275,31 +276,7 @@ class Capability:
         return tp(*args, **kwargs)
 
     def _construct_args(self, *args, **kwargs):
-        rawargs = [None] * len(self.argnames)
-        for name, val in kwargs.items():
-            if name not in self.argnames:
-                raise ValueError("no such argument with name: %s in capability"
-                                 % name)
-            pos = self.argnames.index(name)
-            argdesc = self.argtypes[pos]
-            rawargs[pos] = capability_argument(
-                pos=pos,
-                value=ft_variant_from_value(val, argdesc))
-
-        if (len(args) + len(kwargs)) > len(rawargs):
-            raise ValueError("too many arguments provided")
-
-        for idx, val in enumerate(args):
-            if rawargs[idx] is not None:
-                raise IndexError("conflicting positional and keyword arguments")
-            desc = self.argtypes[idx]
-            rawargs[idx] = capability_argument(position=idx,
-                                               value=ft_variant_from_value(val, desc))
-
-        if any(_ is None for _ in rawargs):
-            raise IndexError("not all arguments filled in")
-
-        return rawargs
+        return construct_args(self.argnames, self.argtypes, *args, **kwargs)
 
     def _process_sync_response(self, repl):
         if self.captp == STREAM:
