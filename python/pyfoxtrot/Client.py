@@ -33,6 +33,7 @@ from .argument_utils import construct_args
 DEFAULT_CHUNKSIZE = 1000
 
 class Client:
+    DEFAULT_CHUNKSIZE: int = DEFAULT_CHUNKSIZE
     def __init__(self, connstr: str, certfile: str = None, **channelkwargs) -> None:
         if certfile is None:
             self._channel = grpc.insecure_channel(connstr, **channelkwargs)
@@ -201,7 +202,8 @@ class Capability:
         self._cl = self.client
 
         self._msgid: int = 0
-        
+        self.chunksize = self._cl.DEFAULT_CHUNKSIZE
+
         self._enum_return_type = None
         self._enum_arg_types = [None] * len(self.argtypes)
 

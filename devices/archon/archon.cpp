@@ -1146,7 +1146,7 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 
 
 template<typename T, typename Tdiff>
-std::vector<T> devices::archon::read_back_buffer(int num_blocks, int retries, unsigned address)
+std::vector<T> devices::archon::read_back_buffer_legacy(int num_blocks, int retries, unsigned address)
 {
     std::ostringstream oss;
     std::unique_lock<std::mutex> lck(_cmdmut);

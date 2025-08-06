@@ -348,7 +348,9 @@ namespace foxtrot {
       template<typename T, typename Tdiff=T>
       std::vector<T> read_back_buffer(int num_blocks, int retries, unsigned address);
 
-
+    template<typename T, typename Tdiff=T>
+    std::vector<T> read_back_buffer_legacy(int num_blocks, int retries, unsigned address);
+    
     short unsigned _order;
 
     std::unordered_map<std::string, std::string> _configmap;
