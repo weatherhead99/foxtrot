@@ -208,8 +208,8 @@ namespace foxtrot {
       writeKeyValue(key, std::to_string(val));
     }
 
-    const std::string& readKeyValue(const std::string& key);
-    const std::string* const readKeyValueOpt(const std::string& key);
+    const std::string& readKeyValue(const std::string& key) const ;
+    const std::string* const readKeyValueOpt(const std::string& key) const;
 
     template<typename Ret>
     Ret readKeyValue(const std::string& key)
@@ -225,6 +225,8 @@ namespace foxtrot {
     
     archon_tap_info tapinfo();
     void set_tapinfo(const archon_tap_info& tapinfo);
+
+    std::vector<std::string> taplines();
     
     const std::map<int,ArchonModule&> getAllModules() const;
 
@@ -334,6 +336,9 @@ namespace foxtrot {
     
   private:
     std::optional<int> find_config_line_from_key(const std::string& key);
+
+    std::vector<std::string> read_key_range(const std::string& key_n,
+					      const std::string& keybase) const;
     
     
     //NOTE: readConfigLine and writeConfigLine are unsafe

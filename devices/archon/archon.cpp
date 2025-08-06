@@ -31,6 +31,7 @@
 
 #include "archon_module_mapper.hh"
 
+#include "../device_utils/string_utils.hh"
 
 #define READ_SIZE 1024
 
@@ -227,6 +228,11 @@ void devices::archon::load_config(const std::string& cfg)
       auto [kview, vview] = spliteq(line);
       std::string k(kview.begin(), kview.end());
       std::string v(vview.begin(), vview.end());
+
+      //trim whitespace from both k and v
+      trim(k);
+      trim(v);
+      
       writeKeyValue(k, v);
       
       i++;
@@ -563,13 +569,30 @@ std::optional<int> devices::archon::find_config_line_from_key(const std::string&
 }
 
 
-const std::string& devices::archon::readKeyValue(const string& key)
+std::vector<std::string> devices::archon::read_key_range(const std::string& n_key, const std::string& keybase) const
+{
+  unsigned n = std::stoul(readKeyValue(n_key));
+  std::vector<std::string> out;
+  out.reserve(n);
+
+  for(unsigned i =0; i < n; i++)
+    {
+      auto kstr = std::format("{}{}", keybase, i);
+      out.push_back(readKeyValue(kstr));
+    }
+
+  return out;
+
+}
+
+
+const std::string& devices::archon::readKeyValue(const string& key) const
 {
   //NOTE: bounds checked by the .at call
   return _configmap.at(key);
 }
 
-const std::string* const devices::archon::readKeyValueOpt(const string& key)
+const std::string* const devices::archon::readKeyValueOpt(const string& key) const
 {
   if(!_configmap.contains(key))
     return nullptr;
@@ -1145,6 +1168,14 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 }
 
 
+std::vector<std::string> devices::archon::taplines()
+{
+
+  return read_key_range("TAPLINES", "TAPLINE");  
+  
+}
+
+
 template<typename T, typename Tdiff>
 std::vector<T> devices::archon::read_back_buffer_legacy(int num_blocks, int retries, unsigned address)
 {
@@ -1495,7 +1526,7 @@ RTTR_REGISTRATION
    .property_readonly("timer", &archon::timer)
    .method("readConfigLine", &archon::readConfigLine)
    (parameter_names("num", "override_existing"))
-   .method("readKeyValue", select_overload<const std::string&(const std::string&), archon>(&archon::readKeyValue))
+   .method("readKeyValue", select_overload<const std::string&(const std::string&) const, archon>(&archon::readKeyValue))
    (parameter_names("key"))
  .method("applyall",&archon::applyall)
    .method("load_config", &archon::load_config)
@@ -1568,6 +1599,8 @@ RTTR_REGISTRATION
    (parameter_names("AD","LR","gain","offset"))
   .method("load_timing", &archon::load_timing)
    .property_readonly("moduleprops", &archon::moduleprops)
+   .method("taplines", &archon::taplines)
+   
 
  ;
 

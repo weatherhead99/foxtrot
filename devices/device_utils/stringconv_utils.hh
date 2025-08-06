@@ -14,10 +14,10 @@ namespace foxtrot
   {
 
     template<typename Ret, int Base=10>
-    Ret number_from_string(const std::string& in,
+    std::decay_t<Ret> number_from_string(const std::string& in,
 		       foxtrot::Logging* lg = nullptr)
     {
-      Ret out;
+      std::decay_t<Ret> out;
       std::from_chars_result res{};
 
       if constexpr(std::is_same_v<Ret, bool>)
