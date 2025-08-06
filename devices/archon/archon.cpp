@@ -1255,7 +1255,7 @@ std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
     auto rawlines = bufinfo.raw_lines;
     auto total_blocks = rawsamp  * rawlines ;
     _lg.strm(sl::debug) << "total blocks: " << total_blocks;
-    out = read_back_buffer<unsigned short>(total_blocks,100, bufinfo.offsetaddr + bufinfo.raw_offset);
+    out = read_back_buffer_legacy<unsigned short>(total_blocks,100, bufinfo.offsetaddr + bufinfo.raw_offset);
     
     return out;
     
