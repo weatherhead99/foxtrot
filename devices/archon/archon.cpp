@@ -1495,7 +1495,7 @@ RTTR_REGISTRATION
    .property_readonly("timer", &archon::timer)
    .method("readConfigLine", &archon::readConfigLine)
    (parameter_names("num", "override_existing"))
-   .method("readKeyValue", select_overload<std::string(const std::string&), archon>(&archon::readKeyValue))
+   .method("readKeyValue", select_overload<const std::string&(const std::string&), archon>(&archon::readKeyValue))
    (parameter_names("key"))
  .method("applyall",&archon::applyall)
    .method("load_config", &archon::load_config)

@@ -278,6 +278,9 @@ RTTR_REGISTRATION
  (parameter_names("HC","channel"))
  .method("measureV",&ArchonLVX::measureV)
  (parameter_names("HC","channel"))
+   .method("biases", rttr::select_overload<std::vector<archon_biasprop>()>(&ArchonLVX::biases))
+
+   
 
  ;
   

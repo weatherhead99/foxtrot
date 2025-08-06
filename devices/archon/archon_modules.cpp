@@ -194,8 +194,9 @@ RTTR_REGISTRATION
    .method("apply",&ArchonModule::apply)
    .method("status",
 	   rttr::select_overload<archon_module_status() const>(&ArchonModule::status))
-   //   .property_readonly("props",
-   //	     rttr::select_overload<std::vector<ArchonModuleProp>()>(&ArchonModule::props))
+   .method("props",
+   	     rttr::select_overload<std::vector<ArchonModuleProp>()>(&ArchonModule::props))
+   
  ;
 
  
