@@ -1229,9 +1229,9 @@ std::vector< unsigned int > devices::archon::fetch_buffer(int buf)
   
   
   if(is32)
-      out = read_back_buffer<unsigned>(num_blocks,100,bufinfo.offsetaddr);
+      out = read_back_buffer_legacy<unsigned>(num_blocks,100,bufinfo.offsetaddr);
   else
-      out = read_back_buffer<unsigned, short unsigned>(num_blocks,100,bufinfo.offsetaddr + bufinfo.raw_offset);
+      out = read_back_buffer_legacy<unsigned, short unsigned>(num_blocks,100,bufinfo.offsetaddr + bufinfo.raw_offset);
   //drop extra bytes off the end
   out.resize(pixels);
   return out;

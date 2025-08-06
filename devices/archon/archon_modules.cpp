@@ -160,11 +160,16 @@ std::vector<ArchonModuleProp> ArchonModule::props()
 
 void ArchonModule::apply()
 {
+
+  //NOTE: it looks like unlike the values in the "status" return,
+  //the position here is numbered from 0... because OF COURSE it is
+
+  //no idea how this was working for 9 years without knowing that....
   std::ostringstream oss;
   
   oss << "APPLYMOD" ;
 //   archon_hex_stream_configure(oss);
-  oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase  << (_info.position);
+  oss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase  << (_info.position-1);
 
   //TODO: should find a way round this not needing to be a friend!
   if(auto ptr = _arch.lock())

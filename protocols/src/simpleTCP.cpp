@@ -554,7 +554,7 @@ std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
   std::vector<unsigned char> out;
   out.resize(len);
   
-  auto readfun = [this, &out, &actlen] () -> boost::asio::awaitable<std::exception_ptr>
+  auto readfun = [this, &out, actlen] () -> boost::asio::awaitable<std::exception_ptr>
     {
       try{
 	auto read_coro = boost::asio::async_read(*(pimpl->sock), boost::asio::buffer(out),
@@ -574,7 +574,9 @@ std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
 	else
 	  {
 	    pimpl->lg.strm(sl::debug) << "actual bytes transferred: " << *res;
-	    *actlen = *res;
+	    if(actlen != nullptr)
+	      *actlen = *res;
+	    pimpl->lg.strm(sl::debug) << "after assignment";
 	  }
       }
       catch(...)
@@ -583,7 +585,6 @@ std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
 	}
 
 
-      
       co_return nullptr;
 
     };
@@ -591,13 +592,21 @@ std::string simpleTCPasio::read(unsigned len, unsigned *actlen) {
 
   auto res = boost::asio::co_spawn(pimpl->exec_, readfun(), boost::asio::use_future);
   pimpl->ensure_exec_run();
-  auto err = res.get();
-  if(err)
-    std::rethrow_exception(err);
+  res.wait();
+  pimpl->lg.strm(sl::debug) << "wait for future completed";
+  if(res.valid())
+    {
+      pimpl->lg.strm(sl::trace) << "future is valid";
+      auto err = res.get();
+      pimpl->lg.strm(sl::trace) << "future get completed";
+      if(err)
+	std::rethrow_exception(err);
+    }
 
+  pimpl->lg.strm(sl::trace) << "out size: " << out.size();
+  std::string outstr(out.begin(), out.end());
 
-  string outstr;
-  std::copy(out.begin(), out.end(), outstr.begin());
+  pimpl->lg.strm(sl::trace) << "outstr size: " << outstr.size();
   return outstr;
 
 }
