@@ -44,8 +44,8 @@ class FoxtrotCoreConan(ConanFile):
 
     def validate_build(self):
         cvers = Version(self.settings.compiler.version)
-        if cvers >= 15:
-            raise ConanInvalidConfiguration("cannot build with gcc > 15 yet")
+        if cvers >= 15 and self.options.get_safe("with_avahi"):
+            raise ConanInvalidConfiguration("cannot build with gcc > 15 yet if avahi support is enabled")
 
     def config_options(self):
         #no libudev or avahi on windows, and grpc must not be shared
