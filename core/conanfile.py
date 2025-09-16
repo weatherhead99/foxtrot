@@ -62,7 +62,7 @@ class FoxtrotCoreConan(ConanFile):
         #Note: using protobuf or grpc shared appears to need this
         self.requires("protobuf/5.27.0", force=True, transitive_libs=True)
 
-        self.requires("boost/1.86.0", headers=True, libs=True,
+        self.requires("boost/1.88.0", headers=True, libs=True,
                       transitive_headers=True,
                       transitive_libs=True)
 
