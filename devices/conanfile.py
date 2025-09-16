@@ -22,6 +22,7 @@ class FoxtrotDevicesConan(ConanFile):
     ft_package_requires = ("protocols")
     cmake_package_name = "foxtrotDevices"
 
+
     def requirements(self):
         super().requirements()
         self.requires("rapidxml/1.13",
@@ -33,7 +34,7 @@ class FoxtrotDevicesConan(ConanFile):
         self.requires("aravis/0.8.33", transitive_headers=True,
                       transitive_libs=True)
         #override, conflict aravis with avahi
-        self.requires("glib/2.78.3", override=True)
+        self.requires("glib/2.85.3", override=True)
 
 
     def generate(self):

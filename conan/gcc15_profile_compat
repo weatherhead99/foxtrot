@@ -1,0 +1,3 @@
+[replace_requires]
+#this breaks due to cstd=23
+libiconv/1.17 : libiconv/1.18
