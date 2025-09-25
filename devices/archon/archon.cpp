@@ -17,7 +17,7 @@
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
-#include <date/tz.h>
+
 
 #include <foxtrot/ft_optional_helper.hh>
 
@@ -880,7 +880,6 @@ void foxtrot::devices::archon::set_const(const std::string &name, float val,
     impl->update_internalmap(*this, _lg, impl->constmap, "CONSTANT",
                              impl->constmapvalid);
 
-  int constnum;
   auto writestr = std::format("{}={}", name, val);
   // no need for try/catch here, a new constant name is always an error
   auto [constval, constidx] = impl->constmap.at(name);
