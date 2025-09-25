@@ -323,6 +323,7 @@ namespace foxtrot {
      archon(std::shared_ptr<foxtrot::protocols::simpleTCPBase> proto);
 
     virtual std::string cmd(const std::string& request) override;
+    std::string cmd(const std::string& request, unsigned override_timeout_ms);
     ssmap parse_parameter_response(const std::string& response);
     
     std::vector<unsigned char> parse_binary_response(const std::string& response);

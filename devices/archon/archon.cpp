@@ -17,6 +17,7 @@
 
 #include <foxtrot/protocols/ProtocolUtilities.h>
 #include <foxtrot/protocols/CommunicationProtocol.h>
+#include <date/tz.h>
 
 #include <foxtrot/ft_optional_helper.hh>
 
@@ -178,6 +179,34 @@ std::string foxtrot::devices::archon::cmd(const std::string& request)
   return ret.substr(3);
 
 }
+
+
+std::string devices::archon::cmd(const std::string& request, unsigned override_timeout_ms)
+{
+  auto tm_bef = _specproto->get_timeout();
+
+  _lg.strm(sl::trace) << "setting override timeout of: " << override_timeout_ms << " ms";
+  _specproto->set_timeout(std::chrono::milliseconds(override_timeout_ms));
+
+  std::string out;
+  try
+    {
+      out = cmd(request);
+    }
+  catch(std::exception& err)
+    {
+      _lg.strm(sl::error) <<" caught error to be processed. Resetting timeout first";
+      _specproto->set_timeout(tm_bef);
+      throw err;
+    }
+
+  _lg.strm(sl::trace) << "resetting timeout to original value";
+  _specproto->set_timeout(tm_bef);
+  
+  return out;
+  
+}
+
 
 ssmap devices::archon::parse_parameter_response(const std::string& response)
 {
@@ -555,7 +584,8 @@ std::string devices::archon::readConfigLine(unsigned num, bool override_existing
 
 void devices::archon::applyall()
 {
-  cmd("APPLYALL");
+  //NOTE: can take a long time, so override timeout here
+  cmd("APPLYALL", 30000);
 
 }
 
@@ -697,24 +727,7 @@ void foxtrot::devices::archon::set_power(bool onoff)
 {
     if(onoff)
       {
-	//note, can take a long time, so setup timeout appropriately (20 seconds)
-	_lg.strm(sl::trace) << "getting existing timeout";
-	auto tm_bef = _specproto->get_timeout();
-
-	_lg.strm(sl::trace) << "setting a long timeout...";
-        _specproto->set_timeout(std::chrono::milliseconds(20000));
-	try {
-	  _lg.strm(sl::trace) << "running comand...";
-	  cmd("POWERON");
-	}
-	catch(foxtrot::ProtocolError& err)
-	  {
-	    _lg.strm(sl::error) << "resetting timeout...";
-	    _specproto->set_timeout(tm_bef);
-	    throw err;
-	  }
-	_lg.strm(sl::trace) << "restore original timeout";
-	_specproto->set_timeout(tm_bef);
+	cmd("POWERON", 20000);	
       }
     else
       cmd("POWEROFF");   
@@ -1178,6 +1191,7 @@ void foxtrot::devices::archon::sync_archon_timer()
     _lg.Info("syncing timer");
     _arch_tmr = timer();
     _sys_tmr = std::chrono::high_resolution_clock::now();
+
 }
 
 
@@ -1341,7 +1355,7 @@ std::vector<unsigned short> foxtrot::devices::archon::fetch_raw_buffer(int buf)
     auto rawsamp = bufinfo.raw_blocks;
     _lg.strm(sl::debug) << "raw blocks per line: " << rawsamp;
     auto rawlines = bufinfo.raw_lines;
-    auto total_blocks = rawsamp  * rawlines ;
+    auto total_blocks = rawsamp  * rawlines * 2 ;
     _lg.strm(sl::debug) << "total blocks: " << total_blocks;
     out = read_back_buffer_legacy<unsigned short>(total_blocks,100, bufinfo.offsetaddr + bufinfo.raw_offset);
     
