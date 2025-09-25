@@ -248,9 +248,16 @@ namespace foxtrot {
     std::vector<std::pair<std::string, std::string>> ordered_config() const;
 
     std::unordered_map<std::string, int> params();
+    std::unordered_map<std::string, float> consts();    
     void set_param(const std::string& name, int val, bool apply_immediate=true, bool allow_new=false);
+    void set_const(const std::string &name, float val,
+                   bool apply_immediate = true);
 
+    
     std::map<int, std::vector<ArchonModuleProp>> moduleprops();
+
+    
+
     
     //void set_constants(int n);
     //int get_constants();
@@ -339,7 +346,6 @@ namespace foxtrot {
 
     std::vector<std::string> read_key_range(const std::string& key_n,
 					      const std::string& keybase) const;
-    
     
     //NOTE: readConfigLine and writeConfigLine are unsafe
     //to call because they cause the config line map

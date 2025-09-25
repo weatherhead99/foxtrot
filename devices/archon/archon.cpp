@@ -54,13 +54,40 @@ std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
 
 
 
-struct foxtrot::devices::detail::archonimpl
-{
-  std::unordered_map<std::string, std::pair<std::string, int>> parammap;
-  std::unordered_map<std::string, std::pair<std::string, int>> constvals;
+struct foxtrot::devices::detail::archonimpl {
+  using ArchMapType = std::unordered_map<std::string, std::pair<std::string, int>>;
+  ArchMapType parammap;
+  ArchMapType constmap;
 
   std::vector<std::string> configindex;
-  bool mapvalid;
+  bool parammapvalid = false;
+  bool constmapvalid = false;
+
+  void update_internalmap(archon & arch, foxtrot::Logging & lg,
+                          ArchMapType & map, const std::string& basestr, bool& validflag)
+  {
+    auto n_qry = std::format("{}S", basestr);
+    auto n = std::stoul(arch.readKeyValue(n_qry));
+
+    map.clear();
+    for (unsigned u = 0; u < n; u++)
+      {
+	auto confkey = std::format("{}{}", basestr, u);
+	auto val = arch.readKeyValue(confkey);
+	lg.strm(sl::debug) << "value string is: " << val;
+	auto [paramk, paramv] = spliteq(val);
+	map.emplace(paramk, std::make_pair(paramv, u));
+	validflag = true;
+      } 
+  }
+
+  void invalidate_maps() {
+      parammapvalid = false;
+      constmapvalid = false;
+  }
+
+  
+  
 };
 
 
@@ -464,7 +491,7 @@ void devices::archon::clear_config()
   //  _configlinemap.clear();
   _configmap.clear();
   impl->configindex.clear();
-  impl->mapvalid = false;
+  impl->invalidate_maps();
   //_statenames.clear();
   //_parammap.clear();
   //_constantmap.clear();
@@ -617,7 +644,7 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
       _configmap.at(key) = val;
     }
 
-  impl->mapvalid = false;
+  impl->invalidate_maps();
   //NOTE: is this exception safe?
   //update the mappings etc
 }
@@ -747,53 +774,59 @@ std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config
 }
 
 
-std::unordered_map<std::string, int> devices::archon::params()
-{
-  unsigned n_params = std::stoul(readKeyValue("PARAMETERS"));
-  std::unordered_map<string, int> out;
-  if(impl->mapvalid == false)
-    {
-      impl->parammap.clear();
-      for(unsigned i=0; i < n_params; i++)
-	{
-	  auto key = std::format("PARAMETER{}", i);
-	  auto val = readKeyValue(key);
-	  _lg.strm(sl::debug) << "value string is: " << val;
+std::unordered_map<std::string, int> devices::archon::params() {
 
-	  auto [paramk, paramv] = spliteq(val);
-	  
-	  //	  auto eqpos = std::find(val.begin(), val.end(), '=');
-	  //auto paramk = std::string(val.begin(), eqpos);
-	  //auto paramv = std::string(eqpos + 1, val.end());
-	  int param = 0;
-	  auto res = std::from_chars(paramv.data(), paramv.data()+ paramv.size(), param);
-	  if(res.ec == std::errc::invalid_argument)
-	    {
-	      _lg.strm(sl::error) << "offending paramk: {" << paramk << "}";
-	      _lg.strm(sl::error) << "offending paramv: {" << paramv << "}"; 
-	      throw std::logic_error("bad value when converting parameter from string");
-	    }
-	  out.emplace(paramk, param);
-	  impl->parammap.emplace(paramk, std::make_pair(paramv, i));
-	}
-      impl->mapvalid = true;
-    }
-  else
-    {
-      for(auto [k,v] : impl->parammap)
+  if (impl->parammapvalid == false)
+    impl->update_internalmap(*this, _lg, impl->parammap, "PARAMETER", impl->parammapvalid);
+
+
+  std::unordered_map<std::string, int> out;
+  
+  for (auto [paramk, v] : impl->parammap) {
+    int param = 0;
+    auto paramv = v.first;
+     auto res =
+       std::from_chars(paramv.data(), paramv.data() + paramv.size(), param);
+     if (res.ec != std::errc{})
 	{
-	  out.emplace(k, std::stoi(v.first));
+	  _lg.strm(sl::error) << "offending paramk: {" << paramk << "}";
+          _lg.strm(sl::error) << "offending paramv: {" << paramv << "}";
+          throw std::logic_error(
+				 "bad value when converting parameter from string");
 	}
-    }
-    return out;
+      out.emplace(paramk, param);
+  }
+  return out;
 }
+
+std::unordered_map<std::string, float> devices::archon::consts() {
+  if (impl->constmapvalid == false)
+    impl->update_internalmap(*this, _lg, impl->constmap, "CONSTANT", impl->constmapvalid);
+
+  std::unordered_map<std::string, float> out;
+
+  for (auto [constk, v] : impl->constmap) {
+    float constout = 0;
+    auto constv = v.first;
+    auto res = std::from_chars(constv.data(), constv.data() + constv.size(), constout);
+    if (res.ec != std::errc{}) {
+          _lg.strm(sl::error) << "offending paramk: {" << constk << "}";
+          _lg.strm(sl::error) << "offending paramv: {" << constv << "}";
+          throw std::logic_error(
+              "bad value when converting parameter from string");
+    }
+    out.emplace(constk, constout);
+  }    
+  return out;
+
+}    
+
 
 void foxtrot::devices::archon::set_param(const std::string& name, int val, bool apply_immediate, bool allow_new)
 {
   //reload parameter map
-  if(impl->mapvalid == false)
-    //side effect of this is to force update
-    auto parammap_temp = params();
+    if (impl->parammapvalid == false)
+      impl->update_internalmap(*this, _lg, impl->parammap, "PARAMETER", impl->parammapvalid);
 
   //if not already this will throw
   int paramnum;
@@ -813,8 +846,8 @@ void foxtrot::devices::archon::set_param(const std::string& name, int val, bool 
       //case for new parameter with allow_new
       auto next_param_num = impl->parammap.size();
       writeKeyValue(std::format("PARAMETER{}",next_param_num),writestr);
-      writeKeyValue("PARAMETERS",impl->parammap.size() +1);
-      impl->mapvalid = false;
+      writeKeyValue("PARAMETERS", impl->parammap.size() + 1);
+      impl->invalidate_maps();
       return;
     }
 
@@ -826,6 +859,30 @@ void foxtrot::devices::archon::set_param(const std::string& name, int val, bool 
     cmd(std::format("LOADPARAM {}", name));
 
 }
+
+void foxtrot::devices::archon::set_const(const std::string &name, float val,
+                                         bool apply_immediate) {
+
+  if (impl->constmapvalid == false)
+    impl->update_internalmap(*this, _lg, impl->constmap, "CONSTANT",
+                             impl->constmapvalid);
+
+  int constnum;
+  auto writestr = std::format("{}={}", name, val);
+  // no need for try/catch here, a new constant name is always an error
+  auto [constval, constidx] = impl->constmap.at(name);
+
+  writeKeyValue(std::format("CONSTANT{}", constidx), writestr);
+  if (apply_immediate) {
+    load_timing();
+  }    
+
+  
+
+}  
+    
+
+
 
 using foxtrot::devices::ArchonModuleProp;
 
@@ -1513,52 +1570,53 @@ RTTR_REGISTRATION
 
 
  foxtrot::register_timestamp<foxtrot::devices::HRTimePoint>();
- 
+
  registration::class_<archon>("foxtrot::devices::archon")
- .method("clear_config",&archon::clear_config)
-   .property_readonly("status", &archon::status)
-   .property_readonly("frameinfo", &archon::frameinfo)
-   .property_readonly("system", &archon::system)
- .property_readonly("fetch_log",&archon::fetch_log)
-   .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
-   .property_readonly("config", &archon::config)
-   .property_readonly("ordered_config", &archon::ordered_config)
-   .property_readonly("timer", &archon::timer)
-   .method("readConfigLine", &archon::readConfigLine)
-   (parameter_names("num", "override_existing"))
-   .method("readKeyValue", select_overload<const std::string&(const std::string&) const, archon>(&archon::readKeyValue))
-   (parameter_names("key"))
- .method("applyall",&archon::applyall)
-   .method("load_config", &archon::load_config)
-   (parameter_names("cfg"))
-   .method("read_parse_existing_config", &archon::read_parse_existing_config)
-   (parameter_names("allow_empty"))
- .method("set_power",&archon::set_power)
- .method("load_timing_script", &archon::load_timing_script)
-   .method("set_param", &archon::set_param)
-   (parameter_names("name", "val", "apply_immediate", "allow_new"))
+     .method("clear_config", &archon::clear_config)
+     .property_readonly("status", &archon::status)
+     .property_readonly("frameinfo", &archon::frameinfo)
+     .property_readonly("system", &archon::system)
+     .property_readonly("fetch_log", &archon::fetch_log)
+     .property_readonly("fetch_all_logs", &archon::fetch_all_logs)
+     .property_readonly("config", &archon::config)
+     .property_readonly("ordered_config", &archon::ordered_config)
+     .property_readonly("timer", &archon::timer)
+     .method("readConfigLine", &archon::readConfigLine)(
+         parameter_names("num", "override_existing"))
+     .method("readKeyValue",
+             select_overload<const std::string &(const std::string &) const,
+                             archon>(&archon::readKeyValue))(
+         parameter_names("key"))
+     .method("applyall", &archon::applyall)
+     .method("load_config", &archon::load_config)(parameter_names("cfg"))
+     .method("read_parse_existing_config", &archon::read_parse_existing_config)(
+         parameter_names("allow_empty"))
+     .method("set_power", &archon::set_power)
+     .method("load_timing_script", &archon::load_timing_script)
+     .method("set_param", &archon::set_param)(
+         parameter_names("name", "val", "apply_immediate", "allow_new"))
+     .method("set_const", &archon::set_const)
+   (parameter_names("name", "val", "apply_immediate"))
 
-   //   .method("getParam", select_overload<unsigned(const std::string&), archon>(&archon::getParam))
-   //   (parameter_names("name"))
- // .method("setParam",&archon::setParam)
- // (
- //   parameter_names("name","val")
- //   )
- // .method("getConstant",&archon::getConstant)
- // (
- //   parameter_names("name")
- //   )
- // .method("setConstant", &archon::setConstant)
- // (
- //   parameter_names("name","val")
- //   )
+     //   .method("getParam", select_overload<unsigned(const std::string&),
+     //   archon>(&archon::getParam)) (parameter_names("name"))
+     // .method("setParam",&archon::setParam)
+     // (
+     //   parameter_names("name","val")
+     //   )
+     // .method("getConstant",&archon::getConstant)
+     // (
+     //   parameter_names("name")
+     //   )
+     // .method("setConstant", &archon::setConstant)
+     // (
+     //   parameter_names("name","val")
+     //   )
 
- .method("apply_param", &archon::apply_param)
- (
-   parameter_names("name")
-   )
- .method("apply_all_params", &archon::apply_all_params)
- .method("params", &archon::params)  
+     .method("apply_param", &archon::apply_param)(parameter_names("name"))
+     .method("apply_all_params", &archon::apply_all_params)
+     .method("params", &archon::params)
+   .method("consts", &archon::consts)
  .method("holdTiming", &archon::holdTiming)
  .method("releaseTiming",&archon::releaseTiming)
  .method("resetTiming", &archon::resetTiming)
