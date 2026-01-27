@@ -12,7 +12,7 @@
 #include "archon.h"
 #include "archon_module_generic_bias.h"
 #include "archon_module_mapper.hh"
-#include "../device_utils/stringconv_utils.hh"
+#include "device_utils/stringconv_utils.hh"
 #include "archon_defs.hh"
 #include <foxtrot/Logging.h>
 

@@ -57,9 +57,13 @@ add_subdirectory(coldvision-ls)
 add_subdirectory(ssc_chiller)
 add_subdirectory(arroyo_peltier)
 
+
+#add include directory dependency to foxtrot_devices
+#because the include files get flattened on install
+target_include_directories(foxtrot_devices INTERFACE $<INSTALL_INTERFACE:${ft_devices_install_includes}>)
 #install the device util headers (manually for now, no build code target yet)
 file(GLOB device_util_hdrs CONFIGURE_DEPENDS ./device_utils/*.hh)
-install(FILES ${device_util_hdrs} DESTINATION ${ft_devices_install_includes})
+install(FILES ${device_util_hdrs} DESTINATION ${ft_devices_install_includes}/device_utils/)
 
 
 message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
