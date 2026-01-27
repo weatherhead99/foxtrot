@@ -10,14 +10,13 @@
 #include <unordered_map>
 
 #include <boost/iterator/iterator_concepts.hpp>
-#include <boost/date_time.hpp>
 
 #include <rttr/registration>
 
 #include <foxtrot/CmdDevice.h>
 #include <foxtrot/protocols/simpleTCP.h>
 #include <foxtrot/Logging.h>
-#include "../device_utils/stringconv_utils.hh"
+#include "device_utils/stringconv_utils.hh"
 
 #include "archon_module_mapper.hh"
 #include "archon_defs.hh"

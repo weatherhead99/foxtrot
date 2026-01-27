@@ -6,13 +6,14 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(packname "devices")
 
-find_package(Boost REQUIRED COMPONENTS date_time NO_MODULE)
 find_package(foxtrotCore REQUIRED)
 find_package(foxtrotProtocols REQUIRED)
 include(FoxtrotCommonSetup)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
+set(ft_devices_install_includes ${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices)
+set(ft_devices_build_includes ${CMAKE_CURRENT_SOURCE_DIR})
 function(ft_device_lib_configure tgtname)
   set(options NO_STANDARD_LINK)
   cmake_parse_arguments(olib "${options}" "" "" ${ARGN})
@@ -22,8 +23,11 @@ function(ft_device_lib_configure tgtname)
   else()
     target_link_libraries(${tgtname} PUBLIC RTTR::Core foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
   endif()
+  message(WARNING "ft devices buildin lcudes: ${ft_devices_build_includes}")
     target_link_libraries(foxtrot_devices PRIVATE ${tgtname})
-    target_include_directories(foxtrot_devices PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+    target_include_directories(${tgtname} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+      $<BUILD_INTERFACE:${ft_devices_build_includes}>
+    $<INSTALL_INTERFACE:${ft_devices_install_includes}>)
     install(TARGETS ${tgtname}
       EXPORT foxtrot_devices
       PUBLIC_HEADER
@@ -39,8 +43,8 @@ find_dependency(rttr 0.9.6 REQUIRED)
 "
   )
 
-add_library(foxtrot_devices)
-target_include_directories(foxtrot_devices PUBLIC $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/foxtrot/devices>)  
+  add_library(foxtrot_devices)
+
 
 add_subdirectory(archon)
 add_subdirectory(cornerstone_260)
@@ -52,6 +56,10 @@ add_subdirectory(DM3068)
 add_subdirectory(coldvision-ls)
 add_subdirectory(ssc_chiller)
 add_subdirectory(arroyo_peltier)
+
+#install the device util headers (manually for now, no build code target yet)
+file(GLOB device_util_hdrs CONFIGURE_DEPENDS ./device_utils/*.hh)
+install(FILES ${device_util_hdrs} DESTINATION ${ft_devices_install_includes})
 
 
 message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
@@ -80,6 +88,8 @@ install(FILES cmake/FindDWF.cmake
  DESTINATION ${ft_cmakedir})
 
 message(DEBUG "ft_devices_dep_str: ${ft_devices_dep_str}")
+
+
 
 foxtrot_standard_setup_cmake_package(devices ${ft_devices_dep_str})
 

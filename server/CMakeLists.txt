@@ -4,6 +4,8 @@ project(foxtrot_server C CXX)
 
 option(USE_CORO_IMPLEMENTATIONS "build the c++ coroutine implementation handlers" OFF)
 option(BUILD_FTAUTH "build the (deprecated) custom ftauth modules" OFF)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 
@@ -37,10 +39,10 @@ endfunction()
 if(${USE_CORO_IMPLEMENTATIONS})
   
   set(ASIO_GRPC_DISABLE_AUTOLINK TRUE)
-  find_package(Boost REQUIRED COMPONENTS program_options system filesystem coroutine)
+  find_package(Boost REQUIRED COMPONENTS program_options filesystem coroutine)
   find_package(asio-grpc)
 else()
-  find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
+  find_package(Boost REQUIRED COMPONENTS program_options  filesystem)
 endif()
 
 #however, if we're using the conan package, then the above is currently not supported.
