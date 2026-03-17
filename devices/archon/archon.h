@@ -176,7 +176,8 @@ namespace foxtrot {
   class archon : public CmdDevice
   {
       RTTR_ENABLE(CmdDevice)
-    friend class foxtrot::devices::ArchonModule;
+      friend class foxtrot::devices::ArchonModule;
+    friend class foxtrot::devices::detail::archonimpl;      
     virtual const string getDeviceTypeName() const override;
   public:
 
@@ -297,8 +298,7 @@ namespace foxtrot {
     std::array<int,4> getCDSTiming();
 
     void settapline(int n, const std::string& tapline);
-    void settap(unsigned char AD, bool LR, double gain, unsigned short offset);
-    void setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset);
+    void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
     
     void settrigoutpower(bool onoff);
     bool gettrigoutpower();
@@ -364,10 +364,7 @@ namespace foxtrot {
     
     short unsigned _order;
 
-    std::unordered_map<std::string, std::string> _configmap;
     std::vector<std::string> _statenames;
-    std::map<unsigned char, unsigned char> _ADtaplinemap;
-    std::optional<bool> _using_AM_taps = std::nullopt;
     
   };
 

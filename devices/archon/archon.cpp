@@ -44,9 +44,9 @@ using foxtrot::protocols::simpleTCPBase;
 
 ArchonStreamHelper::ArchonStreamHelper(archon& dev) : _dev(dev) {}
 
-std::pair<std::string_view, std::string_view> spliteq(const std::string& in)
+std::pair<std::string_view, std::string_view> spliteq(const std::string& in, char splitchar='=')
 {
-  auto eqpos = std::find(in.begin(), in.end(),'=');
+  auto eqpos = std::find(in.begin(), in.end(),splitchar);
   auto k = std::string_view(in.begin(), eqpos);
   auto v = std::string_view(eqpos+1, in.end());
   return {k, v};
@@ -59,35 +59,38 @@ struct foxtrot::devices::detail::archonimpl {
   using ArchMapType = std::unordered_map<std::string, std::pair<std::string, int>>;
   ArchMapType parammap;
   ArchMapType constmap;
+  ArchMapType taplinemap;
 
   std::vector<std::string> configindex;
+  std::unordered_map<std::string, std::string> configmap;  
   bool parammapvalid = false;
   bool constmapvalid = false;
 
+  bool taplinemapvalid = false;
+
+  
   void update_internalmap(archon & arch, foxtrot::Logging & lg,
-                          ArchMapType & map, const std::string& basestr, bool& validflag)
+                          ArchMapType & map, const std::string& basestr, bool& validflag, char splitchar='=')
   {
-    auto n_qry = std::format("{}S", basestr);
-    auto n = std::stoul(arch.readKeyValue(n_qry));
+
+    auto n_qry = std::format("{}S", basestr);    
+    auto confvals = arch.read_key_range(n_qry, basestr);
 
     map.clear();
-    for (unsigned u = 0; u < n; u++)
+    int u = 0;
+    for (auto confline : confvals)
       {
-	auto confkey = std::format("{}{}", basestr, u);
-	auto val = arch.readKeyValue(confkey);
-	lg.strm(sl::debug) << "value string is: " << val;
-	auto [paramk, paramv] = spliteq(val);
-	map.emplace(paramk, std::make_pair(paramv, u));
-	validflag = true;
-      } 
+	auto [paramk, paramv] = spliteq(confline, splitchar);
+      map.emplace(paramk, std::make_pair(paramv, u++));
+    }
+    validflag = true;
   }
 
   void invalidate_maps() {
       parammapvalid = false;
       constmapvalid = false;
+      taplinemapvalid = false;
   }
-
-  
   
 };
 
@@ -518,14 +521,14 @@ void devices::archon::clear_config()
 {
   cmd("CLEARCONFIG");
   //  _configlinemap.clear();
-  _configmap.clear();
+  impl->configmap.clear();
   impl->configindex.clear();
+  impl->taplinemap.clear();
   impl->invalidate_maps();
   //_statenames.clear();
   //_parammap.clear();
   //_constantmap.clear();
   
-  _ADtaplinemap.clear();
   //  _taplines = 0;
   //  _states=  0;  
   //setup lines, timing lines etc...
@@ -646,14 +649,14 @@ std::vector<std::string> devices::archon::read_key_range(const std::string& n_ke
 const std::string& devices::archon::readKeyValue(const string& key) const
 {
   //NOTE: bounds checked by the .at call
-  return _configmap.at(key);
+  return impl->configmap.at(key);
 }
 
 const std::string* const devices::archon::readKeyValueOpt(const string& key) const
 {
-  if(!_configmap.contains(key))
+  if(!impl->configmap.contains(key))
     return nullptr;
-  return &_configmap.at(key);
+  return &impl->configmap.at(key);
 }
 
 
@@ -666,12 +669,12 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
     //this is a new key 
       writeConfigLine(linestr, -1);
       impl->configindex.push_back(key);
-      _configmap.insert({key, val});
+      impl->configmap.insert({key, val});
     }
   else
     {
       writeConfigLine(linestr,*linum);
-      _configmap.at(key) = val;
+      impl->configmap.at(key) = val;
     }
 
   impl->invalidate_maps();
@@ -769,7 +772,7 @@ void foxtrot::devices::archon::lockbuffer(int buf)
 
 const std::unordered_map<std::string, std::string>& devices::archon::config() const
 {
-  return _configmap;
+  return impl->configmap;
 }
 
 std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config() const
@@ -780,7 +783,7 @@ std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config
   for(std::size_t i=0; i < impl->configindex.size(); i++)
     {
       auto& k = impl->configindex[i];
-      auto& v = _configmap.at(k);
+      auto& v = impl->configmap.at(k);
       out.push_back({k, v});
     }
   return out;
@@ -940,11 +943,11 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
       if(not allow_empty)
 	throw foxtrot::DeviceError("no configuration loaded in archon, cannot parse!");
       
-      _configmap.clear();
+      impl->configmap.clear();
       impl->configindex.clear();
       return;
     }
-  _configmap.clear();
+  impl->configmap.clear();
   impl->configindex.clear();
   int i;
   impl->configindex.reserve(ARCHON_MAX_CONFIG_LINES);
@@ -958,7 +961,7 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
 	  throw DeviceError("malformed config line returned from archon");    
         auto key = string(confline.begin(),eqpos);
         auto val = string(eqpos+1,confline.end());
-	_configmap.insert({key, val});
+	impl->configmap.insert({key, val});
 	impl->configindex.push_back(key);
     }
 
@@ -1109,14 +1112,17 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 
 void devices::archon::settapline(int n, const string& tapline)
 {
-  if(static_cast<unsigned>(n) >= _ADtaplinemap.size() )
+  if(static_cast<unsigned>(n) > impl->taplinemap.size() )
   {
     throw DeviceError("invalid TAP line number");
   }
   std::ostringstream oss;
   oss << "TAPLINE" << n;
-  writeKeyValue(oss.str(),tapline);
-  writeKeyValue("TAPLINES", std::to_string(_ADtaplinemap.size()));
+  writeKeyValue(oss.str(), tapline);
+
+  if (static_cast<unsigned>(n) == impl->taplinemap.size()) { // this is appending a new tap line
+    writeKeyValue("TAPLINES", std::to_string(impl->taplinemap.size() + 1));
+  }    
 }
 
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
@@ -1126,51 +1132,42 @@ std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, doub
   return taplinestr;
 
 }
-			     
 
-void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain, unsigned short offset)
+
+void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
+                                      unsigned short offset, bool ADM,
+				      bool apply_immediate)
 {
+
+  std::string nmemonic = ADM ? "AM"  : "AD";
+  
         // char LRchar = LR ? 'R' : 'L';
         // std::ostringstream oss;
         // oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
         
         //WARNING: all sorts of edge cases that could blow up later here
         //UPDATE (2025!!!).... yep, past me present me etc etc
-  if(_using_AM_taps.value_or(false) == true)
-    throw std::runtime_error("attempting to set an AD tap on an Archon already configured with AM taps!");
 
-  auto taplinestr = assemble_tapline("AD", AD, LR, gain, offset);
+  auto taplinestr = assemble_tapline(nmemonic, AD, LR, gain, offset);
 
-	if(_ADtaplinemap.contains(AD))
-	  {
-	    int tline = _ADtaplinemap.at(AD);
-	    settapline(tline, taplinestr);
-	  }
-	else {
-	  _ADtaplinemap[AD] = _ADtaplinemap.size();
-	  settapline(_ADtaplinemap.size(), taplinestr);
-	    }
-	_using_AM_taps = false;
+  // update the tapline map if it's out of sync
+  if (impl->taplinemapvalid == false)
+    impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+                             impl->taplinemapvalid);
 
-}
-
-void foxtrot::devices::archon::setAMtap(unsigned char AD, bool LR, double gain, unsigned short offset)
-{
-  if(_using_AM_taps.value_or(true) == false)
-    throw std::runtime_error("attempting to set an AM tap on an Archon already using AD taps!");
-  auto taplinestr = assemble_tapline("AM",  AD,  LR, gain, offset);
-
-  if(_ADtaplinemap.contains(AD))
+  auto qrystr = std::format("{}{}", nmemonic, AD);
+  if (impl->taplinemap.contains(qrystr))
     {
-      int tline = _ADtaplinemap.at(AD);
-      settapline(tline, taplinestr);
-    }
-  else {
-    _ADtaplinemap[AD] = _ADtaplinemap.size();
-    settapline(_ADtaplinemap.size(), taplinestr);
-      }
+      auto [tlinerest, tlineidx] = impl->taplinemap.at(qrystr);
+      settapline(tlineidx, taplinestr);
+  } else {
+      settapline(impl->taplinemap.size(), taplinestr);
+      // this one changes the number of taplines, so invalidate that map
+      impl->taplinemapvalid = false;
+  }
 
-  _using_AM_taps = true;
+  if (apply_immediate)
+    cmd("APPLYCDS");
 
 }
 
@@ -1240,10 +1237,10 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 
 std::vector<std::string> devices::archon::taplines()
 {
-
-  return read_key_range("TAPLINES", "TAPLINE");  
-  
+  return read_key_range("TAPLINES", "TAPLINE");   
 }
+
+
 
 
 template<typename T, typename Tdiff>
@@ -1608,8 +1605,8 @@ RTTR_REGISTRATION
      .method("load_timing_script", &archon::load_timing_script)
      .method("set_param", &archon::set_param)(
          parameter_names("name", "val", "apply_immediate", "allow_new"))
-     .method("set_const", &archon::set_const)
-   (parameter_names("name", "val", "apply_immediate"))
+     .method("set_const", &archon::set_const)(
+         parameter_names("name", "val", "apply_immediate"))
 
      //   .method("getParam", select_overload<unsigned(const std::string&),
      //   archon>(&archon::getParam)) (parameter_names("name"))
@@ -1629,45 +1626,43 @@ RTTR_REGISTRATION
      .method("apply_param", &archon::apply_param)(parameter_names("name"))
      .method("apply_all_params", &archon::apply_all_params)
      .method("params", &archon::params)
-   .method("consts", &archon::consts)
- .method("holdTiming", &archon::holdTiming)
- .method("releaseTiming",&archon::releaseTiming)
- .method("resetTiming", &archon::resetTiming)
- .method("lockbuffer",&archon::lockbuffer)
- (
-   parameter_names("buf")
-   )
- .method("unlockbuffers",&archon::unlockbuffers)
- // .method("write_timing_state",&archon::write_timing_state)
- // (
- //   parameter_names("name", "state")
- //   )
- // (parameter_names("buf"))
- .method("fetch_buffer",&archon::fetch_buffer)
- (parameter_names("buf"), metadata("streamdata",true))
- .method("fetch_raw_buffer",&archon::fetch_raw_buffer)
- (parameter_names("buf"), metadata("streamdata",true))
- (parameter_names("buf"))
- (parameter_names("reset_start","reset_end","signal_start","signal_end"))
-   //.method("settapline", &archon::settapline)
-   //(parameter_names("n","tapline"))
- .property("trigoutinvert", &archon::gettrigoutinvert, &archon::settrigoutinvert)
- (parameter_names("invert"))
- .property("trigoutpower", &archon::gettrigoutpower, &archon::settrigoutpower)
-   .property_readonly("tapinfo", &archon::tapinfo)
-   .method("set_tapinfo", &archon::set_tapinfo)
-   (parameter_names("tapinfo"))
- .property("trigoutlevel", &archon::gettrigoutlevel, &archon::settrigoutlevel)
- (parameter_names("onoff"))
- .property("trigoutforce", &archon::gettrigoutforce, &archon::settrigoutforce)
- (parameter_names("onoff"))
-   //.property_readonly("get_timing_lines",&archon::get_timing_lines)
-   // .property_readonly("get_states",&archon::get_states)
-   // .property_readonly("get_constants",&archon::get_constants)
- .property_readonly("get_power",&archon::get_power)
-   //.property_readonly("get_parameters",&archon::get_parameters)
- .method("settap", &archon::settap)
-   (parameter_names("AD","LR","gain","offset"))
+     .method("consts", &archon::consts)
+     .method("holdTiming", &archon::holdTiming)
+     .method("releaseTiming", &archon::releaseTiming)
+     .method("resetTiming", &archon::resetTiming)
+     .method("lockbuffer", &archon::lockbuffer)(parameter_names("buf"))
+     .method("unlockbuffers", &archon::unlockbuffers)
+     // .method("write_timing_state",&archon::write_timing_state)
+     // (
+     //   parameter_names("name", "state")
+     //   )
+     // (parameter_names("buf"))
+     .method("fetch_buffer", &archon::fetch_buffer)(
+         parameter_names("buf"), metadata("streamdata", true))
+     .method("fetch_raw_buffer", &archon::fetch_raw_buffer)(
+         parameter_names("buf"), metadata("streamdata", true))(
+         parameter_names("buf"))(parameter_names("reset_start", "reset_end",
+                                                 "signal_start", "signal_end"))
+     //.method("settapline", &archon::settapline)
+     //(parameter_names("n","tapline"))
+     .property("trigoutinvert", &archon::gettrigoutinvert,
+               &archon::settrigoutinvert)(parameter_names("invert"))
+     .property("trigoutpower", &archon::gettrigoutpower,
+               &archon::settrigoutpower)
+     .property_readonly("tapinfo", &archon::tapinfo)
+     .method("set_tapinfo", &archon::set_tapinfo)(parameter_names("tapinfo"))
+     .property("trigoutlevel", &archon::gettrigoutlevel,
+               &archon::settrigoutlevel)(parameter_names("onoff"))
+     .property("trigoutforce", &archon::gettrigoutforce,
+               &archon::settrigoutforce)(parameter_names("onoff"))
+     //.property_readonly("get_timing_lines",&archon::get_timing_lines)
+     // .property_readonly("get_states",&archon::get_states)
+     // .property_readonly("get_constants",&archon::get_constants)
+     .property_readonly("get_power", &archon::get_power)
+     //.property_readonly("get_parameters",&archon::get_parameters)
+     .method("settap",
+             &archon::settap)(parameter_names("AD", "LR", "gain", "offset", "ADM", "apply_immediate"))
+   (parameter_names("AD", "LR", "gain", "offset"))     
   .method("load_timing", &archon::load_timing)
    .property_readonly("moduleprops", &archon::moduleprops)
    .method("taplines", &archon::taplines)
