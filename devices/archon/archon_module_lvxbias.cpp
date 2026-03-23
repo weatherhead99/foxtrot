@@ -218,6 +218,9 @@ int foxtrot::devices::ArchonLVX::getLimit(int channel)
 }
 
 
+#ifndef ARCHON_NO_DEPRECATED
+
+
 double devices::ArchonLVX::measureI(bool HC, int channel)
 {
   if(HC)
@@ -246,6 +249,8 @@ double devices::ArchonLVX::measureV(bool HC, int channel)
 
 }
 
+#endif
+
 
 RTTR_REGISTRATION
 {
@@ -253,31 +258,33 @@ RTTR_REGISTRATION
  using foxtrot::devices::ArchonLVX;
 
  registration::class_<ArchonLVX>("foxtrot::devices::ArchonLVX")
- .method("setLabel", &ArchonLVX::setLabel)
- (parameter_names("HC", "channel", "label"))
- .method("getLabel", &ArchonLVX::getLabel)
- (parameter_names("HC","channel"))
- .method("setOrder", &ArchonLVX::setOrder)
- (parameter_names("HC","channel","sequence"))
- .method("getOrder", &ArchonLVX::getOrder)
- (parameter_names("HC","channel"))
-   .method("setV", rttr::select_overload<void(bool, int, double)>(&ArchonLVX::setV))
- (parameter_names("HC","channel","V"))
-   .method("setV", rttr::select_overload<void(const std::string&, int, double)>(&ArchonLVX::setV))
-   (parameter_names("nmemonic", "channel", "V"))
- .method("getV",&ArchonLVX::getV)
- (parameter_names("HC","channel"))
- .method("setEnable",&ArchonLVX::setEnable)
- (parameter_names("HC","channel","onoff"))
- .method("getEnable",&ArchonLVX::getEnable)
- (parameter_names("HC","channel"))
- .method("setLimit",&ArchonLVX::setLimit)
- (parameter_names("channel","limit_mA"))
- .method("getLimit",&ArchonLVX::getLimit)
- .method("measureI",&ArchonLVX::measureI)
- (parameter_names("HC","channel"))
- .method("measureV",&ArchonLVX::measureV)
- (parameter_names("HC","channel"))
+     .method("setLabel",
+             &ArchonLVX::setLabel)(parameter_names("HC", "channel", "label"))
+     .method("getLabel", &ArchonLVX::getLabel)(parameter_names("HC", "channel"))
+     .method("setOrder",
+             &ArchonLVX::setOrder)(parameter_names("HC", "channel", "sequence"))
+     .method("getOrder", &ArchonLVX::getOrder)(parameter_names("HC", "channel"))
+     .method("setV",
+             rttr::select_overload<void(bool, int, double)>(&ArchonLVX::setV))(
+         parameter_names("HC", "channel", "V"))
+     .method("setV",
+             rttr::select_overload<void(const std::string &, int, double)>(
+                 &ArchonLVX::setV))(parameter_names("nmemonic", "channel", "V"))
+     .method("getV", &ArchonLVX::getV)(parameter_names("HC", "channel"))
+     .method("setEnable",
+             &ArchonLVX::setEnable)(parameter_names("HC", "channel", "onoff"))
+     .method("getEnable",
+             &ArchonLVX::getEnable)(parameter_names("HC", "channel"))
+     .method("setLimit",
+             &ArchonLVX::setLimit)(parameter_names("channel", "limit_mA"))
+
+     .method("getLimit", &ArchonLVX::getLimit)
+
+#ifndef ARCHON_NO_DEPRECATED
+     .method("measureI", &ArchonLVX::measureI)(parameter_names("HC", "channel"))
+     .method("measureV", &ArchonLVX::measureV)(parameter_names("HC", "channel"))
+
+#endif     
    .method("biases", rttr::select_overload<std::vector<archon_biasprop>()>(&ArchonLVX::biases))
 
    

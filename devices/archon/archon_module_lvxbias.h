@@ -45,11 +45,13 @@ namespace foxtrot
             
             void setLimit(int channel, int limit_mA);
             int getLimit(int channel);
-            
+
+
+#ifndef ARCHON_NO_DEPRECATED            
             //TODO: GPIO
-            double measureV(bool HC, int channel);
-	    double measureI(bool HC, int channel);
-	    
+            [[deprecated]] double measureV(bool HC, int channel);
+	    [[deprecated]] double measureI(bool HC, int channel);
+#endif
 	    
         protected:
             Logging _lg; 

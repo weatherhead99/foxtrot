@@ -34,6 +34,9 @@
 
 #include "../device_utils/string_utils.hh"
 
+#include <experimental/scope>
+
+
 #define READ_SIZE 1024
 
 #define ARCHON_MAX_CONFIG_LINES 16384
@@ -67,14 +70,24 @@ struct foxtrot::devices::detail::archonimpl {
   bool constmapvalid = false;
 
   bool taplinemapvalid = false;
+  std::optional<int> true_taplines = std::nullopt;
 
-  
-  void update_internalmap(archon & arch, foxtrot::Logging & lg,
-                          ArchMapType & map, const std::string& basestr, bool& validflag, char splitchar='=')
+  void update_internalmap(archon &arch, foxtrot::Logging &lg, ArchMapType &map,
+                          const std::string &basestr, bool &validflag,
+                          char splitchar = '=',
+			  std::optional<int> override_n=std::nullopt)
   {
 
-    auto n_qry = std::format("{}S", basestr);    
-    auto confvals = arch.read_key_range(n_qry, basestr);
+    std::vector<string> confvals;
+    if (override_n.has_value())
+      {
+      auto n_qry = *override_n;
+      confvals = arch.read_key_range(n_qry, basestr);
+    } else
+      {
+      auto n_qry = std::format("{}S", basestr);
+      confvals = arch.read_key_range(n_qry, basestr);
+      }
 
     map.clear();
     int u = 0;
@@ -91,6 +104,8 @@ struct foxtrot::devices::detail::archonimpl {
       constmapvalid = false;
       taplinemapvalid = false;
   }
+
+
   
 };
 
@@ -629,13 +644,21 @@ std::optional<int> devices::archon::find_config_line_from_key(const std::string&
 }
 
 
+
 std::vector<std::string> devices::archon::read_key_range(const std::string& n_key, const std::string& keybase) const
 {
   unsigned n = std::stoul(readKeyValue(n_key));
+  return read_key_range(n, keybase);
+
+}
+
+std::vector<std::string>
+devices::archon::read_key_range(int n, const std::string &keybase) const
+{
   std::vector<std::string> out;
   out.reserve(n);
 
-  for(unsigned i =0; i < n; i++)
+  for(int i =0; i < n; i++)
     {
       auto kstr = std::format("{}{}", keybase, i);
       out.push_back(readKeyValue(kstr));
@@ -644,6 +667,7 @@ std::vector<std::string> devices::archon::read_key_range(const std::string& n_ke
   return out;
 
 }
+
 
 
 const std::string& devices::archon::readKeyValue(const string& key) const
@@ -1151,9 +1175,14 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
   auto taplinestr = assemble_tapline(nmemonic, AD, LR, gain, offset);
 
   // update the tapline map if it's out of sync
-  if (impl->taplinemapvalid == false)
-    impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
-                             impl->taplinemapvalid);
+  if (impl->taplinemapvalid == false) {
+    if (impl->true_taplines.has_value())
+          impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+                                   impl->taplinemapvalid, '=',
+                                   *(impl->true_taplines));
+    else
+      impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
+    }
 
   auto qrystr = std::format("{}{}", nmemonic, AD);
   if (impl->taplinemap.contains(qrystr))
@@ -1170,6 +1199,33 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
     cmd("APPLYCDS");
 
 }
+
+void devices::archon::override_used_taplines(int use_lines,
+                                             bool apply_immediate) {
+
+  if (!impl->true_taplines.has_value()) {
+
+    if (*(impl->true_taplines) == use_lines)
+      impl->true_taplines = std::nullopt;
+
+    // we've already overridden before, simply update "TAPLINES" config key
+    else
+      impl->true_taplines = impl->taplinemap.size();
+  }
+  writeKeyValue("TAPLINES", std::to_string(use_lines));
+  if (apply_immediate)
+    cmd("APPLYCDS");
+
+
+}
+
+int devices::archon::used_taplines() const {
+  if (impl->true_taplines.has_value())
+    return std::stoi(readKeyValue("TAPLINES"));
+
+  return impl->taplinemap.size();
+}  
+
 
 
 void devices::archon::apply_all_params()
@@ -1235,9 +1291,12 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 }
 
 
-std::vector<std::string> devices::archon::taplines()
-{
-  return read_key_range("TAPLINES", "TAPLINE");   
+std::vector<std::string> devices::archon::taplines() {
+
+  if (impl->true_taplines.has_value())
+    return read_key_range(*(impl->true_taplines), "TAPLINE");
+  else
+    return read_key_range("TAPLINES", "TAPLINE");
 }
 
 
@@ -1660,12 +1719,13 @@ RTTR_REGISTRATION
      // .property_readonly("get_constants",&archon::get_constants)
      .property_readonly("get_power", &archon::get_power)
      //.property_readonly("get_parameters",&archon::get_parameters)
-     .method("settap",
-             &archon::settap)(parameter_names("AD", "LR", "gain", "offset", "ADM", "apply_immediate"))
-   (parameter_names("AD", "LR", "gain", "offset"))     
-  .method("load_timing", &archon::load_timing)
-   .property_readonly("moduleprops", &archon::moduleprops)
-   .method("taplines", &archon::taplines)
+     .method("settap", &archon::settap)(parameter_names(
+         "AD", "LR", "gain", "offset", "ADM", "apply_immediate"))(
+         parameter_names("AD", "LR", "gain", "offset"))
+     .method("load_timing", &archon::load_timing)
+     .property_readonly("moduleprops", &archon::moduleprops)
+     .method("taplines", &archon::taplines)
+   .property_readonly("used_taplines", &archon_used_taplines)     
    
 
  ;

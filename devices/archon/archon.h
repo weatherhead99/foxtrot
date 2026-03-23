@@ -293,12 +293,12 @@ namespace foxtrot {
     
     void sync_archon_timer();
     HRTimePoint get_archon_time();
-    void setCDSTiming(int reset_start, int reset_end, int signal_start, int signal_end);
-
-    std::array<int,4> getCDSTiming();
 
     void settapline(int n, const std::string& tapline);
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
+
+    void override_used_taplines(int use_lines, bool apply_immediate = false);
+    int used_taplines() const;
     
     void settrigoutpower(bool onoff);
     bool gettrigoutpower();
@@ -344,8 +344,10 @@ namespace foxtrot {
   private:
     std::optional<int> find_config_line_from_key(const std::string& key);
 
-    std::vector<std::string> read_key_range(const std::string& key_n,
-					      const std::string& keybase) const;
+    std::vector<std::string> read_key_range(const std::string &key_n,
+                                            const std::string &keybase) const;
+
+    std::vector<std::string> read_key_range(int n, const std::string& keybase) const;
     
     //NOTE: readConfigLine and writeConfigLine are unsafe
     //to call because they cause the config line map
