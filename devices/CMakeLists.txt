@@ -24,7 +24,7 @@ function(ft_device_lib_configure tgtname)
     target_link_libraries(${tgtname} PUBLIC RTTR::Core foxtrot::foxtrot_core foxtrot::foxtrot_protocols)
   endif()
   message(WARNING "ft devices buildin lcudes: ${ft_devices_build_includes}")
-    target_link_libraries(foxtrot_devices PRIVATE ${tgtname})
+    target_link_libraries(foxtrot_devices PUBLIC ${tgtname})
     target_include_directories(${tgtname} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
       $<BUILD_INTERFACE:${ft_devices_build_includes}>
     $<INSTALL_INTERFACE:${ft_devices_install_includes}>)
