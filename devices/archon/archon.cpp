@@ -56,21 +56,38 @@ std::pair<std::string_view, std::string_view> spliteq(const std::string& in, cha
 }
 
 
+// enable heterogeneous lookup in the string map keys
+struct string_hash {
+  using is_transparent = void;
+  [[nodiscard]] size_t operator()(const char *txt) const {
+    return std::hash<std::string_view>{}(txt);
+  }
+  [[nodiscard]] size_t operator()(std::string_view txt) const {
+    return std::hash<std::string_view>{}(txt);
+  }
+  [[nodiscard]] size_t operator()(const std::string &txt) const {
+    return std::hash<std::string>{}(txt);
+  }
+};
+
+
+
+
 
 
 struct foxtrot::devices::detail::archonimpl {
-  using ArchMapType = std::unordered_map<std::string, std::pair<std::string, int>>;
+  using ArchMapType = std::unordered_map<std::string, std::pair<std::string, int>, string_hash, std::equal_to<>>;
   ArchMapType parammap;
   ArchMapType constmap;
   ArchMapType taplinemap;
 
   std::vector<std::string> configindex;
-  std::unordered_map<std::string, std::string> configmap;  
+  std::unordered_map<std::string, std::string, string_hash, std::equal_to<>> configmap;  
   bool parammapvalid = false;
   bool constmapvalid = false;
 
   bool taplinemapvalid = false;
-  std::optional<int> true_taplines = std::nullopt;
+  //std::optional<int> true_taplines = std::nullopt;
 
   void update_internalmap(archon &arch, foxtrot::Logging &lg, ArchMapType &map,
                           const std::string &basestr, bool &validflag,
@@ -555,22 +572,38 @@ void devices::archon::clear_config()
 }
 
 
+int find_empty_insertion_line(const auto &confidx) {
+
+  auto pit = std::find(confidx.begin(), confidx.end(), "");
+  if (pit == confidx.end())
+    return confidx.size();
+
+  return std::distance(confidx.begin(), pit);
+}
+
+
+
+
 int devices::archon::writeConfigLine(const string& line,int num)
 {
-  //check if possible
-  if(impl->configindex.size() >= ARCHON_MAX_CONFIG_LINES)
-  {
-   throw foxtrot::DeviceError("tried to write too many config lines to archon");
-  }
+  // check if possible
   if(line.size() >= 2047)
   {
    throw foxtrot::DeviceError("tried to write a config line to archon that was too long"); 
   }
 
-  if(num <0)
-  {
-    //if the value -1 is passed in, add a new line
-    num = impl->configindex.size();
+
+  if (num < 0) {
+    // if the value -1 is passed in, this is a new line.
+
+   // First, check if we have an empty config line to put it into
+    num = find_empty_insertion_line(impl->configindex);
+    
+    if(num >= ARCHON_MAX_CONFIG_LINES)
+    {
+    throw foxtrot::DeviceError("tried to write too many config lines to archon");
+    }
+
   }
   else if(static_cast<unsigned>(num) > impl->configindex.size())
   {
@@ -582,6 +615,35 @@ int devices::archon::writeConfigLine(const string& line,int num)
 
   return num;
 
+}
+
+void devices::archon::DelConfigLine(int num)
+{
+
+  //get the current config line. Wilil throw if it's too big etc, worry about that later
+  auto& curline = impl->configindex.at(num);
+  auto [k,v] = spliteq(curline);
+
+  // pop the value out of the config line map
+  //again throws if not in the map
+
+  // n.b heterogeneous lookup in .erase() is c++23 and beyond only
+  // (because of course it is).
+  // So in c++20 need to do find, then erase
+
+  auto fiter = impl->configmap.find(k);
+  if (fiter == impl->configmap.end())
+    throw std::logic_error("key to erase not found in config map! Big problem!");
+
+  impl->configmap.erase(fiter);
+
+
+  //now erase the actual config line 
+  writeConfigLine("", num);
+
+  // and overwrite it in the index
+  curline = "";
+  
 }
 
 
@@ -669,6 +731,24 @@ devices::archon::read_key_range(int n, const std::string &keybase) const
 
 }
 
+void devices::archon::del_key_range(const std::string &key_n,
+                                    const std::string &keybase) {
+
+  auto n = std::stoul(readKeyValue(key_n));
+  del_key_range(n, keybase);
+
+}
+
+void devices::archon::del_key_range(int n, const std::string &keybase) {
+  for (int i = 0; i < n; i++) {
+      auto kstr = std::format("{}{}", keybase, i);
+      DelKeyValue(kstr);
+  }      
+
+}  
+
+
+
 
 
 const std::string& devices::archon::readKeyValue(const string& key) const
@@ -698,13 +778,24 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
     }
   else
     {
-      writeConfigLine(linestr,*linum);
+      writeConfigLine(linestr, *linum);
+      impl->configindex[*linum] = val;
       impl->configmap.at(key) = val;
     }
 
   impl->invalidate_maps();
   //NOTE: is this exception safe?
   //update the mappings etc
+}
+
+void devices::archon::DelKeyValue(const std::string &key) {
+  auto linum = find_config_line_from_key(key);
+  if (not linum.has_value())
+    throw std::out_of_range("tried to delete non-existing key!");
+
+  DelConfigLine(*linum);
+  impl->invalidate_maps();
+
 }
 
 
@@ -752,9 +843,15 @@ void foxtrot::devices::archon::lockbuffer(int buf)
     cmd("LOCK" + std::to_string(buf));
 }
 
-const std::unordered_map<std::string, std::string>& devices::archon::config() const
-{
-  return impl->configmap;
+std::unordered_map<std::string, std::string> 
+devices::archon::config() const {
+  //TODO: perf here may be hideous. It may not be, though, compiler might elide the actual memory copying
+    std::unordered_map<std::string, std::string> out;
+    std::copy(impl->configmap.begin(), impl->configmap.end(),
+	      std::inserter(out, out.end()));  
+    
+   
+  return out;
 }
 
 std::vector<std::pair<std::string, std::string>> devices::archon::ordered_config() const
@@ -1109,6 +1206,15 @@ void devices::archon::settapline(int n, const string& tapline)
   }    
 }
 
+void devices::archon::settaplines(const std::vector<std::string> &taplines)
+{
+  
+
+
+}  
+    
+
+
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
 {
   char LRchar = LR ? 'R' : 'L';
@@ -1135,12 +1241,12 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
   auto taplinestr = assemble_tapline(nmemonic, AD, LR, gain, offset);
 
   // update the tapline map if it's out of sync
-  if (impl->taplinemapvalid == false) {
-    if (impl->true_taplines.has_value())
-          impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
-                                   impl->taplinemapvalid, '=',
-                                   *(impl->true_taplines));
-    else
+   if (impl->taplinemapvalid == false) {
+  //   if (impl->true_taplines.has_value())
+  //         impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+  //                                  impl->taplinemapvalid, '=',
+  //                                  *(impl->true_taplines));
+  //   else
       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
     }
 
@@ -1160,48 +1266,48 @@ void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
 
 }
 
-void devices::archon::override_used_taplines(int use_lines,
-                                             bool apply_immediate) {
+// void devices::archon::override_used_taplines(int use_lines,
+//                                              bool apply_immediate) {
 
-  if (!impl->true_taplines.has_value()) {
+//   if (!impl->true_taplines.has_value()) {
 
-    if (*(impl->true_taplines) == use_lines)
-      impl->true_taplines = std::nullopt;
+//     if (*(impl->true_taplines) == use_lines)
+//       impl->true_taplines = std::nullopt;
 
-    // we've already overridden before, simply update "TAPLINES" config key
-    else
-      impl->true_taplines = impl->taplinemap.size();
-  }
-  writeKeyValue("TAPLINES", std::to_string(use_lines));
-  if (apply_immediate)
-    cmd("APPLYCDS");
-
-
-}
-
-void devices::archon::release_tapline_override(bool apply_immediate) {
-  if (!impl->true_taplines.has_value()) {
-    // taplines are not overridden, do nothing
-    return;
-  }
+//     // we've already overridden before, simply update "TAPLINES" config key
+//     else
+//       impl->true_taplines = impl->taplinemap.size();
+//   }
+//   writeKeyValue("TAPLINES", std::to_string(use_lines));
+//   if (apply_immediate)
+//     cmd("APPLYCDS");
 
 
-  writeKeyValue("TAPLINES", std::to_string(*(impl->true_taplines)));
-  impl->true_taplines = std::nullopt;
+// }
 
-  if (apply_immediate)
-    cmd("APPLYCDS");
+// void devices::archon::release_tapline_override(bool apply_immediate) {
+//   if (!impl->true_taplines.has_value()) {
+//     // taplines are not overridden, do nothing
+//     return;
+//   }
+
+
+//   writeKeyValue("TAPLINES", std::to_string(*(impl->true_taplines)));
+//   impl->true_taplines = std::nullopt;
+
+//   if (apply_immediate)
+//     cmd("APPLYCDS");
   
 
-}  
+// }  
 
-int devices::archon::used_taplines() const {
+// int devices::archon::used_taplines() const {
   
-  if (impl->true_taplines.has_value())
-    return std::stoi(readKeyValue("TAPLINES"));
+//   if (impl->true_taplines.has_value())
+//     return std::stoi(readKeyValue("TAPLINES"));
 
-  return impl->taplinemap.size();
-}  
+//   return impl->taplinemap.size();
+// }  
 
 
 
@@ -1272,14 +1378,13 @@ std::vector<std::string> devices::archon::taplines() {
 
   // update the tapline map if it's out of sync
   if (impl->taplinemapvalid == false) {
-    if (impl->true_taplines.has_value())
-          impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
-                                   impl->taplinemapvalid, '=',
-                                   *(impl->true_taplines));
-    else
+    // if (impl->true_taplines.has_value())
+    //       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+    //                                impl->taplinemapvalid, '=',
+    //                                *(impl->true_taplines));
+    //else
       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
     }
-
 
     std::vector<std::string> out;
     out.reserve(impl->taplinemap.size());
@@ -1289,14 +1394,6 @@ std::vector<std::string> devices::archon::taplines() {
     return out;
 	  
 
-    
-
-  //old implementation directly reading configuration
-    
-  // if (impl->true_taplines.has_value())
-  //   return read_key_range(*(impl->true_taplines), "TAPLINE");
-  // else
-  //   return read_key_range("TAPLINES", "TAPLINE");
 }
 
 
@@ -1702,8 +1799,8 @@ RTTR_REGISTRATION
          parameter_names("buf"), metadata("streamdata", true))(
          parameter_names("buf"))(parameter_names("reset_start", "reset_end",
                                                  "signal_start", "signal_end"))
-     //.method("settapline", &archon::settapline)
-     //(parameter_names("n","tapline"))
+     .method("settapline", &archon::settapline)
+     (parameter_names("n","tapline"))
      .property("trigoutinvert", &archon::gettrigoutinvert,
                &archon::settrigoutinvert)(parameter_names("invert"))
      .property("trigoutpower", &archon::gettrigoutpower,
@@ -1725,11 +1822,11 @@ RTTR_REGISTRATION
      .method("load_timing", &archon::load_timing)
      .property_readonly("moduleprops", &archon::moduleprops)
      .method("taplines", &archon::taplines)
-     .property_readonly("used_taplines", &archon::used_taplines)
-     .method("override_used_taplines", &archon::override_used_taplines)(
-         parameter_names("used_lines", "apply_immediate"))
-     .method("release_tapline_override", &archon::release_tapline_override)
-   (parameter_names("apply_immediate"))
+   //  .property_readonly("used_taplines", &archon::used_taplines)
+   // .method("override_used_taplines", &archon::override_used_taplines)(
+   //      parameter_names("used_lines", "apply_immediate"))
+   //     .method("release_tapline_override", &archon::release_tapline_override)
+   //(parameter_names("apply_immediate"))
    
 
  ;

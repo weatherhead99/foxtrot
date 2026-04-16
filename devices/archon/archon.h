@@ -227,16 +227,17 @@ namespace foxtrot {
     void set_tapinfo(const archon_tap_info& tapinfo);
 
     std::vector<std::string> taplines();
+    void set_taplines(const std::vector<std::string>& taplines);
     
     const std::map<int,ArchonModule&> getAllModules() const;
 
     std::shared_ptr<ArchonModule> getModulePtr(int position);
     
-    
+
 
     void load_config(const std::string& cfg);
     
-    const std::unordered_map<std::string, std::string>& config() const;
+    std::unordered_map<std::string, std::string> config() const;
     std::vector<std::pair<std::string, std::string>> ordered_config() const;
 
     std::unordered_map<std::string, int> params();
@@ -284,12 +285,12 @@ namespace foxtrot {
     void sync_archon_timer();
     HRTimePoint get_archon_time();
 
-    void settapline(int n, const std::string& tapline);
+    void settapline(int n, const std::string &tapline);
+    void settaplines(const std::vector<string>& taplines);
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
 
-    void override_used_taplines(int use_lines, bool apply_immediate = false);
-    void release_tapline_override(bool apply_immediate=false);
-    int used_taplines() const;
+
+    
     
     void settrigoutpower(bool onoff);
     bool gettrigoutpower();
@@ -338,14 +339,21 @@ namespace foxtrot {
     std::vector<std::string> read_key_range(const std::string &key_n,
                                             const std::string &keybase) const;
 
-    std::vector<std::string> read_key_range(int n, const std::string& keybase) const;
+    std::vector<std::string> read_key_range(int n,
+                                            const std::string &keybase) const;
+
+    void del_key_range(const std::string &key_n,
+		       const std::string& keybase);
+    void del_key_range(int n,
+		       const std::string& keybase);
     
     //NOTE: readConfigLine and writeConfigLine are unsafe
     //to call because they cause the config line map
     //to get out of sync!
     int writeConfigLine(const std::string& line, int num=-1);
 
-    
+    void DelConfigLine(int num);
+    void DelKeyValue(const std::string& key);
     
     std::unique_ptr<detail::archonimpl> impl;   
      
