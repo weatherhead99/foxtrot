@@ -1386,10 +1386,14 @@ std::vector<std::string> devices::archon::taplines() {
       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
     }
 
+  _lg.strm(sl::debug) << "tapline map updated";
+  
     std::vector<std::string> out;
     out.reserve(impl->taplinemap.size());
-    for (auto [k, v] : impl->taplinemap)
-      out.push_back(std::get<0>(v));
+    for (auto [k, v] : impl->taplinemap) {
+      _lg.strm(sl::trace) << "got value for key: " << k;
+	out.push_back(std::get<0>(v));
+      }
 
     return out;
 	  
