@@ -111,8 +111,9 @@ struct foxtrot::devices::detail::archonimpl {
     int u = 0;
     for (auto confline : confvals) {
       lg.strm(sl::trace) << "config line: " << confline;
-	auto [paramk, paramv] = spliteq(confline, splitchar);
-	map.emplace(paramk, std::make_pair(paramv, u++));
+      auto paramk = std::format("{}{}", basestr,u );
+      map.emplace(paramk, std::make_pair(confline, u++))
+          ;
     }
     validflag = true;
   }
@@ -1391,7 +1392,7 @@ std::vector<std::string> devices::archon::taplines() {
     std::vector<std::string> out;
     out.reserve(impl->taplinemap.size());
     for (auto [k, v] : impl->taplinemap) {
-      _lg.strm(sl::trace) << "got value for key: " << k;
+      _lg.strm(sl::trace) << "got value for key: " << k << ", value: " << std::get<0>(v) << " on line: " << std::get<1>(v);
 	out.push_back(std::get<0>(v));
       }
 
@@ -1803,8 +1804,7 @@ RTTR_REGISTRATION
          parameter_names("buf"), metadata("streamdata", true))(
          parameter_names("buf"))(parameter_names("reset_start", "reset_end",
                                                  "signal_start", "signal_end"))
-     .method("settapline", &archon::settapline)
-     (parameter_names("n","tapline"))
+     .method("settapline", &archon::settapline)(parameter_names("n", "tapline"))
      .property("trigoutinvert", &archon::gettrigoutinvert,
                &archon::settrigoutinvert)(parameter_names("invert"))
      .property("trigoutpower", &archon::gettrigoutpower,
@@ -1826,11 +1826,14 @@ RTTR_REGISTRATION
      .method("load_timing", &archon::load_timing)
      .property_readonly("moduleprops", &archon::moduleprops)
      .method("taplines", &archon::taplines)
-   //  .property_readonly("used_taplines", &archon::used_taplines)
-   // .method("override_used_taplines", &archon::override_used_taplines)(
-   //      parameter_names("used_lines", "apply_immediate"))
-   //     .method("release_tapline_override", &archon::release_tapline_override)
-   //(parameter_names("apply_immediate"))
+     //  .property_readonly("used_taplines", &archon::used_taplines)
+     // .method("override_used_taplines", &archon::override_used_taplines)(
+     //      parameter_names("used_lines", "apply_immediate"))
+     //     .method("release_tapline_override",
+     //     &archon::release_tapline_override)
+     //(parameter_names("apply_immediate"))
+   .method("settaplines", &archon::settaplines)(parameter_names("taplines"))
+     
    
 
  ;
