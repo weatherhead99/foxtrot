@@ -79,22 +79,23 @@ struct foxtrot::devices::detail::archonimpl {
   {
 
     std::vector<string> confvals;
-    if (override_n.has_value())
-      {
+    if (override_n.has_value()) {
+      lg.strm(sl::trace) << "override n has value: " << *override_n;
       auto n_qry = *override_n;
       confvals = arch.read_key_range(n_qry, basestr);
     } else
       {
       auto n_qry = std::format("{}S", basestr);
+      lg.strm(sl::trace) << "n_qry value is: " << n_qry;
       confvals = arch.read_key_range(n_qry, basestr);
       }
 
     map.clear();
     int u = 0;
-    for (auto confline : confvals)
-      {
+    for (auto confline : confvals) {
+      lg.strm(sl::trace) << "config line: " << confline;
 	auto [paramk, paramv] = spliteq(confline, splitchar);
-      map.emplace(paramk, std::make_pair(paramv, u++));
+	map.emplace(paramk, std::make_pair(paramv, u++));
     }
     validflag = true;
   }
