@@ -707,49 +707,6 @@ void devices::archon::writeKeyValue(const string& key, const string& val)
 }
 
 
-// void devices::archon::set_timing_lines(int n)
-// {
-//   writeKeyValue("LINES",std::to_string(n));
-
-// }
-
-// int devices::archon::get_timing_lines()
-// {
-//   return std::stoi(readKeyValue("LINES"));
-
-// }
-
-// int devices::archon::get_states()
-// {
-//   return std::stoi(readKeyValue("STATES"));
-
-// }
-
-// void devices::archon::set_states(int n)
-// {
-//   writeKeyValue("STATES",std::to_string(n));
-// }
-
-// int devices::archon::get_constants()
-// {
-//   return std::stoi(readKeyValue("CONSTANTS"));
-// }
-
-// void devices::archon::set_constants(int n)
-// {
-//   writeKeyValue("CONSTANTS",std::to_string(n));
-// }
-
-// int devices::archon::get_parameters()
-// {
-//   return std::stoi(readKeyValue("PARAMETERS"));
-// }
-
-// void devices::archon::set_parameters(int n)
-// {
-//   writeKeyValue("PARAMETERS",std::to_string(n));
-// }
-
 void foxtrot::devices::archon::set_power(bool onoff)
 {
     if(onoff)
@@ -1218,6 +1175,22 @@ void devices::archon::override_used_taplines(int use_lines,
 
 
 }
+
+void devices::archon::release_tapline_override(bool apply_immediate) {
+  if (!impl->true_taplines.has_value()) {
+    // taplines are not overridden, do nothing
+    return;
+  }
+
+
+  writeKeyValue("TAPLINES", std::to_string(*(impl->true_taplines)));
+  impl->true_taplines = std::nullopt;
+
+  if (apply_immediate)
+    cmd("APPLYCDS");
+  
+
+}  
 
 int devices::archon::used_taplines() const {
   if (impl->true_taplines.has_value())
@@ -1725,7 +1698,11 @@ RTTR_REGISTRATION
      .method("load_timing", &archon::load_timing)
      .property_readonly("moduleprops", &archon::moduleprops)
      .method("taplines", &archon::taplines)
-   .property_readonly("used_taplines", &archon_used_taplines)     
+     .property_readonly("used_taplines", &archon::used_taplines)
+     .method("override_used_taplines", &archon::override_used_taplines)(
+         parameter_names("used_lines", "apply_immediate"))
+     .method("release_tapline_override", &archon::release_tapline_override)
+   (parameter_names("apply_immediate"))
    
 
  ;

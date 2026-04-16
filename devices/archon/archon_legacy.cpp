@@ -61,6 +61,54 @@ bool foxtrot::devices::archon_legacy::isbuffercomplete(int buf)
 
 }
 
+
+
+void devices::archon_legacy::set_timing_lines(int n)
+{
+  writeKeyValue("LINES",std::to_string(n));
+
+}
+
+int devices::archon_legacy::get_timing_lines()
+{
+  return std::stoi(readKeyValue("LINES"));
+
+}
+
+int devices::archon_legacy::get_states()
+{
+  return std::stoi(readKeyValue("STATES"));
+
+}
+
+void devices::archon_legacy::set_states(int n)
+{
+  writeKeyValue("STATES",std::to_string(n));
+}
+
+int devices::archon_legacy::get_constants()
+{
+  return std::stoi(readKeyValue("CONSTANTS"));
+}
+
+void devices::archon_legacy::set_constants(int n)
+{
+  writeKeyValue("CONSTANTS",std::to_string(n));
+}
+
+int devices::archon_legacy::get_parameters()
+{
+  return std::stoi(readKeyValue("PARAMETERS"));
+}
+
+void devices::archon_legacy::set_parameters(int n)
+{
+  writeKeyValue("PARAMETERS",std::to_string(n));
+}
+
+
+
+
 int foxtrot::devices::archon_legacy::get_frameno(int buf)
 {
     std::ostringstream oss ;

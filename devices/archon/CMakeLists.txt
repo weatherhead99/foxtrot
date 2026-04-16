@@ -12,5 +12,5 @@ target_compile_options(archon PRIVATE -Wall)
 
 ft_device_lib_configure(archon)
 
-# add_executable(archon_test archon_test.cpp)
-# target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot archon )
+add_executable(archon_test test_progs/archon_test.cpp)
+target_link_libraries(archon_test  ${RTTR_TARGET} foxtrot::foxtrot_core archon )

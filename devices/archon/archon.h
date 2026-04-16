@@ -233,14 +233,6 @@ namespace foxtrot {
     std::shared_ptr<ArchonModule> getModulePtr(int position);
     
     
-    //void set_timing_lines(int n);
-    //int get_timing_lines();
-    
-    //void set_states(int n);
-    //int get_states();
-    
-    //void set_parameters(int n);
-    //int get_parameters();
 
     void load_config(const std::string& cfg);
     
@@ -259,8 +251,6 @@ namespace foxtrot {
     
 
     
-    //void set_constants(int n);
-    //int get_constants();
     
     void set_power(bool onoff);
     archon_power_status get_power();
@@ -298,6 +288,7 @@ namespace foxtrot {
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
 
     void override_used_taplines(int use_lines, bool apply_immediate = false);
+    void release_tapline_override(bool apply_immediate=false);
     int used_taplines() const;
     
     void settrigoutpower(bool onoff);

@@ -31,8 +31,24 @@ namespace foxtrot
       bool get_32bit(int buf);
       int get_pixels(int buf);
       std::string get_tstamp(int buf);
-   
+
       bool isbuffercomplete(int buf);
+
+
+      void set_timing_lines(int n);
+      int get_timing_lines();
+    
+      void set_states(int n);
+      int get_states();
+    
+      void set_parameters(int n);
+      int get_parameters();
+
+      void set_constants(int n);
+      int get_constants();
+
+
+      
     protected:
       archon_legacy(std::shared_ptr<simpleTCPBase> proto);
     private:

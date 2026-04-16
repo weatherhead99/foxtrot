@@ -1,13 +1,14 @@
 #include "archon.h"
-#include "simpleTCP.h"
+#include <foxtrot/protocols/simpleTCP.h>
+
 #include <memory>
 #include <string>
 #include <iostream>
-#include "archon_modules.h"
+#include "archon_legacy.h"
 #include "archon_module_heaterx.h"
-#include "TestUtilities.h"
-#include "backward.hpp"
-#include <DeviceError.h>
+#include <foxtrot/TestUtilities.h>
+#include <foxtrot/backward.hpp>
+#include <foxtrot/DeviceError.h>
 #include <vector>
 
 using std::cout;
@@ -43,12 +44,14 @@ int main(int argc, char** argv)
   std::shared_ptr<foxtrot::protocols::simpleTCP> proto(new foxtrot::protocols::simpleTCP(&params));
   
   std::cout << "init archon... " << std::endl;
+
+  auto a = foxtrot::devices::archon_legacy::create(std::move(proto));
   
-  foxtrot::devices::archon a(proto);
+  //  foxtrot::devices::archon_legacy a(proto);
   
   
   
-  auto modules = a.getAllModules();
+  auto modules = a->getAllModules();
   for( auto& mod: modules)
   {
     std::cout << "module in position: " << mod.first << std::endl;
@@ -57,7 +60,7 @@ int main(int argc, char** argv)
   
   
   std::cout << "clearing config..." << std::endl;
-  a.clear_config();
+  a->clear_config();
   
   std::cout << "getting heater module..." << std::endl;
   
@@ -76,20 +79,20 @@ int main(int argc, char** argv)
 //  auto current = heater->getSensorCurrent(foxtrot::devices::HeaterXSensors::A);
 //  cout << current << endl;
 //  
- a.set_timing_lines(0);
- a.set_states(0);
- a.set_constants(0);
- a.set_parameters(0);
+ a->set_timing_lines(0);
+ a->set_states(0);
+ a->set_constants(0);
+ a->set_parameters(0);
  
  cout << "applying config... " << endl;
  try{
    
-  a.applyall();
+  a->applyall();
  }
  catch(foxtrot::DeviceError& err)
  {
    cout << "archon log:" << endl;
-   auto logs = a.fetch_all_logs();
+   auto logs = a->fetch_all_logs();
    for(auto& log : logs)
    {
      cout << log << endl;
