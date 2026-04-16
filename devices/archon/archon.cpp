@@ -926,10 +926,12 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
       
       impl->configmap.clear();
       impl->configindex.clear();
+      impl->taplinemap.clear();
       return;
     }
   impl->configmap.clear();
   impl->configindex.clear();
+  impl->taplinemap.clear();
   int i;
   impl->configindex.reserve(ARCHON_MAX_CONFIG_LINES);
   for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
@@ -1193,6 +1195,7 @@ void devices::archon::release_tapline_override(bool apply_immediate) {
 }  
 
 int devices::archon::used_taplines() const {
+  
   if (impl->true_taplines.has_value())
     return std::stoi(readKeyValue("TAPLINES"));
 
@@ -1266,10 +1269,33 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 
 std::vector<std::string> devices::archon::taplines() {
 
-  if (impl->true_taplines.has_value())
-    return read_key_range(*(impl->true_taplines), "TAPLINE");
-  else
-    return read_key_range("TAPLINES", "TAPLINE");
+  // update the tapline map if it's out of sync
+  if (impl->taplinemapvalid == false) {
+    if (impl->true_taplines.has_value())
+          impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+                                   impl->taplinemapvalid, '=',
+                                   *(impl->true_taplines));
+    else
+      impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
+    }
+
+
+    std::vector<std::string> out;
+    out.reserve(impl->taplinemap.size());
+    for (auto [k, v] : impl->taplinemap)
+      out.push_back(std::get<0>(v));
+
+    return out;
+	  
+
+    
+
+  //old implementation directly reading configuration
+    
+  // if (impl->true_taplines.has_value())
+  //   return read_key_range(*(impl->true_taplines), "TAPLINE");
+  // else
+  //   return read_key_range("TAPLINES", "TAPLINE");
 }
 
 
