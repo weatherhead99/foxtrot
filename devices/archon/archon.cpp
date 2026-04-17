@@ -1215,16 +1215,16 @@ void devices::archon::set_taplines(const std::vector<std::string> &taplines)
 }
 
 
-void devices::archon::clear_taplines() {
-  del_key_range("TAPLINES", "TAPLINE");
+void devices::archon::clear_taplines() { del_key_range("TAPLINES", "TAPLINE"); }
 
-}  
+
+void devices::archon::applycds() {cmd("APPLYCDS");};
 
 
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
 {
   char LRchar = LR ? 'R' : 'L';
-  auto taplinestr = std::format("{}{},{},{}", defn, LRchar, gain, offset);
+  auto taplinestr = std::format("{}{}{},{},{}", defn, AD, LRchar, gain, offset);
   return taplinestr;
 
 }

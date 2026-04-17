@@ -231,6 +231,7 @@ namespace foxtrot {
     // NOTE: not ideal but need because supporting heavy vector
     // arguments is a bigger job than I'm ready for right now
     void clear_taplines();
+    void applycds();
     
     const std::map<int,ArchonModule&> getAllModules() const;
 
