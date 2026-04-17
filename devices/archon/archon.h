@@ -227,7 +227,10 @@ namespace foxtrot {
     void set_tapinfo(const archon_tap_info& tapinfo);
 
     std::vector<std::string> taplines();
-    void set_taplines(const std::vector<std::string>& taplines);
+    void set_taplines(const std::vector<std::string> &taplines);
+    // NOTE: not ideal but need because supporting heavy vector
+    // arguments is a bigger job than I'm ready for right now
+    void clear_taplines();
     
     const std::map<int,ArchonModule&> getAllModules() const;
 
@@ -286,7 +289,6 @@ namespace foxtrot {
     HRTimePoint get_archon_time();
 
     void settapline(int n, const std::string &tapline);
-    void settaplines(const std::vector<string>& taplines);
     void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
 
 

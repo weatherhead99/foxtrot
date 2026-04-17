@@ -1207,13 +1207,18 @@ void devices::archon::settapline(int n, const string& tapline)
   }    
 }
 
-void devices::archon::settaplines(const std::vector<std::string> &taplines)
+void devices::archon::set_taplines(const std::vector<std::string> &taplines)
 {
-  
+  int i = 0;
+  for (auto tl : taplines)
+    settapline(i++, tl);
+}
 
+
+void devices::archon::clear_taplines() {
+  del_key_range("TAPLINES", "TAPLINE");
 
 }  
-    
 
 
 std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, double gain, double offset)
@@ -1832,7 +1837,8 @@ RTTR_REGISTRATION
      //     .method("release_tapline_override",
      //     &archon::release_tapline_override)
      //(parameter_names("apply_immediate"))
-   .method("settaplines", &archon::settaplines)(parameter_names("taplines"))
+   .method("clear_taplines", &archon::clear_taplines)
+     
      
    
 
