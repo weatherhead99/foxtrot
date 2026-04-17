@@ -290,6 +290,12 @@ std::vector<std::string> foxtrot::devices::dummyDevice::returns_nonstream_string
   return { "red", "yellow" , "green"};
 }
 
+
+std::string foxtrot::devices::dummyDevice::select_string_from_vector(
+    const std::vector<string> &in, int idx) {
+  return in.at(idx);
+}  
+
 int foxtrot::devices::dummyDevice::select_from_vector(const std::vector<int>& in, int idx)
 {
   return in.at(idx);
@@ -415,18 +421,30 @@ RTTR_REGISTRATION
      .method("takes_variant",
              &dummyDevice::takes_variant)(parameter_names("var"))
      .method("takes_tuple", &dummyDevice::takes_tuple)(parameter_names("in"))
-     .property_readonly("last_supplied_optional_value", &dummyDevice::get_last_supplied_optional_value)
-   .method("takes_optional", &dummyDevice::takes_optional)(parameter_names("opt"))
-   .method("returns_optional", &dummyDevice::returns_optional)(parameter_names("val","ret"))
-   .method("returns_nonstream_double_vector", &dummyDevice::returns_nonstream_double_vector)
-   .method("returns_nonstream_string_vector", &dummyDevice::returns_nonstream_string_vector)
-   .method("methodNamedSomethingSilly", select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
-   .method("methodNamedSomethingSilly", select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))(parameter_names("arg"))
-   .method("returns_strintmap", &dummyDevice::returns_strintmap)
-   .method("returns_intstrmap", &dummyDevice::returns_intstrmap)
-   .method("returns_unorderedmap", &dummyDevice::returns_unorderedmap)
-   .method("returns_current_time", &dummyDevice::returns_current_time)
-   .method("select_from_vector", &dummyDevice::select_from_vector)(parameter_names("in","idx"))
+     .property_readonly("last_supplied_optional_value",
+                        &dummyDevice::get_last_supplied_optional_value)
+     .method("takes_optional",
+             &dummyDevice::takes_optional)(parameter_names("opt"))
+     .method("returns_optional",
+             &dummyDevice::returns_optional)(parameter_names("val", "ret"))
+     .method("returns_nonstream_double_vector",
+             &dummyDevice::returns_nonstream_double_vector)
+     .method("returns_nonstream_string_vector",
+             &dummyDevice::returns_nonstream_string_vector)
+     .method("methodNamedSomethingSilly",
+             select_overload<bool()>(&dummyDevice::methodNamedSomethingSilly))
+     .method(
+         "methodNamedSomethingSilly",
+         select_overload<bool(bool)>(&dummyDevice::methodNamedSomethingSilly))(
+         parameter_names("arg"))
+     .method("returns_strintmap", &dummyDevice::returns_strintmap)
+     .method("returns_intstrmap", &dummyDevice::returns_intstrmap)
+     .method("returns_unorderedmap", &dummyDevice::returns_unorderedmap)
+     .method("returns_current_time", &dummyDevice::returns_current_time)
+     .method("select_from_vector",
+             &dummyDevice::select_from_vector)(parameter_names("in", "idx"))
+     .method("select_string_from_vector",
+	     &dummyDevice::select_string_from_vector)(parameter_names("in", "idx"))
 
    ;
 
@@ -470,7 +488,12 @@ RTTR_REGISTRATION
 
 registration::class_<std::unordered_map<string, string>>(
     "std::unordered_map<std::string,std::string>")
-  .constructor()(policy::ctor::as_object); 
+  .constructor()(policy::ctor::as_object);
+
+
+registration::class_<std::vector<int>>("std::vector<int>")
+ .constructor()(policy::ctor::as_object);
+
  
 }
     

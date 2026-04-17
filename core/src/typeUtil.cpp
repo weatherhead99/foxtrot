@@ -1010,8 +1010,14 @@ rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rt
     
     if(!target_tp.is_sequential_container())
         throw std::logic_error("tried to create an array at non target array type");
-    
+
+    if (!out.is_valid())
+      throw std::logic_error("output type creation failed, invalid");
+
     auto view = out.create_sequential_view();
+
+    if (!view.is_valid())
+      throw std::logic_error("invalid view created, what's happening?");
     
     if(view.is_dynamic())
         view.set_size(encarr.data().size());
@@ -1019,9 +1025,20 @@ rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rt
         if(view.get_size() != encarr.data().size())
             throw ReflectionError("invalid array size passed");
 
-    if(view.get_rank() != 1)
-        throw std::logic_error("can only handle arrays of rank 1 at present!");
+    if (view.get_rank() != 1) {
+            if (lg)
+	      {
+		lg->strm(sl::error) << "view rank reported is: " << view.get_rank();
+		lg->strm(sl::error)
+		  << "reported type is: " << view.get_type().get_name();
+	      }          
+            throw std::logic_error(
+                "can only handle arrays of rank 1 at present!");
+      }            
     auto value_type = view.get_rank_type(1);
+
+    if (lg)
+      lg->strm(sl::debug) << "value_type is: " << value_type.get_name();
     
     auto bdt = get_byte_data_type(value_type, lg);
     if(bdt != encarr.dtp())
@@ -1029,8 +1046,9 @@ rttr::variant foxtrot::wire_type_to_array(const ft_homog_array& wiretp, const rt
         if(lg)
         {
             lg->strm(sl::error) << "target value type: " << value_type.get_name().to_string();
-            lg->strm(sl::error) << "byte data type: " << (int) bdt;
-        throw ReflectionError("invalid byte data type passed!");
+            lg->strm(sl::error) << "byte data type: " << (int)bdt;
+	    lg->strm(sl::error) << "encarr byte data type: " << encarr.dtp();
+	    throw ReflectionError("invalid byte data type passed!");
         }  
     }
     
