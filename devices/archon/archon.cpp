@@ -1187,7 +1187,7 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 void devices::archon::settapline(int n, const string &tapline) {
   
   int n_taplines  = std::stoi(readKeyValue("TAPLINES"));
-  if(static_cast<unsigned>(n) > n_taplines )
+  if(n > n_taplines )
   {
     throw DeviceError("invalid TAP line number");
   }
@@ -1195,7 +1195,7 @@ void devices::archon::settapline(int n, const string &tapline) {
   oss << "TAPLINE" << n;
   writeKeyValue(oss.str(), tapline);
 
-  if (static_cast<unsigned>(n) == n_taplines) { // this is appending a new tap line
+  if (n == n_taplines) { // this is appending a new tap line
     writeKeyValue("TAPLINES", n_taplines + 1);
   }
 
