@@ -79,14 +79,14 @@ struct foxtrot::devices::detail::archonimpl {
   using ArchMapType = std::unordered_map<std::string, std::pair<std::string, int>, string_hash, std::equal_to<>>;
   ArchMapType parammap;
   ArchMapType constmap;
-  ArchMapType taplinemap;
+  //  ArchMapType taplinemap;
 
   std::vector<std::string> configindex;
   std::unordered_map<std::string, std::string, string_hash, std::equal_to<>> configmap;  
   bool parammapvalid = false;
   bool constmapvalid = false;
 
-  bool taplinemapvalid = false;
+  //bool taplinemapvalid = false;
   //std::optional<int> true_taplines = std::nullopt;
 
   void update_internalmap(archon &arch, foxtrot::Logging &lg, ArchMapType &map,
@@ -121,7 +121,7 @@ struct foxtrot::devices::detail::archonimpl {
   void invalidate_maps() {
       parammapvalid = false;
       constmapvalid = false;
-      taplinemapvalid = false;
+      //  taplinemapvalid = false;
   }
 
 
@@ -557,19 +557,9 @@ void devices::archon::clear_config()
   //  _configlinemap.clear();
   impl->configmap.clear();
   impl->configindex.clear();
-  impl->taplinemap.clear();
+  //  impl->taplinemap.clear();
   impl->invalidate_maps();
-  //_statenames.clear();
-  //_parammap.clear();
-  //_constantmap.clear();
-  
-  //  _taplines = 0;
-  //  _states=  0;  
-  //setup lines, timing lines etc...
-  //  set_timing_lines(0);
-  //set_states(0);
-  //set_parameters(0); 
-  //set_constants(0);
+
 }
 
 
@@ -737,6 +727,8 @@ void devices::archon::del_key_range(const std::string &key_n,
 
   auto n = std::stoul(readKeyValue(key_n));
   del_key_range(n, keybase);
+  writeKeyValue(key_n, "0");
+  
 
 }
 
@@ -744,7 +736,7 @@ void devices::archon::del_key_range(int n, const std::string &keybase) {
   for (int i = 0; i < n; i++) {
       auto kstr = std::format("{}{}", keybase, i);
       DelKeyValue(kstr);
-  }      
+  } 
 
 }  
 
@@ -1025,12 +1017,12 @@ void foxtrot::devices::archon::read_parse_existing_config(bool allow_empty)
       
       impl->configmap.clear();
       impl->configindex.clear();
-      impl->taplinemap.clear();
+      //  impl->taplinemap.clear();
       return;
     }
   impl->configmap.clear();
   impl->configindex.clear();
-  impl->taplinemap.clear();
+  //  impl->taplinemap.clear();
   int i;
   impl->configindex.reserve(ARCHON_MAX_CONFIG_LINES);
   for(i =0 ; i < ARCHON_MAX_CONFIG_LINES; i++)
@@ -1192,9 +1184,10 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 
 // }
 
-void devices::archon::settapline(int n, const string& tapline)
-{
-  if(static_cast<unsigned>(n) > impl->taplinemap.size() )
+void devices::archon::settapline(int n, const string &tapline) {
+  
+  int n_taplines  = std::stoi(readKeyValue("TAPLINES"));
+  if(static_cast<unsigned>(n) > n_taplines )
   {
     throw DeviceError("invalid TAP line number");
   }
@@ -1202,9 +1195,12 @@ void devices::archon::settapline(int n, const string& tapline)
   oss << "TAPLINE" << n;
   writeKeyValue(oss.str(), tapline);
 
-  if (static_cast<unsigned>(n) == impl->taplinemap.size()) { // this is appending a new tap line
-    writeKeyValue("TAPLINES", std::to_string(impl->taplinemap.size() + 1));
-  }    
+  if (static_cast<unsigned>(n) == n_taplines) { // this is appending a new tap line
+    writeKeyValue("TAPLINES", n_taplines + 1);
+  }
+
+  //  impl->taplinemapvalid = false;
+  
 }
 
 void devices::archon::set_taplines(const std::vector<std::string> &taplines)
@@ -1215,7 +1211,12 @@ void devices::archon::set_taplines(const std::vector<std::string> &taplines)
 }
 
 
-void devices::archon::clear_taplines() { del_key_range("TAPLINES", "TAPLINE"); }
+void devices::archon::clear_taplines() {
+  del_key_range("TAPLINES", "TAPLINE");
+
+  //impl->taplinemap.clear();
+  //impl->taplinemapvalid = false;
+  }
 
 
 void devices::archon::applycds() {cmd("APPLYCDS");};
@@ -1230,47 +1231,47 @@ std::string assemble_tapline(const string& defn, unsigned char AD, bool LR, doub
 }
 
 
-void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
-                                      unsigned short offset, bool ADM,
-				      bool apply_immediate)
-{
+// void foxtrot::devices::archon::settap(unsigned char AD, bool LR, double gain,
+//                                       unsigned short offset, bool ADM,
+// 				      bool apply_immediate)
+// {
 
-  std::string nmemonic = ADM ? "AM"  : "AD";
+//   std::string nmemonic = ADM ? "AM"  : "AD";
   
-        // char LRchar = LR ? 'R' : 'L';
-        // std::ostringstream oss;
-        // oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
+//         // char LRchar = LR ? 'R' : 'L';
+//         // std::ostringstream oss;
+//         // oss << "AD" << static_cast<unsigned>(AD) << LRchar << ',' << gain << ',' << offset;
         
-        //WARNING: all sorts of edge cases that could blow up later here
-        //UPDATE (2025!!!).... yep, past me present me etc etc
+//         //WARNING: all sorts of edge cases that could blow up later here
+//         //UPDATE (2025!!!).... yep, past me present me etc etc
 
-  auto taplinestr = assemble_tapline(nmemonic, AD, LR, gain, offset);
+//   auto taplinestr = assemble_tapline(nmemonic, AD, LR, gain, offset);
 
-  // update the tapline map if it's out of sync
-   if (impl->taplinemapvalid == false) {
-  //   if (impl->true_taplines.has_value())
-  //         impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
-  //                                  impl->taplinemapvalid, '=',
-  //                                  *(impl->true_taplines));
-  //   else
-      impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
-    }
+//   // update the tapline map if it's out of sync
+//    if (impl->taplinemapvalid == false) {
+//   //   if (impl->true_taplines.has_value())
+//   //         impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
+//   //                                  impl->taplinemapvalid, '=',
+//   //                                  *(impl->true_taplines));
+//   //   else
+//       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
+//     }
 
-  auto qrystr = std::format("{}{}", nmemonic, AD);
-  if (impl->taplinemap.contains(qrystr))
-    {
-      auto [tlinerest, tlineidx] = impl->taplinemap.at(qrystr);
-      settapline(tlineidx, taplinestr);
-  } else {
-      settapline(impl->taplinemap.size(), taplinestr);
-      // this one changes the number of taplines, so invalidate that map
-      impl->taplinemapvalid = false;
-  }
+//   auto qrystr = std::format("{}{}", nmemonic, AD);
+//   if (impl->taplinemap.contains(qrystr))
+//     {
+//       auto [tlinerest, tlineidx] = impl->taplinemap.at(qrystr);
+//       settapline(tlineidx, taplinestr);
+//   } else {
+//       settapline(impl->taplinemap.size(), taplinestr);
+//       // this one changes the number of taplines, so invalidate that map
+//       impl->taplinemapvalid = false;
+//   }
 
-  if (apply_immediate)
-    cmd("APPLYCDS");
+//   if (apply_immediate)
+//     cmd("APPLYCDS");
 
-}
+// }
 
 // void devices::archon::override_used_taplines(int use_lines,
 //                                              bool apply_immediate) {
@@ -1383,26 +1384,29 @@ void devices::archon::set_tapinfo(const devices::archon_tap_info& tapinfo)
 std::vector<std::string> devices::archon::taplines() {
 
   // update the tapline map if it's out of sync
-  if (impl->taplinemapvalid == false) {
+  //  if (impl->taplinemapvalid == false) {
     // if (impl->true_taplines.has_value())
     //       impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE",
     //                                impl->taplinemapvalid, '=',
     //                                *(impl->true_taplines));
     //else
-      impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
-    }
+  //   impl->update_internalmap(*this, _lg, impl->taplinemap, "TAPLINE", impl->taplinemapvalid);
+  //}
 
-  _lg.strm(sl::debug) << "tapline map updated";
+// _lg.strm(sl::debug) << "tapline map updated";
   
-    std::vector<std::string> out;
-    out.reserve(impl->taplinemap.size());
-    for (auto [k, v] : impl->taplinemap) {
-      _lg.strm(sl::trace) << "got value for key: " << k << ", value: " << std::get<0>(v) << " on line: " << std::get<1>(v);
-	out.push_back(std::get<0>(v));
-      }
+    // std::vector<std::string> out;
+    // out.reserve(impl->taplinemap.size());
+    // for (auto [k, v] : impl->taplinemap) {
+    //   _lg.strm(sl::trace) << "got value for key: " << k << ", value: " << std::get<0>(v) << " on line: " << std::get<1>(v);
+    // 	out.push_back(std::get<0>(v));
+    //   }
+  
+          
+    // return out;
 
-    return out;
-	  
+
+return read_key_range("TAPLINES", "TAPLINE");
 
 }
 
@@ -1825,9 +1829,9 @@ RTTR_REGISTRATION
      // .property_readonly("get_constants",&archon::get_constants)
      .property_readonly("get_power", &archon::get_power)
      //.property_readonly("get_parameters",&archon::get_parameters)
-     .method("settap", &archon::settap)(parameter_names(
-         "AD", "LR", "gain", "offset", "ADM", "apply_immediate"))(
-         parameter_names("AD", "LR", "gain", "offset"))
+   /// .method("settap", &archon::settap)(parameter_names(
+   //   "AD", "LR", "gain", "offset", "ADM", "apply_immediate"))(
+   //    parameter_names("AD", "LR", "gain", "offset"))
      .method("load_timing", &archon::load_timing)
      .property_readonly("moduleprops", &archon::moduleprops)
      .method("taplines", &archon::taplines)

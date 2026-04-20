@@ -290,7 +290,7 @@ namespace foxtrot {
     HRTimePoint get_archon_time();
 
     void settapline(int n, const std::string &tapline);
-    void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
+    //void settap(unsigned char AD, bool LR, double gain, unsigned short offset, bool ADM=false, bool apply_immediate=false);
 
 
     
