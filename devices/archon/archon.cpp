@@ -1834,9 +1834,9 @@ RTTR_REGISTRATION
      // .property_readonly("get_constants",&archon::get_constants)
      .property_readonly("get_power", &archon::get_power)
      //.property_readonly("get_parameters",&archon::get_parameters)
-   /// .method("settap", &archon::settap)(parameter_names(
-   //   "AD", "LR", "gain", "offset", "ADM", "apply_immediate"))(
-   //    parameter_names("AD", "LR", "gain", "offset"))
+     /// .method("settap", &archon::settap)(parameter_names(
+     //   "AD", "LR", "gain", "offset", "ADM", "apply_immediate"))(
+     //    parameter_names("AD", "LR", "gain", "offset"))
      .method("load_timing", &archon::load_timing)
      .property_readonly("moduleprops", &archon::moduleprops)
      .method("taplines", &archon::taplines)
@@ -1846,7 +1846,8 @@ RTTR_REGISTRATION
      //     .method("release_tapline_override",
      //     &archon::release_tapline_override)
      //(parameter_names("apply_immediate"))
-   .method("clear_taplines", &archon::clear_taplines)
+     .method("clear_taplines", &archon::clear_taplines)
+   .method("applycds", &archon::applycds)
      
      
    
