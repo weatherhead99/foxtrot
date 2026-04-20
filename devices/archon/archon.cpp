@@ -1186,7 +1186,7 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 
 void devices::archon::settapline(int n, const string &tapline) {
 
-  string *n_taplinestr = readKeyValueOpt("TAPLINES");
+  const string *n_taplinestr = readKeyValueOpt("TAPLINES");
   int n_taplines = (n_taplinestr == nullptr) ?  0 : std::stoi(*n_taplinestr);
     
 
