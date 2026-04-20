@@ -1185,8 +1185,12 @@ std::pair<std::string, std::string> splitconfline(const std::string& confline)
 // }
 
 void devices::archon::settapline(int n, const string &tapline) {
-  
-  int n_taplines  = std::stoi(readKeyValue("TAPLINES"));
+
+  string *n_taplinestr = readKeyValueOpt("TAPLINES");
+  int n_taplines = (n_taplinestr == nullptr) ?  0 : std::stoi(*n_taplinestr);
+    
+
+ 
   if(n > n_taplines )
   {
     throw DeviceError("invalid TAP line number");
@@ -1213,7 +1217,8 @@ void devices::archon::set_taplines(const std::vector<std::string> &taplines)
 
 void devices::archon::clear_taplines() {
   del_key_range("TAPLINES", "TAPLINE");
-
+  writeKeyValue("TAPLINES", 0);
+  
   //impl->taplinemap.clear();
   //impl->taplinemapvalid = false;
   }
